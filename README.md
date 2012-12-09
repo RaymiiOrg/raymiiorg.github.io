@@ -1,3 +1,3 @@
 ## ingsoc
 
-static site generator which builds raymii.org
+static site generator which builds raymii.org.
