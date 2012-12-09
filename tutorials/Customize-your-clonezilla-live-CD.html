@@ -1,0 +1,207 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Customize Your Clonezilla Live Cd - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Customize your Clonezilla Live CD</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="Customize-your-clonezilla-live-CD.html" class="link">Customize your Clonezilla Live CD</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 01-01-2010</h6>
+<br></br>
+<p>At work we need to image laptops. We do that with clonezilla. <br />
+But some people think the clonezilla menu is to hard. So A colleague and I made a script to do it in 2 steps (mount and enter image name). <br />
+But that had to be integrated in to the clonezilla live CD. <br />
+That is a pain to do if you're on a windows vista PC. <br />
+But it worked, and I wanted to share it with the rest of the world. <br />
+Our script to backup can be found at <a href="#example">the bottom of the page.</a> <br />
+But how do I get that script on to the live USB?</p>
+
+<p>This is how I do it:  </p>
+
+<pre><code>mkdir rw.fs  
+mkdir clonscript  
+(above is only required once).  
+mount -t unionfs -o dirs=rw.fs=rw:/mnt=ro unionfs clonscript  
+cd clonscript  
+mkdir clondir1  
+copy the scripts, or nano them.  
+(To launch a clonezilla script as root, make a launcher script, and put this in it:  
+*#!/bin/sh  
+sudo su -c /path/to/script/you/just/made.sh*  
+cd ../../  
+umount clonscript  
+mksquashfs ./rw.fs ./filesystem.squashfs
+</code></pre>
+
+<p>Now the 2 filesystems are being put together. <br />
+The next time, mount it again, make a new directory (say clondir2) and <br />
+cp all the scripts from clondir1 into clondir2, and edit them from there. <br />
+Also change your root launch script to the new dir.</p>
+
+<p>Now edit the isolinux/isolinux.cfg file. To start a script as root, <br />
+make a link to it as described earlier. Here is my setup:</p>
+
+<pre><code>* label RESTORE  
+# MENU DEFAULT  
+# MENU HIDE  
+MENU LABEL RESTORE  
+# MENU PASSWD  
+kernel /live/vmlinuz1  
+append initrd=/live/initrd1.img boot=live union=aufs  
+hostname=jaunty edd=on nolocales ocs_live_run="/path/to/your/root/launcher/script.sh"  
+ocs_live_extra_param="" ocs_live_keymap="NONE" ocs_live_batch="no"  
+ocs_lang="" noprompt mode_option=800x600 toram=filesystem.squashfs  
+ip=frommedia  
+TEXT HELP  
+TEST RESTORE  
+ENDTEXT  
+*
+</code></pre>
+
+<p>Note this part: ocs_live_run="/path/to/your/root/launcher/script.sh". Change that every time you make a change to the script. (For every change to the script you make you must make a new directory and change your root launcher script. This is because your merging a read only file system. And read only cannot be overwritten.)
+Now make an ISO of it again. (At work I need to use the tool <br />
+folder2iso <a href="http://www.trustfm.net/divx/SoftwareFolder2Iso.php?b2=1">which can be downloaded here.</a></p>
+
+<p>after you made the ISO, unetbootin it to USB or burn it to CD.</p>
+
+<p>You can remove the USB stick or CD when clonezilla is imaging, because this boot script loads it into the ram.</p>
+
+<p>If this can be done with less work, please post it in a comment, I <br />
+hate this way... (first start fcking vista, then virtualbox a mint, <br />
+then share a folder, then mount and edit, then folder2iso and at last <br />
+unetbootin...)... And thanks to the people of clonezilla for making such a wonderfull alternative to ghost and acronis ^.^ </p>
+
+<p><a id="example"></a> </p>
+
+<h5>Example Backup Script</h5>
+
+<pre><code>#!/bin/sh  
+dhclient  
+echo "###############################"  
+echo "# Script made by Remy &amp; David #"  
+echo "###############################"  
+echo  
+echo  
+echo Voer nu het wachtwoord van de laptop in   
+echo  
+mount -t cifs -o username="daniel" //192.168.1.2/image /home/partimag  
+echo  
+echo  
+echo "Er komt nu een lijst met images"  
+echo "IMAGES: "  
+ls -n /home/partimag  
+echo  
+echo -n "Voer de naam van het image in(schoon#): "; read NAME;  
+/opt/drbl/sbin/ocs-sr -q -c -z1 -p true saveparts "$NAME" "sda2"
+</code></pre>
+<hr></hr>
+Tags: <a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/clonezilla.html" class="link">clonezilla, 
+</a>
+<a href="../tags/imaging.html" class="link">imaging, 
+</a>
+<a href="../tags/live-cd.html" class="link">live-cd, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>3c1389a4eb806521859cffa4e378bb</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

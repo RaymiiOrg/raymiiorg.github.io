@@ -1,0 +1,246 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Ubuntu/Debian Update Mailer - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Ubuntu/Debian update mailer</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../software" class="link">Software</a>
+<span class="divider">/</span></li>
+<li><a href="Ubuntu_update_mailer.html" class="link">Ubuntu/Debian update mailer</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 10-06-2012</h6>
+<br></br>
+<p>This is a bash script for Ubuntu and Debian, to be run by cron on a set interval. It checks if there are apt-updates, and if so, mails an overview of the packages which can be updated, whith their local version, the version available and an URL to the Ubuntu package site where you can see the changelog. I wrote this as an addition for my Nagios monitoring, that only shows how many updates there are, this is a lot more verbose. It also runs on Debian since 1 Nov 2012. Only the links don't work then, because the packages are different.</p>
+
+<h4>Example output:</h4>
+
+<p>If there are no updates:</p>
+
+<pre><code>No updates available for host vps11.sparklingclouds.nl on date 21.09.2012
+</code></pre>
+
+<p>If there are updates:</p>
+
+<pre><code>--- Updates for host: vps11.sparklingclouds.nl ---
+Date: 21.09.2012 
+
+Total updates available: 44
+
+-- Package: apport --
+ Installed: 2.0.1-0ubuntu12
+ Candidate: 2.0.1-0ubuntu13
+Package Information: http://packages.ubuntu.com/precise/apport
+-- End package apport --
+
+-- Package: base-files --
+ Installed: 6.5ubuntu6
+ Candidate: 6.5ubuntu6.2
+Package Information: http://packages.ubuntu.com/precise/base-files
+-- End package base-files --
+
+-- Package: bind9-host --
+ Installed: 1:9.8.1.dfsg.P1-4ubuntu0.2
+ Candidate: 1:9.8.1.dfsg.P1-4ubuntu0.3
+Package Information: http://packages.ubuntu.com/precise/bind9-host
+-- End package bind9-host --
+
+-- Package: build-essential --
+ Installed: 11.5ubuntu2
+ Candidate: 11.5ubuntu2.1
+Package Information: http://packages.ubuntu.com/precise/build-essential
+-- End package build-essential --
+
+-- Package: dbus --
+ Installed: 1.4.18-1ubuntu1
+ Candidate: 1.4.18-1ubuntu1.1
+Package Information: http://packages.ubuntu.com/precise/dbus
+-- End package dbus --
+</code></pre>
+
+<h3>The script</h3>
+
+<pre><code>#!/bin/bash
+#Copyright (c) 2012 Remy van Elst
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+# 01-11-2012 update version 2, now also supports Debian.
+
+
+if [ -f /etc/lsb-release ]; then
+    TYPE="UBUNTU"
+elif [ -f /etc/debian_version ]; then
+    TYPE="DEBIAN"
+fi
+
+case ${TYPE} in
+    "UBUNTU")
+        VERSION=`grep "DISTRIB_CODENAME" /etc/lsb-release | awk -F = '{ print $2 }'`   
+        ;;
+    "DEBIAN")
+        VERSION="Debian `cat /etc/debian_version`"
+        ;;    
+esac
+
+
+HOSTNAME=`hostname`
+EMAIL="sysadmin@digidentity.eu"
+SUBJECT="Updates for host ${HOSTNAME}"
+DATE=`date +%d.%m.%Y`
+AVAIL_UPD=`apt-get -s upgrade | awk '/[0-9]+ upgraded,/ {print $1}'`
+
+function mailupdates {
+
+echo -e "--- Updates for host: ${HOSTNAME} ---"
+echo -e "Date: ${DATE} \n\n"
+
+echo -n "Total updates available: "
+apt-get -s upgrade | awk '/[0-9]+ upgraded,/ {print $1}'
+echo -e "\n\n"
+
+for i in `aptitude search ~U | cut -c 5- | awk '{ print $1  }'`; do 
+    echo "-- Package: ${i} --"
+    apt-cache policy ${i} | grep 'Installed\|Candidate'
+    if [ $TYPE="UBUNTU" ]; then
+        echo "Package Information: http://packages.ubuntu.com/${VERSION}/${i}"
+    fi
+    echo -e "-- End package ${i} --\n"
+done
+
+}
+
+
+if [[ ${AVAIL_UPD} == 0 ]]; then
+    #echo "No updates available for host $HOSTNAME on date ${DATE}" | mail -s "${SUBJECT}" ${EMAIL}
+    sleep 1
+else
+    mailupdates | mail -s "${SUBJECT}" ${EMAIL}
+fi
+</code></pre>
+<hr></hr>
+Tags: <a href="../tags/apt.html" class="link">apt, 
+</a>
+<a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/command-line.html" class="link">command-line, 
+</a>
+<a href="../tags/debian.html" class="link">debian, 
+</a>
+<a href="../tags/ubuntu.html" class="link">ubuntu, 
+</a>
+<a href="../tags/update.html" class="link">update, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>0e6464a91e9b38983507bec9f644a9</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

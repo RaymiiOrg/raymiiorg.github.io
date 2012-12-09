@@ -1,0 +1,149 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Stopping Fail2Ban.Server : Error Unexpected Communication Error And Other Errors In Fail2Ban On Ubuntu 9.04 - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Stopping fail2ban.server : ERROR Unexpected communication error and other errors in fail2ban on ubuntu 9.04</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="Stopping-fail2ban.server-ERROR-Unexpected-communication-error-and-other-errors-in-fail2ban-on-ubuntu-9.04.html" class="link">Stopping fail2ban.server : ERROR Unexpected communication error and other errors in fail2ban on ubuntu 9.04</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 23-06-2011</h6>
+<br></br>
+<p>While running my ssh server with Fail2ban, I decided to take a look in the log files to see if everything was working. It was not.</p>
+
+<p>Here is the solution to stop errors like: fail2ban.server : ERROR Unexpected communication error on ubuntu 9.04 with Fail2ban from the repo's.  </p>
+
+<p>First we need to install python2.5 because Ubuntu 9.04 has 2.6:</p>
+
+<pre><code>sudo apt-get install python2.5
+</code></pre>
+
+<p>Confirm with Y where needed.</p>
+
+<p>Now, we need to edit the fail2ban binary so that it makes use of python2.5:</p>
+
+<pre><code>sudo gedit /usr/bin/fail2ban-server
+</code></pre>
+
+<p>Change the first line (<em>#!/usr/bin/python</em>) to the following:</p>
+
+<pre><code>#!/usr/bin/python2.5
+</code></pre>
+
+<p>Save and close the file.</p>
+
+<p>Now restart the fail2ban service. Note: sudo /etc/init.d/fail2ban restart did not work for me, so I did the following:</p>
+
+<pre><code>sudo /etc/init.d/fail2ban stop
+sudo /etc/init.d/fail2ban start
+</code></pre>
+
+<p>And If you check the log files now (<strong>vim /var/log/fail2ban.log</strong>) you will not see the error anymore. </p>
+<hr></hr>
+Tags: <a href="../tags/fail2ban.html" class="link">fail2ban, 
+</a>
+<a href="../tags/python.html" class="link">python, 
+</a>
+<a href="../tags/ubuntu.html" class="link">ubuntu, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>2706b63489cf398a0fb1097ecefb0a</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

@@ -1,0 +1,236 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Limit Access To Openssh Features With The Match Option - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Limit access to openssh features with the Match option</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="Limit_access_to_openssh_features_with_the_Match_keyword.html" class="link">Limit access to openssh features with the Match option</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 24-11-2012</h6>
+<br></br>
+<p>OpenSSH has a lot of nice features which let you control how it is used. For example, you can disallow the root account to login, set the port number, protocol version and a lot of other features. This tutorial will show you how to enable certain features for certain hosts, users, groups and addresses with the Match keyword in sshd_config. And as a bonus it also covers the iptables firewall.</p>
+
+<h4>Securing sshd</h4>
+
+<p>First a few general tips about securing ssh. </p>
+
+<ul>
+<li>Disable login with username/pasword and use key based authentication.</li>
+<li>Do not allow root to login, limit permissions with sudo or use su.</li>
+<li>Only allow protocol 2, not any of the earlier ones.</li>
+<li>Not a real security measure but makes your logs less dirty: set sshd to a higher port.</li>
+</ul>
+
+<h4>Examples</h4>
+
+<p>You of course have disabled password authentication and yoy use public/private key based authentication, right? Buy, you might have that one host which is for whatever reason is not able to use ssh keys. The below config line disables password authentication for everyone, and then it enables it for the IP address 1.2.3.4:</p>
+
+<pre><code>PasswordAuthentication no
+
+### this should be on the bottom of the config file
+### Enable password authentication for IP 1.2.3.4
+Match Address 1.2.3.4
+    PasswordAuthentication yes
+</code></pre>
+
+<p>Or you might have a user which needs to use a graphical application on a server. But all the other users do not have to use that. For example, you might have Matlab for one user. You can install a desktop for them, but you can also let them use X forwarding. The below config allows X forwarding for the user John, but disallows it for everyone else.</p>
+
+<pre><code>X11Forwarding no
+### add this to the bottom of the sshd_config
+Match User John
+    X11Forwarding yes
+</code></pre>
+
+<p>But lets say John can only use matlab (X-forwarding) from the internal network and you want to X forwarding for every other user, only allowing it from the local 172.16.1.* network, you might want to use this config lines:</p>
+
+<pre><code>X11Forwarding no
+### add this to the bottom of the sshd_config
+Match User John Address 172.16.1.* 
+    X11Forwarding yes
+</code></pre>
+
+<p>And what if you want to allow a few IP addresses and one hostname to login with a password, as root? <em>Note that this is a bad thing to do, you should not allow root to login but use su or sudo, and preferably all users should login with ssh keys</em>.</p>
+
+<pre><code>PaswordAuthentication no
+PermitRootLogin no
+### Add this to the end of the config file
+Match Address 10.20.30.40,80.90.100.200 Host dispatch.raymii.org
+    PasswordAuthentication Yes
+    PermitRootLogin yes
+</code></pre>
+
+<h4>Restrict access via the firewall</h4>
+
+<p>Using iptables is also a good way to restrict access to a few IP addresses. The below example allows the IP addresses 2.3.4.5, 3.4.5.6 and 10.2.3.40 to talk to port 22, and discards all the other traffic.</p>
+
+<pre><code>iptables -I INPUT -s 2.3.4.5 -p tcp -m tcp --dport 22 -j ACCEPT
+iptables -I INPUT -s 3.4.5.6 -p tcp -m tcp --dport 22 -j ACCEPT
+iptables -I INPUT -s 10.2.3.40 -p tcp -m tcp --dport 22 -j ACCEPT
+iptables -I INPUT -p tcp -m tcp --dport 22 -j REJECT
+</code></pre>
+
+<h4>All the options</h4>
+
+<p>The list below are all the options supported in an SSH Match pattern:</p>
+
+<ul>
+<li>AcceptEnv</li>
+<li>AllowTcpForwarding</li>
+<li>AuthorizedKeysFile</li>
+<li>AuthorizedKeysFile2</li>
+<li>Banner</li>
+<li>ChallengeResponseAuthentication</li>
+<li>ChallengeResponseAuthentication</li>
+<li>ClientAliveCountMax</li>
+<li>ClientAliveInterval</li>
+<li>GatewayPorts</li>
+<li>GssAuthentication</li>
+<li>GssCleanupCreds</li>
+<li>HostbasedAuthentication</li>
+<li>HostbasedUsesNameFromPacketOnly</li>
+<li>IgnoreRhosts</li>
+<li>IgnoreUserKnownHosts</li>
+<li>KbdInteractiveAuthentication</li>
+<li>KerberosAuthentication</li>
+<li>KerberosGetAFSToken</li>
+<li>KerberosOrLocalPasswd</li>
+<li>KerberosTicketCleanup</li>
+<li>LogFacility</li>
+<li>LogLevel</li>
+<li>LoginGraceTime</li>
+<li>MaxAuthTries</li>
+<li>PasswordAuthentication</li>
+<li>PermitEmptyPasswd</li>
+<li>PermitRootLogin</li>
+<li>PermitTunnel</li>
+<li>PermitUserEnvironment</li>
+<li>PrintLastLog</li>
+<li>PrintMotd</li>
+<li>PubkeyAuthentication</li>
+<li>PubkeyAuthentication</li>
+<li>RSAAuthentication</li>
+<li>RhostsRSAAuthentication</li>
+<li>StrictModes</li>
+<li>UseLogin</li>
+<li>UsePAM</li>
+<li>X11DisplayOffset</li>
+<li>X11Forwarding</li>
+<li>X11UseLocalhost</li>
+<li>XAuthLocation</li>
+</ul>
+
+<h4>More information</h4>
+
+<p><a href="https://bugzilla.mindrot.org/show_bug.cgi?id=match">Source link used for this article</a> <br />
+<a href="https://bbs.archlinux.org/viewtopic.php?id=121945">Forum topic on the Arch Linux bbs</a></p>
+<hr></hr>
+Tags: <a href="../tags/limits.html" class="link">limits, 
+</a>
+<a href="../tags/match.html" class="link">match, 
+</a>
+<a href="../tags/openssh.html" class="link">openssh, 
+</a>
+<a href="../tags/ssh.html" class="link">ssh, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>aab2f134403e31bcdf50eb2d4e79b4</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

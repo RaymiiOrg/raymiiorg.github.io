@@ -1,0 +1,176 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Silent Unatended Apt-Get Upgrade - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Silent unatended apt-get upgrade</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="Silent-automatic-apt-get-upgrade.html" class="link">Silent unatended apt-get upgrade</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 09-11-2012</h6>
+<br></br>
+<p>This tutorial will show you how to setup completely silent apt-get upgrade via cron. It also defaults to not overwriting config files if a package has a newer version.</p>
+
+<blockquote>
+  <p>Important! You should watch out with this. Upgrades can break things. Use this on your own risk.</p>
+</blockquote>
+
+<p>apt-get can be ran from a cronjob with different options to let it update everything without asking questions. However, the regular combination as seen below still mails output (and thus, not upgrades) when a changed file is found in a package, for example, the <em>/etc/lighttpd/lighttpd.conf</em> file.</p>
+
+<p>This is example output of such a situation:</p>
+
+<pre><code>apt-get upgrade -y --force-yes -qq
+
+Configuration file `/etc/lighttpd/lighttpd.conf'
+==&gt; Modified (by you or by a script) since installation.
+==&gt; Package distributor has shipped an updated version.
+What would you like to do about it ? Your options are:
+Y or I : install the package maintainer's version
+N or O : keep your currently-installed version
+D : show the differences between the versions
+Z : background this process to examine the situation
+The default action is to keep your current version.
+*** lighttpd.conf (Y/I/N/O/D/Z) [default=N] ?
+</code></pre>
+
+<p>The apt-get command is ran from cron, and the below lines are mailed.</p>
+
+<h4>The solution</h4>
+
+<p>The solution to this can be found in the <em>gnu-coreutils</em> package, the <em>yes</em> program. This is what the manpage of <em>yes</em> says:</p>
+
+<pre><code>man yes
+
+DESCRIPTION
+       Repeatedly output a line with all specified STRING(s), or `y'.
+</code></pre>
+
+<p>So, combining this with the above apt-get upgrade command will let it echo an <em>N</em> character, what means that apt-get does not overwrite the config file. The resulting command is this:</p>
+
+<pre><code>yes N | apt-get upgrade -y --force-yes -qq
+</code></pre>
+
+<p>And thus, the cronjob looks like this:</p>
+
+<pre><code>1 1 * * *       yes N | apt-get upgrade -y --force-yes -qq
+</code></pre>
+
+<p>This will not mail anything when the cronjob runs and it will also make sure your config files will not get overwritten.</p>
+<hr></hr>
+Tags: <a href="../tags/apt.html" class="link">apt, 
+</a>
+<a href="../tags/apt-get.html" class="link">apt-get, 
+</a>
+<a href="../tags/aptitude.html" class="link">aptitude, 
+</a>
+<a href="../tags/automatic.html" class="link">automatic, 
+</a>
+<a href="../tags/dpkg.html" class="link">dpkg, 
+</a>
+<a href="../tags/synaptic.html" class="link">synaptic, 
+</a>
+<a href="../tags/update.html" class="link">update, 
+</a>
+<a href="../tags/upgrade.html" class="link">upgrade, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>5b591a3a8db070d92ec3f370ef75ba</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

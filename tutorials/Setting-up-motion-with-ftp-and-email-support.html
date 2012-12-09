@@ -1,0 +1,183 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Setting Up Motion With Ftp And Email! Support - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Setting up Motion with FTP and Email! support</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="Setting-up-motion-with-ftp-and-email-support.html" class="link">Setting up Motion with FTP and Email! support</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 09-04-2008</h6>
+<br></br>
+<p>I have set up Motion in a way that it Emails me when it detects movement, and it automatically saves the pictures to my FTP server. I do not autostart motion in deamon mode, because it only needs to run while I'm away. <br />
+It requires little config adaption. First we need to install motion, wput, and sendemail:</p>
+
+<pre><code>sudo apt-get install wput sendemail motion
+</code></pre>
+
+<p>Motion for the capturing, wput for the ftp-ing and sendemail for the emailing.</p>
+
+<p>Now edit the config file of motion:</p>
+
+<pre><code>sudo gedit /etc/motion/motion.conf
+</code></pre>
+
+<p>I will list the things i've changed here, my situation is a single USB webcam.</p>
+
+<pre><code># Start in daemon (background) mode and release terminal (default: off)  
+daemon off
+
+# Maximum number of frames to be captured per second.  
+# Valid range: 2-100. Default: 100 (almost no limit).  
+framerate 8
+
+# Number of frames to capture after motion is no longer detected (default: 0)  
+post_capture 5
+
+# Use ffmpeg to encode mpeg movies in realtime (default: off)  
+ffmpeg_cap_new off
+
+# Target base directory for pictures and films  
+# Recommended to use absolute path. (Default: current working directory)  
+## **sudo mkdir /motion &amp;&amp; sudo chmod 777 /motion**  
+target_dir /motion
+
+# Command to be executed when an event starts. (default: none)  
+# An event starts at first motion detected after a period of no motion defined by gap  
+## **This is the situation on a Gmail account, just change the CAPS values to yours.**  
+on_event_start sendEmail -f YOURFROMEMAIL@gmail.com -t YOURTOEMAIL@gmail.com -u "SUBJECT" -m "Movement has been detected on: %d %m %Y. The time of the movement was: %H:%M (Hour:Minute). The Pictures have been uploaded to your FTP account." -s smtp.gmail.com:25 -xu YOURGMAIL@gmail.com -xp YOURGMAILPASSWORD
+
+
+
+# Command to be executed when a picture (.ppm|.jpg) is saved (default: none)  
+# The filename of the picture is appended as an argument for the command.  
+##**Here also, change the CAPS values to yours**  
+on_picture_save wput ftp://USERNAME:PASSWORD@YOUTFTP.COM %f
+</code></pre>
+
+<p>This will email and upload the pictures when motion is detected. It works quite good for me.</p>
+
+<p>Note that when you want to put motion on, like when you go to school/work, fire up a terminal:</p>
+
+<pre><code>sudo motion
+</code></pre>
+
+<p>Or put it in /etc/rc.local for auto start at boot.    </p>
+<hr></hr>
+Tags: <a href="../tags/email.html" class="link">email, 
+</a>
+<a href="../tags/mail.html" class="link">mail, 
+</a>
+<a href="../tags/monitoring.html" class="link">monitoring, 
+</a>
+<a href="../tags/motion.html" class="link">motion, 
+</a>
+<a href="../tags/security.html" class="link">security, 
+</a>
+<a href="../tags/video.html" class="link">video, 
+</a>
+<a href="../tags/webcam.html" class="link">webcam, 
+</a>
+<a href="../tags/wput.html" class="link">wput, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>3993e354eb19c5c9419ee55e768cee</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

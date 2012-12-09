@@ -1,0 +1,409 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Set Up A Semi-Ha Glusterfs Replicated Webroot (Raid-1 Via Software) - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Set up a semi-HA GlusterFS replicated webroot (RAID-1 via software)</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="Gluster-webroot-cluster.html" class="link">Set up a semi-HA GlusterFS replicated webroot (RAID-1 via software)</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 17-08-2012</h6>
+<br></br>
+<p>In this tutorial were going to set up a glusterfs cluster with a replicated folder for use as webroot (/var/www/html) for our webservers. This means that all the servers we run have the same files in the webroot.
+I've run this set-up on Raymii.org in combination with a Round-Robin DNS on 8 OpenVZ servers. I've now switched to something different because GlusterFS consumed more ram than available on my low-end servers.
+Note that this only covers file-replication, not database replication. 
+This for example can work good for static media files (images, video) or websites that run without a database (like mine, or static html). 
+In combination with a round-robin DNS it provides a semi-HA setup. 
+Semi-HA because there is no automated node-checking (heartbeat). If a node goes down, you have to remove it from the RR-dns, or some visitors get a failure. 
+Note 2, GlusterFS needs FUSE setup for the client. Check your host (on OpenVZ) if this is enables.</p>
+
+<p>This guide sets up the webservers as both glusterfs servers, and clients. The gluster data directory on all the servers will be /gluster, and it will be mounted by the glusterfs native client on /var/www/html. (And in the http server config this folder is set as webroot).</p>
+
+<h4>Set up glusterfs</h4>
+
+<p>I'm assuming you have ubuntu (12.04) servers with the webstack set up fully. (working apache/nginx/lighttpd).</p>
+
+<p>First edit the hosts file to make sure that DNS does not gives errors with the Gluster</p>
+
+<pre><code>sudo nano /etc/hosts
+</code></pre>
+
+<p>and add the cluster hosts to it:</p>
+
+<pre><code>node1.raymii.org  172.16.2.3
+node2.raymii.org  172.16.2.4
+node3.raymii.org  172.16.2.5
+node4.raymii.org  80.23.112.98
+</code></pre>
+
+<p>(example setup, replace hostnames and IP addresses here and in the rest of the tutorial).</p>
+
+<p>Then install glusterfs <strong>(Execute command on all nodes)</strong></p>
+
+<pre><code>sudo apt-get install glusterfs-{client,server}
+</code></pre>
+
+<h5>Set up the GlusterFS Servers</h5>
+
+<p>We now add all the nodes to the trusted storage pool: <strong>(Execute only on 1 node)</strong></p>
+
+<pre><code>sudo gluster peer probe node2.raymii.org
+sudo gluster peer probe node3.raymii.org
+sudo gluster peer probe node4.raymii.org
+</code></pre>
+
+<p>Now check if it worked: <strong>(Can be executed on any node)</strong></p>
+
+<pre><code>sudo gluster peer status
+</code></pre>
+
+<p>It shoud give output containing something like this:</p>
+
+<pre><code>Hostname: node2.raymii.org
+Uuid: 8837ccd71-cc3e-ae1e-5314-5465234eeabc2
+State: Peer in Cluster (Connected)
+</code></pre>
+
+<blockquote>
+  <p>About the security, this confused me at first. If you install and start glusterfs-server then you can add the node to any trusted storage pool (anyone can do). But, when it is added to a storage pool you cannot add it to another one. I thought you could, but this is not the case. So make sure you add the nodes to your own storage pool right after you installed glusterfs-server.</p>
+</blockquote>
+
+<p>Now we create the volume (the "shared folder") <strong>(Execute on 1 node)</strong></p>
+
+<pre><code>sudo gluster volume create wwwroot replica 4 transport tcp node1.raymii.org:/gluster node2.raymii.org:/gluster node3.raymii.org:/gluster node4.raymii.org:/gluster
+</code></pre>
+
+<p>If it gives this output it went well. If not, please check DNS settings, network connectivity and if the server is in the trusted storage pool:</p>
+
+<pre><code>Creation of volume wwwroot has been sucessfuul. Please start the volume to access data.
+</code></pre>
+
+<p>So, lets start the glusterfs volume: <strong>(Execute on 1 node)</strong></p>
+
+<pre><code>gluster volume start wwwroot
+</code></pre>
+
+<p>And check if it works: <strong>(Can be executed on any node)</strong></p>
+
+<pre><code>gluster volume info
+</code></pre>
+
+<p>Should give output like this:</p>
+
+<pre><code>Volume Name: wwwroot
+Type: Replicate
+Status: Started
+Number of Bricks: 4
+Transport-type: tcp
+Bricks:
+Brick1: node1.raymii.org
+Brick2: node2.raymii.org
+Brick3: node3.raymii.org
+Brick4: node4.raymii.org
+</code></pre>
+
+<h5>Restrict Access</h5>
+
+<p>We should make sure that only the servers we want can access the volume data. Above I explained the security of the trusted storage pool, now we will limit the access to the volume.
+Execute the following command after changing the IP addresses: <strong>(Execute on 1 node)</strong></p>
+
+<pre><code>gluster volume set wwwroot auth.allow 172.16.2.3, 172.16.2.4, 172.16.2.5, 80.23.112.98
+</code></pre>
+
+<p>Now if you do a volume info you can see that only those Ip address can access it: <strong>(Can be executed on any node)</strong></p>
+
+<pre><code>gluster volume info
+[...]
+auth.allow 172.16.2.3, 172.16.2.4, 172.16.2.5, 80.23.112.98
+[...]
+</code></pre>
+
+<h5>Setting up the Clients</h5>
+
+<p>We've set up the servers, now we are going to setup the clients. The clients are also the servers, this can be a bit confusing. Server/node can be the hardware (machine), but also the glusterfs-server. In this case the glusterfs-server program runs next to the glusterfs-client program. This is just fine. You could also seperate the glusterfs-servers from the glusterfs-clients but this is what I find convinient.</p>
+
+<p><strong>(These commands need to be done on all nodes which are going to mount the shared wwwroot folder)</strong></p>
+
+<p>Create the directory for the wwwroot (if it doesn't yet exists):</p>
+
+<pre><code>sudo mkdir /var/www/html
+sudo chown www-data:www-data /var/www/html/
+</code></pre>
+
+<p>Now mount the folder with the glusterfs client:</p>
+
+<pre><code>mount.glusterfs node1.raymii.org:/gluster /var/www/html
+</code></pre>
+
+<p>If you check the output of the mount or df -h command you can see if it worked:</p>
+
+<pre><code>~$ mount
+[...]
+node1.raymii.org:/gluster on /var/www/html type fuse.glusterfs [...]
+[...]
+
+~$ df -h
+[...]
+node1.raymii.org:/gluster  10G 3G 6.9G 3% /var/www/html/
+[...]
+</code></pre>
+
+<p>If you've done this on all the servers we can continue with:</p>
+
+<h5>Testing</h5>
+
+<p><strong>(Execute this on node 2)</strong></p>
+
+<pre><code>echo "This is a cluster test file" &gt; node2.html
+</code></pre>
+
+<p>Now check if we can open that in the browser: <strong>(Execute on desktop)</strong></p>
+
+<pre><code>firefox http://node2.raymii.org/node2.html
+firefox http://node1.raymii.org/node2.html
+firefox http://node3.raymii.org/node2.html
+firefox http://node4.raymii.org/node2.html
+</code></pre>
+
+<p>Lets create another file: <strong>(Execute this on node 3)</strong>:</p>
+
+<pre><code>cat /dev/random &gt; node3.html (kill with CTRL+C after a few seconds!!)
+</code></pre>
+
+<p>And view that on your desktop on all the nodes as done above. If that is working, we now shut down 1 node to see if the files still get created:</p>
+
+<pre><code>Via your control panel, shutdown node 4, or do a 'sudo shutdown -h now' on the server.
+</code></pre>
+
+<p>Verify that is is down: <strong>(Execute on any other node)</strong></p>
+
+<pre><code>sudo gluster peer status 
+(should show node 4 as disconnected)
+ping node4.raymii.org
+firefox http://node4.raymii.org
+(ping and firefox should both fail).
+</code></pre>
+
+<p>Now we create a few files: <strong>(Execute on node 1 and 2 and 3)</strong></p>
+
+<pre><code>echo `date` &gt; "`date`.html"
+(repeat a few times, you should get files like this: Tue Jul 24 10:22:50 CEST 2012.html  )
+</code></pre>
+
+<p>If they are visible on your webservers then you can start node 4 again. If all went well after it is booted the files will also be there. </p>
+
+<p>This means that when a server fails, the files are still accessible, and available from more than one location. This gives redundancy.</p>
+
+<h5>Auto-mounting</h5>
+
+<p>If everything works then you can add the mount line to the /etc/fstab file so that the gluster folder will be mounted at every boot:</p>
+
+<pre><code>sudo nano /etc/fstab
+</code></pre>
+
+<p>Then add this: </p>
+
+<pre><code>node1.raymii.org:/gluster /var/www/html glusterfs defaults,_netdev 0 0
+</code></pre>
+
+<p>And save and close. </p>
+
+<h4>Expand (C/G)luster</h4>
+
+<p>Now lets say we want to add a node to the gluster? You need to add a number of bricks that is a multiple of the replica or stripe count. For example, to expand a distributed replicated volume with a replica count of 2, you need to add bricks in multiples of 2 (such as 4, 6, 8, etc.). In our case, we have started with 4 nodes, so we need to add 4, 8, 16 e.d. nodes.</p>
+
+<p>So lets say we have 4 extra nodes, edit the hosts file on all the existing gluster servers and add the new nodes there. Then on the new servers update the hosts file to include all the new hosts:</p>
+
+<pre><code>nano /etc/hosts
+[...]
+172.16.5.8   node5.raymii.org
+172.16.5.9   node6.raymii.org
+172.16.5.10  node7.raymii.org
+172.16.5.11  node8.raymii.org
+</code></pre>
+
+<p>Then install all the software (server and client) as described above, but do not create a volume.</p>
+
+<p>We need to add the probes to the Trusted Storage Pool: <strong>(Execute on node1)</strong></p>
+
+<pre><code>peer probe node5.raymii.org
+peer probe node6.raymii.org
+peer probe node7.raymii.org
+peer probe node8.raymii.org
+</code></pre>
+
+<p>Then expand the volume: <strong>(Execute on node1)</strong></p>
+
+<pre><code>gluster volume add-brick wwwroot node5.raymii.org:/gluster node6.raymii.org:/gluster node7.raymii.org:/gluster node8.raymii.org:/gluster
+</code></pre>
+
+<p>Result should be:</p>
+
+<pre><code>Add Brick successful
+</code></pre>
+
+<p>Now verify if it all worked: <strong>(Execute on any node)</strong></p>
+
+<pre><code>gluster peer status
+(New nodes should be visible)
+gluster volume info
+</code></pre>
+
+<p>Output of volume info should be something like:</p>
+
+<pre><code>Volume Name: wwwroot
+Type: Replicate
+Status: Started
+Number of Bricks: 2 x 4 = 8
+Transport-type: tcp
+Bricks:
+Brick1: node1.raymii.org
+Brick2: node2.raymii.org
+Brick3: node3.raymii.org
+Brick4: node4.raymii.org
+Brick5: node5.raymii.org
+Brick6: node6.raymii.org
+Brick7: node7.raymii.org
+Brick8: node8.raymii.org
+</code></pre>
+
+<p>We now need to rebalance the volume:</p>
+
+<pre><code>gluster volume rebalance wwwroot start
+</code></pre>
+
+<p>Check the status via:</p>
+
+<pre><code>gluster volume rebalance wwwroot status
+</code></pre>
+
+<p>When it shows "Rebalance completed" then we are done. Now to make sure all the files are read, execute this on one of the clients:</p>
+
+<pre><code>ls -aR /var/www/html/
+</code></pre>
+
+<p>Thats it.</p>
+
+<h5>Round Robin DNS</h5>
+
+<p><a href="https://en.wikipedia.org/wiki/Round-robin_DNS">Round Robin DNS</a> is nothing more than multiple a records for a domain with different ip addresses.</p>
+
+<p>I for example have 8 A records for raymii.org (and www.raymii.org) which all point to a cluster node.</p>
+
+<p>It is not real HA, but the wikipedia page explains that a lot better.</p>
+
+<h5>Done</h5>
+<hr></hr>
+Tags: <a href="../tags/cluster.html" class="link">cluster, 
+</a>
+<a href="../tags/drbd.html" class="link">drbd, 
+</a>
+<a href="../tags/filesystem.html" class="link">filesystem, 
+</a>
+<a href="../tags/gluster.html" class="link">gluster, 
+</a>
+<a href="../tags/glusterfs.html" class="link">glusterfs, 
+</a>
+<a href="../tags/red-hat.html" class="link">red-hat, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>a489ba677169340636e566eabd863d</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

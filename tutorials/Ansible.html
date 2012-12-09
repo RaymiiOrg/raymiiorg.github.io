@@ -1,0 +1,294 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Ansible - Pure Ssh Based Configuration Management And Deployment - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Ansible - pure ssh based configuration management and deployment</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="Ansible.html" class="link">Ansible - pure ssh based configuration management and deployment</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 14-09-2012</h6>
+<br></br>
+<p>Ansible is a radically simple model-driven configuration management, deployment, and command execution framework. Other tools in this space have been too complicated for too long, require too much bootstrapping, and have too much learning curve. By comparison, Ansible is dead simple and painless to extend. Puppet and Chef have about 60k lines of code. Ansibles core is a little over 2000 lines.</p>
+
+<h4>How do I use Ansible</h4>
+
+<p>I used chef to deploy and manage all my vps servers which host the cluster on which raymii.org is hosted. 
+I've written a chef-bootstrap script to make sure all the packages to build and compile rvm, ruby and chef are installed, and I've got my entire cluster in chef cookbooks. 
+It works well, but it is bloated. It requires ruby on the server nodes, and that sometimes gives problems on the vps servers I have, since none of them have more than 128MB ram.</p>
+
+<p>I discovered Ansible via reddit, and I'm sold. I've converted the scripts I used with chef to ansible format, and not only are they shorter, the biggest advantage is that Ansible does not require ruby on the host. I can start with a newly installed vps with ssh installed. Nothing more.</p>
+
+<p><a href="http://ansible.github.com/">You can find more about Ansible on their website</a>.</p>
+
+<p>Below I'll explain how to install and setup ansible (on debian 6), and I'll give some examples on how to use it.</p>
+
+<h3>Install ansible</h3>
+
+<pre><code>git clone git://github.com/ansible/ansible.git
+cd ./ansible
+sudo make install
+</code></pre>
+
+<h4>You might need some python modules</h4>
+
+<pre><code>sudo easy_install jinja2 
+sudo easy_install pyyaml
+sudo easy_install paramiko
+</code></pre>
+
+<h4>Add localhost to test</h4>
+
+<pre><code>source ./hacking/env-setup
+echo "127.0.0.1" &gt; ~/ansible_hosts
+export ANSIBLE_HOSTS=~/ansible_hosts
+</code></pre>
+
+<h4>Setup ssh-agent</h4>
+
+<pre><code>ssh-agent bash
+ssh-add ~/.ssh/id_rsa
+</code></pre>
+
+<h4>Add servers/hosts</h4>
+
+<pre><code>echo "[master]" &gt;&gt; ~/ansible_hosts
+echo "vps1.sparklingclouds.nl:22" &gt;&gt; ~/ansible_hosts
+echo "[nodes]" &gt;&gt; ~/ansible_hosts
+echo "vps3.sparklingclouds.nl:2222" &gt;&gt; ~/ansible_hosts
+echo "vps5.sparklingclouds.nl:2222" &gt;&gt; ~/ansible_hosts
+echo "vps6.sparklingclouds.nl:2222" &gt;&gt; ~/ansible_hosts
+echo "vps8.sparklingclouds.nl:2222" &gt;&gt; ~/ansible_hosts
+echo "[mail]" &gt;&gt; ~/ansible_hosts
+echo "vps9.sparklingclouds.nl:2222" &gt;&gt; ~/ansible_hosts
+echo "[testing]" &gt;&gt; ~/ansible_hosts
+echo "vps11.sparklingclouds.nl:2222" &gt;&gt; ~/ansible_hosts
+</code></pre>
+
+<h5>Make sure to add the ssh-key to the host</h5>
+
+<pre><code>ssh-copy-id -i ~/.ssh/id_rsa.pub '-p 2222 vps3.sparklingclouds.nl'
+</code></pre>
+
+<h4>Test if it works</h4>
+
+<pre><code> ansible all -m ping
+
+
+vps11.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps.raymii.org | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps3.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps5.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps9.sparklingclouds.nl | FAILED =&gt; FAILED: [Errno 61] Connection refused
+vps8.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps6.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps1.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps7.sparklingclouds.nl | FAILED =&gt; FAILED: timed out
+</code></pre>
+
+<p>It is working. Servers vps9 and vps7 are down, so it reports it correct.</p>
+
+<h3>Examples</h3>
+
+<h6>Get external IP of hosts in groups "nodes" and "master"</h6>
+
+<pre><code>ansible nodes:master -a "wget -qO - http://ifconfig.me/ip" -f 10     
+
+
+vps8.sparklingclouds.nl | success | rc=0 &gt;&gt;
+84.200.77.167
+
+vps11.sparklingclouds.nl | success | rc=0 &gt;&gt;
+192.71.245.64
+
+[...]
+</code></pre>
+
+<h6>Install a package on all hosts in group "nodes" using apt</h6>
+
+<pre><code>ansible nodes -m apt -a "pkg=nano state=latest"
+
+
+vps11.sparklingclouds.nl | FAILED &gt;&gt; {
+    "failed": true, 
+    "msg": "Could not import python modules: apt, apt_pkg. Please install python-apt package."
+}
+
+vps1.sparklingclouds.nl | success &gt;&gt; {
+    "changed": false
+}
+</code></pre>
+
+<h6>Fix the above error</h6>
+
+<p>Install package python-apt manually using the "apt-get -y install python-apt" command. Run it via sudo (-s) as user remy (-u remy) and ask me for the sudo password (-K)</p>
+
+<pre><code>ansible -v vps11.sparklingclouds.nl -a "apt-get -y install python-apt" -f 10 -u remy -s -K
+
+sudo password: 
+vps11.sparklingclouds.nl | success | rc=0 &gt;&gt;
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following extra packages will be installed:
+iso-codes python-apt-common 
+[...]
+Setting up python-apt-common (0.7.100.1+squeeze1) ...
+Setting up python-apt (0.7.100.1+squeeze1) ...
+Setting up iso-codes (3.23-1) ...
+</code></pre>
+
+<h3>My Playbooks</h3>
+
+<p><a href="https://github.com/RaymiiOrg/ansible">I've got my playbooks on my github account. You can see them and use them as reference, and if you want, improve them.</a>.</p>
+
+<h4>Playbook tips</h4>
+
+<p>Get the network inteface (eth0, venet0) in a value (item [0] is lo):</p>
+
+<pre><code>vars:
+  interface: ${ansible_interfaces[1]}
+</code></pre>
+
+<p>Variables with quotes:</p>
+
+<pre><code>vars:
+  compress: '( "application/x-javascript", "text/css", "text/html", "text/plain" )'
+</code></pre>
+<hr></hr>
+Tags: <a href="../tags/ansible.html" class="link">ansible, 
+</a>
+<a href="../tags/chef.html" class="link">chef, 
+</a>
+<a href="../tags/configuration-management.html" class="link">configuration-management, 
+</a>
+<a href="../tags/deployment.html" class="link">deployment, 
+</a>
+<a href="../tags/featured-one.html" class="link">featured-one, 
+</a>
+<a href="../tags/puppet.html" class="link">puppet, 
+</a>
+<a href="../tags/python.html" class="link">python, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>46ce3ed1cecaedb171dfde3b567547</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

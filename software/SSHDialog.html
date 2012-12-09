@@ -1,0 +1,247 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Sshdialog - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>SSHdialog</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../software" class="link">Software</a>
+<span class="divider">/</span></li>
+<li><a href="SSHDialog.html" class="link">SSHdialog</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 26-10-2009</h6>
+<br></br>
+<p><img src="http://nc.raymii.org/cms/images/sshdialog.png" alt="SSHdialog" title="SSHDialog" /></p>
+
+<p>As I manage a lot of linux servers I have to use ssh a lot. <br />
+I am to lazy to remember all the hosts, so I wrote a script which combines dialog, awk and bash to make a nifty ssh script. First of, copy this script to your pc: </p>
+
+<h5>SSHdialog.sg</h5>
+
+<pre><code>#!/bin/bash
+### Copyright (c) 2010 Remy van Elst
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+VERSION="1.2 beta."
+TITLE="SSHdialog $VERSION"
+HOSTSFILE="~/hosts"
+if [ -e $HOSTSFILE ]; then
+awk 'NF &gt; 0' $HOSTSFILE &gt; /tmp/sshost.hosts &amp;&amp; cat /tmp/sshost.hosts &gt; $HOSTSFILE
+else
+echo "Host file does not exist, please create it"
+echo "Use the following format:"
+echo; echo "number,servername,user,url/ip,port"
+echo "Example:"
+echo "1,VPS1,-,vps1.example.com,2223"
+echo "2,VPS2,john,vps2.example.org,2222"
+echo "3,Company Webserver,www,10.0.0.210,22"
+echo "4,Router,root,192.168.1.1,22"
+echo; echo "If you want the current user to be used as the username then use a - (dash)."
+echo "Each value is seperated by a , (comma), and make sure you don't have double numbers. If you have only the first number will work."
+echo "If the syntax is not correct the script will fail so please make sure there are no errors..."
+echo
+exit 1
+fi
+WIDTH=50
+HEIGHT=40
+MENUSIZE=6
+TEMPF=`TEMPF 2&gt;/dev/null` || TEMPF=/tmp/sshost.$$
+OLDIFS=$IFS
+WHICHSSH="`whoami`@${HOSTN[$SSHOST]}"
+DIALOG=${DIALOG=dialog}
+IFS=$'n'
+ALINES=($(awk 'BEGIN{FS=","} {print $1}' $HOSTSFILE | wc -l))
+LINES=($(awk 'BEGIN{FS=","} {print $1, """ $2 """}' $HOSTSFILE))
+NAMES=($(awk 'BEGIN{FS=","} {print $2}' $HOSTSFILE))
+UNAME=($(awk 'BEGIN{FS=","} {print $3}' $HOSTSFILE))
+HOSTN=($(awk 'BEGIN{FS=","} {print $4}' $HOSTSFILE))
+HOSTP=($(awk 'BEGIN{FS=","} {print $5}' $HOSTSFILE))
+
+# if [ $ALINES -gt 6 ]; then MENUSIZE=$ALINES; else MENUSIZE=6; fi
+MENUSIZE=$ALINES
+SMURF="$DIALOG --extra-button --extra-label "Edit Hosts" --cancel-label "Exit" --ok-label "Connect" --menu "$TITLE" $HEIGHT $WIDTH $MENUSIZE ${LINES[*]}"
+eval $SMURF 2&gt; $TEMPF
+RHOST=$?
+KEUZE=`cat $TEMPF`
+SSHOST=$[$KEUZE - 1]
+
+if [ ${UNAME[$SSHOST]} == "-" ]; then
+UNAME2=`whoami`
+WHICHSSH="$UNAME2@${HOSTN[$SSHOST]}"
+else
+UNAME2=${UNAME[$SSHOST]}
+WHICHSSH="$UNAME2@${HOSTN[$SSHOST]}"
+fi
+
+clear
+
+case $RHOST in
+0)
+echo "Connecting user $UNAME2 to ${HOSTN[$SSHOST]} on port ${HOSTP[$SSHOST]}."
+ssh  $WHICHSSH -p ${HOSTP[$SSHOST]}
+echo "ssh terminated, byebye"
+echo "This script is made by Raymii from http://raymii.org"
+;;
+1)
+echo "You selected exit, we will quit"
+exit 0
+;;
+3)
+nano $HOSTSFILE
+exec bash $0
+exit 0
+;;
+255)
+echo "You pressed ESC, we will exit.";
+exit 0
+;;
+esac
+
+rm -f $TEMPF
+exit 0
+</code></pre>
+
+<p>Now comes the hard part, creating your hosts file.</p>
+
+<p>The script wants it to be in the same directory as the script with the name "hosts". <br />
+This requires a special syntax to make it work. <br />
+It has to be like below: </p>
+
+<h5>hosts</h5>
+
+<pre><code>ID,Friendly name,username,host or ip,port
+1,VPS 1,-,vps.example.org,22
+2,VPS 2,www,vps.someserver.com,2222
+3,Home Router,root,192.168.1.1,22
+4,Homeserver,-,192.168.1.10,22
+5,Work,ceo,my.work.com,22
+</code></pre>
+
+<p>If you want the current user to be used as the username then use a - (dash) as username.</p>
+
+<p>Please double check your comma's and your numbers, if something is wrong the script can give strange errors. <br />
+If you like the script or have suggestions the please leave a comment below.</p>
+<hr></hr>
+Tags: <a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/dialog.html" class="link">dialog, 
+</a>
+<a href="../tags/ncurses.html" class="link">ncurses, 
+</a>
+<a href="../tags/ssh.html" class="link">ssh, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>894cf432a62874a8e8ebcb53a7620a</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

@@ -1,0 +1,254 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Easyconverter V0.4 - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>EasyConverter v0.4</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../software" class="link">Software</a>
+<span class="divider">/</span></li>
+<li><a href="Easyconverter.html" class="link">EasyConverter v0.4</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 23-12-2009</h6>
+<br></br>
+<p>So I bought my dad a new MP3 player. His iPod was from 2005 so it was time for a new one. </p>
+
+<p>Almost all of Dad's music files are .flac or .wav. The iPod played them thanks to rockbox. <br />
+This one does not. And my dad is more like the average user, so I wrote a little program to help him. <br />
+Well, program, more like a ffmpeg wrapper with Zenity. But it works and he thinks its easier than opening a terminal and executing a script in a folder. (which I disagree). <br />
+And the second version is finished. It has some new things, mostly as asked in the comments:  </p>
+
+<ul>
+<li>Extension select before folder.</li>
+<li>Filter on extension</li>
+<li>Check if files exist in folder.</li>
+<li>Added .flv to input format (Youtube ripped videos)</li>
+<li>Added .aac to input/output format</li>
+<li>Quality selector for ffmpeg</li>
+<li>Removed folder check.</li>
+<li>Added nautilus open when converting finished. Go get it, paste this in a terminal:</li>
+</ul>
+
+<p><strong>Please note, you are executing untrusted code from an unknown source. This is considered not very safe, so please read the script before you do this.</strong>  </p>
+
+<pre><code>wget http://raymii.org/cms/content/downloads/easyconverter.sh; chmod +x easyconverter.sh; ./easyconverter.sh
+</code></pre>
+
+<p>Note that you'll need zenity and ffmpeg: 
+    sudo apt-get install zenity ffmpeg </p>
+
+<hr />
+
+<p><img src="http://raymii.org/images/easyconv1.png" alt="screenshot1" /> <br />
+<img src="http://raymii.org/images/easyconv2.png" alt="screenshot2" /> <br />
+<img src="http://raymii.org/images/easyconv3.png" alt="screenshot3" /> <br />
+<img src="http://raymii.org/images/easyconv4.png" alt="screenshot4" />  </p>
+
+<h5>And here's the code</h5>
+
+<pre><code>#!/bin/bash
+
+####################################
+##   Script made by Raymii.org    ##
+####################################
+
+# V0.4 new features:
+# Extension select before folder.
+# Filter on extension
+# Check if files exist in folder.
+# Added .flv to input format
+# Added .aac to input/output format
+# Quality selector for ffmpeg
+# removed folder check.
+# added nautilus open when converting finished.
+# fixed the ogg big files problem, thanks http://identi.ca/habtool and http://identi.ca/lesp
+
+
+padself=`pwd`/`basename $0`
+
+function catch_errors() {
+   zenity --question --text="There is something wrong. Do you want to quit or restart the app?" --cancel-label="Quit" --ok-label="Restart";
+   [ "$?" = "0" ] &amp;&amp; ( bash -c $padself &amp; );
+   exit 0;
+}
+
+function func_error2() {
+    echo `date +%h:%m:%s`
+}
+
+trap catch_errors ERR;
+
+mapvraag=0
+titel="EasyConverter v0.4g"
+KBs=128;
+FGOED=1;
+opts="";
+
+zenity --info --text="Hi, I'm **$titel** nI will help you with converting files to another format. n nIn the next window, please select the format of the files. After that please select the folder which has the audio files." --title="$titel"
+
+vanform=$(zenity  --list --title="Select a file extension" --height=270 --text "Which filetype do you want to convert?" --radiolist  --column "Choose" --column "Original Format" TRUE flac FALSE ogg FALSE wav FALSE mp3 FALSE aac FALSE flv);
+
+mapvraag=$(zenity --file-selection --directory --title="Please select a folder with $vanform files." --file-filter="*.$vanform" );
+
+pushd "$mapvraag"
+for f in ./*.$vanform; do
+        test -f "$f" || continue
+        echo "$f bestaat, mooi zo.";
+        FGOED=2;
+    done    
+popd
+
+if [ $FGOED == 1 ]; then
+    zenity --error --text="Oops, the filetype you selected is not found in the folder you selected. nPlease try again." --title="$titel";
+    return 1;
+fi
+
+formaat=$(zenity  --list --height=270 --text "And what should they become?" --radiolist  --column "Choose" --column "Converted Format" TRUE mp3 FALSE ogg FALSE wav FALSE flac FALSE aac);
+if [ $vanform = $formaat ]; then
+    zenity --error --text="You choose the same input and output format nI can't convert the files if you do that. nLets restart." --title="$titel"
+    return 1;
+    exit
+fi
+
+if [ $formaat == "ogg" ]; then
+    opts="-acodec libvorbis";
+fi
+
+KBs=$(zenity  --list --height=380 --text "What output quality you want me to tell ffmpeg?n*64k*: nSmall filesnLow quality n*320k*: nBig filesnHigh quality." --radiolist  --column "Choose" --column "kbps" TRUE 64 FALSE 96 FALSE 128 FALSE 192 FALSE 256 FALSE 320);
+
+finalcheck=$(zenity --question --cancel-label="Don't" --ok-label="Lets Rock Baby!" --text="We're going to convert all files in: **$mapvraag** to ***$formaat*** at ***$KBs** kb/s*. Last check, Do or Don't?" --title="$titel")
+
+trap func_error2 ERR;
+
+pushd "$mapvraag"
+for i in *.$vanform; do
+        mkdir -p "$mapvraag/converted/$formaat/"
+        ffmpeg -y -i "$i" -ab $KBs"k" $opts "$mapvraag/converted/$formaat/$i.$formaat" 2&gt;&amp;1 | zenity --progress --text="Converting: **$i** from **$vanform** to **$formaat** at **$KBs** kb/s" --title="$titel" --auto-close --pulsate
+        echo $i gedaan
+
+done
+
+zenity --question --cancel-label="Nope, just quit." --ok-label="Yes, open it." --text="Done! nI've saved the converted files in this folder: **$mapvraag/converted/$formaat**. n nWould you like me to try and open Nautilus in the output folder? n n nThis little script is made by: **Raymii.org**." --title="$titel";
+[ "$?" = "0" ] &amp;&amp; nautilus --no-desktop "./converted/$formaat";
+popd
+echo Done
+</code></pre>
+
+<p><a href="http://www.webupd8.org/2010/03/zenity-ffmpeg-bash-script-to-convert.html">Thanks to Andrew from webupd8 for posting it on http://webupd8.org</a> <br />
+<a href="http://identi.ca/habtool">Thanks habtool,</a> and<a href="http://identi.ca/lesp"> lesp for help</a>.  </p>
+<hr></hr>
+Tags: <a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/ffmpeg.html" class="link">ffmpeg, 
+</a>
+<a href="../tags/flv.html" class="link">flv, 
+</a>
+<a href="../tags/loop.html" class="link">loop, 
+</a>
+<a href="../tags/mp3.html" class="link">mp3, 
+</a>
+<a href="../tags/ogg.html" class="link">ogg, 
+</a>
+<a href="../tags/wav.html" class="link">wav, 
+</a>
+<a href="../tags/zenity.html" class="link">zenity, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>788cb61ad378ece47a6a5baaa4a4e6</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

@@ -1,0 +1,202 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Clamav Installation And Daily Scan + Report On Ubuntu - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>ClamAV installation and daily scan + report on Ubuntu</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="ClamAV.html" class="link">ClamAV installation and daily scan + report on Ubuntu</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 01-12-2012</h6>
+<br></br>
+<p>ClamAV is a virus scanner for Linux/Unix like systems. This tutorial will show you how to install it and how to set it up to auto-update and do a daily scan. It will only report if threats are found. It is tested on Ubuntu 10.04 and up. It also covers if, and why you might need a virus scanner for Linux/Unix. As an extra, it also covers scans for specific folders which remove infected files automatically.</p>
+
+<h4>Do you need a virus scanner on Linux/Unix?</h4>
+
+<p>Short answer, it depends on your situation.</p>
+
+<p>Long answer: <br />
+You might want to run a virus scanner on a server where files are uploaded, or where users login and manipulate files. <br />
+Lets say you host a file upload site, you want to run a scan on the upload folder which auto removes infected files. <br />
+It can also be that your mailserver runs Linux, but people sometimes mail executables or infected pdf files. Then you also want a scanner. <br />
+Or you might run a source control server (gitolite, mercurial) where sometimes binary files are checked in. (although ClamAV might not find things in bare-git repositories, only in working directories.)</p>
+
+<p>If you however only run a static HTML website, or an rsync backup server, or a Rougelike via telnet, where there are no uploads or like, you might be wasting resources.</p>
+
+<p>My advice is to look at your situation and then decide if you need ClamAV, and if you only need to scan a few folders, the entire system and if you want to auto-remove the virusses or not. </p>
+
+<h4>Install ClamAV</h4>
+
+<p>First we update the package repository:</p>
+
+<pre><code>sudo apt-get update
+</code></pre>
+
+<p>Now we install the clamav scanner, the daemon and the database updater. </p>
+
+<pre><code>sudo apt-get install clamav clamav-daemon clamav-freshclam
+</code></pre>
+
+<p>You can also install the clamav-data package, but the clamav-freshclam package is another (easier) way to update your virus definitions.</p>
+
+<p>On RHEL, CentOS or Scientific Linux, you only need to install the <code>clamav</code> package:</p>
+
+<pre><code>yum install clamav
+</code></pre>
+
+<h4>Update the database</h4>
+
+<p>The below two commands will restart the freshclam daemon (which auto updates the database) and then does a manual update of the definitions.</p>
+
+<pre><code>sudo /etc/init.d/clamav-freshclam restart
+sudo /usr/bin/freshclam
+</code></pre>
+
+<h4>The daily scan</h4>
+
+<p>The below cronjob will run a virus database definition update (so that the scan always has the most recent definitions) and afterwards run a full scan which will only report when there are infected files on the system. It also does not remove the infected files automatically, you have to do this manually. This way you make sure that it does not delete /bin/bash by accident.</p>
+
+<pre><code>## This should be a root cronjob.
+30 01 * * * /usr/bin/freshclam --quiet; /usr/bin/clamscan --recursive --no-summary --infected / 2&gt;/dev/null
+</code></pre>
+
+<p>The <code>2&gt;/dev/null</code> options keeps the /proc and such access denied errors out of the report. The infected files however are still found and reported.</p>
+
+<p>Also make sure that your cron is configured so that it mails you the output of the cronjobs. The manual page will help you with that.</p>
+
+<p>This is how a sample email looks if you have an infection:</p>
+
+<pre><code>/home/remy/eicar.zip: Eicar-Test-Signature FOUND
+/home/remy/eicar.com: Eicar-Test-Signature FOUND
+</code></pre>
+
+<h4>Extra: the targeted scan</h4>
+
+<p>The below cronjob is an example and you should adapt it. It updates the virus definitions and scans the folder <code>/var/www/sites/uploader.com/public-html/uploads/</code> two times per hour, and if it found any files it removes them. </p>
+
+<pre><code>    ## This should be a root cronjob.
+    */29 * * * * /usr/bin/freshclam --quiet; /usr/bin/clamscan --recursive --no-summary --infected --remove /var/www/sites/uploader.com/public-html/uploads 2&gt;/dev/null
+</code></pre>
+
+<p>This is how a sample email might look like:</p>
+
+<pre><code>/var/www/sites/uploader.com/public-html/uploads/eicar.zip: Eicar-Test-Signature FOUND
+/var/www/sites/uploader.com/public-html/uploads/eicar.zip: Removed.
+/var/www/sites/uploader.com/public-html/uploads/eicar.com: Eicar-Test-Signature FOUND
+/var/www/sites/uploader.com/public-html/uploads/eicar.com: Removed.
+</code></pre>
+
+<p>raymii.org
+romeo alpha yankee mike india india dot org</p>
+<hr></hr>
+Tags: <a href="../tags/anti-virus.html" class="link">anti-virus, 
+</a>
+<a href="../tags/clamav.html" class="link">clamav, 
+</a>
+<a href="../tags/malware.html" class="link">malware, 
+</a>
+<a href="../tags/ubuntu.html" class="link">ubuntu, 
+</a>
+<a href="../tags/virus.html" class="link">virus, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>6d8388ff8ee0c5567e39d107136582</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

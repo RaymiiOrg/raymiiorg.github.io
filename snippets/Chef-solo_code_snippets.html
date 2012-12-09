@@ -1,0 +1,400 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Chef-Solo Code Snippets - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Chef-Solo code snippets</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../snippets" class="link">Snippets</a>
+<span class="divider">/</span></li>
+<li><a href="Chef-solo_code_snippets.html" class="link">Chef-Solo code snippets</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 21-09-2012</h6>
+<br></br>
+<p>This article is a collection of snippets for Chef. Chef is an open-source systems integration framework supporting Linux, Windows, BSD and more. <a href="http://www.opscode.com/chef/">For more info about chef, click here</a></p>
+
+<p>These snippets are tested and working with Ruby 1.9.2 and Chef-solo on Ubuntu 10.04, 12.04 and CentOS 5 and 6.</p>
+
+<h5>Do something on a server, based on server name</h5>
+
+<p>Create a new recipe, name it <em>server-specific-config</em> for example. In the data_bags/servers/$servername.json file, make sure the name matches this one.</p>
+
+<h6>server-specific-config/recipes/default.rb</h6>
+
+<pre><code>attribs = get_configuration_attribs(node.hostname)
+server_role = attribs['node_data']['role'] 
+server_name = attribs['id'] 
+
+case server_name
+  when "vps5", "vps6", "vps7"
+    # these are the SQL servers which should have specific databases as defind in mydatabases recipe
+    include_recipe "mysql::server"
+    include_recipe "database"
+    include_recipe "mydatabases"
+  when "vps4", "vps3", "vps2"
+    #these are the webservers which act as reverse-proxy, and should not have lighttpd
+    include_recipe "nginx"
+    include_recipe "raymiiorg-revproxy"
+end
+</code></pre>
+
+<h6>data_bags/servers/$servername.json</h6>
+
+<pre><code>{
+    "id": "vps5",
+    "node_data": {
+        "description": "MySQL database slave 1",
+        "role": "database"
+        }
+}
+</code></pre>
+
+<h5>Do something on a server, based on server role</h5>
+
+<p>Create a new recipe, name it <em>server-specific-config</em> for example. In the data_bags/servers/$servername.json file, make sure the role matches this one. See below for an example $servername.json file.</p>
+
+<h6>server-specific-config/recipes/default.rb</h6>
+
+<pre><code>attribs = get_configuration_attribs(node.hostname)
+server_role = attribs['node_data']['role'] 
+server_name = attribs['id'] 
+
+case server_role
+  when "webserver"
+    #non-reverse proxy servers should have lighttpd.
+    include_recipe "lighttpd"
+    include_recipe "mysql::client"
+  when "database"
+      ##generic database servers should be empty
+      include_recipe "mysql::server"
+      include_recipe "database"
+      gem_package "mysql" do
+        action :install
+        #ignore_failure true
+      end
+      package "memcached" do
+        action :install
+      end
+end
+</code></pre>
+
+<h6>data_bags/servers/$servername.json</h6>
+
+<pre><code>{
+    "id": "vps9",
+    "node_data": {
+        "description": "Lighttpd webserver 2",
+        "role": "webserver"
+        }
+}
+</code></pre>
+
+<h5>MySQL - Create multiple databases and create and add a user to that database</h5>
+
+<p>Create a new recipe, name it <em>mydatabases</em> for example. Make sure you include this recipe on a database server (see above). This requires the <em>mysql</em> and the <em>database</em> recipe.</p>
+
+<h6>mydatabases/recipes/default.rb</h6>
+
+<pre><code>include_recipe "mysql::server"
+include_recipe "database"
+
+mysql_connection_info = {:host =&gt; "localhost", :username =&gt; 'root', :password =&gt; node['mysql']['server_root_password']}
+
+#DB NAME, USER AND PASSWORD ARE REQUIRED!!!
+
+node[:default][:databases].each do |db|
+
+    mysql_database db[:name] do
+        connection mysql_connection_info
+        action :create
+    end
+
+    mysql_database_user db[:user] do
+        connection mysql_connection_info
+        password db[:password]
+        action :create
+    end
+
+    mysql_database_user db[:user] do
+        connection mysql_connection_info
+        password db[:password] 
+        database_name db[:name]
+        privileges [:all]
+        host '%'
+        action :grant
+    end
+end
+</code></pre>
+
+<h6>mydatabases/attributes/default.rb</h6>
+
+<pre><code>default[:default][:databases] = [
+    {
+        :name =&gt; 'database_joomla1',
+        :user =&gt; 'database_joomla1_u',
+        :password =&gt; 'supersecretpassword'
+    },
+    {
+        :name =&gt; 'database_drupal1',
+        :user =&gt; 'database_drupal1_u',
+        :password =&gt; 'supersecretpassword'
+    },
+    {
+        :name =&gt; 'database_drupal2',
+        :user =&gt; 'database_drupal2_u',
+        :password =&gt; 'supersecretpassword'
+    },{
+        :name =&gt; 'database_raymiiorg_cms',
+        :user =&gt; 'database_raymiiorg_cms_u',
+        :password =&gt; 'supersecretpassword'
+    }
+]
+</code></pre>
+
+<h5>Install multiple packages on a server</h5>
+
+<p>This can be in a different recipe, or in the server-specific-config recipe, for example just for server vps5.</p>
+
+<h6>server-specific-config/attributes/default.rb</h6>
+
+<pre><code>default[:vps5][:packages_to_install] = [
+    "htop",
+    "fail2ban",
+    "vim",
+    "nano",
+    "wget",
+    "curl",
+    "git-core",
+    "build-essential",
+    "mailutils",
+    ]
+</code></pre>
+
+<h5>server-specific-config/recipes/default.rb</h5>
+
+<pre><code>default[:vps5][:packages_to_install].each do |p|
+  package p do
+    action :install
+  end
+end
+</code></pre>
+
+<h5>Remove a list of users</h5>
+
+<p>Lets say we do not want all those users defaulting on an ubuntu server system. Lets remove them via the server-specific-config recipe.</p>
+
+<h6>server-specific-config/recipes/default.rb</h6>
+
+<pre><code>default[:vps5][:users_to_delete].each do |user|
+        user "#{user}" do
+            action :remove
+            username "#{user}"
+        end
+end
+</code></pre>
+
+<h6>server-specific-config/attributes/default.rb</h6>
+
+<pre><code>default[:vps5][:users_to_delete] = [
+    "games",
+    "lp",
+    "mail",
+    "news",
+    "uucp",
+    "proxy",
+    "list",
+    "irc",
+    "gnats",
+    "landscape",
+    ]
+</code></pre>
+
+<h5>Simple copy-paste snippets</h5>
+
+<p>Just for me in case I forget them.</p>
+
+<h6>Add a user + group</h6>
+
+<pre><code>group "remy" do
+    action :create
+    group_name "remy"
+    gid 3000
+end     
+
+user "remy" do
+    username "remy"
+    comment "Remy van Elst"
+    uid 3000
+    gid "remy"
+    home "/home/remy"
+    shell "/bin/bash"
+    password "$1$4jfd84hHjkd/.DKHjkhf48A.S-=348(ns"
+    supports :manage_home =&gt; true
+    action :create
+end
+</code></pre>
+
+<h6>Execute a command as another user than the one doing the chef-solo run</h6>
+
+<pre><code>execute "Send email on completion" do
+    command "mail -s \"Chef run on node #{node} complete\" email@mail.com &lt; /var/chef/chef.log"
+    user "remy"
+    action :run
+end
+</code></pre>
+
+<h6>Make sure I can sudo</h6>
+
+<pre><code>group "sudo" do
+  action :manage
+  members "remy"
+  append true
+end
+group "wheel" do
+  action :manage
+  members "remy"
+  append true
+end
+</code></pre>
+
+<h6>Packages</h6>
+
+<p>Install:</p>
+
+<pre><code>package "nano" do
+    action :install
+end
+</code></pre>
+
+<p>Remove:</p>
+
+<pre><code>package "vim" do
+    action :purge
+end
+</code></pre>
+
+<h6>Add remote logging to rsyslog</h6>
+
+<pre><code>ruby_block "Adding remote loghost to /ets/rsyslog.conf" do
+  block do
+    fh = File.open("/etc/rsyslog.conf", 'a+')
+    fh.puts "#Remote logging to server Jupiter5.local.raymii.nl \n*.*     @10.5.0.69"
+    fh.close
+  end
+  only_if { File.file?("/etc/rsyslog.conf") }
+end
+
+service "rsyslog" do
+    supports :status =&gt; true, :restart =&gt; true, :reload =&gt; true
+    action [ :restart ]
+    only_if { File.file?("/etc/rsyslog.conf") }
+end
+</code></pre>
+<hr></hr>
+Tags: <a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/chef.html" class="link">chef, 
+</a>
+<a href="../tags/configuration-management.html" class="link">configuration-management, 
+</a>
+<a href="../tags/ruby.html" class="link">ruby, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>d2f520142a167b67653f5a1bc5de53</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

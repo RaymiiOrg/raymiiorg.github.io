@@ -1,0 +1,195 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Some Bash And Arch Tweaks  - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Some Bash and Arch Tweaks </h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../snippets" class="link">Snippets</a>
+<span class="divider">/</span></li>
+<li><a href="Arch-bash-pacman-bashrc-tips.html" class="link">Some Bash and Arch Tweaks </a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 01-01-2012</h6>
+<br></br>
+<p>So, I have some nice tips for your .bashrc, with screenshots. Also a handy command to show your biggest packages in pacman/arch. </p>
+
+<h5>Simple Calendar with today marked as ##</h5>
+
+<p><img src="/inc/img/bash/tcal.png" alt="tcal" /></p>
+
+<pre><code>alias tcal='cal | sed "s/^/ /;s/$/ /;s/ $(date +%e) / $(date +%e | sed '''s/./#/g''') /"'
+</code></pre>
+
+<h5>Fast cd up:</h5>
+
+<pre><code>alias ..='cd ..'
+alias ...='cd ../..'
+</code></pre>
+
+<h5>Network Info (LAN IP, IP and MAC):</h5>
+
+<p><img src="/inc/img/bash/netinfo.png" alt="netinf" /></p>
+
+<pre><code>netinfo ()
+{
+echo "Internal IPv4 address of eth0: "; ifconfig | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}'
+echo "External IPv4 address: "; wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/
+</code></pre>
+
+<h5>Biggest folders in directory Gigabyte version:</h5>
+
+<p><img src="/inc/img/bash/dug.png" alt="dug" /></p>
+
+<pre><code>alias dug='du -h | grep ^[0-9.]*G | sort -rn | head -n 20'
+</code></pre>
+
+<h5>Biggest folders in directory Megabyte version:</h5>
+
+<p><img src="/inc/img/bash/dum.png" alt="dum" /></p>
+
+<pre><code>alias dum='du -h | grep ^[0-9.]*M | sort -rn | head -n 20'
+</code></pre>
+
+<h5>Process Grep:</h5>
+
+<p><img src="/inc/img/bash/pg.png" alt="pg" /></p>
+
+<pre><code>alias pg='ps -ef | grep '
+</code></pre>
+
+<h5>Nice greeting when opening a bash shell:</h5>
+
+<p><img src="/inc/img/bash/ps1.png" alt="welcome" /></p>
+
+<pre><code>PS1="u@h  -  tn${PWD}/ -$ "
+echo "Welkom Remy,"
+echo "Het is vandaag:";
+date
+echo "Deze PC draait op een:" 
+/bin/uname -p
+echo ""
+netinfo;
+</code></pre>
+
+<p>(put this one at the end of your .bashrc file)</p>
+
+<h5>And the huge packages finder:</h5>
+
+<p><img src="/inc/img/bash/dup.png" alt="dup" /></p>
+
+<pre><code>#!/bin/bash
+pacman -Qi | awk '/Name/ { name=$3 } /Size/ { printf "%.3fMBt%sn", $4/1024, name }' | sort -rh | head -n $1
+exit 0
+</code></pre>
+
+<p>(I've put this in /usr/bin/dup and chmodded it to 755).</p>
+
+<p>Thanks to the arch forum for most of these tips!</p>
+<hr></hr>
+Tags: <a href="../tags/alias.html" class="link">alias, 
+</a>
+<a href="../tags/arch.html" class="link">arch, 
+</a>
+<a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/tweaks.html" class="link">tweaks, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>948eb5f7750da4e5a3951c84e784c5</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

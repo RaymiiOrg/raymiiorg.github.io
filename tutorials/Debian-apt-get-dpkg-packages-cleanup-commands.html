@@ -1,0 +1,216 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Debian Packages Clean Up Commands - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Debian packages clean up commands</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="Debian-apt-get-dpkg-packages-cleanup-commands.html" class="link">Debian packages clean up commands</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 01-01-2010</h6>
+<br></br>
+<p>As all my servers run on Debian and I like to keep things clean, here are some handy commands:</p>
+
+<h5>Find large packages</h5>
+
+<pre><code>dpkg --get-selections | cut -f1 | while read pkg; do dpkg -L $pkg | xargs -I'{}' bash -c 'if [ ! -d "{}" ]; then echo "{}"; fi' | tr 'n' '00' | du -c --files0-from - | tail -1 | sed "s/total/$pkg/"; done | sort -rn &gt; ~/packages.log.txt
+</code></pre>
+
+<p>If you run this as root, when its finished you will have a file in /root called packages.log.txt which has all the packages from your system in it with the size of the package and the files it uses:</p>
+
+<pre><code>15312 perl-modules
+14192 php5-cgi
+12588 perl
+12400 coreutils
+12396 iso-codes
+11232 aptitude
+10684 binutils
+9916 python2.5
+</code></pre>
+
+<p>You can also use something like </p>
+
+<pre><code>dpkg-query -Wf '${Installed-Size}t${Package}n' | sort -n
+</code></pre>
+
+<p>but this also takes the size of databases and extra files. </p>
+
+<h5>Remove config files</h5>
+
+<p>If you uninstall stuff with apt-get remove sometimes debian does not removes config files and they also take up space. Now you can just use apt-get purge but I tend to forget that every time. This command lists all the packages which are removed but still have config files on your system:</p>
+
+<pre><code>dpkg --list | grep '^rcb'
+
+rc binutils     2.20.1-15           The GNU assembler, linker and binary utilities
+rc dbus         1.2.24-3            simple interprocess messaging system
+rc dpkg-dev     1.15.8.5            Debian package development tools
+rc erlang-base  1:14.a-dfsg-2       Erlang/OTP virtual machine and base applications
+rc fakeroot     1.14.4-1            Gives a fake root environment
+</code></pre>
+
+<p>Now, just to make sure check the output and then remove the config files with this command:</p>
+
+<pre><code>dpkg --list | grep '^rcb' | awk '{ print $2 }' | xargs dpkg -P
+</code></pre>
+
+<h5>Cleanup aftwrwards</h5>
+
+<p>To save up some space via apt get you can use these commands:</p>
+
+<pre><code>apt-get autoremove
+apt-get clean
+</code></pre>
+
+<p>autoremove removes unused dependencies, packages which were installed by other packeges but which are no longer needed by your system. <br />
+clean just removes all the packages in the apt cache. You can also use autoclean but clean frees up more space. <br />
+This handy command shows all the packages which are installed on your system because some package recommends it, but they are not actually dependencies of packages:</p>
+
+<pre><code>aptitude search '?and( ?automatic(?reverse-recommends(?installed)), ?not(?automatic(?reverse-depends(?installed))) )'
+</code></pre>
+
+<p>can give something like this:</p>
+
+<pre><code>i A apt-xapian-index    -   maintenance and search tools for a Xapian index of Debian packages 
+i A exim4               -   metapackage to ease Exim MTA (v4) installation 
+i A file                -   Determines file type using "magic" numbers 
+i A heirloom-mailx      -   feature-rich BSD mail(1)
+</code></pre>
+
+<p>Check the output and if needed remove them all:</p>
+
+<pre><code>aptitude search '?and( ?automatic(?reverse-recommends(?installed)), ?not(?automatic(?reverse-depends(?installed))) )' | awk '{ print $3 }' | xargs dpkg -P
+</code></pre>
+
+<p>Then we have the all time favorites to see sizes:</p>
+
+<pre><code>df -h
+du -h | grep ^[0-9.]*M | sort -rn
+du -h | grep ^[0-9.]*G | sort -rn
+</code></pre>
+
+<p>With these commands I keep my servers clean and lean, but if you do something wrong or remove a package like libc6, sysv-rc, apt ore coreutils you'll have to spend your free evening to fix it up :P. </p>
+
+<p>Note that I ran everything as root. If you get strange errors about permissions then try again as root.</p>
+
+<p>Thanks to:</p>
+
+<p><a href="http://www.debian-administration.org">http://www.debian-administration.org/users/fsateler/weblog</a> <br />
+<a href="http://commandlinefu.com">Command Line Fu</a> </p>
+<hr></hr>
+Tags: <a href="../tags/apt-get.html" class="link">apt-get, 
+</a>
+<a href="../tags/aptitude.html" class="link">aptitude, 
+</a>
+<a href="../tags/cleanup.html" class="link">cleanup, 
+</a>
+<a href="../tags/debian.html" class="link">debian, 
+</a>
+<a href="../tags/df.html" class="link">df, 
+</a>
+<a href="../tags/dpkg.html" class="link">dpkg, 
+</a>
+<a href="../tags/size.html" class="link">size, 
+</a>
+<a href="../tags/ubuntu.html" class="link">ubuntu, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>e504b5eb36531b07bcbcf6453b9b74</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

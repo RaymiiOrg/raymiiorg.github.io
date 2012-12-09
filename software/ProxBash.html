@@ -1,0 +1,224 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Proxbash - A Bash Script To Manage Proxmox Ve - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>ProxBash - a bash script to manage Proxmox VE</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../software" class="link">Software</a>
+<span class="divider">/</span></li>
+<li><a href="ProxBash.html" class="link">ProxBash - a bash script to manage Proxmox VE</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 28-06-2012</h6>
+<br></br>
+<pre><code>Proxmox VE is a complete virtualization management solution for servers. You can virtualize even the most demanding application workloads running on Linux and Windows Servers. 
+It is based on the leading Kernel-based Virtual Machine (KVM) hypervisor and OpenVZ, the number one solution for container based virtualization.
+</code></pre>
+
+<p><a href="http://www.proxmox.com/products/proxmox-ve/">Proxmox Website</a></p>
+
+<p>ProxMox VE is a very nice piece of software to setup a VM host very fast, which also is easy managable via a webinterface. It supports both OpenVZ and KVM. I use it to manage a few VM's to test stuff on and it works really great.</p>
+
+<p>However, I'm a command line lover, and I thought it would be nice to be able to "Manage" Proxmox VE from a bash shell. And I've written a script to do just that. </p>
+
+<p>proxbash.sh is a bash script to manage your Proxmox VE server.</p>
+
+<h5>Features</h5>
+
+<ul>
+<li>Add OpenVZ containers</li>
+<li>Remove OpenVZ containers</li>
+<li>Start / Stop OpenVZ containers</li>
+<li>List all OpenVZ containers and KVM virtual machines</li>
+<li>Shell dropper into OpenVZ containers</li>
+<li>Command execution in openvz containers</li>
+</ul>
+
+<p>As you can see there is a lot of OpenVZ and not a lot of KVM. Most of the VM's I use are OpenVZ, so for the KVM things you need to use the webinterface.</p>
+
+<h5>Download</h5>
+
+<p><a href="https://raymii.org/cms/content/downloads/proxbash.sh">Click here to download the script</a></p>
+
+<p>Or use this:</p>
+
+<pre><code>wget https://raymii.org/cms/content/downloads/proxbash.sh; chmod +x ./proxbash.sh; ./proxbash.sh
+</code></pre>
+
+<h5>Usage</h5>
+
+<p>Before you start, edit the script variables:</p>
+
+<pre><code>VAR_PROXMOXHOST="192.168.0.25"      #proxmox server IP
+VAR_PROXMOXSSH="22"                 #proxmox ssh port
+VAR_PROXMOXUSER="root"              #proxmox ssh user
+VAR_PROXMOX_NODE="proxmox"          #proxmox cluster node name
+</code></pre>
+
+<p>and set up passwordless key auth to the proxmox node. If you don't do that, you have to enter the proxmox root password every time. </p>
+
+<p><strong>Also edit the case statement for the templates. Default it has ubuntu 10.04 and 12.04 and centos 5 and 6.</strong> </p>
+
+<p>Replace $CTID with an openvz ct id. (like 103, 104)</p>
+
+<h6>Create a CT</h6>
+
+<pre><code>proxbash.sh createct node-hostname node-password node-template node-ram node-disk node-ip
+proxbash.sh createct prod001 supersecret1 ubuntu12 1024 15 172.20.5.48
+proxbash.sh createct node-hostname node-password node-template node-ram node-disk node-ip $CTID
+</code></pre>
+
+<h6>Start/Stop a CT</h6>
+
+<pre><code>./proxbash.sh startct 
+./proxbash.sh startct $CTID   
+
+./proxbash.sh stopct
+./proxbash.sh stopct $CTID
+</code></pre>
+
+<h6>Remove a CT</h6>
+
+<pre><code>./proxbash.sh deletect
+./proxbash.sh deletect $CTID
+</code></pre>
+
+<h6>Shell dropper</h6>
+
+<pre><code>./proxbash.sh shelldrop $CTID
+</code></pre>
+
+<h6>Execute commands in CT</h6>
+
+<pre><code>./proxbash.sh execinct $CTID "commands you -want -to; execute; in the ../ct"
+</code></pre>
+
+<h6>List CTs/VMs</h6>
+
+<pre><code>./proxbash.sh listcts
+./proxbash.sh listvms
+</code></pre>
+
+<h6>Get CT info</h6>
+
+<pre><code>./proxbash.sh ctinfo
+./proxbash.sh ctinfo $CTID
+</code></pre>
+
+<h5>Notes</h5>
+
+<p>If you like it or use it, please leave a comment. License is MIT/X11 (see script for details).</p>
+<hr></hr>
+Tags: <a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/kvm.html" class="link">kvm, 
+</a>
+<a href="../tags/openvz.html" class="link">openvz, 
+</a>
+<a href="../tags/proxmox.html" class="link">proxmox, 
+</a>
+<a href="../tags/proxmox-ve.html" class="link">proxmox-ve, 
+</a>
+<a href="../tags/ssh.html" class="link">ssh, 
+</a>
+<a href="../tags/virtualization.html" class="link">virtualization, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>706082a6f77f26a3cf4daf35c78eb5</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

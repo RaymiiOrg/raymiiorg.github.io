@@ -1,0 +1,328 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Set Up A Local Ubuntu (Apt) Repository With Apt-Mirror - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Set up a local Ubuntu (apt) repository with apt-mirror</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="Set_up_a_local_Ubuntu_debian_apt_mirror.html" class="link">Set up a local Ubuntu (apt) repository with apt-mirror</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 28-03-2012</h6>
+<br></br>
+<p>This tutorial will cover the setup of an ubuntu/debian repository mirror. This is quite handy if you have multiple machines in your network running ubuntu. You only have to update the mirror, and the rest downloads the packages from there, so instead of having to download it 6 times (for 6 computers) you only download it once. Saves you and the mirrorservers some bandwidth.</p>
+
+<p>We will be using the apt-mirror tool to do all the magic.</p>
+
+<p>Please note that all the command need to be executed as root unless otherwise noted.</p>
+
+<h2>Installing apt-mirror</h2>
+
+<p>If you are on a recent ubuntu/debian version (+lucid or +lenny) you can execute the following command to install apt-mirror:</p>
+
+<pre><code>apt-get install apt-mirror
+</code></pre>
+
+<h2>Configuring apt-mirror</h2>
+
+<p>Apt-mirrors config is quite easy. Below you can find my config file with comments, please adapt where needed.</p>
+
+<p>To edit:</p>
+
+<pre><code>vim /etc/apt/mirror.list
+</code></pre>
+
+<p>/etc/apt/mirror.list:</p>
+
+<pre><code>############# config ##################
+#
+# Default variables are good enough.
+# set base_path    /var/spool/apt-mirror
+#
+# set mirror_path  $base_path/mirror
+# set skel_path    $base_path/skel
+# set var_path     $base_path/var
+# set cleanscript $var_path/clean.sh
+# set defaultarch  &lt;running host architecture&gt;
+# set postmirror_script $var_path/postmirror.sh
+# set run_postmirror 0
+set nthreads     20
+set _tilde 0
+#
+############# end config ##############
+
+# Start of repository URLs.
+
+## Ubuntu Precise (12.04)
+deb http://archive.ubuntu.com/ubuntu precise main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu precise-security main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu precise-updates main restricted universe multiverse
+
+## Ubuntu Lucid (10.04 LTS) (Only 32 bit, no 64 bit machines running 10.04)
+deb-i386 http://archive.ubuntu.com/ubuntu lucid main restricted universe multiverse
+deb-i386 http://archive.ubuntu.com/ubuntu lucid-security main restricted universe multiverse
+deb-i386 http://archive.ubuntu.com/ubuntu lucid-updates main restricted universe multiverse
+
+## Debian Stable (atm 6, squeeze)
+deb http://ftp.nl.debian.org/debian stable main contrib non-free
+
+## Only 64-bit packages for debian testing
+deb-amd64 http://ftp.nl.debian.org/debian testing main contrib non-free
+
+## No backports needed for me.
+## If needed, please uncomment.
+#deb http://archive.ubuntu.com/ubuntu precise-proposed main restricted universe multiverse
+#deb http://archive.ubuntu.com/ubuntu precise-backports main restricted universe multiverse
+
+## Also no deb-src.  
+#deb-src http://archive.ubuntu.com/ubuntu precise main restricted universe multiverse
+#deb-src http://archive.ubuntu.com/ubuntu precise-security main restricted universe multiverse
+#deb-src http://archive.ubuntu.com/ubuntu precise-updates main restricted universe multiverse
+#deb-src http://archive.ubuntu.com/ubuntu precise-proposed main restricted universe multiverse
+#deb-src http://archive.ubuntu.com/ubuntu precise-backports main restricted universe multiverse
+
+## I want to be able to downgrade the packages, so I don't want to clean up automatically.    
+# clean http://archive.ubuntu.com/ubuntu
+# clean http://ftp.nl.debian.org/debian
+</code></pre>
+
+<h2>Downloading the packages</h2>
+
+<p>Now if the config is set up the way you want, we can start downloading the packages and filling the repository.  </p>
+
+<p>Execute the following command to start downloading. Note that this can take a while, here it took half an hour, so be patient. The packages will be stored in subdirectories of the <em>/var/spool/apt-mirror/mirror</em> directory, so make sure the partition that holds that directory has enough disk space left.</p>
+
+<pre><code>root@repo:/var/repo# su - apt-mirror -c apt-mirror
+</code></pre>
+
+<p>Output looks like this:</p>
+
+<pre><code>Downloading 14 index files using 14 threads...
+Begin time: Mon Sep 17 14:26:32 2012
+[14]... [13]... [12]... [11]... [10]... [9]... [8]... [7]... [6]... [5]... [4]... [3]... [2]... [1]... [0]... 
+End time: Mon Sep 17 14:26:37 2012
+
+Proceed indexes: [PP]
+
+149.1 GiB will be downloaded into archive.
+Downloading 116234 archive files using 20 threads...
+Begin time: Mon Sep 17 14:26:38 2012
+[20]... [19]... [18]... [17]... [16]... [15]... [14]... [13]... [12]... [11]... [10]... [9]... [8]... [7]... [6]... [5]... [4]... [3]... [2]... [1]... [0]... 
+End time: Mon Sep 17 15:03:22 2012
+
+3.8 GiB in 5631 files and 1808 directories can be freed.
+Run /var/spool/apt-mirror/var/clean.sh for this purpose.
+
+Running the Post Mirror script ...
+(/var/spool/apt-mirror/var/postmirror.sh)
+
+
+Post Mirror script has completed. See above output for any possible errors.
+</code></pre>
+
+<h2>Installing and configuring a web server</h2>
+
+<p>To be able to access the repo from other computers you need a webserver. You can also do it via ftp but I choose to use a webserver. You can install apache, lighttpd, cherokee, nginx or whatever suits you (boa, thttpd, awk-http). </p>
+
+<p>Install a webserver (in this example, nginx)</p>
+
+<pre><code>apt-get install nginx
+</code></pre>
+
+<p>The packages are in <em>/var/spool/apt-mirror/mirror</em>. We are going to create a symlink to make them available. Make sure you edit the names and folders of the repo if your config is not the same as above.</p>
+
+<pre><code>ln -s /var/spool/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ /var/www/ubuntu
+ln -s /var/spool/apt-mirror/mirror/ftp.nl.debian.org/debian/ /var/www/debian
+</code></pre>
+
+<p>Your /var/www/ folder now should have these two items:</p>
+
+<pre><code>root@repo:~# ls -alh /var/www
+lrwxrwxrwx  1 root root   54 Sep 17 15:54 debian -&gt; /var/spool/apt-mirror/mirror/ftp.nl.debian.org/debian/
+lrwxrwxrwx  1 root root   55 Sep 17 14:22 ubuntu -&gt; /var/spool/apt-mirror/mirror/archive.ubuntu.com/ubuntu/
+</code></pre>
+
+<p>Make sure you can see them via the webserver, go to the url of the server. If you've are doing the repo locally you can use this URL:</p>
+
+<p><a href="http://127.0.0.1/ubuntu">http://127.0.0.1/ubuntu</a></p>
+
+<p>Note, for lighttpd you need to make sure that in the config the following option is enabled: </p>
+
+<pre><code>server.follow-symlink = enabled
+</code></pre>
+
+<h2>Setting up the clients</h2>
+
+<p>Now we have a working repo, we need to set up the clients to use this repo instead of the other (main) ubuntu repo's.</p>
+
+<p>If you only have the standard repositories then you can use sed to comment all the default lines. If you are not sure, or have other repo's, please skip this step.</p>
+
+<p>sed command to comment the entire /etc/apt/sources.list file:</p>
+
+<pre><code>sed -i 's/\(.*\)/#\1/g' /etc/apt/sources.list /etc/apt/sources.list
+</code></pre>
+
+<p>Now edit the /etc/apt/sources.list file. Make sure to replace [[MYREPO]] with the http address of your repo (http://127.0.0.1 or http://myrepo.localdomain or whatever)</p>
+
+<pre><code>vim /etc/apt/sources.list
+</code></pre>
+
+<p>And add the following (adapt if you have changed the config file):</p>
+
+<pre><code>deb http://[[MYREPO]]/ubuntu precise main restricted universe
+deb http://[[MYREPO]]/ubuntu precise-updates main restricted universe
+deb http://[[MYREPO]]/ubuntu precise-security main restricted universe multiverse
+</code></pre>
+
+<p>Or for debian:</p>
+
+<pre><code>deb http://[[MYREPO]]/debian stable main contrib non-free
+</code></pre>
+
+<p>Also comment out the other repositories (by adding a hash # before it).</p>
+
+<p>Now reload the apt sources and see if it works:</p>
+
+<pre><code>root@repo:~# apt-get update
+Ign http://127.0.0.1 precise InRelease
+Get:1 http://127.0.0.1 precise Release.gpg [198 B]
+Get:2 http://127.0.0.1 precise Release [49.6 kB]
+Get:3 http://127.0.0.1 precise/main i386 Packages [1274 kB]
+Ign http://127.0.0.1 precise/main TranslationIndex
+Ign http://127.0.0.1 precise/main Translation-en 
+Fetched 1324 kB in 0s (2009 kB/s)                
+Reading package lists... Done
+</code></pre>
+
+<p>As you can see, it works!</p>
+
+<h2>Cleaning up</h2>
+
+<p>If the repo becomes to big, you can use apt-mirror to clean up some space. This will delete older packages. I choose to not do that automatically, so I can install earlier versions of packages, or downgrade existing ones.</p>
+
+<p>Run the following command to clean up:</p>
+
+<pre><code>/var/spool/apt-mirror/var/clean.sh
+</code></pre>
+
+<p>Output may look like:</p>
+
+<pre><code>root@repo:~#     /var/spool/apt-mirror/var/clean.sh
+Removing 5631 unnecessary files [4077010944 bytes]...
+[0%]..................................................[8%]..................................................[17%]..................................................[26%]..................................................[35%]..................................................[44%]..................................................[53%]..................................................[62%]..................................................[71%]..................................................[79%]..................................................[88%]..................................................[97%]..............done.
+
+Removing 1808 unnecessary directories...
+</code></pre>
+<hr></hr>
+Tags: <a href="../tags/apt.html" class="link">apt, 
+</a>
+<a href="../tags/apt-get.html" class="link">apt-get, 
+</a>
+<a href="../tags/apt-mirror.html" class="link">apt-mirror, 
+</a>
+<a href="../tags/debian.html" class="link">debian, 
+</a>
+<a href="../tags/mirror.html" class="link">mirror, 
+</a>
+<a href="../tags/ubuntu.html" class="link">ubuntu, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>b3f565ccd1b50e0f8a2039214ac796</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

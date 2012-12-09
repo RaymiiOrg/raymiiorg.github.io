@@ -1,0 +1,298 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Clonezilla Backup Script V0.2 - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Clonezilla Backup Script v0.2</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../software" class="link">Software</a>
+<span class="divider">/</span></li>
+<li><a href="Clonezilla-custom-backup-script.html" class="link">Clonezilla Backup Script v0.2</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst, David Bekker</h6>
+<h6>Date: 18-05-2009</h6>
+<br></br>
+<p>Clonezilla is wonderfull software. At work we use it daily to image laptops. We have a windows PC with a big hard drive, which is shared via samba. <br />
+Because we image an average of 10 laptops every morning, I decided to customize the script. So together with a colleague we made a script which automatically grabs our latest image from the share and restores it. <br />
+Our images are named schoon#. <br />
+It restores the image to /dev/sda. But you can change the clonezilla command. <br />
+Make sure your share is writable. <br />
+It gets network from dhcp on eth0. <br />
+So, the steps to get the script in clonezilla:</p>
+
+<ul>
+<li>Install the squashfs-tools for your distro, this is important.  </li>
+<li>Unetbootin the ISO to a USB. </li>
+<li>Copy the files to a dir on your pc and open a terminal in the dir. </li>
+</ul>
+
+<p>Then do this</p>
+
+<pre><code> cd live
+ sudo unsquashfs -f ./filesystem.squashfs
+</code></pre>
+
+<p>Now make a dir in de squashfs-root. Put the scripts in there, change them or not, and chmod them so that they are executable. </p>
+
+<p>Don't forget to change the path in the launcher script, else it won't work. <br />
+Now make it back to a life system:</p>
+
+<pre><code>sudo mksquashfs ./squashfs-root ./filesystem.squashfs.new
+</code></pre>
+
+<p>And change the syslinux.cfg so that the paths are correct if you changed them:</p>
+
+<pre><code>label ubnentry0
+menu label RESTORE
+kernel /live/vmlinuz1
+append initrd=/live/initrd1.img boot=live union=aufs  hostname=jaunty edd=on nolocales ocs_live_run="/laptop03/startr.sh" ocs_live_extra_param="" ocs_live_keymap="NONE" ocs_live_batch="no" ocs_lang="" noprompt mode_option=1024x768 toram=filesystem.squashfs ip=frommedia
+</code></pre>
+
+<p>Now, here are the scripts: backup-schoon.sh (this makes a backup image) </p>
+
+<pre><code>#!/bin/bash
+dhclient
+clear
+echo "################################"
+echo "# Daniel Imager for Erasmus MC #"
+echo "#      By Raymii &amp; David       #"
+echo "#     Based on Clonezilla      #"
+echo "################################"
+echo
+echo
+echo "Mounting the image share. If asked for a password, enter 1234"
+echo
+mount -t cifs -o username="administrator",password="emcdaniel" //192.168.1.2/image /home/partimag
+echo
+#clear
+cd /home/partimag
+echo "We zitten in map:"
+pwd
+echo ;
+DIRS="$(ls -d */ | grep '')"
+GROOTSTE_GETAL=0
+# Met alle directories gaan we een voor een aan de slag 
+for DIR in $DIRS;
+do
+# Stop de naam van de directory in RUWE_STRING
+RUWE_STRING=$DIR
+# Haal de slash aan het eind van RUWE_STRING af 
+RUWE_STRING=${RUWE_STRING%/} 
+# Haal aan het begin van RUWE_STRING "schoon" af. We houden nu het GEZOCHTE_GETAL over
+GEZOCHTE_GETAL=${RUWE_STRING#schoon} 
+# De volgende twee commando's zorgen er voor dat als GEZOCHTE_GETAL geen getal is
+# deze de waarde 0 krijgt 
+let GEZOCHTE_GETAL++
+let GEZOCHTE_GETAL--
+# Als GEZOCHTE_GETAL ongelijk is aan 0 dan gaan we er mee aan de gang
+if (( $GEZOCHTE_GETAL &gt; 0 )) 
+then
+# Als GEZOCHTE_GETAL groter is dan GROOTSTE_GETAL
+# dan wordt GROOTSTE_GETAL gelijk gemaakt aan GEZOCHTE_GETAL
+if (( $GEZOCHTE_GETAL &gt; $GROOTSTE_GETAL )) 
+then
+GROOTSTE_GETAL=$GEZOCHTE_GETAL 
+fi
+#    echo "I: $I  J: $GEZOCHTE_GETAL"
+fi
+done
+
+# Als GROOTSTE_GETAL groter is dan nul is er een schone backup aanwezig en 
+# hogen we GROOTSTE_GETAL met een op maken we een nieuwe schone backup: schoon(GROOTSTE_GETAL+1)
+# Zo niet dan nieuwe schone backup: schoon01
+if (( $GROOTSTE_GETAL &gt; 0 ))
+then
+let GROOTSTE_GETAL++
+echo "Starting latest backup: schoon$GROOTSTE_GETAL"
+NAME="schoon$GROOTSTE_GETAL"
+/opt/drbl/sbin/ocs-sr -q -j2 -z1p -i 3900 -p true savedisk "$NAME" "sda"
+else
+echo "No backups found, making a new one: schoon01"
+/opt/drbl/sbin/ocs-sr -q -j2 -z1p -i 3900 -p true savedisk "schoon11" "sda"
+fi
+</code></pre>
+
+<p>restore-schoon.sh (this restores the image) </p>
+
+<pre><code> #!/bin/bash
+dhclient
+clear
+echo "################################"
+echo "# Daniel Imager for Erasmus MC #"
+echo "#      By Raymii &amp; David       #"
+echo "#     Based on Clonezilla      #"
+echo "#       Made on 01-04-10       #"
+echo "################################"
+echo
+echo
+echo "Mounting the image share. If asked for a password, enter 1234"
+echo
+mount -t cifs -o username="administrator",password="emcdaniel" //192.168.1.2/image /home/partimag
+#clear
+cd /home/partimag
+echo "We zitten in map:"
+pwd
+echo ;
+DIRS="$(ls -d */ | grep '')"
+GROOTSTE_GETAL=0
+# Met alle directories gaan we een voor een aan de slag 
+for DIR in $DIRS;
+do
+# Stop de naam van de directory in RUWE_STRING
+RUWE_STRING=$DIR
+# Haal de slash aan het eind van RUWE_STRING af 
+RUWE_STRING=${RUWE_STRING%/} 
+# Haal aan het begin van RUWE_STRING "schoon" af. We houden nu het GEZOCHTE_GETAL over
+GEZOCHTE_GETAL=${RUWE_STRING#schoon} 
+# De volgende twee commando's zorgen er voor dat als GEZOCHTE_GETAL geen getal is
+# deze de waarde 0 krijgt 
+let GEZOCHTE_GETAL++
+let GEZOCHTE_GETAL--
+# Als GEZOCHTE_GETAL ongelijk is aan 0 dan gaan we er mee aan de gang
+if (( $GEZOCHTE_GETAL &gt; 0 )) 
+then
+# Als GEZOCHTE_GETAL groter is dan GROOTSTE_GETAL
+# dan wordt GROOTSTE_GETAL gelijk gemaakt aan GEZOCHTE_GETAL
+if (( $GEZOCHTE_GETAL &gt; $GROOTSTE_GETAL )) 
+then
+GROOTSTE_GETAL=$GEZOCHTE_GETAL 
+fi
+fi
+done
+
+# Als GROOTSTE_GETAL groter is dan nul is er een schone backup aanwezig en 
+# kunnen we met de restore beginnen. Zo niet dan geven we de error terug
+if (( $GROOTSTE_GETAL &gt; 0 ))
+then
+echo "Start met restore van schoon$GROOTSTE_GETAL"
+NAME="schoon$GROOTSTE_GETAL"
+/opt/drbl/sbin/ocs-sr -g auto -e1  auto -e2 -j2 -p true restoredisk "$NAME" "sda"
+else
+echo "Er is geen schone restore aanwezig."
+echo "Controleer of de server aanstaat en of de share aanwezig is. Maak anders een nieuw image."
+echo "Selecteer dadelijk de optie Start Over."
+fi
+</code></pre>
+
+<p>start.sh (bootstrapper for backup script) </p>
+
+<pre><code> #!/bin/sh
+ sudo su -c /laptop03/backup-schoon.sh
+</code></pre>
+
+<p>startr.sh (bootstrapper for restore script) </p>
+
+<pre><code> #!/bin/sh
+ sudo su -c /laptop03/restore-schoon.sh
+</code></pre>
+
+<p>Note that this is all on your own risk, no warranty or purpose for any target and all the regular bla-bla. </p>
+
+<p>Good luck with the scripts and clonezilla! </p>
+<hr></hr>
+Tags: <a href="../tags/backup.html" class="link">backup, 
+</a>
+<a href="../tags/clonezilla.html" class="link">clonezilla, 
+</a>
+<a href="../tags/imaging.html" class="link">imaging, 
+</a>
+<a href="../tags/squashfs.html" class="link">squashfs, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>0f9b5e20e12bc00775725706f04a5f</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

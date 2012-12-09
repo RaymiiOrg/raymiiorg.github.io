@@ -1,0 +1,253 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Git-Clean - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Git-clean</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../software" class="link">Software</a>
+<span class="divider">/</span></li>
+<li><a href="Git-clean.html" class="link">Git-clean</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 08-11-2012</h6>
+<br></br>
+<p>The script below is a script to clean a git repository. Either to see big files, or to remove them, and remove them from history.</p>
+
+<h4>Examples</h4>
+
+<p>View the list of big files in the git repo and the git repo history (from the sourcecode repo of this website):</p>
+
+<pre><code>remy at sparcstation-20 in ~/repo/raymiiorg (master)
+$ ~/bin/git-clean.sh df
+All sizes are in kB's. The pack column is the size of the object, compressed, inside the pack file.
+size     pack    SHA                                       location
+2051757  655294  7e94729f780724d3b00803b018199f137959630e  includes/sec/dutch.txt
+901683   901853  52e346e5ce9a2f4d9d531f93c082178684da4c72  images/smalldistro12.png
+830998   827833  9afcd85c73a994ce1dc1e5daf1856113d6bf85f0  images/smalldistro10.png
+799361   765804  a8e7d464fbb7e5159442b2644a4f60f6352bf238  content/downloads/packages/gource-0.38-2.x86_64.rpm
+793898   763445  ea80fcf775a070e8d7c2b9375316f27cdac45bf6  content/downloads/packages/gource_0.38-1_amd64.deb
+753400   746864  d9901f182cbd7090efe679847851027e1e05882c  content/downloads/packages/logstalgia-1.0.3-2.x86_64.rpm
+747480   743285  e5aa2be4d510c14c1e67f2c07dbcf812a95a0798  content/downloads/packages/logstalgia_1.0.3-1_amd64.deb
+635854   636023  6e5c39dff693b861f25ec96ba16c5fe9700ec9c9  images/smalldistro3.png
+443121   439081  4461b7489dcb46911e14376e37e7abbe335668a7  images/smalldistro2.png
+395247   393304  47a6ab134240e2433310cc40d8909bd11cf80935  images/smalldistro7.png
+</code></pre>
+
+<p>Remove the file images/smalldistro12.png from the repo and rewrite the history (note the backslash in the filename):</p>
+
+<pre><code>remy at sparcstation-20 in ~/repo/raymiiorg (master)
+$ ~/bin/git-clean.sh rm images\smalldistro12.png
+Removing Biggest file imagessmalldistro12.png from git repo
+Rewrite 2f65a614583053c57934b1b9ad378b77ac1ddbb9 (259/259)
+WARNING: Ref 'refs/heads/master' is unchanged
+WARNING: Ref 'refs/remotes/origin/master' is unchanged
+WARNING: Ref 'refs/remotes/origin/master' is unchanged
+WARNING: Ref 'refs/stash' is unchanged
+Counting objects: 2159, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (785/785), done.
+Writing objects: 100% (2159/2159), done.
+Total 2159 (delta 1366), reused 2152 (delta 1363)
+Counting objects: 2159, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2148/2148), done.
+Writing objects: 100% (2159/2159), done.
+Total 2159 (delta 1368), reused 791 (delta 0)
+</code></pre>
+
+<h4>Info</h4>
+
+<h5>Installation</h5>
+
+<p>Copy the script into a text file, <code>chmod +x ./git-clean.sh</code> and run it. If you do not run it from inside a git repository you will get an error.</p>
+
+<h5>License</h5>
+
+<p>GPLv3.</p>
+
+<h4>The script</h4>
+
+<pre><code>#!/bin/bash
+# Script to remove files from the git history.
+# Execute this script in the git root directory
+# For a size report: ./gitsize.sh df
+# To remove the big files:
+# use like: ./gitsize.sh rm $bigfilename
+# Example: ./gitsize.sh rm includes/ubuntu-12.04.iso
+# It will then search your git repo and remove all of it.
+
+# Copyright (C) 2012 Remy van Elst
+
+#     This program is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+
+if [ ! -e $1 ]; then
+    if [ -d .git ]; then
+        if [ $1 == "rm" ]; then
+            if [ ! -e $2 ]; then
+                echo "Removing Biggest file $2 from git repo"
+                DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &amp;&amp; pwd )"
+                rm -rf .git/refs/original/
+                git filter-branch --index-filter "git rm --cached --ignore-unmatch $2" --tag-name-filter cat -- --all
+                rm -rf .git/refs/original/
+                git reflog expire --all --expire-unreachable=0
+                git repack -A -d
+                git prune
+                git gc --aggressive
+            else 
+                echo "I need a file to remove..."
+            fi
+        elif [ $1 == "df" ]; then
+            IFS=$'\n';
+            echo "All sizes are in kB's. The pack column is the size of the object, compressed, inside the pack file."
+            objects=`git verify-pack -v .git/objects/pack/pack-*.idx | grep -v chain | grep -v pack | sort -k3nr | head -n 10`
+            output="size,pack,SHA,location"
+            for y in $objects
+            do
+                # extract the size in bytes
+                size=$((`echo $y | cut -f 5 -d ' '`))
+                # extract the compressed size in bytes
+                compressedSize=$((`echo $y | cut -f 6 -d ' '`))
+                # extract the SHA
+                sha=`echo $y | cut -f 1 -d ' '`
+                # find the objects location in the repository tree
+                other=`git rev-list --all --objects | grep $sha`
+                #lineBreak=`echo -e "\n"`
+                output="${output}\n${size},${compressedSize},${other}"
+            done
+
+            echo -e $output | column -t -s ', '
+        fi
+    else
+        echo "Cannot find .git directory, exitting. This script should be ran from a git working dir."
+        exit 1
+    fi
+else
+    echo "Usage:"
+    echo "    For a size report:"
+    echo "    $0 df"
+    echo "    "
+    echo "    To remove a big file from git history:"
+    echo "    $0 rm &lt;filename&gt;"
+    echo "    Example, to remove the file \"includes\\ubuntu-12.04.iso\":"
+    echo "    $0 rm includes\\ubuntu-12.04.iso"
+    echo "    Made by Raymii.org. GPLv3 License"
+
+fi
+</code></pre>
+<hr></hr>
+Tags: <a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/clean.html" class="link">clean, 
+</a>
+<a href="../tags/git.html" class="link">git, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>468573b4b30755cbb65f2f7a019422</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

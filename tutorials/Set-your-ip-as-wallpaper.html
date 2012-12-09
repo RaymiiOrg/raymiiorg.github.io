@@ -1,0 +1,162 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Set Your Ip As Wallpaper - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Set your IP as wallpaper</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<span class="divider">/</span></li>
+<li><a href="Set-your-ip-as-wallpaper.html" class="link">Set your IP as wallpaper</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 28-03-2007</h6>
+<br></br>
+<p>This is a tutorial with a script which lets you set your IP address as wallpaper.  </p>
+
+<p>You need to have a white background picture, I created one with GIMP, 800x600 called 2.jpg, and thats what i'll use in the tutorial. So change 2.jpg to whatever you use.</p>
+
+<p>First install imagemagick &amp; feh:  </p>
+
+<pre><code>sudo apt-get install imagemagick feh
+</code></pre>
+
+<p>Then we'll make a bash script with the following in it:</p>
+
+<pre><code>#!/bin/bash  
+export DISPLAY=:0.0  
+convert 2.jpg -pointsize 80 -draw "text 0,150 '`ifconfig eth0 | awk -F ":"  '/inet addr/{split($2,a," ");print a[1]}'`'" -draw "text -0,250 'Made with help of:'" -fill blue -pointsize 150 -draw "text -0,390 'Relst.nl'" -fill red -pointsize 72 -draw "text -0,500 '`date`'" 3.jpg  
+# Uncomment this one if you're not using gnome:  
+# feh --bg-scale ./3.jpg  
+# and place a $ (hash) for the following rule:   
+gconftool -t string -s /desktop/gnome/background/picture_filename ./3.jpg
+</code></pre>
+
+<p>Save as ~/.back.sh and then <strong>chmod 755 ~/.back.sh</strong> <br />
+(make sure that the image file is also in your home dir.)</p>
+
+<p>So, what this does is basically put the output of the ifconfig eth0 (change if needed) command, and the time &amp; date on the background image, then it sets the background image to the newly created image. </p>
+
+<p>And the <em>export DISPLAY=:0.0</em> is because you can then run the script from of ssh to. <br />
+For that I also had a problem. Luckaly I found the solution, but I forgot to write down the source...  </p>
+
+<pre><code>## as root, extract xauth info from user that started X  
+**$ XAUTHORITY=/home/usrname/.Xauthority xauth list**  
+hostname/unix:0 MIT-MAGIC-COOKIE-1 273bf22484148c6504f5d85e6ef510e5  
+hostname.sub.domain:0 MIT-MAGIC-COOKIE-1 273bf22484148c6504f5d85e6ef510e5
+
+# as current user, add xauth info to your xauth info...  
+**$ xauth add hostname/unix:0 MIT-MAGIC-COOKIE-1 273bf22484148c6504f5d85e6ef510e5  
+$ xauth add hostname.sub.domain:0 MIT-MAGIC-COOKIE-1 273bf22484148c6504f5d85e6ef510e5**
+</code></pre>
+
+<p>Now you can set it as a crontab that runs every minute (<strong>crontab -e</strong>) or add it to the gnome startup apps (<strong>gnome-session-properties</strong>).</p>
+
+<p>And you have your own IP as the background :D </p>
+<hr></hr>
+Tags: <a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/imagemagick.html" class="link">imagemagick, 
+</a>
+<a href="../tags/ip.html" class="link">ip, 
+</a>
+<a href="../tags/wallpaper.html" class="link">wallpaper, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>15ef2fd24800fd2fbb900450d66707</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

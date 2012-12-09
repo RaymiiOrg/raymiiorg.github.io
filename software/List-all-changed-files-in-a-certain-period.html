@@ -1,0 +1,206 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Bash Script To List All Changed Files In Certain Peroid - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Bash script to list all changed files in certain peroid</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../software" class="link">Software</a>
+<span class="divider">/</span></li>
+<li><a href="List-all-changed-files-in-a-certain-period.html" class="link">Bash script to list all changed files in certain peroid</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 13-05-2012</h6>
+<br></br>
+<p>This is a little script I wrote and use to get a daily report of all the files that have changed on my servers. What it does is list all the files that are modified within a certain time period from a given directory. It can also be run from a desktop machine, or any machine which runs bash, find and ls. Usage is simple, save the script, chmod +x it, then run (./report.sh). If you want a specific directory to be scanned run it like ./report.sh /var/www/my/dir</p>
+
+<p>This is the script:</p>
+
+<pre><code>#!/bin/bash
+### Copyright (c) 2012 Remy van Elst
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
+#Change these values to your need
+#Exclude hidden directories, 0=exclude,1=include
+HIDDEN=0
+#Time parameter in days for modified files
+MTIME="-1"
+#Directory to look for files, if unset use current dir
+FILEDIR=$1
+if [ -z "$FILEDIR" ]; then
+FILEDIR="./";
+fi
+SVERSION="0.2"
+HOSTPC=`hostname`
+HOSTUSER=`whoami`
+
+#Now do the  find thing
+
+case "$HIDDEN" in
+
+    0) echo "Reporting all files modified in last "$MTIME" period in directory "$FILEDIR" for system "$HOSTPC", running as user "$HOSTUSER" excluding hidden files."
+    echo "Date: `date`"
+    echo "START OF FILE REPORT"
+    find $FILEDIR -type f -mtime $MTIME ! -path "*/.*" | xargs -r ls -lh 2&gt;/dev/null
+    echo "END OF FILE REPORT"
+    echo "Report script version $SVERSION by raymii.org"
+    ;;
+
+    1) echo "Reporting all files modified in last "$MTIME" period in directory "$FILEDIR" for system "$HOSTPC", running as user "$HOSTUSER"."
+    echo "Date: `date`"
+    echo "START OF FILE REPORT"
+    find $FILEDIR -type f -mtime $MTIME | xargs -r ls -lh 2&gt;/dev/null
+    echo "END OF FILE REPORT"
+    echo "Report script version $SVERSION by raymii.org"
+    ;;
+
+esac
+#END OF SCRIPT
+</code></pre>
+
+<p>Sample output looks like this:</p>
+
+<pre><code>remy@USN4 ~/test $ ./report.sh ~
+Reporting all files modified in last "-1" period in directory "/home/remy" for system "USN4" excluding hidden files.
+Date: Fri Mar 30 13:20:59 CEST 2012
+START OF FILE REPORT
+-rw-rw-r-- 1 remy remy    6 2012-03-30 12:54 /home/remy/hoi.test
+-rw-rw-r-- 1 remy remy    0 2012-03-30 12:55 /home/remy/test/hallo
+-rw-rw-r-- 1 remy remy    0 2012-03-30 12:55 /home/remy/test/i
+-rw-rw-r-- 1 remy remy    0 2012-03-30 13:15 /home/remy/test/me.f
+-rwxrwxr-x 1 remy remy 1.2K 2012-03-30 13:20 /home/remy/test/report.sh
+END OF FILE REPORT
+Report script version 0.2 by raymii.org
+</code></pre>
+
+<p>If you want to filter out certain directories you can add grep to the find line in the script to filter out directories:</p>
+
+<pre><code>find $FILEDIR -type f -mtime $MTIME ! -path "*/.*" | grep -v "/sys/" | grep -v "/proc/" | grep -v "/run/" | grep -v "/dev/" | xargs -r ls -lh 2&gt;/dev/null
+</code></pre>
+
+<p>The above command wil filter out the /sys/ /proc/ /run/ and /dev/ directories. Edit it to your needs. I've got a crontab like this, it saves it to the /var/log/freport/ directory so you can check it later or email it:</p>
+
+<pre><code>00 */8 * * * /root/report.sh / &gt; /var/log/freport/filereport`date +%F`.txt
+</code></pre>
+<hr></hr>
+Tags: <a href="../tags/auditing.html" class="link">auditing, 
+</a>
+<a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/changed-files.html" class="link">changed-files, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>e0a18354c6b65213731a31bc14f581</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    

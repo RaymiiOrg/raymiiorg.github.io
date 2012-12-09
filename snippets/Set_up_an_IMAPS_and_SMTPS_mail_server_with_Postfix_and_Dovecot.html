@@ -1,0 +1,228 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Postfix Snippets - Not Finished - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row-fluid">
+        
+        <div class="span10 offset1">
+                
+            <div class="span4 well"> 
+            
+                <h1 class="topheader">Raymii.org</h1>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="/s/feed.xml">RSS</a></h6>
+            
+            </div>
+
+            <div class="span4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
+<br />
+<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<br />
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
+<br />
+<a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+
+            
+        </div>
+        <div class="span4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/articles/Encryption-on-ANY-cloud-service.html" class="whitelink">Encryption on ANY cloud service</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/NutsManager.html" class="whitelink">NutsManager</a>
+<br />
+<a href="/s/tutorials/Tahoe_LAFS_Storage_Grid.html" class="whitelink">Tahoe LAFS Storage Grid</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="span10 offset1">
+    
+
+    <div class="span3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+</ul></div>  <div class="span7">   <div class="inner"><h2>Postfix snippets - not finished</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<span class="divider">/</span></li>
+<li><a href="../snippets" class="link">Snippets</a>
+<span class="divider">/</span></li>
+<li><a href="Set_up_an_IMAPS_and_SMTPS_mail_server_with_Postfix_and_Dovecot.html" class="link">Postfix snippets - not finished</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 09-07-2012</h6>
+<br></br>
+<h5>/etc/postfix/master.cf</h5>
+
+<pre><code>smtp inet n - - - - smtpd 
+  -o smtpd_tls_security_level=encrypt 
+  -o smtpd_sasl_auth_enable=yes 
+  -o smtpd_sasl_type=dovecot 
+  -o smtpd_sasl_path=private/auth 
+  -o smtpd_sasl_security_options=noanonymous 
+  -o smtpd_sasl_local_domain=$myhostname 
+  -o smtpd_client_restrictions=permit_sasl_authenticated,reject_unauth_destination 
+#  -o smtpd_sender_restrictions=reject_sender_login_mismatch
+  -o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject_unauth_destination
+
+  submission inet n - - - - smtpd
+  -o smtpd_tls_security_level=encrypt
+  -o smtpd_sasl_auth_enable=yes
+  -o smtpd_sasl_type=dovecot
+  -o smtpd_sasl_path=private/auth
+  -o smtpd_sasl_security_options=noanonymous
+  -o smtpd_sasl_local_domain=$myhostname
+  -o smtpd_client_restrictions=permit_sasl_authenticated,reject_unauth_destination
+#  -o smtpd_sender_restrictions=reject_sender_login_mismatch
+  -o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject_unauth_destination
+</code></pre>
+
+<h5>/etc/postfix/main.cf</h5>
+
+<pre><code>smtpd_banner = SMTP
+biff = no
+append_dot_mydomain = no
+readme_directory = no
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_tls_cert_file=/etc/ssl/certs/postfix-public.pem
+smtpd_tls_key_file=/etc/ssl/private/postfix-private.key
+smtpd_use_tls=yes
+smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+smtpd_tls_loglevel = 3
+smtpd_tls_received_header = yes
+smtpd_tls_session_cache_timeout = 3600s
+tls_random_source = dev:/dev/urandom
+smtpd_tls_auth_only = yes
+myhostname = vps7.sparklingclouds.nl
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+myorigin = /etc/mailname
+mydestination = sparklingclouds.nl, vps7.sparklingclouds.nl, localhost.sparklingclouds.nl, localhost
+relayhost =
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+mailbox_size_limit = 0
+recipient_delimiter = +
+inet_interfaces = all
+inet_protocols = ipv4
+home_mailbox = Maildir/
+mailbox_command =
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_security_options = noanonymous
+#smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+smtpd_recipient_restrictions = permit_mynetworks permit_sasl_authenticated reject_unauth_destination
+</code></pre>
+
+<h4>Dovecot</h4>
+
+<h5>/etc/dovecot/dovecot.conf</h5>
+
+<pre><code>protocols = imaps
+disable_plaintext_auth = yes
+log_timestamp = "%Y-%m-%d %H:%M:%S "
+ssl = required
+login_greeting = MAPI.
+mail_location = maildir:~/Maildir
+mail_privileged_group = mail
+mmap_disable = yes
+protocol imap {
+}
+protocol managesieve {
+}
+auth default {
+  mechanisms = plain
+  passdb pam {
+  }
+  userdb passwd {
+  }
+  user = root
+socket listen {
+        client {
+          path = /var/spool/postfix/private/auth
+          mode = 0660
+          user = postfix
+          group = postfix
+        }
+}
+}
+dict {
+}
+plugin {
+}
+</code></pre>
+<hr></hr>
+Tags: <a href="../tags/dovecot.html" class="link">dovecot, 
+</a>
+<a href="../tags/imap.html" class="link">imap, 
+</a>
+<a href="../tags/imaps.html" class="link">imaps, 
+</a>
+<a href="../tags/mail.html" class="link">mail, 
+</a>
+<a href="../tags/postfix.html" class="link">postfix, 
+</a>
+<a href="../tags/sasl.html" class="link">sasl, 
+</a>
+<a href="../tags/smtp.html" class="link">smtp, 
+</a>
+<a href="../tags/smtps.html" class="link">smtps, 
+</a>
+<div class="footer">
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                <small>ae52276ad7b2399900161e24dd1fda</small></p>
+
+                <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>    
+    </body>
+    </html>
+    
