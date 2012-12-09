@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Wallbase.Cc Commandline Bash Wget Downloader - Raymii.org</title>
+        <title>Wallbase.cc commandline bash wget downloader - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -80,7 +80,30 @@
 </li>
 <li><a href="/s/tutorials" class="link">Tutorials</a>
 </li>
-</ul></div>  <div class="span7">   <div class="inner"><h2>Wallbase.cc commandline bash wget downloader</h2>
+</ul>
+               <!-- advertisement start -->
+                <hr class="alt2">
+                <h2>Advertisement</h2>
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p />
+                <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-7993642564731324";
+                /* Raymii-2 */
+                google_ad_slot = "9322003332";
+                google_ad_width = 200;
+                google_ad_height = 200;
+                //-->
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+
+           </div>  
+           <div class="span7"> 
+                <div class="inner">
+
+
+           <h2>Wallbase.cc commandline bash wget downloader</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
@@ -91,9 +114,9 @@
 </ul>
 <h6>Author: Remy Van Elst</h6>
 <h6>Date: 22-07-2012</h6>
-<br></br>
+<br>
 <p>I mostly get my wallpapers from the website <a href="http://wallbase.cc">Wallbase.cc</a>. But the site requires a lot of javascript and ajax, and it is hard to get a lot of wallpapers at once.
-I've written a script for this problem, it lets you grep wallbase from the cli!  </p>
+I&#39;ve written a script for this problem, it lets you grep wallbase from the cli!  </p>
 
 <h5>Features</h5>
 
@@ -125,7 +148,7 @@ and kill that afet 10 minutes...</p>
 <pre><code>#!/bin/bash
 #Copyright (c) 2012 Remy van Elst
 #Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
+#of this software and associated documentation files (the &quot;Software&quot;), to deal
 #in the Software without restriction, including without limitation the rights
 #to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 #copies of the Software, and to permit persons to whom the Software is
@@ -134,7 +157,7 @@ and kill that afet 10 minutes...</p>
 #The above copyright notice and this permission notice shall be included in
 #all copies or substantial portions of the Software.
 #
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -142,75 +165,72 @@ and kill that afet 10 minutes...</p>
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 #first the vars
-BASEURL="http://wallbase.cc/search/"
-MODE="$1"
-SEARCH="$2"
-NEWWALLURL="http://wallbase.cc/search/0/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers"
-WALLR="http://wallbase.cc/random/"
-CONFIGS="/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers"
+BASEURL=&quot;http://wallbase.cc/search/&quot;
+MODE=&quot;$1&quot;
+SEARCH=&quot;$2&quot;
+NEWWALLURL=&quot;http://wallbase.cc/search/0/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers&quot;
+WALLR=&quot;http://wallbase.cc/random/&quot;
+CONFIGS=&quot;/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers&quot;
 
 #now see what we need to do
-case "$1" in
+case &quot;$1&quot; in
    s)
    if [ -e $2 ]; then
-      echo "I need search terms"
+      echo &quot;I need search terms&quot;
       exit 1
    fi
-   GETURL="$BASEURL$SEARCH$CONFIGS"
+   GETURL=&quot;$BASEURL$SEARCH$CONFIGS&quot;
    ;;
    n)
-   GETURL="$NEWWALLURL"
+   GETURL=&quot;$NEWWALLURL&quot;
    ;;
    r)
-   GETURL="$WALLR"
+   GETURL=&quot;$WALLR&quot;
    ;;
    *)
-   echo -e "Usage:\n$0 r for random\n$0 n for newest\n$0 s TERM for search TERM."
+   echo -e &quot;Usage:\n$0 r for random\n$0 n for newest\n$0 s TERM for search TERM.&quot;
    exit 1
    ;;
 esac
 
 GETURL=$WALLR
 #get the wallpaper overview page, grep the wallpaper page urls and dump them into a file for wget
-wget -q --referer="http://www.google.com" --user-agent="Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0" $GETURL -O- | egrep -o "http://[^[:space:]]*" | grep "/wallpaper/" | sed 's/"//g' &gt; ./wallist
+wget -q --referer=&quot;http://www.google.com&quot; --user-agent=&quot;Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0&quot; $GETURL -O- | egrep -o &quot;http://[^[:space:]]*&quot; | grep &quot;/wallpaper/&quot; | sed &#39;s/&quot;//g&#39; &gt; ./wallist
 
 #put the url file in a variable, but first backup IFS and later restore it.
 OLDIFS=$IFS
-IFS='
-'
+IFS=&#39;
+&#39;
 urlsa=( $( &lt; ./wallist ) )
 IFS=$OLDIFS
 
 #now loop trough the urls and wget the page, then grep the wallpaper URL, and then wget the wallpaper
-for i in "${urlsa[@]}"
+for i in &quot;${urlsa[@]}&quot;
 do
   echo $i
-  wget -vv --referer="http://www.google.com" --user-agent="Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0" $i -O- | wget -vv -nd -nc `egrep -o "http://[^[:space:]]*.jpg"`
+  wget -vv --referer=&quot;http://www.google.com&quot; --user-agent=&quot;Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0&quot; $i -O- | wget -vv -nd -nc `egrep -o &quot;http://[^[:space:]]*.jpg&quot;`
 done
 
 #now a duplicate check...
-find -not -empty -type f -printf "%s\n" | sort -rn | uniq -d | xargs -I{} -n1 find -type f -size {}c -print0 | xargs -0 md5sum | sort | uniq -w32 | cut -d" " -f3 | xargs -P 10 -r -n 1 rm
+find -not -empty -type f -printf &quot;%s\n&quot; | sort -rn | uniq -d | xargs -I{} -n1 find -type f -size {}c -print0 | xargs -0 md5sum | sort | uniq -w32 | cut -d&quot; &quot; -f3 | xargs -P 10 -r -n 1 rm
 </code></pre>
 
 <h5>Notes</h5>
 
-<p>If you have any tips, questions or comments, please use the form below. <br />
-<strong>Don't go and hammer the wallbase.cc servers, use this script responsibly</strong>  </p>
+<p>If you have any tips, questions or comments, please use the form below.<br>
+<strong>Don&#39;t go and hammer the wallbase.cc servers, use this script responsibly</strong>  </p>
 
 <!-- comments start -->
 
-<script>
-var idcomments_acct = 'cc7c735f8ad159864ee665ab582df619';
-var idcomments_post_id;
-var idcomments_post_url;
+<p><script>
+var idcomments<em>acct = &#39;cc7c735f8ad159864ee665ab582df619&#39;;
+var idcomments</em>post<em>id;
+var idcomments</em>post_url;
 </script>
-
-<p><span id="IDCommentsPostTitle" style="display:none"></span></p>
-
+<span id="IDCommentsPostTitle" style="display:none"></span>
 <script type='text/javascript' src='http://www.intensedebate.com/js/genericCommentWrapperV2.js'></script>
-
-<!-- comments end -->
-<hr></hr>
+&lt;!-- comments end --&gt;</p>
+<hr>
 Tags: <a href="../tags/bash.html" class="link">bash, 
 </a>
 <a href="../tags/command-line.html" class="link">command-line, 
@@ -224,11 +244,30 @@ Tags: <a href="../tags/bash.html" class="link">bash,
 <a href="../tags/wget.html" class="link">wget, 
 </a>
 <div class="footer">
+                <hr />
+                <br />
+                <p>
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+                    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+                    var disqus_shortname = 'raymiiorg'; // required: replace example with your forum shortname
+
+                    /* * * DON'T EDIT BELOW THIS LINE * * */
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </p>
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
 
-                <small>d017a665ece01c095d6aa99653628d</small></p>
+                <small>26d827265d60d78c02e02f024da4af</small></p>
 
                 <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
 

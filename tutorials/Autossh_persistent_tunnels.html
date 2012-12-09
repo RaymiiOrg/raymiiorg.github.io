@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Persistent Reverse (Nat Bypassing) Ssh Access With Autossh - Raymii.org</title>
+        <title>Persistent reverse (NAT bypassing) SSH access with autossh - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -80,7 +80,30 @@
 </li>
 <li><a href="/s/tutorials" class="link">Tutorials</a>
 </li>
-</ul></div>  <div class="span7">   <div class="inner"><h2>Persistent reverse (NAT bypassing) SSH access with autossh</h2>
+</ul>
+               <!-- advertisement start -->
+                <hr class="alt2">
+                <h2>Advertisement</h2>
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p />
+                <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-7993642564731324";
+                /* Raymii-2 */
+                google_ad_slot = "9322003332";
+                google_ad_width = 200;
+                google_ad_height = 200;
+                //-->
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+
+           </div>  
+           <div class="span7"> 
+                <div class="inner">
+
+
+           <h2>Persistent reverse (NAT bypassing) SSH access with autossh</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
@@ -91,12 +114,12 @@
 </ul>
 <h6>Author: Remy Van Elst</h6>
 <h6>Date: 05-10-2012</h6>
-<br></br>
-<p>Situation: you are in a restricted network (company, hotel, hospital) where you have a "server" which you want to access from outside that network. You cannot forward ports to that machine, but you can ssh outside (to your own server). This tutorial solves this problem.</p>
+<br>
+<p>Situation: you are in a restricted network (company, hotel, hospital) where you have a &quot;server&quot; which you want to access from outside that network. You cannot forward ports to that machine, but you can ssh outside (to your own server). This tutorial solves this problem.</p>
 
 <p>You need another server to which you setup a persistent ssh connection with a reverse tunnel. Then if you need to access the machine you ssh into the other server, and from there you ssh through the tunnel to the restriced machine.</p>
 
-<p>Make sure you have permission to do this from the administrators. They generally don't like holes in the firewall/security. They don't block it for no reason.</p>
+<p>Make sure you have permission to do this from the administrators. They generally don&#39;t like holes in the firewall/security. They don&#39;t block it for no reason.</p>
 
 <h4>Naming convention:</h4>
 
@@ -127,7 +150,7 @@ Enter same passphrase again: *leave empty*
 
 <p>Execute on: restricted machine.</p>
 
-<pre><code>ssh-copy-id -i .ssh/nopwd.pub "-p 2222 remy@middleman"
+<pre><code>ssh-copy-id -i .ssh/nopwd.pub &quot;-p 2222 remy@middleman&quot;
 </code></pre>
 
 <p>(replace remy@middleman with your username and middleman ssh server. Also note how you can give a custom port in the ssh-copy-id.)</p>
@@ -136,15 +159,15 @@ Enter same passphrase again: *leave empty*
 
 <p>Execute on: restricted machine</p>
 
-<pre><code>autossh -M 10984 -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /root/.ssh/nopwd -R 6666:localhost:22 remy@middleman -p 2222
+<pre><code>autossh -M 10984 -o &quot;PubkeyAuthentication=yes&quot; -o &quot;PasswordAuthentication=no&quot; -i /root/.ssh/nopwd -R 6666:localhost:22 remy@middleman -p 2222
 </code></pre>
 
-<p>Explanation"of options:</p>
+<p>Explanation&quot;of options:</p>
 
 <ul>
 <li>-M 10984: autossh monitoring port.</li>
-<li>-o "PubkeyAuthentication=yes": authenticate with ssh-keys instead of password.</li>
-<li>-o "PasswordAuthentication=no": explicitly disable password authentication.</li>
+<li>-o &quot;PubkeyAuthentication=yes&quot;: authenticate with ssh-keys instead of password.</li>
+<li>-o &quot;PasswordAuthentication=no&quot;: explicitly disable password authentication.</li>
 <li>-i /root/.ssh/nopwd: the location of the ssh key to use.</li>
 <li>-R 6666:localhost:22: reverse tunnel. forward all traffic on port 6666 on host middleman to port 22 on host restricted machine.</li>
 <li>remy@middleman -p 2222: ssh user remy, ssh host middleman, ssh port 2222</li>
@@ -183,7 +206,7 @@ Enter same passphrase again: *leave empty*
 
 <p>Add (and change) the following line</p>
 
-<pre><code>autossh -M 10984 -N -f -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /root/.ssh/nopwd -R 6666:localhost:22 remy@middleman -p 2222 &amp;
+<pre><code>autossh -M 10984 -N -f -o &quot;PubkeyAuthentication=yes&quot; -o &quot;PasswordAuthentication=no&quot; -i /root/.ssh/nopwd -R 6666:localhost:22 remy@middleman -p 2222 &amp;
 </code></pre>
 
 <p>We have three new things in this command:</p>
@@ -208,13 +231,13 @@ Enter same passphrase again: *leave empty*
 <pre><code>sudo /etc/rc.local
 </code></pre>
 
-<p>If you get your regular promt back without any output you've done it correct.z</p>
+<p>If you get your regular promt back without any output you&#39;ve done it correct.z</p>
 
 <h4>Forward a website, not ssh</h4>
 
 <p>You might want to forward a website on the restricted host. Follow the above tutorial, but change the autossh command:</p>
 
-<pre><code>autossh -M 10984 -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /root/.ssh/nopwd -R 8888:localhost:80 remy@middleman -p 2222
+<pre><code>autossh -M 10984 -o &quot;PubkeyAuthentication=yes&quot; -o &quot;PasswordAuthentication=no&quot; -i /root/.ssh/nopwd -R 8888:localhost:80 remy@middleman -p 2222
 </code></pre>
 
 <ul>
@@ -225,11 +248,11 @@ Enter same passphrase again: *leave empty*
 
 <p>You can also forward ports from other restricted hosts in the network:</p>
 
-<pre><code>autossh -M 10984 -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /root/.ssh/nopwd -R 7777:host2.restrictednetwork:22 remy@middleman -p 2222
+<pre><code>autossh -M 10984 -o &quot;PubkeyAuthentication=yes&quot; -o &quot;PasswordAuthentication=no&quot; -i /root/.ssh/nopwd -R 7777:host2.restrictednetwork:22 remy@middleman -p 2222
 </code></pre>
 
 <p>This will forward all traffic to port 7777 on host middleman, via host restrictedhost, to host host2.restrictednetwork port 22. </p>
-<hr></hr>
+<hr>
 Tags: <a href="../tags/autossh.html" class="link">autossh, 
 </a>
 <a href="../tags/featured-one.html" class="link">featured-one, 
@@ -243,11 +266,30 @@ Tags: <a href="../tags/autossh.html" class="link">autossh,
 <a href="../tags/ssh.html" class="link">ssh, 
 </a>
 <div class="footer">
+                <hr />
+                <br />
+                <p>
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+                    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+                    var disqus_shortname = 'raymiiorg'; // required: replace example with your forum shortname
+
+                    /* * * DON'T EDIT BELOW THIS LINE * * */
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </p>
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
 
-                <small>dc76e89ac53234ca6812bce95a9490</small></p>
+                <small>856945fa40c83ed5f9be5fdb41807f</small></p>
 
                 <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
 

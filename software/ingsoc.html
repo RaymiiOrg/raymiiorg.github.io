@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Ingsoc - A Static Site Generator For Building Raymii.Org - Raymii.org</title>
+        <title>ingsoc - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -80,48 +80,156 @@
 </li>
 <li><a href="/s/tutorials" class="link">Tutorials</a>
 </li>
-</ul></div>  <div class="span7">   <div class="inner"><h2>ingsoc - A static site generator for building Raymii.org</h2>
+</ul>
+               <!-- advertisement start -->
+                <hr class="alt2">
+                <h2>Advertisement</h2>
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p />
+                <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-7993642564731324";
+                /* Raymii-2 */
+                google_ad_slot = "9322003332";
+                google_ad_width = 200;
+                google_ad_height = 200;
+                //-->
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+
+           </div>  
+           <div class="span7"> 
+                <div class="inner">
+
+
+           <h2>ingsoc</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
 <li><a href="../software" class="link">Software</a>
 <span class="divider">/</span></li>
-<li><a href="ingsoc.html" class="link">ingsoc - A static site generator for building Raymii.org</a>
+<li><a href="ingsoc.html" class="link">ingsoc</a>
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
 <h6>Date: 09-12-2012</h6>
-<br></br>
-<h4>Introduction</h4>
+<br>
+<p>ingsoc is a static site generator written in Python with the purpose of generating raymii.org. It differs from other static site generators because it does not create a blog-like site, but it is focused on pages and structure. It also does not use a template engine. It generates categories, pages, tags and a RSS feed. It takes markdown files with a yaml config header as input, and outputs html. </p>
 
-<h4>Installation</h4>
+<h3>Usage</h3>
 
-<p>It requires some python modules, which can be installed via pip. On a standard debian 6 install, use the following command to install pip:</p>
+<p>ingsoc requires three directories and content to work. The directory structure can be as below:</p>
+
+<pre><code>../
+src/
+-- tutorials/
+   -- tutorial1.md
+   -- tutorial2.md
+-- software/
+   -- project1.md
+   -- project2.md
+
+inc/
+-- style.css
+-- css/
+-- img/
+out/
+config.yml
+newspeak.py
+</code></pre>
+
+<p>I have a <code>src</code> directory with my content, which is written in markdown. The <code>inc</code> directory gets copied over to the output folder, it houses the CSS, JS and images. Then the <code>out</code> folder is the one where ingsoc puts its HTML.</p>
+
+<h3>Content</h3>
+
+<p>A content item is a markdown file, with a yaml header. The header looks like this:</p>
+
+<pre><code>title: &quot;Ubuntu/Debian update mailer&quot;
+author: &quot;Remy van Elst&quot;
+category: &quot;software&quot;
+date: &quot;10-06-2012&quot;
+summary: &quot;This is a bash script for Ubuntu and Debian, to be run by cron on a set interval. It checks if there are apt-updates, and if so, mails an overview of the packages which can be updated, whith their local version, the version available and an URL to the Ubuntu package site where you can see the changelog. I wrote this as an addition for my Nagios monitoring, that only shows how many updates there are, this is a lot more verbose. It also runs on Debian since 1 Nov 2012. Only the links don&#39;t work then, because the packages are different.&quot;
+tags: 
+  - command-line
+  - bash
+  - apt
+  - update
+  - ubuntu
+  - debian
+---
+</code></pre>
+
+<p>Then below the three dashes (<code>---</code>) the actual markdown content is placed. The <code>category</code> item is what also end up in the menu. The date and summary are used in the RSS. The summary is the only field which is not required.</p>
+
+<h3>Configuration</h3>
+
+<p>There is also a <code>config.yml</code> file. It looks like this:</p>
+
+<pre><code>title: &quot;Raymii.org&quot;
+subtitle: &quot;Quis custodiet ipsos custodes?&quot;
+rootdir: &quot;./src&quot;
+outdir: &quot;out&quot;
+incfolder: &quot;./inc&quot;
+breadcrumbs: &quot;yes&quot;
+tags: &quot;yes&quot;
+rsstitle: &quot;Raymii.org&quot;
+rssdescr: &quot;The raymii.org RSS feed, all about GNU/Linux&quot;
+rssurl: &quot;https://raymii.org/s&quot;
+
+homepagetext: &gt;
+    &lt;h3&gt;Welcome!&lt;/h3&gt;
+    This is the &lt;strong&gt;best site&lt;/strong&gt; on the entire internet.
+</code></pre>
+
+<p>The <code>homepagetext</code> item is the raw html code which is put on the index.html code. the <code>tags</code> and <code>breadcrumbs</code> are used to define if tags and breadcrumbs should be generated and placed or not.</p>
+
+<h3>Requirements</h3>
+
+<ul>
+<li>python 2.7+ (tested with 2.7 and 3.0)</li>
+<li><a href="https://github.com/FSX/misaka">Sundown/Misaka</a></li>
+<li>dateutils</li>
+<li><a href="http://pyyaml.org/">pyyaml</a></li>
+</ul>
+
+<p>To install them in a standard ubuntu/debian:</p>
 
 <pre><code>sudo apt-get install python-pip
 </code></pre>
 
-<p>And then use pip to install the required modules:</p>
+<p>and then:</p>
 
-<pre><code>sudo pip install pyyaml markdown2 dateutils
+<pre><code>sudo pip install misaka pyyaml dateutils
 </code></pre>
-<hr></hr>
-Tags: <a href="../tags/ingsoc.html" class="link">ingsoc, 
-</a>
-<a href="../tags/markdown.html" class="link">markdown, 
-</a>
-<a href="../tags/newspeak.html" class="link">newspeak, 
-</a>
-<a href="../tags/python.html" class="link">python, 
-</a>
-<a href="../tags/static-site.html" class="link">static-site, 
+<hr>
+Tags: <a href="../tags/command-line.html" class="link">command-line, 
 </a>
 <div class="footer">
+                <hr />
+                <br />
+                <p>
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+                    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+                    var disqus_shortname = 'raymiiorg'; // required: replace example with your forum shortname
+
+                    /* * * DON'T EDIT BELOW THIS LINE * * */
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </p>
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
 
-                <small>247928891249e3db7e7de423265c25</small></p>
+                <small>9cfd723bd8076d932bdc36ffc54ce6</small></p>
 
                 <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
 

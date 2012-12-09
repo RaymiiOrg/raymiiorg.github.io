@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Chef-Solo Code Snippets - Raymii.org</title>
+        <title>Chef-Solo code snippets - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <link href="/s/inc/js/google-code-prettify/prettify.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -80,7 +80,30 @@
 </li>
 <li><a href="/s/tutorials" class="link">Tutorials</a>
 </li>
-</ul></div>  <div class="span7">   <div class="inner"><h2>Chef-Solo code snippets</h2>
+</ul>
+               <!-- advertisement start -->
+                <hr class="alt2">
+                <h2>Advertisement</h2>
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p />
+                <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-7993642564731324";
+                /* Raymii-2 */
+                google_ad_slot = "9322003332";
+                google_ad_width = 200;
+                google_ad_height = 200;
+                //-->
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+
+           </div>  
+           <div class="span7"> 
+                <div class="inner">
+
+
+           <h2>Chef-Solo code snippets</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
@@ -91,7 +114,7 @@
 </ul>
 <h6>Author: Remy Van Elst</h6>
 <h6>Date: 21-09-2012</h6>
-<br></br>
+<br>
 <p>This article is a collection of snippets for Chef. Chef is an open-source systems integration framework supporting Linux, Windows, BSD and more. <a href="http://www.opscode.com/chef/">For more info about chef, click here</a></p>
 
 <p>These snippets are tested and working with Ruby 1.9.2 and Chef-solo on Ubuntu 10.04, 12.04 and CentOS 5 and 6.</p>
@@ -103,29 +126,29 @@
 <h6>server-specific-config/recipes/default.rb</h6>
 
 <pre><code>attribs = get_configuration_attribs(node.hostname)
-server_role = attribs['node_data']['role'] 
-server_name = attribs['id'] 
+server_role = attribs[&#39;node_data&#39;][&#39;role&#39;] 
+server_name = attribs[&#39;id&#39;] 
 
 case server_name
-  when "vps5", "vps6", "vps7"
+  when &quot;vps5&quot;, &quot;vps6&quot;, &quot;vps7&quot;
     # these are the SQL servers which should have specific databases as defind in mydatabases recipe
-    include_recipe "mysql::server"
-    include_recipe "database"
-    include_recipe "mydatabases"
-  when "vps4", "vps3", "vps2"
+    include_recipe &quot;mysql::server&quot;
+    include_recipe &quot;database&quot;
+    include_recipe &quot;mydatabases&quot;
+  when &quot;vps4&quot;, &quot;vps3&quot;, &quot;vps2&quot;
     #these are the webservers which act as reverse-proxy, and should not have lighttpd
-    include_recipe "nginx"
-    include_recipe "raymiiorg-revproxy"
+    include_recipe &quot;nginx&quot;
+    include_recipe &quot;raymiiorg-revproxy&quot;
 end
 </code></pre>
 
 <h6>data_bags/servers/$servername.json</h6>
 
 <pre><code>{
-    "id": "vps5",
-    "node_data": {
-        "description": "MySQL database slave 1",
-        "role": "database"
+    &quot;id&quot;: &quot;vps5&quot;,
+    &quot;node_data&quot;: {
+        &quot;description&quot;: &quot;MySQL database slave 1&quot;,
+        &quot;role&quot;: &quot;database&quot;
         }
 }
 </code></pre>
@@ -137,23 +160,23 @@ end
 <h6>server-specific-config/recipes/default.rb</h6>
 
 <pre><code>attribs = get_configuration_attribs(node.hostname)
-server_role = attribs['node_data']['role'] 
-server_name = attribs['id'] 
+server_role = attribs[&#39;node_data&#39;][&#39;role&#39;] 
+server_name = attribs[&#39;id&#39;] 
 
 case server_role
-  when "webserver"
+  when &quot;webserver&quot;
     #non-reverse proxy servers should have lighttpd.
-    include_recipe "lighttpd"
-    include_recipe "mysql::client"
-  when "database"
+    include_recipe &quot;lighttpd&quot;
+    include_recipe &quot;mysql::client&quot;
+  when &quot;database&quot;
       ##generic database servers should be empty
-      include_recipe "mysql::server"
-      include_recipe "database"
-      gem_package "mysql" do
+      include_recipe &quot;mysql::server&quot;
+      include_recipe &quot;database&quot;
+      gem_package &quot;mysql&quot; do
         action :install
         #ignore_failure true
       end
-      package "memcached" do
+      package &quot;memcached&quot; do
         action :install
       end
 end
@@ -162,10 +185,10 @@ end
 <h6>data_bags/servers/$servername.json</h6>
 
 <pre><code>{
-    "id": "vps9",
-    "node_data": {
-        "description": "Lighttpd webserver 2",
-        "role": "webserver"
+    &quot;id&quot;: &quot;vps9&quot;,
+    &quot;node_data&quot;: {
+        &quot;description&quot;: &quot;Lighttpd webserver 2&quot;,
+        &quot;role&quot;: &quot;webserver&quot;
         }
 }
 </code></pre>
@@ -176,10 +199,10 @@ end
 
 <h6>mydatabases/recipes/default.rb</h6>
 
-<pre><code>include_recipe "mysql::server"
-include_recipe "database"
+<pre><code>include_recipe &quot;mysql::server&quot;
+include_recipe &quot;database&quot;
 
-mysql_connection_info = {:host =&gt; "localhost", :username =&gt; 'root', :password =&gt; node['mysql']['server_root_password']}
+mysql_connection_info = {:host =&gt; &quot;localhost&quot;, :username =&gt; &#39;root&#39;, :password =&gt; node[&#39;mysql&#39;][&#39;server_root_password&#39;]}
 
 #DB NAME, USER AND PASSWORD ARE REQUIRED!!!
 
@@ -201,7 +224,7 @@ node[:default][:databases].each do |db|
         password db[:password] 
         database_name db[:name]
         privileges [:all]
-        host '%'
+        host &#39;%&#39;
         action :grant
     end
 end
@@ -211,25 +234,25 @@ end
 
 <pre><code>default[:default][:databases] = [
     {
-        :name =&gt; 'database_joomla1',
-        :user =&gt; 'database_joomla1_u',
-        :password =&gt; 'supersecretpassword'
+        :name =&gt; &#39;database_joomla1&#39;,
+        :user =&gt; &#39;database_joomla1_u&#39;,
+        :password =&gt; &#39;supersecretpassword&#39;
     },
     {
-        :name =&gt; 'database_drupal1',
-        :user =&gt; 'database_drupal1_u',
-        :password =&gt; 'supersecretpassword'
+        :name =&gt; &#39;database_drupal1&#39;,
+        :user =&gt; &#39;database_drupal1_u&#39;,
+        :password =&gt; &#39;supersecretpassword&#39;
     },
     {
-        :name =&gt; 'database_drupal2',
-        :user =&gt; 'database_drupal2_u',
-        :password =&gt; 'supersecretpassword'
+        :name =&gt; &#39;database_drupal2&#39;,
+        :user =&gt; &#39;database_drupal2_u&#39;,
+        :password =&gt; &#39;supersecretpassword&#39;
     },{
-        :name =&gt; 'database_raymiiorg_cms',
-        :user =&gt; 'database_raymiiorg_cms_u',
-        :password =&gt; 'supersecretpassword'
+        :name =&gt; &#39;database_raymiiorg_cms&#39;,
+        :user =&gt; &#39;database_raymiiorg_cms_u&#39;,
+        :password =&gt; &#39;supersecretpassword&#39;
     }
-]
+]   
 </code></pre>
 
 <h5>Install multiple packages on a server</h5>
@@ -239,15 +262,15 @@ end
 <h6>server-specific-config/attributes/default.rb</h6>
 
 <pre><code>default[:vps5][:packages_to_install] = [
-    "htop",
-    "fail2ban",
-    "vim",
-    "nano",
-    "wget",
-    "curl",
-    "git-core",
-    "build-essential",
-    "mailutils",
+    &quot;htop&quot;,
+    &quot;fail2ban&quot;,
+    &quot;vim&quot;,
+    &quot;nano&quot;,
+    &quot;wget&quot;,
+    &quot;curl&quot;,
+    &quot;git-core&quot;,
+    &quot;build-essential&quot;,
+    &quot;mailutils&quot;,
     ]
 </code></pre>
 
@@ -267,9 +290,9 @@ end
 <h6>server-specific-config/recipes/default.rb</h6>
 
 <pre><code>default[:vps5][:users_to_delete].each do |user|
-        user "#{user}" do
+        user &quot;#{user}&quot; do
             action :remove
-            username "#{user}"
+            username &quot;#{user}&quot;
         end
 end
 </code></pre>
@@ -277,16 +300,16 @@ end
 <h6>server-specific-config/attributes/default.rb</h6>
 
 <pre><code>default[:vps5][:users_to_delete] = [
-    "games",
-    "lp",
-    "mail",
-    "news",
-    "uucp",
-    "proxy",
-    "list",
-    "irc",
-    "gnats",
-    "landscape",
+    &quot;games&quot;,
+    &quot;lp&quot;,
+    &quot;mail&quot;,
+    &quot;news&quot;,
+    &quot;uucp&quot;,
+    &quot;proxy&quot;,
+    &quot;list&quot;,
+    &quot;irc&quot;,
+    &quot;gnats&quot;,
+    &quot;landscape&quot;,
     ]
 </code></pre>
 
@@ -296,20 +319,20 @@ end
 
 <h6>Add a user + group</h6>
 
-<pre><code>group "remy" do
+<pre><code>group &quot;remy&quot; do
     action :create
-    group_name "remy"
+    group_name &quot;remy&quot;
     gid 3000
 end     
 
-user "remy" do
-    username "remy"
-    comment "Remy van Elst"
+user &quot;remy&quot; do
+    username &quot;remy&quot;
+    comment &quot;Remy van Elst&quot;
     uid 3000
-    gid "remy"
-    home "/home/remy"
-    shell "/bin/bash"
-    password "$1$4jfd84hHjkd/.DKHjkhf48A.S-=348(ns"
+    gid &quot;remy&quot;
+    home &quot;/home/remy&quot;
+    shell &quot;/bin/bash&quot;
+    password &quot;$1$4jfd84hHjkd/.DKHjkhf48A.S-=348(ns&quot;
     supports :manage_home =&gt; true
     action :create
 end
@@ -317,61 +340,61 @@ end
 
 <h6>Execute a command as another user than the one doing the chef-solo run</h6>
 
-<pre><code>execute "Send email on completion" do
-    command "mail -s \"Chef run on node #{node} complete\" email@mail.com &lt; /var/chef/chef.log"
-    user "remy"
+<pre><code>execute &quot;Send email on completion&quot; do
+    command &quot;mail -s \&quot;Chef run on node #{node} complete\&quot; email@mail.com &lt; /var/chef/chef.log&quot;
+    user &quot;remy&quot;
     action :run
 end
 </code></pre>
 
 <h6>Make sure I can sudo</h6>
 
-<pre><code>group "sudo" do
+<pre><code>group &quot;sudo&quot; do
   action :manage
-  members "remy"
+  members &quot;remy&quot;
   append true
 end
-group "wheel" do
+group &quot;wheel&quot; do
   action :manage
-  members "remy"
+  members &quot;remy&quot;
   append true
-end
+end 
 </code></pre>
 
 <h6>Packages</h6>
 
 <p>Install:</p>
 
-<pre><code>package "nano" do
+<pre><code>package &quot;nano&quot; do
     action :install
 end
 </code></pre>
 
 <p>Remove:</p>
 
-<pre><code>package "vim" do
+<pre><code>package &quot;vim&quot; do
     action :purge
 end
 </code></pre>
 
 <h6>Add remote logging to rsyslog</h6>
 
-<pre><code>ruby_block "Adding remote loghost to /ets/rsyslog.conf" do
+<pre><code>ruby_block &quot;Adding remote loghost to /ets/rsyslog.conf&quot; do
   block do
-    fh = File.open("/etc/rsyslog.conf", 'a+')
-    fh.puts "#Remote logging to server Jupiter5.local.raymii.nl \n*.*     @10.5.0.69"
+    fh = File.open(&quot;/etc/rsyslog.conf&quot;, &#39;a+&#39;)
+    fh.puts &quot;#Remote logging to server Jupiter5.local.raymii.nl \n*.*     @10.5.0.69&quot;
     fh.close
   end
-  only_if { File.file?("/etc/rsyslog.conf") }
+  only_if { File.file?(&quot;/etc/rsyslog.conf&quot;) }
 end
 
-service "rsyslog" do
+service &quot;rsyslog&quot; do
     supports :status =&gt; true, :restart =&gt; true, :reload =&gt; true
     action [ :restart ]
-    only_if { File.file?("/etc/rsyslog.conf") }
+    only_if { File.file?(&quot;/etc/rsyslog.conf&quot;) }
 end
 </code></pre>
-<hr></hr>
+<hr>
 Tags: <a href="../tags/bash.html" class="link">bash, 
 </a>
 <a href="../tags/chef.html" class="link">chef, 
@@ -381,11 +404,30 @@ Tags: <a href="../tags/bash.html" class="link">bash,
 <a href="../tags/ruby.html" class="link">ruby, 
 </a>
 <div class="footer">
+                <hr />
+                <br />
+                <p>
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+                    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+                    var disqus_shortname = 'raymiiorg'; // required: replace example with your forum shortname
+
+                    /* * * DON'T EDIT BELOW THIS LINE * * */
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </p>
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
 
-                <small>d2f520142a167b67653f5a1bc5de53</small></p>
+                <small>3ba6906a735b002a17a59e0413d812</small></p>
 
                 <small><a href="http://validator.w3.org/check/referer" target="_blank">Validate XHTML</a></small>
 
