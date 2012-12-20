@@ -37,13 +37,13 @@ parser.add_argument("-c", "--checksum-compare",
                     help="MD5 checksum to compare the file to. If not given, last checked checksum is used.")
 
 parser.add_argument("-o", "--overwrite-checksum", help="Overwrite the checksum with the new one.",
-                    default=False)
+        default=False, action="store_true")
 
 parser.add_argument("-e", "--email", 
                     help="Email address to mail report to.", default="root@" + hostname)
 
 parser.add_argument("-a", "--attach-file", help="Attach the file to the email message.",
-                    default=False)
+                    default=False, action="store_true")
 
 parser.add_argument("-s", "--smtp", help="Hostname or IP address of SMTP server",
                      default="localhost")
@@ -51,7 +51,7 @@ parser.add_argument("-s", "--smtp", help="Hostname or IP address of SMTP server"
 parser.add_argument("-f", "--sender", help="The from address of the email.",
                     default="filechecker@" + hostname)
 parser.add_argument("-m", "--mail-on-match", help="Send an email when the file is not changed",
-                    default=False)
+                    default=False, action="store_true")
 
 args = parser.parse_args()
 
@@ -156,7 +156,7 @@ def compare_checksum(filename, checksumToCompare=None, save=False):
             message += "Filename: %s. \n" % abspath
             message += "I checksummed the file itself.\n"
             
-    if save == "yes" and compareGiven == False:
+    if save == True and compareGiven == False:
         message += "Overwriting old checksum with new checksum as requested. \n"
         message += save_checksum(basename, fileCheckSum)
 
@@ -226,17 +226,22 @@ result = compare_checksum(filename, checksum_compare, overwrite_checksum)
 
 sendthemail = False
 
-if matches == 1 and mail_on_match == "yes":
+if matches == 1 and mail_on_match == True:
     sendthemail = True
 
 if matches == 0:
     sendthemail = True
 
 if sendthemail == True:
-    if attach_file == "yes":
-        sendEmail(mail_to, mail_from, result, smtp_server, abspath)
+    if attach_file == True:
+        try:
+            sendEmail(mail_to, mail_from, result, smtp_server, abspath)
+        except socket.error, e:
+            print "Error: mail could not be sent: ", e
     else:
-        sendEmail(mail_to, mail_from, result, smtp_server)
-
+        try:
+            sendEmail(mail_to, mail_from, result, smtp_server)
+        except socket.error, e:
+            print "Error: mail could not be sent: ", e
 
     
