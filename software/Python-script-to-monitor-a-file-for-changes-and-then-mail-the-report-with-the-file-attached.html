@@ -115,7 +115,7 @@
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 15-12-2012</h6>
+<h6>Date: 21-12-2012</h6>
 <br>
 <p>This is a script which checks a file&#39;s md5 hash, compares it to a previous (or given) hash and mails a report with the option of attaching the file with the email. I wrote it because I use AIDE on some systems, and I let it auto update the database. This script runs via cron before and after the AIDE run, so I have an archive of databases. But it can be used for all kind of files, not just for the AIDE database.</p>
 
@@ -163,16 +163,16 @@ When this option is set, it mails when the file matches. By default no email is 
 <ol>
 <li><p>Monitor the file <code>/var/lib/aide/aide.db.gz</code>, mail to <code>admin@domain.com</code>, overwrite checksum on change and attach the file:</p>
 
-<p><code>./check-file.py  -e &quot;admin@domain.com&quot; -a yes -o yes /var/lib/aide/aide.db.gz</code></p></li>
+<p><code>./check-file.py  -e &quot;admin@domain.com&quot; -a -o /var/lib/aide/aide.db.gz</code></p></li>
 <li><p>Monitor the file <code>/var/lib/aide/aide.db.gz</code> against known checksum and mail to <code>admin@domain.com</code>:</p>
 
-<p><code>./check-file.py -e &quot;admin@domain.com&quot; -a yes -c &quot;41ce523dd72a67039df2db9b4542411c&quot; /var/lib/aide/aide.db.gz</code></p></li>
+<p><code>./check-file.py -e &quot;admin@domain.com&quot; -a -c &quot;41ce523dd72a67039df2db9b4542411c&quot; /var/lib/aide/aide.db.gz</code></p></li>
 <li><p>Monitor file <code>/etc/passwd</code>, send even if md5sum matches, from <code>customer@kpn.nl</code> using smtp server <code>smtp.kpnmail.com</code>, do not attach it to the email and do not overwrite the checksum file:</p>
 
-<p><code>./check-file.py -e &quot;admin@domain.com&quot; -f &quot;customer@kpn.nl&quot; -s &quot;smtp.kpnmail.com&quot; -m yes /etc/passwd</code></p></li>
+<p><code>./check-file.py -e &quot;admin@domain.com&quot; -f &quot;customer@kpn.nl&quot; -s &quot;smtp.kpnmail.com&quot; -m /etc/passwd</code></p></li>
 <li><p>Cron job to monitor the AIDE database and mail changes every night at 10 PM:</p>
 
-<p><code>1 22 * * * /usr/bin/python /root/scripts/check-file.py -e &quot;admin@domain.com&quot; -a yes -o yes /var/lib/aide/aide.db.gz</code></p></li>
+<p><code>1 22 * * * /usr/bin/python /root/scripts/check-file.py -e &quot;admin@domain.com&quot; -a -o /var/lib/aide/aide.db.gz</code></p></li>
 </ol>
 
 <h3>Sample report email</h3>
