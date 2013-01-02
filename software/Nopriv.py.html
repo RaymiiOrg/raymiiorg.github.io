@@ -114,7 +114,7 @@
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 30-12-2012</h6>
+<h6>Date: 02-01-2013</h6>
 <br>
 <h3>NoPriv.py - HTML5 IMAP email backup</h3>
 
@@ -128,15 +128,20 @@
 
 <h4>Running the program</h4>
 
-<p><a href="http://i.imgur.com/iH330.png"<img src="http://i.imgur.com/iH330.png" width=400 height=400 /></a></p>
+<p><a href = "http://i.imgur.com/8Uvrk.png"><img src="http://i.imgur.com/8Uvrk.png" width=400 height=400 /></a></p>
 
-<h4>Overview page</h4>
+<h4>Index page</h4>
 
-<p><a href="http://i.imgur.com/5TvtU.jpg"><img src="http://i.imgur.com/5TvtU.jpg" width=400 height=400 /></a></p>
+<p><a href = 'http://i.imgur.com/jFLX7.png'><img src="http://i.imgur.com/jFLX7.png" width=400 height=400 /></a></p>
+
+<h4>Folder Overview page</h4>
+
+<p><a href = "http://i.imgur.com/BKHln.jpg"><img src="http://i.imgur.com/BKHln.jpg" width=400 height=400 /></a></p>
 
 <h4>Email itself</h4>
 
-<p><a href = "http://i.imgur.com/enrnBh.png"><img src="http://i.imgur.com/enrnBh.png" width=400 height=400 /></a></p>
+<p><a href = "http://i.imgur.com/1JTKA.jpg"><img src="http://i.imgur.com/1JTKA.jpg" width=400 height=400 /></a><br />
+<a href = "http://imgur.com/W18fR"><img src="http://i.imgur.com/W18fR.png" width=400 height=400 /></a></p>
 
 <h4>Attachments</h4>
 
@@ -150,12 +155,24 @@
 
 <ul>
 <li>Works with any IMAP/IMAPS account</li>
+<li>Supports multiple IMAP folders</li>
 <li>Supports HTML email</li>
 <li>Supports TEXT email</li>
 <li>Supports MULTIPART email</li>
 <li>Saves attachments</li>
 <li>Backups to HTML files for easy browsing</li>
 <li>Small HTML files can be backed up to external medium more easily, and can be sent over the internet more easily.</li>
+</ul>
+
+<h3>Changelog</h3>
+
+<p>New in version 2:</p>
+
+<ul>
+<li>Support for multiple IMAP folders</li>
+<li>Index page is generated</li>
+<li>Pages have menu now.</li>
+<li>On running it shows all available IMAP folders.</li>
 </ul>
 
 <h3>Usage</h3>
@@ -172,21 +189,15 @@
 <pre><code>IMAPSERVER = &quot;imap.gmail.com&quot;
 IMAPLOGIN = &quot;janeway@gmail.com&quot;
 IMAPPASSWORD = &quot;voyager1&quot;
-IMAPFOLDER = &quot;[Gmail]/All Mail&quot;
+IMAPFOLDER = [&quot;[Gmail]/Sent Mail&quot;, &quot;INBOX&quot;, &quot;[Gmail]/Starred&quot;, &quot;Captains_Log&quot;, &quot;Important&quot;]
 ssl = True
 </code></pre>
 
 <p>(Mind the capital on ssl, <code>True</code>/<code>False</code>, not <code>true</code>/<code>false</code>). </p>
 
-<p><em>Note: Nopriv.py at the moment only handles 1 IMAP folder. Putting multiple folders in does not work. For gmail, use your &quot;All Mail&quot; folder.</em></p>
+<p>If you use gmail and want to backup all your email, use the &quot;[Gmail]/All Mail&quot; folder. It might be named different if you use another locale, for me with a Dutch gmail account it is named &quot;[Gmail]/Alle Berichten&quot;.</p>
 
-<p>Some example IMAP folders:</p>
-
-<pre><code>IMAPFOLDER = &quot;INBOX&quot;
-IMAPFOLDER = &quot;[Gmail]/Alle berichten&quot;
-IMAPFOLDER = &quot;[Gmail]/Sent Mail&quot;
-IMAPFOLDER = &quot;My_OWN_Folder&quot;
-</code></pre>
+<p>If you only want to backup one folder, use something like this: <code>IMAPFOLDER = [&quot;Folder&quot;]</code>. </p>
 
 <ol>
 <li><p>Execute the script:</p>
@@ -195,11 +206,11 @@ IMAPFOLDER = &quot;My_OWN_Folder&quot;
 <li><p>Browse the generated backup:</p></li>
 </ol>
 
-<p>Open the file <code>email-report-1.html</code> in your browser. There is all your email.</p>
+<p>Open the file <code>index.html</code> in your browser. There are all your folders and emails.</p>
 
 <p>If you only have a console, it works just fine in Links2 (see above screenshot):</p>
 
-<pre><code>links2 ./email-report-1.html
+<pre><code>links2 ./index.html
 </code></pre>
 
 <h3>Requirements</h3>
