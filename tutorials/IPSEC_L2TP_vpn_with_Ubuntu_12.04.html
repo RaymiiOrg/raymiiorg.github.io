@@ -114,7 +114,7 @@
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 08-07-2012</h6>
+<h6>Date: 04-01-2013</h6>
 <br>
 <p>This is a guide on setting up a IPSEC/L2TP vpn on Ubuntu 12.04 using Openswan as the IPsec server, xl2tpd as the l2tp provider and ppp for authentication. We choose the IPSEC/L2TP protocol stack because of recent vulnerabilities found in pptpd VPN&#39;s. </p>
 
@@ -287,10 +287,44 @@ length bit = yes
 <li>ppp debug = yes when testing, no when in production</li>
 </ul>
 
-<p>If you want local accounts to be used instead of PPP accounts you can add the following line to the file:</p>
+<h4>Local user (PAM//etc/passwd) authentication</h4>
+
+<p>To use local user accounts via pam (or /etc/passwd), and thus not having plain text user passwords in a text file you have to do a few extra steps. Huge thanks to <code>Sascha Scandella</code> for the hard work and troubleshooting.</p>
+
+<p>In your <code>/etc/xl2tpd/xl2tpd.conf</code> add the following line:</p>
 
 <pre><code>unix authentication = yes
 </code></pre>
+
+<p>and remove the following line:</p>
+
+<pre><code>refuse pap = yes
+</code></pre>
+
+<p>In the file <code>/etc/ppp/options.xl2tpd</code> make sure you do not add the following line (below it states to add it, but not if you want to use UNIX authentication):</p>
+
+<pre><code>require-mschap-v2
+</code></pre>
+
+<p>Also in that file (<code>/etc/ppp/options.xl2tpd</code>) add the following extra line:</p>
+
+<pre><code>login
+</code></pre>
+
+<p>Change <code>/etc/pam.d/ppp</code> to this:</p>
+
+<pre><code>auth    required        pam_nologin.so
+auth    required        pam_unix.so
+account required        pam_unix.so
+session required        pam_unix.so
+</code></pre>
+
+<p>Add the following to <code>/etc/ppp/pap-secrets</code>:</p>
+
+<pre><code>*       l2tpd           &quot;&quot;              *
+</code></pre>
+
+<p>(And, skip the <code>chap-secrets</code> file below (adding users).)</p>
 
 <h4>Configuring PPP</h4>
 
