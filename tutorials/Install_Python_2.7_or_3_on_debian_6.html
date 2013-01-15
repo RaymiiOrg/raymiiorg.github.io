@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>python - Raymii.org</title>
+        <title>Install python 2.7 or 3 under Debian 6 - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     </head>
@@ -104,22 +104,120 @@
                 <div class="inner">
 
 
-           <h2>Tag python</h2><ul class="breadcrumb">
+           <h2>Install python 2.7 or 3 under Debian 6</h2>
+<ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
-<li><a href="../tags" class="link">Tags</a>
+<li><a href="../tutorials" class="link">Tutorials</a>
 <span class="divider">/</span></li>
-<li><a href="python.html" class="link">python</a>
+<li><a href="Install_Python_2.7_or_3_on_debian_6.html" class="link">Install python 2.7 or 3 under Debian 6</a>
 </li>
 </ul>
-<li><a href="../tutorials/Ansible.html" class="link">Ansible - pure ssh based configuration management and deployment</a>
-</li><li><a href="../tutorials/Install_Python_2.7_or_3_on_debian_6.html" class="link">Install python 2.7 or 3 under Debian 6</a>
-</li><li><a href="../software/Magicprog.html" class="link">MagicProg: Magic the Gathering (RPG/TGC) Life Program </a>
-</li><li><a href="../software/Nopriv.py.html" class="link">NoPriv.py - Easy IMAP email backup to HTML archive.</a>
-</li><li><a href="../software/Python-script-to-monitor-a-file-for-changes-and-then-mail-the-report-with-the-file-attached.html" class="link">Python script to monitor a file for changes and then mail the report with the file attached.</a>
-</li><li><a href="../tutorials/Stopping-fail2ban.server-ERROR-Unexpected-communication-error-and-other-errors-in-fail2ban-on-ubuntu-9.04.html" class="link">Stopping fail2ban.server : ERROR Unexpected communication error and other errors in fail2ban on ubuntu 9.04</a>
-</li><li><a href="../software/Terrible-start.html" class="link">Terrible Start</a>
-</li></ul><div class="footer">
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 15-01-2013</h6>
+<br>
+<p>Debian 6 by default ships with python 2.6.6. If for some reason need a newer version of python you can either mess with repo&#39;s, compile from source or use pythonbrew. This tutorial will show you how to install python 2.7 or 3 under debian 6 using pythonbrew. </p>
+
+<h3>What is pythonbrew</h3>
+
+<blockquote>
+<p>pythonbrew is a program to automate the building and installation of Python in the users $HOME. pythonbrew is inspired by <a href="http://github.com/gugod/App-perlbrew">perlbrew</a> and <a href="https://github.com/wayneeseguin/rvm">rvm</a>.<br>
+<a href="http://pypi.python.org/pypi/pythonbrew/">More info about pythonbrew</a></p>
+</blockquote>
+
+<h3>Install pip</h3>
+
+<p>We first need to install pip, which we will use to install pythonbrew:</p>
+
+<pre><code>sudo apt-get install python-pip
+</code></pre>
+
+<h3>Install pythonbrew</h3>
+
+<p>We now use pip to install pythonbrew</p>
+
+<pre><code>sudo pip install pythonbrew
+</code></pre>
+
+<p>Now we finish the install of pythonbrew as it instructs us:</p>
+
+<pre><code>pythonbrew_install
+</code></pre>
+
+<p>Then we make sure the pythonbrew files are loaded in our shell:</p>
+
+<pre><code>source &quot;$HOME/.pythonbrew/etc/bashrc&quot;
+</code></pre>
+
+<h3>Install python 2.7</h3>
+
+<p>We can now instruct pythonbrew to install and compile python 2.7 for us:</p>
+
+<pre><code>pythonbrew install 2.7.3
+</code></pre>
+
+<p>This takes a while, it will go and compile python for you. When it it finished, we can tell our shell to use the freshly installed python:</p>
+
+<pre><code>pythonbrew use 2.7.3
+</code></pre>
+
+<h3>Install python 3</h3>
+
+<p>To install python 3, we execute the following command. Note that this may take a while, because it compiles python:</p>
+
+<pre><code>pythonbrew install 3.2
+</code></pre>
+
+<p>To use this python, execute the following command:</p>
+
+<pre><code>pythonbrew use 3.2
+</code></pre>
+
+<h3>Pythonbrew extra&#39;s</h3>
+
+<p>List all installed pythons:</p>
+
+<pre><code>pythonbrew list
+</code></pre>
+
+<p>List the available installation pythons:</p>
+
+<pre><code>pythonbrew list -k
+</code></pre>
+
+<p>Uninstall a python version (2.7.3 for this example):</p>
+
+<pre><code>pythonbrew uninstall 2.7.3
+</code></pre>
+
+<p>Clean up stale source folders and archives:</p>
+
+<pre><code>pythonbrew cleanup
+</code></pre>
+<hr>
+Tags: <a href="../tags/debian.html" class="link">debian, 
+</a>
+<a href="../tags/python.html" class="link">python, 
+</a>
+<a href="../tags/pythonbrew.html" class="link">pythonbrew, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+                <p>
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+                    var disqus_shortname = 'raymiiorg'; // required: replace example with your forum shortname
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </p>
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
