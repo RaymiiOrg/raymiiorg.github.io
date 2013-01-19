@@ -116,7 +116,7 @@
 <h6>Author: Remy Van Elst</h6>
 <h6>Date: 17-01-2013</h6>
 <br>
-<p>RT (Request Tracker) can save attachments. It saves these in the database (mysql). I had an issue where my mysqldump used in backupping RT would fail due to an <code>mysqldump: Error 2020: Got packet bigger than &#39;max_allowed_packet&#39; bytes when dumping table Attachments at row: xxxxx</code> error. Adding the <code>--max_allowed_packet=500M</code> parameter to the mysqldump command didn&#39;t work, so here is how to search and find big attachments in RT using mysql.</p>
+<p>RT (Request Tracker) can save attachments. It saves these in the database (mysql). I had an issue where my mysqldump used in backupping RT would fail due to an <code>mysqldump: Error 2020: Got packet bigger than &#39;max_allowed_packet&#39; bytes when dumping table Attachments at row: xxxxx</code> error. Adding the <code>--max_allowed_packet=500M</code> parameter to the mysqldump command didn&#39;t work, so here is how to search and find big attachments in RT using mysql. This is tested on RT 4.0.8, but the RT install has been running and updated since RT 3.</p>
 
 <h3>Connect to MySQL</h3>
 
@@ -148,10 +148,7 @@
 
 <p>This was my result:</p>
 
-<p>
-<pre>
-<CODE>
-+----------+---------------------------------------------------------------+
+<pre><code>+----------+---------------------------------------------------------------+
 | ObjectId | Subject                                                       |
 +----------+---------------------------------------------------------------+
 |     1291 |                                                               |
@@ -162,9 +159,7 @@
 |    85579 | [filename]                                                    |
 +----------+---------------------------------------------------------------+
 6878 rows in set (1.89 sec)
-</code>
-</pre>
-</p>
+</code></pre>
 
 <p>If you get the following error:</p>
 

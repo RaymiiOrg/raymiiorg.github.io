@@ -114,9 +114,9 @@
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 02-01-2013</h6>
+<h6>Date: 19-01-2013</h6>
 <br>
-<h3>NoPriv.py - HTML5 IMAP email backup</h3>
+<h1>NoPriv.py - HTML5 IMAP email backup</h1>
 
 <p>NoPriv.py is a python script to backup any IMAP capable email account to a HTML archive, nicely browsable, instead of weird folders (Maildir), one huge file (mbox), only needing a web browser to view (thunderbird) and no propritary code, so you can make sure I won&#39;t steal your password.</p>
 
@@ -159,11 +159,23 @@
 <li>Supports TEXT email</li>
 <li>Supports MULTIPART email</li>
 <li>Saves attachments</li>
+<li>Supports incremental backups</li>
 <li>Backups to HTML files for easy browsing</li>
 <li>Small HTML files can be backed up to external medium more easily, and can be sent over the internet more easily.</li>
+<li>Also backs up to Maildir for <a href="http://wiki.colar.net/ruby_script_to_upload_convert_a_maildir_inbox_to_an_imap_server">easy restoring</a></li>
 </ul>
 
 <h3>Changelog</h3>
+
+<p>New in version 3:</p>
+
+<ul>
+<li>Supports incremental backups</li>
+<li>If you stop the backup while running, it will now continue were it left off</li>
+<li>Unread mails stay unread, but are backed up (before they were marked as read)</li>
+<li>Restoring possible because it also creates a Maildir</li>
+<li>Better unicode support</li>
+</ul>
 
 <p>New in version 2:</p>
 
@@ -190,9 +202,10 @@ IMAPLOGIN = &quot;janeway@gmail.com&quot;
 IMAPPASSWORD = &quot;Voyager1&quot;
 IMAPFOLDER = [&quot;[Gmail]/Sent Mail&quot;, &quot;INBOX&quot;, &quot;[Gmail]/Starred&quot;, &quot;Captains_Log&quot;, &quot;Important&quot;]
 ssl = True
+incremental_backup = True
 </code></pre>
 
-<p>(Mind the capital on ssl, <code>True</code>/<code>False</code>, not <code>true</code>/<code>false</code>). </p>
+<p>(Mind the capital on ssl/incremental_backup, <code>True</code>/<code>False</code>, not <code>true</code>/<code>false</code>). </p>
 
 <p>If you use gmail and want to backup all your email, use the &quot;[Gmail]/All Mail&quot; folder. It might be named different if you use another locale, for me with a Dutch gmail account it is named &quot;[Gmail]/Alle Berichten&quot;.</p>
 
@@ -216,31 +229,25 @@ ssl = True
 
 <p>Python 2.7</p>
 
-<p>Running debian 6 which has python 2.6.6? Execute the following steps to install python 2.7:</p>
-
-<pre><code>sudo apt-get install python-pip
-
-sudo pip install pythonbrew
-
-pythonbrew_install
-
-source &quot;$HOME/.pythonbrew/etc/bashrc&quot;
-
-pythonbrew install 2.7.3
-
-pythonbrew use 2.7.3
-</code></pre>
+<p>Running debian 6 which has python 2.6.6? <a href="https://raymii.org/s/tutorials/Install_Python_2.7_or_3_on_debian_6.html">See here how to install python 2.7 on debian 6.</a></p>
 
 <h3>Known issues</h3>
 
 <ul>
 <li>Does not work with python3 (Feel free to port/fix it.)</li>
 <li>Does not handle all charsets. Works best with utf-8 and ascii.</li>
-<li>Might create an extra index file (example: you have 46 pages, there are 47 in the folder).</li>
-<li>Some non-rfc compliant emails will look weird, or have weird subjects etc. </li>
 <li>No search function.</li>
 <li>Not able to change default sorting (latest first).</li>
 </ul>
+
+<h3>Info on incremental backups</h3>
+
+<p>If you disable incremental backups, the script will run over the folders, create a maildir, create the pages and then move the maildir to <code>$maildir.date</code> where date is a timestamp. 
+If you enable incremental backup, it will create a text file <code>nopriv.txt</code> with the mail ID&#39;s of the folder, so that it know which ID it needs to continue on the next time it is ran. If you delete emails from the folder, the incremental function will not work as expected because of differing ID&#39;s.</p>
+
+<h2>Info on restoring</h2>
+
+<p>Nopriv creates a Maildir folder, which houses all your email. You can restore this maildir folder to an IMAP account either by using the script linked at the top on this page, or use a mail client like Mutt or Evolution and transport it to an imap account via there.</p>
 
 <h3>More Info:</h3>
 
