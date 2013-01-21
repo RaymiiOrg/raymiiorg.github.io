@@ -118,11 +118,11 @@
 <h6>Author: Remy Van Elst</h6>
 <h6>Date: 20-01-2013</h6>
 <br>
-<p>restrict<em>ssh.sh is a bash script which restricts ssh for a user to a set of commands via .ssh/authorized</em>keys, and log it verbosely.</p>
+<p>restrict<em>ssh.sh is a bash script which restricts ssh for a user to a set of (flexible) commands via .ssh/authorized</em>keys, and log it verbosely.</p>
 
 <h3>Purpose</h3>
 
-<p>I have a web application which needs to do some things over ssh on a server. It runs as a seperate user, and this script allows me to restrict the commands it can execute as well. It also logs the commands and session info.</p>
+<p>I have a web application which needs to do some things over ssh on a server. It runs as a seperate user, and this script allows me to restrict the commands it can execute as well. It however does allow regexes so filenames can be passed. It also logs the commands and session info.</p>
 
 <h3>Installation / Usage</h3>
 
@@ -132,7 +132,7 @@
 
 <p>Edit the <code>allowed_commands</code> array:</p>
 
-<pre><code>allowed_commands=(&quot;ls&quot; &quot;ls -la&quot; &quot;w&quot; &quot;uptime&quot; &quot;pwd&quot; &quot;uname -a&quot;)
+<pre><code>declare -a allowed_commands=(&#39;^ls -[l|d|a]$&#39; &#39;ls -la&#39; &#39;w&#39; &#39;uptime&#39; &#39;pwd&#39; &#39;uname -a&#39;) 
 </code></pre>
 
 <p>Make sure that there are no comma&#39;s (<code>,</code>) between the options, otherwise it will fail.</p>
@@ -152,15 +152,23 @@
 
 <p>This will disable password logins only for user <code>remy</code>.</p>
 
+<h3>Regexing / Safety</h3>
+
+<p>The default setup has a regex command allowed. It is the <code>ls</code> command, and the regex allows either <code>ls -l</code>, <code>ls -d</code> or <code>ls -a</code>. If you know basic Perl style regexes you can be very creative with this, for example <code>^ping -c 4 [a-zA-Z0-9]{2,20}.(com|org|net)$</code> allows the command ping to be executed for any 2 to 20 character .com, .net or .org domain. domain and nothing else.</p>
+
+<p><em>BE CAREFULL WITH THIS. IF YOU CONFIGURE IT WRONG USER MAY BE ABLE TO GET A SHELL (vim, :!bash) OR OVERWRITE THE .ssh/authorized_keys FILE. IF YOU ARE NOT SURE, THEN DO NOT USE IT AT ALL!</em></p>
+
+<p>Also, if you allow <code>vim</code>, <code>less</code>, <code>man</code>, or any other program, a user might get a shell. If the program you allow includes the possibility to run a shell, this script/restriction is of no use.</p>
+
 <h3>Logging</h3>
 
 <p>By default it logs lines like these to syslog:</p>
 
-<pre><code>Jan 20 20:39:23 vps11 RESTRICTED_SSH[9013]: INFO: Sent SSH command: &#39;vim&#39;
+<pre><code>Jan 20 20:39:23 vps11 RESTRICTED_SSH[9015]: INFO: SSH Connection: &#39;x.x.x.x 32309 x.x.x.x 22&#39;
 Jan 20 20:39:23 vps11 RESTRICTED_SSH[9014]: INFO: SSH Client: &#39;x.x.x.x 32309 22&#39;
-Jan 20 20:39:23 vps11 RESTRICTED_SSH[9015]: INFO: SSH Connection: &#39;x.x.x.x 32309 x.x.x.x 22&#39;
-Jan 20 20:39:23 vps11 RESTRICTED_SSH[9016]: INFO: SSH Shell: &#39;/bin/bash&#39;
 Jan 20 20:39:23 vps11 RESTRICTED_SSH[9017]: INFO: SSH Username: &#39;remy&#39;
+Jan 20 20:39:23 vps11 RESTRICTED_SSH[9016]: INFO: SSH Shell: &#39;/bin/bash&#39;
+Jan 20 20:39:23 vps11 RESTRICTED_SSH[9013]: INFO: Sent SSH command: &#39;vim&#39;
 Jan 20 20:39:23 vps11 RESTRICTED_SSH[9018]: ERROR: Command &quot;vim&quot; is not allowed.
 </code></pre>
 
