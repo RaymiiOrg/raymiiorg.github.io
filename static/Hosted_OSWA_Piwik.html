@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>RT (Request Tracker) - find and delete big attachments - Raymii.org</title>
+        <title>Hosted Piwik - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
@@ -30,7 +30,7 @@
 <br />
 <a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
 <br />
-<a href="/s/static/Hosted_OSWA.html" class="whitelink">Hosted OSWA</a>
+<a href="/s/software/Codename_Geld.html" class="whitelink">Codename Geld</a>
 <br />
 <a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
 <br />
@@ -72,6 +72,8 @@
 </li>
 <li><a href="/s/static/Hosted_OSWA.html" class="link">Hosted Oswa</a>
 </li>
+<li><a href="/s/static/Hosted_OSWA_Piwik.html" class="link">Hosted Oswa Piwik</a>
+</li>
 <li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
 </li>
 </ul>
@@ -108,99 +110,101 @@
                 <div class="inner">
 
 
-           <h2>RT (Request Tracker) - find and delete big attachments</h2>
+           <h2>Hosted Piwik</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
-<li><a href="../tutorials" class="link">Tutorials</a>
+<li><a href="../static" class="link">Static</a>
 <span class="divider">/</span></li>
-<li><a href="RT_find__and_delete_big_attachments.html" class="link">RT (Request Tracker) - find and delete big attachments</a>
+<li><a href="Hosted_OSWA_Piwik.html" class="link">Hosted Piwik</a>
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 17-01-2013</h6>
+<h6>Date: 28-01-2013</h6>
 <br>
-<p>RT (Request Tracker) can save attachments. It saves these in the database (mysql). I had an issue where my mysqldump used in backupping RT would fail due to an <code>mysqldump: Error 2020: Got packet bigger than &#39;max_allowed_packet&#39; bytes when dumping table Attachments at row: xxxxx</code> error. Adding the <code>--max_allowed_packet=500M</code> parameter to the mysqldump command didn&#39;t work, so here is how to search and find big attachments in RT using mysql. This is tested on RT 4.0.8, but the RT install has been running and updated since RT 3.</p>
+<blockquote>
+<p>Piwik is a free web analytics tool that provides you with detailed reports on your website&#39;s visitors, your marketing campaigns and much more. Piwik is an open source alternative to Google Analytics, available in 45 languages, and has been downloaded more than 1 million times!
+Piwik is an amazing alternative to Google Analytics. </p>
+</blockquote>
 
-<h3>Connect to MySQL</h3>
+<p>I use it on this website and a lot of others. There is no free hosted version, but I&#39;m changing that. I&#39;m giving you free access to hosted-oswa.org. You can find instructions on how to get an account at the bottom of this page. </p>
 
-<p>If you have your database on the same box as RT, connect using the following command, where you replace <code>rt_db_u</code> with the RT MySQL username:</p>
+<h3>Sign Up</h3>
 
-<pre><code>mysql -u rt_db_u -p
-</code></pre>
+<p><a href="mailto:hostedpiwik-signup@relst.nl?subject=Hosted%20Piwik%20Signup&body=Please%20send%20the%20full%20url%20of%20your%20website%20the%20username%20you%20want.%20Incomplete%20requests%20are%20not%20processed." class="btn btn-success btn-large"><i class="icon-white icon-ok"></i> Sign Up!</a>  </p>
 
-<p>It will now ask for the RT MySQL password, which you can find in the RT <code>SiteConfig.pm</code> file. Enter it and press ENTER.</p>
+<p>Please include the following:</p>
 
-<p>If you have your MySQL running on a dedicated database server, connect to it remotely via the following command, again replacing <code>rt_db_u</code> with your database name and <code>database_blade_043</code> with your database servers hostname/IP:</p>
+<ul>
+<li>URL&#39;s of websites you want to use Piwik on</li>
+<li>Username</li>
+</ul>
 
-<pre><code>mysql -u rt_db_u -h database_blade_034 -p
-</code></pre>
+<p><em>IMPORTANT: Registrations are manually reviewed and can take up at most 48 hours. Uptime/SLA is not available, this is on a best effort base.</em>   </p>
 
-<h3>Select the RT database</h3>
+<p><em>ALSO IMPORTANT: hosted-oswa.org/raymii.org is not in any way connected or sponsored or affiliated with Piwik.org, the piwik team or any of their developers.</em>  </p>
 
-<p>Select the RT database with the following MySQL command, replacing <code>rt_db</code> with the name of your RT MySQL database:</p>
+<p><em>The official name for my project is &quot;hosted-oswa.org&quot;, which stands for &quot;Hosted Open Source Web Analytics&quot;. Piwik is the name of the software that is used, and that can be found at <a href="http://piwik.org">piwik.org</a>.</em>  </p>
 
-<pre><code>mysql&gt; use rt
-</code></pre>
+<h3>News</h3>
 
-<h3>Finding the big attachments</h3>
+<p>Here you will always find the latest news about Hosted-OSWA.org</p>
 
-<pre><code>mysql&gt; SELECT DISTINCT Transactions.ObjectId,Attachments.Subject FROM Attachments LEFT OUTER JOIN Transactions ON Transactions.Id = Attachments.TransactionId WHERE Transactions.ObjectType = &#39;RT::Ticket&#39; AND LENGTH(Attachments.Content) &gt; 4000000;
-</code></pre>
+<h3>How does it work</h3>
 
-<p>This command will display all the ticket ID&#39;s and Subjects from items where the attachment size is more than 4 MB (4194304 Bytes). The outer join is because <a href="http://lists.bestpractical.com/pipermail/rt-users/2013-January/078909.html">ticket ID&#39;s are[1]</a> <a href="http://lists.bestpractical.com/pipermail/rt-users/2007-June/046395.html">not Attachments ID&#39;s[2].</a> It might take a while, the query took about 4 minutes on my DB.</p>
+<ol>
+<li>You sign up via the above link</li>
+<li>Within 48 hours you receive an email with a username, a password, the hosted-oswa URL and your tracking codes.</li>
+<li>You add the tracking code to your website, or you use <a href="http://piwik.org/integrate/">one of the many plugins for your CMS</a>.</li>
+<li>???</li>
+<li>PROFIT!!!</li>
+</ol>
 
-<p>This was my result:</p>
+<h3>Piwik Features</h3>
 
-<pre><code>+----------+---------------------------------------------------------------+
-| ObjectId | Subject                                                       |
-+----------+---------------------------------------------------------------+
-|     1291 |                                                               |
-|     1546 |                                                               |
-|     1562 | [filename]                                                    |
-|     2016 |                                                               |
-|    [...] | [...]                                                         |
-|    85579 | [filename]                                                    |
-+----------+---------------------------------------------------------------+
-6878 rows in set (1.89 sec)
-</code></pre>
+<p><img src="http://i.imgur.com/fKX5qRa.png" /></p>
 
-<p>If you get the following error:</p>
+<ul>
+<li>All standard statistics reports: top keywords and search engines, websites, top page URLs, page titles, user countries, providers, operating system, browser marketshare, screen resolution, Desktop VS Mobile, engagement (time on site, pages per visit, repeated visits), top campaigns, custom variables, top entry/exit pages,  downloaded files, and many more, classified into four main analytics report categories - Visitors, Actions, Referrers, Goals/Ecommerce (30+ reports)</li>
+<li>Real time data updates</li>
+<li>Get a detailed view of your visitors, pages they have visited and goals they have triggered</li>
+<li>Customizable Dashboard - and create new dashboards as you see fit!</li>
+<li>All Websites Dashboard</li>
+<li>Beautiful historical reports</li>
+<li>Goal conversion tracking</li>
+<li>Track custom variables</li>
+<li>Track Searches done on your internal search engine (Site Search Analytics)</li>
+<li>Geo Locate your visitors for accurate detection of Country, Region, City, Organization</li>
+<li>World map of your visitors</li>
+<li>Pages Transitions: view what visitors did before, and after a specific page (awesome feature!)</li>
+<li>Page Overlay: A visual and powerful way to look at your Page views reports, the statistics are directly displayed on overlay on top of your website!</li>
+<li>Automatic tracking of file downloads</li>
+<li>Automatic tracking of clicks on external website links</li>
+<li>Optional tracking of 404 pages</li>
+<li>Analytics campaign tracking</li>
+<li>Automatically detects Google Analytics campaign parameters in your URLs</li>
+<li>More than 800 Search Engines tracked</li>
+<li>Scheduled email reports (PDF and HTML reports)</li>
+<li>Embed reports in your app or website, 40+ Widgets available...</li>
+<li>or embed (beautiful) PNG Graphs in any custom page, email, or app!</li>
+<li>Optionally make your statistics public</li>
+<li>No data limit, you can keep all your data FOREVER. See our limits analytics data fact sheet.</li>
+<li>Create text annotations in your Graphs, to annotate particular events or notes for a given day</li>
+</ul>
 
-<pre><code>ERROR 2020 (HY000): Got packet bigger than &#39;max_allowed_packet&#39; bytes
-</code></pre>
-
-<p>Reconnect to the MySQL database with the following parameter added to the command:</p>
-
-<pre><code>--max_allowed_packet=500M
-</code></pre>
-
-<p><a href="https://dev.mysql.com/doc/refman/5.5/en/packet-too-large.html">More info</a></p>
-
-<p>Now you can go to those tickets, and remove the attachments.</p>
-
-<p>If you don&#39;t want to get blank Subjects, you can execute the following query:</p>
-
-<pre><code>mysql&gt; SELECT DISTINCT Transactions.ObjectId,Attachments.Subject FROM Attachments LEFT OUTER JOIN Transactions ON Transactions.Id = Attachments.TransactionId WHERE Transactions.ObjectType = &#39;RT::Ticket&#39; AND LENGTH(Attachments.Content) &gt; 4000000 AND Attachments.Subject != &quot;&quot;;
-</code></pre>
-
-<h3>Notes</h3>
-
-<p>Do note that this is also possible via the Shredder, using the Attachments filter. </p>
+<p><a href="http://piwik.org/features/list/">Full list of features</a></p>
 <hr>
-Tags: <a href="../tags/helpdesk.html" class="link">helpdesk, 
+Tags: <a href="../tags/google-analytics.html" class="link">google-analytics, 
 </a>
-<a href="../tags/mysql.html" class="link">mysql, 
+<a href="../tags/hosted-oswa.html" class="link">hosted-oswa, 
 </a>
-<a href="../tags/perl.html" class="link">perl, 
+<a href="../tags/hosted-piwik.html" class="link">hosted-piwik, 
 </a>
-<a href="../tags/request-tracker.html" class="link">request-tracker, 
+<a href="../tags/oswa.html" class="link">oswa, 
 </a>
-<a href="../tags/rt.html" class="link">rt, 
+<a href="../tags/piwik.html" class="link">piwik, 
 </a>
-<a href="../tags/size.html" class="link">size, 
-</a>
-<a href="../tags/tickets.html" class="link">tickets, 
+<a href="../tags/statistics.html" class="link">statistics, 
 </a>
 <div class="footer">
                 <hr />
