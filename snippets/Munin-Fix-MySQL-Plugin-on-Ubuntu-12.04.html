@@ -144,6 +144,16 @@ munin-node-configure --suggest --shell | sh
 </code></pre>
 
 <p>The graphs should now appear. If not, you might need to manually symlink the munin mysql plugins from <code>/usr/share/munin/plugins/</code> to <code>/etc/munin/plugins/</code>.</p>
+
+<p>If you need to define another user for MySQL, configure <code>/etc/munin/plugin-conf.d/munin-node</code> with the following settings:</p>
+
+<pre><code>[mysql*]
+user root
+env.mysqluser monitoring
+env.mysqlpassword MyOwnSuperSecretPassword
+</code></pre>
+
+<p>Altough on Ubuntu and Debian this should run via the debian maintenance user.</p>
 <hr>
 Tags: <a href="../tags/debian.html" class="link">debian, 
 </a>
