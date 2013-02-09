@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>private-key - Raymii.org</title>
+        <title>OpenSSL Generate CSR non-interactive - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
@@ -108,17 +108,107 @@
                 <div class="inner">
 
 
-           <h2>Tag private-key</h2><ul class="breadcrumb">
+           <h2>OpenSSL Generate CSR non-interactive</h2>
+<ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
-<li><a href="../tags" class="link">Tags</a>
+<li><a href="../snippets" class="link">Snippets</a>
 <span class="divider">/</span></li>
-<li><a href="private-key.html" class="link">private-key</a>
+<li><a href="OpenSSL_generate_CSR_non-interactivemd.html" class="link">OpenSSL Generate CSR non-interactive</a>
 </li>
 </ul>
-<li><a href="../snippets/OpenSSL_generate_CSR_non-interactivemd.html" class="link">OpenSSL Generate CSR non-interactive</a>
-</li><li><a href="../snippets/OpenSSL_match_certificate_with_private_key.html" class="link">Match OpenSSL certificate and private key</a>
-</li></ul><div class="footer">
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 09-02-2013</h6>
+<br>
+<p>This is a short command to generate a CSR (certificate signing request) with openssl without being prompted for the values which go in the certificate&#39;s Subject field.</p>
+
+<p>When you use OpenSSL to generate a CSR and a private key you use the following command:</p>
+
+<pre><code>openssl req -nodes -newkey rsa:2048 -keyout private.key -out CSR.csr                                                                                 
+Generating a 2048 bit RSA private key
+.................................................................+++
+.......................................................................+++
+writing new private key to &#39;private.key&#39;
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter &#39;.&#39;, the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:NL
+State or Province Name (full name) [Some-State]:Zuid Holland
+Locality Name (eg, city) []:Rotterdam
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Sparkling Network
+Organizational Unit Name (eg, section) []:IT Department
+Common Name (e.g. server FQDN or YOUR name) []:ssl.raymii.org
+Email Address []:
+
+Please enter the following &#39;extra&#39; attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+</code></pre>
+
+<p>You can see that you have to fill in a lot of data during the generation. If you do not want that, maybe because you are using a script to generate a lot of CSR&#39;s and private keys, you use the following command. It does the same as the above command, but it has all the data in it:</p>
+
+<pre><code>openssl req -nodes -newkey rsa:2048 -keyout private.key -out CSR.csr -subj &quot;/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Department/CN=ssl.raymii.org&quot;
+</code></pre>
+
+<p>This is the output:</p>
+
+<pre><code>Generating a 2048 bit RSA private key
+.......+++
+..............................................................................................................................................+++
+writing new private key to &#39;private.key&#39;
+-----
+</code></pre>
+
+<p>This is what the <code>-subj</code> option does:</p>
+
+<ul>
+<li>/C=NL: 2 letter ISO country code (Netherlands)</li>
+<li>/ST=: State, Zuid Holland (South holland)</li>
+<li>/L=: Location, city (Rotterdam)</li>
+<li>/O=: Organization (Sparkling Network)</li>
+<li>/OU=: Organizational Unit, Department (IT Department, Sales)</li>
+<li>/CN=: Common Name, for a website certificate this is the FQDN. (ssl.raymii.org)</li>
+</ul>
+
+<p>You can also give a <code>/serialNumber=0123456</code> with the above option. <a href="http://permalink.gmane.org/gmane.comp.encryption.openssl.user/9091">This is NOT the serial number the issuing Certificate Authority (CA) will use, but a way to give extra information to a certificate. If you have a CN for John Doe, and another one, the serialNumber field can be used to distinguish John Doe 1 from John Doe 2&#39;s certificate. Click here for more info.</a></p>
+<hr>
+Tags: <a href="../tags/certificates.html" class="link">certificates, 
+</a>
+<a href="../tags/csr.html" class="link">csr, 
+</a>
+<a href="../tags/openssl.html" class="link">openssl, 
+</a>
+<a href="../tags/pki.html" class="link">pki, 
+</a>
+<a href="../tags/private-key.html" class="link">private-key, 
+</a>
+<a href="../tags/public-key.html" class="link">public-key, 
+</a>
+<a href="../tags/ssl.html" class="link">ssl, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+                <p>
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+                    var disqus_shortname = 'raymiiorg'; // required: replace example with your forum shortname
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </p>
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
