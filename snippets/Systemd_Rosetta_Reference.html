@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>OpenSSL Generate CSR non-interactive - Raymii.org</title>
+        <title>Systemd rosetta / cheatsheet - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
@@ -108,93 +108,120 @@
                 <div class="inner">
 
 
-           <h2>OpenSSL Generate CSR non-interactive</h2>
+           <h2>Systemd rosetta / cheatsheet</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
 <li><a href="../snippets" class="link">Snippets</a>
 <span class="divider">/</span></li>
-<li><a href="OpenSSL_generate_CSR_non-interactivemd.html" class="link">OpenSSL Generate CSR non-interactive</a>
+<li><a href="Systemd_Rosetta_Reference.html" class="link">Systemd rosetta / cheatsheet</a>
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 09-02-2013</h6>
+<h6>Date: 10-02-2013</h6>
 <br>
-<p>This is a short command to generate a CSR (certificate signing request) with openssl without being prompted for the values which go in the certificate&#39;s Subject field.</p>
+<p>The below table has systemd versus init examples. the service used as example is <em>nginx</em>:</p>
 
-<p>When you use OpenSSL to generate a CSR and a private key you use the following command:</p>
-
-<pre><code>openssl req -nodes -newkey rsa:2048 -keyout private.key -out CSR.csr
-</code></pre>
-
-<p>This is the output:</p>
-
-<pre><code>Generating a 2048 bit RSA private key
-.................................................................+++
-.......................................................................+++
-writing new private key to &#39;private.key&#39;
------
-You are about to be asked to enter information that will be incorporated
-into your certificate request.
-What you are about to enter is what is called a Distinguished Name or a DN.
-There are quite a few fields but you can leave some blank
-For some fields there will be a default value,
-If you enter &#39;.&#39;, the field will be left blank.
------
-Country Name (2 letter code) [AU]:NL
-State or Province Name (full name) [Some-State]:Zuid Holland
-Locality Name (eg, city) []:Rotterdam
-Organization Name (eg, company) [Internet Widgits Pty Ltd]:Sparkling Network
-Organizational Unit Name (eg, section) []:IT Department
-Common Name (e.g. server FQDN or YOUR name) []:ssl.raymii.org
-Email Address []:
-
-Please enter the following &#39;extra&#39; attributes
-to be sent with your certificate request
-A challenge password []:
-An optional company name []:
-</code></pre>
-
-<p>You can see that you have to fill in a lot of data during the generation. If you do not want that, maybe because you are using a script to generate a lot of CSR&#39;s and private keys, you use the following command. It does the same as the above command, but it has all the data in it:</p>
-
-<pre><code>openssl req -nodes -newkey rsa:2048 -keyout private.key -out CSR.csr -subj &quot;/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Department/CN=ssl.raymii.org&quot;
-</code></pre>
-
-<p>This is the output:</p>
-
-<pre><code>Generating a 2048 bit RSA private key
-.......+++
-..............................................................................................................................................+++
-writing new private key to &#39;private.key&#39;
------
-</code></pre>
-
-<p>This is what the <code>-subj</code> option does:</p>
-
-<ul>
-<li>/C=NL: 2 letter ISO country code (Netherlands)</li>
-<li>/ST=: State, Zuid Holland (South holland)</li>
-<li>/L=: Location, city (Rotterdam)</li>
-<li>/O=: Organization (Sparkling Network)</li>
-<li>/OU=: Organizational Unit, Department (IT Department, Sales)</li>
-<li>/CN=: Common Name, for a website certificate this is the FQDN. (ssl.raymii.org)</li>
-</ul>
-
-<p>You can also give a <code>/serialNumber=0123456</code> with the above option. <a href="http://permalink.gmane.org/gmane.comp.encryption.openssl.user/9091">This is NOT the serial number the issuing Certificate Authority (CA) will use, but a way to give extra information to a certificate. If you have a CN for John Doe, and another one, the serialNumber field can be used to distinguish John Doe 1 from John Doe 2&#39;s certificate. Click here for more info.</a></p>
+<table class="table-striped">
+    <thead>
+        <tr>
+            <th>Action</th>
+            <th>Debian Init</th>
+            <th>Ubuntu Upstart</th>
+            <th>Red Hat/CentOS Init</th>
+            <th><b>Systemd</b></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Start service</td>
+            <td>`/etc/init.d/nginx start`</td>
+            <td>`initctl start nginx`<br />
+            `/etc/init.d/nginx start`</td>
+            <td>`/etc/init.d/nginx start`</td>
+            <td>`systemctl start nginx.service`</td>
+        </tr>
+        <tr>
+            <td>Stop service</td>
+            <td>`/etc/init.d/nginx stop`</td>
+            <td>`initctl stop nginx`<br />
+            `/etc/init.d/nginx stop`</td>
+            <td>`/etc/init.d/nginx stop`</td>
+            <td>`systemctl stop nginx.service`</td>
+        </tr>
+        <tr>
+            <td>Restart service</td>
+            <td>`/etc/init.d/nginx restart`</td>
+            <td>`initctl restart nginx`<br />
+                `/etc/init.d/nginx restart`</td>
+            <td>`/etc/init.d/nginx restart`</td>
+            <td>`systemctl restart nginx.service`</td>
+        </tr>
+        <tr>
+            <td>Enable service at boot / startup</td>
+            <td>`update-rc.d nginx defaults`</td>
+            <td>edit `etc/init/nginx.conf` add `start on local-filesystems` line<br />
+                `update-rc.d nginx defaults` 
+            </td>
+            <td>`chkconfig nginx on`<br />
+                `ntsysv`</td>
+            <td>`systemctl enable nginx.service`</td>
+        </tr>
+        <tr>
+            <td>Disable service at startup / boot</td>
+            <td>`update-rc.d nginx remove`</td>
+            <td>`echo 'manual' > /etc/init/nginx.override`<br />
+            `update-rc.d nginx remove`</td>
+            <td>`chkconfig nginx off`<br />
+                `ntsysv`</td>
+            <td>`systemctl disable nginx.service`</td>
+        </tr>
+        <tr>
+            <td>List all available services</td>
+            <td>`ls /etc/init.d/`</td>
+            <td>`initctl list`</td>
+            <td>`chkconfig --list`<br />
+                `ntsysv`</td>
+            <td>`systemctl list-units -t service --all`</td>
+        </tr>
+        <tr>
+            <td>Get a service status</td>
+            <td>`/etc/init.d/nginx status`</td>
+            <td>`initctl status nginx`</td>
+            <td>`/etc/init.d/nginx status`</td>
+            <td>`systemctl status nginx.service`</td>
+        </tr>
+        <tr>
+            <td>``</td>
+            <td>``</td>
+            <td>``</td>
+            <td>``</td>
+            <td>``</td>
+        </tr>
+    </tbody>
+</table>
 <hr>
-Tags: <a href="../tags/certificates.html" class="link">certificates, 
+Tags: <a href="../tags/arch-linux.html" class="link">arch-linux, 
 </a>
-<a href="../tags/csr.html" class="link">csr, 
+<a href="../tags/boot.html" class="link">boot, 
 </a>
-<a href="../tags/openssl.html" class="link">openssl, 
+<a href="../tags/centos.html" class="link">centos, 
 </a>
-<a href="../tags/pki.html" class="link">pki, 
+<a href="../tags/chkconfig.html" class="link">chkconfig, 
 </a>
-<a href="../tags/private-key.html" class="link">private-key, 
+<a href="../tags/debian.html" class="link">debian, 
 </a>
-<a href="../tags/public-key.html" class="link">public-key, 
+<a href="../tags/init.html" class="link">init, 
 </a>
-<a href="../tags/ssl.html" class="link">ssl, 
+<a href="../tags/redhat.html" class="link">redhat, 
+</a>
+<a href="../tags/systemd.html" class="link">systemd, 
+</a>
+<a href="../tags/sysvinit.html" class="link">sysvinit, 
+</a>
+<a href="../tags/ubuntu.html" class="link">ubuntu, 
+</a>
+<a href="../tags/upstart.html" class="link">upstart, 
 </a>
 <div class="footer">
                 <hr />
