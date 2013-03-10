@@ -118,7 +118,7 @@
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 14-09-2012</h6>
+<h6>Date: 09-03-2013</h6>
 <br>
 <p>Ansible is a radically simple model-driven configuration management, deployment, and command execution framework. Other tools in this space have been too complicated for too long, require too much bootstrapping, and have too much learning curve. By comparison, Ansible is dead simple and painless to extend. Puppet and Chef have about 60k lines of code. Ansibles core is a little over 2000 lines.</p>
 
@@ -129,6 +129,9 @@ I&#39;ve written a chef-bootstrap script to make sure all the packages to build 
 It works well, but it is bloated. It requires ruby on the server nodes, and that sometimes gives problems on the vps servers I have, since none of them have more than 128MB ram.</p>
 
 <p>I discovered Ansible via reddit, and I&#39;m sold. I&#39;ve converted the scripts I used with chef to ansible format, and not only are they shorter, the biggest advantage is that Ansible does not require ruby on the host. I can start with a newly installed vps with ssh installed. Nothing more.</p>
+
+<p><em>Update 2013-03-09</em>
+I&#39;ve also contributed a few pieces of code to Ansible, namely for the apt and yum modules. It is such a great project!</p>
 
 <p><a href="http://ansible.github.com/">You can find more about Ansible on their website</a>.</p>
 
@@ -163,17 +166,23 @@ ssh-add ~/.ssh/id_rsa
 
 <h4>Add servers/hosts</h4>
 
-<pre><code>echo &quot;[master]&quot; &gt;&gt; ~/ansible_hosts
-echo &quot;vps1.sparklingclouds.nl:22&quot; &gt;&gt; ~/ansible_hosts
-echo &quot;[nodes]&quot; &gt;&gt; ~/ansible_hosts
-echo &quot;vps3.sparklingclouds.nl:2222&quot; &gt;&gt; ~/ansible_hosts
-echo &quot;vps5.sparklingclouds.nl:2222&quot; &gt;&gt; ~/ansible_hosts
-echo &quot;vps6.sparklingclouds.nl:2222&quot; &gt;&gt; ~/ansible_hosts
-echo &quot;vps8.sparklingclouds.nl:2222&quot; &gt;&gt; ~/ansible_hosts
-echo &quot;[mail]&quot; &gt;&gt; ~/ansible_hosts
-echo &quot;vps9.sparklingclouds.nl:2222&quot; &gt;&gt; ~/ansible_hosts
-echo &quot;[testing]&quot; &gt;&gt; ~/ansible_hosts
-echo &quot;vps11.sparklingclouds.nl:2222&quot; &gt;&gt; ~/ansible_hosts
+<p>Edit the <code>~/ansible_hosts</code> file:</p>
+
+<pre><code>[spcs]
+vps1.sparklingclouds.nl:2222
+vps3.sparklingclouds.nl:2222
+vps5.sparklingclouds.nl:2222
+
+[raymii]
+raymii.nl:7777
+ssh.raymii.org:7777
+
+[hostedpiwik]
+vps7.sparklingclouds.nl:2233
+vps17.sparklingclouds.nl:2222
+
+[z1s.org]
+vps21.sparklingclouds.nl:2222
 </code></pre>
 
 <h5>Make sure to add the ssh-key to the host</h5>
@@ -186,7 +195,7 @@ echo &quot;vps11.sparklingclouds.nl:2222&quot; &gt;&gt; ~/ansible_hosts
 <pre><code> ansible all -m ping
 
 
-vps11.sparklingclouds.nl | success &gt;&gt; {
+vps1.sparklingclouds.nl | success &gt;&gt; {
 &quot;ping&quot;: &quot;pong&quot;
 }
 
@@ -202,30 +211,24 @@ vps5.sparklingclouds.nl | success &gt;&gt; {
 &quot;ping&quot;: &quot;pong&quot;
 }
 
-vps9.sparklingclouds.nl | FAILED =&gt; FAILED: [Errno 61] Connection refused
-vps8.sparklingclouds.nl | success &gt;&gt; {
-&quot;ping&quot;: &quot;pong&quot;
-}
-
 vps6.sparklingclouds.nl | success &gt;&gt; {
 &quot;ping&quot;: &quot;pong&quot;
 }
 
-vps1.sparklingclouds.nl | success &gt;&gt; {
+vps17.sparklingclouds.nl | success &gt;&gt; {
 &quot;ping&quot;: &quot;pong&quot;
 }
 
 vps7.sparklingclouds.nl | FAILED =&gt; FAILED: timed out
 </code></pre>
 
-<p>It is working. Servers vps9 and vps7 are down, so it reports it correct.</p>
+<p>It is working. Server vps7 is down, so it reports it correct.</p>
 
 <h3>Examples</h3>
 
 <h6>Get external IP of hosts in groups &quot;nodes&quot; and &quot;master&quot;</h6>
 
 <pre><code>ansible nodes:master -a &quot;wget -qO - http://ifconfig.me/ip&quot; -f 10     
-
 
 vps8.sparklingclouds.nl | success | rc=0 &gt;&gt;
 84.200.77.167
@@ -239,7 +242,6 @@ vps11.sparklingclouds.nl | success | rc=0 &gt;&gt;
 <h6>Install a package on all hosts in group &quot;nodes&quot; using apt</h6>
 
 <pre><code>ansible nodes -m apt -a &quot;pkg=nano state=latest&quot;
-
 
 vps11.sparklingclouds.nl | FAILED &gt;&gt; {
     &quot;failed&quot;: true, 
@@ -287,6 +289,46 @@ Setting up iso-codes (3.23-1) ...
 <pre><code>vars:
   compress: &#39;( &quot;application/x-javascript&quot;, &quot;text/css&quot;, &quot;text/html&quot;, &quot;text/plain&quot; )&#39;
 </code></pre>
+
+<p>Result of a command in a variable:</p>
+
+<pre><code>vars:
+  date: $PIPE(date)
+  hard_command: $PIPE(&quot;this_is_a_long_command | which gets piped | and grepped&quot;)
+</code></pre>
+
+<p>Running on CentOS and Debian and have a yum and an apt statement with an if? Use the pkg_mgr variable:</p>
+
+<pre><code>vars:
+  pkg_mgr: ${ansible_pkg_mgr}
+
+tasks:
+  - name: Install vim and git with ${pkg_mgr}
+    action: $pkg_mgr name=$item state=latest
+    with_items:
+      - vim
+      - git
+</code></pre>
+
+<p>Have special IPv6 config? Or want general if exectution based on variables?
+Define a variable (this is in the ansible_hosts file)</p>
+
+<pre><code>vps5.sparklingclouds.nl:444 ipv6=True
+vps6.sparklingclouds.nl:444 ipv6=True
+vps12.sparklingclouds.nl:444 
+vps13.sparklingclouds.nl:444 
+</code></pre>
+
+<p>Now in a template (example for nginx):</p>
+
+<pre><code>{% if ipv6 == &quot;True&quot; %}
+  listen [::]:80 default_server; # ipv6only=on;  
+{% else %}
+  listen 80 default_server;
+{% endif %}
+</code></pre>
+
+<p>This makes sure nginx runs on non-ipv6 nodes. </p>
 <hr>
 Tags: <a href="../tags/ansible.html" class="link">ansible, 
 </a>
