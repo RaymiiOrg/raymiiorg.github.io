@@ -128,23 +128,20 @@
 
 <p>Sample from the playbook:</p>
 
-<p><code>
-      - name: Deploy munin http status code plugin
-        copy: src=files/http-status dest=/usr/share/munin/plugins/http-status.sh owner=root group=root mode=0755</p>
+<pre><code>      - name: Deploy munin http status code plugin
+        copy: src=files/http-status dest=/usr/share/munin/plugins/http-status.sh owner=root group=root mode=0755
 
-<pre><code>  - name: Deploy postgres status plugin
-    copy: src=files/postgres-status dest=/usr/share/munin/plugins/posgres-status.py owner=root group=root mode=0755
+      - name: Deploy postgres status plugin
+        copy: src=files/postgres-status dest=/usr/share/munin/plugins/posgres-status.py owner=root group=root mode=0755
 
-  - name: Link munin apache plugin
-    command: ln -sf /usr/share/munin/plugins/http-status /etc/munin/plugins/http-status
-    only_if: &quot;&#39;webservers&#39; in $group_names&quot; 
+      - name: Link munin apache plugin
+        command: ln -sf /usr/share/munin/plugins/http-status /etc/munin/plugins/http-status
+        only_if: &quot;&#39;webservers&#39; in $group_names&quot; 
 
-  - name: Link munin postgres plugin
-    command: ln -sf /usr/share/munin/plugins/postgres-status.py /etc/munin/plugins/postgres-status
-    only_if: &quot;&#39;databaseservers&#39; in $group_names&quot;    
+      - name: Link munin postgres plugin
+        command: ln -sf /usr/share/munin/plugins/postgres-status.py /etc/munin/plugins/postgres-status
+        only_if: &quot;&#39;databaseservers&#39; in $group_names&quot;    
 </code></pre>
-
-<p><code></p>
 
 <p>So by using the <code>only_if: &quot;&#39;GROUP_NAME&#39; in $group_names&quot;</code> statement in an action you get more control over the nodes specific actions are run on.</p>
 <hr>
