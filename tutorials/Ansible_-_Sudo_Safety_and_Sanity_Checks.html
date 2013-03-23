@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>python - Raymii.org</title>
+        <title>Ansible - /etc/sudoers safety and sanity checking in playbook - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
@@ -110,23 +110,81 @@
                 <div class="inner">
 
 
-           <h2>Tag python</h2><ul class="breadcrumb">
+           <h2>Ansible - /etc/sudoers safety and sanity checking in playbook</h2>
+<ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
-<li><a href="../tags" class="link">Tags</a>
+<li><a href="../tutorials" class="link">Tutorials</a>
 <span class="divider">/</span></li>
-<li><a href="python.html" class="link">python</a>
+<li><a href="Ansible_-_Sudo_Safety_and_Sanity_Checks.html" class="link">Ansible - /etc/sudoers safety and sanity checking in playbook</a>
 </li>
 </ul>
-<li><a href="../tutorials/Ansible.html" class="link">Ansible - pure ssh based configuration management and deployment</a>
-</li><li><a href="../tutorials/Ansible_-_Sudo_Safety_and_Sanity_Checks.html" class="link">Ansible - /etc/sudoers safety and sanity checking in playbook</a>
-</li><li><a href="../tutorials/Install_Python_2.7_or_3_on_debian_6.html" class="link">Install python 2.7 or 3 under Debian 6</a>
-</li><li><a href="../software/Magicprog.html" class="link">MagicProg: Magic the Gathering (RPG/TGC) Life Program </a>
-</li><li><a href="../software/Nopriv.py.html" class="link">NoPriv.py - Easy IMAP email backup to HTML archive.</a>
-</li><li><a href="../software/Python-script-to-monitor-a-file-for-changes-and-then-mail-the-report-with-the-file-attached.html" class="link">Python script to monitor a file for changes and then mail the report with the file attached.</a>
-</li><li><a href="../tutorials/Stopping-fail2ban.server-ERROR-Unexpected-communication-error-and-other-errors-in-fail2ban-on-ubuntu-9.04.html" class="link">Stopping fail2ban.server : ERROR Unexpected communication error and other errors in fail2ban on ubuntu 9.04</a>
-</li><li><a href="../software/Terrible-start.html" class="link">Terrible Start</a>
-</li></ul><div class="footer">
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 23-03-2013</h6>
+<br>
+<p>Using Ansible to manage the /etc/sudoers file is fine, except when you have a syntax error in your template. This method helps you to only deploy a correct sudoers file. </p>
+
+<p>I use <a href="http://ansible.cc">Ansible</a> on my servers, and I also manage the <code>sudo</code> config (<code>/etc/sudoers/</code>) via Ansible. My sudo playbook creates an admin group, adds me to that admin group, and sets some variables in <code>/etc/sudoers/</code>. I do not have a sudoers template file, because I created the playbook at a client which had various different sudoers files which they do not wanted to have changed because of different nagios checks that needed sudo on different hosts. However, if you start of clean, then a template file for <code>/etc/sudoers</code> is the best choice.</p>
+
+<p>This is the playbook:</p>
+
+<hr>
+
+<ul>
+<li><p>hosts: all
+sudo: True
+user: remy
+connection: ssh # or paramiko</p>
+
+<p>vars:
+  date: $PIPE(date)
+  distro: ${ansible<em>distribution}
+  pkg</em>mgr: ${ansible<em>pkg</em>mgr}
+  pbname: $inventory_hostname</p>
+
+<p>tasks:</p>
+
+<ul>
+<li>name: Copy sudoers file for safety
+command: cp -f /etc/sudoers /etc/sudoers.tmp</li>
+<li>name: Create sudoers file backup
+command: cp -f /etc/sudoers /etc/sudoers.${date}.bak</li>
+<li>name: Create admins group
+group: name=admins system=yes state=present</li>
+<li>name: make sure we can sudo as admin group
+lineinfile: dest=/etc/sudoers.tmp state=present regexp=&#39;^%admin&#39; line=&#39;%admin ALL=(ALL) ALL&#39;</li>
+<li>name: also make sure ssh-agent works via sudo
+lineinfile: dest=/etc/sudoers.tmp state=present regexp=&#39;^Defaults env<em>keep+\=SSH</em>AUTH<em>SOCK&#39; line=&#39;Defaults env</em>keep+=SSH<em>AUTH</em>SOCK&#39;</li>
+<li>name: Final sudoers file check
+shell: visudo -q -c -f /etc/sudoers.tmp &amp;&amp; cp -f /etc/sudoers.tmp /etc/sudoers</li>
+<li>We create the <code>admins</code> group, to which all users that need sudo are added by other playbooks.<br></li>
+<li>We copy the remote sudoers file to a temp one and perform all actions on the temp sudoers file. We also back up the sudoers file.</li>
+<li>We enable the <code>admins</code> group to sudo</li>
+<li>We make sure <code>ssh-agent</code> works via sudo. This was used for a git repository on the root user account, to show our own names in the commits.</li>
+<li>Finally we use <code>visudo</code> to check if the file is correct, and if so we copy the file over the &quot;original&quot; sudos file.</li>
+</ul></li>
+</ul>
+
+<p>By using the temp file we make sure we don&#39;t have any syntax errors and lock ourselves out of machines, needing to use ILO/DRAC to reset passwords and such. Been there, done that, not funny at all.</p>
+<hr>
+Tags: <a href="../tags/ansible.html" class="link">ansible, 
+</a>
+<a href="../tags/configuration-management.html" class="link">configuration-management, 
+</a>
+<a href="../tags/deployment.html" class="link">deployment, 
+</a>
+<a href="../tags/python.html" class="link">python, 
+</a>
+<a href="../tags/sudo.html" class="link">sudo, 
+</a>
+<a href="../tags/sudoers.html" class="link">sudoers, 
+</a>
+<a href="../tags/visudo.html" class="link">visudo, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
