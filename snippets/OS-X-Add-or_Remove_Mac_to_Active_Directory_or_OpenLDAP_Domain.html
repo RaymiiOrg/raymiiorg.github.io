@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Snippets - Raymii.org</title>
+        <title>Join Mac OS X to an Active Directory / OpenDLAP directory from the commandline - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
@@ -87,40 +87,78 @@
 </li>
 <li><a href="/s/everything.html" class="link">All Items</li>
 </a>
-</ul></ul>
-</div>
-<div class="span8">
-<h2>Snippets</h2>
+</ul>
+               <!-- advertisement start -->
+                <hr class="alt2">
+                <h2>Advertisement</h2>
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p />
+                <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-7993642564731324";
+                /* Raymii-2 */
+                google_ad_slot = "9322003332";
+                google_ad_width = 200;
+                google_ad_height = 200;
+                //-->
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+
+           </div>  
+           <div class="span7"> 
+                <div class="inner">
+
+
+           <h2>Join Mac OS X to an Active Directory / OpenDLAP directory from the commandline</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
 <li><a href="../snippets" class="link">Snippets</a>
 <span class="divider">/</span></li>
-</ul>
-<li><a href="Arch-bash-pacman-bashrc-tips.html" class="link">Some Bash and Arch Tweaks </a>
+<li><a href="OS-X-Add-or_Remove_Mac_to_Active_Directory_or_OpenLDAP_Domain.html" class="link">Join Mac OS X to an Active Directory / OpenDLAP directory from the commandline</a>
 </li>
-<li><a href="Bash-massive-rename-to-numbers.html" class="link">Bash script for massive rename to numbers</a>
-</li><li><a href="Bash_-_Do_something_in_every_subdirectory_of_a_folder.html" class="link">Bash - do something in every subdirectory</a>
-</li><li><a href="CentOS_Save_iptables_restorecon_error.html" class="link">Fix CentOS IPTables rule saving (iptables: Saving firewall rules to /etc/sysconfig/iptables: /etc/init.d/iptables: line 274: restorecon: command not found)</a>
-</li><li><a href="Chef-solo_code_snippets.html" class="link">Chef-Solo code snippets</a>
-</li><li><a href="Convert-all-flv-files-in-a-folder-to-mp3.html" class="link">Convert FLV's to MP3</a>
-</li><li><a href="Get_uptime_load_and_users_with_grep_sed_and_awk.html" class="link">Correctly grep and display the uptime, load average and amount of users</a>
-</li><li><a href="HP-ILO-Quickly-gather-firmware-and-version-information-with-CUR.html" class="link">HP ILO - Quickly gather ILO version and firmware information via CURL</a>
-</li><li><a href="Imagemagick-thumbnailer.html" class="link">Imagemagick thumbnailer</a>
-</li><li><a href="Ja-Nee-keuze-toevoegen-in-een-bash-script.html" class="link">Bash ja/nee keuze</a>
-</li><li><a href="Javascript-tricks.html" class="link">Javascript tricks</a>
-</li><li><a href="Munin-Fix-MySQL-Plugin-on-Ubuntu-12.04.html" class="link">Munin - Fix MySQL plugin on Ubuntu 12.04 and Debian 6</a>
-</li><li><a href="Munin-NGINX-Status-Plugin-Ubuntu-12.04.html" class="link">Munin - Set up the NGINX status plugin on Ubuntu 12.04</a>
-</li><li><a href="NGINX_Block_access_to_.git_or_.svn_project_folders.html" class="link">NGINX: Hide / Block .git and .svn folders</a>
-</li><li><a href="OS-X-Add-or_Remove_Mac_to_Active_Directory_or_OpenLDAP_Domain.html" class="link">Join Mac OS X to an Active Directory / OpenDLAP directory from the commandline</a>
-</li><li><a href="OS-X-Change-Hostname.html" class="link">Set OS X hostname from the commandline</a>
-</li><li><a href="OpenSSL_Get_Certificate_Expiry_Date_and_Other_Info.html" class="link">OpenSSL one liner to get expiry date from SSL Certificate of any website</a>
-</li><li><a href="OpenSSL_generate_CSR_non-interactivemd.html" class="link">OpenSSL Generate CSR non-interactive</a>
-</li><li><a href="OpenSSL_match_certificate_with_private_key.html" class="link">OpenSSL match certificate and private key</a>
-</li><li><a href="Set_up_an_IMAPS_and_SMTPS_mail_server_with_Postfix_and_Dovecot.html" class="link">Postfix snippets - not finished</a>
-</li><li><a href="Systemd_Rosetta_Reference.html" class="link">Systemd rosetta / cheatsheet</a>
-</li><li><a href="Vim_Cheatsheet.html" class="link">Vim Cheatsheet</a>
-</li></ul><div class="footer">
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 02-03-2013</h6>
+<br>
+<p>This little snippet joins an Mac OS X computer to a Windows Active Directory or OpenLDAP Directory domain from the Command Line or via Apple Remote Desktop. It is tested on OS X 10.6, 10.7 and 10.8 combined with a Windows Server 2003/2008/2012 mixed Active Directory domain and a Fedora 389 DS domain and an OpenLDAP domain.</p>
+
+<pre><code>dsconfigad -add DOMAIN.EXT -computer &quot;`hostname -s`&quot; -mobile enable -mobileconfirm disable -username &quot;DOMAIN_ADMIN_USERNAME&quot; -password &quot;DOMAIN_ADMIN_PASSWORD&quot; -ou &quot;CN=Computers,DC=DOMAIN,DC=EXT&quot;
+</code></pre>
+
+<p>The following command also add&#39;s users in the &quot;Domain Admins&quot; and &quot;IT_ADM&quot; to the local Mac OS Admin users. Those users have local administrator rights on the OS X Machine</p>
+
+<pre><code>dsconfigad -groups &quot;DOMAIN\Domain Admins,DOMAIN\IT_ADM&quot;
+</code></pre>
+
+<p>This last command removes the OS X machine from a domain:</p>
+
+<pre><code>dsconfigad -remove DOMAIN.EXT -computer &quot;`hostname -s`&quot; -username &quot;DOMAIN_ADMIN_USERNAME&quot; -password &quot;DOMAIN_ADMIN_PASSWORD&quot;
+</code></pre>
+<hr>
+Tags: <a href="../tags/389-ds.html" class="link">389-ds, 
+</a>
+<a href="../tags/active-directory.html" class="link">active-directory, 
+</a>
+<a href="../tags/apple.html" class="link">apple, 
+</a>
+<a href="../tags/apple-remote-desktop.html" class="link">apple-remote-desktop, 
+</a>
+<a href="../tags/ard.html" class="link">ard, 
+</a>
+<a href="../tags/mac.html" class="link">mac, 
+</a>
+<a href="../tags/openldap.html" class="link">openldap, 
+</a>
+<a href="../tags/os-x.html" class="link">os-x, 
+</a>
+<a href="../tags/windows.html" class="link">windows, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
