@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Nagios plugin to check CRL expiry in hours - Raymii.org</title>
+        <title>Nagios plugin to check CRL expiry in minutes - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
@@ -110,25 +110,24 @@
                 <div class="inner">
 
 
-           <h2>Nagios plugin to check CRL expiry in hours</h2>
+           <h2>Nagios plugin to check CRL expiry in minutes</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
 <li><a href="../software" class="link">Software</a>
 <span class="divider">/</span></li>
-<li><a href="Nagios_plugin_to_check_CRL_expiry.html" class="link">Nagios plugin to check CRL expiry in hours</a>
+<li><a href="Nagios_plugin_to_check_CRL_expiry.html" class="link">Nagios plugin to check CRL expiry in minutes</a>
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 24-10-2012</h6>
+<h6>Date: 02-05-2013</h6>
 <br>
-<p>This is a nagios plugin which you can use to check if a CRL (Certificate Revocation List, public list with revoked certificates) is still valid. This is based on the check_crl.py plugin from <a href="http://acksyn.org/?p=690">Michele Baldessari</a>. I&#39;ve modified it so that it checks the time in hours (for more precision) instead of days, and I&#39;ve added error handling so that if the plugin cannot get a crl file (because the webserver is down) it gives a Critical error in nagios.</p>
+<p>This is a nagios plugin which you can use to check if a CRL (Certificate Revocation List, public list with revoked certificates) is still valid. This is based on the check_crl.py plugin from <a href="http://acksyn.org/?p=690">Michele Baldessari</a>. It is modified it so that it checks the time in minutes (for more precision) instead of days, it has a GMT time comparison bug fixed and I&#39;ve added error handling so that if the plugin cannot get a crl file (because the webserver is down) it gives a Critical error in nagios.</p>
 
 <h4>Download</h4>
 
 <p><a href="https://github.com/RaymiiOrg/nagios">Download the plugin from my github</a><br>
-<a href="https://raymii.org/s/inc/downloads/check_crl.py">Download the plugin from raymii.org</a><br>
-<a href="https://raymii.org/s/inc/downloads/check_crl.py.txt">View the source code in the browser</a>  </p>
+<a href="https://raymii.org/s/inc/downloads/check_crl.py">Download the plugin from raymii.org</a>  </p>
 
 <h4>Install and Usage</h4>
 
@@ -151,14 +150,14 @@
 
 <p>Now test the script. I&#39;m using the URL of the Comodo CA CRL file which is the CA that signed my certificate for raymii.org.</p>
 
-<pre><code>/etc/nagios/plugins/check_crl.py -h http://crl.comodoca.com/PositiveSSLCA2.crl -w 60 -c 30
-OK CRL Expires in 76 hours (3 days) (on 2012-11-09 21:06:42)
+<pre><code>/etc/nagios/plugins/check_crl.py -h http://crl.comodoca.com/PositiveSSLCA2.crl -w 480 -c 360
+OK CRL Expires in 5109 minutes (on Thu May  9 07:30:32 2013 GMT)
 
-/etc/nagios/plugins/check_crl.py -h http://crl.comodoca.com/PositiveSSLCA2.crl -w 90 -c 80
-CRITICAL CRL Expires in 76 hours (3  days ) (on 2012-11-09 21:06:42)
+/etc/nagios/plugins/check_crl.py -h http://crl.comodoca.com/PositiveSSLCA2.crl -w 5200 -c 360
+WARNING CRL Expires in 5108 minutes (on Thu May  9 07:30:32 2013 GMT)
 
-/etc/nagios/plugins/check_crl.py -h http://crl.comodoca.com/PositiveSSLCA2.crl -w 90 -c 60
-WARNING CRL Expires in 76 hours (3  days ) (on 2012-11-09 21:06:42)
+/etc/nagios/plugins/check_crl.py -h http://crl.comodoca.com/PositiveSSLCA2.crl -w 5000 -c 5300
+CRITICAL CRL Expires in 5108 minutes (on Thu May  9 07:30:32 2013 GMT)
 </code></pre>
 
 <p>Lets add the nagios command:</p>
@@ -180,23 +179,17 @@ WARNING CRL Expires in 76 hours (3  days ) (on 2012-11-09 21:06:42)
 }
 </code></pre>
 
-<p>The above service check runs on the nagios defined host &quot;localhost&quot;, uses the (default) service template &quot;generic-service&quot; and had the contact &quot;nagiosadmin&quot;. As you can see, the URL maps to $ARG1$, the warning hours to $ARG2$ and the critical hours to $ARG3$. This means that if the field <em>&quot;Next Update:&quot;</em> is less then 24 hours in the future you get a warning and if it is less then 12 hours you get a critical.</p>
+<p>The above service check runs on the nagios defined host &quot;localhost&quot;, uses the (default) service template &quot;generic-service&quot; and had the contact &quot;nagiosadmin&quot;. As you can see, the URL maps to $ARG1$, the warning hours to $ARG2$ and the critical hours to $ARG3$. This means that if the field <em>&quot;Next Update:&quot;</em> is less then 8 hours in the future you get a warning and if it is less then 6 hours you get a critical.</p>
 
 <h4>Changelog</h4>
+
+<p>03-04-2013:
+- Changed time to minutes for more precision
+- Fixed timezone bug by comparing GMT with GMT</p>
 
 <p>06-11-2012:
 - Changed checking interval from dates to hours
 - Added error catching if a crl file cannot be retreived.</p>
-
-<h4>Bugs</h4>
-
-<ul>
-<li>The CRL file must be a DER encoded CRL file. I&#39;m planning to also add a switch/check to see if it is a DER or PEM file and handle it correctly, but for now it only handles DER CRL files.</li>
-</ul>
-
-<h4>License</h4>
-
-<p>Unknown.</p>
 <hr>
 Tags: <a href="../tags/certificates.html" class="link">certificates, 
 </a>

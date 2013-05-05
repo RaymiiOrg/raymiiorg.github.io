@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Nagios plugin to check an OCSP server with hardcoded certificate - Raymii.org</title>
+        <title>Nagios plugin to check an OCSP server - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
@@ -110,31 +110,44 @@
                 <div class="inner">
 
 
-           <h2>Nagios plugin to check an OCSP server with hardcoded certificate</h2>
+           <h2>Nagios plugin to check an OCSP server</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
 <li><a href="../software" class="link">Software</a>
 <span class="divider">/</span></li>
-<li><a href="Nagios_plugin_to_check_OCSP.html" class="link">Nagios plugin to check an OCSP server with hardcoded certificate</a>
+<li><a href="Nagios_plugin_to_check_OCSP.html" class="link">Nagios plugin to check an OCSP server</a>
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 01-11-2012</h6>
+<h6>Date: 06-05-2013</h6>
 <br>
-<p>This is a nagios plugin to check an OCSP server. It does so by having a PEM encoded certificate in the code, and the PEM encoded certificate of the issuer. This is sent to the OCSP server and the response is then parsed to give the correct nagios result. It is targeted at administrators who have their own OCSP and need to know when it is not working. </p>
+<p>This is a nagios plugin to check an OCSP server. It does so by having either a PEM encoded certificate in the code, and the PEM encoded certificate of the issuer in the code, or by using two given PEM files. This is sent to the OCSP server and the response is then parsed to give the correct nagios result. It is targeted at administrators who have their own OCSP and need to know when it is not working. </p>
 
-<p>The certificate is in the code because this saves going to a website and getting the certificate, the issuers certificate and then sending that to the OCSP server. It also can be used for certificates which are not public.</p>
+<p>This version has contributions from <a href="https://github.com/palli/">Pali Sigurdsson</a>.</p>
 
 <p><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Do you need a VPS for hosting nagios? InceptionHosting has very good VPS servers!</a></p>
 
 <h4>Download</h4>
 
 <p><a href="https://github.com/RaymiiOrg/nagios">Download the plugin from my github</a><br>
-<a href="https://raymii.org/s/inc/downloads/check_ocsp_hard.sh">Download the plugin from raymii.org</a><br>
-<a href="https://raymii.org/s/inc/downloads/check_ocsp_hard.sh.txt">View the source code in the browser</a>  </p>
+<a href="https://raymii.org/s/inc/downloads/check_ocsp.sh">Download the plugin from raymii.org</a>  </p>
 
-<h4>Installation and usage</h4>
+<h4>Usage</h4>
+
+<p><code>./check_ocsp.sh</code>:</p>
+
+<ul>
+<li><code>-H host_name</code> - remote host to check</li>
+<li><code>-P port</code> - port to use</li>
+<li><code>--noverify</code> - Don&#39;t verify if certificate is valid</li>
+<li><code>--max-age 4800</code> - alert if certificate is about to expire</li>
+<li><code>--cert filename</code> - use this cert file instead of the hardcoded one</li>
+<li><code>--issuer filename.pem</code> - use this issuer certificate instead of the hardcoded one</li>
+<li><code>--verbose</code> - handy for troubleshooting, echos the exact openssl command used</li>
+</ul>
+
+<h4>Installation</h4>
 
 <p>This guide covers the steps needed for Ubuntu 10.04/12.04 and Debian 6. It should also work on other distro&#39;s, but make sure to modify the commands where needed (package installation for example).</p>
 
@@ -159,22 +172,15 @@
 OK: OCSP up and running - status of certificate for raymii.org GOOD by OCSP: http://ocsp.comodoca.com/
 </code></pre>
 
-<p>You have to put your own PEM encoded certificate in the script. You also need to place the PEM encoded certificate of the issuer of your certificate in the script. The variable <code>CERTTOCHECK</code> contains your certificate, the variable <code>ISSUERCERT</code> contains the issuer certificate.</p>
+<h4>Nagios config</h4>
 
-<p>A way of getting those certificate is via the following <em>openssl</em> command:</p>
-
-<pre><code>echo -n |openssl s_client -connect $DOMAIN:$PORT -showcerts
-</code></pre>
-
-<p>where you of course replace $DOMAIN and $PORT with the domain and the port you want to query. If your certificate is directly signed by one of the browsers trusted certificates (you don&#39;t send a chain) you have to get that (issuer) certificate another way. </p>
-
-<p>When you&#39;ve replaced my certificate with your own we are ready to configure it in Nagios.</p>
+<p>Here&#39;s some example nagios config:</p>
 
 <p>Lets create a command definition:</p>
 
 <pre><code>define command{
-    command_name    ocsp_check_hard
-    command_line    /etc/nagios-plugins/check_ocsp_hard.sh
+    command_name    check_ocsp
+    command_line    /etc/nagios-plugins/check_ocsp.sh -H $USER1$ -p $USER2$ --cert $USER3$ --issuer $USER4$
 }
 </code></pre>
 
@@ -183,15 +189,27 @@ OK: OCSP up and running - status of certificate for raymii.org GOOD by OCSP: htt
 <pre><code>define service {
         use                             generic-service
         host_name                       localhost
-        service_description             OCSP check of $OCSP with hardcoded certificate of $DOMAIN
+        service_description             OCSP check of $OCSP for $DOMAIN
         contact                         nagiosadmin                 
-        check_command                   ocsp_check_hard
+        check_command                   check_ocsp!raymii.org!443!/etc/ssl/certs/raymiiorg.pem!/etc/ssl/certs/comodo.pem
 }
 </code></pre>
 
-<p>This defines a service check on the host <em>localhost</em>, and with contact <em>nagiosadmin</em>. Be sure to replace $OCSP with the name/url of the OCSP you hardcoded, and $DOMAIN with the name of the domain/name of certificate that is used. </p>
+<p>Or if you use a hardcoded certificate:</p>
 
-<p>If you need to monitor multiple OCSP&#39;s (you maybe have more than one CA instance running) you need to have multiple copies of this script with different hardcoded certificates. You also need multiple commands and service checks.</p>
+<pre><code>define command{
+    command_name    check_ocsp_hard
+    command_line    /etc/nagios-plugins/check_ocsp.sh
+}
+
+define service {
+        use                             generic-service
+        host_name                       localhost
+        service_description             OCSP check of $OCSP for $DOMAIN with hardcoded certificate
+        contact                         nagiosadmin                 
+        check_command                   check_ocsp_hard
+}
+</code></pre>
 <hr>
 Tags: <a href="../tags/certificates.html" class="link">certificates, 
 </a>
