@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>python - Raymii.org</title>
+        <title>Ansible - Only if on specific distribution (Debian, Ubuntu, CentOS or RHEL) or distribution version (ubuntu lucid, ubuntu precise) - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
@@ -110,25 +110,132 @@
                 <div class="inner">
 
 
-           <h2>Tag python</h2><ul class="breadcrumb">
+           <h2>Ansible - Only if on specific distribution (Debian, Ubuntu, CentOS or RHEL) or distribution version (ubuntu lucid, ubuntu precise)</h2>
+<ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
-<li><a href="../tags" class="link">Tags</a>
+<li><a href="../tutorials" class="link">Tutorials</a>
 <span class="divider">/</span></li>
-<li><a href="python.html" class="link">python</a>
+<li><a href="Ansible_-_Only_if_on_specific_distribution_or_distribution_version.html" class="link">Ansible - Only if on specific distribution (Debian, Ubuntu, CentOS or RHEL) or distribution version (ubuntu lucid, ubuntu precise)</a>
 </li>
 </ul>
-<li><a href="../tutorials/Ansible.html" class="link">Ansible - pure ssh based configuration management and deployment</a>
-</li><li><a href="../tutorials/Ansible_-_Only_if_host_is_also_in_other_hostgroup.html" class="link">Ansible - Only if host is also in other hostgroup</a>
-</li><li><a href="../tutorials/Ansible_-_Only_if_on_specific_distribution_or_distribution_version.html" class="link">Ansible - Only if on specific distribution (Debian, Ubuntu, CentOS or RHEL) or distribution version (ubuntu lucid, ubuntu precise)</a>
-</li><li><a href="../tutorials/Ansible_-_Sudo_Safety_and_Sanity_Checks.html" class="link">Ansible - /etc/sudoers safety and sanity checking in playbook</a>
-</li><li><a href="../tutorials/Install_Python_2.7_or_3_on_debian_6.html" class="link">Install python 2.7 or 3 under Debian 6</a>
-</li><li><a href="../software/Magicprog.html" class="link">MagicProg: Magic the Gathering (RPG/TGC) Life Program </a>
-</li><li><a href="../software/Nopriv.py.html" class="link">NoPriv.py - Easy IMAP email backup to HTML archive.</a>
-</li><li><a href="../software/Python-script-to-monitor-a-file-for-changes-and-then-mail-the-report-with-the-file-attached.html" class="link">Python script to monitor a file for changes and then mail the report with the file attached.</a>
-</li><li><a href="../tutorials/Stopping-fail2ban.server-ERROR-Unexpected-communication-error-and-other-errors-in-fail2ban-on-ubuntu-9.04.html" class="link">Stopping fail2ban.server : ERROR Unexpected communication error and other errors in fail2ban on ubuntu 9.04</a>
-</li><li><a href="../software/Terrible-start.html" class="link">Terrible Start</a>
-</li></ul><div class="footer">
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 05-05-2013</h6>
+<br>
+<p>This Ansible playbook example helps you execute actions only if you are on a certain distribution. You might have a mixed environment with CentOS and Debian and when using Ansible to execute actions on nodes you don&#39;t need to run Yum on Debian, or Apt on CentOS. Some package names are different and such, so this helps you with an only if statement to select a specific distribution. As a bonus, you also get an only_if for specific distribution versions, like Ubuntu Lucid or Ubuntu Precise.</p>
+
+<h4>Specific Distribution</h4>
+
+<p>You need to add the following variable to your playbook:</p>
+
+<pre><code>vars:
+  distro_name: ${ansible_distribution}
+</code></pre>
+
+<p>Then on a specific action, add the following <code>when_string</code> statement:</p>
+
+<pre><code>when_string: $distro_name == &#39;CentOS&#39; or $distro_name == &#39;Red Hat Enterprise Linux&#39;
+</code></pre>
+
+<p>This is for RHEL and Centos, the following is for Debian/Ubuntu:</p>
+
+<pre><code>when_string: $distro_name == &#39;Ubuntu&#39; or $distro_name == &#39;Debian&#39;
+</code></pre>
+
+<p>This example playbook installs <code>ntpd</code> on both Debian/Ubuntu and CentOS.</p>
+
+<pre><code>---
+- hosts: sparklingnetwork
+  sudo: True
+  user: remy
+  connection: ssh # or paramiko
+
+  vars:
+    distro_name: ${ansible_distribution}
+
+  tasks:
+  - apt: name=$item state=latest
+    with_items:
+     - openntpd
+     - ntp
+    when_string: $distro_name == &#39;Ubuntu&#39; or $distro_name == &#39;Debian&#39;
+
+
+  - yum: name=$item state=latest
+    with_items:
+     - ntp
+    when_string: $distro_name == &#39;CentOS&#39; or $distro_name == &#39;Red Hat Enterprise Linux&#39;
+
+
+  - service: name=ntpd state=started enabled=yes
+</code></pre>
+
+<h4>Specific Distribution Version</h4>
+
+<p>You might also need to do different actions based on distribution version, because some things are available on CentOS 6 but not on 5, or on Ubuntu Lucid you need to install some backported packages and not on Ubuntu Precise.</p>
+
+<p>For those situations, you can use either the <code>${ansible_distribution_version}</code> or <code>${ansible_distribution_release}</code> variable. See some example output from <code>ansible all -m setup -a &quot;filter=ansible_distribution*&quot;</code>:</p>
+
+<pre><code>    &quot;ansible_distribution&quot;: &quot;CentOS&quot;,
+    &quot;ansible_distribution_release&quot;: &quot;Final&quot;,
+    &quot;ansible_distribution_version&quot;: &quot;5.9&quot;
+
+    &quot;ansible_distribution&quot;: &quot;CentOS&quot;,
+    &quot;ansible_distribution_release&quot;: &quot;Final&quot;,
+    &quot;ansible_distribution_version&quot;: &quot;6.4&quot;
+
+    &quot;ansible_distribution&quot;: &quot;Ubuntu&quot;,
+    &quot;ansible_distribution_release&quot;: &quot;lucid&quot;,
+    &quot;ansible_distribution_version&quot;: &quot;10.04&quot;
+
+    &quot;ansible_distribution&quot;: &quot;Ubuntu&quot;,
+    &quot;ansible_distribution_release&quot;: &quot;precise&quot;,
+    &quot;ansible_distribution_version&quot;: &quot;12.04&quot;
+
+    &quot;ansible_distribution&quot;: &quot;Debian&quot;,
+    &quot;ansible_distribution_release&quot;: &quot;wheezy&quot;,
+    &quot;ansible_distribution_version&quot;: &quot;7&quot;
+</code></pre>
+
+<p>Using these, you can filter the output by adding the following two variables to your ansible playbook:</p>
+
+<pre><code>vars:
+  distro_name: ${ansible_distribution}
+  distro_release: ${ansible_distribution_release}
+  distro_version: ${ansible_distribution_version}
+</code></pre>
+
+<p>And then in playbook actions you cen filter with <code>when_string</code>:</p>
+
+<pre><code>when_string: $distro_name == &#39;CentOS&#39; and $distro_version == &#39;6.4&#39;
+
+when_string: $distro_name == &#39;Ubuntu&#39; and $distro_release == &#39;precise&#39;
+
+when_string: $distro_name == &#39;Debian&#39; and $distro_version == &#39;7&#39;
+</code></pre>
+<hr>
+Tags: <a href="../tags/ansible.html" class="link">ansible, 
+</a>
+<a href="../tags/apt.html" class="link">apt, 
+</a>
+<a href="../tags/configuration-management.html" class="link">configuration-management, 
+</a>
+<a href="../tags/deployment.html" class="link">deployment, 
+</a>
+<a href="../tags/ntp.html" class="link">ntp, 
+</a>
+<a href="../tags/ntpd.html" class="link">ntpd, 
+</a>
+<a href="../tags/packages.html" class="link">packages, 
+</a>
+<a href="../tags/python.html" class="link">python, 
+</a>
+<a href="../tags/yum.html" class="link">yum, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
