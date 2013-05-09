@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>exchange - Raymii.org</title>
+        <title>Exchange 2007/2010 Autodiscovery DNS SRV record for BIND - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
@@ -110,17 +110,84 @@
                 <div class="inner">
 
 
-           <h2>Tag exchange</h2><ul class="breadcrumb">
+           <h2>Exchange 2007/2010 Autodiscovery DNS SRV record for BIND</h2>
+<ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
-<li><a href="../tags" class="link">Tags</a>
+<li><a href="../tutorials" class="link">Tutorials</a>
 <span class="divider">/</span></li>
-<li><a href="exchange.html" class="link">exchange</a>
+<li><a href="Exchange_2007_2010_Autodiscovery_DNS_SRV_record_for_BIND.html" class="link">Exchange 2007/2010 Autodiscovery DNS SRV record for BIND</a>
 </li>
 </ul>
-<li><a href="../tutorials/Exchange_2007_2010_Autodiscovery_DNS_SRV_record_for_BIND.html" class="link">Exchange 2007/2010 Autodiscovery DNS SRV record for BIND</a>
-</li><li><a href="../tutorials/Exchange_2010_OWA_lock_users_after_x_amount_of_failed_logins.html" class="link">Exchange 2010 - OWA - Lock user after x amount of failed logins</a>
-</li></ul><div class="footer">
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 09-05-2013</h6>
+<br>
+<p>Note: This article is targeted at *NIX administrators who have to manage Exchange installations, but are not Microsoft specialists. Therefore the BIND setup does not have an explanaition, but the Exchange part has.</p>
+
+<h3>What is Exchange Autodiscovery</h3>
+
+<p>Exchange 2007/2010 Autodiscovery is the ability for Outlook to automatically configure itself to an Exchange 2007/2010 server. 
+The main benefit is for remote users to use Outlook on the Internet as if it was connected on the LAN, this is called Outlook Anywhere or Outlook RPC over HTTP. 
+This is very easily accomplished by having a specific DNS record available for the domain. </p>
+
+<h4>How does Exchange Autodiscovery work?</h4>
+
+<p>Outlook has a few ways to look for domain information when configuring itself based on the users email address. Lets say I want to set up Outlook as <code>john.doe@example.org</code>, but my site does not have the required Autodiscovery XML files set up. I enter that email address in Outlook, now Outlook do the following things to get its information:</p>
+
+<ul>
+<li>Autodiscover posts to https://example.org/Autodiscover/Autodiscover.xml. This fails.</li>
+<li>Autodiscover posts to https://autodiscover.example.org/Autodiscover/Autodiscover.xml. This fails.</li>
+<li>Autodiscover performs the following redirect check: GET http://autodiscover.example.org/Autodiscover/Autodiscover.xml. This fails.</li>
+<li>Autodiscover uses DNS SRV lookup for <em>autodiscover.</em>tcp.example.org, and then &quot;mail.example.org&quot; is returned.</li>
+<li>Outlook asks permission from the user to continue with Autodiscover to post to https://mail.example.org/autodiscover/autodiscover.xml.</li>
+<li>Autodiscover&#39;s  POST request is successfully posted to https://mail.example.org/autodiscover/autodiscover.xml.</li>
+</ul>
+
+<p>There are various reasons not to set up the Autodiscovery XML on the main website or the Autodiscover.example.org. Mainly because it requires extra certificates, IP addresses and maintenance. Maybe a company does not have Windows servers to host their main website, or they don&#39;t want the hassle. In those cases the DNS SRV record works very nice.</p>
+
+<h3>BIND DNS Record</h3>
+
+<p>The following record line should be put in your zone config file (<code>/etc/bind/example.org</code>):</p>
+
+<pre><code>; Exchange autodiscovery
+_autodiscover._tcp                      IN      SRV 0 0 443 mail.example.org.
+</code></pre>
+
+<p>After a <code>rndc reload</code> you should be able to use the Autodiscovery service without problems. It is tested with BIND 9.8.</p>
+
+<h3>Sources</h3>
+
+<p><a href="http://technet.microsoft.com/en-us/library/bb332063(EXCHG.80">White Paper: Exchange 2007 Autodiscover Service</a>.aspx)<br>
+<a href="http://support.microsoft.com/kb/940881/en-us">A new feature is available that enables Outlook 2007 to use DNS Service Location (SRV) records to locate the Exchange Autodiscover service</a>  </p>
+<hr>
+Tags: <a href="../tags/BIND.html" class="link">BIND, 
+</a>
+<a href="../tags/DNS.html" class="link">DNS, 
+</a>
+<a href="../tags/SRV.html" class="link">SRV, 
+</a>
+<a href="../tags/exchange.html" class="link">exchange, 
+</a>
+<a href="../tags/microsoft.html" class="link">microsoft, 
+</a>
+<a href="../tags/nameserver.html" class="link">nameserver, 
+</a>
+<a href="../tags/outlook.html" class="link">outlook, 
+</a>
+<a href="../tags/outlook-anywhere.html" class="link">outlook-anywhere, 
+</a>
+<a href="../tags/outlook-rpc.html" class="link">outlook-rpc, 
+</a>
+<a href="../tags/owa.html" class="link">owa, 
+</a>
+<a href="../tags/server-2008.html" class="link">server-2008, 
+</a>
+<a href="../tags/windows.html" class="link">windows, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />

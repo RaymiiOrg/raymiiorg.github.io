@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>exchange - Raymii.org</title>
+        <title>Hide or determine BIND version number - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
@@ -110,17 +110,125 @@
                 <div class="inner">
 
 
-           <h2>Tag exchange</h2><ul class="breadcrumb">
+           <h2>Hide or determine BIND version number</h2>
+<ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
-<li><a href="../tags" class="link">Tags</a>
+<li><a href="../tutorials" class="link">Tutorials</a>
 <span class="divider">/</span></li>
-<li><a href="exchange.html" class="link">exchange</a>
+<li><a href="Get_DNS_server_version_and_hide_it_in_BIND.html" class="link">Hide or determine BIND version number</a>
 </li>
 </ul>
-<li><a href="../tutorials/Exchange_2007_2010_Autodiscovery_DNS_SRV_record_for_BIND.html" class="link">Exchange 2007/2010 Autodiscovery DNS SRV record for BIND</a>
-</li><li><a href="../tutorials/Exchange_2010_OWA_lock_users_after_x_amount_of_failed_logins.html" class="link">Exchange 2010 - OWA - Lock user after x amount of failed logins</a>
-</li></ul><div class="footer">
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 08-05-2013</h6>
+<br>
+<p>The BIND nameserver (and many others) return their version number when queried a special DNS query. This gives exposure and that is most of the time a bad thing. This tutorial shows you how to query DNS servers for their version and how to stop/change your own BIND server version exposure.</p>
+
+<h3>Chaos Query</h3>
+
+<p>The following <code>DIG</code> and <code>NSLOOKUP</code> queries will show the version of BIND:</p>
+
+<p>A home router queried with <code>DIG</code>:</p>
+
+<pre><code>dig @192.168.1.1 version.bind txt chaos
+;; ANSWER SECTION:
+version.bind.       0   CH  TXT &quot;dnsmasq-2.47&quot;
+</code></pre>
+
+<p>A Microsoft DNS server queried with <code>nslookup</code>:</p>
+
+<pre><code>nslookup -type=txt -class=chaos version.bind ns1.metaregistrar.nl
+Server:         ns1.metaregistrar.nl
+Address:        81.4.97.217#53
+
+version.bind    text = &quot;Served by PowerDNS - http://www.powerdns.com&quot;
+</code></pre>
+
+<p>What is <code>chaos</code> or CH class you ask? <a href="https://en.wikipedia.org/wiki/Chaosnet">It is/was a network technology, see the wikipedia page for more info.</a>. There is also the <a href="https://en.wikipedia.org/wiki/Hesiod_(name_service">HS class, that stands for Hesiod.</a>)</p>
+
+<h3>Hide it in BIND</h3>
+
+<p>When running a BIND nameserver, edit your <code>/etc/bind/named.conf.options</code> file (or the config file where you have your options) and add the following option:</p>
+
+<pre><code>options {
+    [...]
+    version &quot;Not supported&quot;;
+}
+</code></pre>
+
+<p>You can of course put whatever you like in there, for example you can spoof a Microsoft DNS server:</p>
+
+<pre><code>version &quot;Microsoft DNS 6.0.6100 (2AEF76E)&quot;;
+</code></pre>
+
+<p>Or like TransIP does, make it look like your own DNS software:</p>
+
+<pre><code>dig @ns1.transip.nl version.bind txt chaos
+
+;; ANSWER SECTION:
+version.bind.       86400   CH  TXT &quot;TransDNS 2.1.1&quot;
+</code></pre>
+
+<p>Make sure to reload/restart your BIND servers after the change. Do note that you need BIND 8.2 or later for this option to work.</p>
+
+<h3>db.bind zone</h3>
+
+<p>You can also add a .bind zone, this way your queries will also be logged and you can block possible attempts.</p>
+
+<p><code>/etc/bind/named.conf.local</code>:</p>
+
+<pre><code>view &quot;chaos&quot; CH {
+  match-clients { any; };
+  zone &quot;bind&quot; CH {
+      type master;
+      file &quot;db.bind&quot;;
+      allow-update { none; };
+  };
+};
+</code></pre>
+
+<p><code>/etc/bind/db.bind</code>:</p>
+
+<pre><code>$TTL    3600
+@       86400       CH   SOA     localhost. root.localhost. ( 
+                    2013050801      ; serial 
+                    3600            ; refresh 
+                    3600            ; retry 
+                    604800          ; expiry 
+                    86400 )         ; minimum 
+;  
+@                   CH  NS  localhost.
+
+version             CH  TXT &quot;Microsoft DNS 6.0.6100 (2AEF76E)&quot; 
+authors             CH  TXT &quot;Raymii.org&quot; 
+</code></pre>
+
+<p>However this gets complicated very fast, you need to wrap all your other zones in views as well:</p>
+
+<pre><code>view &quot;default&quot; IN {
+  match-clients { any; };
+  [...]
+};
+</code></pre>
+
+<p>So it&#39;s better to use the above options file.</p>
+<hr>
+Tags: <a href="../tags/bind.html" class="link">bind, 
+</a>
+<a href="../tags/dns.html" class="link">dns, 
+</a>
+<a href="../tags/dnsmasq.html" class="link">dnsmasq, 
+</a>
+<a href="../tags/exposure.html" class="link">exposure, 
+</a>
+<a href="../tags/named.html" class="link">named, 
+</a>
+<a href="../tags/version.html" class="link">version, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
