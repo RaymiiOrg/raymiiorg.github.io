@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>dns - Raymii.org</title>
+        <title>Ejabberd SSL Certificate - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -112,21 +112,141 @@
                 <div class="inner">
 
 
-           <h2>Tag dns</h2><ul class="breadcrumb">
+           <h2>Ejabberd SSL Certificate</h2>
+<ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
-<li><a href="../tags" class="link">Tags</a>
+<li><a href="../tutorials" class="link">Tutorials</a>
 <span class="divider">/</span></li>
-<li><a href="dns.html" class="link">dns</a>
+<li><a href="Ejabberd_SSL_Certificate.html" class="link">Ejabberd SSL Certificate</a>
 </li>
 </ul>
-<li><a href="../tutorials/Ejabberd_Active_Directory_LDAP_Login.html" class="link">Ejabberd Active Directory LDAP Login</a>
-</li><li><a href="../tutorials/Ejabberd_SSL_Certificate.html" class="link">Ejabberd SSL Certificate</a>
-</li><li><a href="../tutorials/Exchange_2007_2010_Autodiscovery_DNS_SRV_record_for_BIND.html" class="link">Exchange 2007/2010 Autodiscovery DNS SRV record for BIND</a>
-</li><li><a href="../tutorials/Get_DNS_server_version_and_hide_it_in_BIND.html" class="link">Hide or determine BIND version number</a>
-</li><li><a href="../snippets/OS_X_Turn_Bonjour_off_or_on_via_the_command_line.html" class="link">OS X - Turn Bonjour off or on via the command line</a>
-</li><li><a href="../tutorials/Set_up_a_federated_XMPP_Chat_Network_with_ejabberd.html" class="link">Set up a federated XMPP Chat Network with ejabberd, your own Google Talk/Hangouts alternative</a>
-</li></ul><div class="footer">
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 13-06-2013</h6>
+<br>
+<p>This tutorial shows you how to set up an SSL Certificate for use with Ejabberd. It covers both the creation of the Certificate Signing Request, the preparing of the certificate for use with Ejabberd and the installation of the certificate.</p>
+
+<p><a href="https://raymii.org/s/tutorials/Set_up_a_federated_XMPP_Chat_Network_with_ejabberd.html">If you need to set up an ejabberd server then you can read my tutorial here how to do that</a>. <a href="http://clients.inceptionhosting.com/aff.php?aff=083">If you need a VPS to set up ejabberd you can use an Inception Hosting VPS to set up your own XMPP server, I use them and they are very stable and offer good performace and pricing.</a></p>
+
+<p>This tutorial assumes a working ejabberd installation. It is tested on Debian and Ubuntu, but should work on any ejabberd installation.</p>
+
+<h3>Steps and Explanation</h3>
+
+<p>To get an SSL certificate working on ejabberd we need to do a few things:</p>
+
+<ul>
+<li>Create an Certificate Signing Request (CSR) and a Private Key</li>
+<li>Submit the CSR to a Certificate Authority, let them sign it and give you a Certificate</li>
+<li>Combine the certificate, private key (and chain) into a ejabberd compatible PEM file</li>
+<li>Install the certificate in ejabberd</li>
+</ul>
+
+<p>With a certificate we can secure our XMPP connection and conversations. This way it is much harder for others to spy on your conversations. Combined with OTR this enabled a super secure channel for conversation. </p>
+
+<h3>Creating the Certificate Signing Request</h3>
+
+<p>Create a folder to store all the files and cd to that:</p>
+
+<p>mkdir -p ~/Certificates/xmpp
+  cd ~/Certificates/xmpp</p>
+
+<p>Now use OpenSSL to create both a Private Key and a CSR. The first command will do it interactively, the second command will do it non-interactive. Make sure to set the correct values, your Common Name (CN) should be your XMPP server URL:</p>
+
+<p>Interactive:</p>
+
+<p>openssl req -nodes -newkey rsa:2048 -keyout private.key -out CSR.csr</p>
+
+<p>Non-interactive:</p>
+
+<p>openssl req -nodes -newkey rsa:2048 -keyout private.key -out CSR.csr -subj &quot;/C=NL/ST=State/L=City/O=Company Name/OU=Department/CN=chat.example.org&quot;</p>
+
+<p>This will result in two files, <code>CSR.csr</code> and <code>private.key</code>. You now have to submit the CSR to a Certificate Authority. This can be any CA, I myself have good experiences with <a href="https://sslcertificaten.nl">Xolphin</a>, but there are others like Digicert and Verisign.</p>
+
+<p>Once you have submitted your CSR and have gotten a Certificate you can continue.</p>
+
+<h3>Creating the ejabberd certificate</h3>
+
+<p>Once you have all the files (private key, certificate and certificate chain), put them all in a folder and continue. We are going to <code>cat</code> all the required files into a <code>ejabberd.pem</code> file. </p>
+
+<p>This needs to happen in a specific order:</p>
+
+<ul>
+<li>private key</li>
+<li>certificate</li>
+<li>chains</li>
+</ul>
+
+<p>So adapt the following commands to your filenames and create the pem file:</p>
+
+<p>cat private.key &gt;&gt; ejabberd.pem
+  cat certificate.pem &gt;&gt; ejabberd.pem
+  cat chain-1.pem &gt;&gt; ejabberd.pem
+  cat chain-2.pem &gt;&gt; ejabberd.pem</p>
+
+<p>If that all works out continue.</p>
+
+<h3>Installing the certificate in ejabberd</h3>
+
+<p>Copy the certificate to all your ejabberd servers:</p>
+
+<p>scp ejabberd.pem user@srv1.example.org:</p>
+
+<p>The place the certificate in the <code>/etc/ejabberd</code> folder:</p>
+
+<p>cp ejabberd.pem /etc/ejabberd/ejabberd.pem</p>
+
+<p>Now change the ejabberd config to point to the new certificate:</p>
+
+<p>vim /etc/ejabberd/ejabberd.cfg</p>
+
+<p>Check/change the following to point to the new certificate:</p>
+
+<p>[...]
+  {listen,
+    [
+    {5222, ejabberd<em>c2s, [
+                          {access, c2s},
+                          {shaper, c2s</em>shaper},
+                          {max<em>stanza</em>size, 65536},
+                          starttls, {certfile, &quot;/etc/ejabberd/ejabberd.pem&quot;}
+                         ]},
+  [...]
+  {s2s<em>use</em>starttls, true}.
+  {s2s_certfile, &quot;/etc/ejabberd/ejabberd.pem&quot;}.
+  [...]</p>
+
+<p>Afterwards restart ejabberd:</p>
+
+<p>/etc/init.d/ejabberd restart</p>
+
+<p>You can now use any XMPP client to connect with SSL/TLS to see if it works.</p>
+<hr>
+Tags: <a href="../tags/certificate.html" class="link">certificate, 
+</a>
+<a href="../tags/chat.html" class="link">chat, 
+</a>
+<a href="../tags/dns.html" class="link">dns, 
+</a>
+<a href="../tags/ejabberd.html" class="link">ejabberd, 
+</a>
+<a href="../tags/erlang.html" class="link">erlang, 
+</a>
+<a href="../tags/federation.html" class="link">federation, 
+</a>
+<a href="../tags/jabber.html" class="link">jabber, 
+</a>
+<a href="../tags/secure.html" class="link">secure, 
+</a>
+<a href="../tags/ssl.html" class="link">ssl, 
+</a>
+<a href="../tags/starttls.html" class="link">starttls, 
+</a>
+<a href="../tags/xmpp.html" class="link">xmpp, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
