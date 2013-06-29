@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>bash - Raymii.org</title>
+        <title>bdsh - Whitelist Restricted Shell - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -112,46 +112,124 @@
                 <div class="inner">
 
 
-           <h2>Tag bash</h2><ul class="breadcrumb">
+           <h2>bdsh - Whitelist Restricted Shell</h2>
+<ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
-<li><a href="../tags" class="link">Tags</a>
+<li><a href="../software" class="link">Software</a>
 <span class="divider">/</span></li>
-<li><a href="bash.html" class="link">bash</a>
+<li><a href="bdsh.html" class="link">bdsh - Whitelist Restricted Shell</a>
 </li>
 </ul>
-<li><a href="../snippets/Arch-bash-pacman-bashrc-tips.html" class="link">Some Bash and Arch Tweaks </a>
-</li><li><a href="../snippets/Bash-massive-rename-to-numbers.html" class="link">Bash script for massive rename to numbers</a>
-</li><li><a href="../snippets/Bash_-_Do_something_in_every_subdirectory_of_a_folder.html" class="link">Bash - do something in every subdirectory</a>
-</li><li><a href="../snippets/Bash_-_Incremental_History_Search_Autocomplete.html" class="link">Bash Incremental History Search / Autocomplete </a>
-</li><li><a href="../software/Bash_PHP_Server_Status_Monitor.html" class="link">Ray-Mon - PHP/Bash server status monitoring</a>
-</li><li><a href="../tutorials/Better_cron_env_and_shell_control_with_the_SHELL_variale.html" class="link">Better Cron env and shell control with the SHELL variable</a>
-</li><li><a href="../snippets/Chef-solo_code_snippets.html" class="link">Chef-Solo code snippets</a>
-</li><li><a href="../snippets/Convert-all-flv-files-in-a-folder-to-mp3.html" class="link">Convert FLV's to MP3</a>
-</li><li><a href="../tutorials/Customize-your-clonezilla-live-CD.html" class="link">Customize your Clonezilla Live CD</a>
-</li><li><a href="../software/Easyconverter.html" class="link">EasyConverter</a>
-</li><li><a href="../snippets/Get_uptime_load_and_users_with_grep_sed_and_awk.html" class="link">Correctly grep and display the uptime, load average and amount of users</a>
-</li><li><a href="../software/Git-clean.html" class="link">Git-clean</a>
-</li><li><a href="../snippets/Imagemagick-thumbnailer.html" class="link">Imagemagick thumbnailer</a>
-</li><li><a href="../snippets/Ja-Nee-keuze-toevoegen-in-een-bash-script.html" class="link">Bash ja/nee keuze</a>
-</li><li><a href="../software/List-all-changed-files-in-a-certain-period.html" class="link">Bash script to list all changed files in certain peroid</a>
-</li><li><a href="../software/Nursecalc-Infuus.html" class="link">NurseCalc Infuus - Bash script and Online app for infusion and drip (speed) Calculations </a>
-</li><li><a href="../software/Nursecalc-o2.html" class="link">NurseCalc o2 - Bash script and online app for Oxygen Calculations</a>
-</li><li><a href="../software/ProxBash.html" class="link">ProxBash - a bash script to manage Proxmox VE</a>
-</li><li><a href="../software/Restrict_SSH.html" class="link">Restrict SSH</a>
-</li><li><a href="../software/SSHDialog.html" class="link">SSHdialog</a>
-</li><li><a href="../tutorials/Screenfetch_installation_tutorial.html" class="link">Screenfetch installation tutorial</a>
-</li><li><a href="../articles/Security_Now_Word_Analyzer.html" class="link">Complete word count analasys of Security Now, episode 1 trough 370.</a>
-</li><li><a href="../tutorials/Set-your-ip-as-wallpaper.html" class="link">Set your IP as wallpaper</a>
-</li><li><a href="../tutorials/Shared_Git_repository_via_ssh_for_multiple_users.html" class="link">Shared Git repository over ssh for multiple users</a>
-</li><li><a href="../tutorials/Switch-to-the-command-line-part-1.html" class="link">Switch To The Command Line - Part 1</a>
-</li><li><a href="../tutorials/Switch-to-the-command-line-part-2.html" class="link">Switch To The Command Line - Part 2</a>
-</li><li><a href="../tutorials/Switch-to-the-command-line-part-3.html" class="link">Switch To The Command Line - Part 3.1</a>
-</li><li><a href="../software/Ubuntu_update_mailer.html" class="link">Ubuntu/Debian update mailer</a>
-</li><li><a href="../software/Wallbase.cc_Command_line_script.html" class="link">Wallbase.cc commandline bash wget downloader</a>
-</li><li><a href="../articles/Word_occurrence_counter_and_analyzer.html" class="link">Word occurrence counter and analyzer</a>
-</li><li><a href="../software/bdsh.html" class="link">bdsh - Whitelist Restricted Shell</a>
-</li></ul><div class="footer">
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 29-06-2013</h6>
+<br>
+<p>bdsh is a shell where you whitelist commands and only those commands can be executed. Either via ssh, as an interactive shell or launched with commands. Logs everything and escapes &quot;dangerous&quot; characters.</p>
+
+<p>bdsh stands for Boa Diminish SHell. You can probably guess why. It might have to to with snakes and restricting users, no pun intended.</p>
+
+<h3>What is the reason you wrote bdsh?</h3>
+
+<p>Sometimes sysadmins are forced to work with insecure systems or badly written applications. Critical systems working with a push model instead of a pull model, things that use ssh and break when stuff changes or users that need to be audit trailed. </p>
+
+<p>I couldn&#39;t find an easy way to set a shell for a user that both logs and is configurable via a whitelist. I tried scripts in <code>auhorized_keys</code> but then things <code>scp</code> and <code>sftp</code> break. bdsh tries to solve that and is fairly successfull in that.</p>
+
+<h3>Requirements</h3>
+
+<ul>
+<li>Python 2.6+
+
+<ul>
+<li>Python 3 is supported!</li>
+</ul></li>
+</ul>
+
+<p>bdsh is tested on Ubuntu, CentOS, OpenSUSE and Debian all with Python 2.7 or above.</p>
+
+<h3>Download</h3>
+
+<p>Either from github:</p>
+
+<pre><code>git clone https://github.com/RaymiiOrg/boa-diminish-restricted-shell.git
+</code></pre>
+
+<p>Or from this website: </p>
+
+<pre><code>wget http://raymii.org/s/inc/software/bdsh.py
+</code></pre>
+
+<h3>Installation</h3>
+
+<ul>
+<li>Clone the git repo &amp;&amp; cd in</li>
+<li>Install bdsh sytemwide
+
+<ul>
+<li><code>sudo cp bdsh.py /usr/bin/bdsh</code></li>
+<li><code>sudo chmod +x /usr/bin/bdsh</code></li>
+</ul></li>
+<li>Edit and place whitelist
+
+<ul>
+<li><code>vi example_whitelist.conf &amp;&amp; sudo cp example_whitelist.conf /etc/bdsh_whitelist.conf</code></li>
+</ul></li>
+<li>Edit <code>/etc/shells</code> and add <code>/usr/bin/bdsh</code></li>
+<li>Set the shell for the user, either via:
+
+<ul>
+<li><code>sudo chsh -s /usr/bin/bdsh $USERNAME</code></li>
+<li>or</li>
+<li><code>vi /etc/passwd</code></li>
+</ul></li>
+</ul>
+
+<h3>Tips</h3>
+
+<h4>Enable SFTP/SCP</h4>
+
+<p>Put these two lines in the whitelist file:</p>
+
+<pre><code>scp
+/usr/lib/openssh/sftp-server
+</code></pre>
+
+<p>Note that you might have to change <code>scp</code> to <code>/usr/bin/scp</code>.</p>
+
+<h3>Important</h3>
+
+<p>bdsh only checks if the command is whitelisted, not the arguments. So if you allow <code>ls</code>, you also allow <code>ls -la</code>, and <code>ls -d</code> and such. </p>
+
+<p>bdsh is not 100% safe, but it does provide a layer of security.</p>
+
+<p>Read this article about restriced shells: http://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells</p>
+
+<p>Don&#39;t change the &quot;Dangerous Characters&quot; array, if you for example remove the <code>&amp;</code> then you can do something like this: <code>ssh user@host &quot;ls &amp;&amp; perl -e &#39;exec &quot;/bin/bash&quot;&#39;&quot;</code>. </p>
+
+<p>It does try its best to catch restriction-escaping:</p>
+
+<pre><code>Jun 29 17:41:07 localhost bdsh: [RESTRICTED SHELL]: user &quot;testshell&quot; executed vim
+Jun 29 17:41:11 localhost bdsh: [RESTRICTED SHELL]: user &quot;testshell&quot; NOT allowed for /usr/bin/bdsh -c bash
+</code></pre>
+
+<h3>See Also</h3>
+
+<p>Another way to restrict ssh, written by me: <a href="https://github.com/RaymiiOrg/restrict_ssh">https://github.com/RaymiiOrg/restrict_ssh</a>
+The github page: <a href="https://github.com/RaymiiOrg/boa-diminish-restricted-shell">https://github.com/RaymiiOrg/boa-diminish-restricted-shell</a></p>
+<hr>
+Tags: <a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/python.html" class="link">python, 
+</a>
+<a href="../tags/resricted.html" class="link">resricted, 
+</a>
+<a href="../tags/sh.html" class="link">sh, 
+</a>
+<a href="../tags/shell.html" class="link">shell, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
