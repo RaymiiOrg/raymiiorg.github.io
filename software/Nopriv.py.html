@@ -5,6 +5,7 @@
         <title>NoPriv.py - Easy IMAP email backup to HTML archive. - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
 
     </head>
@@ -15,11 +16,12 @@
         
         <div class="span10 offset1">
                 
-            <div class="span4 well"> 
+            <div class="span3 well"> 
             
-                <h1 class="topheader">Raymii.org</h1>
+                <!-- <h1 class="topheader"></h1> -->
+                <h3>Raymii.org</h3>
                 <h6>Quis custodiet ipsos custodes?</h6>
-                <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS</a></h6>
+                <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
             
             </div>
 
@@ -28,13 +30,15 @@
                     <h3>Featured Items</h3>
     <a href="/s/tutorials/Ansible.html" class="whitelink">Ansible</a>
 <br />
-<a href="/s/tutorials/Autossh_persistent_tunnels.html" class="whitelink">Autossh persistent tunnels</a>
+<a href="/s/tutorials/Ansible_Deployment_Framework.html" class="whitelink">Ansible Deployment Framework</a>
 <br />
 <a href="/s/static/Hosted_Piwik.html" class="whitelink">Hosted Piwik</a>
 <br />
 <a href="/s/tutorials/Munin_optimalization_on_Debian.html" class="whitelink">Munin optimalization on Debian</a>
 <br />
 <a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+<a href="/s/tutorials/VMWare-ESXi-5-USB-installer.html" class="whitelink">VMWare ESXi 5 USB installer</a>
 <br />
 
             
@@ -45,6 +49,8 @@
     <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
 <br />
 <a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/Nopriv-IMAP-backup.html" class="whitelink">Nopriv IMAP backup</a>
 <br />
 <a href="/s/software/Nopriv.py.html" class="whitelink">Nopriv.py</a>
 <br />
@@ -63,7 +69,7 @@
     
 
     <div class="span3">
-    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+    <h3>&nbsp;&nbsp;&nbsp;Menu</h3><ul class="nav nav-pills nav-stacked">
 <li><a href="/s/" class="link">Home</a>
 </li>
 <li><a href="/s/static/Contact.html" class="link">Contact</a>
@@ -75,7 +81,7 @@
 <li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
 </li>
 </ul>
-<h3>Categories</h3>
+<h3>&nbsp;&nbsp;&nbsp;Categories</h3>
 <ul class="nav nav-pills nav-stacked">
 <li><a href="/s/articles" class="link">Articles</a>
 </li>
@@ -173,18 +179,6 @@
 
 <h3>Changelog</h3>
 
-<p>New in version 4:</p>
-
-<ul>
-<li>INI style config, either per user or system wide (thanks to <a href="Jochen%20Breuer">https://github.com/brejoc</a>)</li>
-</ul>
-
-<p>New in version 3.1:</p>
-
-<ul>
-<li>Added a sample <code>muttrc</code> file to view NoPriv with the Mutt mail client. </li>
-</ul>
-
 <p>New in version 3:</p>
 
 <ul>
@@ -214,32 +208,21 @@
 <li><p>Set up your login details, imap server and ssl:</p></li>
 </ol>
 
-<p>Edit the <code>nopriv.ini</code> file with your IMAP server, login and password:</p>
+<p>Open <code>nopriv.py</code> in a text editor and edit the following variables (example filled in for gmail):</p>
 
-<pre><code>[nopriv]
-imap_server = imap.gmail.com
-imap_user = xyz@googlemail.com
-imap_password = my_secrept_password
-imap_folder = INBOX, Draft, Newletters
-
-#optional
-ssl = true
-incremental_backup = true
+<pre><code>IMAPSERVER = &quot;imap.gmail.com&quot;
+IMAPLOGIN = &quot;janeway@gmail.com&quot;
+IMAPPASSWORD = &quot;Voyager1&quot;
+IMAPFOLDER = [&quot;[Gmail]/Sent Mail&quot;, &quot;INBOX&quot;, &quot;[Gmail]/Starred&quot;, &quot;Captains_Log&quot;, &quot;Important&quot;]
+ssl = True
+incremental_backup = True
 </code></pre>
 
-<p>If you want to use SSL to connect to IMAP, or want to use incremental backups, enable or disable the options.</p>
-
-<p><code>Nopriv.ini</code> can be in the following locations:</p>
-
-<ul>
-<li>&#39;./nopriv.ini&#39;</li>
-<li>&#39;./.nopriv.ini&#39;</li>
-<li>&#39;~/.config/nopriv.ini&#39;</li>
-<li>&#39;/opt/local/etc/nopriv.ini&#39;</li>
-<li>&#39;/etc/nopriv.ini&#39;</li>
-</ul>
+<p>(Mind the capital on ssl/incremental_backup, <code>True</code>/<code>False</code>, not <code>true</code>/<code>false</code>). </p>
 
 <p>If you use gmail and want to backup all your email, use the &quot;[Gmail]/All Mail&quot; folder. It might be named different if you use another locale, for me with a Dutch gmail account it is named &quot;[Gmail]/Alle Berichten&quot;.</p>
+
+<p>If you only want to backup one folder, use something like this: <code>IMAPFOLDER = [&quot;Folder&quot;]</code>. </p>
 
 <ol>
 <li><p>Execute the script:</p>
@@ -281,7 +264,7 @@ If you enable incremental backup, it will create a text file <code>nopriv.txt</c
 
 <h3>More Info:</h3>
 
-<p><a href="https://raymii.org/s/software/Nopriv.py.html">https://raymii.org/s/software/Nopriv.py.html</a>
+<p><a href="https://raymii.org/s/software/Nopriv.py.html">https://raymii.org/s/software/Nopriv.py.html</a><br>
 <a href="https://github.com/RaymiiOrg/NoPriv">https://github.com/RaymiiOrg/NoPriv</a></p>
 <hr>
 Tags: <a href="../tags/backup.html" class="link">backup, 
