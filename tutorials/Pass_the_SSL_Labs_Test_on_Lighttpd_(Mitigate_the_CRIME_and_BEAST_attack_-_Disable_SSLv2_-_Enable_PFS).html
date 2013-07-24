@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack, Disable SSLv2 and Enable Perfect Forward Secrecy). - Raymii.org</title>
+        <title>Pass the SSL Labs Test on Lighttpd (Mitigate the CRIME and BEAST attack, Disable SSLv2 and Enable Perfect Forward Secrecy). - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -110,24 +110,24 @@
                 <div class="inner">
 
 
-           <h2>Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack, Disable SSLv2 and Enable Perfect Forward Secrecy).</h2>
+           <h2>Pass the SSL Labs Test on Lighttpd (Mitigate the CRIME and BEAST attack, Disable SSLv2 and Enable Perfect Forward Secrecy).</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
 <li><a href="../tutorials" class="link">Tutorials</a>
 <span class="divider">/</span></li>
-<li><a href="Pass_the_SSL_Labs_Test_on_Apache2_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html" class="link">Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack, Disable SSLv2 and Enable Perfect Forward Secrecy).</a>
+<li><a href="Pass_the_SSL_Labs_Test_on_Lighttpd_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html" class="link">Pass the SSL Labs Test on Lighttpd (Mitigate the CRIME and BEAST attack, Disable SSLv2 and Enable Perfect Forward Secrecy).</a>
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 20-07-2013</h6>
+<h6>Date: 23-07-2013</h6>
 <br>
-<p><a href="https://www.ssllabs.com/ssltest/analyze.html?d=raymii.org"><img src="https://raymii.org/s/inc/img/ssl-labs-a.png" alt="A on ssl labs test" /></a></p>
+<p><a href="https://www.ssllabs.com/ssltest/analyze.html?d=raymii.org"><img src="https://raymii.org/s/inc/img/ssl-labs-lighttpd.png" alt="A on ssl labs test" /></a></p>
 
-<p>This tutorial shows you how to get an A on the <a href="https://www.ssllabs.com/ssltest/">SSL Labs test</a> using the Apache2 webserver. We do this by disabling CBC based ciphers to mitigate the BEAST attack, disabling SSL Compression to mitigate the CRIME attack, disable SSLv2 and below because of vulnerabilities in the protocol and we will enable Perfect Forward Secrecy when possible. This way we have a future proof ssl configuration and we get an A on the Qually Labs SSL Test.</p>
+<p>This tutorial shows you how to get an A on the <a href="https://www.ssllabs.com/ssltest/">SSL Labs test</a> using the lighttpd webserver. We do this by disabling CBC based ciphers to mitigate the BEAST attack, disabling SSL Compression to mitigate the CRIME attack, disable SSLv2 and below because of vulnerabilities in the protocol and we will enable Perfect Forward Secrecy when possible. This way we have a future proof ssl configuration and we get an A on the Qually Labs SSL Test.</p>
 
-<p><a href="https://raymii.org/s/tutorials/Pass_the_SSL_Labs_Test_on_NGINX_%28Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS%29.html">This tutorial is also available for NGINX</a><br>
-<a href="https://raymii.org/s/tutorials/Pass_the_SSL_Labs_Test_on_Lighttpd_%28Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS%29.html">This tutorial is also available for Lighttpd</a></p>
+<p><a href="https://raymii.org/s/tutorials/Pass_the_SSL_Labs_Test_on_Apache2_%28Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS%29.html">This tutorial is also available for Apache2</a>
+<a href="https://raymii.org/s/tutorials/Pass_the_SSL_Labs_Test_on_NGINX_%28Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS%29.html">This tutorial is also available for NGINX</a></p>
 
 <p>You can find more info on the topics by following the links below:</p>
 
@@ -140,39 +140,44 @@
 
 <p><em>Make sure you backup the files before editing them!</em></p>
 
+<p>I&#39;m using lighttpd 1.4.31 from the Debian Wheezy repositories on this website. The CentOS 5/6 EPEL versions wouldn&#39;t work for me because either lighttpd or OpenSSL being to old. Debian Squeeze also failed.</p>
+
 <h3>Mitigate the BEAST attack</h3>
 
 <p>In short, by tampering with with an encryption algorithm&#39;s CBC - cipher block chaining - mode&#39;s,  portions of the encrypted traffic can be secretly decrypted. More info on the above link.</p>
 
-<p>To mitigate it, we are going to edit the Apache settings in the file <code>/etc/apache2/mods-enabled/ssl.conf</code> (On Ubuntu/Debian) or in <code>/etc/httpd/conf.d/httpd.conf</code> (On RHEL/CentOS).</p>
+<p>To mitigate it, we are going to edit the lighttpd settings in the file <code>/etc/lighttpd/lighttpd.conf</code>.</p>
+
+<p><em>In the entire tutorial, you have to edit your SSL settings, for me that is in a <code>$SERVER[&quot;socket&quot;] == &quot;:443&quot; {</code> block. At the end of the tutorial you can find the complete config example.</em> </p>
 
 <p>What we need to do is disable all CBC ciphers. If you have a version of OpenSSL lower than 1.0.1c then your only option is to use the RC4 cipher because TLS 1.2 support is added in 1.0.1c, but the RC4 cipher also has known weaknesses in it.</p>
 
-<p>The lines below first have TLS 1.2 ciphers for TLS 1.2 clients to pick those up, and at the end it has the RC4 cipher. It also enables the <code>HonorcipherOrder</code> option which uses the servers order of ciphers instead of letting the client choose. (<a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslhonorcipherorder">More on HonorcipherOrder</a> - <a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslciphersuite">More info on SSLcipherSuite</a>.</p>
+<p>The lines below first have TLS 1.2 ciphers for TLS 1.2 clients to pick those up, and at the end it has the RC4 cipher. It also enables the <code>ssl_prefer_server_ciphers</code> option which uses the servers order of ciphers instead of letting the client choose. (<a href="http://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_SSL">Lighttpd SSL Docs</a> - <a href="http://redmine.lighttpd.net/issues/2364">The bugfix/patch for ssl.honor-cipher-order</a>.</p>
 
-<pre><code>SSLHonorCipherOrder On
-SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-RC4-SHA:ECDHE-RSA-RC4-SHA:ECDH-ECDSA-RC4-SHA:ECDH-RSA-RC4-SHA:ECDHE-RSA-AES256-SHA:RC4-SHA:!MD5:!aNULL:!EDH
+<pre><code>ssl.honor-cipher-order = &quot;enable&quot;
+ssl.cipher-list = &quot;ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-RC4-SHA:ECDHE-RSA-RC4-SHA:ECDH-ECDSA-RC4-SHA:ECDH-RSA-RC4-SHA:ECDHE-RSA-AES256-SHA:RC4-SHA&quot;
 </code></pre>
-
-<p>If you run an Apache and OpenSSL Version that do not support TLS 1.2 you can also use this config because it will then only use the RC4 cipher.</p>
 
 <h3>Mitigate the CRIME attack</h3>
 
-<p>The CRIME attack uses SSL Compression to do its magic, so we need to disable that. On Apache 2.2.24+ we can add the following line to the SSL config file we also edited above:</p>
+<p>The CRIME attack uses SSL Compression to do its magic, so we need to disable that. The following option disables SSL compression:</p>
 
-<pre><code>SSLCompression off
+<pre><code>ssl.use-compression = &quot;disable&quot;
 </code></pre>
 
-<p>If you are using al earlier version of Apache and your distro has not backported this option then you need to recompile OpenSSL without ZLIB support. This will disable the use of OpenSSL using the DEFLATE compression method. If you do this then you can still use regular HTML DEFLATE compression.</p>
+<p>By default lighttpd disables SSL compression at compile time. If you find it to be enabled, either use the above option, or recompile OpenSSL without ZLIB support. This will disable the use of OpenSSL using the DEFLATE compression method. If you do this then you can still use regular HTML DEFLATE compression.</p>
 
 <h3>Disable SSLv2</h3>
 
 <p>SSL v2 is insecure, so we need to disable it. Again edit the config file:</p>
 
-<pre><code>SSLProtocol All -SSLv2
+<pre><code>ssl.use-sslv2 = &quot;disable&quot;
 </code></pre>
 
-<p>All is a shortcut for <code>+SSLv2 +SSLv3 +TLSv1</code> or - when using OpenSSL 1.0.1 and later - <code>+SSLv2 +SSLv3 +TLSv1 +TLSv1.1 +TLSv1.2</code>, respectively. The above line enables everything except SSLv2. <a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslprotocol">More Info</a></p>
+<p>If you want, you can also disable SSLv3, but that might break compatibility with some browsers.</p>
+
+<pre><code>ssl.use-sslv3 = &quot;disable&quot;
+</code></pre>
 
 <h3>Enable Forward Secrecy</h3>
 
@@ -184,28 +189,38 @@ SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-E
 
 <p>Do note that for PFS support and mitigating the BEAST attack TLS v1.2 is required. I&#39;ve also included a config line which gives you PFS but lets you vulnerable for the BEAST attack, but that is your only option on &lt; TLS v1.2.</p>
 
-<p>The above config line <code>SSLCipherSuite</code> in the <em>Beast Attack</em> section, is the most workable line for now. It enables a few forward secrecy ciphers, but it also allows RC4 (non-cbc). <em>You should use this line if you want to mititgate the BEAST attack and offer forward secrecy</em>:</p>
+<p>The above config line <code>ssl_ciphers</code> in the <em>Beast Attack</em> section, is the most workable line for now. It enables a few forward secrecy ciphers, but it also allows RC4 (non-cbc). <em>You should use this line if you want to mititgate the BEAST attack and offer forward secrecy</em>:</p>
 
-<pre><code>SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-RC4-SHA:ECDHE-RSA-RC4-SHA:ECDH-ECDSA-RC4-SHA:ECDH-RSA-RC4-SHA:ECDHE-RSA-AES256-SHA:RC4-SHA:!MD5:!aNULL:!EDH
+<pre><code>ssl.cipher-list = &quot;ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-RC4-SHA:ECDHE-RSA-RC4-SHA:ECDH-ECDSA-RC4-SHA:ECDH-RSA-RC4-SHA:ECDHE-RSA-AES256-SHA:RC4-SHA&quot;
 </code></pre>
 
-<p>If you really need forward secrecy and want to accept the rist of being vulnerable to the BEAST attack, use this line:</p>
+<p>If you really need forward secrecy, don&#39;t have TLS 1.2 and want to accept the rist of being vulnerable to the BEAST attack, use this line:</p>
 
-<pre><code>SSLCipherSuite ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:EDH-DSS-DES-CBC3-SHA:!MD5:!aNULL:!EDH
+<pre><code>ssl.cipher-list = &quot;ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:EDH-DSS-DES-CBC3-SHA:!MD5:!aNULL:!EDH&quot;
+</code></pre>
+
+<h3>Config Example</h3>
+
+<pre><code>var.confdir = &quot;/etc/ssl/certs&quot;
+$SERVER[&quot;socket&quot;] == &quot;:443&quot; {
+  ssl.engine = &quot;enable&quot;
+  ssl.pemfile = var.confdir + &quot;/example.org.pem&quot;
+  ssl.ca-file = var.confdir + &quot;/example.org.bundle.crt&quot;
+  server.name = var.confdir + &quot;/example.org&quot;
+  server.document-root = &quot;/srv/html&quot;
+  ssl.use-sslv2 = &quot;disable&quot;
+  ssl.use-sslv3 = &quot;disable&quot;
+  ssl.use-compression = &quot;disable&quot;
+  ssl.honor-cipher-order = &quot;enable&quot;
+  ssl.cipher-list = &quot;ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-RC4-SHA:ECDHE-RSA-RC4-SHA:ECDH-ECDSA-RC4-SHA:ECDH-RSA-RC4-SHA:ECDHE-RSA-AES256-SHA:RC4-SHA&quot;
+}
 </code></pre>
 
 <h3>Conclusion</h3>
 
-<p>If you have applied the above config lines you need to restart apache:</p>
+<p>If you have applied the above config lines you need to restart lighttpd:</p>
 
-<pre><code># Check the config first:
-apache2ctl -t
-# Then restart:
-/etc/init.d/apache2 restart
-
-# If you are on RHEL/CentOS:
-apachectl -t
-/etc/init.d/httpd restart
+<pre><code>/etc/init.d/lighttpd restart
 </code></pre>
 
 <p>Now use the <a href="https://www.ssllabs.com/ssltest/">SSL Labs test</a> to see if you get a nice A. And of course have a safe and future proof SSL configuration!</p>
@@ -218,9 +233,7 @@ Tags: <a href="../tags/BEAST.html" class="link">BEAST,
 </a>
 <a href="../tags/RC4.html" class="link">RC4, 
 </a>
-<a href="../tags/apache.html" class="link">apache, 
-</a>
-<a href="../tags/featured-one.html" class="link">featured-one, 
+<a href="../tags/lighttpd.html" class="link">lighttpd, 
 </a>
 <a href="../tags/pfs.html" class="link">pfs, 
 </a>
