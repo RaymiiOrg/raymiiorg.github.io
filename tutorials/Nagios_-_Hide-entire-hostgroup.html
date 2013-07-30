@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>monitoring - Raymii.org</title>
+        <title>Nagios - Hide all hosts in hostgroup - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -110,29 +110,86 @@
                 <div class="inner">
 
 
-           <h2>Tag monitoring</h2><ul class="breadcrumb">
+           <h2>Nagios - Hide all hosts in hostgroup</h2>
+<ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <span class="divider">/</span></li>
-<li><a href="../tags" class="link">Tags</a>
+<li><a href="../tutorials" class="link">Tutorials</a>
 <span class="divider">/</span></li>
-<li><a href="monitoring.html" class="link">monitoring</a>
+<li><a href="Nagios_-_Hide-entire-hostgroup.html" class="link">Nagios - Hide all hosts in hostgroup</a>
 </li>
 </ul>
-<li><a href="../software/Bash_PHP_Server_Status_Monitor.html" class="link">Ray-Mon - PHP/Bash server status monitoring</a>
-</li><li><a href="../tutorials/Collectd_client_setup_tutorial.html" class="link">Set up a Collectd client</a>
-</li><li><a href="../tutorials/Collectd_server_setup_tutorial_with_web_frontend.html" class="link">Set up a Collectd server with web frontend</a>
-</li><li><a href="../snippets/Munin-Fix-MySQL-Plugin-on-Ubuntu-12.04.html" class="link">Munin - Fix MySQL plugin on Ubuntu 12.04 and Debian 6</a>
-</li><li><a href="../snippets/Munin-NGINX-Status-Plugin-Ubuntu-12.04.html" class="link">Munin - Set up the NGINX status plugin on Ubuntu 12.04</a>
-</li><li><a href="../tutorials/Munin_optimalization_on_Debian.html" class="link">Munin optimalization guide for Debian (rrdcached, tmpfs, ionice and nice)</a>
-</li><li><a href="../software/Munin_plugin_Logstash_Kibana_messages_per_hour.html" class="link">Munin plugin to show Logstash/Kibana messages per hour</a>
-</li><li><a href="../tutorials/Nagios_-_Hide-entire-hostgroup.html" class="link">Nagios - Hide all hosts in hostgroup</a>
-</li><li><a href="../software/Nagios_Plugin_to_check_a_Safenet_HSM.html" class="link">Nagios plugin to check Safenet HSM</a>
-</li><li><a href="../software/Nagios_check_local_certificate_files.html" class="link">Nagios plugin to check certificates on local file system</a>
-</li><li><a href="../software/Nagios_plugin_to_check_CRL_expiry.html" class="link">Nagios plugin to check CRL expiry in minutes</a>
-</li><li><a href="../software/Nagios_plugin_to_check_OCSP.html" class="link">Nagios plugin to check an OCSP server</a>
-</li><li><a href="../software/Python-script-to-monitor-a-file-for-changes-and-then-mail-the-report-with-the-file-attached.html" class="link">Python script to monitor a file for changes and then mail the report with the file attached.</a>
-</li><li><a href="../tutorials/Setting-up-motion-with-ftp-and-email-support.html" class="link">Setting up Motion with FTP and Email! support</a>
-</li></ul><div class="footer">
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 30-07-2013</h6>
+<br>
+<p>This tutorial shows you how to hide all hosts from a hostgroup in Nagios, including the webinterface and email/sms notifications. It does however monitors and checks all the hosts in the hostgroup, so when there are problems you can view the hosts in Nagios. This is usefull for example when you have a staging, preproduction and production environment monitored by the same Nagios host, or by a Nagios cluster, and want to hide all of staging, but do want to quickly view the status when developers complain about a node.</p>
+
+<p>First you needble all notifications for the hostgroup of choice, in my case &quot;staging&quot;. Navigate in the Web interface to the Hostgroup Overview, Click on the second hostgroup link (like: staging <em>(staging)</em> ) and then select &quot;Disable notifications for all services in this hostgroup&quot;. On the next page, select the checkbox &quot;Disable for hosts too&quot; and click Commit. You could also go to the following url, replacing the values for your environment: <code>http(s)://&lt;nagios-url.tld&gt;/&lt;cgi-folder&gt;/cmd.cgi?cmd_typ=64&amp;hostgroup=&lt;hostgroup-name&gt;</code>.</p>
+
+<p>Now navigate to the following page, again replacing the values for your environment: <code>http(s)://&lt;nagios-url.tld&gt;/&lt;cgi-folder&gt;/status.cgi?host=all&amp;type=detail&amp;servicestatustypes=28&amp;serviceprops=8202</code>. This will open the view for the Service Status, with the properties <code>Not In Scheduled Downtime &amp; Has Not Been Acknowledged &amp; Notifications Enabled</code>. There are all your notifications, but not from the &quot;hidden&quot; hostgroup.</p>
+
+<p>You can also change the HTML files (index.html or side.html) to either change the frame to go directly to this page, or add a link in the menu to this page.</p>
+
+<h3>URL Properties</h3>
+
+<p>You can fiddle with the Nagios URL properties, below are the values you can use, which you can also find in the Nagios Source Code, in <code>include/cgiutils.h</code>.</p>
+
+<pre><code>/****************** HOST AND SERVICE FILTER PROPERTIES  *******************/
+
+#define HOST_SCHEDULED_DOWNTIME         1
+#define HOST_NO_SCHEDULED_DOWNTIME      2
+#define HOST_STATE_ACKNOWLEDGED         4
+#define HOST_STATE_UNACKNOWLEDGED       8
+#define HOST_CHECKS_DISABLED            16
+#define HOST_CHECKS_ENABLED             32
+#define HOST_EVENT_HANDLER_DISABLED     64
+#define HOST_EVENT_HANDLER_ENABLED      128
+#define HOST_FLAP_DETECTION_DISABLED    256
+#define HOST_FLAP_DETECTION_ENABLED     512
+#define HOST_IS_FLAPPING                1024
+#define HOST_IS_NOT_FLAPPING            2048
+#define HOST_NOTIFICATIONS_DISABLED     4096
+#define HOST_NOTIFICATIONS_ENABLED      8192
+#define HOST_PASSIVE_CHECKS_DISABLED    16384
+#define HOST_PASSIVE_CHECKS_ENABLED     32768
+#define HOST_PASSIVE_CHECK              65536
+#define HOST_ACTIVE_CHECK               131072
+
+
+#define SERVICE_SCHEDULED_DOWNTIME      1
+#define SERVICE_NO_SCHEDULED_DOWNTIME   2
+#define SERVICE_STATE_ACKNOWLEDGED      4
+#define SERVICE_STATE_UNACKNOWLEDGED    8
+#define SERVICE_CHECKS_DISABLED         16
+#define SERVICE_CHECKS_ENABLED          32
+#define SERVICE_EVENT_HANDLER_DISABLED  64
+#define SERVICE_EVENT_HANDLER_ENABLED   128
+#define SERVICE_FLAP_DETECTION_ENABLED  256
+#define SERVICE_FLAP_DETECTION_DISABLED 512
+#define SERVICE_IS_FLAPPING             1024
+#define SERVICE_IS_NOT_FLAPPING         2048
+#define SERVICE_NOTIFICATIONS_DISABLED  4096
+#define SERVICE_NOTIFICATIONS_ENABLED   8192
+#define SERVICE_PASSIVE_CHECKS_DISABLED 16384
+#define SERVICE_PASSIVE_CHECKS_ENABLED  32768
+#define SERVICE_PASSIVE_CHECK           65536
+#define SERVICE_ACTIVE_CHECK            131072
+</code></pre>
+
+<p>In our example above we added the 8192 with 8 and 2 to get 8202, so we have selected <code>SERVICE_NOTIFICATIONS_ENABLED</code>, <code>SERVICE_STATE_UNACKNOWLEDGED</code> and <code>SERVICE_NO_SCHEDULED_DOWNTIME</code>. </p>
+<hr>
+Tags: <a href="../tags/DTAP.html" class="link">DTAP, 
+</a>
+<a href="../tags/monitoring.html" class="link">monitoring, 
+</a>
+<a href="../tags/nagios.html" class="link">nagios, 
+</a>
+<a href="../tags/staging.html" class="link">staging, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+        
                 <hr>
 
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
