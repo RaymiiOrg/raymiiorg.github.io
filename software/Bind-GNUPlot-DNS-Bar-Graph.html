@@ -160,6 +160,14 @@
      };
 </code></pre>
 
+<p>Don&#39;t forget to create the <code>/var/log/named</code> folder:</p>
+
+<pre><code>mkdir /var/log/named
+chown bind:bind /var/log/named
+</code></pre>
+
+<p>Why <code>/var/log/named</code>? Because AppArmor on Ubuntu allows bind to write to this path, and I don&#39;t like messing with either AppArmor or SELinux.</p>
+
 <h3>Bind log parsing</h3>
 
 <p>Use the following command line to get the 20 most queries domains</p>
@@ -180,7 +188,19 @@
 <pre><code>gnuplot &lt; plot.gplt
 </code></pre>
 
-<p>And there you go.</p>
+<p>And there you go. This is the GNUPlot script if you don&#39;t want to check out the repo.</p>
+
+<pre><code>set term png truecolor size 800,600
+set output &quot;data.png&quot;
+set xlabel &quot;Domains&quot;
+set ylabel &quot;Queries&quot;
+set title &quot;DNS Usage&quot;
+set grid
+set xtics rotate by -45 axis out offset 0,1.5
+set boxwidth 1 relative
+set style fill transparent solid 0.5 border rgb&quot;black&quot;
+plot &quot;dns-data&quot; u 1:xtic(2) w boxes lc rgb&quot;blue&quot;
+</code></pre>
 
 <p>Because GNUplot has no easy support for horizotal bar graphs, if you want it horizontal, rotate it with Imagemagick:</p>
 
@@ -192,9 +212,27 @@
 <h3>Links</h3>
 
 <ul>
-<li>Raymii.org: https://raymii.org/s/software/Bind-GNUPlot-DNS-Bar-Graph.html</li>
-<li>Github: https://github.com/RaymiiOrg/bind-gnuplot-reports</li>
+<li><a href="https://raymii.org/s/software/Bind-GNUPlot-DNS-Bar-Graph.html">Raymii.org</a></li>
+<li><a href="https://github.com/RaymiiOrg/bind-gnuplot-reports">Github</a></li>
 </ul>
+
+<h3>License</h3>
+
+<pre><code>Copyright (C) 2013 Remy van Elst
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+</code></pre>
 <hr>
 Tags: <a href="../tags/bind.html" class="link">bind, 
 </a>
