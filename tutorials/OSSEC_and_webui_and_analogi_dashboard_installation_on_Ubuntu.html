@@ -1,32 +1,245 @@
-<!DOCTYPE html><html lang="en"><head><title>OSSEC Server, Client, Web UI and Analogi Dashboard Installation tutorial - Raymii.org</title><link href="/s/inc/css/bootstrap.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet"/><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><meta content="IE=edge" http-equiv="X-UA-Compatible"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="Raymii.org RSS" type="application/rss+xml"/></head><body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-10 col-md-offset-1"><div class="col-md-3 well"> <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org</a></h3><h6>Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><div class="col-md-4 green-block"><h3>Featured Items</h3><a class="whitelink" href="/s/tutorials/Ansible_Deployment_Framework.html">Ansible Deployment Framework</a> <br/><a class="whitelink" href="/s/tutorials/Pass_the_SSL_Labs_Test_on_Apache2_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html">Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack Disable SSLv2 Enable PFS)</a> <br/><a class="whitelink" href="/s/articles/Small_Linux_PCs.html">Small Linux PCs</a> <br/><a class="whitelink" href="/s/tutorials/VMWare-ESXi-5-USB-installer.html">VMWare ESXi 5 USB installer</a> <br/></div><div class="col-md-4 green-block"><h3>Featured Items</h3><a class="whitelink" href="/s/software/Bash_PHP_Server_Status_Monitor.html">Bash PHP Server Status Monitor</a> <br/><a class="whitelink" href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html">IPSEC L2TP vpn with Ubuntu 12.04</a> <br/><a class="whitelink" href="/s/software/Nopriv-IMAP-backup.html">Nopriv IMAP backup</a> <br/><a class="whitelink" href="/s/tutorials/Pass_the_SSL_Labs_Test_on_NGINX_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html">Pass the SSL Labs Test on NGINX (Mitigate the CRIME and BEAST attack Disable SSLv2 Enable PFS)</a> <br/></div></div></div><div class="row-fluid"><div class="col-md-11 col-md-offset-1"><div class="col-md-3"><h3>Menu</h3><ul class="nav nav-pills nav-stacked"><li><a class="link" href="/s/">Home</a> </li><li><a class="link" href="/s/static/Contact.html">Contact</a> </li><li><a class="link" href="/s/static/Disclaimer.html">Disclaimer</a> </li><li><a class="link" href="/s/static/Hosted_Piwik.html">Hosted Piwik</a> </li><li><a class="link" href="/s/static/Sparkling_Network.html">Sparkling Network</a> </li><li><a class="link" href="/s/static/Terrible-Linux.html">Terrible Linux</a> </li></ul><h3>Categories</h3><ul class="nav nav-pills nav-stacked"><li><a class="link" href="/s/articles">Articles</a> </li><li><a class="link" href="/s/snippets">Snippets</a> </li><li><a class="link" href="/s/software">Software</a> </li><li><a class="link" href="/s/tutorials">Tutorials</a> </li><li><a class="link" href="/s/everything.html">All Items</a></li><a class="link" href="/s/everything.html"></a> </ul><hr class="alt2"/><h3>Donate</h3><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p><script id="flattrbtn">(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=Remy&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('flattrbtn');</script><br/></p><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input name="cmd" type="hidden" value="_s-xclick"/><input name="encrypted" type="hidden" value="-----BEGIN PKCS7-----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-----END PKCS7-----"/><input alt="PayPal - The safer, easier way to pay online!" border="0" name="submit" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" type="image"/><img alt="" border="0" height="1" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1"/></form><script type="text/javascript"><!--
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>OSSEC Server, Client, Web UI and Analogi Dashboard Installation tutorial - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
+
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="col-md-3 well"> 
+                <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org</a></h3>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
+            
+            </div>
+
+            <div class="col-md-4 green-block">
+                
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible_Deployment_Framework.html" class="whitelink">Ansible Deployment Framework</a>
+<br />
+<a href="/s/tutorials/Pass_the_SSL_Labs_Test_on_Apache2_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html" class="whitelink">Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack   Disable SSLv2   Enable PFS)</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+<a href="/s/tutorials/VMWare-ESXi-5-USB-installer.html" class="whitelink">VMWare ESXi 5 USB installer</a>
+<br />
+
+            
+        </div>
+        <div class="col-md-4 green-block">
+            
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/Nopriv-IMAP-backup.html" class="whitelink">Nopriv IMAP backup</a>
+<br />
+<a href="/s/tutorials/Pass_the_SSL_Labs_Test_on_NGINX_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html" class="whitelink">Pass the SSL Labs Test on NGINX (Mitigate the CRIME and BEAST attack   Disable SSLv2   Enable PFS)</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="col-md-11 col-md-offset-1">
+    
+
+    <div class="col-md-3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Contact.html" class="link">Contact</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Hosted_Piwik.html" class="link">Hosted Piwik</a>
+</li>
+<li><a href="/s/static/Sparkling_Network.html" class="link">Sparkling Network</a>
+</li>
+<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+<li><a href="/s/everything.html" class="link">All Items</li>
+</a>
+</ul>
+               <!-- advertisement start -->
+                <hr class="alt2">
+                <h3>Donate</h3>
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p />
+                <script id='flattrbtn'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=Remy&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('flattrbtn');</script><br />
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                <input type="hidden" name="cmd" value="_s-xclick">
+                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----MIIHLwYJKoZIhvcNAQcEoIIHIDCCBxwCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYB1lOyoMm13xLpyJ06VTAajIRPFl46+yfqSnLQLu1lFfVKmhLtM0Ql+JSnH+LzVuhHLTzXegaPClXjMvhTpp0byApM4YlCi1czJKxBGb2+qw6il53H1g7L1qlfm95Jd80s80C9r+b3ituTXuYhb4Eb7PQ6Cyy6ca9raUgYVv90pETELMAkGBSsOAwIaBQAwgawGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIS23AJUhGuB6AgYhcWUVn4DMqTx2Ai2Ql9TQjkiAC3tXScmjpq/10b0P6DTIIg5OSPIly9C2gLMEcMCZ8aNuLT3kp+2Hn+nDuzsdY/4QU8zOFC4STyDrAn1gqe8q4pPGADqE0KUiWRAJR8eTx9paclkiaxDicr3D0uF409IRLIe/v1S6ZV9JOlQk5Xys9cRfAuhTioIIDhzCCA4MwggLsoAMCAQICAQAwDQYJKoZIhvcNAQEFBQAwgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMB4XDTA0MDIxMzEwMTMxNVoXDTM1MDIxMzEwMTMxNVowgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBR07d/ETMS1ycjtkpkvjXZe9k+6CieLuLsPumsJ7QC1odNz3sJiCbs2wC0nLE0uLGaEtXynIgRqIddYCHx88pb5HTXv4SZeuv0Rqq4+axW9PLAAATU8w04qqjaSXgbGLP3NmohqM6bV9kZZwZLR/klDaQGo1u9uDb9lr4Yn+rBQIDAQABo4HuMIHrMB0GA1UdDgQWBBSWn3y7xm8XvVk/UtcKG+wQ1mSUazCBuwYDVR0jBIGzMIGwgBSWn3y7xm8XvVk/UtcKG+wQ1mSUa6GBlKSBkTCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb22CAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOBgQCBXzpWmoBa5e9fo6ujionW1hUhPkOBakTr3YCDjbYfvJEiv/2P+IobhOGJr85+XHhN0v4gUkEDI8r2/rNk1m0GA8HKddvTjyGw/XqXa+LSTlDYkqI8OwR8GEYj4efEtcRpRYBxV8KxAW93YDWzFGvruKnnLbDAF6VR5w/cCMn5hzGCAZowggGWAgEBMIGUMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNvbQIBADAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTMwODAzMTQxNTQ2WjAjBgkqhkiG9w0BCQQxFgQUhdv5C5Xqr+zLV4qAlrYYqFV/fgYwDQYJKoZIhvcNAQEBBQAEgYBaGzom1dMP+CEmGQIZfP6ynZyRIc+4uQuvKoeRlkHwOj9F4c8QqXwBq/fyMogtZ/iES1oTifarxzQ3gesy/dSSs+IxG6YLICQXsAWNVnYL7u9of1xcCyJh3QoH/elgrjdHw0KCeBWNZPlbzEKSwTJ08yBsuKFR8zSqz8pIjC6XrQ==-----END PKCS7-----
+                ">
+                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                <img alt="" border="0" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
+                </form>
+                <script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 /* Raymii-2 */
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script><script src="http://pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
-                </script></div> <div class="col-md-7"> <div class="inner"><h2>OSSEC Server, Client, Web UI and Analogi Dashboard Installation tutorial</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a> <col-md- class="divider">/</col-md-></li><li><a class="link" href="../tutorials">Tutorials</a> <col-md- class="divider">/</col-md-></li><li><a class="link" href="OSSEC_and_webui_and_analogi_dashboard_installation_on_Ubuntu.html">OSSEC Server, Client, Web UI and Analogi Dashboard Installation tutorial</a> </li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 07-09-2013</h6><br/><p>OSSEC is an Open Source Host-based Intrusion Detection System that performs log analysis, file integrity checking, policy monitoring, rootkit detection, real-time alerting and active response. It runs on most operating systems, including Linux, MacOS, Solaris, HP-UX, AIX and Windows. It also includes agentless monitoring for use with for example Cisco or Juniper hardware.</p><p>This tutorial covers the installation of the OSSEC server, the standard OSSEC Web UI and the Analogi dashboard on Ubuntu 12.04. It also covers OSSEC setup with MySQL support, including a Makefile bugfix. Last but not least it shows you how to install the OSSEC agent on a *NIX system.</p><p><a href="https://raymii.org/s/inc/img/ossec/analogi.png"><img alt="OSSEC Analogi dashboard" height="240" src="https://raymii.org/s/inc/img/ossec/analogi.png" width="320"/></a></p><p>This tutorial is written for an ubuntu 12.04 OSSEC server, but can be easily adapted to other *NIX operating systems. It only covers basic OSSEC client/server configuration, not automatic blocking or comprehensive configuration settings. It gets you started, the rest is available in the documentation: http://www.ossec.net/doc/</p><h3>Steps</h3><ul><li>Installing development packages</li><li>Installing Apache, PHP and MySQL</li><li>Configuring MySQL</li><li>Compiling the OSSEC server<ul><li>Makefile fix for Ubuntu</li></ul></li><li>Basic OSSEC setup with MySQL</li><li>Installing OSSEC Web UI</li><li><p>Installing Analogi Web Dashboard</p></li><li><p>Installing and configuring a client</p></li></ul><h3>Requirements</h3><ul><li>An Ubuntu 12.04 server</li><li>Apache2, PHP, MySQL and development packages</li><li>OSSEC clients to monitor (*NIX or Windows machines, Cisco switches etc).</li></ul><h3>Installing development packages</h3><p>OSSEC is installed from source, therefore you need development packages. This is both for the OSSEC clients as for the OSSEC server:</p><pre><code>apt-get install build-essential make libssl-dev
-</code></pre><h3>Installing Apache, MySQL and PHP</h3><p>This is fairly simple on Ubuntu. It is all covered with apt:</p><pre><code>apt-get install mysql-server libmysqlclient-dev mysql-client apache2 php5 libapache2-mod-php5 php5-mysql php5-curl php5-gd php5-intl php-pear php5-imagick php5-imap php5-mcrypt php5-memcache php5-ming php5-ps php5-pspell php5-recode php5-snmp php5-sqlite php5-tidy php5-xmlrpc php5-xsl
-</code></pre><p>Remember to give a strong root password for MySQL. Next finish MySQL with a secure installation:</p><pre><code>mysql_secure_installation
-</code></pre><p>Accept all the suggested options. Now restart all requires services:</p><pre><code>/etc/init.d/apache2 restart
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+
+           </div>  
+           <div class="col-md-7"> 
+                <div class="inner">
+
+
+           <h2>OSSEC Server, Client, Web UI and Analogi Dashboard Installation tutorial</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<col-md- class="divider">/</col-md-></li>
+<li><a href="../tutorials" class="link">Tutorials</a>
+<col-md- class="divider">/</col-md-></li>
+<li><a href="OSSEC_and_webui_and_analogi_dashboard_installation_on_Ubuntu.html" class="link">OSSEC Server, Client, Web UI and Analogi Dashboard Installation tutorial</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 07-09-2013</h6>
+<br>
+<p>OSSEC is an Open Source Host-based Intrusion Detection System that performs log analysis, file integrity checking, policy monitoring, rootkit detection, real-time alerting and active response. It runs on most operating systems, including Linux, MacOS, Solaris, HP-UX, AIX and Windows. It also includes agentless monitoring for use with for example Cisco or Juniper hardware.</p>
+
+<p>This tutorial covers the installation of the OSSEC server, the standard OSSEC Web UI and the Analogi dashboard on Ubuntu 12.04. It also covers OSSEC setup with MySQL support, including a Makefile bugfix. Last but not least it shows you how to install the OSSEC agent on a *NIX system.</p>
+
+<p><a href="https://raymii.org/s/inc/img/ossec/analogi.png"><img src="https://raymii.org/s/inc/img/ossec/analogi.png" width="320" height="240" alt="OSSEC Analogi dashboard" /></a></p>
+
+<p>This tutorial is written for an ubuntu 12.04 OSSEC server, but can be easily adapted to other *NIX operating systems. It only covers basic OSSEC client/server configuration, not automatic blocking or comprehensive configuration settings. It gets you started, the rest is available in the documentation: http://www.ossec.net/doc/</p>
+
+<h3>Steps</h3>
+
+<ul>
+<li>Installing development packages</li>
+<li>Installing Apache, PHP and MySQL</li>
+<li>Configuring MySQL</li>
+<li>Compiling the OSSEC server
+
+<ul>
+<li>Makefile fix for Ubuntu</li>
+</ul></li>
+<li>Basic OSSEC setup with MySQL</li>
+<li>Installing OSSEC Web UI</li>
+<li><p>Installing Analogi Web Dashboard</p></li>
+<li><p>Installing and configuring a client</p></li>
+</ul>
+
+<h3>Requirements</h3>
+
+<ul>
+<li>An Ubuntu 12.04 server</li>
+<li>Apache2, PHP, MySQL and development packages</li>
+<li>OSSEC clients to monitor (*NIX or Windows machines, Cisco switches etc).</li>
+</ul>
+
+<h3>Installing development packages</h3>
+
+<p>OSSEC is installed from source, therefore you need development packages. This is both for the OSSEC clients as for the OSSEC server:</p>
+
+<pre><code>apt-get install build-essential make libssl-dev
+</code></pre>
+
+<h3>Installing Apache, MySQL and PHP</h3>
+
+<p>This is fairly simple on Ubuntu. It is all covered with apt:</p>
+
+<pre><code>apt-get install mysql-server libmysqlclient-dev mysql-client apache2 php5 libapache2-mod-php5 php5-mysql php5-curl php5-gd php5-intl php-pear php5-imagick php5-imap php5-mcrypt php5-memcache php5-ming php5-ps php5-pspell php5-recode php5-snmp php5-sqlite php5-tidy php5-xmlrpc php5-xsl
+</code></pre>
+
+<p>Remember to give a strong root password for MySQL. Next finish MySQL with a secure installation:</p>
+
+<pre><code>mysql_secure_installation
+</code></pre>
+
+<p>Accept all the suggested options. Now restart all requires services:</p>
+
+<pre><code>/etc/init.d/apache2 restart
 /etc/init.d/mysqld restart
-</code></pre><h3>Compiling the OSSEC server</h3><p>Download and verify OSSEC, either via wget or from the website: http://www.ossec.net/?page_id=19</p><pre><code>wget http://www.ossec.net/files/ossec-hids-2.7.tar.gz
+</code></pre>
+
+<h3>Compiling the OSSEC server</h3>
+
+<p>Download and verify OSSEC, either via wget or from the website: http://www.ossec.net/?page_id=19</p>
+
+<pre><code>wget http://www.ossec.net/files/ossec-hids-2.7.tar.gz
 
 md5sum ossec-hids-2.7.tar.gz
 ossec-hids-2.7.tar.gz: 71cd21a20f22b8eafffa3b57250f0a70
-</code></pre><p>From the OSSEC website:</p><pre><code>MD5(ossec-hids-2.7.tar.gz)= 71cd21a20f22b8eafffa3b57250f0a70
+</code></pre>
+
+<p>From the OSSEC website:</p>
+
+<pre><code>MD5(ossec-hids-2.7.tar.gz)= 71cd21a20f22b8eafffa3b57250f0a70
 SHA1(ossec-hids-2.7.tar.gz)= 721aa7649d5c1e37007b95a89e685af41a39da43
-</code></pre><p>If it is correct, then extract it:</p><pre><code>tar -xf ossec-hids-2.7.tar.gz
+</code></pre>
+
+<p>If it is correct, then extract it:</p>
+
+<pre><code>tar -xf ossec-hids-2.7.tar.gz
 cd ossec-hids-2.7
-</code></pre><p>We first need to fix MySQL support in the installation. Read on:</p><h4>Makefile fix for Ubuntu</h4><p>Because of some Ubuntu specific errors in compiling with MySQL support we need to edit the MySQL Makefile:</p><pre><code>cd src
+</code></pre>
+
+<p>We first need to fix MySQL support in the installation. Read on:</p>
+
+<h4>Makefile fix for Ubuntu</h4>
+
+<p>Because of some Ubuntu specific errors in compiling with MySQL support we need to edit the MySQL Makefile:</p>
+
+<pre><code>cd src
 vim os_dbd/Makefile
-</code></pre><p>Change this line:</p><pre><code>${CC} ${CFLAGS} ${OS_LINK} ${DBFLAGS} ${CDB} ${LOCAL} ${OBJS} -o ${NAME}
-</code></pre><p>To this:</p><pre><code> ${CC} ${CFLAGS} ${OS_LINK} ${DBFLAGS} ${LOCAL} ${OBJS} -o ${NAME} ${CDB}
-</code></pre><p>This is only needed in Ubuntu, Debian works fine.</p><p>Run:</p><pre><code>make setdb
+</code></pre>
+
+<p>Change this line:</p>
+
+<pre><code>${CC} ${CFLAGS} ${OS_LINK} ${DBFLAGS} ${CDB} ${LOCAL} ${OBJS} -o ${NAME}
+</code></pre>
+
+<p>To this:</p>
+
+<pre><code> ${CC} ${CFLAGS} ${OS_LINK} ${DBFLAGS} ${LOCAL} ${OBJS} -o ${NAME} ${CDB}
+</code></pre>
+
+<p>This is only needed in Ubuntu, Debian works fine.</p>
+
+<p>Run:</p>
+
+<pre><code>make setdb
 Error: PostgreSQL client libraries not installed.
 Info: Compiled with MySQL support.
-</code></pre><p>Continue with the compilation/installation:</p><pre><code>cd ../
+</code></pre>
+
+<p>Continue with the compilation/installation:</p>
+
+<pre><code>cd ../
 ./install.sh
 
   ** For installation in English, choose [en].
@@ -50,7 +263,7 @@ Info: Compiled with MySQL support.
 
 3- Configuring the OSSEC HIDS.
   3.1- Do you want e-mail notification? (y/n) [y]:
-   - What's your e-mail address? ossec@example.org
+   - What&#39;s your e-mail address? ossec@example.org
    - We found your SMTP server as: mail.raymii.org.
    - Do you want to use it? (y/n) [y]: y
    --- Using SMTP server:  mail.raymii.org.
@@ -81,7 +294,7 @@ Info: Compiled with MySQL support.
      also add them to block on snort events, for example.
 
    - Do you want to enable the firewall-drop response? (y/n) [y]:
-     - firewall-drop enabled (local) for levels >= 6
+     - firewall-drop enabled (local) for levels &gt;= 6
 
    - Default white list for the active response:
       - 205.185.112.68
@@ -172,53 +385,111 @@ INFO: Little endian set.
     ---  Press ENTER to finish (maybe more information below). ---
 
  - In order to connect agent and server, you need to add each agent to the server.
-   Run the 'manage_agents' to add or remove them:
+   Run the &#39;manage_agents&#39; to add or remove them:
 
    /var/ossec/bin/manage_agents
 
    More information at:
    http://www.ossec.net/en/manual.html#ma
-</code></pre><p>OSSEC is now installed. Restart it:</p><pre><code>/var/ossec/bin/ossec-control restart
-</code></pre><p>Continue to the next step for MySQL setup.</p><h3>Configuring MySQL</h3><p>We need to create a user and database for OSSEC. Go to a MySQL shell:</p><pre><code>mysql -u root -p
+</code></pre>
+
+<p>OSSEC is now installed. Restart it:</p>
+
+<pre><code>/var/ossec/bin/ossec-control restart
+</code></pre>
+
+<p>Continue to the next step for MySQL setup.</p>
+
+<h3>Configuring MySQL</h3>
+
+<p>We need to create a user and database for OSSEC. Go to a MySQL shell:</p>
+
+<pre><code>mysql -u root -p
 Enter password:
 [...]
 
-mysql> create database ossec;
+mysql&gt; create database ossec;
 Query OK, 1 row affected (0.02 sec)
 
 grant INSERT,SELECT,UPDATE,CREATE,DELETE,EXECUTE on ossec.* to ossec_u;
 Query OK, 0 rows affected (0.00 sec)
 
-set password for ossec_u = PASSWORD('Passw0rd');
+set password for ossec_u = PASSWORD(&#39;Passw0rd&#39;);
 Query OK, 1 row affected (0.01 sec)
 
 flush privileges;
 Query OK, 0 rows affected (0.00 sec)
 
 quit;
-</code></pre><p>The database also needs a schema. OSSEC provides a schema, it is located in the extracted OSSEC folder, <code>src/os_dbd</code>. Import it into MySQL:</p><pre><code>mysql -u root -p ossec < src/os_dbd/mysql.schema
-</code></pre><p>Thats it for the database setup. Continue to see the OSSEC configuration.</p><h3>OSSEC MySQL configuration</h3><p>We have to add the database config to <code>/var/ossec/etc/ossec.conf</code>:</p><pre><code><ossec_config>
-    <database_output>
-        <hostname>127.0.0.1</hostname>
-        <username>ossec_u</username>
-        <password>Passw0rd</password>
-        <database>ossec</database>
-        <type>mysql</type>
-    </database_output>
-</ossec_config>
-</code></pre><p>Save it, then enable the database in OSSEC:</p><pre><code>/var/ossec/bin/ossec-control enable database
+</code></pre>
+
+<p>The database also needs a schema. OSSEC provides a schema, it is located in the extracted OSSEC folder, <code>src/os_dbd</code>. Import it into MySQL:</p>
+
+<pre><code>mysql -u root -p ossec &lt; src/os_dbd/mysql.schema
+</code></pre>
+
+<p>Thats it for the database setup. Continue to see the OSSEC configuration.</p>
+
+<h3>OSSEC MySQL configuration</h3>
+
+<p>We have to add the database config to <code>/var/ossec/etc/ossec.conf</code>:</p>
+
+<pre><code>&lt;ossec_config&gt;
+    &lt;database_output&gt;
+        &lt;hostname&gt;127.0.0.1&lt;/hostname&gt;
+        &lt;username&gt;ossec_u&lt;/username&gt;
+        &lt;password&gt;Passw0rd&lt;/password&gt;
+        &lt;database&gt;ossec&lt;/database&gt;
+        &lt;type&gt;mysql&lt;/type&gt;
+    &lt;/database_output&gt;
+&lt;/ossec_config&gt;
+</code></pre>
+
+<p>Save it, then enable the database in OSSEC:</p>
+
+<pre><code>/var/ossec/bin/ossec-control enable database
 /var/ossec/bin/ossec-control restart 
-</code></pre><h3>Installing OSSEC Web UI</h3><p><a href="https://raymii.org/s/inc/img/ossec/webui.png"><img alt="OSSEC Web UI" height="240" src="https://raymii.org/s/inc/img/ossec/webui.png" width="320"/></a></p><p>This is also quite simple. Because we've already set up Apache and PHP, we can just download the web UI and extract to <code>/var/www/</code>:</p><pre><code>wget http://www.ossec.net/files/ossec-wui-0.8-beta-1.tar.gz
+</code></pre>
+
+<h3>Installing OSSEC Web UI</h3>
+
+<p><a href="https://raymii.org/s/inc/img/ossec/webui.png"><img src="https://raymii.org/s/inc/img/ossec/webui.png" width="320" height="240" alt="OSSEC Web UI" /></a></p>
+
+<p>This is also quite simple. Because we&#39;ve already set up Apache and PHP, we can just download the web UI and extract to <code>/var/www/</code>:</p>
+
+<pre><code>wget http://www.ossec.net/files/ossec-wui-0.8-beta-1.tar.gz
 tar -xf ossec-wui-0.8-beta-1.tar.gz
 mkdir /var/www/ossec/
 mv ossec-wui-0.8-beta-1/* /var/www/ossec/
 chown www-data:www-data /var/www/ossec/tmp/
 chmod 666 /var/www/ossec/tmp
-</code></pre><p>We use the web UI Beta because there are a lot of errors (like broken search) in the stable 0.3 version. We also set the correct permissions on the <code>tmp/</code> folder. Afterwards the web ui is visible at http://hostname/ossec/.</p><h3>Installing Analogi Web Dashboard</h3><p><a href="https://raymii.org/s/inc/img/ossec/analogi.png"><img alt="OSSEC Analogi dashboard" height="240" src="https://raymii.org/s/inc/img/ossec/analogi.png" width="320"/></a></p><p>The Analogi dashboard is a nice and informative dashboard around OSSEC, which provides more visual information then the standard Web UI. The standard Web UI has better search functions, the Dashboard can be used for example on a Wall Mounted monitor and such.</p><p>Installation consists out of cloning the git repo and entering the settings file:</p><pre><code>cd /var/www
+</code></pre>
+
+<p>We use the web UI Beta because there are a lot of errors (like broken search) in the stable 0.3 version. We also set the correct permissions on the <code>tmp/</code> folder. Afterwards the web ui is visible at http://hostname/ossec/.</p>
+
+<h3>Installing Analogi Web Dashboard</h3>
+
+<p><a href="https://raymii.org/s/inc/img/ossec/analogi.png"><img src="https://raymii.org/s/inc/img/ossec/analogi.png" width="320" height="240" alt="OSSEC Analogi dashboard" /></a></p>
+
+<p>The Analogi dashboard is a nice and informative dashboard around OSSEC, which provides more visual information then the standard Web UI. The standard Web UI has better search functions, the Dashboard can be used for example on a Wall Mounted monitor and such.</p>
+
+<p>Installation consists out of cloning the git repo and entering the settings file:</p>
+
+<pre><code>cd /var/www
 git clone https://github.com/ECSC/analogi.git
 cp analogi/db_ossec.php.new analogi/db_ossec.php
 vim analogi/db_ossec.php        
-</code></pre><p>Edit the relevant settings for the MySQL database configuration. When correctly configured the Analogi webinterface can be found at http://hostname/analogi/.</p><p>The OSSEC server is now correctly set up. </p><h3>Client installation</h3><p>Download and verify the OSSEC stable .tar.gz file as described above. This time, do an agent installation. See the output below:</p><pre><code>root@testclient:~/ossec-hids-2.7# ./install.sh
+</code></pre>
+
+<p>Edit the relevant settings for the MySQL database configuration. When correctly configured the Analogi webinterface can be found at http://hostname/analogi/.</p>
+
+<p>The OSSEC server is now correctly set up. </p>
+
+<h3>Client installation</h3>
+
+<p>Download and verify the OSSEC stable .tar.gz file as described above. This time, do an agent installation. See the output below:</p>
+
+<pre><code>root@testclient:~/ossec-hids-2.7# ./install.sh
 
   ** Para instalao em portugus, escolha [br].
   ** ,  [cn].
@@ -228,7 +499,7 @@ vim analogi/db_ossec.php
   ** Para instalar en Espaol , eliga [es].
   ** Pour une installation en franais, choisissez [fr]
   ** A Magyar nyelv teleptshez vlassza [hu].
-  ** Per l'installazione in Italiano, scegli [it].
+  ** Per l&#39;installazione in Italiano, scegli [it].
   ** [jp].
   ** Voor installatie in het Nederlands, kies [nl].
   ** Aby instalowa w jzyku Polskim, wybierz [pl].
@@ -282,7 +553,15 @@ vim analogi/db_ossec.php
 5- Installing the system
  - Running the Makefile
 INFO: Little endian set.
-</code></pre><h4>Client OSSEC config</h4><p>Adding a client to OSSEC is quite simple. First you add the client to the server, which gives you a key. Then you add this key to the client, edit the config file on the client and thats it.</p><p>First we need to generate a key on the OSSEC server for this client. We do this by running <code>/var/ossec/bin/manage_agents</code>, option A, then entering the hostname, IP and ID for the client we want to add. Do these steps on the OSSEC server!:</p><pre><code>root@ossec:~# /var/ossec/bin/manage_agents
+</code></pre>
+
+<h4>Client OSSEC config</h4>
+
+<p>Adding a client to OSSEC is quite simple. First you add the client to the server, which gives you a key. Then you add this key to the client, edit the config file on the client and thats it.</p>
+
+<p>First we need to generate a key on the OSSEC server for this client. We do this by running <code>/var/ossec/bin/manage_agents</code>, option A, then entering the hostname, IP and ID for the client we want to add. Do these steps on the OSSEC server!:</p>
+
+<pre><code>root@ossec:~# /var/ossec/bin/manage_agents
 
 ****************************************
 * OSSEC HIDS v2.7 Agent manager.     *
@@ -295,7 +574,7 @@ INFO: Little endian set.
    (Q)uit.
 Choose your action: A,E,L,R or Q: a
 
-- Adding a new agent (use '\q' to return to the main menu).
+- Adding a new agent (use &#39;\q&#39; to return to the main menu).
   Please provide the following:
    * A name for the new agent: testclient
    * The IP Address of the new agent: 10.0.51.32
@@ -307,7 +586,11 @@ Agent information:
 
 Confirm adding it?(y/n): y
 Agent added.
-</code></pre><p>Now we find out the key for the OSSEC client:</p><pre><code>root@ossec:~# /var/ossec/bin/manage_agents
+</code></pre>
+
+<p>Now we find out the key for the OSSEC client:</p>
+
+<pre><code>root@ossec:~# /var/ossec/bin/manage_agents
 
 ****************************************
 * OSSEC HIDS v2.7 Agent manager.     *
@@ -322,13 +605,17 @@ Choose your action: A,E,L,R or Q: e
 
 Available agents:
    ID: 001, Name: testclient, IP: 10.0.51.32
-Provide the ID of the agent to extract the key (or '\q' to quit): 001
+Provide the ID of the agent to extract the key (or &#39;\q&#39; to quit): 001
 
-Agent key information for '001' is:
+Agent key information for &#39;001&#39; is:
 SD[...]AAUjd=
 
 ** Press ENTER to return to the main menu.
-</code></pre><p>Then switch to the OSSEC client and execute the manage_agents:</p><pre><code>root@ossec:~# /var/ossec/bin/manage_agents
+</code></pre>
+
+<p>Then switch to the OSSEC client and execute the manage_agents:</p>
+
+<pre><code>root@ossec:~# /var/ossec/bin/manage_agents
 
 ****************************************
 * OSSEC HIDS v2.7 Agent manager.     *
@@ -342,7 +629,7 @@ Choose your action: I or Q: i
 * The best approach is to cut and paste it.
 *** OBS: Do not include spaces or new lines.
 
-Paste it here (or '\q' to quit): SD[...]AAUjd=
+Paste it here (or &#39;\q&#39; to quit): SD[...]AAUjd=
 
 Agent information:
    ID:001
@@ -352,10 +639,20 @@ Agent information:
 Confirm adding it?(y/n): y
 Added.
 ** Press ENTER to return to the main menu.
-</code></pre><p>And then this needs to be in the <code>/var/ossec/etc/ossec.conf</code> file:</p><pre><code><client>
-  <server-hostname>ossec.raymii.nl</server-hostname>
-</client>
-</code></pre><p>Where <code>ossec.raymii.nl</code> is your OSSEC server URL or IP.</p><p>Now restart the OSSEC agents:</p><pre><code>/var/ossec/bin/ossec-control restart
+</code></pre>
+
+<p>And then this needs to be in the <code>/var/ossec/etc/ossec.conf</code> file:</p>
+
+<pre><code>&lt;client&gt;
+  &lt;server-hostname&gt;ossec.raymii.nl&lt;/server-hostname&gt;
+&lt;/client&gt;
+</code></pre>
+
+<p>Where <code>ossec.raymii.nl</code> is your OSSEC server URL or IP.</p>
+
+<p>Now restart the OSSEC agents:</p>
+
+<pre><code>/var/ossec/bin/ossec-control restart
 Killing ossec-monitord ..
 Killing ossec-logcollector ..
 Killing ossec-remoted ..
@@ -377,20 +674,90 @@ Started ossec-remoted...
 Started ossec-syscheckd...
 Started ossec-monitord...
 Completed.
-</code></pre><p>Thats it. Repeat these steps for any client that needs to be added. There are both puppetfiles and chef cookbooks to manage this process.</p><h3>Bonus Tips</h3><p>Here are a few bonus tips/config examples for OSSEC:</p><h4>Ignoring rules</h4><p>To very simply ignore rules based on rule id, add them to the XML file located in <code>/var/ossec/rules/local_rules/xml</code>, either on the ossec client for one machine or the ossec server to ignore on all machines:</p><pre><code><!-- Specify here a list of rules to ignore. -->
-<!-- 3334 postfix start  -->
-<!-- 3333 postfix stop -->
-<rule id="100030" level="0">
-    <if_sid>3333, 3334</if_sid>
-    <description>List of rules to be ignored.</description>
-</rule>
-</code></pre><h4>Monitoring additional log files</h4><p>The OSSEC agent by default only monitors a few log files. To add more, edit the <code>/var/ossec/etc/ossec.conf</code> file and add a line like this:</p><pre><code><localfile>
-    <location>/var/log/*</location>
-    <log_format>syslog</log_format>
-</localfile>
-</code></pre><p>This will add all files under <code>/var/log</code>. This might be a lot, you can also just add multiple <code>&lt;localfile&gt;</code> blocks with filenames.</p><h4>Firewall</h4><p>You need to allow UDP port 1514 between OSSEC server and clients. Otherwise you get errors like this:</p><pre><code>2013/09/06 19:53:00 ossec-agentd: INFO: Using IPv4 for: 10.0.51.31 .
-2013/09/06 19:53:21 ossec-agentd(4101): WARN: Waiting for server reply (not started). Tried: 'ossec.raymii.nl/10.0.51.31'.
-</code></pre><hr/>Tags: <a class="link" href="../tags/active-response.html">active-response, </a> <a class="link" href="../tags/analogi.html">analogi, </a> <a class="link" href="../tags/file-monitoring.html">file-monitoring, </a> <a class="link" href="../tags/ids.html">ids, </a> <a class="link" href="../tags/integrity.html">integrity, </a> <a class="link" href="../tags/intrusion-detection.html">intrusion-detection, </a> <a class="link" href="../tags/monitoring.html">monitoring, </a> <a class="link" href="../tags/ossec.html">ossec, </a> <a class="link" href="../tags/ossec-wui.html">ossec-wui, </a> <a class="link" href="../tags/rootkit.html">rootkit, </a> <a class="link" href="../tags/security.html">security, </a> <a class="link" href="../tags/splunk.html">splunk, </a> <a class="link" href="../tags/syslog.html">syslog, </a> <div class="footer"><hr/><br/><hr/><p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br/></p></div></div></div></div> </div></div><script type="text/javascript">
+</code></pre>
+
+<p>Thats it. Repeat these steps for any client that needs to be added. There are both puppetfiles and chef cookbooks to manage this process.</p>
+
+<h3>Bonus Tips</h3>
+
+<p>Here are a few bonus tips/config examples for OSSEC:</p>
+
+<h4>Ignoring rules</h4>
+
+<p>To very simply ignore rules based on rule id, add them to the XML file located in <code>/var/ossec/rules/local_rules/xml</code>, either on the ossec client for one machine or the ossec server to ignore on all machines:</p>
+
+<pre><code>&lt;!-- Specify here a list of rules to ignore. --&gt;
+&lt;!-- 3334 postfix start  --&gt;
+&lt;!-- 3333 postfix stop --&gt;
+&lt;rule id=&quot;100030&quot; level=&quot;0&quot;&gt;
+    &lt;if_sid&gt;3333, 3334&lt;/if_sid&gt;
+    &lt;description&gt;List of rules to be ignored.&lt;/description&gt;
+&lt;/rule&gt;
+</code></pre>
+
+<h4>Monitoring additional log files</h4>
+
+<p>The OSSEC agent by default only monitors a few log files. To add more, edit the <code>/var/ossec/etc/ossec.conf</code> file and add a line like this:</p>
+
+<pre><code>&lt;localfile&gt;
+    &lt;location&gt;/var/log/*&lt;/location&gt;
+    &lt;log_format&gt;syslog&lt;/log_format&gt;
+&lt;/localfile&gt;
+</code></pre>
+
+<p>This will add all files under <code>/var/log</code>. This might be a lot, you can also just add multiple <code>&lt;localfile&gt;</code> blocks with filenames.</p>
+
+<h4>Firewall</h4>
+
+<p>You need to allow UDP port 1514 between OSSEC server and clients. Otherwise you get errors like this:</p>
+
+<pre><code>2013/09/06 19:53:00 ossec-agentd: INFO: Using IPv4 for: 10.0.51.31 .
+2013/09/06 19:53:21 ossec-agentd(4101): WARN: Waiting for server reply (not started). Tried: &#39;ossec.raymii.nl/10.0.51.31&#39;.
+</code></pre>
+<hr>
+Tags: <a href="../tags/active-response.html" class="link">active-response, 
+</a>
+<a href="../tags/analogi.html" class="link">analogi, 
+</a>
+<a href="../tags/file-monitoring.html" class="link">file-monitoring, 
+</a>
+<a href="../tags/ids.html" class="link">ids, 
+</a>
+<a href="../tags/integrity.html" class="link">integrity, 
+</a>
+<a href="../tags/intrusion-detection.html" class="link">intrusion-detection, 
+</a>
+<a href="../tags/monitoring.html" class="link">monitoring, 
+</a>
+<a href="../tags/ossec.html" class="link">ossec, 
+</a>
+<a href="../tags/ossec-wui.html" class="link">ossec-wui, 
+</a>
+<a href="../tags/rootkit.html" class="link">rootkit, 
+</a>
+<a href="../tags/security.html" class="link">security, 
+</a>
+<a href="../tags/splunk.html" class="link">splunk, 
+</a>
+<a href="../tags/syslog.html" class="link">syslog, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+        
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -399,11 +766,20 @@ Completed.
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&amp;lt;p&amp;gt;&amp;lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&amp;gt;&amp;lt;/p&amp;gt;</noscript><script type="text/javascript">
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    
+    <!-- google analytics -->
+    <script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-    </script><script type="text/javascript">
+    </script>
+    <script type="text/javascript">
     try {
     var pageTracker = _gat._getTracker("UA-3704876-6");
     pageTracker._trackPageview();
-    } catch(err) {}</script></body></html>
+    } catch(err) {}</script>
+    <!--end analytics -->
+    </body>
+    </html>
+    
