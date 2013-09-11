@@ -1,365 +1,62 @@
-
-    <!DOCTYPE html>
-    <html lang="en">
-        <head>
-        <title>Ray-Mon - PHP/Bash server status monitoring - Raymii.org</title>
-        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
-        <link href="/s/inc/css/custom.css" rel="stylesheet" />
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="alternate" type="application/rss+xml" title="Raymii.org RSS" href="http://feeds.feedburner.com/Raymiiorg" />
-
-    </head>
-    <body>
-        <a id="top-of-page"></a>
-        <div class="container-fluid ">
-        <div class="row">
-        
-        <div class="col-md-10 col-md-offset-1">
-                
-            <div class="col-md-3 well"> 
-            
-                <!-- <h1 class="topheader"></h1> -->
-                <h3>Raymii.org</h3>
-                <h6>Quis custodiet ipsos custodes?</h6>
-                <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
-            
-            </div>
-
-            <div class="col-md-4 green-block">
-                
-                    <h3>Featured Items</h3>
-    <a href="/s/tutorials/Ansible_Deployment_Framework.html" class="whitelink">Ansible Deployment Framework</a>
-<br />
-<a href="/s/tutorials/Pass_the_SSL_Labs_Test_on_Apache2_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html" class="whitelink">Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack   Disable SSLv2   Enable PFS)</a>
-<br />
-<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
-<br />
-<a href="/s/tutorials/VMWare-ESXi-5-USB-installer.html" class="whitelink">VMWare ESXi 5 USB installer</a>
-<br />
-
-            
-        </div>
-        <div class="col-md-4 green-block">
-            
-                <h3>Featured Items</h3>
-    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
-<br />
-<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
-<br />
-<a href="/s/software/Nopriv-IMAP-backup.html" class="whitelink">Nopriv IMAP backup</a>
-<br />
-<a href="/s/tutorials/Pass_the_SSL_Labs_Test_on_NGINX_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html" class="whitelink">Pass the SSL Labs Test on NGINX (Mitigate the CRIME and BEAST attack   Disable SSLv2   Enable PFS)</a>
-<br />
-
-            
-        </div>
-    </div>
-    
-    </div>
-    <div class="row-fluid">
-    <div class="col-md-11 col-md-offset-1">
-    
-
-    <div class="col-md-3">
-    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
-<li><a href="/s/" class="link">Home</a>
-</li>
-<li><a href="/s/static/Contact.html" class="link">Contact</a>
-</li>
-<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
-</li>
-<li><a href="/s/static/Hosted_Piwik.html" class="link">Hosted Piwik</a>
-</li>
-<li><a href="/s/static/Sparkling_Network.html" class="link">Sparkling Network</a>
-</li>
-<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
-</li>
-</ul>
-<h3>Categories</h3>
-<ul class="nav nav-pills nav-stacked">
-<li><a href="/s/articles" class="link">Articles</a>
-</li>
-<li><a href="/s/snippets" class="link">Snippets</a>
-</li>
-<li><a href="/s/software" class="link">Software</a>
-</li>
-<li><a href="/s/tutorials" class="link">Tutorials</a>
-</li>
-<li><a href="/s/everything.html" class="link">All Items</li>
-</a>
-</ul>
-               <!-- advertisement start -->
-                <hr class="alt2">
-                <h3>Donate</h3>
-                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p />
-                <script id='flattrbtn'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=Remy&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('flattrbtn');</script><br />
-                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-                <input type="hidden" name="cmd" value="_s-xclick">
-                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
-                ">
-                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-                <img alt="" border="0" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
-                </form>
-                <script type="text/javascript"><!--
+<!DOCTYPE html><html lang="en"><head><title>Ray-Mon - PHP/Bash server status monitoring - Raymii.org</title><link href="/s/inc/css/bootstrap.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet"/><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><meta content="IE=edge" http-equiv="X-UA-Compatible"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="Raymii.org RSS" type="application/rss+xml"/></head><body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-10 col-md-offset-1"><div class="col-md-3 well"> <h3>Raymii.org</h3><h6>Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><div class="col-md-4 green-block"><h3>Featured Items</h3><a class="whitelink" href="/s/tutorials/Ansible_Deployment_Framework.html">Ansible Deployment Framework</a> <br/><a class="whitelink" href="/s/tutorials/Pass_the_SSL_Labs_Test_on_Apache2_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html">Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack Disable SSLv2 Enable PFS)</a> <br/><a class="whitelink" href="/s/articles/Small_Linux_PCs.html">Small Linux PCs</a> <br/><a class="whitelink" href="/s/tutorials/VMWare-ESXi-5-USB-installer.html">VMWare ESXi 5 USB installer</a> <br/></div><div class="col-md-4 green-block"><h3>Featured Items</h3><a class="whitelink" href="/s/software/Bash_PHP_Server_Status_Monitor.html">Bash PHP Server Status Monitor</a> <br/><a class="whitelink" href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html">IPSEC L2TP vpn with Ubuntu 12.04</a> <br/><a class="whitelink" href="/s/software/Nopriv-IMAP-backup.html">Nopriv IMAP backup</a> <br/><a class="whitelink" href="/s/tutorials/Pass_the_SSL_Labs_Test_on_NGINX_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html">Pass the SSL Labs Test on NGINX (Mitigate the CRIME and BEAST attack Disable SSLv2 Enable PFS)</a> <br/></div></div></div><div class="row-fluid"><div class="col-md-11 col-md-offset-1"><div class="col-md-3"><h3>Menu</h3><ul class="nav nav-pills nav-stacked"><li><a class="link" href="/s/">Home</a> </li><li><a class="link" href="/s/static/Contact.html">Contact</a> </li><li><a class="link" href="/s/static/Disclaimer.html">Disclaimer</a> </li><li><a class="link" href="/s/static/Hosted_Piwik.html">Hosted Piwik</a> </li><li><a class="link" href="/s/static/Sparkling_Network.html">Sparkling Network</a> </li><li><a class="link" href="/s/static/Terrible-Linux.html">Terrible Linux</a> </li></ul><h3>Categories</h3><ul class="nav nav-pills nav-stacked"><li><a class="link" href="/s/articles">Articles</a> </li><li><a class="link" href="/s/snippets">Snippets</a> </li><li><a class="link" href="/s/software">Software</a> </li><li><a class="link" href="/s/tutorials">Tutorials</a> </li><li><a class="link" href="/s/everything.html">All Items</a></li><a class="link" href="/s/everything.html"></a> </ul><hr class="alt2"/><h3>Donate</h3><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p><script id="flattrbtn">(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=Remy&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('flattrbtn');</script><br/></p><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input name="cmd" type="hidden" value="_s-xclick"/><input name="encrypted" type="hidden" value="-----BEGIN PKCS7-----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-----END PKCS7-----"/><input alt="PayPal - The safer, easier way to pay online!" border="0" name="submit" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" type="image"/><img alt="" border="0" height="1" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1"/></form><script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 /* Raymii-2 */
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script>
-                <script type="text/javascript"
-                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-                </script>    
-                <!-- advertisement end -->
-
-           </div>  
-           <div class="col-md-7"> 
-                <div class="inner">
-
-
-           <h2>Ray-Mon - PHP/Bash server status monitoring</h2>
-<ul class="breadcrumb">
-<li><a href="../" class="link">Home</a>
-<col-md- class="divider">/</col-md-></li>
-<li><a href="../software" class="link">Software</a>
-<col-md- class="divider">/</col-md-></li>
-<li><a href="Bash_PHP_Server_Status_Monitor.html" class="link">Ray-Mon - PHP/Bash server status monitoring</a>
-</li>
-</ul>
-<h6>Author: Remy Van Elst</h6>
-<h6>Date: 22-10-2012</h6>
-<br>
-<p><img src="http://i.imgur.com/AccDKyZ.png" width="640" height="480" alt="screenshot" /></p>
-
-<p>Ray-Mon is a linux server monitoring script written in PHP and Bash, utilizing JSON as data storage. It requires only bash and a webserver on the client side, and only php on the server side. The client currently supports monitoring processes, uptime, updates, amount of users logged in, disk usage, RAM usage and network traffic.</p>
-
-<h4>Live Demo</h4>
-
-<p><a href="http://vps11.sparklingclouds.nl/status/stat.php">This is a live demo of this script, monitoring the sparkling network (my vps servers)</a></p>
-
-<h4>Features</h4>
-
-<ul>
-<li>Ping monitor</li>
-<li>History per host</li>
-<li>Threshold per monitored item.</li>
-<li>Monitors:
-
-<ul>
-<li>Processes (lighttpd, apache, nginx, sshd, munin etc.) </li>
-<li>RAM</li>
-<li>Disk</li>
-<li>Uptime</li>
-<li>Users logged on</li>
-<li>Updates</li>
-<li>Network (RX/TX)</li>
-</ul></li>
-</ul>
-
-<h4>Download</h4>
-
-<p>Either <em>git clone</em> the github repo:</p>
-
-<pre><code>git clone git://github.com/RaymiiOrg/raymon.git
-</code></pre>
-
-<p>Or download the zipfile from github:</p>
-
-<p><a href="https://github.com/RaymiiOrg/raymon/zipball/master">https://github.com/RaymiiOrg/raymon/zipball/master</a></p>
-
-<p>Or download the zipfile from Raymii.org</p>
-
-<p><a href="https://raymii.org/s/inc/software/raymon-0.0.2.zip">https://raymii.org/s/inc/software/raymon-0.0.2.zip</a></p>
-
-<p>This is the github page: <a href="https://github.com/RaymiiOrg/raymon/">https://github.com/RaymiiOrg/raymon/</a></p>
-
-<h4>Changelog</h4>
-
-<h5>v0.0.2</h5>
-
-<ul>
-<li>Server side now only requires 1 script instead of 2.</li>
-<li>Client script creates the json better, if a value is missing the json file doesn&#39;t break.</li>
-<li>Changed the visual style to a better layout.</li>
-<li>Thresholds implemented and configurable.</li>
-<li>History per host now implemented.</li>
-</ul>
-
-<h5>v0.0.1</h5>
-
-<ul>
-<li>Initial release</li>
-</ul>
-
-<h4>Install</h4>
-
-<h5>Client</h5>
-
-<p>The client.sh script is a bash script which outputs JSON. It requires root access and should be run as root. It also requires a webserver, so that the server can get the json file. </p>
-
-<p>Software needed for the script:</p>
-
-<ul>
-<li>bash </li>
-<li>awk </li>
-<li>grep </li>
-<li>ifconfig</li>
-<li>package managers supported: apt-get, yum and pacman (debian/ubuntu, centos/RHEL/SL, Arch)</li>
-</ul>
-
-<p>Setup a webserver (lighttpd, apache, boa, thttpd, nginx) for the script output. If there is already a webserver running on the server you dont need to install another one.</p>
-
-<p>Edit the script:</p>
-
-<p>Network interfaces. First one is used for the IP, the second one is used for bandwidth calculations. This is done because openVZ has the &quot;venet0&quot; interface for the bandwidth, and the venet0:0 interface with an IP. If you run bare-metal or KVM or vserver etc. you can set these two to the same value (eth0 eth1 etc).</p>
-
-<pre><code># Network interface for the IP address
-iface=&quot;venet0:0&quot;
+                </script><script src="http://pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
+                </script></div> <div class="col-md-7"> <div class="inner"><h2>Ray-Mon - PHP/Bash server status monitoring</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a> <col-md- class="divider">/</col-md-></li><li><a class="link" href="../software">Software</a> <col-md- class="divider">/</col-md-></li><li><a class="link" href="Bash_PHP_Server_Status_Monitor.html">Ray-Mon - PHP/Bash server status monitoring</a> </li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 22-10-2012</h6><br/><p><img alt="screenshot" height="480" src="http://i.imgur.com/AccDKyZ.png" width="640"/></p><p>Ray-Mon is a linux server monitoring script written in PHP and Bash, utilizing JSON as data storage. It requires only bash and a webserver on the client side, and only php on the server side. The client currently supports monitoring processes, uptime, updates, amount of users logged in, disk usage, RAM usage and network traffic.</p><h4>Live Demo</h4><p><a href="http://vps11.sparklingclouds.nl/status/stat.php">This is a live demo of this script, monitoring the sparkling network (my vps servers)</a></p><h4>Features</h4><ul><li>Ping monitor</li><li>History per host</li><li>Threshold per monitored item.</li><li>Monitors:<ul><li>Processes (lighttpd, apache, nginx, sshd, munin etc.) </li><li>RAM</li><li>Disk</li><li>Uptime</li><li>Users logged on</li><li>Updates</li><li>Network (RX/TX)</li></ul></li></ul><h4>Download</h4><p>Either <em>git clone</em> the github repo:</p><pre><code>git clone git://github.com/RaymiiOrg/raymon.git
+</code></pre><p>Or download the zipfile from github:</p><p><a href="https://github.com/RaymiiOrg/raymon/zipball/master">https://github.com/RaymiiOrg/raymon/zipball/master</a></p><p>Or download the zipfile from Raymii.org</p><p><a href="https://raymii.org/s/inc/software/raymon-0.0.2.zip">https://raymii.org/s/inc/software/raymon-0.0.2.zip</a></p><p>This is the github page: <a href="https://github.com/RaymiiOrg/raymon/">https://github.com/RaymiiOrg/raymon/</a></p><h4>Changelog</h4><h5>v0.0.2</h5><ul><li>Server side now only requires 1 script instead of 2.</li><li>Client script creates the json better, if a value is missing the json file doesn't break.</li><li>Changed the visual style to a better layout.</li><li>Thresholds implemented and configurable.</li><li>History per host now implemented.</li></ul><h5>v0.0.1</h5><ul><li>Initial release</li></ul><h4>Install</h4><h5>Client</h5><p>The client.sh script is a bash script which outputs JSON. It requires root access and should be run as root. It also requires a webserver, so that the server can get the json file. </p><p>Software needed for the script:</p><ul><li>bash </li><li>awk </li><li>grep </li><li>ifconfig</li><li>package managers supported: apt-get, yum and pacman (debian/ubuntu, centos/RHEL/SL, Arch)</li></ul><p>Setup a webserver (lighttpd, apache, boa, thttpd, nginx) for the script output. If there is already a webserver running on the server you dont need to install another one.</p><p>Edit the script:</p><p>Network interfaces. First one is used for the IP, the second one is used for bandwidth calculations. This is done because openVZ has the "venet0" interface for the bandwidth, and the venet0:0 interface with an IP. If you run bare-metal or KVM or vserver etc. you can set these two to the same value (eth0 eth1 etc).</p><pre><code># Network interface for the IP address
+iface="venet0:0"
 # network interface for traffic monitoring (RX/TX bytes)
-iface2=&quot;venet0&quot;
-</code></pre>
-
-<p>The IP address of the server, this is used by me when deploying this script via chef or ansible. You can set it, but it is not required.</p>
-
-<p>Services are checked by doing a <em>ps</em> to see if the process is running. The last service should be defined without a comma, for valid JSON. The code below monitors &quot;sshd&quot;, &quot;lighttpd&quot;, &quot;munin-node&quot; and &quot;syslog&quot;. </p>
-
-<pre><code>SERVICE=lighttpd
-if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;running\&quot;,&quot;; else echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;not running\&quot;,&quot;; fi
+iface2="venet0"
+</code></pre><p>The IP address of the server, this is used by me when deploying this script via chef or ansible. You can set it, but it is not required.</p><p>Services are checked by doing a <em>ps</em> to see if the process is running. The last service should be defined without a comma, for valid JSON. The code below monitors "sshd", "lighttpd", "munin-node" and "syslog". </p><pre><code>SERVICE=lighttpd
+if ps ax | grep -v grep | grep $SERVICE > /dev/null; then echo -n "\"$SERVICE\" : \"running\","; else echo -n "\"$SERVICE\" : \"not running\","; fi
 SERVICE=sshd
-if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;running\&quot;,&quot;; else echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;not running\&quot;,&quot;; fi
+if ps ax | grep -v grep | grep $SERVICE > /dev/null; then echo -n "\"$SERVICE\" : \"running\","; else echo -n "\"$SERVICE\" : \"not running\","; fi
 SERVICE=syslog
-if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;running\&quot;,&quot;; else echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;not running\&quot;,&quot;; fi
+if ps ax | grep -v grep | grep $SERVICE > /dev/null; then echo -n "\"$SERVICE\" : \"running\","; else echo -n "\"$SERVICE\" : \"not running\","; fi
 #LAST SERVICE HAS TO BE WITHOUT , FOR VALID JSON!!!
 SERVICE=munin-node
-if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;running\&quot;&quot;; else echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;not running\&quot;&quot;; fi
-</code></pre>
-
-<p>To add a service, copy the 2 lines and replace the SERVICE=processname with the actual process name:</p>
-
-<pre><code>SERVICE=processname
-if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;running\&quot;,&quot;; else echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;not running\&quot;,&quot;; fi
-</code></pre>
-
-<p>And, make sure the last service montiored does not echo a comma at the end, else the JSON is not valid and the php script fails.</p>
-
-<p>Now setup a cronjob to execute the script on a set interval and save the JSON to the webserver directory.</p>
-
-<p>As root, create the file /etc/cron.d/raymon-client with the following contents:</p>
-
-<pre><code>SHELL=/bin/bash
+if ps ax | grep -v grep | grep $SERVICE > /dev/null; then echo -n "\"$SERVICE\" : \"running\""; else echo -n "\"$SERVICE\" : \"not running\""; fi
+</code></pre><p>To add a service, copy the 2 lines and replace the SERVICE=processname with the actual process name:</p><pre><code>SERVICE=processname
+if ps ax | grep -v grep | grep $SERVICE > /dev/null; then echo -n "\"$SERVICE\" : \"running\","; else echo -n "\"$SERVICE\" : \"not running\","; fi
+</code></pre><p>And, make sure the last service montiored does not echo a comma at the end, else the JSON is not valid and the php script fails.</p><p>Now setup a cronjob to execute the script on a set interval and save the JSON to the webserver directory.</p><p>As root, create the file /etc/cron.d/raymon-client with the following contents:</p><pre><code>SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-*/5 * * * * root /root/scripts/client.sh | sed &#39;:a;N;$!ba;s/\n//g&#39; &gt; /var/www/stat.json
-</code></pre>
-
-<p>In my case, the client script is in <em>/root/scripts</em>, and my webserver directory is <em>/var/www</em>. Change this to your own setup. Also, you might want to change the time interval. */5 executes every 5 minutes. The sed line is in there to remove the newlines, this creates a shorter JSOn file, saves some KB&#39;s. The <em>root</em> after the cron time is special for a file in <em>/etc/cron.d/</em>, it tells cron as which user it has to execute the crontab file.</p>
-
-<p>When this is setup you should get a stat.json file in the /var/www/ folder containing the status json. If so, the client is setup correctly.</p>
-
-<h5>Server</h5>
-
-<p>The status server is a php script which fetches the json files from the clients every 5 minutes, saves them and shows them. It also saves the history, but that is defined <a href="#History">below</a>. </p>
-
-<p>Requirements:</p>
-
-<ul>
-<li>Webserver with PHP (min. 5.2) and write access to the folder the script is located.</li>
-</ul>
-
-<p>Steps:</p>
-
-<p>Create a new folder on the webserver and make sure the webserver user (www-data) can write to it.  </p>
-
-<p>Place the php file &quot;stat.php&quot; in that folder.  </p>
-
-<p>Edit the host list in the php file to include your clients:  </p>
-
-<p>The first parameter is the filename the json file is saved to, and the second is the URL where the json file is located.  </p>
-
-<pre><code>$hostlist=array(
-                &#39;example1.org.json&#39; =&gt; &#39;http://example1.org/stat.json&#39;,
-                &#39;example2.nl.json&#39; =&gt; &#39;http://example2.nl/stat.json&#39;,
-                &#39;special1.network.json&#39; =&gt; &#39;http://special1.network.eu:8080/stat.json&#39;,
-                &#39;special2.network.json&#39; =&gt; &#39;https://special2.network.eu/stat.json&#39;
+*/5 * * * * root /root/scripts/client.sh | sed ':a;N;$!ba;s/\n//g' > /var/www/stat.json
+</code></pre><p>In my case, the client script is in <em>/root/scripts</em>, and my webserver directory is <em>/var/www</em>. Change this to your own setup. Also, you might want to change the time interval. */5 executes every 5 minutes. The sed line is in there to remove the newlines, this creates a shorter JSOn file, saves some KB's. The <em>root</em> after the cron time is special for a file in <em>/etc/cron.d/</em>, it tells cron as which user it has to execute the crontab file.</p><p>When this is setup you should get a stat.json file in the /var/www/ folder containing the status json. If so, the client is setup correctly.</p><h5>Server</h5><p>The status server is a php script which fetches the json files from the clients every 5 minutes, saves them and shows them. It also saves the history, but that is defined <a href="#History">below</a>. </p><p>Requirements:</p><ul><li>Webserver with PHP (min. 5.2) and write access to the folder the script is located.</li></ul><p>Steps:</p><p>Create a new folder on the webserver and make sure the webserver user (www-data) can write to it. </p><p>Place the php file "stat.php" in that folder. </p><p>Edit the host list in the php file to include your clients: </p><p>The first parameter is the filename the json file is saved to, and the second is the URL where the json file is located. </p><pre><code>$hostlist=array(
+                'example1.org.json' => 'http://example1.org/stat.json',
+                'example2.nl.json' => 'http://example2.nl/stat.json',
+                'special1.network.json' => 'http://special1.network.eu:8080/stat.json',
+                'special2.network.json' => 'https://special2.network.eu/stat.json'
                 );
-</code></pre>
-
-<p>Edit the values for the ping monitor:  </p>
-
-<pre><code>$pinglist = array(
-                  &#39;github.com&#39;,
-                  &#39;google.nl&#39;,
-                  &#39;tweakers.net&#39;,
-                  &#39;jupiterbroadcasting.com&#39;,
-                  &#39;lowendtalk.com&#39;,
-                  &#39;lowendbox.com&#39; 
+</code></pre><p>Edit the values for the ping monitor: </p><pre><code>$pinglist = array(
+                  'github.com',
+                  'google.nl',
+                  'tweakers.net',
+                  'jupiterbroadcasting.com',
+                  'lowendtalk.com',
+                  'lowendbox.com' 
                   );
-</code></pre>
-
-<p>Edit the threshold values:  </p>
-
-<pre><code>## Set this to &quot;secure&quot; the history saving. This key has to be given as a parameter to save the history.
-$historykey = &quot;8A29691737D&quot;;
+</code></pre><p>Edit the threshold values: </p><pre><code>## Set this to "secure" the history saving. This key has to be given as a parameter to save the history.
+$historykey = "8A29691737D";
 #the below values set the threshold before a value gets shown in bold on the page.
 # Max updates available
-$maxupdates = &quot;10&quot;;
+$maxupdates = "10";
 # Max users concurrently logged in
-$maxusers = &quot;3&quot;;
+$maxusers = "3";
 # Max load.
-$maxload = &quot;2&quot;;
+$maxload = "2";
 # Max disk usage (in percent)
-$maxdisk = &quot;75&quot;;
+$maxdisk = "75";
 # Max RAM usage (in percent)
-$maxram = &quot;75&quot;;
-</code></pre>
-
-<h6>History</h6>
-
-<p>To save the history you have to setup a cronjob to get the status page with a special &quot;history key&quot;. You define this in the stat.php file:</p>
-
-<pre><code>## Set this to &quot;secure&quot; the history saving. This key has to be given as a parameter to save the history.
-$historykey = &quot;8A29691737D&quot;;    
-</code></pre>
-
-<p>And then the cronjob to get it:</p>
-
-<pre><code>## This saves the history every 8 hours. 
-30 */8 * * * wget -qO /dev/null http://url-to-status.site/status/stat.php?action=save&amp;key=8A29691737D
-</code></pre>
-
-<p>The cronjob can be on any server which can access the status page, but preferably on the host where the status page is located.</p>
-<hr>
-Tags: <a href="../tags/bash.html" class="link">bash, 
-</a>
-<a href="../tags/featured-two.html" class="link">featured-two, 
-</a>
-<a href="../tags/git.html" class="link">git, 
-</a>
-<a href="../tags/monitoring.html" class="link">monitoring, 
-</a>
-<a href="../tags/php.html" class="link">php, 
-</a>
-<a href="../tags/status-monitoring.html" class="link">status-monitoring, 
-</a>
-<div class="footer">
-                <hr />
-                <br />
-        
-                <hr>
-
-                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
-
-                </div>
-            </div>
-        </div>
-    </div>  
-    </div>
-    </div>
-     
-    <!-- Piwik --> 
-    <script type="text/javascript">
+$maxram = "75";
+</code></pre><h6>History</h6><p>To save the history you have to setup a cronjob to get the status page with a special "history key". You define this in the stat.php file:</p><pre><code>## Set this to "secure" the history saving. This key has to be given as a parameter to save the history.
+$historykey = "8A29691737D";    
+</code></pre><p>And then the cronjob to get it:</p><pre><code>## This saves the history every 8 hours. 
+30 */8 * * * wget -qO /dev/null http://url-to-status.site/status/stat.php?action=save&key=8A29691737D
+</code></pre><p>The cronjob can be on any server which can access the status page, but preferably on the host where the status page is located.</p><hr/>Tags: <a class="link" href="../tags/bash.html">bash, </a> <a class="link" href="../tags/featured-two.html">featured-two, </a> <a class="link" href="../tags/git.html">git, </a> <a class="link" href="../tags/monitoring.html">monitoring, </a> <a class="link" href="../tags/php.html">php, </a> <a class="link" href="../tags/status-monitoring.html">status-monitoring, </a> <div class="footer"><hr/><br/><hr/><p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br/></p></div></div></div></div> </div></div><script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -368,20 +65,11 @@ Tags: <a href="../tags/bash.html" class="link">bash,
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
-    <!-- End Piwik Tracking Code -->
-    
-    <!-- google analytics -->
-    <script type="text/javascript">
+    </script><noscript>&amp;lt;p&amp;gt;&amp;lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&amp;gt;&amp;lt;/p&amp;gt;</noscript><script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-    </script>
-    <script type="text/javascript">
+    </script><script type="text/javascript">
     try {
     var pageTracker = _gat._getTracker("UA-3704876-6");
     pageTracker._trackPageview();
-    } catch(err) {}</script>
-    <!--end analytics -->
-    </body>
-    </html>
-    
+    } catch(err) {}</script></body></html>
