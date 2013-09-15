@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Terrible Linux - Raymii.org</title>
+        <title>Bash Bits: Debug Logging - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <link href="/s/inc/css/custom.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -110,98 +110,71 @@
                 <div class="inner">
 
 
-           <h2>Terrible Linux</h2>
+           <h2>Bash Bits: Debug Logging</h2>
 <ul class="breadcrumb">
 <li><a href="../" class="link">Home</a>
 <col-md- class="divider">/</col-md-></li>
-<li><a href="../static" class="link">Static</a>
+<li><a href="../snippets" class="link">Snippets</a>
 <col-md- class="divider">/</col-md-></li>
-<li><a href="Terrible-Linux.html" class="link">Terrible Linux</a>
+<li><a href="Bash_Bits_Trap_Control_C_SIGTERM.html" class="link">Bash Bits: Debug Logging</a>
 </li>
 </ul>
 <h6>Author: Remy Van Elst</h6>
-<h6>Date: 01-01-2006</h6>
+<h6>Date: 15-09-2013</h6>
 <br>
-<p><img src="https://raymii.org/s/inc/img/terriblelinux/screen-1.png" alt="screenshot"></p>
+<p>Bash Bits are small examples and tips for Bash Scripts. This bash bit shows you how to add debug logging to a bash script. </p>
 
-<p>I don&#39;t like the changing Linux landscape. I, however love the &quot;old&quot; desktop way of working. You know, with a menu, taskbar, window buttons and a keyboard launcher. I also don&#39;t like a linux distribution that eats up resources. So, except for crunchbang and arch (and gentoo) there are at the moment no workable out of the box distro&#39;s for me which I know and like.
-I used to like suse, mint and mandrake. Mandrake is no more,Ssuse is a resource hog, and mint is going the right way with their own desktop.
-Now I know that it is all configurable, but when you have work to do you just want things to work. Tinkering is something for a free weekend, and that is when I customize my arch workstations, sun sparcstation, dos 5.5 monochrome 12 lbs laptop and other exotic hardware.(OS/2, BEOS, DOS, HAIKU, REACTOS)
-So, thats why I made a custom debian respin with remastersys, and the software I use.</p>
+<p><a href="https://raymii.org/s/tags/bash-bits.html">All Bash Bits can be found using this link</a></p>
 
-<p><strong>It is targeted at likeminded people, it requires some linux knowledge and it is very fast on my netbook and main workstation.</strong> </p>
+<p>Debug logging can be very usefull when scripts or programs don&#39;t do what you want. I use it in most of my scripts. </p>
 
-<h5>Whats new in v0.0.3?</h5>
+<p>First we create a simple one line function named <code>debug</code>:</p>
 
-<ul>
-<li>  Terrible Start</li>
-<li>  Audacious instead of exaile</li>
-<li>  Zenmap/Nmap</li>
-<li>  Debian updates, LibreOffice updates, kernel updates</li>
-<li>  Some handy keyboard shortcuts enabled</li>
-<li>  Varous little bugfixes</li>
-</ul>
+<pre><code>function debug() { ((DEBUG_LOG)) &amp;&amp; echo &quot;### $*&quot;; }
+</code></pre>
 
-<h5>Features</h5>
+<p>As you can see, very simple. If the variable <code>DEBUG_LOG</code> is set, then it prints all the text given to the function. If the variable is not set, it does nothing.</p>
 
-<ul>
-<li>  Debian 6 base install with XFCE</li>
-<li>  Libreoffice 3.5</li>
-<li>  <a href="http://devio.us/%7Eclorow/minecraft_deb.cgi">Minecraft</a></li>
-<li>  Geany</li>
-<li>  Audacious</li>
-<li>  Claws mail &amp; Cone for email</li>
-<li>  Google Chrome</li>
-<li>  Various console programs (mutt, irssi, cone</li>
-<li>  <a href="http://sourceforge.net/projects/pacmanager/">PAC (tabbed putty)</a></li>
-<li>  Kupfer</li>
-<li>  Shiki-wise XFCE theme</li>
-<li>  Kupfer</li>
-<li>  OpenSSH by default (root login disabled)</li>
-<li>  Pidgin</li>
-<li>  Filezilla&gt;</li>
-<li>  Zenmap %2B Nmap</li>
-<li>  Networkmanager (with pptp, openvpn, 3g support and cnetworkmanager (command line client))</li>
-</ul>
+<p>Now if we want to debug log something, we place the following line in our script:</p>
 
-<p>It is a remastersys dist, the installer is advanced, and i have no idea if I will update this project. </p>
+<pre><code>debug &quot;This is debug output&quot;.
+</code></pre>
 
-<p>It is a hybrid iso, you can either burn it or dd it to an USB drive.
-*<em>IT IS NOT READY FOR PRODUCTION, INSERT USUAL BETA SOFTWARE BLABLA HERE</em></p>
+<p>When we want to see the debug logging, before we run the script, we set the variable <code>DEBUG_LOG</code> to 1:</p>
 
-<p>So, use it at your own risk. By the way, the name is just a little joke.</p>
+<pre><code>export DEBUG_LOG=1
+# or just for this script run:
+DEBUG_LOG=1 ./script.sh
+</code></pre>
 
-<h3>Downloads</h3>
+<p>Example with debug logging:</p>
 
-<p><a href="http://raymii.org/s/inc/downloads/terrible-0.0.3.torrent">DOWNLOAD VERSION 0.0.3 TORRENT</a>
-MD5 of the 0.0.3 ISO: 3dcbf471ac9817c853c6165d4e2a787f </p>
+<pre><code>[10:52:51] [remy@gateway] [ ~/conf (master) ]
+$ export DEBUG_LOG=1
+[10:52:56] [remy@gateway] [ ~/conf (master) ]
+$ ./setup.sh
+### vimrc done
+### screenrc done
+### bash done
+</code></pre>
 
-<p><a href="http://raymii.org/s/inc/downloads/terrible-0.0.3.torrent">DOWNLOAD VERSION 0.0.2 TORRENT</a>
-MD5 of the 0.0.2 ISO: a262ce7f499b17b000869b0947150f55 </p>
+<p>Example without debug logging:</p>
 
-<h5>Known Bugs</h5>
-
-<ul>
-<li>  None yet found</li>
-</ul>
-
-<h5>What was new in 0.0.2</h5>
-
-<ul>
-<li>  Size cleanup, from 1.1GB to 880 MB</li>
-<li>  Added filezilla</li>
-<li>  Replaced Wicd with Networkmanager</li>
-<li>  Fixed wifi bugs</li>
-<li>  New SLiM login theme</li>
-<li>  New grub bootloader theme</li>
-<li>  Added a clipboard manager</li>
-<li>  Chrome addons (adblock and privacy enhanchers)</li>
-<li>  Small config tweaks</li>
-</ul>
+<pre><code>[10:53:11] [remy@gateway] [ ~/conf (master) ]
+$ unset DEBUG_LOG
+[10:53:11] [remy@gateway] [ ~/conf (master) ]
+$ ./setup.sh
+</code></pre>
 <hr>
-Tags: <a href="../tags/static.html" class="link">static, 
+Tags: <a href="../tags/bash.html" class="link">bash, 
 </a>
-<a href="../tags/terrible-linux.html" class="link">terrible-linux, 
+<a href="../tags/bash-bits.html" class="link">bash-bits, 
+</a>
+<a href="../tags/debug.html" class="link">debug, 
+</a>
+<a href="../tags/logging.html" class="link">logging, 
+</a>
+<a href="../tags/shell.html" class="link">shell, 
 </a>
 <div class="footer">
                 <hr />
