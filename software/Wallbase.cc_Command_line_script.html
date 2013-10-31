@@ -1,163 +1,15 @@
-
-    <!DOCTYPE html>
-    <html lang="en">
-        <head>
-        <title>Wallbase.cc commandline bash wget downloader - Raymii.org</title>
-        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
-        <link href="/s/inc/css/custom.css" rel="stylesheet" />
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
-    </head>
-    <body>
-        <a id="top-of-page"></a>
-        <div class="container-fluid ">
-        <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-            <div class="col-md-3 well"> 
-                <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org</a></h3>
-                <h6>Quis custodiet ipsos custodes?</h6>
-                <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
-            </div>
-            <div class="col-md-4 green-block">
-                    <h3>Featured Items</h3>
-    <a href="/s/tutorials/Ansible_Deployment_Framework.html" class="whitelink">Ansible Deployment Framework</a>
-<br />
-<a href="/s/tutorials/Pass_the_SSL_Labs_Test_on_Apache2_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html" class="whitelink">Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack   Disable SSLv2   Enable PFS)</a>
-<br />
-<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
-<br />
-<a href="/s/tutorials/VMWare-ESXi-5-USB-installer.html" class="whitelink">VMWare ESXi 5 USB installer</a>
-<br />
-
-        </div>
-        <div class="col-md-4 green-block">
-                <h3>Featured Items</h3>
-    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
-<br />
-<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
-<br />
-<a href="/s/software/Nopriv-IMAP-backup.html" class="whitelink">Nopriv IMAP backup</a>
-<br />
-<a href="/s/tutorials/Pass_the_SSL_Labs_Test_on_NGINX_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html" class="whitelink">Pass the SSL Labs Test on NGINX (Mitigate the CRIME and BEAST attack   Disable SSLv2   Enable PFS)</a>
-<br />
-
-            
-        </div>
-    </div>
-    
-    </div>
-    <div class="row-fluid">
-    <div class="col-md-11 col-md-offset-1">
-    
-
-    <div class="col-md-3">
-    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
-<li><a href="/s/" class="link">Home</a>
-</li>
-<li><a href="/s/static/Contact.html" class="link">Contact</a>
-</li>
-<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
-</li>
-<li><a href="/s/static/Free_Raspberry_Pi.html" class="link">Free Raspberry Pi</a>
-</li>
-<li><a href="/s/static/Hosted_Piwik.html" class="link">Hosted Piwik</a>
-</li>
-<li><a href="/s/static/Sparkling_Network.html" class="link">Sparkling Network</a>
-</li>
-<li><a href="/s/static/Terrible-Linux.html" class="link">Terrible Linux</a>
-</li>
-</ul>
-<h3>Categories</h3>
-<ul class="nav nav-pills nav-stacked">
-<li><a href="/s/articles" class="link">Articles</a>
-</li>
-<li><a href="/s/snippets" class="link">Snippets</a>
-</li>
-<li><a href="/s/software" class="link">Software</a>
-</li>
-<li><a href="/s/tutorials" class="link">Tutorials</a>
-</li>
-<li><a href="/s/everything.html" class="link">All Items</li>
-</a>
-</ul>
-               <!-- advertisement start -->
-                <hr class="alt2">
-                <h3>Donate</h3>
-                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p />
-                <script id='flattrbtn'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=Remy&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('flattrbtn');</script><br />
-                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-                <input type="hidden" name="cmd" value="_s-xclick">
-                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
-                ">
-                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-                <img alt="" border="0" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
-                </form>
-                <script type="text/javascript"><!--
+<!DOCTYPE html><html lang="en"><head><title>Wallbase.cc commandline bash wget downloader - Raymii.org</title><link href="/s/inc/css/bootstrap.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet"/><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><meta content="IE=edge" http-equiv="X-UA-Compatible"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-10 col-md-offset-1"><div class="col-md-3 well"> <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org</a></h3><h6>Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><div class="col-md-4 green-block"><h3>Featured Items</h3><a class="whitelink" href="/s/tutorials/Ansible_Deployment_Framework.html">Ansible Deployment Framework</a> <br/><a class="whitelink" href="/s/tutorials/Pass_the_SSL_Labs_Test_on_Apache2_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html">Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack Disable SSLv2 Enable PFS)</a> <br/><a class="whitelink" href="/s/articles/Small_Linux_PCs.html">Small Linux PCs</a> <br/><a class="whitelink" href="/s/tutorials/VMWare-ESXi-5-USB-installer.html">VMWare ESXi 5 USB installer</a> <br/></div><div class="col-md-4 green-block"><h3>Featured Items</h3><a class="whitelink" href="/s/software/Bash_PHP_Server_Status_Monitor.html">Bash PHP Server Status Monitor</a> <br/><a class="whitelink" href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html">IPSEC L2TP vpn with Ubuntu 12.04</a> <br/><a class="whitelink" href="/s/software/Nopriv-IMAP-backup.html">Nopriv IMAP backup</a> <br/><a class="whitelink" href="/s/tutorials/Pass_the_SSL_Labs_Test_on_NGINX_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html">Pass the SSL Labs Test on NGINX (Mitigate the CRIME and BEAST attack Disable SSLv2 Enable PFS)</a> <br/></div></div></div><div class="row-fluid"><div class="col-md-11 col-md-offset-1"><div class="col-md-3"><h3>Menu</h3><ul class="nav nav-pills nav-stacked"><li><a class="link" href="/s/">Home</a> </li><li><a class="link" href="/s/static/Contact.html">Contact</a> </li><li><a class="link" href="/s/static/Disclaimer.html">Disclaimer</a> </li><li><a class="link" href="/s/static/Free_Raspberry_Pi.html">Free Raspberry Pi</a> </li><li><a class="link" href="/s/static/Free_Raspberry_Pi_October_2013_Winners.html">Free Raspberry Pi October 2013 Winners</a> </li><li><a class="link" href="/s/static/Hosted_Piwik.html">Hosted Piwik</a> </li><li><a class="link" href="/s/static/Sparkling_Network.html">Sparkling Network</a> </li><li><a class="link" href="/s/static/Terrible-Linux.html">Terrible Linux</a> </li></ul><h3>Categories</h3><ul class="nav nav-pills nav-stacked"><li><a class="link" href="/s/articles">Articles</a> </li><li><a class="link" href="/s/snippets">Snippets</a> </li><li><a class="link" href="/s/software">Software</a> </li><li><a class="link" href="/s/tutorials">Tutorials</a> </li><li><a class="link" href="/s/everything.html">All Items</a></li><a class="link" href="/s/everything.html"></a> </ul><hr class="alt2"/><h3>Donate</h3><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p><script id="flattrbtn">(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=Remy&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('flattrbtn');</script><br/></p><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input name="cmd" type="hidden" value="_s-xclick"/><input name="encrypted" type="hidden" value="-----BEGIN PKCS7-----MIIHLwYJKoZIhvcNAQcEoIIHIDCCBxwCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYB1lOyoMm13xLpyJ06VTAajIRPFl46+yfqSnLQLu1lFfVKmhLtM0Ql+JSnH+LzVuhHLTzXegaPClXjMvhTpp0byApM4YlCi1czJKxBGb2+qw6il53H1g7L1qlfm95Jd80s80C9r+b3ituTXuYhb4Eb7PQ6Cyy6ca9raUgYVv90pETELMAkGBSsOAwIaBQAwgawGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIS23AJUhGuB6AgYhcWUVn4DMqTx2Ai2Ql9TQjkiAC3tXScmjpq/10b0P6DTIIg5OSPIly9C2gLMEcMCZ8aNuLT3kp+2Hn+nDuzsdY/4QU8zOFC4STyDrAn1gqe8q4pPGADqE0KUiWRAJR8eTx9paclkiaxDicr3D0uF409IRLIe/v1S6ZV9JOlQk5Xys9cRfAuhTioIIDhzCCA4MwggLsoAMCAQICAQAwDQYJKoZIhvcNAQEFBQAwgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMB4XDTA0MDIxMzEwMTMxNVoXDTM1MDIxMzEwMTMxNVowgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBR07d/ETMS1ycjtkpkvjXZe9k+6CieLuLsPumsJ7QC1odNz3sJiCbs2wC0nLE0uLGaEtXynIgRqIddYCHx88pb5HTXv4SZeuv0Rqq4+axW9PLAAATU8w04qqjaSXgbGLP3NmohqM6bV9kZZwZLR/klDaQGo1u9uDb9lr4Yn+rBQIDAQABo4HuMIHrMB0GA1UdDgQWBBSWn3y7xm8XvVk/UtcKG+wQ1mSUazCBuwYDVR0jBIGzMIGwgBSWn3y7xm8XvVk/UtcKG+wQ1mSUa6GBlKSBkTCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb22CAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOBgQCBXzpWmoBa5e9fo6ujionW1hUhPkOBakTr3YCDjbYfvJEiv/2P+IobhOGJr85+XHhN0v4gUkEDI8r2/rNk1m0GA8HKddvTjyGw/XqXa+LSTlDYkqI8OwR8GEYj4efEtcRpRYBxV8KxAW93YDWzFGvruKnnLbDAF6VR5w/cCMn5hzGCAZowggGWAgEBMIGUMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNvbQIBADAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTMwODAzMTQxNTQ2WjAjBgkqhkiG9w0BCQQxFgQUhdv5C5Xqr+zLV4qAlrYYqFV/fgYwDQYJKoZIhvcNAQEBBQAEgYBaGzom1dMP+CEmGQIZfP6ynZyRIc+4uQuvKoeRlkHwOj9F4c8QqXwBq/fyMogtZ/iES1oTifarxzQ3gesy/dSSs+IxG6YLICQXsAWNVnYL7u9of1xcCyJh3QoH/elgrjdHw0KCeBWNZPlbzEKSwTJ08yBsuKFR8zSqz8pIjC6XrQ==-----END PKCS7-----"/><input alt="PayPal - The safer, easier way to pay online!" border="0" name="submit" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" type="image"/><img alt="" border="0" height="1" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1"/></form><script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 /* Raymii-2 */
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script>
-                <script type="text/javascript"
-                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-                </script>    
-                <!-- advertisement end -->
-
-           </div>  
-           <div class="col-md-7"> 
-                <div class="inner">
-
-
-           <h2>Wallbase.cc commandline bash wget downloader</h2>
-<ul class="breadcrumb">
-<li><a href="../" class="link">Home</a>
-<col-md- class="divider">/</col-md-></li>
-<li><a href="../software" class="link">Software</a>
-<col-md- class="divider">/</col-md-></li>
-<li><a href="Wallbase.cc_Command_line_script.html" class="link">Wallbase.cc commandline bash wget downloader</a>
-</li>
-</ul>
-<h6>Author: Remy Van Elst</h6>
-<h6>Date: 22-07-2012</h6>
-<br>
-<p>I mostly get my wallpapers from the website <a href="http://wallbase.cc">Wallbase.cc</a>. But the site requires a lot of javascript and ajax, and it is hard to get a lot of wallpapers at once.
-I&#39;ve written a script for this problem, it lets you grep wallbase from the cli!  </p>
-
-<h5>Features</h5>
-
-<ul>
-<li>Bash, wget, awk only, nothing else required (well, active internet connection)</li>
-<li>Get the newest wallpapers from wallbase.cc</li>
-<li>Search for a term and get all the wallpapers from the first page at wallbase.cc</li>
-<li>Get random wallpapers</li>
-<li>Duplicate check, removes duplicate wallpapers (filesize &amp; md5sum)</li>
-</ul>
-
-<h5>Usage</h5>
-
-<p>Very simple, first copy and paste the script into a file (wall.sh) and chmod that so that you can execute it.
-    chmod +x ./wall.sh
-    ./wall.sh r for random
-    ./wall.sh n for newest
-    ./wall.sh s TERM for search TERM.</p>
-
-<p>So to download forest wallpapers:
-    ./wall.sh s forest    </p>
-
-<p>If you want to get a lot of random wallpapers then execute this:
-    while true; do ./wall.sh r; sleep 1; done
-and kill that afet 10 minutes...</p>
-
-<h5>The Script</h5>
-
-<pre><code>#!/bin/bash
+                </script><script src="http://pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
+                </script></div> <div class="col-md-7"> <div class="inner"><h2>Wallbase.cc commandline bash wget downloader</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a> <col-md- class="divider">/</col-md-></li><li><a class="link" href="../software">Software</a> <col-md- class="divider">/</col-md-></li><li><a class="link" href="Wallbase.cc_Command_line_script.html">Wallbase.cc commandline bash wget downloader</a> </li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 22-07-2012</h6><br/><p>I mostly get my wallpapers from the website <a href="http://wallbase.cc">Wallbase.cc</a>. But the site requires a lot of javascript and ajax, and it is hard to get a lot of wallpapers at once. I've written a script for this problem, it lets you grep wallbase from the cli! </p><h5>Features</h5><ul><li>Bash, wget, awk only, nothing else required (well, active internet connection)</li><li>Get the newest wallpapers from wallbase.cc</li><li>Search for a term and get all the wallpapers from the first page at wallbase.cc</li><li>Get random wallpapers</li><li>Duplicate check, removes duplicate wallpapers (filesize &amp; md5sum)</li></ul><h5>Usage</h5><p>Very simple, first copy and paste the script into a file (wall.sh) and chmod that so that you can execute it.chmod +x ./wall.sh ./wall.sh r for random./wall.sh n for newest./wall.sh s TERM for search TERM.</p><p>So to download forest wallpapers:./wall.sh s forest </p><p>If you want to get a lot of random wallpapers then execute this:while true; do ./wall.sh r; sleep 1; done and kill that afet 10 minutes...</p><h5>The Script</h5><pre><code>#!/bin/bash
 #Copyright (c) 2012 Remy van Elst
 #Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the &quot;Software&quot;), to deal
+#of this software and associated documentation files (the "Software"), to deal
 #in the Software without restriction, including without limitation the rights
 #to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 #copies of the Software, and to permit persons to whom the Software is
@@ -166,7 +18,7 @@ and kill that afet 10 minutes...</p>
 #The above copyright notice and this permission notice shall be included in
 #all copies or substantial portions of the Software.
 #
-#THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -174,101 +26,59 @@ and kill that afet 10 minutes...</p>
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 #first the vars
-BASEURL=&quot;http://wallbase.cc/search/&quot;
-MODE=&quot;$1&quot;
-SEARCH=&quot;$2&quot;
-NEWWALLURL=&quot;http://wallbase.cc/search/0/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers&quot;
-WALLR=&quot;http://wallbase.cc/random/&quot;
-CONFIGS=&quot;/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers&quot;
+BASEURL="http://wallbase.cc/search/"
+MODE="$1"
+SEARCH="$2"
+NEWWALLURL="http://wallbase.cc/search/0/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers"
+WALLR="http://wallbase.cc/random/"
+CONFIGS="/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers"
 
 #now see what we need to do
-case &quot;$1&quot; in
+case "$1" in
    s)
    if [ -e $2 ]; then
-      echo &quot;I need search terms&quot;
+      echo "I need search terms"
       exit 1
    fi
-   GETURL=&quot;$BASEURL$SEARCH$CONFIGS&quot;
+   GETURL="$BASEURL$SEARCH$CONFIGS"
    ;;
    n)
-   GETURL=&quot;$NEWWALLURL&quot;
+   GETURL="$NEWWALLURL"
    ;;
    r)
-   GETURL=&quot;$WALLR&quot;
+   GETURL="$WALLR"
    ;;
    *)
-   echo -e &quot;Usage:\n$0 r for random\n$0 n for newest\n$0 s TERM for search TERM.&quot;
+   echo -e "Usage:\n$0 r for random\n$0 n for newest\n$0 s TERM for search TERM."
    exit 1
    ;;
 esac
 
 GETURL=$WALLR
 #get the wallpaper overview page, grep the wallpaper page urls and dump them into a file for wget
-wget -q --referer=&quot;http://www.google.com&quot; --user-agent=&quot;Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0&quot; $GETURL -O- | egrep -o &quot;http://[^[:space:]]*&quot; | grep &quot;/wallpaper/&quot; | sed &#39;s/&quot;//g&#39; &gt; ./wallist
+wget -q --referer="http://www.google.com" --user-agent="Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0" $GETURL -O- | egrep -o "http://[^[:space:]]*" | grep "/wallpaper/" | sed 's/"//g' > ./wallist
 
 #put the url file in a variable, but first backup IFS and later restore it.
 OLDIFS=$IFS
-IFS=&#39;
-&#39;
-urlsa=( $( &lt; ./wallist ) )
+IFS='
+'
+urlsa=( $( < ./wallist ) )
 IFS=$OLDIFS
 
 #now loop trough the urls and wget the page, then grep the wallpaper URL, and then wget the wallpaper
-for i in &quot;${urlsa[@]}&quot;
+for i in "${urlsa[@]}"
 do
   echo $i
-  wget -vv --referer=&quot;http://www.google.com&quot; --user-agent=&quot;Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0&quot; $i -O- | wget -vv -nd -nc `egrep -o &quot;http://[^[:space:]]*.jpg&quot;`
+  wget -vv --referer="http://www.google.com" --user-agent="Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0" $i -O- | wget -vv -nd -nc `egrep -o "http://[^[:space:]]*.jpg"`
 done
 
 #now a duplicate check...
-find -not -empty -type f -printf &quot;%s\n&quot; | sort -rn | uniq -d | xargs -I{} -n1 find -type f -size {}c -print0 | xargs -0 md5sum | sort | uniq -w32 | cut -d&quot; &quot; -f3 | xargs -P 10 -r -n 1 rm
-</code></pre>
-
-<h5>Notes</h5>
-
-<p>If you have any tips, questions or comments, please use the form below.<br>
-<strong>Don&#39;t go and hammer the wallbase.cc servers, use this script responsibly</strong>  </p>
-
-<!-- comments start -->
-
-<p><script>
-var idcomments<em>acct = &#39;cc7c735f8ad159864ee665ab582df619&#39;;
+find -not -empty -type f -printf "%s\n" | sort -rn | uniq -d | xargs -I{} -n1 find -type f -size {}c -print0 | xargs -0 md5sum | sort | uniq -w32 | cut -d" " -f3 | xargs -P 10 -r -n 1 rm
+</code></pre><h5>Notes</h5><p>If you have any tips, questions or comments, please use the form below.<br/><strong>Don't go and hammer the wallbase.cc servers, use this script responsibly</strong> </p><p><script>
+var idcomments<em>acct = 'cc7c735f8ad159864ee665ab582df619';
 var idcomments</em>post<em>id;
 var idcomments</em>post_url;
-</script>
-<span id="IDCommentsPostTitle" style="display:none"></span>
-<script type='text/javascript' src='http://www.intensedebate.com/js/genericCommentWrapperV2.js'></script>
-&lt;!-- comments end --&gt;</p>
-<hr>
-Tags: <a href="../tags/bash.html" class="link">bash, 
-</a>
-<a href="../tags/command-line.html" class="link">command-line, 
-</a>
-<a href="../tags/wallbase.html" class="link">wallbase, 
-</a>
-<a href="../tags/wallbase.cc.html" class="link">wallbase.cc, 
-</a>
-<a href="../tags/wallpapers.html" class="link">wallpapers, 
-</a>
-<a href="../tags/wget.html" class="link">wget, 
-</a>
-<div class="footer">
-                <hr />
-                <br />
-        
-                <hr>
-
-                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
-
-                </div>
-            </div>
-        </div>
-    </div>  
-    </div>
-    </div>
-     
-    <!-- Piwik --> 
-    <script type="text/javascript">
+</script><span id="IDCommentsPostTitle" style="display:none"></span><script src="http://www.intensedebate.com/js/genericCommentWrapperV2.js" type="text/javascript"></script> &lt;!-- comments end --&gt;</p><hr/> Tags: <a class="link" href="../tags/bash.html">bash, </a> <a class="link" href="../tags/command-line.html">command-line, </a> <a class="link" href="../tags/wallbase.html">wallbase, </a> <a class="link" href="../tags/wallbase.cc.html">wallbase.cc, </a> <a class="link" href="../tags/wallpapers.html">wallpapers, </a> <a class="link" href="../tags/wget.html">wget, </a> <div class="footer"><hr/><br/><hr/><p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br/></p></div></div></div></div> </div></div><script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -277,20 +87,11 @@ Tags: <a href="../tags/bash.html" class="link">bash,
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
-    <!-- End Piwik Tracking Code -->
-    
-    <!-- google analytics -->
-    <script type="text/javascript">
+    </script><noscript>&amp;lt;p&amp;gt;&amp;lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&amp;gt;&amp;lt;/p&amp;gt;</noscript><script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-    </script>
-    <script type="text/javascript">
+    </script><script type="text/javascript">
     try {
     var pageTracker = _gat._getTracker("UA-3704876-6");
     pageTracker._trackPageview();
-    } catch(err) {}</script>
-    <!--end analytics -->
-    </body>
-    </html>
-    
+    } catch(err) {}</script></body></html>
