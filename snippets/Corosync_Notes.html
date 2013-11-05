@@ -38,7 +38,9 @@ nginx                oracle               oralsnr              pgsql
 pingd                portblock            postfix              proftpd
 rsyncd               scsi2reservation     sfex                 symlink
 syslog-ng            tomcat               vmware
-</code></pre><h4>Add simple apache resource</h4><pre><code>crm configure primitive failover-apache lsb::apache op monitor interval=15s
+</code></pre><h4>Add simple apache resource</h4><pre><code>crm configure primitive apache-ha ocf:heartbeat:apache params configfile=/etc/apache2/apachd2.conf op monitor interval=1min
+</code></pre><h4>Make sure Apache and the Virtual IP are on the same node</h4><pre><code>crm configure colocation apache-with-ip inf: apache-ha failover-ip
+</code></pre><h4>Make sure that when either one crashes they both are recovered on another node:</h4><pre><code>crm configure order apache-after-ip mandatory: failover-ip apache-ha
 </code></pre><h4>Remove a node from the cluster</h4><pre><code>crm node delete $NODENAME
 </code></pre><h4>Stop all cluster resources</h4><pre><code>crm configure property stop-all-resources=true
 </code></pre><h4>Erase config</h4><pre><code>crm configure erase
