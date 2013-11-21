@@ -1,65 +1,218 @@
-<!DOCTYPE html><html lang="en"><head><title>Chef-Solo code snippets - Raymii.org</title><link href="/s/inc/css/bootstrap.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet"/><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><meta content="IE=edge" http-equiv="X-UA-Compatible"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-10 col-md-offset-1"><div class="col-md-3 well"> <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org</a></h3><h6>Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><div class="col-md-4 green-block"><h3>Featured Items</h3><a class="whitelink" href="/s/tutorials/Ansible_Deployment_Framework.html">Ansible Deployment Framework</a> <br/><a class="whitelink" href="/s/tutorials/Pass_the_SSL_Labs_Test_on_Apache2_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html">Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack Disable SSLv2 Enable PFS)</a> <br/><a class="whitelink" href="/s/articles/Small_Linux_PCs.html">Small Linux PCs</a> <br/><a class="whitelink" href="/s/tutorials/VMWare-ESXi-5-USB-installer.html">VMWare ESXi 5 USB installer</a> <br/></div><div class="col-md-4 green-block"><h3>Featured Items</h3><a class="whitelink" href="/s/software/Bash_PHP_Server_Status_Monitor.html">Bash PHP Server Status Monitor</a> <br/><a class="whitelink" href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html">IPSEC L2TP vpn with Ubuntu 12.04</a> <br/><a class="whitelink" href="/s/software/Nopriv-IMAP-backup.html">Nopriv IMAP backup</a> <br/><a class="whitelink" href="/s/tutorials/Pass_the_SSL_Labs_Test_on_NGINX_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html">Pass the SSL Labs Test on NGINX (Mitigate the CRIME and BEAST attack Disable SSLv2 Enable PFS)</a> <br/></div></div></div><div class="row-fluid"><div class="col-md-11 col-md-offset-1"><div class="col-md-3"><h3>Menu</h3><ul class="nav nav-pills nav-stacked"><li><a class="link" href="/s/">Home</a> </li><li><a class="link" href="/s/static/Contact.html">Contact</a> </li><li><a class="link" href="/s/static/Disclaimer.html">Disclaimer</a> </li><li><a class="link" href="/s/static/Hosted_Piwik.html">Hosted Piwik</a> </li><li><a class="link" href="/s/static/Sparkling_Network.html">Sparkling Network</a> </li></ul><h3>Categories</h3><ul class="nav nav-pills nav-stacked"><li><a class="link" href="/s/articles">Articles</a> </li><li><a class="link" href="/s/snippets">Snippets</a> </li><li><a class="link" href="/s/software">Software</a> </li><li><a class="link" href="/s/tutorials">Tutorials</a> </li><li><a class="link" href="/s/everything.html">All Items</a></li><a class="link" href="/s/everything.html"></a> </ul><hr class="alt2"/><h3>Donate</h3><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p><script id="flattrbtn">(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=Remy&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('flattrbtn');</script><br/></p><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input name="cmd" type="hidden" value="_s-xclick"/><input name="encrypted" type="hidden" value="-----BEGIN PKCS7-----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-----END PKCS7-----"/><input alt="PayPal - The safer, easier way to pay online!" border="0" name="submit" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" type="image"/><img alt="" border="0" height="1" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1"/></form><script type="text/javascript"><!--
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Chef-Solo code snippets - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="col-md-3 well"> 
+                <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org</a></h3>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
+            </div>
+            <div class="col-md-4 green-block">
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible_Deployment_Framework.html" class="whitelink">Ansible Deployment Framework</a>
+<br />
+<a href="/s/tutorials/Pass_the_SSL_Labs_Test_on_Apache2_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html" class="whitelink">Pass the SSL Labs Test on Apache2 (Mitigate the CRIME and BEAST attack   Disable SSLv2   Enable PFS)</a>
+<br />
+<a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a>
+<br />
+<a href="/s/tutorials/VMWare-ESXi-5-USB-installer.html" class="whitelink">VMWare ESXi 5 USB installer</a>
+<br />
+
+        </div>
+        <div class="col-md-4 green-block">
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a>
+<br />
+<a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a>
+<br />
+<a href="/s/software/Nopriv-IMAP-backup.html" class="whitelink">Nopriv IMAP backup</a>
+<br />
+<a href="/s/tutorials/Pass_the_SSL_Labs_Test_on_NGINX_(Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS).html" class="whitelink">Pass the SSL Labs Test on NGINX (Mitigate the CRIME and BEAST attack   Disable SSLv2   Enable PFS)</a>
+<br />
+
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="col-md-11 col-md-offset-1">
+    
+
+    <div class="col-md-3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked">
+<li><a href="/s/" class="link">Home</a>
+</li>
+<li><a href="/s/static/Contact.html" class="link">Contact</a>
+</li>
+<li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a>
+</li>
+<li><a href="/s/static/Hosted_Piwik.html" class="link">Hosted Piwik</a>
+</li>
+<li><a href="/s/static/Sparkling_Network.html" class="link">Sparkling Network</a>
+</li>
+</ul>
+<h3>Categories</h3>
+<ul class="nav nav-pills nav-stacked">
+<li><a href="/s/articles" class="link">Articles</a>
+</li>
+<li><a href="/s/snippets" class="link">Snippets</a>
+</li>
+<li><a href="/s/software" class="link">Software</a>
+</li>
+<li><a href="/s/tutorials" class="link">Tutorials</a>
+</li>
+<li><a href="/s/everything.html" class="link">All Items</li>
+</a>
+</ul>
+               <!-- advertisement start -->
+                <hr class="alt2">
+                <h3>Donate</h3>
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Need a VPS server? InceptionHosting has excellent VPS servers located in the USA or NL!</a><p />
+                <script id='flattrbtn'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=Remy&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('flattrbtn');</script><br />
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                <input type="hidden" name="cmd" value="_s-xclick">
+                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                ">
+                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                <img alt="" border="0" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
+                </form>
+                <script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 /* Raymii-2 */
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script><script src="http://pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
-                </script></div> <div class="col-md-7"> <div class="inner"><h2>Chef-Solo code snippets</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a> <col-md- class="divider">/</col-md-></li><li><a class="link" href="../snippets">Snippets</a> <col-md- class="divider">/</col-md-></li><li><a class="link" href="Chef-solo_code_snippets.html">Chef-Solo code snippets</a> </li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 21-09-2012</h6><br/><p>This article is a collection of snippets for Chef. Chef is an open-source systems integration framework supporting Linux, Windows, BSD and more. <a href="http://www.opscode.com/chef/">For more info about chef, click here</a></p><p>These snippets are tested and working with Ruby 1.9.2 and Chef-solo on Ubuntu 10.04, 12.04 and CentOS 5 and 6.</p><h5>Do something on a server, based on server name</h5><p>Create a new recipe, name it <em>server-specific-config</em> for example. In the data_bags/servers/$servername.json file, make sure the name matches this one.</p><h6>server-specific-config/recipes/default.rb</h6><pre><code>attribs = get_configuration_attribs(node.hostname)
-server_role = attribs['node_data']['role'] 
-server_name = attribs['id'] 
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+
+           </div>  
+           <div class="col-md-7"> 
+                <div class="inner">
+
+
+           <h2>Chef-Solo code snippets</h2>
+<ul class="breadcrumb">
+<li><a href="../" class="link">Home</a>
+<col-md- class="divider">/</col-md-></li>
+<li><a href="../snippets" class="link">Snippets</a>
+<col-md- class="divider">/</col-md-></li>
+<li><a href="Chef-solo_code_snippets.html" class="link">Chef-Solo code snippets</a>
+</li>
+</ul>
+<h6>Author: Remy Van Elst</h6>
+<h6>Date: 21-09-2012</h6>
+<br>
+<p>This article is a collection of snippets for Chef. Chef is an open-source systems integration framework supporting Linux, Windows, BSD and more. <a href="http://www.opscode.com/chef/">For more info about chef, click here</a></p>
+
+<p>These snippets are tested and working with Ruby 1.9.2 and Chef-solo on Ubuntu 10.04, 12.04 and CentOS 5 and 6.</p>
+
+<h5>Do something on a server, based on server name</h5>
+
+<p>Create a new recipe, name it <em>server-specific-config</em> for example. In the data_bags/servers/$servername.json file, make sure the name matches this one.</p>
+
+<h6>server-specific-config/recipes/default.rb</h6>
+
+<pre><code>attribs = get_configuration_attribs(node.hostname)
+server_role = attribs[&#39;node_data&#39;][&#39;role&#39;] 
+server_name = attribs[&#39;id&#39;] 
 
 case server_name
-  when "vps5", "vps6", "vps7"
+  when &quot;vps5&quot;, &quot;vps6&quot;, &quot;vps7&quot;
     # these are the SQL servers which should have specific databases as defind in mydatabases recipe
-    include_recipe "mysql::server"
-    include_recipe "database"
-    include_recipe "mydatabases"
-  when "vps4", "vps3", "vps2"
+    include_recipe &quot;mysql::server&quot;
+    include_recipe &quot;database&quot;
+    include_recipe &quot;mydatabases&quot;
+  when &quot;vps4&quot;, &quot;vps3&quot;, &quot;vps2&quot;
     #these are the webservers which act as reverse-proxy, and should not have lighttpd
-    include_recipe "nginx"
-    include_recipe "raymiiorg-revproxy"
+    include_recipe &quot;nginx&quot;
+    include_recipe &quot;raymiiorg-revproxy&quot;
 end
-</code></pre><h6>data_bags/servers/$servername.json</h6><pre><code>{
-    "id": "vps5",
-    "node_data": {
-        "description": "MySQL database slave 1",
-        "role": "database"
+</code></pre>
+
+<h6>data_bags/servers/$servername.json</h6>
+
+<pre><code>{
+    &quot;id&quot;: &quot;vps5&quot;,
+    &quot;node_data&quot;: {
+        &quot;description&quot;: &quot;MySQL database slave 1&quot;,
+        &quot;role&quot;: &quot;database&quot;
         }
 }
-</code></pre><h5>Do something on a server, based on server role</h5><p>Create a new recipe, name it <em>server-specific-config</em> for example. In the data_bags/servers/$servername.json file, make sure the role matches this one. See below for an example $servername.json file.</p><h6>server-specific-config/recipes/default.rb</h6><pre><code>attribs = get_configuration_attribs(node.hostname)
-server_role = attribs['node_data']['role'] 
-server_name = attribs['id'] 
+</code></pre>
+
+<h5>Do something on a server, based on server role</h5>
+
+<p>Create a new recipe, name it <em>server-specific-config</em> for example. In the data_bags/servers/$servername.json file, make sure the role matches this one. See below for an example $servername.json file.</p>
+
+<h6>server-specific-config/recipes/default.rb</h6>
+
+<pre><code>attribs = get_configuration_attribs(node.hostname)
+server_role = attribs[&#39;node_data&#39;][&#39;role&#39;] 
+server_name = attribs[&#39;id&#39;] 
 
 case server_role
-  when "webserver"
+  when &quot;webserver&quot;
     #non-reverse proxy servers should have lighttpd.
-    include_recipe "lighttpd"
-    include_recipe "mysql::client"
-  when "database"
+    include_recipe &quot;lighttpd&quot;
+    include_recipe &quot;mysql::client&quot;
+  when &quot;database&quot;
       ##generic database servers should be empty
-      include_recipe "mysql::server"
-      include_recipe "database"
-      gem_package "mysql" do
+      include_recipe &quot;mysql::server&quot;
+      include_recipe &quot;database&quot;
+      gem_package &quot;mysql&quot; do
         action :install
         #ignore_failure true
       end
-      package "memcached" do
+      package &quot;memcached&quot; do
         action :install
       end
 end
-</code></pre><h6>data_bags/servers/$servername.json</h6><pre><code>{
-    "id": "vps9",
-    "node_data": {
-        "description": "Lighttpd webserver 2",
-        "role": "webserver"
+</code></pre>
+
+<h6>data_bags/servers/$servername.json</h6>
+
+<pre><code>{
+    &quot;id&quot;: &quot;vps9&quot;,
+    &quot;node_data&quot;: {
+        &quot;description&quot;: &quot;Lighttpd webserver 2&quot;,
+        &quot;role&quot;: &quot;webserver&quot;
         }
 }
-</code></pre><h5>MySQL - Create multiple databases and create and add a user to that database</h5><p>Create a new recipe, name it <em>mydatabases</em> for example. Make sure you include this recipe on a database server (see above). This requires the <em>mysql</em> and the <em>database</em> recipe.</p><h6>mydatabases/recipes/default.rb</h6><pre><code>include_recipe "mysql::server"
-include_recipe "database"
+</code></pre>
 
-mysql_connection_info = {:host => "localhost", :username => 'root', :password => node['mysql']['server_root_password']}
+<h5>MySQL - Create multiple databases and create and add a user to that database</h5>
+
+<p>Create a new recipe, name it <em>mydatabases</em> for example. Make sure you include this recipe on a database server (see above). This requires the <em>mysql</em> and the <em>database</em> recipe.</p>
+
+<h6>mydatabases/recipes/default.rb</h6>
+
+<pre><code>include_recipe &quot;mysql::server&quot;
+include_recipe &quot;database&quot;
+
+mysql_connection_info = {:host =&gt; &quot;localhost&quot;, :username =&gt; &#39;root&#39;, :password =&gt; node[&#39;mysql&#39;][&#39;server_root_password&#39;]}
 
 #DB NAME, USER AND PASSWORD ARE REQUIRED!!!
 
@@ -81,118 +234,202 @@ node[:default][:databases].each do |db|
         password db[:password] 
         database_name db[:name]
         privileges [:all]
-        host '%'
+        host &#39;%&#39;
         action :grant
     end
 end
-</code></pre><h6>mydatabases/attributes/default.rb</h6><pre><code>default[:default][:databases] = [
+</code></pre>
+
+<h6>mydatabases/attributes/default.rb</h6>
+
+<pre><code>default[:default][:databases] = [
     {
-        :name => 'database_joomla1',
-        :user => 'database_joomla1_u',
-        :password => 'supersecretpassword'
+        :name =&gt; &#39;database_joomla1&#39;,
+        :user =&gt; &#39;database_joomla1_u&#39;,
+        :password =&gt; &#39;supersecretpassword&#39;
     },
     {
-        :name => 'database_drupal1',
-        :user => 'database_drupal1_u',
-        :password => 'supersecretpassword'
+        :name =&gt; &#39;database_drupal1&#39;,
+        :user =&gt; &#39;database_drupal1_u&#39;,
+        :password =&gt; &#39;supersecretpassword&#39;
     },
     {
-        :name => 'database_drupal2',
-        :user => 'database_drupal2_u',
-        :password => 'supersecretpassword'
+        :name =&gt; &#39;database_drupal2&#39;,
+        :user =&gt; &#39;database_drupal2_u&#39;,
+        :password =&gt; &#39;supersecretpassword&#39;
     },{
-        :name => 'database_raymiiorg_cms',
-        :user => 'database_raymiiorg_cms_u',
-        :password => 'supersecretpassword'
+        :name =&gt; &#39;database_raymiiorg_cms&#39;,
+        :user =&gt; &#39;database_raymiiorg_cms_u&#39;,
+        :password =&gt; &#39;supersecretpassword&#39;
     }
 ]   
-</code></pre><h5>Install multiple packages on a server</h5><p>This can be in a different recipe, or in the server-specific-config recipe, for example just for server vps5.</p><h6>server-specific-config/attributes/default.rb</h6><pre><code>default[:vps5][:packages_to_install] = [
-    "htop",
-    "fail2ban",
-    "vim",
-    "nano",
-    "wget",
-    "curl",
-    "git-core",
-    "build-essential",
-    "mailutils",
+</code></pre>
+
+<h5>Install multiple packages on a server</h5>
+
+<p>This can be in a different recipe, or in the server-specific-config recipe, for example just for server vps5.</p>
+
+<h6>server-specific-config/attributes/default.rb</h6>
+
+<pre><code>default[:vps5][:packages_to_install] = [
+    &quot;htop&quot;,
+    &quot;fail2ban&quot;,
+    &quot;vim&quot;,
+    &quot;nano&quot;,
+    &quot;wget&quot;,
+    &quot;curl&quot;,
+    &quot;git-core&quot;,
+    &quot;build-essential&quot;,
+    &quot;mailutils&quot;,
     ]
-</code></pre><h5>server-specific-config/recipes/default.rb</h5><pre><code>default[:vps5][:packages_to_install].each do |p|
+</code></pre>
+
+<h5>server-specific-config/recipes/default.rb</h5>
+
+<pre><code>default[:vps5][:packages_to_install].each do |p|
   package p do
     action :install
   end
 end
-</code></pre><h5>Remove a list of users</h5><p>Lets say we do not want all those users defaulting on an ubuntu server system. Lets remove them via the server-specific-config recipe.</p><h6>server-specific-config/recipes/default.rb</h6><pre><code>default[:vps5][:users_to_delete].each do |user|
-        user "#{user}" do
+</code></pre>
+
+<h5>Remove a list of users</h5>
+
+<p>Lets say we do not want all those users defaulting on an ubuntu server system. Lets remove them via the server-specific-config recipe.</p>
+
+<h6>server-specific-config/recipes/default.rb</h6>
+
+<pre><code>default[:vps5][:users_to_delete].each do |user|
+        user &quot;#{user}&quot; do
             action :remove
-            username "#{user}"
+            username &quot;#{user}&quot;
         end
 end
-</code></pre><h6>server-specific-config/attributes/default.rb</h6><pre><code>default[:vps5][:users_to_delete] = [
-    "games",
-    "lp",
-    "mail",
-    "news",
-    "uucp",
-    "proxy",
-    "list",
-    "irc",
-    "gnats",
-    "landscape",
+</code></pre>
+
+<h6>server-specific-config/attributes/default.rb</h6>
+
+<pre><code>default[:vps5][:users_to_delete] = [
+    &quot;games&quot;,
+    &quot;lp&quot;,
+    &quot;mail&quot;,
+    &quot;news&quot;,
+    &quot;uucp&quot;,
+    &quot;proxy&quot;,
+    &quot;list&quot;,
+    &quot;irc&quot;,
+    &quot;gnats&quot;,
+    &quot;landscape&quot;,
     ]
-</code></pre><h5>Simple copy-paste snippets</h5><p>Just for me in case I forget them.</p><h6>Add a user + group</h6><pre><code>group "remy" do
+</code></pre>
+
+<h5>Simple copy-paste snippets</h5>
+
+<p>Just for me in case I forget them.</p>
+
+<h6>Add a user + group</h6>
+
+<pre><code>group &quot;remy&quot; do
     action :create
-    group_name "remy"
+    group_name &quot;remy&quot;
     gid 3000
 end     
 
-user "remy" do
-    username "remy"
-    comment "Remy van Elst"
+user &quot;remy&quot; do
+    username &quot;remy&quot;
+    comment &quot;Remy van Elst&quot;
     uid 3000
-    gid "remy"
-    home "/home/remy"
-    shell "/bin/bash"
-    password "$1$4jfd84hHjkd/.DKHjkhf48A.S-=348(ns"
-    supports :manage_home => true
+    gid &quot;remy&quot;
+    home &quot;/home/remy&quot;
+    shell &quot;/bin/bash&quot;
+    password &quot;$1$4jfd84hHjkd/.DKHjkhf48A.S-=348(ns&quot;
+    supports :manage_home =&gt; true
     action :create
 end
-</code></pre><h6>Execute a command as another user than the one doing the chef-solo run</h6><pre><code>execute "Send email on completion" do
-    command "mail -s \"Chef run on node #{node} complete\" email@mail.com < /var/chef/chef.log"
-    user "remy"
+</code></pre>
+
+<h6>Execute a command as another user than the one doing the chef-solo run</h6>
+
+<pre><code>execute &quot;Send email on completion&quot; do
+    command &quot;mail -s \&quot;Chef run on node #{node} complete\&quot; email@mail.com &lt; /var/chef/chef.log&quot;
+    user &quot;remy&quot;
     action :run
 end
-</code></pre><h6>Make sure I can sudo</h6><pre><code>group "sudo" do
+</code></pre>
+
+<h6>Make sure I can sudo</h6>
+
+<pre><code>group &quot;sudo&quot; do
   action :manage
-  members "remy"
+  members &quot;remy&quot;
   append true
 end
-group "wheel" do
+group &quot;wheel&quot; do
   action :manage
-  members "remy"
+  members &quot;remy&quot;
   append true
 end 
-</code></pre><h6>Packages</h6><p>Install:</p><pre><code>package "nano" do
+</code></pre>
+
+<h6>Packages</h6>
+
+<p>Install:</p>
+
+<pre><code>package &quot;nano&quot; do
     action :install
 end
-</code></pre><p>Remove:</p><pre><code>package "vim" do
+</code></pre>
+
+<p>Remove:</p>
+
+<pre><code>package &quot;vim&quot; do
     action :purge
 end
-</code></pre><h6>Add remote logging to rsyslog</h6><pre><code>ruby_block "Adding remote loghost to /ets/rsyslog.conf" do
+</code></pre>
+
+<h6>Add remote logging to rsyslog</h6>
+
+<pre><code>ruby_block &quot;Adding remote loghost to /ets/rsyslog.conf&quot; do
   block do
-    fh = File.open("/etc/rsyslog.conf", 'a+')
-    fh.puts "#Remote logging to server Jupiter5.local.raymii.nl \n*.*     @10.5.0.69"
+    fh = File.open(&quot;/etc/rsyslog.conf&quot;, &#39;a+&#39;)
+    fh.puts &quot;#Remote logging to server Jupiter5.local.raymii.nl \n*.*     @10.5.0.69&quot;
     fh.close
   end
-  only_if { File.file?("/etc/rsyslog.conf") }
+  only_if { File.file?(&quot;/etc/rsyslog.conf&quot;) }
 end
 
-service "rsyslog" do
-    supports :status => true, :restart => true, :reload => true
+service &quot;rsyslog&quot; do
+    supports :status =&gt; true, :restart =&gt; true, :reload =&gt; true
     action [ :restart ]
-    only_if { File.file?("/etc/rsyslog.conf") }
+    only_if { File.file?(&quot;/etc/rsyslog.conf&quot;) }
 end
-</code></pre><hr/> Tags: <a class="link" href="../tags/bash.html">bash, </a> <a class="link" href="../tags/chef.html">chef, </a> <a class="link" href="../tags/configuration-management.html">configuration-management, </a> <a class="link" href="../tags/ruby.html">ruby, </a> <div class="footer"><hr/><br/><hr/><p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br/></p></div></div></div></div> </div></div><script type="text/javascript">
+</code></pre>
+<hr>
+Tags: <a href="../tags/bash.html" class="link">bash, 
+</a>
+<a href="../tags/chef.html" class="link">chef, 
+</a>
+<a href="../tags/configuration-management.html" class="link">configuration-management, 
+</a>
+<a href="../tags/ruby.html" class="link">ruby, 
+</a>
+<div class="footer">
+                <hr />
+                <br />
+        
+                <hr>
+
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -201,11 +438,20 @@ end
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&amp;lt;p&amp;gt;&amp;lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&amp;gt;&amp;lt;/p&amp;gt;</noscript><script type="text/javascript">
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    
+    <!-- google analytics -->
+    <script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-    </script><script type="text/javascript">
+    </script>
+    <script type="text/javascript">
     try {
     var pageTracker = _gat._getTracker("UA-3704876-6");
     pageTracker._trackPageview();
-    } catch(err) {}</script></body></html>
+    } catch(err) {}</script>
+    <!--end analytics -->
+    </body>
+    </html>
+    
