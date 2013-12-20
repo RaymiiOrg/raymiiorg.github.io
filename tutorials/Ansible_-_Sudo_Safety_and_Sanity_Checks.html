@@ -12,10 +12,9 @@
         connection: ssh # or paramiko
 
         vars:
-          date: $PIPE(date)
-          distro: ${ansible_distribution}
-          pkg_mgr: ${ansible_pkg_mgr}
-          pbname: $inventory_hostname
+          distro: {{ ansible_distribution }}
+          pkg_mgr: {{ ansible_pkg_mgr }}
+          pbname: {{ inventory_hostname }}
 
         tasks:
 
@@ -23,7 +22,7 @@
           command: cp -f /etc/sudoers /etc/sudoers.tmp
 
         - name: Create sudoers file backup
-          command: cp -f /etc/sudoers /etc/sudoers.${date}.bak
+          command: cp -f /etc/sudoers /etc/sudoers.bak
 
         - name: Create admins group
           group: name=admins system=yes state=present
