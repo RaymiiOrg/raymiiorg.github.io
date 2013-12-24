@@ -16,7 +16,7 @@
 # set skel_path    $base_path/skel
 # set var_path     $base_path/var
 # set cleanscript $var_path/clean.sh
-# set defaultarch  <running host architecture>
+# set defaultarch  &lt;running host architecture&gt;
 # set postmirror_script $var_path/postmirror.sh
 # set run_postmirror 0
 set nthreads     20
@@ -83,10 +83,10 @@ Post Mirror script has completed. See above output for any possible errors.
 </code></pre><p>The packages are in <em>/var/spool/apt-mirror/mirror</em>. We are going to create a symlink to make them available. Make sure you edit the names and folders of the repo if your config is not the same as above.</p><pre><code>ln -s /var/spool/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ /var/www/ubuntu
 ln -s /var/spool/apt-mirror/mirror/ftp.nl.debian.org/debian/ /var/www/debian
 </code></pre><p>Your /var/www/ folder now should have these two items:</p><pre><code>root@repo:~# ls -alh /var/www
-lrwxrwxrwx  1 root root   54 Sep 17 15:54 debian -> /var/spool/apt-mirror/mirror/ftp.nl.debian.org/debian/
-lrwxrwxrwx  1 root root   55 Sep 17 14:22 ubuntu -> /var/spool/apt-mirror/mirror/archive.ubuntu.com/ubuntu/    
+lrwxrwxrwx  1 root root   54 Sep 17 15:54 debian -&gt; /var/spool/apt-mirror/mirror/ftp.nl.debian.org/debian/
+lrwxrwxrwx  1 root root   55 Sep 17 14:22 ubuntu -&gt; /var/spool/apt-mirror/mirror/archive.ubuntu.com/ubuntu/    
 </code></pre><p>Make sure you can see them via the webserver, go to the url of the server. If you've are doing the repo locally you can use this URL:</p><p><a href="http://127.0.0.1/ubuntu">http://127.0.0.1/ubuntu</a></p><p>Note, for lighttpd you need to make sure that in the config the following option is enabled: </p><pre><code>server.follow-symlink = enabled    
-</code></pre><h2>Setting up the clients</h2><p>Now we have a working repo, we need to set up the clients to use this repo instead of the other (main) ubuntu repo's.</p><p>If you only have the standard repositories then you can use sed to comment all the default lines. If you are not sure, or have other repo's, please skip this step.</p><p>sed command to comment the entire /etc/apt/sources.list file:</p><pre><code>sed -i 's/\(.*\)/#\1/g' /etc/apt/sources.list /etc/apt/sources.list
+</code></pre><h2>Setting up the clients</h2><p>Now we have a working repo, we need to set up the clients to use this repo instead of the other (main) ubuntu repo's.</p><p>If you only have the standard repositories then you can use sed to comment all the default lines. If you are not sure, or have other repo's, please skip this step.</p><p>sed command to comment the entire /etc/apt/sources.list file:</p><pre><code>sed -i 's/(.*)/#1/g' /etc/apt/sources.list /etc/apt/sources.list
 </code></pre><p>Now edit the /etc/apt/sources.list file. Make sure to replace [[MYREPO]] with the http address of your repo (http://127.0.0.1 or http://myrepo.localdomain or whatever)</p><pre><code>vim /etc/apt/sources.list 
 </code></pre><p>And add the following (adapt if you have changed the config file):</p><pre><code>deb http://[[MYREPO]]/ubuntu precise main restricted universe
 deb http://[[MYREPO]]/ubuntu precise-updates main restricted universe
