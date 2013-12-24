@@ -14,7 +14,7 @@ Units = cylinders of 16065 * 512 = 8225280 bytes
  Device Boot Start End Blocks Id System
 /dev/sdc1 * 1 243 1951866 c W95 FAT32 (LBA)
 </code></pre><ul><li><p>Type <code>w</code> to write the partition table and quit.</p></li><li><p>Format the USB flash drive with the Fat32 file system.</p><p>/sbin/mkfs.vfat -F 32 -n USB /dev/sdc1</p></li></ul><p>Now we are going to install the syslinux bootloader to the USB device. Please replace the path below with the location where your downloaded and extracted version of syslinux is.</p><pre><code>syslinux /dev/sdc1
-cat /path/to/syslinux/download/mbr/mbr.bin > /dev/sdC
+cat /path/to/syslinux/download/mbr/mbr.bin &gt; /dev/sdC
 </code></pre><h3>Copy the ISO</h3><p>First create two mount folders, one for the USB drive, and one for the ISO:</p><pre><code>mkdir -p /mnt/{iso,usb}
 </code></pre><p>Now mount the VMWare ESXi 5.1 iso</p><pre><code>mount -o loop ./path/to/vmware-esxi-5.1.iso /mnt/iso
 </code></pre><p>And mount the USB stick:</p><pre><code>mount /dev/sdc1 /mnt/usb

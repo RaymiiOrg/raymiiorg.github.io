@@ -16,7 +16,7 @@ iface eth0 inet static
     [...]
     dns-nameservers 10.0.23.1
     dns-search example.org
-</code></pre><p>We do this because Active Directory uses DNS for a lot of things. You can also setup your standard DNS servers to use an Active Directory DNS server as first upstream.</p><h3>Configure Kerberos</h3><p>What is Kerberos? </p><pre><code>Kerberos is a computer network authentication protocol which works on the basis of "tickets" to allow nodes communicating over a non-secure network to prove their identity to one another in a secure manner. Its designers aimed it primarily at a clientserver model and it provides mutual authenticationboth the user and the server verify each other's identity.
+</code></pre><p>We do this because Active Directory uses DNS for a lot of things. You can also setup your standard DNS servers to use an Active Directory DNS server as first upstream.</p><h3>Configure Kerberos</h3><p>What is Kerberos? </p><pre><code>Kerberos is a computer network authentication protocol which works on the basis of &quot;tickets&quot; to allow nodes communicating over a non-secure network to prove their identity to one another in a secure manner. Its designers aimed it primarily at a clientserver model and it provides mutual authenticationboth the user and the server verify each other's identity.
 </code></pre><p><a href="http://technet.microsoft.com/en-us/library/bb742516.aspx">A good article on how Kerberos is used in Active Directory can be found here: http://technet.microsoft.com/en-us/library/bb742516.aspx</a></p><p>We need to set up Kerberos so that we can bind our machine against Active Directory and let users access the Samba share via the AD. Edit the <code>/etc/krb5.conf</code> file, remove everything and place the following in it, changing the <code>EXAMPLE.ORG</code> domain to your own Active Directory Domain:</p><pre><code>[libdefaults]
   ticket_lifetime = 24h
   default_realm = EXAMPLE.ORG
@@ -121,11 +121,11 @@ wbinfo -g # lists all the groups in the domain
 getent group # should return a list with all groups and their members, both from the local system and the active directory
 </code></pre><p>If this does not work, go back to the nsswitch configuration section and change the <code>compat</code> to <code>files</code>. </p><h3>Configure Samba (#2): Shares</h3><p>This setup reflects an average bussiness. Two departments with their own share, and one dump folder for everyone. And a folder for the CEO so that he feels special. Do note that it is a good idea to clean the Dropbox every night with a cronjob, but let your users know that that happens.</p><p>We are going to create the shares. First create the folders on the system:</p><pre><code>mkdir -p /sharing/{marketing,research,ceo,dropbox}
 chmod -R 0770 /sharing/
-chgrp -R "Domain Users" /sharing/
+chgrp -R &quot;Domain Users&quot; /sharing/
 </code></pre><p>Add the shares to <code>/etc/samba/smb.conf</code>:</p><pre><code>[Marketing]
     comment = Marketing
     path = /sharing/marketing/
-    valid users = @EXAMPLE\marketing
+    valid users = @EXAMPLEmarketing
     force group = marketing
     writable = yes
     read only = no
@@ -139,8 +139,8 @@ chgrp -R "Domain Users" /sharing/
 [Research]
     comment = Research
     path = /sharing/research
-    valid users = @EXAMPLE\development, @EXAMPLE\research
-    force group = "domain users"
+    valid users = @EXAMPLEdevelopment, @EXAMPLEresearch
+    force group = &quot;domain users&quot;
     writable = yes
     read only = no
     force create mode = 0660
@@ -153,8 +153,8 @@ chgrp -R "Domain Users" /sharing/
 [Dropbox]
     comment = Daily Emptied Dropbox
     path = /sharing/dropbox
-    valid users = "@EXAMPLE\Domain Users"
-    force group = "domain users"
+    valid users = &quot;@EXAMPLEDomain Users&quot;
+    force group = &quot;domain users&quot;
     writable = yes
     read only = no
     force create mode = 0660
@@ -167,8 +167,8 @@ chgrp -R "Domain Users" /sharing/
 [CEO]
     comment = CEO Only
     path = /sharing/ceo
-    valid users = EXAMPLE\ceo
-    force group = "domain users"
+    valid users = EXAMPLEceo
+    force group = &quot;domain users&quot;
     writable = yes
     read only = no
     force create mode = 0660
@@ -177,7 +177,7 @@ chgrp -R "Domain Users" /sharing/
     force directory mode = 0770
     access based share enum = yes
     hide unreadable = yes
-</code></pre><p>As you can see, an active directory group is defined with an <code>@</code>, and a user without. Also, when there are spaces in the groupname, you escape that with quotes: <code>"@EXAMPLE\Domain Users"</code>.</p><p><a href="https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.htm">You can find a lot of information on the smb.conf file in the man page: https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html</a></p><p><a href="https://www.samba.org/samba/docs/man/Samba-HOWTO-Collection/AccessControls.html#id2615334">Why do we force the mode on files and folders? Because of problems with MS word, according to the Samba documentation: https://www.samba.org/samba/docs/man/Samba-HOWTO-Collection/AccessControls.html#id2615334</a></p><p>Afterwards restart samba:</p><pre><code>/etc/init.d/smbd restart
+</code></pre><p>As you can see, an active directory group is defined with an <code>@</code>, and a user without. Also, when there are spaces in the groupname, you escape that with quotes: <code>&amp;quot;@EXAMPLEDomain Users&amp;quot;</code>.</p><p><a href="https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.htm">You can find a lot of information on the smb.conf file in the man page: https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html</a></p><p><a href="https://www.samba.org/samba/docs/man/Samba-HOWTO-Collection/AccessControls.html#id2615334">Why do we force the mode on files and folders? Because of problems with MS word, according to the Samba documentation: https://www.samba.org/samba/docs/man/Samba-HOWTO-Collection/AccessControls.html#id2615334</a></p><p>Afterwards restart samba:</p><pre><code>/etc/init.d/smbd restart
 </code></pre><h3>Testing it</h3><p>Create a few accounts in the groups used (set expiry date to 1 day so you don't forget to remove them) and use those accounts to test the shares. Create files and folders as one user, try to edit and remove them as another user. Also try to access the shares with a non-priviledged user. </p><p>If you run into errors, check your log files in <code>/var/log/samba</code>. Make sure that the capitalization and spelling is correct in the <code>valid users</code> part of the samba config file, and also check the permissions on the folders themselves with <code>ls -la</code>. You can set <code>valid users = any</code> to make check if there are errors or not. The <code>testparm</code> command is also very helpful for the samba config file part.</p><hr/>Tags: <a class="link" href="../tags/active-directory.html">active-directory, </a><a class="link" href="../tags/kerberos.html">kerberos, </a><a class="link" href="../tags/ldap.html">ldap, </a><a class="link" href="../tags/microsoft.html">microsoft, </a><a class="link" href="../tags/nsswitch.html">nsswitch, </a><a class="link" href="../tags/samba.html">samba, </a><a class="link" href="../tags/smb.html">smb, </a><a class="link" href="../tags/ubuntu.html">ubuntu, </a><a class="link" href="../tags/winbind.html">winbind, </a><div class="footer"><hr/><br/><hr/><p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br/></p></div></div></div></div> </div></div><script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));

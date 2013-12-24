@@ -8,7 +8,7 @@
                 </script></div> <div class="col-md-7"> <div class="inner"><h2>Set your IP as wallpaper</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a></li><li><a class="link" href="../tutorials">Tutorials</a></li><li><a class="link" href="Set-your-ip-as-wallpaper.html">Set your IP as wallpaper</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 28-03-2007</h6><br/><p>This is a tutorial with a script which lets you set your IP address as wallpaper. </p><p>You need to have a white background picture, I created one with GIMP, 800x600 called 2.jpg, and thats what i'll use in the tutorial. So change 2.jpg to whatever you use.</p><p>First install imagemagick &amp; feh: </p><pre><code>sudo apt-get install imagemagick feh
 </code></pre><p>Then we'll make a bash script with the following in it:</p><pre><code>#!/bin/bash  
 export DISPLAY=:0.0  
-convert 2.jpg -pointsize 80 -draw "text 0,150 '`ifconfig eth0 | awk -F ":"  '/inet addr/{split($2,a," ");print a[1]}'`'" -draw "text -0,250 'Made with help of:'" -fill blue -pointsize 150 -draw "text -0,390 'Relst.nl'" -fill red -pointsize 72 -draw "text -0,500 '`date`'" 3.jpg  
+convert 2.jpg -pointsize 80 -draw &quot;text 0,150 '`ifconfig eth0 | awk -F &quot;:&quot;  '/inet addr/{split($2,a,&quot; &quot;);print a[1]}'`'&quot; -draw &quot;text -0,250 'Made with help of:'&quot; -fill blue -pointsize 150 -draw &quot;text -0,390 'Relst.nl'&quot; -fill red -pointsize 72 -draw &quot;text -0,500 '`date`'&quot; 3.jpg  
 # Uncomment this one if you're not using gnome:  
 # feh --bg-scale ./3.jpg  
 # and place a $ (hash) for the following rule:   
