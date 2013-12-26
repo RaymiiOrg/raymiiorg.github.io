@@ -1,14 +1,183 @@
-<!DOCTYPE html><html lang="en"><head><title>Strong SSL Security on Apache2 - Raymii.org</title><link href="/s/inc/css/bootstrap.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet"/><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-10 col-md-offset-1"><div class="col-md-3 well"> <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org</a></h3><h6>Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><div class="col-md-4 green-block"><h3>Featured Items</h3><a class="whitelink" href="/s/tutorials/Ansible_Deployment_Framework.html">Ansible Deployment Framework</a><br/><a class="whitelink" href="/s/articles/Digital_Ocean_Sucks._Use_Digital_Ocean.html">Digital Ocean Sucks. Use Digital Ocean</a><br/><a class="whitelink" href="/s/tutorials/Gitlab_and_Active_Directory_LDAP_Authentication.html">Gitlab and Active Directory LDAP Authentication</a><br/><a class="whitelink" href="/s/articles/Small_Linux_PCs.html">Small Linux PCs</a><br/><a class="whitelink" href="/s/tutorials/Strong_SSL_Security_On_Apache2.html">Strong SSL Security On Apache2</a><br/><a class="whitelink" href="/s/tutorials/VMWare-ESXi-5-USB-installer.html">VMWare ESXi 5 USB installer</a><br/></div><div class="col-md-4 green-block"><h3>Featured Items</h3><a class="whitelink" href="/s/software/Bash_PHP_Server_Status_Monitor.html">Bash PHP Server Status Monitor</a><br/><a class="whitelink" href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html">IPSEC L2TP vpn with Ubuntu 12.04</a><br/><a class="whitelink" href="/s/software/Nopriv-IMAP-backup.html">Nopriv IMAP backup</a><br/><a class="whitelink" href="/s/articles/Set_up_your_own_truly_secure_encrypted_shared_storage_aka_Dropbox_clone.html">Set up your own truly secure encrypted shared storage aka Dropbox clone</a><br/><a class="whitelink" href="/s/tutorials/Strong_SSL_Security_On_nginx.html">Strong SSL Security On nginx</a><br/></div></div></div><div class="row-fluid"><div class="col-md-11 col-md-offset-1"><div class="col-md-3"><h3>Menu</h3><ul class="nav nav-pills nav-stacked"><li><a class="link" href="/s/">Home</a></li><li><a class="link" href="/s/static/Contact.html">Contact</a></li><li><a class="link" href="/s/static/Disclaimer.html">Disclaimer</a></li><li><a class="link" href="/s/static/Hosted_Piwik.html">Hosted Piwik</a></li><li><a class="link" href="/s/static/Sparkling_Network.html">Sparkling Network</a></li></ul><h3>Categories</h3><ul class="nav nav-pills nav-stacked"><li><a class="link" href="/s/articles">Articles</a></li><li><a class="link" href="/s/snippets">Snippets</a></li><li><a class="link" href="/s/software">Software</a></li><li><a class="link" href="/s/tutorials">Tutorials</a></li><li><a class="link" href="/s/everything.html">All Items</a></li></ul><hr class="alt2"/><h3>Donate</h3><ul><li><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a></li><li><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a></li></ul><script id="flattrbtn">(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=Remy&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('flattrbtn');</script><br/><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input name="cmd" type="hidden" value="_s-xclick"/><input name="encrypted" type="hidden" value="-----BEGIN PKCS7-----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-----END PKCS7-----"/><input alt="PayPal - The safer, easier way to pay online!" name="submit" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" type="image"/><img alt="" height="1" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1"/></form><script type="text/javascript"><!--
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Strong SSL Security on Apache2 - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+        <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="col-md-3 well"> 
+                <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org</a></h3>
+                <h6>Quis custodiet ipsos custodes?</h6>
+                <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
+            </div>
+            <div class="col-md-4 green-block">
+                    <h3>Featured Items</h3>
+    <a href="/s/tutorials/Ansible_Deployment_Framework.html" class="whitelink">Ansible Deployment Framework</a><br /><a href="/s/articles/Digital_Ocean_Sucks._Use_Digital_Ocean.html" class="whitelink">Digital Ocean Sucks. Use Digital Ocean</a><br /><a href="/s/tutorials/Gitlab_and_Active_Directory_LDAP_Authentication.html" class="whitelink">Gitlab and Active Directory LDAP Authentication</a><br /><a href="/s/articles/Small_Linux_PCs.html" class="whitelink">Small Linux PCs</a><br /><a href="/s/tutorials/Strong_SSL_Security_On_Apache2.html" class="whitelink">Strong SSL Security On Apache2</a><br /><a href="/s/tutorials/VMWare-ESXi-5-USB-installer.html" class="whitelink">VMWare ESXi 5 USB installer</a><br />
+        </div>
+        <div class="col-md-4 green-block">
+                <h3>Featured Items</h3>
+    <a href="/s/software/Bash_PHP_Server_Status_Monitor.html" class="whitelink">Bash PHP Server Status Monitor</a><br /><a href="/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html" class="whitelink">IPSEC L2TP vpn with Ubuntu 12.04</a><br /><a href="/s/software/Nopriv-IMAP-backup.html" class="whitelink">Nopriv IMAP backup</a><br /><a href="/s/articles/Set_up_your_own_truly_secure_encrypted_shared_storage_aka_Dropbox_clone.html" class="whitelink">Set up your own truly secure encrypted shared storage aka Dropbox clone</a><br /><a href="/s/tutorials/Strong_SSL_Security_On_nginx.html" class="whitelink">Strong SSL Security On nginx</a><br />
+            
+        </div>
+    </div>
+    
+    </div>
+    <div class="row-fluid">
+    <div class="col-md-11 col-md-offset-1">
+    
+
+    <div class="col-md-3">
+    <h3>Menu</h3><ul class="nav nav-pills nav-stacked"><li><a href="/s/" class="link">Home</a></li><li><a href="/s/static/Contact.html" class="link">Contact</a></li><li><a href="/s/static/Disclaimer.html" class="link">Disclaimer</a></li><li><a href="/s/static/Hosted_Piwik.html" class="link">Hosted Piwik</a></li><li><a href="/s/static/Sparkling_Network.html" class="link">Sparkling Network</a></li></ul><h3>Categories</h3><ul class="nav nav-pills nav-stacked"><li><a href="/s/articles" class="link">Articles</a></li><li><a href="/s/snippets" class="link">Snippets</a></li><li><a href="/s/software" class="link">Software</a></li><li><a href="/s/tutorials" class="link">Tutorials</a></li><li><a href="/s/everything.html" class="link">All Items</a></li></ul>
+               <!-- advertisement start -->
+                <hr class="alt2">
+                <h3>Donate</h3>
+                <ul><li><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a></li>
+                <li><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a></li></ul>
+                <script id='flattrbtn'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=Remy&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('flattrbtn');</script><br />
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                <input type="hidden" name="cmd" value="_s-xclick">
+                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                ">
+                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                <img alt="" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
+                </form>
+                <script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script><script src="http://pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
-                </script></div> <div class="col-md-7"> <div class="inner"><h2>Strong SSL Security on Apache2</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a></li><li><a class="link" href="../tutorials">Tutorials</a></li><li><a class="link" href="Strong_SSL_Security_On_Apache2.html">Strong SSL Security on Apache2</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 15-12-2013</h6><br/><p><a href="https://www.ssllabs.com/ssltest/analyze.html?d=raymii.org"><img alt="A on ssl labs test" src="https://raymii.org/s/inc/img/ssl-labs-a.png"/></a></p><p>This tutorial shows you how to set up strong SSL security on the Apache2 webserver. We do this by disabling SSL Compression to mitigate the CRIME attack, disable SSLv3 and below because of vulnerabilities in the protocol and we will set up a ciphersuite that enables Forward Secrecy when possible. This way we have a strong and future proof ssl configuration and we get an A on the Qually Labs SSL Test. </p><p>This tutorial is tested on a Digital Ocean VPS. If you like this tutorial and want to support my website, use this link to order a Digital Ocean VPS: <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">https://www.digitalocean.com/?refcode=7435ae6b8212</a> </p><p><a href="https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html">This tutorial is also available for NGINX</a><br/><a href="https://raymii.org/s/tutorials/Pass_the_SSL_Labs_Test_on_Lighttpd_%28Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS%29.html">This tutorial is also available for Lighttpd</a></p><p>You can find more info on the topics by following the links below:</p><ul><li><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#BEAST_attack">BEAST Attack</a></li><li><a href="https://en.wikipedia.org/wiki/CRIME_%28security_exploit%29">CRIME Attack</a></li><li><a href="https://en.wikipedia.org/wiki/Perfect_forward_secrecy">Perfect Forward Secrecy</a></li><li><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#Dealing_with_RC4_and_BEAST">Dealing with RC4 and BEAST</a></li></ul><p><em>Make sure you back up the files before editing them!</em></p><h3>The BEAST attack and RC4</h3><p>In short, by tampering with with an encryption algorithm's CBC - cipher block chaining - mode's, portions of the encrypted traffic can be secretly decrypted. More info on the above link.</p><p>Recent browser versions have enabled client side mitigation for the beast attack. The recomendation was to disable all TLS 1.0 ciphers and only offer RC4. However, [RC4 has a growing list of attacks against it],(http://www.isg.rhul.ac.uk/tls/) many of which have crossed the line from theoretical to practical. Moreover, there is reason to believe that the NSA has broken RC4, their so-called "big breakthrough."</p><p>Disabling RC4 has several ramifications. One, users with shitty browsers such as Internet Explorer on Windows XP will use 3DES in lieu. Triple-DES is more secure than RC4, but it is significantly more expensive. Your server will pay the cost for these users. Two, RC4 mitigates BEAST. Thus, disabling RC4 makes TLS 1.0 users susceptible to that attack, by moving them to AES-CBC (the usual server-side BEAST "fix" is to prioritize RC4 above all else). I am confident that the flaws in RC4 significantly outweigh the risks from BEAST. Indeed, with client-side mitigation (which Chrome and Firefox both provide), BEAST is a nonissue. But the risk from RC4 only grows: More cryptanalysis will surface over time.</p><h3>SSL Compression (CRIME attack)</h3><p>The CRIME attack uses SSL Compression to do its magic, so we need to disable that. On Apache 2.2.24+ we can add the following line to the SSL config file we also edited above:</p><pre><code>SSLCompression off
-</code></pre><p>If you are using al earlier version of Apache and your distro has not backported this option then you need to recompile OpenSSL without ZLIB support. This will disable the use of OpenSSL using the DEFLATE compression method. If you do this then you can still use regular HTML DEFLATE compression.</p><h3>SSLv2 and SSLv3</h3><p>SSL v2 is insecure, so we need to disable it. We also disable SSLv3, as TLS 1.0 suffers a downgrade attack, allowing an attacker to force a connection to use SSLv3 and therefore disable forward secrecy. Again edit the config file:</p><pre><code>SSLProtocol All -SSLv2 -SSLv3
-</code></pre><p>All is a shortcut for <code>+SSLv2 +SSLv3 +TLSv1</code> or - when using OpenSSL 1.0.1 and later - <code>+SSLv2 +SSLv3 +TLSv1 +TLSv1.1 +TLSv1.2</code>, respectively. The above line enables everything except SSLv2 and SSLv3. <a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslprotocol">More info on the apache website</a></p><h3>The Cipher Suite</h3><p>(Perfect) Forward Secrecy ensures the integrity of a session key in the event that a long-term key is compromised. PFS accomplishes this by enforcing the derivation of a new key for each and every session.</p><p>This means that when the private key gets compromised it cannot be used to decrypt recorded SSL traffic.</p><p>The cipher suites that provide Perfect Forward Secrecy are those that use an ephemeral form of the Diffie-Hellman key exchange. Their disadvantage is their overhead, which can be improved by using the elliptic curve variants.</p><p>This is my recommended cipher suite:</p><pre><code>SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4
-</code></pre><p>In short, the above ciphersuite:</p><ul><li>Provides forward secrecy to most reasonably modern clients</li><li>Provides improved security as more clients enable TLS 1.2</li><li>Provides some security for people stuck on Windows XP (which is still a large percentage of traffic)</li></ul><p>Explained: </p><ul><li>For the key exchange, we prefer ephemeral key-exchange algorithms that provide PFS. We favor Elliptic Curve Diffie-Hellman (ECDHE) over the multiplicative version (DHE), as the former is less processor intense for a similar level of security, but we support both.</li><li>For identity, we only support RSA. That's fine, as your certificate is RSA (DSA certs are uncommon).</li><li>For message ciphers, we favor AES over everything else. For AES, we favor the GCM version over CBC, as GCM is more efficient and not susceptible to BEAST, and we favor AES-256 over AES-128.</li><li>For message authentication, we favor SHA-2 with 256 or 384-byte digests.</li><li>We disable non-authenticated and non-encrypted suites, all of the legacy export-approved ciphers, Camellia, DES (but not 3DES), MD5, and pre-shared keys.</li></ul><p>With Apache 2.2.x you have only DHE suites to work with, but they are not enough. Internet Explorer (in all versions) does not support the required DHE suites to achieve Forward Secrecy. (Unless youre using DSA keys, but no one does; thats a long story.) Apache does not support configurable DH parameters in any version, but there are patches you could use if you can install from source.</p><p>Even if openssl can provide ECDHE the apache 2.2 in debian stable does not support this mechanism. You need apache 2.4 to fully support forward secrecy.</p><p>A workaround could be the usage of nginx as a reverse proxy because it fully supports ECDHE.</p><p>Make sure you also add this line:</p><p>SSLHonorCipherOrder on</p><p>When choosing a cipher during an SSLv3 or TLSv1 handshake, normally the client's preference is used. If this directive is enabled, the server's preference will be used instead.</p><h3>DHE Parameters</h3><p>Apache prior to version 2.4.7 and all versions of Nginx as of 1.4.4 rely on OpenSSL for input parameters to Diffie-Hellman (DH). Unfortunately, this means that Ephemeral Diffie-Hellman (DHE) will use OpenSSL's defaults, which include a 1024-bit key for the key-exchange. Since we're using a 2048-bit certificate, DHE clients will use a weaker key-exchange than non-ephemeral DH clients.</p><p>For Apache, there is no fix except to upgrade to 2.4.7 or later. With that version, Apache automatically selects a stronger key.</p><h3>HTTP Strict Transport Security</h3><p>When possible, you should enable <a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">HTTP Strict Transport Security (HSTS)</a>, which instructs browsers to communicate with your site only over HTTPS.</p><p><a href="https://raymii.org/s/tutorials/HTTP_Strict_Transport_Security_for_Apache_NGINX_and_Lighttpd.html">View my article on HTST to see how to configure it.</a></p><h3>Conclusion</h3><p>If you have applied the above config lines you need to restart apache:</p><pre><code># Check the config first:
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+
+           </div>  
+           <div class="col-md-7"> 
+                <div class="inner">
+
+
+           <h2>Strong SSL Security on Apache2</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../tutorials" class="link">Tutorials</a></li><li><a href="Strong_SSL_Security_On_Apache2.html" class="link">Strong SSL Security on Apache2</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 15-12-2013</h6><br><p><a href="https://www.ssllabs.com/ssltest/analyze.html?d=raymii.org"><img src="https://raymii.org/s/inc/img/ssl-labs-a.png" alt="A on ssl labs test" /></a></p>
+
+<p>This tutorial shows you how to set up strong SSL security on the Apache2 webserver. We do this by disabling SSL Compression to mitigate the CRIME attack, disable SSLv3 and below because of vulnerabilities in the protocol and we will set up a ciphersuite that enables Forward Secrecy when possible. This way we have a strong and future proof ssl configuration and we get an A on the Qually Labs SSL Test.  </p>
+
+<p>This tutorial is tested on a Digital Ocean VPS. If you like this tutorial and want to support my website, use this link to order a Digital Ocean VPS: <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">https://www.digitalocean.com/?refcode=7435ae6b8212</a>   </p>
+
+<p><a href="https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html">This tutorial is also available for NGINX</a><br>
+<a href="https://raymii.org/s/tutorials/Pass_the_SSL_Labs_Test_on_Lighttpd_%28Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS%29.html">This tutorial is also available for Lighttpd</a></p>
+
+<p>You can find more info on the topics by following the links below:</p>
+
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#BEAST_attack">BEAST Attack</a></li>
+<li><a href="https://en.wikipedia.org/wiki/CRIME_%28security_exploit%29">CRIME Attack</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Perfect_forward_secrecy">Perfect Forward Secrecy</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#Dealing_with_RC4_and_BEAST">Dealing with RC4 and BEAST</a></li>
+</ul>
+
+<p><em>Make sure you back up the files before editing them!</em></p>
+
+<h3>The BEAST attack and RC4</h3>
+
+<p>In short, by tampering with with an encryption algorithm&#39;s CBC - cipher block chaining - mode&#39;s,  portions of the encrypted traffic can be secretly decrypted. More info on the above link.</p>
+
+<p>Recent browser versions have enabled client side mitigation for the beast attack. The recomendation was to disable all TLS 1.0 ciphers and only offer RC4. However, [RC4 has a growing list of attacks against it],(http://www.isg.rhul.ac.uk/tls/) many of which have crossed the line from theoretical to practical. Moreover, there is reason to believe that the NSA has broken RC4, their so-called &quot;big breakthrough.&quot;</p>
+
+<p>Disabling RC4 has several ramifications. One, users with shitty browsers such as Internet Explorer on Windows XP will use 3DES in lieu. Triple-DES is more secure than RC4, but it is significantly more expensive. Your server will pay the cost for these users. Two, RC4 mitigates BEAST. Thus, disabling RC4 makes TLS 1.0 users susceptible to that attack, by moving them to AES-CBC (the usual server-side BEAST &quot;fix&quot; is to prioritize RC4 above all else). I am confident that the flaws in RC4 significantly outweigh the risks from BEAST. Indeed, with client-side mitigation (which Chrome and Firefox both provide), BEAST is a nonissue. But the risk from RC4 only grows: More cryptanalysis will surface over time.</p>
+
+<h3>SSL Compression (CRIME attack)</h3>
+
+<p>The CRIME attack uses SSL Compression to do its magic, so we need to disable that. On Apache 2.2.24+ we can add the following line to the SSL config file we also edited above:</p>
+
+<pre><code>SSLCompression off
+</code></pre>
+
+<p>If you are using al earlier version of Apache and your distro has not backported this option then you need to recompile OpenSSL without ZLIB support. This will disable the use of OpenSSL using the DEFLATE compression method. If you do this then you can still use regular HTML DEFLATE compression.</p>
+
+<h3>SSLv2 and SSLv3</h3>
+
+<p>SSL v2 is insecure, so we need to disable it. We also disable SSLv3, as TLS 1.0 suffers a downgrade attack, allowing an attacker to force a connection to use SSLv3 and therefore disable forward secrecy. Again edit the config file:</p>
+
+<pre><code>SSLProtocol All -SSLv2 -SSLv3
+</code></pre>
+
+<p>All is a shortcut for <code>+SSLv2 +SSLv3 +TLSv1</code> or - when using OpenSSL 1.0.1 and later - <code>+SSLv2 +SSLv3 +TLSv1 +TLSv1.1 +TLSv1.2</code>, respectively. The above line enables everything except SSLv2 and SSLv3. <a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslprotocol">More info on the apache website</a></p>
+
+<h3>The Cipher Suite</h3>
+
+<p>(Perfect) Forward Secrecy ensures the integrity of a session key in the event that a long-term key is compromised. PFS accomplishes this by enforcing the derivation of a new key for each and every session.</p>
+
+<p>This means that when the private key gets compromised it cannot be used to decrypt recorded SSL traffic.</p>
+
+<p>The cipher suites that provide Perfect Forward Secrecy are those that use an ephemeral form of the Diffie-Hellman key exchange. Their disadvantage is their overhead, which can be improved by using the elliptic curve variants.</p>
+
+<p>This is my recommended cipher suite:</p>
+
+<pre><code>SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4
+</code></pre>
+
+<p>In short, the above ciphersuite:</p>
+
+<ul>
+<li>Provides forward secrecy to most reasonably modern clients</li>
+<li>Provides improved security as more clients enable TLS 1.2</li>
+<li>Provides some security for people stuck on Windows XP (which is still a large percentage of traffic)</li>
+</ul>
+
+<p>Explained: </p>
+
+<ul>
+<li>For the key exchange, we prefer ephemeral key-exchange algorithms that provide PFS. We favor Elliptic Curve Diffie-Hellman (ECDHE) over the multiplicative version (DHE), as the former is less processor intense for a similar level of security, but we support both.</li>
+<li>For identity, we only support RSA. That&#39;s fine, as your certificate is RSA (DSA certs are uncommon).</li>
+<li>For message ciphers, we favor AES over everything else. For AES, we favor the GCM version over CBC, as GCM is more efficient and not susceptible to BEAST, and we favor AES-256 over AES-128.</li>
+<li>For message authentication, we favor SHA-2 with 256 or 384-byte digests.</li>
+<li>We disable non-authenticated and non-encrypted suites, all of the legacy export-approved ciphers, Camellia, DES (but not 3DES), MD5, and pre-shared keys.</li>
+</ul>
+
+<p>With Apache 2.2.x you have only DHE suites to work with, but they are not enough. Internet Explorer (in all versions) does not support the required DHE suites to achieve Forward Secrecy. (Unless youre using DSA keys, but no one does; thats a long story.) Apache does not support configurable DH parameters in any version, but there are patches you could use if you can install from source.</p>
+
+<p>Even if openssl can provide ECDHE the apache 2.2 in debian stable does not support this mechanism. You need apache 2.4 to fully support forward secrecy.</p>
+
+<p>A workaround could be the usage of nginx as a reverse proxy because it fully supports ECDHE.</p>
+
+<p>Make sure you also add this line:</p>
+
+<p>SSLHonorCipherOrder on</p>
+
+<p>When choosing a cipher during an SSLv3 or TLSv1 handshake, normally the client&#39;s preference is used. If this directive is enabled, the server&#39;s preference will be used instead.</p>
+
+<h3>DHE Parameters</h3>
+
+<p>Apache prior to version 2.4.7 and all versions of Nginx as of 1.4.4 rely on OpenSSL for input parameters to Diffie-Hellman (DH). Unfortunately, this means that Ephemeral Diffie-Hellman (DHE) will use OpenSSL&#39;s defaults, which include a 1024-bit key for the key-exchange. Since we&#39;re using a 2048-bit certificate, DHE clients will use a weaker key-exchange than non-ephemeral DH clients.</p>
+
+<p>For Apache, there is no fix except to upgrade to 2.4.7 or later. With that version, Apache automatically selects a stronger key.</p>
+
+<h3>HTTP Strict Transport Security</h3>
+
+<p>When possible, you should enable <a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">HTTP Strict Transport Security (HSTS)</a>, which instructs browsers to communicate with your site only over HTTPS.</p>
+
+<p><a href="https://raymii.org/s/tutorials/HTTP_Strict_Transport_Security_for_Apache_NGINX_and_Lighttpd.html">View my article on HTST to see how to configure it.</a></p>
+
+<h3>Conclusion</h3>
+
+<p>If you have applied the above config lines you need to restart apache:</p>
+
+<pre><code># Check the config first:
 apache2ctl -t
 # Then restart:
 /etc/init.d/apache2 restart
@@ -16,7 +185,24 @@ apache2ctl -t
 # If you are on RHEL/CentOS:
 apachectl -t
 /etc/init.d/httpd restart
-</code></pre><p>Now use the <a href="https://www.ssllabs.com/ssltest/">SSL Labs test</a> to see if you get a nice A. And, of course, have a safe, strong and future proof SSL configuration!</p><hr/>Tags: <a class="link" href="../tags/BEAST.html">BEAST, </a><a class="link" href="../tags/CBC.html">CBC, </a><a class="link" href="../tags/CRIME.html">CRIME, </a><a class="link" href="../tags/RC4.html">RC4, </a><a class="link" href="../tags/apache.html">apache, </a><a class="link" href="../tags/featured-one.html">featured-one, </a><a class="link" href="../tags/pfs.html">pfs, </a><a class="link" href="../tags/ssl.html">ssl, </a><a class="link" href="../tags/ssl-labs.html">ssl-labs, </a><a class="link" href="../tags/tls.html">tls, </a><div class="footer"><hr/><br/><hr/><p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br/></p></div></div></div></div> </div></div><script type="text/javascript">
+</code></pre>
+
+<p>Now use the <a href="https://www.ssllabs.com/ssltest/">SSL Labs test</a> to see if you get a nice A. And, of course, have a safe, strong and future proof SSL configuration!</p>
+<hr>Tags: <a href="../tags/BEAST.html" class="link">BEAST, </a><a href="../tags/CBC.html" class="link">CBC, </a><a href="../tags/CRIME.html" class="link">CRIME, </a><a href="../tags/RC4.html" class="link">RC4, </a><a href="../tags/apache.html" class="link">apache, </a><a href="../tags/featured-one.html" class="link">featured-one, </a><a href="../tags/pfs.html" class="link">pfs, </a><a href="../tags/ssl.html" class="link">ssl, </a><a href="../tags/ssl-labs.html" class="link">ssl-labs, </a><a href="../tags/tls.html" class="link">tls, </a><div class="footer">
+                <hr />
+                <br />
+        
+                <hr>
+                <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a>.<br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -25,4 +211,8 @@ apachectl -t
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&amp;lt;p&amp;gt;&amp;lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&amp;gt;&amp;lt;/p&amp;gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
