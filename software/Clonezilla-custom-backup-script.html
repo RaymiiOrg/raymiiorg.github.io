@@ -105,7 +105,7 @@ Now make it back to a life system:</p>
 <pre><code>label ubnentry0
 menu label RESTORE
 kernel /live/vmlinuz1
-append initrd=/live/initrd1.img boot=live union=aufs  hostname=jaunty edd=on nolocales ocs_live_run=&quot;/laptop03/startr.sh&quot; ocs_live_extra_param=&quot;&quot; ocs_live_keymap=&quot;NONE&quot; ocs_live_batch=&quot;no&quot; ocs_lang=&quot;&quot; noprompt mode_option=1024x768 toram=filesystem.squashfs ip=frommedia
+append initrd=/live/initrd1.img boot=live union=aufs  hostname=jaunty edd=on nolocales ocs_live_run=&amp;quot;/laptop03/startr.sh&amp;quot; ocs_live_extra_param=&amp;quot;&amp;quot; ocs_live_keymap=&amp;quot;NONE&amp;quot; ocs_live_batch=&amp;quot;no&amp;quot; ocs_lang=&amp;quot;&amp;quot; noprompt mode_option=1024x768 toram=filesystem.squashfs ip=frommedia
 </code></pre>
 
 <p>Now, here are the scripts: backup-schoon.sh (this makes a backup image) </p>
@@ -113,23 +113,23 @@ append initrd=/live/initrd1.img boot=live union=aufs  hostname=jaunty edd=on nol
 <pre><code>#!/bin/bash
 dhclient
 clear
-echo &quot;################################&quot;
-echo &quot;# Daniel Imager for Erasmus MC #&quot;
-echo &quot;#      By Raymii &amp; David       #&quot;
-echo &quot;#     Based on Clonezilla      #&quot;
-echo &quot;################################&quot;
+echo &amp;quot;################################&amp;quot;
+echo &amp;quot;# Daniel Imager for Erasmus MC #&amp;quot;
+echo &amp;quot;#      By Raymii &amp;amp; David       #&amp;quot;
+echo &amp;quot;#     Based on Clonezilla      #&amp;quot;
+echo &amp;quot;################################&amp;quot;
 echo
 echo
-echo &quot;Mounting the image share. If asked for a password, enter 1234&quot;
+echo &amp;quot;Mounting the image share. If asked for a password, enter 1234&amp;quot;
 echo
-mount -t cifs -o username=&quot;administrator&quot;,password=&quot;emcdaniel&quot; //192.168.1.2/image /home/partimag
+mount -t cifs -o username=&amp;quot;administrator&amp;quot;,password=&amp;quot;emcdaniel&amp;quot; //192.168.1.2/image /home/partimag
 echo
 #clear
 cd /home/partimag
-echo &quot;We zitten in map:&quot;
+echo &amp;quot;We zitten in map:&amp;quot;
 pwd
 echo ;
-DIRS=&quot;$(ls -d */ | grep &#39;&#39;)&quot;
+DIRS=&amp;quot;$(ls -d */ | grep &#39;&#39;)&amp;quot;
 GROOTSTE_GETAL=0
 # Met alle directories gaan we een voor een aan de slag 
 for DIR in $DIRS;
@@ -138,37 +138,37 @@ do
 RUWE_STRING=$DIR
 # Haal de slash aan het eind van RUWE_STRING af 
 RUWE_STRING=${RUWE_STRING%/} 
-# Haal aan het begin van RUWE_STRING &quot;schoon&quot; af. We houden nu het GEZOCHTE_GETAL over
+# Haal aan het begin van RUWE_STRING &amp;quot;schoon&amp;quot; af. We houden nu het GEZOCHTE_GETAL over
 GEZOCHTE_GETAL=${RUWE_STRING#schoon} 
 # De volgende twee commando&#39;s zorgen er voor dat als GEZOCHTE_GETAL geen getal is
 # deze de waarde 0 krijgt 
 let GEZOCHTE_GETAL++
 let GEZOCHTE_GETAL--
 # Als GEZOCHTE_GETAL ongelijk is aan 0 dan gaan we er mee aan de gang
-if (( $GEZOCHTE_GETAL &gt; 0 )) 
+if (( $GEZOCHTE_GETAL &amp;gt; 0 )) 
 then
 # Als GEZOCHTE_GETAL groter is dan GROOTSTE_GETAL
 # dan wordt GROOTSTE_GETAL gelijk gemaakt aan GEZOCHTE_GETAL
-if (( $GEZOCHTE_GETAL &gt; $GROOTSTE_GETAL )) 
+if (( $GEZOCHTE_GETAL &amp;gt; $GROOTSTE_GETAL )) 
 then
 GROOTSTE_GETAL=$GEZOCHTE_GETAL 
 fi
-#    echo &quot;I: $I  J: $GEZOCHTE_GETAL&quot;
+#    echo &amp;quot;I: $I  J: $GEZOCHTE_GETAL&amp;quot;
 fi
 done
 
 # Als GROOTSTE_GETAL groter is dan nul is er een schone backup aanwezig en 
 # hogen we GROOTSTE_GETAL met een op maken we een nieuwe schone backup: schoon(GROOTSTE_GETAL+1)
 # Zo niet dan nieuwe schone backup: schoon01
-if (( $GROOTSTE_GETAL &gt; 0 ))
+if (( $GROOTSTE_GETAL &amp;gt; 0 ))
 then
 let GROOTSTE_GETAL++
-echo &quot;Starting latest backup: schoon$GROOTSTE_GETAL&quot;
-NAME=&quot;schoon$GROOTSTE_GETAL&quot;
-/opt/drbl/sbin/ocs-sr -q -j2 -z1p -i 3900 -p true savedisk &quot;$NAME&quot; &quot;sda&quot;
+echo &amp;quot;Starting latest backup: schoon$GROOTSTE_GETAL&amp;quot;
+NAME=&amp;quot;schoon$GROOTSTE_GETAL&amp;quot;
+/opt/drbl/sbin/ocs-sr -q -j2 -z1p -i 3900 -p true savedisk &amp;quot;$NAME&amp;quot; &amp;quot;sda&amp;quot;
 else
-echo &quot;No backups found, making a new one: schoon01&quot;
-/opt/drbl/sbin/ocs-sr -q -j2 -z1p -i 3900 -p true savedisk &quot;schoon11&quot; &quot;sda&quot;
+echo &amp;quot;No backups found, making a new one: schoon01&amp;quot;
+/opt/drbl/sbin/ocs-sr -q -j2 -z1p -i 3900 -p true savedisk &amp;quot;schoon11&amp;quot; &amp;quot;sda&amp;quot;
 fi
 </code></pre>
 
@@ -177,23 +177,23 @@ fi
 <pre><code> #!/bin/bash
 dhclient
 clear
-echo &quot;################################&quot;
-echo &quot;# Daniel Imager for Erasmus MC #&quot;
-echo &quot;#      By Raymii &amp; David       #&quot;
-echo &quot;#     Based on Clonezilla      #&quot;
-echo &quot;#       Made on 01-04-10       #&quot;
-echo &quot;################################&quot;
+echo &amp;quot;################################&amp;quot;
+echo &amp;quot;# Daniel Imager for Erasmus MC #&amp;quot;
+echo &amp;quot;#      By Raymii &amp;amp; David       #&amp;quot;
+echo &amp;quot;#     Based on Clonezilla      #&amp;quot;
+echo &amp;quot;#       Made on 01-04-10       #&amp;quot;
+echo &amp;quot;################################&amp;quot;
 echo
 echo
-echo &quot;Mounting the image share. If asked for a password, enter 1234&quot;
+echo &amp;quot;Mounting the image share. If asked for a password, enter 1234&amp;quot;
 echo
-mount -t cifs -o username=&quot;administrator&quot;,password=&quot;emcdaniel&quot; //192.168.1.2/image /home/partimag
+mount -t cifs -o username=&amp;quot;administrator&amp;quot;,password=&amp;quot;emcdaniel&amp;quot; //192.168.1.2/image /home/partimag
 #clear
 cd /home/partimag
-echo &quot;We zitten in map:&quot;
+echo &amp;quot;We zitten in map:&amp;quot;
 pwd
 echo ;
-DIRS=&quot;$(ls -d */ | grep &#39;&#39;)&quot;
+DIRS=&amp;quot;$(ls -d */ | grep &#39;&#39;)&amp;quot;
 GROOTSTE_GETAL=0
 # Met alle directories gaan we een voor een aan de slag 
 for DIR in $DIRS;
@@ -202,18 +202,18 @@ do
 RUWE_STRING=$DIR
 # Haal de slash aan het eind van RUWE_STRING af 
 RUWE_STRING=${RUWE_STRING%/} 
-# Haal aan het begin van RUWE_STRING &quot;schoon&quot; af. We houden nu het GEZOCHTE_GETAL over
+# Haal aan het begin van RUWE_STRING &amp;quot;schoon&amp;quot; af. We houden nu het GEZOCHTE_GETAL over
 GEZOCHTE_GETAL=${RUWE_STRING#schoon} 
 # De volgende twee commando&#39;s zorgen er voor dat als GEZOCHTE_GETAL geen getal is
 # deze de waarde 0 krijgt 
 let GEZOCHTE_GETAL++
 let GEZOCHTE_GETAL--
 # Als GEZOCHTE_GETAL ongelijk is aan 0 dan gaan we er mee aan de gang
-if (( $GEZOCHTE_GETAL &gt; 0 )) 
+if (( $GEZOCHTE_GETAL &amp;gt; 0 )) 
 then
 # Als GEZOCHTE_GETAL groter is dan GROOTSTE_GETAL
 # dan wordt GROOTSTE_GETAL gelijk gemaakt aan GEZOCHTE_GETAL
-if (( $GEZOCHTE_GETAL &gt; $GROOTSTE_GETAL )) 
+if (( $GEZOCHTE_GETAL &amp;gt; $GROOTSTE_GETAL )) 
 then
 GROOTSTE_GETAL=$GEZOCHTE_GETAL 
 fi
@@ -222,15 +222,15 @@ done
 
 # Als GROOTSTE_GETAL groter is dan nul is er een schone backup aanwezig en 
 # kunnen we met de restore beginnen. Zo niet dan geven we de error terug
-if (( $GROOTSTE_GETAL &gt; 0 ))
+if (( $GROOTSTE_GETAL &amp;gt; 0 ))
 then
-echo &quot;Start met restore van schoon$GROOTSTE_GETAL&quot;
-NAME=&quot;schoon$GROOTSTE_GETAL&quot;
-/opt/drbl/sbin/ocs-sr -g auto -e1  auto -e2 -j2 -p true restoredisk &quot;$NAME&quot; &quot;sda&quot;
+echo &amp;quot;Start met restore van schoon$GROOTSTE_GETAL&amp;quot;
+NAME=&amp;quot;schoon$GROOTSTE_GETAL&amp;quot;
+/opt/drbl/sbin/ocs-sr -g auto -e1  auto -e2 -j2 -p true restoredisk &amp;quot;$NAME&amp;quot; &amp;quot;sda&amp;quot;
 else
-echo &quot;Er is geen schone restore aanwezig.&quot;
-echo &quot;Controleer of de server aanstaat en of de share aanwezig is. Maak anders een nieuw image.&quot;
-echo &quot;Selecteer dadelijk de optie Start Over.&quot;
+echo &amp;quot;Er is geen schone restore aanwezig.&amp;quot;
+echo &amp;quot;Controleer of de server aanstaat en of de share aanwezig is. Maak anders een nieuw image.&amp;quot;
+echo &amp;quot;Selecteer dadelijk de optie Start Over.&amp;quot;
 fi
 </code></pre>
 

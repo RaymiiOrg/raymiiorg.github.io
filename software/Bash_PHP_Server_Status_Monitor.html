@@ -76,10 +76,6 @@
 
 <p>Ray-Mon is a linux server monitoring script written in PHP and Bash, utilizing JSON as data storage. It requires only bash and a webserver on the client side, and only php on the server side. The client currently supports monitoring processes, uptime, updates, amount of users logged in, disk usage, RAM usage and network traffic.</p>
 
-<h4>Live Demo</h4>
-
-<p><a href="http://vps11.sparklingclouds.nl/status/stat.php">This is a live demo of this script, monitoring the sparkling network (my vps servers)</a></p>
-
 <h4>Features</h4>
 
 <ul>
@@ -157,9 +153,9 @@
 <p>Network interfaces. First one is used for the IP, the second one is used for bandwidth calculations. This is done because openVZ has the &quot;venet0&quot; interface for the bandwidth, and the venet0:0 interface with an IP. If you run bare-metal or KVM or vserver etc. you can set these two to the same value (eth0 eth1 etc).</p>
 
 <pre><code># Network interface for the IP address
-iface=&quot;venet0:0&quot;
+iface=&amp;quot;venet0:0&amp;quot;
 # network interface for traffic monitoring (RX/TX bytes)
-iface2=&quot;venet0&quot;
+iface2=&amp;quot;venet0&amp;quot;
 </code></pre>
 
 <p>The IP address of the server, this is used by me when deploying this script via chef or ansible. You can set it, but it is not required.</p>
@@ -167,20 +163,20 @@ iface2=&quot;venet0&quot;
 <p>Services are checked by doing a <em>ps</em> to see if the process is running. The last service should be defined without a comma, for valid JSON. The code below monitors &quot;sshd&quot;, &quot;lighttpd&quot;, &quot;munin-node&quot; and &quot;syslog&quot;. </p>
 
 <pre><code>SERVICE=lighttpd
-if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;running\&quot;,&quot;; else echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;not running\&quot;,&quot;; fi
+if ps ax | grep -v grep | grep $SERVICE &amp;gt; /dev/null; then echo -n &amp;quot;&amp;quot;$SERVICE&amp;quot; : &amp;quot;running&amp;quot;,&amp;quot;; else echo -n &amp;quot;&amp;quot;$SERVICE&amp;quot; : &amp;quot;not running&amp;quot;,&amp;quot;; fi
 SERVICE=sshd
-if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;running\&quot;,&quot;; else echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;not running\&quot;,&quot;; fi
+if ps ax | grep -v grep | grep $SERVICE &amp;gt; /dev/null; then echo -n &amp;quot;&amp;quot;$SERVICE&amp;quot; : &amp;quot;running&amp;quot;,&amp;quot;; else echo -n &amp;quot;&amp;quot;$SERVICE&amp;quot; : &amp;quot;not running&amp;quot;,&amp;quot;; fi
 SERVICE=syslog
-if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;running\&quot;,&quot;; else echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;not running\&quot;,&quot;; fi
+if ps ax | grep -v grep | grep $SERVICE &amp;gt; /dev/null; then echo -n &amp;quot;&amp;quot;$SERVICE&amp;quot; : &amp;quot;running&amp;quot;,&amp;quot;; else echo -n &amp;quot;&amp;quot;$SERVICE&amp;quot; : &amp;quot;not running&amp;quot;,&amp;quot;; fi
 #LAST SERVICE HAS TO BE WITHOUT , FOR VALID JSON!!!
 SERVICE=munin-node
-if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;running\&quot;&quot;; else echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;not running\&quot;&quot;; fi
+if ps ax | grep -v grep | grep $SERVICE &amp;gt; /dev/null; then echo -n &amp;quot;&amp;quot;$SERVICE&amp;quot; : &amp;quot;running&amp;quot;&amp;quot;; else echo -n &amp;quot;&amp;quot;$SERVICE&amp;quot; : &amp;quot;not running&amp;quot;&amp;quot;; fi
 </code></pre>
 
 <p>To add a service, copy the 2 lines and replace the SERVICE=processname with the actual process name:</p>
 
 <pre><code>SERVICE=processname
-if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;running\&quot;,&quot;; else echo -n &quot;\&quot;$SERVICE\&quot; : \&quot;not running\&quot;,&quot;; fi
+if ps ax | grep -v grep | grep $SERVICE &amp;gt; /dev/null; then echo -n &amp;quot;&amp;quot;$SERVICE&amp;quot; : &amp;quot;running&amp;quot;,&amp;quot;; else echo -n &amp;quot;&amp;quot;$SERVICE&amp;quot; : &amp;quot;not running&amp;quot;,&amp;quot;; fi
 </code></pre>
 
 <p>And, make sure the last service montiored does not echo a comma at the end, else the JSON is not valid and the php script fails.</p>
@@ -191,10 +187,10 @@ if ps ax | grep -v grep | grep $SERVICE &gt; /dev/null; then echo -n &quot;\&quo
 
 <pre><code>SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-*/5 * * * * root /root/scripts/client.sh | sed &#39;:a;N;$!ba;s/\n//g&#39; &gt; /var/www/stat.json
+*/5 * * * * root /root/scripts/client.sh | sed &#39;:a;N;$!ba;s/n//g&#39; &amp;gt; /var/www/stat.json
 </code></pre>
 
-<p>In my case, the client script is in <em>/root/scripts</em>, and my webserver directory is <em>/var/www</em>. Change this to your own setup. Also, you might want to change the time interval. */5 executes every 5 minutes. The sed line is in there to remove the newlines, this creates a shorter JSOn file, saves some KB&#39;s. The <em>root</em> after the cron time is special for a file in <em>/etc/cron.d/</em>, it tells cron as which user it has to execute the crontab file.</p>
+<p>In my case, the client script is in <em>/root/scripts</em>, and my webserver directory is <em>/var/www</em>. Change this to your own setup. Also, you might want to change the time interval. <em>/5 executes every 5 minutes. The sed line is in there to remove the newlines, this creates a shorter JSOn file, saves some KB&#39;s. The *root</em> after the cron time is special for a file in <em>/etc/cron.d/</em>, it tells cron as which user it has to execute the crontab file.</p>
 
 <p>When this is setup you should get a stat.json file in the /var/www/ folder containing the status json. If so, the client is setup correctly.</p>
 
@@ -219,10 +215,10 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 <p>The first parameter is the filename the json file is saved to, and the second is the URL where the json file is located.  </p>
 
 <pre><code>$hostlist=array(
-                &#39;example1.org.json&#39; =&gt; &#39;http://example1.org/stat.json&#39;,
-                &#39;example2.nl.json&#39; =&gt; &#39;http://example2.nl/stat.json&#39;,
-                &#39;special1.network.json&#39; =&gt; &#39;http://special1.network.eu:8080/stat.json&#39;,
-                &#39;special2.network.json&#39; =&gt; &#39;https://special2.network.eu/stat.json&#39;
+                &#39;example1.org.json&#39; =&amp;gt; &#39;http://example1.org/stat.json&#39;,
+                &#39;example2.nl.json&#39; =&amp;gt; &#39;http://example2.nl/stat.json&#39;,
+                &#39;special1.network.json&#39; =&amp;gt; &#39;http://special1.network.eu:8080/stat.json&#39;,
+                &#39;special2.network.json&#39; =&amp;gt; &#39;https://special2.network.eu/stat.json&#39;
                 );
 </code></pre>
 
@@ -240,33 +236,33 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 <p>Edit the threshold values:  </p>
 
-<pre><code>## Set this to &quot;secure&quot; the history saving. This key has to be given as a parameter to save the history.
-$historykey = &quot;8A29691737D&quot;;
+<pre><code>## Set this to &amp;quot;secure&amp;quot; the history saving. This key has to be given as a parameter to save the history.
+$historykey = &amp;quot;8A29691737D&amp;quot;;
 #the below values set the threshold before a value gets shown in bold on the page.
 # Max updates available
-$maxupdates = &quot;10&quot;;
+$maxupdates = &amp;quot;10&amp;quot;;
 # Max users concurrently logged in
-$maxusers = &quot;3&quot;;
+$maxusers = &amp;quot;3&amp;quot;;
 # Max load.
-$maxload = &quot;2&quot;;
+$maxload = &amp;quot;2&amp;quot;;
 # Max disk usage (in percent)
-$maxdisk = &quot;75&quot;;
+$maxdisk = &amp;quot;75&amp;quot;;
 # Max RAM usage (in percent)
-$maxram = &quot;75&quot;;
+$maxram = &amp;quot;75&amp;quot;;
 </code></pre>
 
 <h6>History</h6>
 
 <p>To save the history you have to setup a cronjob to get the status page with a special &quot;history key&quot;. You define this in the stat.php file:</p>
 
-<pre><code>## Set this to &quot;secure&quot; the history saving. This key has to be given as a parameter to save the history.
-$historykey = &quot;8A29691737D&quot;;    
+<pre><code>## Set this to &amp;quot;secure&amp;quot; the history saving. This key has to be given as a parameter to save the history.
+$historykey = &amp;quot;8A29691737D&amp;quot;;    
 </code></pre>
 
 <p>And then the cronjob to get it:</p>
 
 <pre><code>## This saves the history every 8 hours. 
-30 */8 * * * wget -qO /dev/null http://url-to-status.site/status/stat.php?action=save&amp;key=8A29691737D
+30 */8 * * * wget -qO /dev/null http://url-to-status.site/status/stat.php?action=save&amp;amp;key=8A29691737D
 </code></pre>
 
 <p>The cronjob can be on any server which can access the status page, but preferably on the host where the status page is located.</p>

@@ -74,7 +74,7 @@
 
            <h2>Set up a Collectd server with web frontend</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../tutorials" class="link">Tutorials</a></li><li><a href="Collectd_server_setup_tutorial_with_web_frontend.html" class="link">Set up a Collectd server with web frontend</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 09-04-2013</h6><br><p>This tutorial shows you how to set up a collectd server. It also shows you how to set up the collectd-web frontend, an interactive gui for collectd and has it all firewalled. What is collectd? collectd gathers statistics about the system it is running on and stores this information. Those statistics can then be used to find current performance bottlenecks (i.e. performance analysis) and predict future system load (i.e. capacity planning). Or if you just want pretty graphs of your private server and are fed up with some homegrown solution you&#39;re at the right place, too ;). A collectd server is able to receive data from collectd clients.</p>
 
-<p><a href="https://raymii.org/s/tutorials/Collectd_client_setup_tutorial.html">The collectd client tutorial can be found here</a>, a DEMO can be found <a href="http://vps5.sparklingclouds.nl/collectd/">here</a> and a <a href="http://ansible.cc">Ansible</a> playbook to set this up can be found <a href="http://github.com/RaymiiOrg/ansible/">here</a></p>
+<p><a href="https://raymii.org/s/tutorials/Collectd_client_setup_tutorial.html">The collectd client tutorial can be found here</a> and a <a href="http://ansible.cc">Ansible</a> playbook to set this up can be found <a href="http://github.com/RaymiiOrg/ansible/">here</a></p>
 
 <p>We will first set up Collectd on the server, and configure it to listen on the network. Then we will enable the web GUI, and use NGINX to reverse proxy it. <em>Collectd client configuration is not handled by this tutorial. <a href="">It is handled in this tutorial</a>.</em> This tutorial is tested on Debian 6, Debian 7, Ubuntu 10.04 and Ubuntu 12.04. However, the configuration works on any other distro.</p>
 
@@ -100,9 +100,9 @@ Interval 30
 ## This can be higher if you have a more powerfull box
 ReadThreads 1
 LoadPlugin syslog
-&lt;Plugin syslog&gt;
+&amp;lt;Plugin syslog&amp;gt;
         LogLevel info
-&lt;/Plugin&gt;
+&amp;lt;/Plugin&amp;gt;
 
 LoadPlugin cpu
 LoadPlugin df
@@ -119,13 +119,13 @@ LoadPlugin users
 LoadPlugin network
 
 ## Server config
-&lt;Plugin &quot;network&quot;&gt;
-  # Can also be &quot;*&quot; &quot;25826&quot; to listen on 0.0.0.0
-  Listen &quot;$EXTENRAL_IPV4$&quot; &quot;25826&quot;
-  Listen &quot;$EXTENRAL_IPV6$&quot; &quot;25826&quot;
+&amp;lt;Plugin &amp;quot;network&amp;quot;&amp;gt;
+  # Can also be &amp;quot;*&amp;quot; &amp;quot;25826&amp;quot; to listen on 0.0.0.0
+  Listen &amp;quot;$EXTENRAL_IPV4$&amp;quot; &amp;quot;25826&amp;quot;
+  Listen &amp;quot;$EXTENRAL_IPV6$&amp;quot; &amp;quot;25826&amp;quot;
   ReportStats true
   SecurityLevel None 
-&lt;/Plugin&gt;
+&amp;lt;/Plugin&amp;gt;
 
 ## Extra Plugins
 ## remove to disable
@@ -136,16 +136,16 @@ LoadPlugin dns
 LoadPlugin ping
 
 
-&lt;Plugin rrdtool&gt;
-        DataDir &quot;/var/lib/collectd/rrd&quot;
-&lt;/Plugin&gt;
+&amp;lt;Plugin rrdtool&amp;gt;
+        DataDir &amp;quot;/var/lib/collectd/rrd&amp;quot;
+&amp;lt;/Plugin&amp;gt;
 
-Include &quot;/etc/collectd/filters.conf&quot;
-Include &quot;/etc/collectd/plugins.conf&quot;
-Include &quot;/etc/collectd/thresholds.conf&quot;
+Include &amp;quot;/etc/collectd/filters.conf&amp;quot;
+Include &amp;quot;/etc/collectd/plugins.conf&amp;quot;
+Include &amp;quot;/etc/collectd/thresholds.conf&amp;quot;
 </code></pre>
 
-<p>The configuration file is relativly simple. Make sure to replace $VARIABLE$ by the correct on for your server. You load plugins via <code>&quot;LoadPlugin $name&quot;</code>. The network part is important, this defines the server. Collectd supports both IPv4 and IPv6, I have a few IPv6 IP&#39;s in the listen part, and &quot;0.0.0.0&quot; as IPv4 address. <em>Make sure the file has a blank newline at the end. If it has not, collectd will fail to start/run correctly</em>.</p>
+<p>The configuration file is relativly simple. Make sure to replace $VARIABLE$ by the correct on for your server. You load plugins via <code>&amp;quot;LoadPlugin $name&amp;quot;</code>. The network part is important, this defines the server. Collectd supports both IPv4 and IPv6, I have a few IPv6 IP&#39;s in the listen part, and &quot;0.0.0.0&quot; as IPv4 address. <em>Make sure the file has a blank newline at the end. If it has not, collectd will fail to start/run correctly</em>.</p>
 
 <h4>Configure collectd plugins</h4>
 
@@ -154,45 +154,45 @@ Include &quot;/etc/collectd/thresholds.conf&quot;
 <pre><code>## /etc/collectd/plugins.conf 
 
 ## Static Plugins (every host has them)
-&lt;Plugin swap&gt;
+&amp;lt;Plugin swap&amp;gt;
        ReportByDevice false
-&lt;/Plugin&gt;
+&amp;lt;/Plugin&amp;gt;
 
 
 ## Dynamic Plugins (loaded by Ansible based on options)
-&lt;Plugin nginx&gt;
-       URL &quot;http://127.0.0.1/nginx_status&quot;
-&lt;/Plugin&gt;
+&amp;lt;Plugin nginx&amp;gt;
+       URL &amp;quot;http://127.0.0.1/nginx_status&amp;quot;
+&amp;lt;/Plugin&amp;gt;
 
-&lt;Plugin ntpd&gt;
-       Host &quot;localhost&quot;
+&amp;lt;Plugin ntpd&amp;gt;
+       Host &amp;quot;localhost&amp;quot;
        Port 123
        ReverseLookups false
-&lt;/Plugin&gt;
+&amp;lt;/Plugin&amp;gt;
 
-&lt;Plugin ping&gt;
-       Host &quot;google.com&quot;
-&lt;/Plugin&gt;
+&amp;lt;Plugin ping&amp;gt;
+       Host &amp;quot;google.com&amp;quot;
+&amp;lt;/Plugin&amp;gt;
 
-&lt;Plugin sensors&gt;
-       SensorConfigFile &quot;/etc/sensors3.conf&quot;
-       Sensor &quot;it8712-isa-0290/temperature-temp1&quot;
-       Sensor &quot;it8712-isa-0290/fanspeed-fan3&quot;
-       Sensor &quot;it8712-isa-0290/voltage-in8&quot;
+&amp;lt;Plugin sensors&amp;gt;
+       SensorConfigFile &amp;quot;/etc/sensors3.conf&amp;quot;
+       Sensor &amp;quot;it8712-isa-0290/temperature-temp1&amp;quot;
+       Sensor &amp;quot;it8712-isa-0290/fanspeed-fan3&amp;quot;
+       Sensor &amp;quot;it8712-isa-0290/voltage-in8&amp;quot;
        IgnoreSelected false
-&lt;/Plugin&gt;
+&amp;lt;/Plugin&amp;gt;
 
-&lt;Plugin write_graphite&gt;
-       &lt;Carbon&gt;
-               Host &quot;$GRAPHITE_HOST$&quot;
-               Port &quot;2003&quot;
-               Prefix &quot;collectd&quot;
-               Postfix &quot;collectd&quot;
+&amp;lt;Plugin write_graphite&amp;gt;
+       &amp;lt;Carbon&amp;gt;
+               Host &amp;quot;$GRAPHITE_HOST$&amp;quot;
+               Port &amp;quot;2003&amp;quot;
+               Prefix &amp;quot;collectd&amp;quot;
+               Postfix &amp;quot;collectd&amp;quot;
                StoreRates false
                AlwaysAppendDS false
-               EscapeCharacter &quot;_&quot;
-       &lt;/Carbon&gt;
-&lt;/Plugin&gt;
+               EscapeCharacter &amp;quot;_&amp;quot;
+       &amp;lt;/Carbon&amp;gt;
+&amp;lt;/Plugin&amp;gt;
 </code></pre>
 
 <p>Collectd server is now set up in &quot;server&quot; mode. To test it we restart the service:</p>
@@ -220,7 +220,7 @@ python runserver.py
 <pre><code>ssh -t -t -L 8888:localhost:8888 USER@SERVER.COM
 </code></pre>
 
-<p>You can now view the app in your local web browser via <a href="http://localhost:8888">http://localhost:8888</a></p>
+<p>You can now view the app in your local web browser via <code>http://localhost:8888</code></p>
 
 <h4>Set up restartd</h4>
 
@@ -228,7 +228,7 @@ python runserver.py
 
 <p>Edit <code>/etc/restartd.conf</code> and make sure it has the following in it:</p>
 
-<pre><code>collectd-web &quot;.*runserver.py&quot; &quot;su $USER -l -c &#39;pushd /home/$USER/collectd-web/ &amp;&amp; /usr/bin/python /home/$USER/collectd-web/runserver.py&#39; &gt;&gt; /var/log/$USER-collectd-server.log&quot; &quot;/bin/echo &#39;collectd-server running&#39; &gt;&gt; /var/log/$USER-collectd-server.log&quot;
+<pre><code>collectd-web &amp;quot;.*runserver.py&amp;quot; &amp;quot;su $USER -l -c &#39;pushd /home/$USER/collectd-web/ &amp;amp;&amp;amp; /usr/bin/python /home/$USER/collectd-web/runserver.py&#39; &amp;gt;&amp;gt; /var/log/$USER-collectd-server.log&amp;quot; &amp;quot;/bin/echo &#39;collectd-server running&#39; &amp;gt;&amp;gt; /var/log/$USER-collectd-server.log&amp;quot;
 </code></pre>
 
 <p>Make sure you change $USER to the username which has the application, and check if the paths are correct. If so then restart restartd:</p>

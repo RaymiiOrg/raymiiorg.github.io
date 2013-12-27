@@ -122,8 +122,8 @@
 padself=`pwd`/`basename $0`
 
 function catch_errors() {
-   zenity --question --text=&quot;There is something wrong. Do you want to quit or restart the app?&quot; --cancel-label=&quot;Quit&quot; --ok-label=&quot;Restart&quot;;
-   [ &quot;$?&quot; = &quot;0&quot; ] &amp;&amp; ( bash -c $padself &amp; );
+   zenity --question --text=&amp;quot;There is something wrong. Do you want to quit or restart the app?&amp;quot; --cancel-label=&amp;quot;Quit&amp;quot; --ok-label=&amp;quot;Restart&amp;quot;;
+   [ &amp;quot;$?&amp;quot; = &amp;quot;0&amp;quot; ] &amp;amp;&amp;amp; ( bash -c $padself &amp;amp; );
    exit 0;
 }
 
@@ -134,57 +134,57 @@ function func_error2() {
 trap catch_errors ERR;
 
 mapvraag=0
-titel=&quot;EasyConverter v0.4g&quot;
+titel=&amp;quot;EasyConverter v0.4g&amp;quot;
 KBs=128;
 FGOED=1;
-opts=&quot;&quot;;
+opts=&amp;quot;&amp;quot;;
 
-zenity --info --text=&quot;Hi, I&#39;m **$titel** nI will help you with converting files to another format. n nIn the next window, please select the format of the files. After that please select the folder which has the audio files.&quot; --title=&quot;$titel&quot;
+zenity --info --text=&amp;quot;Hi, I&#39;m **$titel** nI will help you with converting files to another format. n nIn the next window, please select the format of the files. After that please select the folder which has the audio files.&amp;quot; --title=&amp;quot;$titel&amp;quot;
 
-vanform=$(zenity  --list --title=&quot;Select a file extension&quot; --height=270 --text &quot;Which filetype do you want to convert?&quot; --radiolist  --column &quot;Choose&quot; --column &quot;Original Format&quot; TRUE flac FALSE ogg FALSE wav FALSE mp3 FALSE aac FALSE flv);
+vanform=$(zenity  --list --title=&amp;quot;Select a file extension&amp;quot; --height=270 --text &amp;quot;Which filetype do you want to convert?&amp;quot; --radiolist  --column &amp;quot;Choose&amp;quot; --column &amp;quot;Original Format&amp;quot; TRUE flac FALSE ogg FALSE wav FALSE mp3 FALSE aac FALSE flv);
 
-mapvraag=$(zenity --file-selection --directory --title=&quot;Please select a folder with $vanform files.&quot; --file-filter=&quot;*.$vanform&quot; );
+mapvraag=$(zenity --file-selection --directory --title=&amp;quot;Please select a folder with $vanform files.&amp;quot; --file-filter=&amp;quot;*.$vanform&amp;quot; );
 
-pushd &quot;$mapvraag&quot;
+pushd &amp;quot;$mapvraag&amp;quot;
 for f in ./*.$vanform; do
-        test -f &quot;$f&quot; || continue
-        echo &quot;$f bestaat, mooi zo.&quot;;
+        test -f &amp;quot;$f&amp;quot; || continue
+        echo &amp;quot;$f bestaat, mooi zo.&amp;quot;;
         FGOED=2;
     done    
 popd
 
 if [ $FGOED == 1 ]; then
-    zenity --error --text=&quot;Oops, the filetype you selected is not found in the folder you selected. nPlease try again.&quot; --title=&quot;$titel&quot;;
+    zenity --error --text=&amp;quot;Oops, the filetype you selected is not found in the folder you selected. nPlease try again.&amp;quot; --title=&amp;quot;$titel&amp;quot;;
     return 1;
 fi
 
-formaat=$(zenity  --list --height=270 --text &quot;And what should they become?&quot; --radiolist  --column &quot;Choose&quot; --column &quot;Converted Format&quot; TRUE mp3 FALSE ogg FALSE wav FALSE flac FALSE aac);
+formaat=$(zenity  --list --height=270 --text &amp;quot;And what should they become?&amp;quot; --radiolist  --column &amp;quot;Choose&amp;quot; --column &amp;quot;Converted Format&amp;quot; TRUE mp3 FALSE ogg FALSE wav FALSE flac FALSE aac);
 if [ $vanform = $formaat ]; then
-    zenity --error --text=&quot;You choose the same input and output format nI can&#39;t convert the files if you do that. nLets restart.&quot; --title=&quot;$titel&quot;
+    zenity --error --text=&amp;quot;You choose the same input and output format nI can&#39;t convert the files if you do that. nLets restart.&amp;quot; --title=&amp;quot;$titel&amp;quot;
     return 1;
     exit
 fi
 
-if [ $formaat == &quot;ogg&quot; ]; then
-    opts=&quot;-acodec libvorbis&quot;;
+if [ $formaat == &amp;quot;ogg&amp;quot; ]; then
+    opts=&amp;quot;-acodec libvorbis&amp;quot;;
 fi
 
-KBs=$(zenity  --list --height=380 --text &quot;What output quality you want me to tell ffmpeg?n*64k*: nSmall filesnLow quality n*320k*: nBig filesnHigh quality.&quot; --radiolist  --column &quot;Choose&quot; --column &quot;kbps&quot; TRUE 64 FALSE 96 FALSE 128 FALSE 192 FALSE 256 FALSE 320);
+KBs=$(zenity  --list --height=380 --text &amp;quot;What output quality you want me to tell ffmpeg?n*64k*: nSmall filesnLow quality n*320k*: nBig filesnHigh quality.&amp;quot; --radiolist  --column &amp;quot;Choose&amp;quot; --column &amp;quot;kbps&amp;quot; TRUE 64 FALSE 96 FALSE 128 FALSE 192 FALSE 256 FALSE 320);
 
-finalcheck=$(zenity --question --cancel-label=&quot;Don&#39;t&quot; --ok-label=&quot;Lets Rock Baby!&quot; --text=&quot;We&#39;re going to convert all files in: **$mapvraag** to ***$formaat*** at ***$KBs** kb/s*. Last check, Do or Don&#39;t?&quot; --title=&quot;$titel&quot;)
+finalcheck=$(zenity --question --cancel-label=&amp;quot;Don&#39;t&amp;quot; --ok-label=&amp;quot;Lets Rock Baby!&amp;quot; --text=&amp;quot;We&#39;re going to convert all files in: **$mapvraag** to ***$formaat*** at ***$KBs** kb/s*. Last check, Do or Don&#39;t?&amp;quot; --title=&amp;quot;$titel&amp;quot;)
 
 trap func_error2 ERR;
 
-pushd &quot;$mapvraag&quot;
+pushd &amp;quot;$mapvraag&amp;quot;
 for i in *.$vanform; do
-        mkdir -p &quot;$mapvraag/converted/$formaat/&quot;
-        ffmpeg -y -i &quot;$i&quot; -ab $KBs&quot;k&quot; $opts &quot;$mapvraag/converted/$formaat/$i.$formaat&quot; 2&gt;&amp;1 | zenity --progress --text=&quot;Converting: **$i** from **$vanform** to **$formaat** at **$KBs** kb/s&quot; --title=&quot;$titel&quot; --auto-close --pulsate
+        mkdir -p &amp;quot;$mapvraag/converted/$formaat/&amp;quot;
+        ffmpeg -y -i &amp;quot;$i&amp;quot; -ab $KBs&amp;quot;k&amp;quot; $opts &amp;quot;$mapvraag/converted/$formaat/$i.$formaat&amp;quot; 2&amp;gt;&amp;amp;1 | zenity --progress --text=&amp;quot;Converting: **$i** from **$vanform** to **$formaat** at **$KBs** kb/s&amp;quot; --title=&amp;quot;$titel&amp;quot; --auto-close --pulsate
         echo $i gedaan
 
 done
 
-zenity --question --cancel-label=&quot;Nope, just quit.&quot; --ok-label=&quot;Yes, open it.&quot; --text=&quot;Done! nI&#39;ve saved the converted files in this folder: **$mapvraag/converted/$formaat**. n nWould you like me to try and open Nautilus in the output folder? n n nThis little script is made by: **Raymii.org**.&quot; --title=&quot;$titel&quot;;
-[ &quot;$?&quot; = &quot;0&quot; ] &amp;&amp; nautilus --no-desktop &quot;./converted/$formaat&quot;;
+zenity --question --cancel-label=&amp;quot;Nope, just quit.&amp;quot; --ok-label=&amp;quot;Yes, open it.&amp;quot; --text=&amp;quot;Done! nI&#39;ve saved the converted files in this folder: **$mapvraag/converted/$formaat**. n nWould you like me to try and open Nautilus in the output folder? n n nThis little script is made by: **Raymii.org**.&amp;quot; --title=&amp;quot;$titel&amp;quot;;
+[ &amp;quot;$?&amp;quot; = &amp;quot;0&amp;quot; ] &amp;amp;&amp;amp; nautilus --no-desktop &amp;quot;./converted/$formaat&amp;quot;;
 popd
 echo Done
 </code></pre>

@@ -72,7 +72,17 @@
                 <div class="inner">
 
 
-           <h2>ntop-ng 1.1 installation on Ubuntu 12.04</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../tutorials" class="link">Tutorials</a></li><li><a href="ntop-ng-installation-on-Ubuntu.html" class="link">ntop-ng 1.1 installation on Ubuntu 12.04</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 29-11-2013</h6><br><p><a href="https://raymii.org/s/inc/img/ntopng/1.png"><img src="https://raymii.org/s/inc/img/ntopng/1.png" alt="ntop" /></a></p>
+           <h2>ntop-ng 1.1 installation on Ubuntu 12.04</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../tutorials" class="link">Tutorials</a></li><li><a href="ntop-ng-installation-on-Ubuntu.html" class="link">ntop-ng 1.1 installation on Ubuntu 12.04</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 29-11-2013</h6><br><h3>Screenshots</h3>
+
+<p><a href="https://raymii.org/s/inc/img/ntopng/1.png"><img src="https://raymii.org/s/inc/img/ntopng/1.png" alt="ntop" /></a></p>
+
+<p><a href="https://raymii.org/s/inc/img/ntopng/2.png"><img src="https://raymii.org/s/inc/img/ntopng/2.png" alt="ntop" /></a></p>
+
+<p><a href="https://raymii.org/s/inc/img/ntopng/3.png"><img src="https://raymii.org/s/inc/img/ntopng/3.png" alt="ntop" /></a></p>
+
+<p><a href="https://raymii.org/s/inc/img/ntopng/4.png"><img src="https://raymii.org/s/inc/img/ntopng/4.png" alt="ntop" /></a></p>
+
+<p><a href="https://raymii.org/s/inc/img/ntopng/5.png"><img src="https://raymii.org/s/inc/img/ntopng/5.png" alt="ntop" /></a></p>
 
 <p>This is a guide on installing the latest ntop-ng (1.1) on Ubuntu 12.04. </p>
 
@@ -99,8 +109,6 @@
 </ul>
 
 <p><a href="http://www.ntop.org/">More information on ntop-ng can be found on their website: http://www.ntop.org/</a></p>
-
-<p><a href="https://raymii.org/s/inc/img/ntopng/2.png"><img src="https://raymii.org/s/inc/img/ntopng/2.png" alt="ntop" /></a></p>
 
 <h3>Contents</h3>
 
@@ -132,8 +140,6 @@
 <pre><code> apt-get install libpcap-dev libglib2.0-dev libgeoip-dev redis-server wget libxml2-dev build-essential
 </code></pre>
 
-<p><a href="https://raymii.org/s/inc/img/ntopng/3.png"><img src="https://raymii.org/s/inc/img/ntopng/3.png" alt="ntop" /></a></p>
-
 <h3>Download the files</h3>
 
 <p>We need to download both the data files and the source code. You can download it <a href="http://sourceforge.net/projects/ntop/files/ntopng/">from sourceforge</a>:</p>
@@ -141,9 +147,9 @@
 <pre><code>mkdir -p /usr/local/src
 cd /usr/local/src
 
-wget &quot;http://downloads.sourceforge.net/project/ntop/ntopng/ntopng-data-1.1_6932.tgz&quot; -O ntopng-data-1.1.tar.gz
+wget &amp;quot;http://downloads.sourceforge.net/project/ntop/ntopng/ntopng-data-1.1_6932.tgz&amp;quot; -O ntopng-data-1.1.tar.gz
 
-wget &quot;http://downloads.sourceforge.net/project/ntop/ntopng/ntopng-1.1_6932.tgz&quot; -O ntopng-1.1.tar.gz
+wget &amp;quot;http://downloads.sourceforge.net/project/ntop/ntopng/ntopng-1.1_6932.tgz&amp;quot; -O ntopng-1.1.tar.gz
 </code></pre>
 
 <h3>Place ntopng-data</h3>
@@ -207,8 +213,6 @@ cd ..
 <pre><code>make install
 </code></pre>
 
-<p><a href="https://raymii.org/s/inc/img/ntopng/4.png"><img src="https://raymii.org/s/inc/img/ntopng/4.png" alt="ntop" /></a></p>
-
 <h3>Creating the ntopng config file</h3>
 
 <p>First we create the required folder:</p>
@@ -218,13 +222,13 @@ cd ..
 
 <p>There are two files needed. First is <code>/etc/ntopng/ntopng.start</code>:</p>
 
-<pre><code>--local-networks &quot;172.20.16.0/24&quot;
+<pre><code>--local-networks &amp;quot;172.20.16.0/24&amp;quot;
 --interface 1
 </code></pre>
 
 <p>To see all available interfaces and options, use the <code>ntopng -h</code> option:</p>
 
-<pre><code>Available interfaces (-i &lt;interface index&gt;):
+<pre><code>Available interfaces (-i &amp;lt;interface index&amp;gt;):
    1. eth0
    2. vmbr0
    3. venet0
@@ -256,8 +260,6 @@ cd ..
 
 <p>If this works, and there is data visible as in the screenshots, continue on to set up the upstart script.</p>
 
-<p><a href="https://raymii.org/s/inc/img/ntopng/5.png"><img src="https://raymii.org/s/inc/img/ntopng/5.png" alt="ntop" /></a></p>
-
 <h3>Upstart script</h3>
 
 <p>This is a simple upstart script which can be used to start, stop and restart ntopng. Place it in <code>/etc/init/ntopng.conf</code>:</p>
@@ -265,7 +267,7 @@ cd ..
 <pre><code># ntopng network flow analyzer
 # by https://raymii.org
 
-description     &quot;ntopng network flow analyzer&quot;
+description     &amp;quot;ntopng network flow analyzer&amp;quot;
 
 start on virtual-filesystems
 stop on runlevel [06]

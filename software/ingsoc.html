@@ -150,9 +150,96 @@ homepagetext: &gt;
 <li><a href="http://pyyaml.org/">pyyaml</a></li>
 </ul>
 
+<p>To install them in a standard ubuntu/debian:
+ingsoc is a static site generator written in Python with the purpose of generating raymii.org. It differs from other static site generators because it does not create a blog-like site, but it is focused on pages and structure. It also does not use a template engine. It generates categories, pages, tags and a RSS feed. It takes markdown files with a yaml config header as input, and outputs html. </p>
+
+<h3>Usage</h3>
+
+<p>ingsoc requires three directories and content to work. The directory structure can be as below:</p>
+
+<pre><code>../
+src/
+-- tutorials/
+   -- tutorial1.md
+   -- tutorial2.md
+-- software/
+   -- project1.md
+   -- project2.md
+
+inc/
+-- style.css
+-- css/
+-- img/
+out/
+config.yml
+newspeak.py
+</code></pre>
+
+<p>I have a <code>src</code> directory with my content, which is written in markdown. The <code>inc</code> directory gets copied over to the output folder, it houses the CSS, JS and images. Then the <code>out</code> folder is the one where ingsoc puts its HTML.</p>
+
+<h3>Content</h3>
+
+<p>A content item is a markdown file, with a yaml header. The header looks like this:</p>
+
+<pre><code>title: &amp;quot;Ubuntu/Debian update mailer&amp;quot;
+author: &amp;quot;Remy van Elst&amp;quot;
+category: &amp;quot;software&amp;quot;
+date: &amp;quot;10-06-2012&amp;quot;
+summary: &amp;quot;This is a bash script for Ubuntu and Debian, to be run by cron on a set interval. It checks if there are apt-updates, and if so, mails an overview of the packages which can be updated, whith their local version, the version available and an URL to the Ubuntu package site where you can see the changelog. I wrote this as an addition for my Nagios monitoring, that only shows how many updates there are, this is a lot more verbose. It also runs on Debian since 1 Nov 2012. Only the links don&#39;t work then, because the packages are different.&amp;quot;
+tags: 
+  - command-line
+  - bash
+  - apt
+  - update
+  - ubuntu
+  - debian
+---
+</code></pre>
+
+<p>Then below the three dashes (<code>---</code>) the actual markdown content is placed. The <code>category</code> item is what also end up in the menu. The date and summary are used in the RSS. The summary is the only field which is not required.</p>
+
+<h3>Configuration</h3>
+
+<p>There is also a <code>config.yml</code> file. It looks like this:</p>
+
+<pre><code>title: &amp;quot;Raymii.org&amp;quot;
+subtitle: &amp;quot;Quis custodiet ipsos custodes?&amp;quot;
+rootdir: &amp;quot;./src&amp;quot;
+outdir: &amp;quot;out&amp;quot;
+incfolder: &amp;quot;./inc&amp;quot;
+breadcrumbs: &amp;quot;yes&amp;quot;
+tags: &amp;quot;yes&amp;quot;
+rsstitle: &amp;quot;Raymii.org&amp;quot;
+rssdescr: &amp;quot;The raymii.org RSS feed, all about GNU/Linux&amp;quot;
+rssurl: &amp;quot;https://raymii.org/s&amp;quot;
+
+homepagetext: &amp;gt;
+    &amp;lt;h3&amp;gt;Welcome!&amp;lt;/h3&amp;gt;
+    This is the &amp;lt;strong&amp;gt;best site&amp;lt;/strong&amp;gt; on the entire internet.
+</code></pre>
+
+<p>The <code>homepagetext</code> item is the raw html code which is put on the index.html code. the <code>tags</code> and <code>breadcrumbs</code> are used to define if tags and breadcrumbs should be generated and placed or not.</p>
+
+<h3>Requirements</h3>
+
+<ul>
+<li>python 2.7+ (tested with 2.7 and 3.0)</li>
+<li><a href="https://github.com/FSX/misaka">Sundown/Misaka</a></li>
+<li>dateutils</li>
+<li><a href="http://pyyaml.org/">pyyaml</a></li>
+</ul>
+
 <p>To install them in a standard ubuntu/debian:</p>
 
 <pre><code>sudo apt-get install python-pip
+</code></pre>
+
+<p>and then:</p>
+
+<pre><code>sudo pip install misaka pyyaml dateutils
+
+
+sudo apt-get install python-pip
 </code></pre>
 
 <p>and then:</p>

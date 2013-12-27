@@ -87,58 +87,58 @@ First I made screenshots of the website&#39;s I wanted, with the firefox add-on 
 #!/bin/bash
 NUMMR=1
 
-EXTENSION=&quot;jpg&quot;;
+EXTENSION=&amp;quot;jpg&amp;quot;;
 mkdir work
 mkdir -p finished/pics 
 
 GALL=./finished/gallery.html
 rm -rf $GALL 
-echo &quot;Made with raymii.orgs gallery thumber&quot; &gt; $GALL 
-tabhead=&quot; &lt;table border=\&quot;0\&quot; bordercolor=\&quot;0\&quot; &gt;&quot; 
-tabfeet=&quot; &lt;/table &gt;&quot; 
-echo $tabhead &gt;&gt; $GALL 
+echo &amp;quot;Made with raymii.orgs gallery thumber&amp;quot; &amp;gt; $GALL 
+tabhead=&amp;quot; &amp;lt;table border=&amp;quot;0&amp;quot; bordercolor=&amp;quot;0&amp;quot; &amp;gt;&amp;quot; 
+tabfeet=&amp;quot; &amp;lt;/table &amp;gt;&amp;quot; 
+echo $tabhead &amp;gt;&amp;gt; $GALL 
 
 
 for i in *.$EXTENSION; 
-do cp -rf -v &quot;$i&quot; &quot;./work/$NUMMR.$EXTENSION&quot;; 
+do cp -rf -v &amp;quot;$i&amp;quot; &amp;quot;./work/$NUMMR.$EXTENSION&amp;quot;; 
 
-convert ./work/$NUMMR.$EXTENSION -auto-orient \
+convert ./work/$NUMMR.$EXTENSION -auto-orient 
  -thumbnail 160x160 -unsharp 0x.5 ./work/$NUMMR.w1.png 
 
 
-convert ./work/$NUMMR.w1.png \
- -bordercolor white -border 6 \
- -bordercolor grey60 -border 1 \
- -bordercolor none -background none \
- \( -clone 0 -rotate `convert null: -format &#39;%[fx:rand()*30-15]&#39; info:` \) \
- \( -clone 0 -rotate `convert null: -format &#39;%[fx:rand()*30-15]&#39; info:` \) \
- \( -clone 0 -rotate `convert null: -format &#39;%[fx:rand()*30-15]&#39; info:` \) \
- \( -clone 0 -rotate `convert null: -format &#39;%[fx:rand()*30-15]&#39; info:` \) \
- -delete 0 -border 100x100 -gravity center \
- -crop 200x200+0+0 +repage -flatten -trim +repage \
- -background black \( +clone -shadow 60x4+4+4 \) +swap \
- -background none -flatten \
- &quot;./work/$NUMMR.thumb.png&quot; 
+convert ./work/$NUMMR.w1.png 
+ -bordercolor white -border 6 
+ -bordercolor grey60 -border 1 
+ -bordercolor none -background none 
+ ( -clone 0 -rotate `convert null: -format &#39;%[fx:rand()*30-15]&#39; info:` ) 
+ ( -clone 0 -rotate `convert null: -format &#39;%[fx:rand()*30-15]&#39; info:` ) 
+ ( -clone 0 -rotate `convert null: -format &#39;%[fx:rand()*30-15]&#39; info:` ) 
+ ( -clone 0 -rotate `convert null: -format &#39;%[fx:rand()*30-15]&#39; info:` ) 
+ -delete 0 -border 100x100 -gravity center 
+ -crop 200x200+0+0 +repage -flatten -trim +repage 
+ -background black ( +clone -shadow 60x4+4+4 ) +swap 
+ -background none -flatten 
+ &amp;quot;./work/$NUMMR.thumb.png&amp;quot; 
 
 
 
 
 cp ./work/$NUMMR.thumb.png ./finished/pics/$NUMMR.png
 
-evenline=&quot; &lt;tr &gt; &lt;td &gt; &lt;a href=\&quot;\&quot;&gt;&lt;img src=\&quot;pics/$NUMMR.png\&quot; alt=\&quot; pic $NUMMR - made by raymii.org script\&quot; / &gt; &lt;/a&gt;&lt;/td &gt;&quot; 
-oddline=&quot; &lt;td &gt; &lt;a href=\&quot;\&quot;&gt;&lt;img src=\&quot;pics/$NUMMR.png\&quot; alt=\&quot; pic $NUMMR - made by raymii.org script\&quot; / &gt; &lt;/td &gt; &lt;/a&gt;&lt;/tr &gt;&quot; 
+evenline=&amp;quot; &amp;lt;tr &amp;gt; &amp;lt;td &amp;gt; &amp;lt;a href=&amp;quot;&amp;quot;&amp;gt;&amp;lt;img src=&amp;quot;pics/$NUMMR.png&amp;quot; alt=&amp;quot; pic $NUMMR - made by raymii.org script&amp;quot; / &amp;gt; &amp;lt;/a&amp;gt;&amp;lt;/td &amp;gt;&amp;quot; 
+oddline=&amp;quot; &amp;lt;td &amp;gt; &amp;lt;a href=&amp;quot;&amp;quot;&amp;gt;&amp;lt;img src=&amp;quot;pics/$NUMMR.png&amp;quot; alt=&amp;quot; pic $NUMMR - made by raymii.org script&amp;quot; / &amp;gt; &amp;lt;/td &amp;gt; &amp;lt;/a&amp;gt;&amp;lt;/tr &amp;gt;&amp;quot; 
 
  slot=$(( $NUMMR % 2 )) 
 if [ $slot -eq 0 ] 
 then 
- echo $oddline &gt;&gt; $GALL 
+ echo $oddline &amp;gt;&amp;gt; $GALL 
 else 
- echo $evenline &gt;&gt; $GALL 
+ echo $evenline &amp;gt;&amp;gt; $GALL 
 fi 
-let &quot;NUMMR += 1&quot; 
+let &amp;quot;NUMMR += 1&amp;quot; 
 done 
 
-echo $tabfeet &gt;&gt; $GALL 
+echo $tabfeet &amp;gt;&amp;gt; $GALL 
 rm -rf ./work 
 exit 0 
 </code></pre>

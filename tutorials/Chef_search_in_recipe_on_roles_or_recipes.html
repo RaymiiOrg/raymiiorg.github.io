@@ -82,34 +82,34 @@
 
 <p>This very simple cookbook installs the collectd package and sets the config file. Take a look at it:</p>
 
-<pre><code>package &quot;collectd-core&quot; do
+<pre><code>package &amp;quot;collectd-core&amp;quot; do
     action :install
 end
 
-service &quot;collectd&quot; do
-  supports :start =&gt;true, :restart =&gt; true, :stop =&gt; true
+service &amp;quot;collectd&amp;quot; do
+  supports :start =&amp;gt;true, :restart =&amp;gt; true, :stop =&amp;gt; true
   action [:enable, :start]
 end
 
 node.set[:collectd][:client] = true
 
-graphite_servers = search(:node, &#39;recipes:&quot;graphite&quot;&#39;)
+graphite_servers = search(:node, &#39;recipes:&amp;quot;graphite&amp;quot;&#39;)
 
-template &quot;/etc/collectd/collectd.conf&quot; do
-    source &quot;collectd.conf.erb&quot;
-    owner &quot;root&quot;
-    group &quot;root&quot;
+template &amp;quot;/etc/collectd/collectd.conf&amp;quot; do
+    source &amp;quot;collectd.conf.erb&amp;quot;
+    owner &amp;quot;root&amp;quot;
+    group &amp;quot;root&amp;quot;
     mode 0644
-    notifies :restart, &quot;service[collectd]&quot;
+    notifies :restart, &amp;quot;service[collectd]&amp;quot;
     variables(
-        :graphite_servers =&gt; graphite_servers
+        :graphite_servers =&amp;gt; graphite_servers
     )
 end
 </code></pre>
 
 <p>The following line does the search magic:</p>
 
-<pre><code>graphite_servers = search(:node, &#39;recipes:&quot;graphite&quot;&#39;)
+<pre><code>graphite_servers = search(:node, &#39;recipes:&amp;quot;graphite&amp;quot;&#39;)
 </code></pre>
 
 <p>It searches the Chef server for all nodes with the <code>graphite</code> recipe and makes that available in this cookbook. Then it passes it on to the template, which we will discuss below. If you don&#39;t want to search on recipes but for example on roles, you can use the following code:</p>
@@ -124,9 +124,9 @@ end
 
 <p>Now the template (<code>collectd.conf.erb</code>) is a standard collectd template with some erb to enumerate the information in the <code>graphite_servers</code> variable. Skip to the bottom to see it:</p>
 
-<pre><code># Managed by Chef for node &lt;%= node[&#39;fqdn&#39;] -%&gt;.
+<pre><code># Managed by Chef for node &amp;lt;%= node[&#39;fqdn&#39;] -%&amp;gt;.
 # Do not edit manually, your changes will be overwritten.
-Hostname &lt;%= node[&#39;fqdn&#39;] -%&gt;
+Hostname &amp;lt;%= node[&#39;fqdn&#39;] -%&amp;gt;
 FQDNLookup false
 Interval 30
 ReadThreads 1
@@ -147,24 +147,24 @@ LoadPlugin users
 LoadPlugin network
 LoadPlugin iptables
 LoadPlugin uptime
-LoadPlugin &quot;write_graphite&quot;
-&lt;Plugin &quot;write_graphite&quot;&gt;
-&lt;% @graphite_servers.each do |graphite_server| -%&gt;
- &lt;Carbon&gt;
-   Host &quot;&lt;%= graphite_server[&#39;ipaddress&#39;] -%&gt;&quot;
-   Port &quot;2003&quot;
-   EscapeCharacter &quot;_&quot;
+LoadPlugin &amp;quot;write_graphite&amp;quot;
+&amp;lt;Plugin &amp;quot;write_graphite&amp;quot;&amp;gt;
+&amp;lt;% @graphite_servers.each do |graphite_server| -%&amp;gt;
+ &amp;lt;Carbon&amp;gt;
+   Host &amp;quot;&amp;lt;%= graphite_server[&#39;ipaddress&#39;] -%&amp;gt;&amp;quot;
+   Port &amp;quot;2003&amp;quot;
+   EscapeCharacter &amp;quot;_&amp;quot;
    SeparateInstances true
    StoreRates false
    AlwaysAppendDS false
- &lt;/Carbon&gt;
- &lt;% end -%&gt;
-&lt;/Plugin&gt;
+ &amp;lt;/Carbon&amp;gt;
+ &amp;lt;% end -%&amp;gt;
+&amp;lt;/Plugin&amp;gt;
 </code></pre>
 
 <p>This part starts a loop, which will loop trough all the values in the array it got from the cookbook:</p>
 
-<pre><code>&lt;% @graphite_servers.each do |graphite_server| -%&gt;
+<pre><code>&amp;lt;% @graphite_servers.each do |graphite_server| -%&amp;gt;
 </code></pre>
 
 <p>Then this part does another lookup to get the node&#39;s IP address:</p>
@@ -175,7 +175,7 @@ LoadPlugin &quot;write_graphite&quot;
 
 <p>This last part ends the loop:</p>
 
-<pre><code> &lt;% end -%&gt;
+<pre><code> &amp;lt;% end -%&amp;gt;
 </code></pre>
 
 <p>This will result in a config file with all the graphite servers you have in your Chef environment. One of the big plus points is that you can add or remove graphite servers whenever you want without the nodes having issues. Need to scale up a few servers? Just deploy some new nodes and all the clients will use them. Scaling down? No issue, all the clients will stop using them without manual action.</p>

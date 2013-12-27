@@ -74,11 +74,42 @@
 
            <h2>OS X - Enable access for assitive devices via the command line</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../snippets" class="link">Snippets</a></li><li><a href="OS-X-Enable-Access-for-assistive-devices-via-command-line.html" class="link">OS X - Enable access for assitive devices via the command line</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 03-09-2013</h6><br><p>This command enables access for assistive decives on Apple OS X machines via the command line, or via Apple Remote Desktop. This is needed for software like SpectacleApp or Sizeup.</p>
 
-<pre><code>touch /private/var/db/.AccessibilityAPIEnabled
+<h3>Mavericks</h3>
+
+<p>In Mavericks Apple changed the permissions so that every app has to be given permission individually. Therefore we need to do a bit more work. We first need to get the applications Bundle Identifier:</p>
+
+<pre><code>/usr/libexec/PlistBuddy -c &#39;Print CFBundleIdentifier&#39; /Applications/&amp;lt;Appname.app&amp;gt;/Contents/Info.plist
+com.apple.Safari
 </code></pre>
 
-<p>It should run as root.</p>
-<hr>Tags: <a href="../tags/apple.html" class="link">apple, </a><a href="../tags/apple-remote-desktop.html" class="link">apple-remote-desktop, </a><a href="../tags/ard.html" class="link">ard, </a><a href="../tags/assistive.html" class="link">assistive, </a><a href="../tags/command-line.html" class="link">command-line, </a><a href="../tags/mac.html" class="link">mac, </a><a href="../tags/os-x.html" class="link">os-x, </a><a href="../tags/spectacle.html" class="link">spectacle, </a><div class="footer">
+<p>For SpectacleApp:</p>
+
+<pre><code>/usr/libexec/PlistBuddy -c &#39;Print CFBundleIdentifier&#39; /Applications/Spectacle.app/Contents/Info.plist
+com.divisiblebyzero.Spectacle
+</code></pre>
+
+<p>Then we use the Bundle ID in the following command to modify the permission database:</p>
+
+<pre><code>sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db &amp;quot;INSERT INTO access VALUES(&#39;kTCCServiceAccessibility&#39;,&#39;&amp;lt;Bundle-ID&amp;gt;&#39;,0,1,1,NULL);&amp;quot; 
+</code></pre>
+
+<p>For SpectacleApp:</p>
+
+<pre><code>sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db &amp;quot;INSERT INTO access VALUES(&#39;kTCCServiceAccessibility&#39;,&#39;com.divisiblebyzero.Spectacle&#39;,0,1,1,NULL);&amp;quot;
+</code></pre>
+
+<p>To remove an application from the list we use the following command, with the correct bundle ID:</p>
+
+<pre><code>sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db &amp;quot;delete from access where client=&#39;&amp;lt;Bundle ID&amp;gt;&#39;;&amp;quot;
+</code></pre>
+
+<h3>Mountain Lion and Lion</h3>
+
+<p>On OS X Mountain Lion (10.8) or Lion (10.7) simply run this command as root:</p>
+
+<pre><code>touch /private/var/db/.AccessibilityAPIEnabled
+</code></pre>
+<hr>Tags: <a href="../tags/apple.html" class="link">apple, </a><a href="../tags/apple-remote-desktop.html" class="link">apple-remote-desktop, </a><a href="../tags/ard.html" class="link">ard, </a><a href="../tags/assistive.html" class="link">assistive, </a><a href="../tags/command-line.html" class="link">command-line, </a><a href="../tags/mac.html" class="link">mac, </a><a href="../tags/mavericks.html" class="link">mavericks, </a><a href="../tags/os-x.html" class="link">os-x, </a><a href="../tags/spectacle.html" class="link">spectacle, </a><div class="footer">
                 <hr />
                 <br />
         
