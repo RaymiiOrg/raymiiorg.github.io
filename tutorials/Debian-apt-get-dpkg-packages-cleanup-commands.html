@@ -14,7 +14,7 @@
 11232 aptitude
 10684 binutils
 9916 python2.5 
-</code></pre><p>You can also use something like </p><pre><code>dpkg-query -Wf '${Installed-Size}t${Package}n' | sort -n 
+</code></pre><p>You can also use something like </p><pre><code>dpkg-query -Wf '${Installed-Size}\t${Package}\n' | sort -n 
 </code></pre><p>but this also takes the size of databases and extra files. </p><h5>Remove config files</h5><p>If you uninstall stuff with apt-get remove sometimes debian does not removes config files and they also take up space. Now you can just use apt-get purge but I tend to forget that every time. This command lists all the packages which are removed but still have config files on your system:</p><pre><code>dpkg --list | grep '^rcb'
 
 rc binutils     2.20.1-15           The GNU assembler, linker and binary utilities
@@ -23,7 +23,7 @@ rc dpkg-dev     1.15.8.5            Debian package development tools
 rc erlang-base  1:14.a-dfsg-2       Erlang/OTP virtual machine and base applications
 rc fakeroot     1.14.4-1            Gives a fake root environment
 </code></pre><p>Now, just to make sure check the output and then remove the config files with this command:</p><pre><code>dpkg --list | grep '^rcb' | awk '{ print $2 }' | xargs dpkg -P
-</code></pre><h5>Cleanup aftwrwards</h5><p>To save up some space via apt get you can use these commands:</p><pre><code>apt-get autoremove
+</code></pre><h5>Cleanup afterwards</h5><p>To save up some space via apt get you can use these commands:</p><pre><code>apt-get autoremove
 apt-get clean 
 </code></pre><p>autoremove removes unused dependencies, packages which were installed by other packeges but which are no longer needed by your system.<br/> clean just removes all the packages in the apt cache. You can also use autoclean but clean frees up more space.<br/>This handy command shows all the packages which are installed on your system because some package recommends it, but they are not actually dependencies of packages:</p><pre><code>aptitude search '?and( ?automatic(?reverse-recommends(?installed)), ?not(?automatic(?reverse-depends(?installed))) )' 
 </code></pre><p>can give something like this:</p><pre><code>i A apt-xapian-index    -   maintenance and search tools for a Xapian index of Debian packages 

@@ -5,7 +5,7 @@
                 google_ad_height = 200;
                 //-->
                 </script><script src="http://pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
-                </script></div> <div class="col-md-7"> <div class="inner"><h2>Set your IP as wallpaper</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a></li><li><a class="link" href="../tutorials">Tutorials</a></li><li><a class="link" href="Set-your-ip-as-wallpaper.html">Set your IP as wallpaper</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 28-03-2007</h6><br/><p>This is a tutorial with a script which lets you set your IP address as wallpaper. </p><p>You need to have a white background picture, I created one with GIMP, 800x600 called 2.jpg, and thats what i'll use in the tutorial. So change 2.jpg to whatever you use.</p><p>First install imagemagick &amp; feh: </p><pre><code>sudo apt-get install imagemagick feh
+                </script></div> <div class="col-md-7"> <div class="inner"><h2>Set your IP as wallpaper</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a></li><li><a class="link" href="../tutorials">Tutorials</a></li><li><a class="link" href="Set-your-ip-as-wallpaper.html">Set your IP as wallpaper</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 28-03-2007</h6><br/><p>This is a tutorial with a script which lets you set your IP address as wallpaper. </p><p>You need to have a white background picture, I created one with GIMP, 800x600 called 2.jpg, and that's what I'll use in the tutorial. So change 2.jpg to whatever you use.</p><p>First install imagemagick &amp; feh: </p><pre><code>sudo apt-get install imagemagick feh
 </code></pre><p>Then we'll make a bash script with the following in it:</p><pre><code>#!/bin/bash  
 export DISPLAY=:0.0  
 convert 2.jpg -pointsize 80 -draw &quot;text 0,150 '`ifconfig eth0 | awk -F &quot;:&quot;  '/inet addr/{split($2,a,&quot; &quot;);print a[1]}'`'&quot; -draw &quot;text -0,250 'Made with help of:'&quot; -fill blue -pointsize 150 -draw &quot;text -0,390 'Relst.nl'&quot; -fill red -pointsize 72 -draw &quot;text -0,500 '`date`'&quot; 3.jpg  
@@ -13,8 +13,8 @@ convert 2.jpg -pointsize 80 -draw &quot;text 0,150 '`ifconfig eth0 | awk -F &quo
 # feh --bg-scale ./3.jpg  
 # and place a $ (hash) for the following rule:   
 gconftool -t string -s /desktop/gnome/background/picture_filename ./3.jpg  
-</code></pre><p>Save as ~/.back.sh and then <strong>chmod 755 ~/.back.sh</strong><br/> (make sure that the image file is also in your home dir.)</p><p>So, what this does is basically put the output of the ifconfig eth0 (change if needed) command, and the time &amp; date on the background image, then it sets the background image to the newly created image. </p><p>And the <em>export DISPLAY=:0.0</em> is because you can then run the script from of ssh to.<br/> For that I also had a problem. Luckaly I found the solution, but I forgot to write down the source... </p><pre><code>## as root, extract xauth info from user that started X  
-**$ XAUTHORITY=/home/usrname/.Xauthority xauth list**  
+</code></pre><p>Save as ~/.back.sh and then <strong>chmod 755 ~/.back.sh</strong><br/> (make sure that the image file is also in your home dir.)</p><p>So, what this does is basically put the output of the ifconfig eth0 (change if needed) command, and the time &amp; date on the background image, then it sets the background image to the newly created image. </p><p>And the <em>export DISPLAY=:0.0</em> is because you can then run the script from of ssh to.<br/> For that I also had a problem. Luckily I found the solution, but I forgot to write down the source... </p><pre><code>## as root, extract xauth info from user that started X  
+**$ XAUTHORITY=/home/username/.Xauthority xauth list**  
 hostname/unix:0 MIT-MAGIC-COOKIE-1 273bf22484148c6504f5d85e6ef510e5  
 hostname.sub.domain:0 MIT-MAGIC-COOKIE-1 273bf22484148c6504f5d85e6ef510e5
 
