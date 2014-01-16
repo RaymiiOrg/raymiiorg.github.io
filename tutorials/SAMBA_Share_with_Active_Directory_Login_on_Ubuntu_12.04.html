@@ -167,7 +167,7 @@ iface eth0 inet static
 
 <p>What is Kerberos? </p>
 
-<pre><code>Kerberos is a computer network authentication protocol which works on the basis of &amp;quot;tickets&amp;quot; to allow nodes communicating over a non-secure network to prove their identity to one another in a secure manner. Its designers aimed it primarily at a clientserver model and it provides mutual authenticationboth the user and the server verify each other&#39;s identity.
+<pre><code>Kerberos is a computer network authentication protocol which works on the basis of &quot;tickets&quot; to allow nodes communicating over a non-secure network to prove their identity to one another in a secure manner. Its designers aimed it primarily at a clientserver model and it provides mutual authenticationboth the user and the server verify each other&#39;s identity.
 </code></pre>
 
 <p><a href="http://technet.microsoft.com/en-us/library/bb742516.aspx">A good article on how Kerberos is used in Active Directory can be found here: http://technet.microsoft.com/en-us/library/bb742516.aspx</a></p>
@@ -350,7 +350,7 @@ getent group # should return a list with all groups and their members, both from
 
 <pre><code>mkdir -p /sharing/{marketing,research,ceo,dropbox}
 chmod -R 0770 /sharing/
-chgrp -R &amp;quot;Domain Users&amp;quot; /sharing/
+chgrp -R &quot;Domain Users&quot; /sharing/
 </code></pre>
 
 <p>Add the shares to <code>/etc/samba/smb.conf</code>:</p>
@@ -358,7 +358,7 @@ chgrp -R &amp;quot;Domain Users&amp;quot; /sharing/
 <pre><code>[Marketing]
     comment = Marketing
     path = /sharing/marketing/
-    valid users = @EXAMPLEmarketing
+    valid users = @EXAMPLE\marketing
     force group = marketing
     writable = yes
     read only = no
@@ -372,8 +372,8 @@ chgrp -R &amp;quot;Domain Users&amp;quot; /sharing/
 [Research]
     comment = Research
     path = /sharing/research
-    valid users = @EXAMPLEdevelopment, @EXAMPLEresearch
-    force group = &amp;quot;domain users&amp;quot;
+    valid users = @EXAMPLE\development, @EXAMPLE\research
+    force group = &quot;domain users&quot;
     writable = yes
     read only = no
     force create mode = 0660
@@ -386,8 +386,8 @@ chgrp -R &amp;quot;Domain Users&amp;quot; /sharing/
 [Dropbox]
     comment = Daily Emptied Dropbox
     path = /sharing/dropbox
-    valid users = &amp;quot;@EXAMPLEDomain Users&amp;quot;
-    force group = &amp;quot;domain users&amp;quot;
+    valid users = &quot;@EXAMPLE\Domain Users&quot;
+    force group = &quot;domain users&quot;
     writable = yes
     read only = no
     force create mode = 0660
@@ -400,8 +400,8 @@ chgrp -R &amp;quot;Domain Users&amp;quot; /sharing/
 [CEO]
     comment = CEO Only
     path = /sharing/ceo
-    valid users = EXAMPLEceo
-    force group = &amp;quot;domain users&amp;quot;
+    valid users = EXAMPLE\ceo
+    force group = &quot;domain users&quot;
     writable = yes
     read only = no
     force create mode = 0660
@@ -412,7 +412,7 @@ chgrp -R &amp;quot;Domain Users&amp;quot; /sharing/
     hide unreadable = yes
 </code></pre>
 
-<p>As you can see, an active directory group is defined with an <code>@</code>, and a user without. Also, when there are spaces in the groupname, you escape that with quotes: <code>&amp;quot;@EXAMPLEDomain Users&amp;quot;</code>.</p>
+<p>As you can see, an active directory group is defined with an <code>@</code>, and a user without. Also, when there are spaces in the groupname, you escape that with quotes: <code>&quot;@EXAMPLE\Domain Users&quot;</code>.</p>
 
 <p><a href="https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html">You can find a lot of information on the smb.conf file in the man page: https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html</a></p>
 
