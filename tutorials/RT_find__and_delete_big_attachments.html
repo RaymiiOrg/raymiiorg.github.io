@@ -92,12 +92,12 @@
 
 <p>Select the RT database with the following MySQL command, replacing <code>rt_db</code> with the name of your RT MySQL database:</p>
 
-<pre><code>mysql&amp;gt; use rt
+<pre><code>mysql&gt; use rt
 </code></pre>
 
 <h3>Finding the big attachments</h3>
 
-<pre><code>mysql&amp;gt; SELECT DISTINCT Transactions.ObjectId,Attachments.Subject FROM Attachments LEFT OUTER JOIN Transactions ON Transactions.Id = Attachments.TransactionId WHERE Transactions.ObjectType = &#39;RT::Ticket&#39; AND LENGTH(Attachments.Content) &amp;gt; 4000000;
+<pre><code>mysql&gt; SELECT DISTINCT Transactions.ObjectId,Attachments.Subject FROM Attachments LEFT OUTER JOIN Transactions ON Transactions.Id = Attachments.TransactionId WHERE Transactions.ObjectType = &#39;RT::Ticket&#39; AND LENGTH(Attachments.Content) &gt; 4000000;
 </code></pre>
 
 <p>This command will display all the ticket ID&#39;s and Subjects from items where the attachment size is more than 4 MB (4194304 Bytes). The outer join is because <a href="http://lists.bestpractical.com/pipermail/rt-users/2013-January/078909.html">ticket ID&#39;s are[1]</a> <a href="http://lists.bestpractical.com/pipermail/rt-users/2007-June/046395.html">not Attachments ID&#39;s[2].</a> It might take a while, the query took about 4 minutes on my DB.</p>
@@ -133,7 +133,7 @@
 
 <p>If you don&#39;t want to get blank Subjects, you can execute the following query:</p>
 
-<pre><code>mysql&amp;gt; SELECT DISTINCT Transactions.ObjectId,Attachments.Subject FROM Attachments LEFT OUTER JOIN Transactions ON Transactions.Id = Attachments.TransactionId WHERE Transactions.ObjectType = &#39;RT::Ticket&#39; AND LENGTH(Attachments.Content) &amp;gt; 4000000 AND Attachments.Subject != &amp;quot;&amp;quot;;
+<pre><code>mysql&gt; SELECT DISTINCT Transactions.ObjectId,Attachments.Subject FROM Attachments LEFT OUTER JOIN Transactions ON Transactions.Id = Attachments.TransactionId WHERE Transactions.ObjectType = &#39;RT::Ticket&#39; AND LENGTH(Attachments.Content) &gt; 4000000 AND Attachments.Subject != &quot;&quot;;
 </code></pre>
 
 <h3>Notes</h3>

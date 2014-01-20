@@ -74,7 +74,9 @@
 
            <h2>Silent unatended apt-get upgrade</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../tutorials" class="link">Tutorials</a></li><li><a href="Silent-automatic-apt-get-upgrade.html" class="link">Silent unatended apt-get upgrade</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 30-03-2013</h6><br><p>This tutorial will show you how to setup completely silent apt-get upgrade via cron. It also defaults to not overwriting config files if a package has a newer version.</p>
 
-<p>&gt; Important! You should watch out with this. Upgrades can break things. Use this on your own risk.</p>
+<blockquote>
+<p>Important! You should watch out with this. Upgrades can break things. Use this on your own risk.</p>
+</blockquote>
 
 <p>apt-get can be ran from a cronjob with different options to let it update everything without asking questions. However, the regular combination as seen below still mails output (and thus, not upgrades) when a changed file is found in a package, for example, the <em>/etc/lighttpd/lighttpd.conf</em> file.</p>
 
@@ -83,8 +85,8 @@
 <pre><code>apt-get upgrade -y --force-yes -qq
 
 Configuration file `/etc/lighttpd/lighttpd.conf&#39;
-==&amp;gt; Modified (by you or by a script) since installation.
-==&amp;gt; Package distributor has shipped an updated version.
+==&gt; Modified (by you or by a script) since installation.
+==&gt; Package distributor has shipped an updated version.
 What would you like to do about it ? Your options are:
 Y or I : install the package maintainer&#39;s version
 N or O : keep your currently-installed version
@@ -100,17 +102,17 @@ The default action is to keep your current version.
 
 <p>Using a few options for DPKG results in this command:</p>
 
-<pre><code>DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -q -y -o &amp;quot;Dpkg::Options::=--force-confdef&amp;quot; -o &amp;quot;Dpkg::Options::=--force-confold&amp;quot; upgrade
+<pre><code>DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -q -y -o &quot;Dpkg::Options::=--force-confdef&quot; -o &quot;Dpkg::Options::=--force-confold&quot; upgrade
 </code></pre>
 
 <p>Results in this cronjob:</p>
 
-<pre><code>1 1 * * * DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical sudo apt-get -q -y -o &amp;quot;Dpkg::Options::=--force-confdef&amp;quot; -o &amp;quot;Dpkg::Options::=--force-confold&amp;quot; dist-upgrade
+<pre><code>1 1 * * * DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical sudo apt-get -q -y -o &quot;Dpkg::Options::=--force-confdef&quot; -o &quot;Dpkg::Options::=--force-confold&quot; dist-upgrade
 </code></pre>
 
 <p>And if you also want to update the apt-cache:</p>
 
-<pre><code>1 3 * * * DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical sudo apt-get -q -y -o &amp;quot;Dpkg::Options::=--force-confdef&amp;quot; -o &amp;quot;Dpkg::Options::=--force-confold&amp;quot; dist-upgrade
+<pre><code>1 3 * * * DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical sudo apt-get -q -y -o &quot;Dpkg::Options::=--force-confdef&quot; -o &quot;Dpkg::Options::=--force-confold&quot; dist-upgrade
 1 1 * * * apt-get -y update
 </code></pre>
 <hr>Tags: <a href="../tags/apt.html" class="link">apt, </a><a href="../tags/apt-get.html" class="link">apt-get, </a><a href="../tags/aptitude.html" class="link">aptitude, </a><a href="../tags/automatic.html" class="link">automatic, </a><a href="../tags/dpkg.html" class="link">dpkg, </a><a href="../tags/synaptic.html" class="link">synaptic, </a><a href="../tags/update.html" class="link">update, </a><a href="../tags/upgrade.html" class="link">upgrade, </a><div class="footer">

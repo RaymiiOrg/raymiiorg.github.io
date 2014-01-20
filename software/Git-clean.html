@@ -150,29 +150,29 @@ Total 2159 (delta 1368), reused 791 (delta 0)
 #     GNU General Public License for more details.
 
 #     You should have received a copy of the GNU General Public License
-#     along with this program.  If not, see &amp;lt;http://www.gnu.org/licenses/&amp;gt;.
+#     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 if [ ! -e $1 ]; then
     if [ -d .git ]; then
-        if [ $1 == &amp;quot;rm&amp;quot; ]; then
+        if [ $1 == &quot;rm&quot; ]; then
             if [ ! -e $2 ]; then
-                echo &amp;quot;Removing Biggest file $2 from git repo&amp;quot;
-                DIR=&amp;quot;$( cd &amp;quot;$( dirname &amp;quot;${BASH_SOURCE[0]}&amp;quot; )&amp;quot; &amp;amp;&amp;amp; pwd )&amp;quot;
+                echo &quot;Removing Biggest file $2 from git repo&quot;
+                DIR=&quot;$( cd &quot;$( dirname &quot;${BASH_SOURCE[0]}&quot; )&quot; &amp;&amp;&amp;&amp; pwd )&quot;
                 rm -rf .git/refs/original/
-                git filter-branch --index-filter &amp;quot;git rm --cached --ignore-unmatch $2&amp;quot; --tag-name-filter cat -- --all
+                git filter-branch --index-filter &quot;git rm --cached --ignore-unmatch $2&quot; --tag-name-filter cat -- --all
                 rm -rf .git/refs/original/
                 git reflog expire --all --expire-unreachable=0
                 git repack -A -d
                 git prune
                 git gc --aggressive
             else 
-                echo &amp;quot;I need a file to remove...&amp;quot;
+                echo &quot;I need a file to remove...&quot;
             fi
-        elif [ $1 == &amp;quot;df&amp;quot; ]; then
+        elif [ $1 == &quot;df&quot; ]; then
             IFS=$&#39;n&#39;;
-            echo &amp;quot;All sizes are in kB&#39;s. The pack column is the size of the object, compressed, inside the pack file.&amp;quot;
+            echo &quot;All sizes are in kB&#39;s. The pack column is the size of the object, compressed, inside the pack file.&quot;
             objects=`git verify-pack -v .git/objects/pack/pack-*.idx | grep -v chain | grep -v pack | sort -k3nr | head -n 10`
-            output=&amp;quot;size,pack,SHA,location&amp;quot;
+            output=&quot;size,pack,SHA,location&quot;
             for y in $objects
             do
                 # extract the size in bytes
@@ -183,26 +183,26 @@ if [ ! -e $1 ]; then
                 sha=`echo $y | cut -f 1 -d &#39; &#39;`
                 # find the objects location in the repository tree
                 other=`git rev-list --all --objects | grep $sha`
-                #lineBreak=`echo -e &amp;quot;n&amp;quot;`
-                output=&amp;quot;${output}n${size},${compressedSize},${other}&amp;quot;
+                #lineBreak=`echo -e &quot;n&quot;`
+                output=&quot;${output}n${size},${compressedSize},${other}&quot;
             done
 
             echo -e $output | column -t -s &#39;, &#39;
         fi
     else
-        echo &amp;quot;Cannot find .git directory, exitting. This script should be ran from a git working dir.&amp;quot;
+        echo &quot;Cannot find .git directory, exitting. This script should be ran from a git working dir.&quot;
         exit 1
     fi
 else
-    echo &amp;quot;Usage:&amp;quot;
-    echo &amp;quot;    For a size report:&amp;quot;
-    echo &amp;quot;    $0 df&amp;quot;
-    echo &amp;quot;    &amp;quot;
-    echo &amp;quot;    To remove a big file from git history:&amp;quot;
-    echo &amp;quot;    $0 rm &amp;lt;filename&amp;gt;&amp;quot;
-    echo &amp;quot;    Example, to remove the file &amp;quot;includes\ubuntu-12.04.iso&amp;quot;:&amp;quot;
-    echo &amp;quot;    $0 rm includes\ubuntu-12.04.iso&amp;quot;
-    echo &amp;quot;    Made by Raymii.org. GPLv3 License&amp;quot;
+    echo &quot;Usage:&quot;
+    echo &quot;    For a size report:&quot;
+    echo &quot;    $0 df&quot;
+    echo &quot;    &quot;
+    echo &quot;    To remove a big file from git history:&quot;
+    echo &quot;    $0 rm &lt;filename&gt;&quot;
+    echo &quot;    Example, to remove the file &quot;includes\ubuntu-12.04.iso&quot;:&quot;
+    echo &quot;    $0 rm includes\ubuntu-12.04.iso&quot;
+    echo &quot;    Made by Raymii.org. GPLv3 License&quot;
 
 fi
 </code></pre>

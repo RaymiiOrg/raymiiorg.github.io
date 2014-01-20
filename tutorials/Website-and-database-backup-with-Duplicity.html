@@ -142,7 +142,7 @@
 
 <p>The mysqldump command to backup the database:</p>
 
-<pre><code>mysqldump --single-transaction --routines --events --triggers --add-drop-table --extended-insert -u db_054_u -h 127.0.0.1 -pMyDatabsePassw0rd db_054 | gzip -9 &amp;gt; /var/backups/sql/db_054_$(date +&amp;quot;%H:%M_%d-%m-%Y&amp;quot;).sql.gz
+<pre><code>mysqldump --single-transaction --routines --events --triggers --add-drop-table --extended-insert -u db_054_u -h 127.0.0.1 -pMyDatabsePassw0rd db_054 | gzip -9 &gt; /var/backups/sql/db_054_$(date +&quot;%H:%M_%d-%m-%Y&quot;).sql.gz
 </code></pre>
 
 <p>You will have to replace the <code>-u db_054_u</code> with your database user, the <code>-pMyDatabasePassw0rd</code> with your database password and <code>db_054</code> with the name of your database.</p>
@@ -180,7 +180,7 @@ Your public key has been saved in /home/remy/.ssh/backup_rsa.pub.
 
 <p>Now copy over that key to your other (trusted) server:</p>
 
-<pre><code>ssh-copy-id -i /home/remy/.ssh/backup_rsa.pub &amp;quot;-p 22 trusted-backup-server.org&amp;quot;
+<pre><code>ssh-copy-id -i /home/remy/.ssh/backup_rsa.pub &quot;-p 22 trusted-backup-server.org&quot;
 </code></pre>
 
 <p>And test if you can login without a password with that key:</p>
@@ -192,38 +192,38 @@ Your public key has been saved in /home/remy/.ssh/backup_rsa.pub.
 
 <p>We are now going to set up duplicity. I use the following command to back up all the folders:</p>
 
-<pre><code>duplicity incremental --no-encryption --ssh-options=&amp;quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&amp;quot; --include=&amp;quot;/var/backups/sql&amp;quot; --include=&amp;quot;/etc/apache2/&amp;quot; --include=&amp;quot;/var/www/joomla&amp;quot; --exclude=&amp;quot;**&amp;quot; /  ssh://remy@trusted-backup-server.org:22/backups/joomla/
+<pre><code>duplicity incremental --no-encryption --ssh-options=&quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&quot; --include=&quot;/var/backups/sql&quot; --include=&quot;/etc/apache2/&quot; --include=&quot;/var/www/joomla&quot; --exclude=&quot;**&quot; /  ssh://remy@trusted-backup-server.org:22/backups/joomla/
 </code></pre>
 
-<p>If you need to backup more folders, add another <code>--include=&amp;quot;/path/to/folder&amp;quot;</code> option. The <code>--exclude=&amp;quot;**&amp;quot; /</code> option is a trick to backup everything which is in the include list and nothing else.</p>
+<p>If you need to backup more folders, add another <code>--include=&quot;/path/to/folder&quot;</code> option. The <code>--exclude=&quot;**&quot; /</code> option is a trick to backup everything which is in the include list and nothing else.</p>
 
 <p>For the Node.js/Mongodb application, I would use the following command:</p>
 
-<pre><code>duplicity incremental --no-encryption --ssh-options=&amp;quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&amp;quot; --include=&amp;quot;/var/backups/mongo&amp;quot; --include=&amp;quot;/home/appuser/www/&amp;quot; --exclude=&amp;quot;**&amp;quot; /  ssh://remy@trusted-backup-server.org:22/backups/uptime/
+<pre><code>duplicity incremental --no-encryption --ssh-options=&quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&quot; --include=&quot;/var/backups/mongo&quot; --include=&quot;/home/appuser/www/&quot; --exclude=&quot;**&quot; /  ssh://remy@trusted-backup-server.org:22/backups/uptime/
 </code></pre>
 
 <h3>Cron</h3>
 
 <p>Now putting everything in a cronjob. By using the <code>;</code> character after a command, you can specify multiple commands in one cronjob which run after each other. We combine the database dump with the duplicity command to set up the back up:</p>
 
-<pre><code>10 01 * * 1,2,3,4,5,6 mysqldump --single-transaction --routines --events --triggers --add-drop-table --extended-insert -u db_054_u -h 127.0.0.1 -pMyDatabsePassw0rd db_054 | gzip -9 &amp;gt; /var/backups/sql/db_054_$(date +&amp;quot;%H:%M_%d-%m-%Y&amp;quot;).sql.gz; duplicity incremental --no-encryption --ssh-options=&amp;quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&amp;quot; --include=&amp;quot;/var/backups/sql&amp;quot; --include=&amp;quot;/etc/apache2/&amp;quot; --include=&amp;quot;/var/www/joomla&amp;quot; --exclude=&amp;quot;**&amp;quot; /  ssh://remy@trusted-backup-server.org:22/backups/joomla/
+<pre><code>10 01 * * 1,2,3,4,5,6 mysqldump --single-transaction --routines --events --triggers --add-drop-table --extended-insert -u db_054_u -h 127.0.0.1 -pMyDatabsePassw0rd db_054 | gzip -9 &gt; /var/backups/sql/db_054_$(date +&quot;%H:%M_%d-%m-%Y&quot;).sql.gz; duplicity incremental --no-encryption --ssh-options=&quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&quot; --include=&quot;/var/backups/sql&quot; --include=&quot;/etc/apache2/&quot; --include=&quot;/var/www/joomla&quot; --exclude=&quot;**&quot; /  ssh://remy@trusted-backup-server.org:22/backups/joomla/
 </code></pre>
 
 <p>This schedule will create an incremental backup every day of the week  at 01:10 AM except sunday. For sunday we have a different cronjob. The only thing different is the <code>day of the week</code> and the duplicity command has the <code>incremental</code> parameter replaced by <code>full</code>. This forces duplicity to do a full backup:</p>
 
-<pre><code>10 01 * * 7 mysqldump --single-transaction --routines --events --triggers --add-drop-table --extended-insert -u db_054_u -h 127.0.0.1 -pMyDatabsePassw0rd db_054 | gzip -9 &amp;gt; /var/backups/sql/db_054_$(date +&amp;quot;%H:%M_%d-%m-%Y&amp;quot;).sql.gz; duplicity full --no-encryption --ssh-options=&amp;quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&amp;quot; --include=&amp;quot;/var/backups/sql&amp;quot; --include=&amp;quot;/etc/apache2/&amp;quot; --include=&amp;quot;/var/www/joomla&amp;quot; --exclude=&amp;quot;**&amp;quot; /  ssh://remy@trusted-backup-server.org:22/backups/joomla/
+<pre><code>10 01 * * 7 mysqldump --single-transaction --routines --events --triggers --add-drop-table --extended-insert -u db_054_u -h 127.0.0.1 -pMyDatabsePassw0rd db_054 | gzip -9 &gt; /var/backups/sql/db_054_$(date +&quot;%H:%M_%d-%m-%Y&quot;).sql.gz; duplicity full --no-encryption --ssh-options=&quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&quot; --include=&quot;/var/backups/sql&quot; --include=&quot;/etc/apache2/&quot; --include=&quot;/var/www/joomla&quot; --exclude=&quot;**&quot; /  ssh://remy@trusted-backup-server.org:22/backups/joomla/
 </code></pre>
 
 <p>For the node.js/mongodb application we use the following cronjobs:</p>
 
 <p>Incremental:</p>
 
-<pre><code>10 01 * * 1,2,3,4,5,6 mongodump --host 127.0.0.1:28017 --db uptime --user uptime_u --password uptime_password --out /var/backups/mongo/; duplicity incremental --no-encryption --ssh-options=&amp;quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&amp;quot; --include=&amp;quot;/var/backups/mongo&amp;quot; --include=&amp;quot;/home/appuser/www/&amp;quot; --exclude=&amp;quot;**&amp;quot; /  ssh://remy@trusted-backup-server.org:22/backups/uptime/
+<pre><code>10 01 * * 1,2,3,4,5,6 mongodump --host 127.0.0.1:28017 --db uptime --user uptime_u --password uptime_password --out /var/backups/mongo/; duplicity incremental --no-encryption --ssh-options=&quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&quot; --include=&quot;/var/backups/mongo&quot; --include=&quot;/home/appuser/www/&quot; --exclude=&quot;**&quot; /  ssh://remy@trusted-backup-server.org:22/backups/uptime/
 </code></pre>
 
 <p>Full on sunday:</p>
 
-<pre><code>10 01 * * 7 mongodump --host 127.0.0.1:28017 --db uptime --user uptime_u --password uptime_password --out /var/backups/mongo/; duplicity full --no-encryption --ssh-options=&amp;quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&amp;quot; --include=&amp;quot;/var/backups/mongo&amp;quot; --include=&amp;quot;/home/appuser/www/&amp;quot; --exclude=&amp;quot;**&amp;quot; /  ssh://remy@trusted-backup-server.org:22/backups/uptime/
+<pre><code>10 01 * * 7 mongodump --host 127.0.0.1:28017 --db uptime --user uptime_u --password uptime_password --out /var/backups/mongo/; duplicity full --no-encryption --ssh-options=&quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&quot; --include=&quot;/var/backups/mongo&quot; --include=&quot;/home/appuser/www/&quot; --exclude=&quot;**&quot; /  ssh://remy@trusted-backup-server.org:22/backups/uptime/
 </code></pre>
 
 <h3>Restoring</h3>
@@ -232,12 +232,12 @@ Your public key has been saved in /home/remy/.ssh/backup_rsa.pub.
 
 <p>First we get the backups from the backup server:</p>
 
-<pre><code>duplicity --no-encryption --ssh-options=&amp;quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&amp;quot; --file-to-restore / ssh://remy@trusted-backup-server.org:22/backups/joomla/
+<pre><code>duplicity --no-encryption --ssh-options=&quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&quot; --file-to-restore / ssh://remy@trusted-backup-server.org:22/backups/joomla/
 </code></pre>
 
 <p>If you need a backup from an earlier date:</p>
 
-<pre><code>duplicity --no-encryption --ssh-options=&amp;quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&amp;quot; -t 3D --file-to-restore / ssh://remy@trusted-backup-server.org:22/backups/joomla/
+<pre><code>duplicity --no-encryption --ssh-options=&quot;-oProtocol=2 -oIdentityFile=/home/remy/.ssh/backup_rsa&quot; -t 3D --file-to-restore / ssh://remy@trusted-backup-server.org:22/backups/joomla/
 </code></pre>
 
 <p>The <code>-t 3D</code> option means restore a backup from three days ago. Things like <code>-t 1M</code> (for one month ago) or <code>-t 5H</code> (for 5 hours ago) also work.</p>
@@ -251,7 +251,7 @@ Your public key has been saved in /home/remy/.ssh/backup_rsa.pub.
 
 <p>And then restore it:</p>
 
-<pre><code>mysql -u db_054_u -pMyDatabasePassw0rd db_054 &amp;lt; db_054_15:28_16-02-2013.sql
+<pre><code>mysql -u db_054_u -pMyDatabasePassw0rd db_054 &lt; db_054_15:28_16-02-2013.sql
 </code></pre>
 
 <p>For MongoDB:</p>

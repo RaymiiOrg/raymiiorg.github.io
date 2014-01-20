@@ -83,14 +83,14 @@
 <pre><code># /etc/bind/named.conf.options
      logging{
        channel system_log {
-         file &amp;quot;/var/log/named/sys.log&amp;quot; versions unlimited size 2g;
+         file &quot;/var/log/named/sys.log&quot; versions unlimited size 2g;
          severity warning;
          print-time yes;
          print-severity yes;
          print-category yes;
        };
        channel queries_log {
-         file &amp;quot;/var/log/named/queries.log&amp;quot; versions unlimited size 2g;
+         file &quot;/var/log/named/queries.log&quot; versions unlimited size 2g;
          severity info;
          print-time no;
        };
@@ -115,7 +115,7 @@ chown bind:bind /var/log/named
 
 <p>Use the following command line to get the 20 most queries domains</p>
 
-<pre><code>awk &#39;{ print $4 }&#39; /var/log/named/queries.log | sort | uniq -c | sort -n | tail -n 20 &amp;gt; dns-data
+<pre><code>awk &#39;{ print $4 }&#39; /var/log/named/queries.log | sort | uniq -c | sort -n | tail -n 20 &gt; dns-data
 </code></pre>
 
 <p>Example data:</p>
@@ -128,21 +128,21 @@ chown bind:bind /var/log/named
 
 <p>The use the gnuplot script to create the graph:</p>
 
-<pre><code>gnuplot &amp;lt; plot.gplt
+<pre><code>gnuplot &lt; plot.gplt
 </code></pre>
 
 <p>And there you go. This is the GNUPlot script if you don&#39;t want to check out the repo.</p>
 
 <pre><code>set term png truecolor size 800,600
-set output &amp;quot;data.png&amp;quot;
-set xlabel &amp;quot;Domains&amp;quot;
-set ylabel &amp;quot;Queries&amp;quot;
-set title &amp;quot;DNS Usage&amp;quot;
+set output &quot;data.png&quot;
+set xlabel &quot;Domains&quot;
+set ylabel &quot;Queries&quot;
+set title &quot;DNS Usage&quot;
 set grid
 set xtics rotate by -45 axis out offset 0,1.5
 set boxwidth 1 relative
-set style fill transparent solid 0.5 border rgb&amp;quot;black&amp;quot;
-plot &amp;quot;dns-data&amp;quot; u 1:xtic(2) w boxes lc rgb&amp;quot;blue&amp;quot;
+set style fill transparent solid 0.5 border rgb&quot;black&quot;
+plot &quot;dns-data&quot; u 1:xtic(2) w boxes lc rgb&quot;blue&quot;
 </code></pre>
 
 <p>Because GNUplot has no easy support for horizotal bar graphs, if you want it horizontal, rotate it with Imagemagick:</p>
@@ -174,7 +174,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see &amp;lt;http://www.gnu.org/licenses/&amp;gt;.
+along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 </code></pre>
 <hr>Tags: <a href="../tags/bind.html" class="link">bind, </a><a href="../tags/chart.html" class="link">chart, </a><a href="../tags/dns.html" class="link">dns, </a><a href="../tags/gnuplot.html" class="link">gnuplot, </a><a href="../tags/graph.html" class="link">graph, </a><a href="../tags/metrics.html" class="link">metrics, </a><div class="footer">
                 <hr />

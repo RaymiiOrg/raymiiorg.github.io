@@ -82,7 +82,7 @@
 
 <pre><code>dig @192.168.1.1 version.bind txt chaos
 ;; ANSWER SECTION:
-version.bind.       0   CH  TXT &amp;quot;dnsmasq-2.47&amp;quot;
+version.bind.       0   CH  TXT &quot;dnsmasq-2.47&quot;
 </code></pre>
 
 <p>A Microsoft DNS server queried with <code>nslookup</code>:</p>
@@ -91,7 +91,7 @@ version.bind.       0   CH  TXT &amp;quot;dnsmasq-2.47&amp;quot;
 Server:         ns1.metaregistrar.nl
 Address:        81.4.97.217#53
 
-version.bind    text = &amp;quot;Served by PowerDNS - http://www.powerdns.com&amp;quot;
+version.bind    text = &quot;Served by PowerDNS - http://www.powerdns.com&quot;
 </code></pre>
 
 <p>What is <code>chaos</code> or CH class you ask? <a href="https://en.wikipedia.org/wiki/Chaosnet">It is/was a network technology, see the wikipedia page for more info.</a>. There is also the <a href="https://en.wikipedia.org/wiki/Hesiod_(name_service">HS class, that stands for Hesiod.</a>)</p>
@@ -102,13 +102,13 @@ version.bind    text = &amp;quot;Served by PowerDNS - http://www.powerdns.com&am
 
 <pre><code>options {
     [...]
-    version &amp;quot;Not supported&amp;quot;;
+    version &quot;Not supported&quot;;
 }
 </code></pre>
 
 <p>You can of course put whatever you like in there, for example you can spoof a Microsoft DNS server:</p>
 
-<pre><code>version &amp;quot;Microsoft DNS 6.0.6100 (2AEF76E)&amp;quot;;
+<pre><code>version &quot;Microsoft DNS 6.0.6100 (2AEF76E)&quot;;
 </code></pre>
 
 <p>Or like TransIP does, make it look like your own DNS software:</p>
@@ -116,7 +116,7 @@ version.bind    text = &amp;quot;Served by PowerDNS - http://www.powerdns.com&am
 <pre><code>dig @ns1.transip.nl version.bind txt chaos
 
 ;; ANSWER SECTION:
-version.bind.       86400   CH  TXT &amp;quot;TransDNS 2.1.1&amp;quot;
+version.bind.       86400   CH  TXT &quot;TransDNS 2.1.1&quot;
 </code></pre>
 
 <p>Make sure to reload/restart your BIND servers after the change. Do note that you need BIND 8.2 or later for this option to work.</p>
@@ -127,11 +127,11 @@ version.bind.       86400   CH  TXT &amp;quot;TransDNS 2.1.1&amp;quot;
 
 <p><code>/etc/bind/named.conf.local</code>:</p>
 
-<pre><code>view &amp;quot;chaos&amp;quot; CH {
+<pre><code>view &quot;chaos&quot; CH {
   match-clients { any; };
-  zone &amp;quot;bind&amp;quot; CH {
+  zone &quot;bind&quot; CH {
       type master;
-      file &amp;quot;db.bind&amp;quot;;
+      file &quot;db.bind&quot;;
       allow-update { none; };
   };
 };
@@ -149,13 +149,13 @@ version.bind.       86400   CH  TXT &amp;quot;TransDNS 2.1.1&amp;quot;
 ;  
 @                   CH  NS  localhost.
 
-version             CH  TXT &amp;quot;Microsoft DNS 6.0.6100 (2AEF76E)&amp;quot; 
-authors             CH  TXT &amp;quot;Raymii.org&amp;quot; 
+version             CH  TXT &quot;Microsoft DNS 6.0.6100 (2AEF76E)&quot; 
+authors             CH  TXT &quot;Raymii.org&quot; 
 </code></pre>
 
 <p>However this gets complicated very fast, you need to wrap all your other zones in views as well:</p>
 
-<pre><code>view &amp;quot;default&amp;quot; IN {
+<pre><code>view &quot;default&quot; IN {
   match-clients { any; };
   [...]
 };

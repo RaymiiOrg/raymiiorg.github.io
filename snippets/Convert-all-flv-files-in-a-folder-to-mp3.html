@@ -73,24 +73,34 @@
 
 
            <h2>Convert FLV's to MP3</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../snippets" class="link">Snippets</a></li><li><a href="Convert-all-flv-files-in-a-folder-to-mp3.html" class="link">Convert FLV's to MP3</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 15-06-2008</h6><br><p>If you&#39;ve got a large folder of .flv files (lets say you&#39;ve ripped them from youtube) and you want to put them on a music player, you can use this script.
-First make a file called <strong>convert.sh</strong>. (<em>relst@relst-desktop ~$ *</em>nano convert.sh***)<br>
-Then paste the following in it:</p>
+First make a file called <code>convert.sh</code>. </p>
+
+<pre><code>vim convert.sh
+</code></pre>
+
+<p>Then paste the following in it:</p>
 
 <pre><code>#!/bin/bash
-for f in *.flv;
-do
-echo &quot;Converting $f&quot;
-ffmpeg -i &quot;$f&quot; &quot;${f%.flv}.mp3&quot;
+for f in *.flv; do
+    echo &quot;Converting $f&quot;
+    ffmpeg -i &quot;$f&quot; &quot;${f%.flv}.mp3&quot;
 done
 </code></pre>
 
-<p>Save, and make it executable:<br>
-<em>relst@relst-desktop ~$ *</em>chmod +x ./convert.sh***
-Now <strong>copy</strong> all your FLV&#39;s in that folder, and then open a terminal there:<br>
-<em>relst@relst-desktop ~$ *</em>./convert.sh***</p>
+<p>Save, and make it executable:  </p>
 
-<p>Then, when finished remove all the flv&#39;s you <strong>copied</strong>:<br>
-<em>relst@relst-desktop ~$ *</em>rm -rf ./<em>.flv</em>**</p>
+<pre><code>chmod +x ./convert.sh
+</code></pre>
+
+<p>Now copy all your FLV&#39;s in that folder, and then open a terminal there:  </p>
+
+<pre><code>./convert.sh
+</code></pre>
+
+<p>Then, when finished remove all the flv&#39;s you copied:  </p>
+
+<pre><code>rm ./*.flv
+</code></pre>
 
 <p>Now you have a folder full of mp3&#39;s instead of .flv&#39;s.</p>
 

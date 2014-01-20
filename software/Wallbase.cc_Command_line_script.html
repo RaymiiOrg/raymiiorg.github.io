@@ -82,7 +82,7 @@ I&#39;ve written a script for this problem, it lets you grep wallbase from the c
 <li>Get the newest wallpapers from wallbase.cc</li>
 <li>Search for a term and get all the wallpapers from the first page at wallbase.cc</li>
 <li>Get random wallpapers</li>
-<li>Duplicate check, removes duplicate wallpapers (filesize &amp; md5sum)</li>
+<li>Duplicate check, removes duplicate wallpapers (filesize &amp;&amp; md5sum)</li>
 </ul>
 
 <h5>Usage</h5>
@@ -105,7 +105,7 @@ and kill that afet 10 minutes...</p>
 <pre><code>#!/bin/bash
 #Copyright (c) 2012 Remy van Elst
 #Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the &amp;quot;Software&amp;quot;), to deal
+#of this software and associated documentation files (the &quot;Software&quot;), to deal
 #in the Software without restriction, including without limitation the rights
 #to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 #copies of the Software, and to permit persons to whom the Software is
@@ -114,7 +114,7 @@ and kill that afet 10 minutes...</p>
 #The above copyright notice and this permission notice shall be included in
 #all copies or substantial portions of the Software.
 #
-#THE SOFTWARE IS PROVIDED &amp;quot;AS IS&amp;quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -122,54 +122,54 @@ and kill that afet 10 minutes...</p>
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 #first the vars
-BASEURL=&amp;quot;http://wallbase.cc/search/&amp;quot;
-MODE=&amp;quot;$1&amp;quot;
-SEARCH=&amp;quot;$2&amp;quot;
-NEWWALLURL=&amp;quot;http://wallbase.cc/search/0/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers&amp;quot;
-WALLR=&amp;quot;http://wallbase.cc/random/&amp;quot;
-CONFIGS=&amp;quot;/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers&amp;quot;
+BASEURL=&quot;http://wallbase.cc/search/&quot;
+MODE=&quot;$1&quot;
+SEARCH=&quot;$2&quot;
+NEWWALLURL=&quot;http://wallbase.cc/search/0/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers&quot;
+WALLR=&quot;http://wallbase.cc/random/&quot;
+CONFIGS=&quot;/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers&quot;
 
 #now see what we need to do
-case &amp;quot;$1&amp;quot; in
+case &quot;$1&quot; in
    s)
    if [ -e $2 ]; then
-      echo &amp;quot;I need search terms&amp;quot;
+      echo &quot;I need search terms&quot;
       exit 1
    fi
-   GETURL=&amp;quot;$BASEURL$SEARCH$CONFIGS&amp;quot;
+   GETURL=&quot;$BASEURL$SEARCH$CONFIGS&quot;
    ;;
    n)
-   GETURL=&amp;quot;$NEWWALLURL&amp;quot;
+   GETURL=&quot;$NEWWALLURL&quot;
    ;;
    r)
-   GETURL=&amp;quot;$WALLR&amp;quot;
+   GETURL=&quot;$WALLR&quot;
    ;;
    *)
-   echo -e &amp;quot;Usage:n$0 r for randomn$0 n for newestn$0 s TERM for search TERM.&amp;quot;
+   echo -e &quot;Usage:n$0 r for randomn$0 n for newestn$0 s TERM for search TERM.&quot;
    exit 1
    ;;
 esac
 
 GETURL=$WALLR
 #get the wallpaper overview page, grep the wallpaper page urls and dump them into a file for wget
-wget -q --referer=&amp;quot;http://www.google.com&amp;quot; --user-agent=&amp;quot;Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0&amp;quot; $GETURL -O- | egrep -o &amp;quot;http://[^[:space:]]*&amp;quot; | grep &amp;quot;/wallpaper/&amp;quot; | sed &#39;s/&amp;quot;//g&#39; &amp;gt; ./wallist
+wget -q --referer=&quot;http://www.google.com&quot; --user-agent=&quot;Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0&quot; $GETURL -O- | egrep -o &quot;http://[^[:space:]]*&quot; | grep &quot;/wallpaper/&quot; | sed &#39;s/&quot;//g&#39; &gt; ./wallist
 
 #put the url file in a variable, but first backup IFS and later restore it.
 OLDIFS=$IFS
 IFS=&#39;
 &#39;
-urlsa=( $( &amp;lt; ./wallist ) )
+urlsa=( $( &lt; ./wallist ) )
 IFS=$OLDIFS
 
 #now loop trough the urls and wget the page, then grep the wallpaper URL, and then wget the wallpaper
-for i in &amp;quot;${urlsa[@]}&amp;quot;
+for i in &quot;${urlsa[@]}&quot;
 do
   echo $i
-  wget -vv --referer=&amp;quot;http://www.google.com&amp;quot; --user-agent=&amp;quot;Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0&amp;quot; $i -O- | wget -vv -nd -nc `egrep -o &amp;quot;http://[^[:space:]]*.jpg&amp;quot;`
+  wget -vv --referer=&quot;http://www.google.com&quot; --user-agent=&quot;Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0&quot; $i -O- | wget -vv -nd -nc `egrep -o &quot;http://[^[:space:]]*.jpg&quot;`
 done
 
 #now a duplicate check...
-find -not -empty -type f -printf &amp;quot;%sn&amp;quot; | sort -rn | uniq -d | xargs -I{} -n1 find -type f -size {}c -print0 | xargs -0 md5sum | sort | uniq -w32 | cut -d&amp;quot; &amp;quot; -f3 | xargs -P 10 -r -n 1 rm
+find -not -empty -type f -printf &quot;%sn&quot; | sort -rn | uniq -d | xargs -I{} -n1 find -type f -size {}c -print0 | xargs -0 md5sum | sort | uniq -w32 | cut -d&quot; &quot; -f3 | xargs -P 10 -r -n 1 rm
 </code></pre>
 
 <h5>Notes</h5>

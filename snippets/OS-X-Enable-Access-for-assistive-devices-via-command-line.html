@@ -78,7 +78,7 @@
 
 <p>In Mavericks Apple changed the permissions so that every app has to be given permission individually. Therefore we need to do a bit more work. We first need to get the applications Bundle Identifier:</p>
 
-<pre><code>/usr/libexec/PlistBuddy -c &#39;Print CFBundleIdentifier&#39; /Applications/&amp;lt;Appname.app&amp;gt;/Contents/Info.plist
+<pre><code>/usr/libexec/PlistBuddy -c &#39;Print CFBundleIdentifier&#39; /Applications/&lt;Appname.app&gt;/Contents/Info.plist
 com.apple.Safari
 </code></pre>
 
@@ -90,17 +90,17 @@ com.divisiblebyzero.Spectacle
 
 <p>Then we use the Bundle ID in the following command to modify the permission database:</p>
 
-<pre><code>sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db &amp;quot;INSERT INTO access VALUES(&#39;kTCCServiceAccessibility&#39;,&#39;&amp;lt;Bundle-ID&amp;gt;&#39;,0,1,1,NULL);&amp;quot; 
+<pre><code>sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db &quot;INSERT INTO access VALUES(&#39;kTCCServiceAccessibility&#39;,&#39;&lt;Bundle-ID&gt;&#39;,0,1,1,NULL);&quot; 
 </code></pre>
 
 <p>For SpectacleApp:</p>
 
-<pre><code>sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db &amp;quot;INSERT INTO access VALUES(&#39;kTCCServiceAccessibility&#39;,&#39;com.divisiblebyzero.Spectacle&#39;,0,1,1,NULL);&amp;quot;
+<pre><code>sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db &quot;INSERT INTO access VALUES(&#39;kTCCServiceAccessibility&#39;,&#39;com.divisiblebyzero.Spectacle&#39;,0,1,1,NULL);&quot;
 </code></pre>
 
 <p>To remove an application from the list we use the following command, with the correct bundle ID:</p>
 
-<pre><code>sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db &amp;quot;delete from access where client=&#39;&amp;lt;Bundle ID&amp;gt;&#39;;&amp;quot;
+<pre><code>sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db &quot;delete from access where client=&#39;&lt;Bundle ID&gt;&#39;;&quot;
 </code></pre>
 
 <h3>Mountain Lion and Lion</h3>

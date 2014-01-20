@@ -100,9 +100,9 @@ FQDNLookup false
 Interval 30
 ReadThreads 1
 LoadPlugin syslog
-&amp;lt;Plugin syslog&amp;gt;
+&lt;Plugin syslog&gt;
         LogLevel info
-&amp;lt;/Plugin&amp;gt;
+&lt;/Plugin&gt;
 
 LoadPlugin cpu
 LoadPlugin df
@@ -126,23 +126,23 @@ LoadPlugin dns
 LoadPlugin ping
 
 ## CollectD Servers
-&amp;lt;Plugin &amp;quot;network&amp;quot;&amp;gt;
-        Server &amp;quot;$COLLECTD SERVER IP&amp;quot; &amp;quot;25826&amp;quot;
-        Server &amp;quot;$COLLECTD SERVER IP&amp;quot; &amp;quot;25826&amp;quot;
+&lt;Plugin &quot;network&quot;&gt;
+        Server &quot;$COLLECTD SERVER IP&quot; &quot;25826&quot;
+        Server &quot;$COLLECTD SERVER IP&quot; &quot;25826&quot;
         SecurityLevel None
-&amp;lt;/Plugin&amp;gt;
+&lt;/Plugin&gt;
 
 
-&amp;lt;Plugin rrdtool&amp;gt;
-        DataDir &amp;quot;/var/lib/collectd/rrd&amp;quot;
-&amp;lt;/Plugin&amp;gt;
+&lt;Plugin rrdtool&gt;
+        DataDir &quot;/var/lib/collectd/rrd&quot;
+&lt;/Plugin&gt;
 
-Include &amp;quot;/etc/collectd/filters.conf&amp;quot;
-Include &amp;quot;/etc/collectd/plugins.conf&amp;quot;
-Include &amp;quot;/etc/collectd/thresholds.conf&amp;quot;
+Include &quot;/etc/collectd/filters.conf&quot;
+Include &quot;/etc/collectd/plugins.conf&quot;
+Include &quot;/etc/collectd/thresholds.conf&quot;
 </code></pre>
 
-<p>The configuration file is relatively simple. Make sure to replace $VARIABLE$ by the correct on for your server. You load plugins via <code>&amp;quot;LoadPlugin $name&amp;quot;</code>. The network part is important, this configures our client to send its data to our server. Replace $COLLECT SERVER IP with your collectd server IP. </p>
+<p>The configuration file is relatively simple. Make sure to replace $VARIABLE$ by the correct on for your server. You load plugins via <code>&quot;LoadPlugin $name&quot;</code>. The network part is important, this configures our client to send its data to our server. Replace $COLLECT SERVER IP with your collectd server IP. </p>
 
 <p><em>Make sure the file has a blank newline at the end. If it has not, collectd will fail to start/run correctly</em>.</p>
 
@@ -153,45 +153,45 @@ Include &amp;quot;/etc/collectd/thresholds.conf&amp;quot;
 <pre><code>## /etc/collectd/plugins.conf 
 
 ## Static Plugins (every host has them)
-&amp;lt;Plugin swap&amp;gt;
+&lt;Plugin swap&gt;
        ReportByDevice false
-&amp;lt;/Plugin&amp;gt;
+&lt;/Plugin&gt;
 
 
 ## Dynamic Plugins 
-&amp;lt;Plugin nginx&amp;gt;
-       URL &amp;quot;http://127.0.0.1/nginx_status&amp;quot;
-&amp;lt;/Plugin&amp;gt;
+&lt;Plugin nginx&gt;
+       URL &quot;http://127.0.0.1/nginx_status&quot;
+&lt;/Plugin&gt;
 
-&amp;lt;Plugin ntpd&amp;gt;
-       Host &amp;quot;localhost&amp;quot;
+&lt;Plugin ntpd&gt;
+       Host &quot;localhost&quot;
        Port 123
        ReverseLookups false
-&amp;lt;/Plugin&amp;gt;
+&lt;/Plugin&gt;
 
-&amp;lt;Plugin ping&amp;gt;
-       Host &amp;quot;google.com&amp;quot;
-&amp;lt;/Plugin&amp;gt;
+&lt;Plugin ping&gt;
+       Host &quot;google.com&quot;
+&lt;/Plugin&gt;
 
-&amp;lt;Plugin sensors&amp;gt;
-       SensorConfigFile &amp;quot;/etc/sensors3.conf&amp;quot;
-       Sensor &amp;quot;it8712-isa-0290/temperature-temp1&amp;quot;
-       Sensor &amp;quot;it8712-isa-0290/fanspeed-fan3&amp;quot;
-       Sensor &amp;quot;it8712-isa-0290/voltage-in8&amp;quot;
+&lt;Plugin sensors&gt;
+       SensorConfigFile &quot;/etc/sensors3.conf&quot;
+       Sensor &quot;it8712-isa-0290/temperature-temp1&quot;
+       Sensor &quot;it8712-isa-0290/fanspeed-fan3&quot;
+       Sensor &quot;it8712-isa-0290/voltage-in8&quot;
        IgnoreSelected false
-&amp;lt;/Plugin&amp;gt;
+&lt;/Plugin&gt;
 
-&amp;lt;Plugin write_graphite&amp;gt;
-       &amp;lt;Carbon&amp;gt;
-               Host &amp;quot;$GRAPHITE_HOST$&amp;quot;
-               Port &amp;quot;2003&amp;quot;
-               Prefix &amp;quot;collectd&amp;quot;
-               Postfix &amp;quot;collectd&amp;quot;
+&lt;Plugin write_graphite&gt;
+       &lt;Carbon&gt;
+               Host &quot;$GRAPHITE_HOST$&quot;
+               Port &quot;2003&quot;
+               Prefix &quot;collectd&quot;
+               Postfix &quot;collectd&quot;
                StoreRates false
                AlwaysAppendDS false
-               EscapeCharacter &amp;quot;_&amp;quot;
-       &amp;lt;/Carbon&amp;gt;
-&amp;lt;/Plugin&amp;gt;
+               EscapeCharacter &quot;_&quot;
+       &lt;/Carbon&gt;
+&lt;/Plugin&gt;
 </code></pre>
 
 <p>Collectd server is now set up in &quot;client&quot; mode. To test it we restart the service:</p>

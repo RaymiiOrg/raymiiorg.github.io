@@ -75,9 +75,17 @@
            <h2>Imagemagick thumbnailer</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../snippets" class="link">Snippets</a></li><li><a href="Imagemagick-thumbnailer.html" class="link">Imagemagick thumbnailer</a></li></ul><h6>Author: Remy Van Elst</h6><h6>Date: 29-11-2007</h6><br><p>Below you&#39;ll find the script that makes nice thumbnails from a bunch of images. I&#39;ve used it on the links page on this website. (Which is not around anymore).<br>
 First I made screenshots of the website&#39;s I wanted, with the firefox add-on screengrab. It also works with pictures, but then you&#39;ll have to change the png to jpg in the script. The script also makes a HTML page with a 2 collumn table witth the thumbs in it. </p>
 
-<p>Make sure you have imagemagick installed (<em>sudo apt-get install imagemagick</em> or <em>sudo pacman -S imagemagick</em>) The script:</p>
+<p>Make sure you have imagemagick installed:</p>
 
-<h5>The code</h5>
+<pre><code>sudo apt-get install imagemagick
+</code></pre>
+
+<p>or</p>
+
+<pre><code>sudo pacman -S imagemagick
+</code></pre>
+
+<p>The script:</p>
 
 <pre><code>#####################################
 ## Raymii.org Thumbr script        ##
@@ -87,20 +95,20 @@ First I made screenshots of the website&#39;s I wanted, with the firefox add-on 
 #!/bin/bash
 NUMMR=1
 
-EXTENSION=&amp;quot;jpg&amp;quot;;
+EXTENSION=&quot;jpg&quot;;
 mkdir work
 mkdir -p finished/pics 
 
 GALL=./finished/gallery.html
 rm -rf $GALL 
-echo &amp;quot;Made with raymii.orgs gallery thumber&amp;quot; &amp;gt; $GALL 
-tabhead=&amp;quot; &amp;lt;table border=&amp;quot;0&amp;quot; bordercolor=&amp;quot;0&amp;quot; &amp;gt;&amp;quot; 
-tabfeet=&amp;quot; &amp;lt;/table &amp;gt;&amp;quot; 
-echo $tabhead &amp;gt;&amp;gt; $GALL 
+echo &quot;Made with raymii.orgs gallery thumber&quot; &gt; $GALL 
+tabhead=&quot; &lt;table border=&quot;0&quot; bordercolor=&quot;0&quot; &gt;&quot; 
+tabfeet=&quot; &lt;/table &gt;&quot; 
+echo $tabhead &gt;&gt; $GALL 
 
 
 for i in *.$EXTENSION; 
-do cp -rf -v &amp;quot;$i&amp;quot; &amp;quot;./work/$NUMMR.$EXTENSION&amp;quot;; 
+do cp -rf -v &quot;$i&quot; &quot;./work/$NUMMR.$EXTENSION&quot;; 
 
 convert ./work/$NUMMR.$EXTENSION -auto-orient 
  -thumbnail 160x160 -unsharp 0x.5 ./work/$NUMMR.w1.png 
@@ -118,27 +126,24 @@ convert ./work/$NUMMR.w1.png
  -crop 200x200+0+0 +repage -flatten -trim +repage 
  -background black ( +clone -shadow 60x4+4+4 ) +swap 
  -background none -flatten 
- &amp;quot;./work/$NUMMR.thumb.png&amp;quot; 
-
-
-
+ &quot;./work/$NUMMR.thumb.png&quot; 
 
 cp ./work/$NUMMR.thumb.png ./finished/pics/$NUMMR.png
 
-evenline=&amp;quot; &amp;lt;tr &amp;gt; &amp;lt;td &amp;gt; &amp;lt;a href=&amp;quot;&amp;quot;&amp;gt;&amp;lt;img src=&amp;quot;pics/$NUMMR.png&amp;quot; alt=&amp;quot; pic $NUMMR - made by raymii.org script&amp;quot; / &amp;gt; &amp;lt;/a&amp;gt;&amp;lt;/td &amp;gt;&amp;quot; 
-oddline=&amp;quot; &amp;lt;td &amp;gt; &amp;lt;a href=&amp;quot;&amp;quot;&amp;gt;&amp;lt;img src=&amp;quot;pics/$NUMMR.png&amp;quot; alt=&amp;quot; pic $NUMMR - made by raymii.org script&amp;quot; / &amp;gt; &amp;lt;/td &amp;gt; &amp;lt;/a&amp;gt;&amp;lt;/tr &amp;gt;&amp;quot; 
+evenline=&quot; &lt;tr &gt; &lt;td &gt; &lt;a href=&quot;&quot;&gt;&lt;img src=&quot;pics/$NUMMR.png&quot; alt=&quot; pic $NUMMR - made by raymii.org script&quot; / &gt; &lt;/a&gt;&lt;/td &gt;&quot; 
+oddline=&quot; &lt;td &gt; &lt;a href=&quot;&quot;&gt;&lt;img src=&quot;pics/$NUMMR.png&quot; alt=&quot; pic $NUMMR - made by raymii.org script&quot; / &gt; &lt;/td &gt; &lt;/a&gt;&lt;/tr &gt;&quot; 
 
  slot=$(( $NUMMR % 2 )) 
 if [ $slot -eq 0 ] 
 then 
- echo $oddline &amp;gt;&amp;gt; $GALL 
+ echo $oddline &gt;&gt; $GALL 
 else 
- echo $evenline &amp;gt;&amp;gt; $GALL 
+ echo $evenline &gt;&gt; $GALL 
 fi 
-let &amp;quot;NUMMR += 1&amp;quot; 
+let &quot;NUMMR += 1&quot; 
 done 
 
-echo $tabfeet &amp;gt;&amp;gt; $GALL 
+echo $tabfeet &gt;&gt; $GALL 
 rm -rf ./work 
 exit 0 
 </code></pre>

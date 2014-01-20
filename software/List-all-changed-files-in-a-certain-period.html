@@ -79,7 +79,7 @@
 <pre><code>#!/bin/bash
 ### Copyright (c) 2012 Remy van Elst
 #Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the &amp;quot;Software&amp;quot;), to deal
+#of this software and associated documentation files (the &quot;Software&quot;), to deal
 #in the Software without restriction, including without limitation the rights
 #to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 #copies of the Software, and to permit persons to whom the Software is
@@ -88,7 +88,7 @@
 #The above copyright notice and this permission notice shall be included in
 #all copies or substantial portions of the Software.
 #
-#THE SOFTWARE IS PROVIDED &amp;quot;AS IS&amp;quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -101,34 +101,34 @@
 #Exclude hidden directories, 0=exclude,1=include
 HIDDEN=0
 #Time parameter in days for modified files
-MTIME=&amp;quot;-1&amp;quot;
+MTIME=&quot;-1&quot;
 #Directory to look for files, if unset use current dir
 FILEDIR=$1
-if [ -z &amp;quot;$FILEDIR&amp;quot; ]; then
-FILEDIR=&amp;quot;./&amp;quot;;
+if [ -z &quot;$FILEDIR&quot; ]; then
+FILEDIR=&quot;./&quot;;
 fi
-SVERSION=&amp;quot;0.2&amp;quot;
+SVERSION=&quot;0.2&quot;
 HOSTPC=`hostname`
 HOSTUSER=`whoami`
 
 #Now do the  find thing
 
-case &amp;quot;$HIDDEN&amp;quot; in
+case &quot;$HIDDEN&quot; in
 
-    0) echo &amp;quot;Reporting all files modified in last &amp;quot;$MTIME&amp;quot; period in directory &amp;quot;$FILEDIR&amp;quot; for system &amp;quot;$HOSTPC&amp;quot;, running as user &amp;quot;$HOSTUSER&amp;quot; excluding hidden files.&amp;quot;
-    echo &amp;quot;Date: `date`&amp;quot;
-    echo &amp;quot;START OF FILE REPORT&amp;quot;
-    find $FILEDIR -type f -mtime $MTIME ! -path &amp;quot;*/.*&amp;quot; | xargs -r ls -lh 2&amp;gt;/dev/null
-    echo &amp;quot;END OF FILE REPORT&amp;quot;
-    echo &amp;quot;Report script version $SVERSION by raymii.org&amp;quot;
+    0) echo &quot;Reporting all files modified in last &quot;$MTIME&quot; period in directory &quot;$FILEDIR&quot; for system &quot;$HOSTPC&quot;, running as user &quot;$HOSTUSER&quot; excluding hidden files.&quot;
+    echo &quot;Date: `date`&quot;
+    echo &quot;START OF FILE REPORT&quot;
+    find $FILEDIR -type f -mtime $MTIME ! -path &quot;*/.*&quot; | xargs -r ls -lh 2&gt;/dev/null
+    echo &quot;END OF FILE REPORT&quot;
+    echo &quot;Report script version $SVERSION by raymii.org&quot;
     ;;
 
-    1) echo &amp;quot;Reporting all files modified in last &amp;quot;$MTIME&amp;quot; period in directory &amp;quot;$FILEDIR&amp;quot; for system &amp;quot;$HOSTPC&amp;quot;, running as user &amp;quot;$HOSTUSER&amp;quot;.&amp;quot;
-    echo &amp;quot;Date: `date`&amp;quot;
-    echo &amp;quot;START OF FILE REPORT&amp;quot;
-    find $FILEDIR -type f -mtime $MTIME | xargs -r ls -lh 2&amp;gt;/dev/null
-    echo &amp;quot;END OF FILE REPORT&amp;quot;
-    echo &amp;quot;Report script version $SVERSION by raymii.org&amp;quot;
+    1) echo &quot;Reporting all files modified in last &quot;$MTIME&quot; period in directory &quot;$FILEDIR&quot; for system &quot;$HOSTPC&quot;, running as user &quot;$HOSTUSER&quot;.&quot;
+    echo &quot;Date: `date`&quot;
+    echo &quot;START OF FILE REPORT&quot;
+    find $FILEDIR -type f -mtime $MTIME | xargs -r ls -lh 2&gt;/dev/null
+    echo &quot;END OF FILE REPORT&quot;
+    echo &quot;Report script version $SVERSION by raymii.org&quot;
     ;;
 
 esac
@@ -138,7 +138,7 @@ esac
 <p>Sample output looks like this:</p>
 
 <pre><code>remy@USN4 ~/test $ ./report.sh ~
-Reporting all files modified in last &amp;quot;-1&amp;quot; period in directory &amp;quot;/home/remy&amp;quot; for system &amp;quot;USN4&amp;quot; excluding hidden files.
+Reporting all files modified in last &quot;-1&quot; period in directory &quot;/home/remy&quot; for system &quot;USN4&quot; excluding hidden files.
 Date: Fri Mar 30 13:20:59 CEST 2012
 START OF FILE REPORT
 -rw-rw-r-- 1 remy remy    6 2012-03-30 12:54 /home/remy/hoi.test
@@ -152,12 +152,12 @@ Report script version 0.2 by raymii.org
 
 <p>If you want to filter out certain directories you can add grep to the find line in the script to filter out directories:</p>
 
-<pre><code>find $FILEDIR -type f -mtime $MTIME ! -path &amp;quot;*/.*&amp;quot; | grep -v &amp;quot;/sys/&amp;quot; | grep -v &amp;quot;/proc/&amp;quot; | grep -v &amp;quot;/run/&amp;quot; | grep -v &amp;quot;/dev/&amp;quot; | xargs -r ls -lh 2&amp;gt;/dev/null
+<pre><code>find $FILEDIR -type f -mtime $MTIME ! -path &quot;*/.*&quot; | grep -v &quot;/sys/&quot; | grep -v &quot;/proc/&quot; | grep -v &quot;/run/&quot; | grep -v &quot;/dev/&quot; | xargs -r ls -lh 2&gt;/dev/null
 </code></pre>
 
 <p>The above command wil filter out the /sys/ /proc/ /run/ and /dev/ directories. Edit it to your needs. I&#39;ve got a crontab like this, it saves it to the /var/log/freport/ directory so you can check it later or email it:</p>
 
-<pre><code>00 */8 * * * /root/report.sh / &amp;gt; /var/log/freport/filereport`date +%F`.txt
+<pre><code>00 */8 * * * /root/report.sh / &gt; /var/log/freport/filereport`date +%F`.txt
 </code></pre>
 <hr>Tags: <a href="../tags/auditing.html" class="link">auditing, </a><a href="../tags/bash.html" class="link">bash, </a><a href="../tags/changed-files.html" class="link">changed-files, </a><div class="footer">
                 <hr />

@@ -101,9 +101,9 @@ Strict Transport Security resolves this problem; as long as you&#39;ve accessed 
 <pre><code># Optionally load the headers module:
 LoadModule headers_module modules/mod_headers.so
 
-&amp;lt;VirtualHost 67.89.123.45:443&amp;gt;
-    Header always set Strict-Transport-Security &amp;quot;max-age=63072000; includeSubDomains&amp;quot;
-&amp;lt;/VirtualHost&amp;gt;
+&lt;VirtualHost 67.89.123.45:443&gt;
+    Header always set Strict-Transport-Security &quot;max-age=63072000; includeSubDomains&quot;
+&lt;/VirtualHost&gt;
 </code></pre>
 
 <p>Now your website will set the header every time someone visits, with an expiration date of two years (in seconds). It sets it at every visit. So tomorrow, it will say two years again.<br>
@@ -111,11 +111,11 @@ You do have to set it on the HTTPS vhost only. It cannot be in the http vhost. <
 
 <p>To redirect your visitors to the HTTPS version of your website, use the mod_rewrite:</p>
 
-<pre><code>&amp;lt;IfModule mod_rewrite.c&amp;gt;
+<pre><code>&lt;IfModule mod_rewrite.c&gt;
   RewriteEngine On
   RewriteCond %{HTTPS} off
   RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
-&amp;lt;/IfModule&amp;gt;
+&lt;/IfModule&gt;
 </code></pre>
 
 <p>And don&#39;t forget to restart Apache.</p>
@@ -124,9 +124,9 @@ You do have to set it on the HTTPS vhost only. It cannot be in the http vhost. <
 
 <p>The lighttpd variant is just as simple. Add it to your Lighttpd configuration file (<code>/etc/lighttpd/lighttpd.conf</code> for example):</p>
 
-<pre><code>server.modules += ( &amp;quot;mod_setenv&amp;quot; )
-$HTTP[&amp;quot;scheme&amp;quot;] == &amp;quot;https&amp;quot; {
-    setenv.add-response-header  = ( &amp;quot;Strict-Transport-Security&amp;quot; =&amp;gt; &amp;quot;max-age=63072000&amp;quot;)
+<pre><code>server.modules += ( &quot;mod_setenv&quot; )
+$HTTP[&quot;scheme&quot;] == &quot;https&quot; {
+    setenv.add-response-header  = ( &quot;Strict-Transport-Security&quot; =&gt; &quot;max-age=63072000&quot;)
 }
 </code></pre>
 
@@ -145,7 +145,7 @@ $HTTP[&amp;quot;scheme&amp;quot;] == &amp;quot;https&amp;quot; {
 
 <p>The last tip I&#39;ll give you is the X-Frame-Options header, which you can add to your HTTPS website to make sure it is not embedded in a frame or iframe. This avoids clickjacking, and might be helpfull for HTTPS websites. Quoting the <a href="https://developer.mozilla.org/en-US/docs/HTTP/X-Frame-Options">Mozilla Developer Network again</a>:</p>
 
-<pre><code>The X-Frame-Options HTTP response header can be used to indicate whether or not a browser should be allowed to render a page in a `&amp;lt;frame&amp;gt;` or `&amp;lt;iframe&amp;gt;`. Sites can use this to avoid clickjacking attacks, by ensuring that their content is not embedded into other sites.
+<pre><code>The X-Frame-Options HTTP response header can be used to indicate whether or not a browser should be allowed to render a page in a `&lt;frame&gt;` or `&lt;iframe&gt;`. Sites can use this to avoid clickjacking attacks, by ensuring that their content is not embedded into other sites.
 </code></pre>
 
 <p>You can change DENY to SAME-ORIGIN or ALLOW-FROM uri, see the Mozilla link above for more information on that.</p>
@@ -161,9 +161,9 @@ $HTTP[&amp;quot;scheme&amp;quot;] == &amp;quot;https&amp;quot; {
 
 <p>This goes in the lighttpd config. Make sure you don&#39;t double the above set config, if you have that, just add the rule it to it.</p>
 
-<pre><code>server.modules += ( &amp;quot;mod_setenv&amp;quot; )
-$HTTP[&amp;quot;scheme&amp;quot;] == &amp;quot;https&amp;quot; {
-    setenv.add-response-header  = ( &amp;quot;X-Frame-Options&amp;quot; =&amp;gt; &amp;quot;DENY&amp;quot;)
+<pre><code>server.modules += ( &quot;mod_setenv&quot; )
+$HTTP[&quot;scheme&quot;] == &quot;https&quot; {
+    setenv.add-response-header  = ( &quot;X-Frame-Options&quot; =&gt; &quot;DENY&quot;)
 }
 </code></pre>
 

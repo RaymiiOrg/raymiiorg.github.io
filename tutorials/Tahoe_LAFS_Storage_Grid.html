@@ -88,7 +88,9 @@
 
 <p>From the <a href="http://tahoe-lafs.org/">Tahoe-LAFS website</a>:</p>
 
-<p>&gt; Tahoe-LAFS is a Free and Open cloud storage system. It distributes your data across multiple servers. Even if some of the servers fail or are taken over by an attacker, the entire filesystem continues to function correctly, including preservation of your privacy and security.</p>
+<blockquote>
+<p>Tahoe-LAFS is a Free and Open cloud storage system. It distributes your data across multiple servers. Even if some of the servers fail or are taken over by an attacker, the entire filesystem continues to function correctly, including preservation of your privacy and security.</p>
+</blockquote>
 
 <p>The short version: Tahoe-LAFS uses a RAID-like mechanism to store &#39;shares&#39; (parts of a file) across the storage grid, according to the settings you specified. When a file is retrieved, all storage servers will be asked for shares of this file, and those that responded fastest will be used to retrieve the data from. The shares are reconstructed by the requesting client into the original file.</p>
 
@@ -181,10 +183,10 @@ tahoe start ~/.tahoe-introducer
 
 <p>I recently started working on a Python module named <code>pytahoe</code>, that you can use to easily interface with Tahoe-LAFS from a Python application or shell. To install it, simply run <code>pip install pytahoe</code> as root - you&#39;ll need to make sure that you have libfuse/libfuse2 installed. There is no real documentation for now other than in the code itself, but the below code gives you an idea of how it works:</p>
 
-<pre><code>&amp;gt;&amp;gt;&amp;gt; import pytahoe
-&amp;gt;&amp;gt;&amp;gt; fs = pytahoe.Filesystem()
-&amp;gt;&amp;gt;&amp;gt; d = fs.Directory(&amp;quot;URI:DIR2:hnncfsbzsxv5fhdymxhycm3xc4:qjipiqg3bozb5evb6krdwfmsgks6j4ymivopgx7eoxcjb3avslqq&amp;quot;)
-&amp;gt;&amp;gt;&amp;gt; d.upload(&amp;quot;devilskitchen.tar.gz&amp;quot;)
+<pre><code>&gt;&gt;&gt; import pytahoe
+&gt;&gt;&gt; fs = pytahoe.Filesystem()
+&gt;&gt;&gt; d = fs.Directory(&quot;URI:DIR2:hnncfsbzsxv5fhdymxhycm3xc4:qjipiqg3bozb5evb6krdwfmsgks6j4ymivopgx7eoxcjb3avslqq&quot;)
+&gt;&gt;&gt; d.upload(&quot;devilskitchen.tar.gz&quot;)
 </code></pre>
 
 <p>The result of this is <a href="http://owely.com/04swmf">something like this</a>.</p>
@@ -193,10 +195,10 @@ tahoe start ~/.tahoe-introducer
 
 <p>You can also mount a directory as a local filesystem using FUSE (on OpenVZ, make sure your host supports FUSE). Right now, the easiest way appears to be using pytahoe (this can be done from a Python shell as well). Example:</p>
 
-<pre><code>&amp;gt;&amp;gt;&amp;gt; import pytahoe
-&amp;gt;&amp;gt;&amp;gt; fs = pytahoe.Filesystem()
-&amp;gt;&amp;gt;&amp;gt; d = fs.Directory(&amp;quot;URI:DIR2:hnncfsbzsxv5fhdymxhycm3xc4:qjipiqg3bozb5evb6krdwfmsgks6j4ymivopgx7eoxcjb3avslqq&amp;quot;)
-&amp;gt;&amp;gt;&amp;gt; d.mount(&amp;quot;http://www.lowendtalk.com/mnt/something&amp;quot;)
+<pre><code>&gt;&gt;&gt; import pytahoe
+&gt;&gt;&gt; fs = pytahoe.Filesystem()
+&gt;&gt;&gt; d = fs.Directory(&quot;URI:DIR2:hnncfsbzsxv5fhdymxhycm3xc4:qjipiqg3bozb5evb6krdwfmsgks6j4ymivopgx7eoxcjb3avslqq&quot;)
+&gt;&gt;&gt; d.mount(&quot;http://www.lowendtalk.com/mnt/something&quot;)
 </code></pre>
 
 <h5>Via the web API</h5>
@@ -207,7 +209,7 @@ tahoe start ~/.tahoe-introducer
 
 <p>HalfEatenPie November 8: </p>
 
-<pre><code>Out of curiosity @joepie91, what if one of the servers suddenly just &amp;quot;disappear&amp;quot; from the network? What happens to the files?
+<pre><code>Out of curiosity @joepie91, what if one of the servers suddenly just &quot;disappear&quot; from the network? What happens to the files?
 </code></pre>
 
 <p>joepie91 November 8:</p>
@@ -230,7 +232,7 @@ From a practical viewpoint, I&#39;ve had many (and I mean MANY) nodes disappear 
 
 <pre><code>- how many of those 10 can disappear with data still intact?
 
-    Total shares would be 8, happy would be 6, and needed would be 4 - this means you can lose 6 - 4 = 2 servers (worst case scenario) without losing access to your data. It&#39;s likely possible to lose 3 or 4 servers (this depends on whether the servers you are losing hold 1 or more shares). In this, with &amp;quot;losing&amp;quot; servers I only mean the (max.) 8 servers that you uploaded a share to, to start with. Since your total amount of servers is 10, you could lose 2 more servers without any issues if those servers happen to not hold any shares for this file.
+    Total shares would be 8, happy would be 6, and needed would be 4 - this means you can lose 6 - 4 = 2 servers (worst case scenario) without losing access to your data. It&#39;s likely possible to lose 3 or 4 servers (this depends on whether the servers you are losing hold 1 or more shares). In this, with &quot;losing&quot; servers I only mean the (max.) 8 servers that you uploaded a share to, to start with. Since your total amount of servers is 10, you could lose 2 more servers without any issues if those servers happen to not hold any shares for this file.
 
     Summary: worst case scenario, you can lose any 2 servers. Best case scenario, you can lose 6 servers. It&#39;ll usually be somewhere in the middle.
 
