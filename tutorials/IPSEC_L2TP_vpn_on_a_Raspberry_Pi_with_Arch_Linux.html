@@ -139,7 +139,7 @@ echo &quot;net.ipv4.icmp_ignore_bogus_error_responses = 1&quot; |  tee -a /etc/s
 
 <p>Now apply these settings for other network interfaces:</p>
 
-<pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &amp;gt; $vpn/send_redirects; done
+<pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &gt; $vpn/send_redirects; done
 </code></pre>
 
 <p>And apply them:</p>
@@ -329,6 +329,11 @@ length bit = yes
 <li>ppp debug = yes when testing, no when in production</li>
 </ul>
 
+<p>Also create the following folder for xl2tpd&#39;s control file:</p>
+
+<pre><code>mkdir /var/run/xl2tpd/
+</code></pre>
+
 <h4>Local user (PAM//etc/passwd) authentication</h4>
 
 <p>To use local user accounts via pam (or /etc/passwd), and thus not having plain text user passwords in a text file you have to do a few extra steps. Huge thanks to <code>Sascha Scandella</code> for the hard work and troubleshooting.</p>
@@ -419,7 +424,7 @@ bob            l2tpd   DF98F09F74C06A2F             *
 
 <p>To make sure everything has the newest config files restart openswan and xl2tpd:  </p>
 
-<pre><code>systemctl restart ipsec
+<pre><code>systemctl restart openswan
 systemctl restart xl2tpd
 </code></pre>
 
