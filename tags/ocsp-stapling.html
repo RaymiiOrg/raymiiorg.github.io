@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>SSHdialog - Raymii.org</title>
+        <title>ocsp-stapling - Raymii.org</title>
         <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
         <link href="/s/inc/css/custom.css" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -66,133 +66,7 @@
                 <div class="inner">
 
 
-           <h2 class='headheader'>SSHdialog</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../software" class="link">Software</a></li><li><a href="SSHDialog.html" class="link">SSHdialog</a></li></ul><small>Author: Remy van Elst</small> | <small>Date: 26-10-2009</small><p /><p><img src="http://nc.raymii.org/cms/images/sshdialog.png" alt="SSHdialog" title="SSHDialog"></p>
-
-<p>As I manage a lot of linux servers I have to use ssh a lot.<br>
-I am to lazy to remember all the hosts, so I wrote a script which combines dialog, awk and bash to make a nifty ssh script. First of, copy this script to your pc: </p>
-
-<h5>SSHdialog.sg</h5>
-
-<pre><code>#!/bin/bash
-### Copyright (c) 2010 Remy van Elst
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the &quot;Software&quot;), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
-
-VERSION=&quot;1.2 beta.&quot;
-TITLE=&quot;SSHdialog $VERSION&quot;
-HOSTSFILE=&quot;~/hosts&quot;
-if [ -e $HOSTSFILE ]; then
-awk &#39;NF &gt; 0&#39; $HOSTSFILE &gt; /tmp/sshost.hosts &amp;&amp; cat /tmp/sshost.hosts &gt; $HOSTSFILE
-else
-echo &quot;Host file does not exist, please create it&quot;
-echo &quot;Use the following format:&quot;
-echo; echo &quot;number,servername,user,url/ip,port&quot;
-echo &quot;Example:&quot;
-echo &quot;1,VPS1,-,vps1.example.com,2223&quot;
-echo &quot;2,VPS2,john,vps2.example.org,2222&quot;
-echo &quot;3,Company Webserver,www,10.0.0.210,22&quot;
-echo &quot;4,Router,root,192.168.1.1,22&quot;
-echo; echo &quot;If you want the current user to be used as the username then use a - (dash).&quot;
-echo &quot;Each value is separated by a , (comma), and make sure you don&#39;t have double numbers. If you have only the first number will work.&quot;
-echo &quot;If the syntax is not correct the script will fail so please make sure there are no errors...&quot;
-echo
-exit 1
-fi
-WIDTH=50
-HEIGHT=40
-MENUSIZE=6
-TEMPF=`TEMPF 2&gt;/dev/null` || TEMPF=/tmp/sshost.$$
-OLDIFS=$IFS
-WHICHSSH=&quot;`whoami`@${HOSTN[$SSHOST]}&quot;
-DIALOG=${DIALOG=dialog}
-IFS=$&#39;n&#39;
-ALINES=($(awk &#39;BEGIN{FS=&quot;,&quot;} {print $1}&#39; $HOSTSFILE | wc -l))
-LINES=($(awk &#39;BEGIN{FS=&quot;,&quot;} {print $1, &quot;&quot;&quot; $2 &quot;&quot;&quot;}&#39; $HOSTSFILE))
-NAMES=($(awk &#39;BEGIN{FS=&quot;,&quot;} {print $2}&#39; $HOSTSFILE))
-UNAME=($(awk &#39;BEGIN{FS=&quot;,&quot;} {print $3}&#39; $HOSTSFILE))
-HOSTN=($(awk &#39;BEGIN{FS=&quot;,&quot;} {print $4}&#39; $HOSTSFILE))
-HOSTP=($(awk &#39;BEGIN{FS=&quot;,&quot;} {print $5}&#39; $HOSTSFILE))
-
-# if [ $ALINES -gt 6 ]; then MENUSIZE=$ALINES; else MENUSIZE=6; fi
-MENUSIZE=$ALINES
-SMURF=&quot;$DIALOG --extra-button --extra-label &quot;Edit Hosts&quot; --cancel-label &quot;Exit&quot; --ok-label &quot;Connect&quot; --menu &quot;$TITLE&quot; $HEIGHT $WIDTH $MENUSIZE ${LINES[*]}&quot;
-eval $SMURF 2&gt; $TEMPF
-RHOST=$?
-KEUZE=`cat $TEMPF`
-SSHOST=$[$KEUZE - 1]
-
-if [ ${UNAME[$SSHOST]} == &quot;-&quot; ]; then
-UNAME2=`whoami`
-WHICHSSH=&quot;$UNAME2@${HOSTN[$SSHOST]}&quot;
-else
-UNAME2=${UNAME[$SSHOST]}
-WHICHSSH=&quot;$UNAME2@${HOSTN[$SSHOST]}&quot;
-fi
-
-clear
-
-case $RHOST in
-0)
-echo &quot;Connecting user $UNAME2 to ${HOSTN[$SSHOST]} on port ${HOSTP[$SSHOST]}.&quot;
-ssh  $WHICHSSH -p ${HOSTP[$SSHOST]}
-echo &quot;ssh terminated, byebye&quot;
-echo &quot;This script is made by Raymii from http://raymii.org&quot;
-;;
-1)
-echo &quot;You selected exit, we will quit&quot;
-exit 0
-;;
-3)
-nano $HOSTSFILE
-exec bash $0
-exit 0
-;;
-255)
-echo &quot;You pressed ESC, we will exit.&quot;;
-exit 0
-;;
-esac
-
-rm -f $TEMPF
-exit 0
-</code></pre>
-
-<p>Now comes the hard part, creating your hosts file.</p>
-
-<p>The script wants it to be in the same directory as the script with the name &quot;hosts&quot;.<br>
-This requires a special syntax to make it work.<br>
-It has to be like below: </p>
-
-<h5>hosts</h5>
-
-<pre><code>ID,Friendly name,username,host or ip,port
-1,VPS 1,-,vps.example.org,22
-2,VPS 2,www,vps.someserver.com,2222
-3,Home Router,root,192.168.1.1,22
-4,Homeserver,-,192.168.1.10,22
-5,Work,ceo,my.work.com,22 
-</code></pre>
-
-<p>If you want the current user to be used as the username then use a - (dash) as username.</p>
-
-<p>Please double check your comma&#39;s and your numbers, if something is wrong the script can give strange errors.<br>
-If you like the script or have suggestions the please leave a comment below.</p>
-<hr>Tags: <a href="../tags/bash.html" class="link">bash, </a><a href="../tags/dialog.html" class="link">dialog, </a><a href="../tags/ncurses.html" class="link">ncurses, </a><a href="../tags/ssh.html" class="link">ssh, </a><div class="footer">
+           <h2>Tag ocsp-stapling</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../tags" class="link">Tags</a></li><li><a href="ocsp-stapling.html" class="link">ocsp-stapling</a></li></ul><ul><li><a href="../tutorials/OCSP_Stapling_on_nginx.html" class="link">OCSP Stapling on nginx</a></li></ul><div class="footer">
                 <hr>
                 <p>Generated by <a href="https://raymii.org/s/software/ingsoc.html">ingsoc</a> | 
                 <a href="https://raymii.org/s/software/Sparkling_Network.html">Cluster Status</a> | 
