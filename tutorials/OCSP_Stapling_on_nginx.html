@@ -35,7 +35,7 @@
           <input type="text" name="as_q" class="form-control" placeholder="Search">
         </div>
       </form>
-      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">Ssl</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/nginx.html" class="link">Nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li><li><a href="/s/tags/deployment.html" class="link">Deployment</a></li></ul>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li><li><a href="/s/tags/deployment.html" class="link">Deployment</a></li></ul>
                <!-- advertisement start -->
                
                 
@@ -68,6 +68,8 @@
 
            <h2 class='headheader'>OCSP Stapling on nginx</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../tutorials" class="link">Tutorials</a></li><li><a href="OCSP_Stapling_on_nginx.html" class="link">OCSP Stapling on nginx</a></li></ul><small>03-02-2014</small> | <small>Remy van Elst</small><p /><p>OCSP stapling is an enhancement to the standard OCSP protocol that delivers OCSP responses from the server with the certificate, eliminating the need for relying parties (web users) to check OCSP responses with the issuing CA. This has the effect of reducing bandwidth, improving perceived site performance, and increasing security for everyone involved in establishing the secure session. This tutorial shows you how to set it up with nginx.</p>
 
+<p><a href="https://raymii.org/s/tutorials/OCSP_Stapling_on_Apache2.html">This tutorial is also available for Apache</a></p>
+
 <h3>What is OCSP Stapling</h3>
 
 <p>OCSP stapling is defined in the <a href="http://tools.ietf.org/html/rfc6066">IETF RFC 6066</a>. The term &quot;stapling&quot; is a popular term used to describe how the OCSP response is obtained by the web server. The web server caches the response from the CA that issued the certificate.  When an SSL/TLS handshake is initiated, the response is returned by the web server to the client by attaching the cached OCSP response to the CertificateStatus message.  To make use of OCSP stapling, a client must include the &quot;status_request&quot; extension with its SSL/TSL Client &quot;Hello&quot; message.</p>
@@ -85,6 +87,17 @@
 <h3>Requirements</h3>
 
 <p>You need at least nginx 1.3.7 for this to work. This is not available in the current Ubuntu LTS releases (12.04), <a href="http://packages.ubuntu.com/precise/nginx">it has 1.1.19</a> and on CentOS you need EPEL or the official repositories. However, it is easy <a href="http://wiki.nginx.org/Install">to install the latest version of nginx.</a></p>
+
+<p>You also need create a firewall exception to allow your server to make outbound connections to the upstream OCSP&#39;s. You can view all OCSP URI&#39;s from a website using this one liner:</p>
+
+<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug -tls1 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -ocsp_uri; done; IFS=$OLDIFS
+</code></pre>
+
+<p>It results for google.com in:</p>
+
+<pre><code>http://clients1.google.com/ocsp
+http://gtglobal-ocsp.geotrust.com
+</code></pre>
 
 <h3>nginx Configuration</h3>
 
