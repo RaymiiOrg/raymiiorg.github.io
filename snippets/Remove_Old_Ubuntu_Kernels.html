@@ -21,7 +21,7 @@
                 <div class="col-md-12">
                     <div class="col-md-3 col-sm-3 max-200">
                         <div class="well well-none"> 
-                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor"></a></h3>
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
                             <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
                             <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
                         </div>
@@ -66,7 +66,7 @@
                 <div class="inner">
 
 
-           <h2 class='headheader'>Remove unused Ubuntu kernels</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../snippets" class="link">Snippets</a></li><li><a href="Remove_Old_Ubuntu_Kernels.html" class="link">Remove unused Ubuntu kernels</a></li></ul><small>28-10-2013</small> | <small>Remy van Elst</small><p /><p>This one liner will help you remove unused Ubuntu kernels. Ubuntu does not remove kernels when they install a new one, however the default /boot partition is relatively small, about 100MB. So after 10 kernels, you can get No Space Left On Device errors with apt-get upgrading. Then you can eitehr remove them manually, or use this one liner to automatically remove them all.</p>
+           <h2 class='headheader'>Remove unused Ubuntu kernels</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../snippets" class="link">Snippets</a></li><li><a href="Remove_Old_Ubuntu_Kernels.html" class="link">Remove unused Ubuntu kernels</a></li></ul><p><small>28-10-2013</small> | <small>Remy van Elst</small></p><p>This one liner will help you remove unused Ubuntu kernels. Ubuntu does not remove kernels when they install a new one, however the default /boot partition is relatively small, about 100MB. So after 10 kernels, you can get No Space Left On Device errors with apt-get upgrading. Then you can eitehr remove them manually, or use this one liner to automatically remove them all.</p>
 
 <pre><code>export KERNEL=&quot;$(uname -r | grep -Po &#39;([0-9\.\-]*[0-9])?&#39;)&quot;; dpkg --get-selections | grep -E &quot;linux-(header|image).*&quot; | grep -iw install | sort | grep -v &quot;$KERNEL&quot; | grep -v &quot;lts&quot; | sed &#39;s/install//g&#39; | xargs dpkg -P
 </code></pre>
