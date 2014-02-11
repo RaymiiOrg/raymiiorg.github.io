@@ -1,18 +1,194 @@
-<!DOCTYPE html><html lang="en"><head><title>Strong SSL Security on nginx - Raymii.org</title><link href="/s/inc/css/bootstrap.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet"/><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"> <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img alt="IEC Resistor logo" src="https://raymii.org/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Items</a></li><li><a class="link" href="/s/tags/bash.html">Bash</a></li><li><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li><a class="link" href="/s/tags/ssl.html">SSL</a></li><li><a class="link" href="/s/tags/debian.html">Debian</a></li><li><a class="link" href="/s/tags/python.html">Python</a></li><li><a class="link" href="/s/tags/vpn.html">VPN</a></li><li><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li><a class="link" href="/s/tags/nginx.html">nginx</a></li><li><a class="link" href="/s/tags/apache.html">Apache</a></li><li><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><strong>Support this website:</strong><br/><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a><br/><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a><br/><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input name="cmd" type="hidden" value="_s-xclick"/><input name="encrypted" type="hidden" value="-----BEGIN PKCS7-----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-----END PKCS7-----"/><input alt="PayPal - The safer, easier way to pay online!" name="submit" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" type="image"/><img alt="" height="1" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1"/></form><script type="text/javascript"><!--
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Strong SSL Security on nginx - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/vpn.html" class="link">VPN</a></li><li><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>
+               <!-- advertisement start -->
+               
+                
+                <strong>Support this website:</strong><br />
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a><br />
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                <input type="hidden" name="cmd" value="_s-xclick">
+                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                ">
+                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                <img alt="" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
+                </form>
+                <script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script><script src="http://pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
-                </script> </div></div> <div class="col-md-8 col-sm-8"> <div class="inner"><h2 class="headheader">Strong SSL Security on nginx</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a></li><li><a class="link" href="../tutorials">Tutorials</a></li><li><a class="link" href="Strong_SSL_Security_On_nginx.html">Strong SSL Security on nginx</a></li></ul><p><small>01-02-2013</small> | <small>Remy van Elst</small></p><p><a href="https://www.ssllabs.com/ssltest/analyze.html?d=raymii.org"><img alt="A on ssl labs test" src="https://raymii.org/s/inc/img/ssl-labs-a.png"/></a></p><p>This tutorial shows you how to set up strong SSL security on the nginx webserver. We do this by disabling SSL Compression to mitigate the CRIME attack, disable SSLv3 and below because of vulnerabilities in the protocol and we will set up a strong ciphersuite that enables Forward Secrecy when possible. This way we have a strong and future proof ssl configuration and we get an A on the Qually Labs SSL Test. </p><p>This tutorial is tested on a Digital Ocean VPS. If you like this tutorial and want to support my website, use this link to order a Digital Ocean VPS: <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">https://www.digitalocean.com/?refcode=7435ae6b8212</a> </p><p>This tutorial works with the stricter requirements of the SSL Labs test <a href="http://blog.ivanristic.com/2014/01/ssl-labs-stricter-security-requirements-for-2014.html">announced on the 21st of January 2014</a> (It already did before that, if you follow(ed) it you get an A+)</p><p><a href="https://raymii.org/s/tutorials/Strong_SSL_Security_On_Apache2.html">This tutorial is also available for Apache</a><br/><a href="https://raymii.org/s/tutorials/Pass_the_SSL_Labs_Test_on_Lighttpd_%28Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS%29.html">This tutorial is also available for Lighttpd</a></p><p>You can find more info on the topics by following the links below:</p><ul><li><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#BEAST_attack">BEAST Attack</a></li><li><a href="https://en.wikipedia.org/wiki/CRIME_%28security_exploit%29">CRIME Attack</a></li><li><a href="https://en.wikipedia.org/wiki/Perfect_forward_secrecy">Perfect Forward Secrecy</a></li><li><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#Dealing_with_RC4_and_BEAST">Dealing with RC4 and BEAST</a></li></ul><p>We are going to edit the nginx settings in the file <code>/etc/nginx/sited-enabled/yoursite.com</code> (On Ubuntu/Debian) or in <code>/etc/nginx/conf.d/nginx.conf</code> (On RHEL/CentOS).</p><p>For the entire tutorial, you need to edit the parts between the <code>server</code> block for the server config for port 443 (ssl config). At the end of the tutorial you can find the complete config example. </p><p><em>Make sure you back up the files before editing them!</em></p><h3>The BEAST attack and RC4</h3><p>In short, by tampering with with an encryption algorithm's CBC - cipher block chaining - mode's, portions of the encrypted traffic can be secretly decrypted. More info on the above link.</p><p>Recent browser versions have enabled client side mitigation for the beast attack. The recommendation was to disable all TLS 1.0 ciphers and only offer RC4. However, [RC4 has a growing list of attacks against it],(http://www.isg.rhul.ac.uk/tls/) many of which have crossed the line from theoretical to practical. Moreover, there is reason to believe that the NSA has broken RC4, their so-called "big breakthrough."</p><p>Disabling RC4 has several ramifications. One, users with shitty browsers such as Internet Explorer on Windows XP will use 3DES in lieu. Triple-DES is more secure than RC4, but it is significantly more expensive. Your server will pay the cost for these users. Two, RC4 mitigates BEAST. Thus, disabling RC4 makes TLS 1.0 users susceptible to that attack, by moving them to AES-CBC (the usual server-side BEAST "fix" is to prioritize RC4 above all else). I am confident that the flaws in RC4 significantly outweigh the risks from BEAST. Indeed, with client-side mitigation (which Chrome and Firefox both provide), BEAST is a nonissue. But the risk from RC4 only grows: More cryptanalysis will surface over time.</p><h3>SSL Compression (CRIME attack)</h3><p>The CRIME attack uses SSL Compression to do its magic. SSL compression is turned off by default in nginx 1.1.6+/1.0.9+ (if OpenSSL 1.0.0+ used) and nginx 1.3.2+/1.2.2+ (if older versions of OpenSSL are used). </p><p>If you are using al earlier version of nginx or OpenSSL and your distro has not backported this option then you need to recompile OpenSSL without ZLIB support. This will disable the use of OpenSSL using the DEFLATE compression method. If you do this then you can still use regular HTML DEFLATE compression.</p><h3>SSLv2 and SSLv3</h3><p>SSL v2 is insecure, so we need to disable it. We also disable SSLv3, as TLS 1.0 suffers a downgrade attack, allowing an attacker to force a connection to use SSLv3 and therefore disable forward secrecy. Again edit the config file:</p><pre><code>ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-</code></pre><p><a href="http://wiki.nginx.org/HttpSslModule#ssl_protocols">More info on the NGINX documentation</a></p><h3>The Cipher Suite</h3><p>Forward Secrecy ensures the integrity of a session key in the event that a long-term key is compromised. PFS accomplishes this by enforcing the derivation of a new key for each and every session.</p><p>This means that when the private key gets compromised it cannot be used to decrypt recorded SSL traffic.</p><p>The cipher suites that provide Perfect Forward Secrecy are those that use an ephemeral form of the Diffie-Hellman key exchange. Their disadvantage is their overhead, which can be improved by using the elliptic curve variants.</p><p>This is my recommended cipher suite:</p><pre><code>ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4';
-</code></pre><p>In short, the above ciphersuite:</p><ul><li>Provides forward secrecy to most reasonably modern clients</li><li>Provides improved security as more clients enable TLS 1.2</li><li>Provides some security for people stuck on Windows XP (which is still a large percentage of traffic)</li></ul><p>Explained: </p><ul><li>For the key exchange, we prefer ephemeral key-exchange algorithms that provide PFS. We favor Elliptic Curve Diffie-Hellman (ECDHE) over the multiplicative version (DHE), as the former is less processor intense for a similar level of security, but we support both.</li><li>For identity, we only support RSA. That's fine, as your certificate is RSA (DSA certs are uncommon).</li><li>For message ciphers, we favor AES over everything else. For AES, we favor the GCM version over CBC, as GCM is more efficient and not susceptible to BEAST, and we favor AES-256 over AES-128.</li><li>For message authentication, we favor SHA-2 with 256 or 384-byte digests.</li><li>We disable non-authenticated and non-encrypted suites, all of the legacy export-approved ciphers, Camellia, DES (but not 3DES), MD5, and pre-shared keys.</li></ul><h3>Extra settings</h3><p>Make sure you also add these lines:</p><pre><code>ssl_prefer_server_ciphers on;
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+
+           <h2 class='headheader'>Strong SSL Security on nginx</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../tutorials" class="link">Tutorials</a></li><li><a href="Strong_SSL_Security_On_nginx.html" class="link">Strong SSL Security on nginx</a></li></ul><p><small>01-02-2013</small> | <small>Remy van Elst</small></p><p><a href="https://www.ssllabs.com/ssltest/analyze.html?d=raymii.org"><img src="https://raymii.org/s/inc/img/ssl-labs-a.png" alt="A on ssl labs test" /></a></p>
+
+<p>This tutorial shows you how to set up strong SSL security on the nginx webserver. We do this by disabling SSL Compression to mitigate the CRIME attack, disable SSLv3 and below because of vulnerabilities in the protocol and we will set up a strong ciphersuite that enables Forward Secrecy when possible. This way we have a strong and future proof ssl configuration and we get an A on the Qually Labs SSL Test.  </p>
+
+<p>This tutorial is tested on a Digital Ocean VPS. If you like this tutorial and want to support my website, use this link to order a Digital Ocean VPS: <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">https://www.digitalocean.com/?refcode=7435ae6b8212</a>   </p>
+
+<p>This tutorial works with the stricter requirements of the SSL Labs test <a href="http://blog.ivanristic.com/2014/01/ssl-labs-stricter-security-requirements-for-2014.html">announced on the 21st of January 2014</a> (It already did before that, if you follow(ed) it you get an A+)</p>
+
+<p><a href="https://raymii.org/s/tutorials/Strong_SSL_Security_On_Apache2.html">This tutorial is also available for Apache</a><br>
+<a href="https://raymii.org/s/tutorials/Pass_the_SSL_Labs_Test_on_Lighttpd_%28Mitigate_the_CRIME_and_BEAST_attack_-_Disable_SSLv2_-_Enable_PFS%29.html">This tutorial is also available for Lighttpd</a></p>
+
+<p>You can find more info on the topics by following the links below:</p>
+
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#BEAST_attack">BEAST Attack</a></li>
+<li><a href="https://en.wikipedia.org/wiki/CRIME_%28security_exploit%29">CRIME Attack</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Perfect_forward_secrecy">Perfect Forward Secrecy</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#Dealing_with_RC4_and_BEAST">Dealing with RC4 and BEAST</a></li>
+</ul>
+
+<p>We are going to edit the nginx settings in the file <code>/etc/nginx/sited-enabled/yoursite.com</code> (On Ubuntu/Debian) or in <code>/etc/nginx/conf.d/nginx.conf</code> (On RHEL/CentOS).</p>
+
+<p>For the entire tutorial, you need to edit the parts between the <code>server</code> block for the server config for port 443 (ssl config). At the end of the tutorial you can find the complete config example. </p>
+
+<p><em>Make sure you back up the files before editing them!</em></p>
+
+<h3>The BEAST attack and RC4</h3>
+
+<p>In short, by tampering with with an encryption algorithm&#39;s CBC - cipher block chaining - mode&#39;s,  portions of the encrypted traffic can be secretly decrypted. More info on the above link.</p>
+
+<p>Recent browser versions have enabled client side mitigation for the beast attack. The recommendation was to disable all TLS 1.0 ciphers and only offer RC4. However, [RC4 has a growing list of attacks against it],(http://www.isg.rhul.ac.uk/tls/) many of which have crossed the line from theoretical to practical. Moreover, there is reason to believe that the NSA has broken RC4, their so-called &quot;big breakthrough.&quot;</p>
+
+<p>Disabling RC4 has several ramifications. One, users with shitty browsers such as Internet Explorer on Windows XP will use 3DES in lieu. Triple-DES is more secure than RC4, but it is significantly more expensive. Your server will pay the cost for these users. Two, RC4 mitigates BEAST. Thus, disabling RC4 makes TLS 1.0 users susceptible to that attack, by moving them to AES-CBC (the usual server-side BEAST &quot;fix&quot; is to prioritize RC4 above all else). I am confident that the flaws in RC4 significantly outweigh the risks from BEAST. Indeed, with client-side mitigation (which Chrome and Firefox both provide), BEAST is a nonissue. But the risk from RC4 only grows: More cryptanalysis will surface over time.</p>
+
+<h3>SSL Compression (CRIME attack)</h3>
+
+<p>The CRIME attack uses SSL Compression to do its magic. SSL compression is turned off by default in nginx 1.1.6+/1.0.9+ (if OpenSSL 1.0.0+ used) and nginx 1.3.2+/1.2.2+ (if older versions of OpenSSL are used). </p>
+
+<p>If you are using al earlier version of nginx or OpenSSL and your distro has not backported this option then you need to recompile OpenSSL without ZLIB support. This will disable the use of OpenSSL using the DEFLATE compression method. If you do this then you can still use regular HTML DEFLATE compression.</p>
+
+<h3>SSLv2 and SSLv3</h3>
+
+<p>SSL v2 is insecure, so we need to disable it. We also disable SSLv3, as TLS 1.0 suffers a downgrade attack, allowing an attacker to force a connection to use SSLv3 and therefore disable forward secrecy. Again edit the config file:</p>
+
+<pre><code>ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+</code></pre>
+
+<p><a href="http://wiki.nginx.org/HttpSslModule#ssl_protocols">More info on the NGINX documentation</a></p>
+
+<h3>The Cipher Suite</h3>
+
+<p>Forward Secrecy ensures the integrity of a session key in the event that a long-term key is compromised. PFS accomplishes this by enforcing the derivation of a new key for each and every session.</p>
+
+<p>This means that when the private key gets compromised it cannot be used to decrypt recorded SSL traffic.</p>
+
+<p>The cipher suites that provide Perfect Forward Secrecy are those that use an ephemeral form of the Diffie-Hellman key exchange. Their disadvantage is their overhead, which can be improved by using the elliptic curve variants.</p>
+
+<p>This is my recommended cipher suite:</p>
+
+<pre><code>ssl_ciphers &#39;ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4&#39;;
+</code></pre>
+
+<p>In short, the above ciphersuite:</p>
+
+<ul>
+<li>Provides forward secrecy to most reasonably modern clients</li>
+<li>Provides improved security as more clients enable TLS 1.2</li>
+<li>Provides some security for people stuck on Windows XP (which is still a large percentage of traffic)</li>
+</ul>
+
+<p>Explained: </p>
+
+<ul>
+<li>For the key exchange, we prefer ephemeral key-exchange algorithms that provide PFS. We favor Elliptic Curve Diffie-Hellman (ECDHE) over the multiplicative version (DHE), as the former is less processor intense for a similar level of security, but we support both.</li>
+<li>For identity, we only support RSA. That&#39;s fine, as your certificate is RSA (DSA certs are uncommon).</li>
+<li>For message ciphers, we favor AES over everything else. For AES, we favor the GCM version over CBC, as GCM is more efficient and not susceptible to BEAST, and we favor AES-256 over AES-128.</li>
+<li>For message authentication, we favor SHA-2 with 256 or 384-byte digests.</li>
+<li>We disable non-authenticated and non-encrypted suites, all of the legacy export-approved ciphers, Camellia, DES (but not 3DES), MD5, and pre-shared keys.</li>
+</ul>
+
+<h3>Extra settings</h3>
+
+<p>Make sure you also add these lines:</p>
+
+<pre><code>ssl_prefer_server_ciphers on;
 ssl_session_cache  builtin:1000  shared:SSL:10m;
-</code></pre><p>When choosing a cipher during an SSLv3 or TLSv1 handshake, normally the client's preference is used. If this directive is enabled, the server's preference will be used instead.</p><p><a href="http://wiki.nginx.org/HttpSslModule#ssl_prefer_server_ciphers">More info on ssl<em>prefer</em>server_ciphers</a><br/><a href="http://wiki.nginx.org/HttpSslModule#ssl_ciphers">More info on ssl_ciphers</a></p><h3>Diffie Hellman Ephemeral Parameters</h3><p>All versions of nginx as of 1.4.4 rely on OpenSSL for input parameters to Diffie-Hellman (DH). Unfortunately, this means that Ephemeral Diffie-Hellman (DHE) will use OpenSSL's defaults, which include a 1024-bit key for the key-exchange. Since we're using a 2048-bit certificate, DHE clients will use a weaker key-exchange than non-ephemeral DH clients.</p><p>We need generate a stronger DHE parameter:</p><pre><code>cd /etc/ssl/certs
+</code></pre>
+
+<p>When choosing a cipher during an SSLv3 or TLSv1 handshake, normally the client&#39;s preference is used. If this directive is enabled, the server&#39;s preference will be used instead.</p>
+
+<p><a href="http://wiki.nginx.org/HttpSslModule#ssl_prefer_server_ciphers">More info on ssl<em>prefer</em>server_ciphers</a><br>
+<a href="http://wiki.nginx.org/HttpSslModule#ssl_ciphers">More info on ssl_ciphers</a></p>
+
+<h3>Diffie Hellman Ephemeral Parameters</h3>
+
+<p>All versions of nginx as of 1.4.4 rely on OpenSSL for input parameters to Diffie-Hellman (DH). Unfortunately, this means that Ephemeral Diffie-Hellman (DHE) will use OpenSSL&#39;s defaults, which include a 1024-bit key for the key-exchange. Since we&#39;re using a 2048-bit certificate, DHE clients will use a weaker key-exchange than non-ephemeral DH clients.</p>
+
+<p>We need generate a stronger DHE parameter:</p>
+
+<pre><code>cd /etc/ssl/certs
 openssl dhparam -out dhparam.pem 2048
-</code></pre><p>And then tell nginx to use it for DHE key-exchange:</p><pre><code>ssl_dhparam /etc/ssl/certs/dhparam.pem;
-</code></pre><h3>OCSP Stapling</h3><p>OCSP stapling is an enhancement to the standard OCSP protocol that delivers OCSP responses from the server with the certificate, eliminating the need for relying parties (web users) to check OCSP responses with the issuing CA. This has the effect of reducing bandwidth, improving perceived site performance, and increasing security for everyone involved in establishing the secure session. OCSP stapling is defined in the IETF RFC 6066. The term "stapling" is a popular term used to describe how the OCSP response is obtained by the web server. The web server caches the response from the CA that issued the certificate. When an SSL/TLS handshake is initiated, the response is returned by the web server to the client by attaching the cached OCSP response to the CertificateStatus message.</p><p><a href="https://raymii.org/s/tutorials/OCSP_Stapling_on_nginx.html">View my tutorial on enabling OCSP stapling on NGINX</a></p><h3>HTTP Strict Transport Security</h3><p>When possible, you should enable <a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">HTTP Strict Transport Security (HSTS)</a>, which instructs browsers to communicate with your site only over HTTPS.</p><p><a href="https://raymii.org/s/tutorials/HTTP_Strict_Transport_Security_for_nginx_NGINX_and_Lighttpd.html">View my article on HTST to see how to configure it.</a></p><h3>Config Example</h3><pre><code>server {
+</code></pre>
+
+<p>And then tell nginx to use it for DHE key-exchange:</p>
+
+<pre><code>ssl_dhparam /etc/ssl/certs/dhparam.pem;
+</code></pre>
+
+<h3>OCSP Stapling</h3>
+
+<p>OCSP stapling is an enhancement to the standard OCSP protocol that delivers OCSP responses from the server with the certificate, eliminating the need for relying parties (web users) to check OCSP responses with the issuing CA. This has the effect of reducing bandwidth, improving perceived site performance, and increasing security for everyone involved in establishing the secure session. OCSP stapling is defined in the IETF RFC 6066. The term &quot;stapling&quot; is a popular term used to describe how the OCSP response is obtained by the web server. The web server caches the response from the CA that issued the certificate. When an SSL/TLS handshake is initiated, the response is returned by the web server to the client by attaching the cached OCSP response to the CertificateStatus message.</p>
+
+<p><a href="https://raymii.org/s/tutorials/OCSP_Stapling_on_nginx.html">View my tutorial on enabling OCSP stapling on NGINX</a></p>
+
+<h3>HTTP Strict Transport Security</h3>
+
+<p>When possible, you should enable <a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">HTTP Strict Transport Security (HSTS)</a>, which instructs browsers to communicate with your site only over HTTPS.</p>
+
+<p><a href="https://raymii.org/s/tutorials/HTTP_Strict_Transport_Security_for_nginx_NGINX_and_Lighttpd.html">View my article on HTST to see how to configure it.</a></p>
+
+<h3>Config Example</h3>
+
+<pre><code>server {
 
   listen [::]:443 default_server;
 
@@ -20,7 +196,7 @@ openssl dhparam -out dhparam.pem 2048
   ssl_certificate_key /etc/ssl/cert/raymii_org.pem;
   ssl_certificate /etc/ssl/cert/ca-bundle.pem;
 
-  ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4';
+  ssl_ciphers &#39;ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4&#39;;
 
   ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
   ssl_session_cache  builtin:1000  shared:SSL:10m;
@@ -42,11 +218,33 @@ openssl dhparam -out dhparam.pem 2048
   server_name raymii.org;
 
 }
-</code></pre><h3>Conclusion</h3><p>If you have applied the above config lines you need to restart nginx:</p><pre><code># Check the config first:
+</code></pre>
+
+<h3>Conclusion</h3>
+
+<p>If you have applied the above config lines you need to restart nginx:</p>
+
+<pre><code># Check the config first:
 /etc/init.d/nginx configtest
 # Then restart:
 /etc/init.d/nginx restart
-</code></pre><p>Now use the <a href="https://www.ssllabs.com/ssltest/">SSL Labs test</a> to see if you get a nice A. And, of course, have a safe, strong and future proof SSL configuration!</p><hr/>Tags: <a class="link" href="../tags/nginx.html">nginx, </a><a class="link" href="../tags/ssl.html">ssl, </a><a class="link" href="../tags/ssl-labs.html">ssl-labs, </a><a class="link" href="../tags/tls.html">tls, </a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div> </div></div><script type="text/javascript">
+</code></pre>
+
+<p>Now use the <a href="https://www.ssllabs.com/ssltest/">SSL Labs test</a> to see if you get a nice A. And, of course, have a safe, strong and future proof SSL configuration!</p>
+<hr>Tags: <a href="../tags/nginx.html" class="link">nginx, </a><a href="../tags/ssl.html" class="link">ssl, </a><a href="../tags/ssl-labs.html" class="link">ssl-labs, </a><a href="../tags/tls.html" class="link">tls, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -55,4 +253,8 @@ openssl dhparam -out dhparam.pem 2048
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&amp;lt;p&amp;gt;&amp;lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&amp;gt;&amp;lt;/p&amp;gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
