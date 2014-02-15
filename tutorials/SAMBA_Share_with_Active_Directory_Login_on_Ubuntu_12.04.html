@@ -1,150 +1,13 @@
-
-    <!DOCTYPE html>
-    <html lang="en">
-        <head>
-        <title>Samba Shares with Active Directory Login on Ubuntu 12.04 - Raymii.org</title>
-        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
-        <link href="/s/inc/css/custom.css" rel="stylesheet" />
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
-        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
-        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
-        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
-    </head>
-    <body>
-        <a id="top-of-page"></a>
-        <div class="container-fluid ">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="col-md-3 col-sm-3 max-200">
-                        <div class="well well-none"> 
-                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
-                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
-                            <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
-                        </div>
-          
-
-    
-    <form role="search" action="https://encrypted.google.com/search">
-        <div class="form-group">
-          <input type="hidden" name="as_sitesearch" value="raymii.org">
-          <input type="hidden" name="as_qdr" value="all">
-          <input type="text" name="as_q" class="form-control" placeholder="Search">
-        </div>
-      </form>
-      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/vpn.html" class="link">VPN</a></li><li><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>
-               <!-- advertisement start -->
-               
-                
-                <strong>Support this website:</strong><br />
-                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a><br />
-                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a><br />
-                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-                <input type="hidden" name="cmd" value="_s-xclick">
-                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
-                ">
-                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
-                <img alt="" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
-                </form>
-                <script type="text/javascript"><!--
+<!DOCTYPE html><html lang="en"><head><title>Samba Shares with Active Directory Login on Ubuntu 12.04 - Raymii.org</title><link href="/s/inc/css/bootstrap.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet"/><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"> <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img alt="IEC Resistor logo" src="https://raymii.org/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Items</a></li><li><a class="link" href="/s/tags/bash.html">Bash</a></li><li><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li><a class="link" href="/s/tags/ssl.html">SSL</a></li><li><a class="link" href="/s/tags/debian.html">Debian</a></li><li><a class="link" href="/s/tags/python.html">Python</a></li><li><a class="link" href="/s/tags/vpn.html">VPN</a></li><li><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li><a class="link" href="/s/tags/nginx.html">nginx</a></li><li><a class="link" href="/s/tags/apache.html">Apache</a></li><li><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><strong>Support this website:</strong><br/><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a><br/><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a><br/><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input name="cmd" type="hidden" value="_s-xclick"/><input name="encrypted" type="hidden" value="-----BEGIN PKCS7-----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-----END PKCS7-----"/><input alt="PayPal - The safer, easier way to pay online!" name="submit" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" type="image"/><img alt="" height="1" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1"/></form><script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script>
-                <script type="text/javascript"
-                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-                </script>    
-                <!-- advertisement end -->
-                </div>
-           </div>  
-           <div class="col-md-8 col-sm-8"> 
-                <div class="inner">
-
-
-           <h2 class='headheader'>Samba Shares with Active Directory Login on Ubuntu 12.04</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../tutorials" class="link">Tutorials</a></li><li><a href="SAMBA_Share_with_Active_Directory_Login_on_Ubuntu_12.04.html" class="link">Samba Shares with Active Directory Login on Ubuntu 12.04</a></li></ul><p><small>27-06-2013</small> | <small>Remy van Elst</small></p><p>This tutorial shows you how to set up a SAMBA server which authenticates all users to an Active Directory, including group based permissions. It uses Samba, Winbind, Kerberos and nsswitch. This allows you to have a Linux machine serving files via SMB, where your authentication and autorization for the files and folders is done via Active Directory.</p>
-
-<p>We are actually doing two things, we bind a Linux machine to the Active Directory (but we disable shell access for the users), and we then configure Samba to accept these users to the shares we set up.</p>
-
-<h3>Introduction</h3>
-
-<p>The data used in this tutorial:</p>
-
-<ul>
-<li>Active Directory Domain: example.org</li>
-<li>Realm/workgroup: example</li>
-<li>Active Directory Server IP: 10.0.23.1 (Also DNS and NTP)</li>
-<li>Share 1: Marketing
-
-<ul>
-<li>Allowed AD group: marketing</li>
-</ul></li>
-<li>Share 2: Research
-
-<ul>
-<li>Allowed AD groups: research, development</li>
-</ul></li>
-<li>Share 3: Dropbox
-
-<ul>
-<li>Allowed AD groups: Everyone with a domain account, Domain Users.</li>
-</ul></li>
-<li>Share 4: CEO
-
-<ul>
-<li>Allowed AD users: CEO.</li>
-</ul></li>
-</ul>
-
-<p>This setup is tested with the following software:</p>
-
-<ul>
-<li>Ubuntu 12.04</li>
-<li>Samba 3.6.3</li>
-<li>Active Directory on Windows Server 2008 mixed with Windows Server 2012.</li>
-<li>Active Directory on Windows Server 2003 mixed with Windows Server 2008.</li>
-</ul>
-
-<h3>Overview</h3>
-
-<p>A summary of the steps we are going to do:</p>
-
-<ul>
-<li>Install Packages</li>
-<li>Configure NTP &amp; DNS</li>
-<li>Configure Kerberos</li>
-<li>Configure nsswitch</li>
-<li>Configure Samba</li>
-<li>Join the Domain</li>
-<li>Configure Samba shares</li>
-<li>Test the setup</li>
-</ul>
-
-<p>You need to have a privileged account to join the Active Directory Domain. </p>
-
-<h3>Install Packages</h3>
-
-<p>On a freshly installed Ubuntu Server 12.04 we need to install the following packages to get started:</p>
-
-<pre><code>apt-get install ntp krb5-user samba smbfs smbclient winbind
-</code></pre>
-
-<p>krb5, Kerberos will ask some questions about your domain and a privileged user. You can enter through this, we are going to put our own config files. </p>
-
-<h3>Configure NTP &amp; DNS</h3>
-
-<p>Active Directory (Kerberos in general) is very picky about the system time, so configure NTP to sync the time against your Active Directory NTP server. Edit <code>/etc/ntp.conf</code>:</p>
-
-<pre><code>server 10.0.23.1
-</code></pre>
-
-<p>Now also edit your <code>/etc/resolv.conf</code> (or <code>/etc/network/interfaces</code>) file and change the DNS to your Active Directory DNS servers:</p>
-
-<pre><code># /etc/resolv.conf
+                </script><script src="http://pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
+                </script> </div></div> <div class="col-md-8 col-sm-8"> <div class="inner"><h2 class="headheader">Samba Shares with Active Directory Login on Ubuntu 12.04</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a></li><li><a class="link" href="../tutorials">Tutorials</a></li><li><a class="link" href="SAMBA_Share_with_Active_Directory_Login_on_Ubuntu_12.04.html">Samba Shares with Active Directory Login on Ubuntu 12.04</a></li></ul><p><small>27-06-2013</small> | <small>Remy van Elst</small></p><p>This tutorial shows you how to set up a SAMBA server which authenticates all users to an Active Directory, including group based permissions. It uses Samba, Winbind, Kerberos and nsswitch. This allows you to have a Linux machine serving files via SMB, where your authentication and autorization for the files and folders is done via Active Directory.</p><p>We are actually doing two things, we bind a Linux machine to the Active Directory (but we disable shell access for the users), and we then configure Samba to accept these users to the shares we set up.</p><h3>Introduction</h3><p>The data used in this tutorial:</p><ul><li>Active Directory Domain: example.org</li><li>Realm/workgroup: example</li><li>Active Directory Server IP: 10.0.23.1 (Also DNS and NTP)</li><li>Share 1: Marketing<ul><li>Allowed AD group: marketing</li></ul></li><li>Share 2: Research<ul><li>Allowed AD groups: research, development</li></ul></li><li>Share 3: Dropbox<ul><li>Allowed AD groups: Everyone with a domain account, Domain Users.</li></ul></li><li>Share 4: CEO<ul><li>Allowed AD users: CEO.</li></ul></li></ul><p>This setup is tested with the following software:</p><ul><li>Ubuntu 12.04</li><li>Samba 3.6.3</li><li>Active Directory on Windows Server 2008 mixed with Windows Server 2012.</li><li>Active Directory on Windows Server 2003 mixed with Windows Server 2008.</li></ul><h3>Overview</h3><p>A summary of the steps we are going to do:</p><ul><li>Install Packages</li><li>Configure NTP &amp; DNS</li><li>Configure Kerberos</li><li>Configure nsswitch</li><li>Configure Samba</li><li>Join the Domain</li><li>Configure Samba shares</li><li>Test the setup</li></ul><p>You need to have a privileged account to join the Active Directory Domain. </p><h3>Install Packages</h3><p>On a freshly installed Ubuntu Server 12.04 we need to install the following packages to get started:</p><pre><code>apt-get install ntp krb5-user samba smbfs smbclient winbind
+</code></pre><p>krb5, Kerberos will ask some questions about your domain and a privileged user. You can enter through this, we are going to put our own config files. </p><h3>Configure NTP &amp; DNS</h3><p>Active Directory (Kerberos in general) is very picky about the system time, so configure NTP to sync the time against your Active Directory NTP server. Edit <code>/etc/ntp.conf</code>:</p><pre><code>server 10.0.23.1
+</code></pre><p>Now also edit your <code>/etc/resolv.conf</code> (or <code>/etc/network/interfaces</code>) file and change the DNS to your Active Directory DNS servers:</p><pre><code># /etc/resolv.conf
 nameserver 10.0.23.1
 search example.org
 
@@ -153,22 +16,8 @@ iface eth0 inet static
     [...]
     dns-nameservers 10.0.23.1
     dns-search example.org
-</code></pre>
-
-<p>We do this because Active Directory uses DNS for a lot of things. You can also setup your standard DNS servers to use an Active Directory DNS server as first upstream.</p>
-
-<h3>Configure Kerberos</h3>
-
-<p>What is Kerberos? </p>
-
-<pre><code>Kerberos is a computer network authentication protocol which works on the basis of &quot;tickets&quot; to allow nodes communicating over a non-secure network to prove their identity to one another in a secure manner. Its designers aimed it primarily at a clientserver model and it provides mutual authenticationboth the user and the server verify each other&#39;s identity.
-</code></pre>
-
-<p><a href="http://technet.microsoft.com/en-us/library/bb742516.aspx">A good article on how Kerberos is used in Active Directory can be found here: http://technet.microsoft.com/en-us/library/bb742516.aspx</a></p>
-
-<p>We need to set up Kerberos so that we can bind our machine against Active Directory and let users access the Samba share via the AD. Edit the <code>/etc/krb5.conf</code> file, remove everything and place the following in it, changing the <code>EXAMPLE.ORG</code> domain to your own Active Directory Domain:</p>
-
-<pre><code>[libdefaults]
+</code></pre><p>We do this because Active Directory uses DNS for a lot of things. You can also setup your standard DNS servers to use an Active Directory DNS server as first upstream.</p><h3>Configure Kerberos</h3><p>What is Kerberos? </p><pre><code>Kerberos is a computer network authentication protocol which works on the basis of "tickets" to allow nodes communicating over a non-secure network to prove their identity to one another in a secure manner. Its designers aimed it primarily at a clientserver model and it provides mutual authenticationboth the user and the server verify each other's identity.
+</code></pre><p><a href="http://technet.microsoft.com/en-us/library/bb742516.aspx">A good article on how Kerberos is used in Active Directory can be found here: http://technet.microsoft.com/en-us/library/bb742516.aspx</a></p><p>We need to set up Kerberos so that we can bind our machine against Active Directory and let users access the Samba share via the AD. Edit the <code>/etc/krb5.conf</code> file, remove everything and place the following in it, changing the <code>EXAMPLE.ORG</code> domain to your own Active Directory Domain:</p><pre><code>[libdefaults]
   ticket_lifetime = 24h
   default_realm = EXAMPLE.ORG
   forwardable = true
@@ -199,52 +48,22 @@ iface eth0 inet static
   kdc = FILE:/var/log/krb5kdc.log
   admin_server = FILE:/var/log/kadmin.log
   default = FILE:/var/log/krb5lib.log
-</code></pre>
-
-<p>We are now going to test Kerberos by getting a ticket for the Active Directory Administrator User. Make sure you have the password ready:</p>
-
-<pre><code>kinit Administrator
+</code></pre><p>We are now going to test Kerberos by getting a ticket for the Active Directory Administrator User. Make sure you have the password ready:</p><pre><code>kinit Administrator
 Password for Administrator@EXAMPLE.ORG:
-</code></pre>
-
-<p>Now we check if we got a valid ticket:</p>
-
-<pre><code>klist
+</code></pre><p>Now we check if we got a valid ticket:</p><pre><code>klist
 Ticket cache: FILE:/tmp/krb5cc_0
 Default principal: Administrator@EXAMPLE.ORG
 
 Valid starting    Expires           Service principal
 27/06/2013 07:17  27/06/2013 17:17  krbtgt/EXAMPLE.ORG@EXAMPLE.ORG
         renew until 28/06/2013 07:17
-</code></pre>
-
-<p>If this is not correct, check your Kerberos and DNS and NTP (time) settings and try again.</p>
-
-<h3>Configure nsswitch</h3>
-
-<p>nsswitch is used to tell the system that the Active Directory users are also valid users. We are going to configure it to also accept winbind users, which is what Samba uses after it has bound to the domain.</p>
-
-<p>Edit the <code>/etc/nsswitch.conf</code> and change the <code>passwd</code>, <code>shadow</code> and <code>group</code> lines to look like this:</p>
-
-<pre><code>passwd:         compat winbind
+</code></pre><p>If this is not correct, check your Kerberos and DNS and NTP (time) settings and try again.</p><h3>Configure nsswitch</h3><p>nsswitch is used to tell the system that the Active Directory users are also valid users. We are going to configure it to also accept winbind users, which is what Samba uses after it has bound to the domain.</p><p>Edit the <code>/etc/nsswitch.conf</code> and change the <code>passwd</code>, <code>shadow</code> and <code>group</code> lines to look like this:</p><pre><code>passwd:         compat winbind
 group:          compat winbind
 shadow:         compat winbind
-</code></pre>
-
-<p>Note that this might not work for you. If you have issues with the users later on, change these lines to this:</p>
-
-<pre><code> passwd:            files winbind
+</code></pre><p>Note that this might not work for you. If you have issues with the users later on, change these lines to this:</p><pre><code> passwd:            files winbind
  shadow:            files winbind
  group:             files winbind
-</code></pre>
-
-<p><a href="http://www.daemon-systems.org/man/nsswitch.conf.5.html">The NetBSD man page explains more than the Ubuntu man page: http://www.daemon-systems.org/man/nsswitch.conf.5.html</a></p>
-
-<h3>Configure Samba (#1)</h3>
-
-<p>Now we need to set up Samba to also support the domain. Edit <code>/etc/samba/smb.conf</code> and remove everything, then place the following in it:</p>
-
-<pre><code>[global]
+</code></pre><p><a href="http://www.daemon-systems.org/man/nsswitch.conf.5.html">The NetBSD man page explains more than the Ubuntu man page: http://www.daemon-systems.org/man/nsswitch.conf.5.html</a></p><h3>Configure Samba (#1)</h3><p>Now we need to set up Samba to also support the domain. Edit <code>/etc/samba/smb.conf</code> and remove everything, then place the following in it:</p><pre><code>[global]
     # No .tld
     workgroup = EXAMPLE
     # Active Directory System
@@ -283,73 +102,27 @@ shadow:         compat winbind
     restrict anonymous = 2
     log file = /var/log/samba/samba.log
     log level = 2
-</code></pre>
-
-<p>Save the file and restart all the daemons:</p>
-
-<pre><code>/etc/init.d/winbind restart
+</code></pre><p>Save the file and restart all the daemons:</p><pre><code>/etc/init.d/winbind restart
 /etc/init.d/nmbd restart
 /etc/init.d/smbd restart
-</code></pre>
-
-<h3>Join the domain</h3>
-
-<p>Make sure you still have a valid Kerberos ticket. If not, do a new <code>kinit Administrator</code>. Then execute the following command:</p>
-
-<pre><code>net ads join -U administrator
-</code></pre>
-
-<p>Output is like this:</p>
-
-<pre><code>Enter Administrator&#39;s password:
+</code></pre><h3>Join the domain</h3><p>Make sure you still have a valid Kerberos ticket. If not, do a new <code>kinit Administrator</code>. Then execute the following command:</p><pre><code>net ads join -U administrator
+</code></pre><p>Output is like this:</p><pre><code>Enter Administrator's password:
 Using short domain name -- EXAMPLE
-Joined &#39;HOSTNAME&#39; to realm &#39;Example.org&#39;
+Joined 'HOSTNAME' to realm 'Example.org'
 DNS Update for hostname.example.org failed: ERROR_DNS_GSS_ERROR
 DNS update failed!
-</code></pre>
-
-<p>The DNS error can be ignored, make sure you create an A record and a PTR record manually.</p>
-
-<p>Restart all the daemons again:</p>
-
-<pre><code>/etc/init.d/winbind restart
+</code></pre><p>The DNS error can be ignored, make sure you create an A record and a PTR record manually.</p><p>Restart all the daemons again:</p><pre><code>/etc/init.d/winbind restart
 /etc/init.d/nmbd restart
 /etc/init.d/smbd restart
-</code></pre>
-
-<p>Also update PAM:</p>
-
-<pre><code>pam-auth-update
-</code></pre>
-
-<p>Now see if you can list the domain users and groups:</p>
-
-<pre><code>wbinfo -u # lists all the users in the domain
+</code></pre><p>Also update PAM:</p><pre><code>pam-auth-update
+</code></pre><p>Now see if you can list the domain users and groups:</p><pre><code>wbinfo -u # lists all the users in the domain
 wbinfo -g # lists all the groups in the domain
-</code></pre>
-
-<p>And also check if winbind and nsswitch are correctly working:</p>
-
-<pre><code>getent passwd # should return a list with all users on the local system and from the active directory
+</code></pre><p>And also check if winbind and nsswitch are correctly working:</p><pre><code>getent passwd # should return a list with all users on the local system and from the active directory
 getent group # should return a list with all groups and their members, both from the local system and the active directory
-</code></pre>
-
-<p>If this does not work, go back to the nsswitch configuration section and change the <code>compat</code> to <code>files</code>. </p>
-
-<h3>Configure Samba (#2): Shares</h3>
-
-<p>This setup reflects an average business. Two departments with their own share, and one dump folder for everyone. And a folder for the CEO so that he feels special. Do note that it is a good idea to clean the Dropbox every night with a cronjob, but let your users know that that happens.</p>
-
-<p>We are going to create the shares. First create the folders on the system:</p>
-
-<pre><code>mkdir -p /sharing/{marketing,research,ceo,dropbox}
+</code></pre><p>If this does not work, go back to the nsswitch configuration section and change the <code>compat</code> to <code>files</code>. </p><h3>Configure Samba (#2): Shares</h3><p>This setup reflects an average business. Two departments with their own share, and one dump folder for everyone. And a folder for the CEO so that he feels special. Do note that it is a good idea to clean the Dropbox every night with a cronjob, but let your users know that that happens.</p><p>We are going to create the shares. First create the folders on the system:</p><pre><code>mkdir -p /sharing/{marketing,research,ceo,dropbox}
 chmod -R 0770 /sharing/
-chgrp -R &quot;Domain Users&quot; /sharing/
-</code></pre>
-
-<p>Add the shares to <code>/etc/samba/smb.conf</code>:</p>
-
-<pre><code>[Marketing]
+chgrp -R "Domain Users" /sharing/
+</code></pre><p>Add the shares to <code>/etc/samba/smb.conf</code>:</p><pre><code>[Marketing]
     comment = Marketing
     path = /sharing/marketing/
     valid users = @EXAMPLE\marketing
@@ -367,7 +140,7 @@ chgrp -R &quot;Domain Users&quot; /sharing/
     comment = Research
     path = /sharing/research
     valid users = @EXAMPLE\development, @EXAMPLE\research
-    force group = &quot;domain users&quot;
+    force group = "domain users"
     writable = yes
     read only = no
     force create mode = 0660
@@ -380,8 +153,8 @@ chgrp -R &quot;Domain Users&quot; /sharing/
 [Dropbox]
     comment = Daily Emptied Dropbox
     path = /sharing/dropbox
-    valid users = &quot;@EXAMPLE\Domain Users&quot;
-    force group = &quot;domain users&quot;
+    valid users = "@EXAMPLE\Domain Users"
+    force group = "domain users"
     writable = yes
     read only = no
     force create mode = 0660
@@ -395,7 +168,7 @@ chgrp -R &quot;Domain Users&quot; /sharing/
     comment = CEO Only
     path = /sharing/ceo
     valid users = EXAMPLE\ceo
-    force group = &quot;domain users&quot;
+    force group = "domain users"
     writable = yes
     read only = no
     force create mode = 0660
@@ -404,38 +177,8 @@ chgrp -R &quot;Domain Users&quot; /sharing/
     force directory mode = 0770
     access based share enum = yes
     hide unreadable = yes
-</code></pre>
-
-<p>As you can see, an active directory group is defined with an <code>@</code>, and a user without. Also, when there are spaces in the groupname, you escape that with quotes: <code>&quot;@EXAMPLE\Domain Users&quot;</code>.</p>
-
-<p><a href="https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html">You can find a lot of information on the smb.conf file in the man page: https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html</a></p>
-
-<p><a href="https://www.samba.org/samba/docs/man/Samba-HOWTO-Collection/AccessControls.html#id2615334">Why do we force the mode on files and folders? Because of problems with MS word, according to the Samba documentation: https://www.samba.org/samba/docs/man/Samba-HOWTO-Collection/AccessControls.html#id2615334</a></p>
-
-<p>Afterwards restart samba:</p>
-
-<pre><code>/etc/init.d/smbd restart
-</code></pre>
-
-<h3>Testing it</h3>
-
-<p>Create a few accounts in the groups used (set expiry date to 1 day so you don&#39;t forget to remove them) and use those accounts to test the shares. Create files and folders as one user, try to edit and remove them as another user. Also try to access the shares with a non-privileged user. </p>
-
-<p>If you run into errors, check your log files in <code>/var/log/samba</code>. Make sure that the capitalization and spelling is correct in the <code>valid users</code> part of the samba config file, and also check the permissions on the folders themselves with <code>ls -la</code>. You can set <code>valid users = any</code> to make check if there are errors or not. The <code>testparm</code> command is also very helpful for the samba config file part.</p>
-<hr>Tags: <a href="../tags/active-directory.html" class="link">active-directory, </a><a href="../tags/kerberos.html" class="link">kerberos, </a><a href="../tags/ldap.html" class="link">ldap, </a><a href="../tags/microsoft.html" class="link">microsoft, </a><a href="../tags/nsswitch.html" class="link">nsswitch, </a><a href="../tags/samba.html" class="link">samba, </a><a href="../tags/smb.html" class="link">smb, </a><a href="../tags/ubuntu.html" class="link">ubuntu, </a><a href="../tags/winbind.html" class="link">winbind, </a><div class="footer">
-                <hr>
-                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
-                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
-                <a href="/s/static/About.html">About</a><br />
-                </div>
-            </div>
-        </div>
-    </div>  
-    </div>
-    </div>
-     
-    <!-- Piwik --> 
-    <script type="text/javascript">
+</code></pre><p>As you can see, an active directory group is defined with an <code>@</code>, and a user without. Also, when there are spaces in the groupname, you escape that with quotes: <code>"@EXAMPLE\Domain Users"</code>.</p><p><a href="https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html">You can find a lot of information on the smb.conf file in the man page: https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html</a></p><p><a href="https://www.samba.org/samba/docs/man/Samba-HOWTO-Collection/AccessControls.html#id2615334">Why do we force the mode on files and folders? Because of problems with MS word, according to the Samba documentation: https://www.samba.org/samba/docs/man/Samba-HOWTO-Collection/AccessControls.html#id2615334</a></p><p>Afterwards restart samba:</p><pre><code>/etc/init.d/smbd restart
+</code></pre><h3>Testing it</h3><p>Create a few accounts in the groups used (set expiry date to 1 day so you don't forget to remove them) and use those accounts to test the shares. Create files and folders as one user, try to edit and remove them as another user. Also try to access the shares with a non-privileged user. </p><p>If you run into errors, check your log files in <code>/var/log/samba</code>. Make sure that the capitalization and spelling is correct in the <code>valid users</code> part of the samba config file, and also check the permissions on the folders themselves with <code>ls -la</code>. You can set <code>valid users = any</code> to make check if there are errors or not. The <code>testparm</code> command is also very helpful for the samba config file part.</p><hr/>Tags: <a class="link" href="../tags/active-directory.html">active-directory, </a><a class="link" href="../tags/kerberos.html">kerberos, </a><a class="link" href="../tags/ldap.html">ldap, </a><a class="link" href="../tags/microsoft.html">microsoft, </a><a class="link" href="../tags/nsswitch.html">nsswitch, </a><a class="link" href="../tags/samba.html">samba, </a><a class="link" href="../tags/smb.html">smb, </a><a class="link" href="../tags/ubuntu.html">ubuntu, </a><a class="link" href="../tags/winbind.html">winbind, </a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div> </div></div><script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -444,8 +187,4 @@ chgrp -R &quot;Domain Users&quot; /sharing/
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
-    <!-- End Piwik Tracking Code -->
-    </body>
-    </html>
-    
+    </script><noscript>&amp;lt;p&amp;gt;&amp;lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&amp;gt;&amp;lt;/p&amp;gt;</noscript></body></html>

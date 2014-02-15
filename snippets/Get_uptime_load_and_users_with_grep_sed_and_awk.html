@@ -1,130 +1,17 @@
-
-    <!DOCTYPE html>
-    <html lang="en">
-        <head>
-        <title>Correctly grep and display the uptime, load average and amount of users - Raymii.org</title>
-        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
-        <link href="/s/inc/css/custom.css" rel="stylesheet" />
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
-        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
-        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
-        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
-    </head>
-    <body>
-        <a id="top-of-page"></a>
-        <div class="container-fluid ">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="col-md-3 col-sm-3 max-200">
-                        <div class="well well-none"> 
-                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
-                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
-                            <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
-                        </div>
-          
-
-    
-    <form role="search" action="https://encrypted.google.com/search">
-        <div class="form-group">
-          <input type="hidden" name="as_sitesearch" value="raymii.org">
-          <input type="hidden" name="as_qdr" value="all">
-          <input type="text" name="as_q" class="form-control" placeholder="Search">
-        </div>
-      </form>
-      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/vpn.html" class="link">VPN</a></li><li><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>
-               <!-- advertisement start -->
-               
-                
-                <strong>Support this website:</strong><br />
-                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a><br />
-                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a><br />
-                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-                <input type="hidden" name="cmd" value="_s-xclick">
-                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
-                ">
-                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
-                <img alt="" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
-                </form>
-                <script type="text/javascript"><!--
+<!DOCTYPE html><html lang="en"><head><title>Correctly grep and display the uptime, load average and amount of users - Raymii.org</title><link href="/s/inc/css/bootstrap.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet"/><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"> <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img alt="IEC Resistor logo" src="https://raymii.org/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Items</a></li><li><a class="link" href="/s/tags/bash.html">Bash</a></li><li><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li><a class="link" href="/s/tags/ssl.html">SSL</a></li><li><a class="link" href="/s/tags/debian.html">Debian</a></li><li><a class="link" href="/s/tags/python.html">Python</a></li><li><a class="link" href="/s/tags/vpn.html">VPN</a></li><li><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li><a class="link" href="/s/tags/nginx.html">nginx</a></li><li><a class="link" href="/s/tags/apache.html">Apache</a></li><li><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><strong>Support this website:</strong><br/><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a><br/><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a><br/><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input name="cmd" type="hidden" value="_s-xclick"/><input name="encrypted" type="hidden" value="-----BEGIN PKCS7-----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-----END PKCS7-----"/><input alt="PayPal - The safer, easier way to pay online!" name="submit" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" type="image"/><img alt="" height="1" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1"/></form><script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script>
-                <script type="text/javascript"
-                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-                </script>    
-                <!-- advertisement end -->
-                </div>
-           </div>  
-           <div class="col-md-8 col-sm-8"> 
-                <div class="inner">
-
-
-           <h2 class='headheader'>Correctly grep and display the uptime, load average and amount of users</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../snippets" class="link">Snippets</a></li><li><a href="Get_uptime_load_and_users_with_grep_sed_and_awk.html" class="link">Correctly grep and display the uptime, load average and amount of users</a></li></ul><p><small>06-09-2012</small> | <small>Remy van Elst</small></p><p>While doing my monitoring script <a href="https://raymii.org/s/software/Bash_PHP_Server_Status_Monitor.html">ray-mon</a> I found out it can be quite hard to get the correct values for uptime, load average and users on different systems. </p>
-
-<p>For example, the <em>uptime</em> command displays this on a mac:</p>
-
-<pre><code> 8:27  up 1 day, 17:06, 1 user, load averages: 1,01 0,87 0,79
-</code></pre>
-
-<p>This on a debian 6 machine:</p>
-
-<pre><code> 06:27:33 up 4 days,  2:36,  2 users,  load average: 0.16, 0.26, 0.27
-</code></pre>
-
-<p>This on a RHEL 5 machine:</p>
-
-<pre><code> 06:28:26 up 54 min,  127 users,  load average: 6.34, 6.28, 6.27    
-</code></pre>
-
-<p>Small differences in space placement, &quot;load averages:&quot; instead of &quot;load average:&quot; and &quot;min&quot; vs &quot;days&quot;. It took me quite a while to find out how to get the correct values for the following items using just unix tools:</p>
-
-<ul>
-<li>Uptime</li>
-<li>Amount of users logged in</li>
-<li>Current load average</li>
-</ul>
-
-<h4>Uptime</h4>
-
-<pre><code>uptime | grep -ohe &#39;up .*&#39; | sed &#39;s/,//g&#39; | awk &#39;{ print $2&quot; &quot;$3 }&#39;
-</code></pre>
-
-<p>First take the output of uptime to grep, only show matching characters (-oh) and do regex (-e). Filter on &quot;up&quot; &quot;space&quot; &quot;everything after that&quot;. Then go to sed to remove the comma&#39;s &quot;4 days,&quot; to &quot;4 days&quot;, and then with awk print the second and third collumn, and remove the rest of the output.</p>
-
-<h4>Users logged in</h4>
-
-<pre><code>uptime | grep -ohe &#39;[0-9.*] user[s,]&#39;
-</code></pre>
-
-<p>Take the output of uptime to grep, only show matching characters (-oh), and do regex (-e). Filter on &quot;number between 0 and 9&quot; &quot;any amount of the previous character&quot; &quot;space&quot; &quot;user, or users&quot;</p>
-
-<h4>Load</h4>
-
-<pre><code>uptime | grep -ohe &#39;load average[s:][: ].*&#39; | awk &#39;{ print $3 }&#39;
-</code></pre>
-
-<p>First take the output of uptime to grep. only show matching characters (-oh), and do regex (-e). Filter on &quot;load average: or load averages:&quot; &quot;everything after that&quot;. The with awk print the 3d collumn.</p>
-<hr>Tags: <a href="../tags/awk.html" class="link">awk, </a><a href="../tags/bash.html" class="link">bash, </a><a href="../tags/grep.html" class="link">grep, </a><a href="../tags/load.html" class="link">load, </a><a href="../tags/uptime.html" class="link">uptime, </a><a href="../tags/users.html" class="link">users, </a><div class="footer">
-                <hr>
-                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
-                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
-                <a href="/s/static/About.html">About</a><br />
-                </div>
-            </div>
-        </div>
-    </div>  
-    </div>
-    </div>
-     
-    <!-- Piwik --> 
-    <script type="text/javascript">
+                </script><script src="http://pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
+                </script> </div></div> <div class="col-md-8 col-sm-8"> <div class="inner"><h2 class="headheader">Correctly grep and display the uptime, load average and amount of users</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a></li><li><a class="link" href="../snippets">Snippets</a></li><li><a class="link" href="Get_uptime_load_and_users_with_grep_sed_and_awk.html">Correctly grep and display the uptime, load average and amount of users</a></li></ul><p><small>06-09-2012</small> | <small>Remy van Elst</small></p><p>While doing my monitoring script <a href="https://raymii.org/s/software/Bash_PHP_Server_Status_Monitor.html">ray-mon</a> I found out it can be quite hard to get the correct values for uptime, load average and users on different systems. </p><p>For example, the <em>uptime</em> command displays this on a mac:</p><pre><code> 8:27  up 1 day, 17:06, 1 user, load averages: 1,01 0,87 0,79
+</code></pre><p>This on a debian 6 machine:</p><pre><code> 06:27:33 up 4 days,  2:36,  2 users,  load average: 0.16, 0.26, 0.27
+</code></pre><p>This on a RHEL 5 machine:</p><pre><code> 06:28:26 up 54 min,  127 users,  load average: 6.34, 6.28, 6.27    
+</code></pre><p>Small differences in space placement, "load averages:" instead of "load average:" and "min" vs "days". It took me quite a while to find out how to get the correct values for the following items using just unix tools:</p><ul><li>Uptime</li><li>Amount of users logged in</li><li>Current load average</li></ul><h4>Uptime</h4><pre><code>uptime | grep -ohe 'up .*' | sed 's/,//g' | awk '{ print $2" "$3 }'
+</code></pre><p>First take the output of uptime to grep, only show matching characters (-oh) and do regex (-e). Filter on "up" "space" "everything after that". Then go to sed to remove the comma's "4 days," to "4 days", and then with awk print the second and third collumn, and remove the rest of the output.</p><h4>Users logged in</h4><pre><code>uptime | grep -ohe '[0-9.*] user[s,]'
+</code></pre><p>Take the output of uptime to grep, only show matching characters (-oh), and do regex (-e). Filter on "number between 0 and 9" "any amount of the previous character" "space" "user, or users"</p><h4>Load</h4><pre><code>uptime | grep -ohe 'load average[s:][: ].*' | awk '{ print $3 }'
+</code></pre><p>First take the output of uptime to grep. only show matching characters (-oh), and do regex (-e). Filter on "load average: or load averages:" "everything after that". The with awk print the 3d collumn.</p><hr/>Tags: <a class="link" href="../tags/awk.html">awk, </a><a class="link" href="../tags/bash.html">bash, </a><a class="link" href="../tags/grep.html">grep, </a><a class="link" href="../tags/load.html">load, </a><a class="link" href="../tags/uptime.html">uptime, </a><a class="link" href="../tags/users.html">users, </a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div> </div></div><script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -133,8 +20,4 @@
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
-    <!-- End Piwik Tracking Code -->
-    </body>
-    </html>
-    
+    </script><noscript>&amp;lt;p&amp;gt;&amp;lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&amp;gt;&amp;lt;/p&amp;gt;</noscript></body></html>
