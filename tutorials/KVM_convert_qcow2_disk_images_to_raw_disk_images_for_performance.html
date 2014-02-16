@@ -12,12 +12,12 @@
 </code></pre><h3>Converting the image</h3><p>I'll convert the disk image for the example vm <code>vm1</code>. Change the name and disk paths for your setup.</p><p>First shut down the VM:</p><pre><code>virsh shutdown vm1
 </code></pre><p>Then convert all the disk images using this command for each disk image:</p><pre><code>qemu-img convert /var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.qcow2 /var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.raw
 </code></pre><p>Edit the VM config:</p><pre><code>virsh edit vm1
-</code></pre><p>Change the <code>disk</code> section to point to the new raw image:</p><p>Change the lines <code>&lt;driver name='qemu' type='qcow2'/&gt;</code> and <code>&lt;source file='/var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.qcow2'/&gt;</code> to <code>&lt;driver name='qemu' type='raw'/&gt;</code> and <code>&lt;source file='/var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.raw'/&gt;</code>. Like so:</p><pre><code>    <disk type='file' device='disk'>
-      <driver name='qemu' type='raw' cache='none'/>
-      <source file='/var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.raw'/>
-      <target dev='hda' bus='ide'/>
-      <address type='drive' controller='0' bus='0' unit='0'/>
-    </disk> 
+</code></pre><p>Change the <code>disk</code> section to point to the new raw image:</p><p>Change the lines <code>&lt;driver name='qemu' type='qcow2'/&gt;</code> and <code>&lt;source file='/var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.qcow2'/&gt;</code> to <code>&lt;driver name='qemu' type='raw'/&gt;</code> and <code>&lt;source file='/var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.raw'/&gt;</code>. Like so:</p><pre><code>&lt;disk type='file' device='disk'&gt;
+  &lt;driver name='qemu' type='raw' cache='none'/&gt;
+  &lt;source file='/var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.raw'/&gt;
+  &lt;target dev='hda' bus='ide'/&gt;
+  &lt;address type='drive' controller='0' bus='0' unit='0'/&gt;
+&lt;/disk&gt; 
 </code></pre><p>That's it. Start the VM:</p><pre><code>virsh start vm1
 </code></pre><p>If it all works, remove the qcow2 image:</p><pre><code>rm /var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.qcow2
 </code></pre><h3>Disk scheduler</h3><p>To change the default disk scheduler in your VM, you can use the following command:</p><pre><code>echo $scheduler > /sys/block/$device/queue/scheduler
