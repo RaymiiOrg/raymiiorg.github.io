@@ -16,15 +16,19 @@ echo "net.ipv4.conf.default.send_redirects = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" |  tee -a /etc/sysctl.conf
 </code></pre><p>Now apply these settings for other network interfaces:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 > $vpn/accept_redirects; echo 0 > $vpn/send_redirects; done
 </code></pre><p>And apply them:</p><pre><code>sysctl -p
-</code></pre><h5>Persistent settings via systemd</h5><p>Arch Linux uses systemd. Init script functionality like rc.local is not available. To have these settings applied at boot we can however create a custom systemd service which starts at boot.</p><p>Add the following code to <code>/usr/local/bin/vpn-boot.sh</code>:</p><pre><code>#!/bin/bash
+</code></pre><h5>Persistent settings via systemd</h5><p>Arch Linux uses systemd. Init script functionality like rc.local is not available. To have these settings applied at boot we can however create a custom systemd service which starts at boot.</p><p>Add the following code to <code>/usr/local/bin/vpn-boot.sh</code>:</p><pre><code>#!/usr/bin/env bash
 for vpn in /proc/sys/net/ipv4/conf/*; do 
     echo 0 > $vpn/accept_redirects; 
     echo 0 > $vpn/send_redirects; 
 done
 iptables --table nat --append POSTROUTING --jump MASQUERADE
+
+sysctl -p
 </code></pre><p>Make it executable:</p><pre><code>chmod 755 /usr/local/bin/vpn-boot.sh
 </code></pre><p>Using the following systemd service we can start the script which sets the above things at boot:</p><p>Add the following code to <code>/etc/systemd/system/vpnboot.service</code>:</p><pre><code>[Unit]
 Description=VPN Settings at boot
+After=netctl@eth0.service
+Before=openswan.service xl2tpd.service
 
 [Service]
 ExecStart=/usr/local/bin/vpn-boot.sh
@@ -63,9 +67,17 @@ conn L2TP-PSK-noNAT
     leftprotoport=17/1701
     right=%any
     rightprotoport=17/%any
+    dpddelay=10
+    # Dead Peer Dectection (RFC 3706) keepalives delay
+    dpdtimeout=20
+    #  length of time (in seconds) we will idle without hearing either an R_U_THERE poll from our peer, or an R_U_THERE_ACK reply.
+    dpdaction=clear
+    # When a DPD enabled peer is declared dead, what action should be taken. clear means the eroute and SA with both be cleared.
 </code></pre><p>Replace %SERVERIP% with the external IP of your Raspberry Pi. You can find it out by:</p><pre><code>curl http://ip.mtak.nl
-</code></pre><h5>The shared secret</h5><p>The shared secret is defined in the <code>/etc/ipsec.secrets</code> file. Make sure it is long and random: </p><pre><code>%SERVERIP%  %any:   PSK "69EA16F2C5DCED8B29E74A7D1B0FE99E69F6BDC4"
-</code></pre><p>Again, replace %SERVERIP% with the external IP of your Raspberry Pi.</p><h5>Verify IPSEC Settings</h5><p>Now to make sure IPSEC works, execute the following command: </p><pre><code>ipsec verify
+</code></pre><h5>The shared secret</h5><p>The shared secret is defined in the <code>/etc/ipsec.secrets</code> file. Make sure it is long and random: </p><pre><code>%SERVERIP%  %any:   PSK "Your secret random key"
+</code></pre><p>Again, replace %SERVERIP% with the external IP of your Raspberry Pi. If you want to generate a random key you can use the following openssl command:</p><pre><code>openssl rand -hex 30
+</code></pre><p>Example output:</p><pre><code>c12cf75b47c210b9d7094ce10e3b3544c6927ff49ca2d949252b5a94ccf5
+</code></pre><h5>Verify IPSEC Settings</h5><p>Now to make sure IPSEC works, execute the following command: </p><pre><code>ipsec verify
 </code></pre><p>My output looks like this: </p><pre><code> Checking if IPsec got installed and started correctly:
 
 Version check and ipsec on-path                     [OK]
@@ -147,7 +159,7 @@ alice          l2tpd   0F92E5FC2414101EA            *
 bob            l2tpd   DF98F09F74C06A2F             *
 </code></pre><ul><li>client = username for the user</li><li>server = the name we define in the ppp.options file for xl2tpd</li><li>secret = password for the user</li><li>IP Address = leave to * for any address or define addresses from were a user can login.</li></ul><h4>Testing it</h4><p>To make sure everything has the newest config files restart openswan and xl2tpd: </p><pre><code>systemctl restart openswan
 systemctl restart xl2tpd
-</code></pre><p>On the client connect to the server IP address (or add a DNS name) with a valid user, password and the shared secret. Test if you have internet access and which IP you have (via for example <a href="http://whatsmyip.org">http://whatsmyip.org</a>. If it is the VPN servers IP then it works. </p><p>If you experience problems make sure to check the client log files. Also, on Arch Linux, the system log can be viewed by using <code>journalctl -f</code> (that emulates <code>tail -f /var/log/syslog</code>). Arch Linux uses systemd logging. </p><p>If you have your Raspberry Pi behind a NAT router, you might need to change your %SERVERIP% to the internal IP of your Raspberry Pi (like 192.168.1.101) instead of your external IP address.</p><p>If you google the error messages you most of the time get a good answer. </p><hr/>Tags: <a class="link" href="../tags/arch.html">arch, </a><a class="link" href="../tags/ipsec.html">ipsec, </a><a class="link" href="../tags/l2tp.html">l2tp, </a><a class="link" href="../tags/openvpn.html">openvpn, </a><a class="link" href="../tags/pptp.html">pptp, </a><a class="link" href="../tags/raspberry-pi.html">raspberry-pi, </a><a class="link" href="../tags/systemd.html">systemd, </a><a class="link" href="../tags/vpn.html">vpn, </a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div> </div></div><script type="text/javascript">
+</code></pre><p>On the client connect to the server IP address (or add a DNS name) with a valid user, password and the shared secret. Test if you have internet access and which IP you have (via for example <a href="http://whatsmyip.org">http://whatsmyip.org</a>. If it is the VPN servers IP then it works. </p><p>If you experience problems make sure to check the client log files. Also, on Arch Linux, the system log can be viewed by using <code>journalctl -f</code> (that emulates <code>tail -f /var/log/syslog</code>). Arch Linux uses systemd logging. For more info about systemd services, <a href="http://www.freedesktop.org/software/systemd/man/systemd.service.html">see this page</a></p><p>If you have your Raspberry Pi behind a NAT router, you might need to change your %SERVERIP% to the internal IP of your Raspberry Pi (like 192.168.1.101) instead of your external IP address.</p><p>If you google the error messages you most of the time get a good answer. </p><p>Thanks to <a href="https://smileykeith.com/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/">Keith's article</a> for help with boot persistency.</p><hr/>Tags: <a class="link" href="../tags/arch.html">arch, </a><a class="link" href="../tags/ipsec.html">ipsec, </a><a class="link" href="../tags/l2tp.html">l2tp, </a><a class="link" href="../tags/openvpn.html">openvpn, </a><a class="link" href="../tags/pptp.html">pptp, </a><a class="link" href="../tags/raspberry-pi.html">raspberry-pi, </a><a class="link" href="../tags/systemd.html">systemd, </a><a class="link" href="../tags/vpn.html">vpn, </a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div> </div></div><script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
