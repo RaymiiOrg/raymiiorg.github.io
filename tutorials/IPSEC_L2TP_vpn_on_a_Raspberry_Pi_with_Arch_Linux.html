@@ -37,36 +37,53 @@ ExecStart=/usr/local/bin/vpn-boot.sh
 WantedBy=multi-user.target 
 </code></pre><p>Then enable it:</p><pre><code>systemctl enable vpnboot.service
 </code></pre><h4>Configure Openswan (IPSEC)</h4><p>Use your favorite editor to edit the following file: </p><pre><code>vim /etc/ipsec.conf  
-</code></pre><p>Replace the contents with the following: </p><p>(Most lines have a comment below it explaining what it does.)</p><pre><code>config setup
+</code></pre><p>Replace the contents with the following: </p><p>(Most lines have a comment below it explaining what it does.)</p><pre><code>version 2 
+config setup
     dumpdir=/var/run/pluto/
     #in what directory should things started by setup (notably the Pluto daemon) be allowed to dump core?
+
     nat_traversal=yes
     #whether to accept/offer to support NAT (NAPT, also known as "IP Masqurade") workaround for IPsec
+
     virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v6:fd00::/8,%v6:fe80::/10
     #contains the networks that are allowed as subnet= for the remote client. In other words, the address ranges that may live behind a NAT router through which a client connects.
+
     protostack=netkey
     #decide which protocol stack is going to be used.
+
     plutoopts="--interface=eth0"
     # replace with your ethernet interface.
+
+    force_keepalive=yes
+    keep_alive=60
+    # Send a keep-alive packet every 60 seconds.
 
 conn L2TP-PSK-noNAT
     authby=secret
     #shared secret. Use rsasig for certificates.
-    pfs=no
-    #Disable pfs
+
+    pfs=yes
+    #Enable pfs
+
     auto=add
-    #start at boot
+    #add at ipsec startup
+
     keyingtries=3
     #Only negotiate a conn. 3 times.
+
     ikelifetime=8h
     keylife=1h
+
     type=transport
     #because we use l2tp as tunnel protocol
+
     left=%SERVERIP%
     #fill in server IP above
+
     leftprotoport=17/1701
     right=%any
     rightprotoport=17/%any
+
     dpddelay=10
     # Dead Peer Dectection (RFC 3706) keepalives delay
     dpdtimeout=20
