@@ -9,14 +9,12 @@
   action :purge
   not_if "psql --version | grep 9.1"
 end
-</code></pre><p>The postgresql apt-repository is enabled:</p><pre><code>if node.default['postgresql']['enable_pgdg_apt']
-  include_recipe 'postgresql::apt_pgdg_postgresql'
-end
+</code></pre><p>The postgresql apt-repository is enabled:</p><pre><code>include_recipe 'postgresql::apt_pgdg_postgresql'
 </code></pre><p>The <code>postgresql::server</code> recipe is included:</p><pre><code>include_recipe "postgresql::server"
 </code></pre><p>Then a few templates from the postgresql cookbook are overwritten by templates from the wrapper-cookbook:</p><pre><code>r = resources(:template => "#{node['postgresql']['dir']}/pg_hba.conf")
 r.source "pg_hba.conf.erb"
 r.cookbook "wrapper-postgresql"
-</code></pre><p>This goes on for a few templates and files. Then the culprit comes along:</p><pre><code>gem_package "pg"
+</code></pre><p>This goes on for a few templates and files. Then the culprit comes along:</p><pre><code>chef_gem "pg"
 </code></pre><p>Now what we want to happen is that first the postgresql apt-repository is enabled. Then the correct packages are installed. This includes the <code>libpq-dev</code> package. This is installed in the regular postgres cookbook.</p><p>This cookbook however, on a new node, fails with the following error messages:</p><pre><code>================================================================================
 Error executing action `install` on resource 'chef_gem[pg]'
 ================================================================================
