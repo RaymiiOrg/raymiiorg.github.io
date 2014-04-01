@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="en"><head><title>Chef: overwrite templates in wrapper-cookbooks - Raymii.org</title><link href="/s/inc/css/bootstrap.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet"/><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a> <div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"> <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img alt="IEC Resistor logo" src="https://raymii.org/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Items</a></li><li><a class="link" href="/s/tags/bash.html">Bash</a></li><li><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li><a class="link" href="/s/tags/ssl.html">SSL</a></li><li><a class="link" href="/s/tags/debian.html">Debian</a></li><li><a class="link" href="/s/tags/python.html">Python</a></li><li><a class="link" href="/s/tags/vpn.html">VPN</a></li><li><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li><a class="link" href="/s/tags/nginx.html">nginx</a></li><li><a class="link" href="/s/tags/apache.html">Apache</a></li><li><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><strong>Support this website:</strong><br/><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a><br/><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a><br/><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input name="cmd" type="hidden" value="_s-xclick"/><input name="encrypted" type="hidden" value="-----BEGIN PKCS7-----MIIHLwYJKoZIhvcNAQcEoIIHIDCCBxwCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYB1lOyoMm13xLpyJ06VTAajIRPFl46+yfqSnLQLu1lFfVKmhLtM0Ql+JSnH+LzVuhHLTzXegaPClXjMvhTpp0byApM4YlCi1czJKxBGb2+qw6il53H1g7L1qlfm95Jd80s80C9r+b3ituTXuYhb4Eb7PQ6Cyy6ca9raUgYVv90pETELMAkGBSsOAwIaBQAwgawGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIS23AJUhGuB6AgYhcWUVn4DMqTx2Ai2Ql9TQjkiAC3tXScmjpq/10b0P6DTIIg5OSPIly9C2gLMEcMCZ8aNuLT3kp+2Hn+nDuzsdY/4QU8zOFC4STyDrAn1gqe8q4pPGADqE0KUiWRAJR8eTx9paclkiaxDicr3D0uF409IRLIe/v1S6ZV9JOlQk5Xys9cRfAuhTioIIDhzCCA4MwggLsoAMCAQICAQAwDQYJKoZIhvcNAQEFBQAwgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMB4XDTA0MDIxMzEwMTMxNVoXDTM1MDIxMzEwMTMxNVowgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBR07d/ETMS1ycjtkpkvjXZe9k+6CieLuLsPumsJ7QC1odNz3sJiCbs2wC0nLE0uLGaEtXynIgRqIddYCHx88pb5HTXv4SZeuv0Rqq4+axW9PLAAATU8w04qqjaSXgbGLP3NmohqM6bV9kZZwZLR/klDaQGo1u9uDb9lr4Yn+rBQIDAQABo4HuMIHrMB0GA1UdDgQWBBSWn3y7xm8XvVk/UtcKG+wQ1mSUazCBuwYDVR0jBIGzMIGwgBSWn3y7xm8XvVk/UtcKG+wQ1mSUa6GBlKSBkTCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb22CAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOBgQCBXzpWmoBa5e9fo6ujionW1hUhPkOBakTr3YCDjbYfvJEiv/2P+IobhOGJr85+XHhN0v4gUkEDI8r2/rNk1m0GA8HKddvTjyGw/XqXa+LSTlDYkqI8OwR8GEYj4efEtcRpRYBxV8KxAW93YDWzFGvruKnnLbDAF6VR5w/cCMn5hzGCAZowggGWAgEBMIGUMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNvbQIBADAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTMwODAzMTQxNTQ2WjAjBgkqhkiG9w0BCQQxFgQUhdv5C5Xqr+zLV4qAlrYYqFV/fgYwDQYJKoZIhvcNAQEBBQAEgYBaGzom1dMP+CEmGQIZfP6ynZyRIc+4uQuvKoeRlkHwOj9F4c8QqXwBq/fyMogtZ/iES1oTifarxzQ3gesy/dSSs+IxG6YLICQXsAWNVnYL7u9of1xcCyJh3QoH/elgrjdHw0KCeBWNZPlbzEKSwTJ08yBsuKFR8zSqz8pIjC6XrQ==-----END PKCS7-----"/><input alt="PayPal - The safer, easier way to pay online!" name="submit" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" type="image"/><img alt="" height="1" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1"/></form><script type="text/javascript"><!--
+                google_ad_client = "ca-pub-7993642564731324";
+                google_ad_slot = "9322003332";
+                google_ad_width = 200;
+                google_ad_height = 200;
+                //-->
+                </script><script src="http://pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
+                </script> </div></div> <div class="col-md-8 col-sm-8"> <div class="inner"><h2 class="headheader">Chef: overwrite templates in wrapper-cookbooks</h2><ul class="breadcrumb"><li><a class="link" href="../">Home</a></li><li><a class="link" href="../articles">Articles</a></li><li><a class="link" href="Chef_-_overwrite_templates_in_wrapper_cookbooks.html">Chef: overwrite templates in wrapper-cookbooks</a></li></ul><p><small>02-04-2014</small> | <small>Remy van Elst</small></p><p>This article describes how to use a template in a wrapper-cookbook in Chef. </p><h3>Background on Wrapper Cookbooks</h3><p>The Chef Cookbook Wrapper Pattern is based upon a design convention where you customize an existing library cookbook by using a separate wrapper cookbook, which wraps the original cookbook with any related configuration changes. </p><p>A library cookbook is an existing cookbook, typically an open-source contribution from a user in the Chef community, designed for server configuration purposes. </p><p>A wrapper cookbook is a cookbook that wraps the original library cookbook with custom modifications or additions such as overriding a Chef attribute, changing a Chef template, converting a Chef attribute to a user-definable input, etc. </p><p>As the Chef community continues to grow, both in the number of active Chef developers and the range of available applications, finding an existing community cookbook that you want to leverage will become more of the norm than the exception. Therefore, it will be easier to find an existing cookbook that you can either use as-is or slightly modify for your own purposes. When possible, it's best to leverage an existing cookbook (assuming that it's actively being maintained) than trying to create your own custom cookbook from scratch or forking a cookbook repository. </p><p>Although forking a repository may initially seem like the easiest way to modify an existing cookbook, it will likely cause you more headaches over time as you try to maintain and upgrade your codebase over time. Therefore, it's recommended that you spend the extra time and effort to integrate a Wrapper Cookbook Pattern into your development routine because you will have a more manageable upgrade path for integrating future bug fixes and new functionality. </p><p><a href="http://support.rightscale.com/12-Guides/Chef_Cookbooks_Developer_Guide/04-Developer/06-Development_Resources/Chef_Cookbook_Design_Patterns/Wrapper_Cookbook_Pattern">Source</a></p><h3>Templates in wrapper-cookbooks</h3><p>To override a template by just defining it again would result in it being written two times every Chef run, which is not what we want. Using this method, you can override the template from the default cookbook with a template in your wrapper-cookbook. </p><p>One of my clients uses graphite and wants to limit which users can login using LDAP in Apache. The <a href="https://github.com/hw-cookbooks/graphite">graphite</a> cookbook does not support this by default, but it works for all the other things.</p><p>Graphite itself has support for LDAP login, however, the client has experience with Apache LDAP and wants to use that so that other admins can manage it as well.</p><p>So what we want to do is overwrite the default apache template from the graphite cookbook with our template which has the LDAP data. </p><p>In the graphite cookbook we see the following piece of code which places the template for the graphite website in the apache <code>sites-available</code> folder:</p><pre><code>template "#{node['apache']['dir']}/sites-available/graphite" do
+  source "graphite-vhost.conf.erb"
+  mode 0755
+  variables(:timezone => node['graphite']['timezone'],
+            :debug => node['graphite']['web']['debug'],
+            :base_dir => node['graphite']['base_dir'],
+            :doc_root => node['graphite']['doc_root'],
+            :storage_dir => node['graphite']['storage_dir'],
+            :cluster_servers => node['graphite']['web']['cluster_servers'],
+            :carbonlink_hosts => node['graphite']['web']['carbonlink_hosts'],
+            :memcached_hosts => node['graphite']['web']['memcached_hosts'],
+     )
+  notifies :reload, "service[apache2]", :immediately
+end
+</code></pre><p>We are going to override </p><p>Add a few node attributes, or place them in a data bag, whatever you like, for the LDAP:</p><pre><code>{
+    "tags": [],
+    "graphite": {
+        "ldap": {
+            "password": "passw0rd",
+            "server": "ldap.example.org",
+            "enabled": true,
+            "binddn": "uid=graphite,ou=Applications,dc=example,dc=org",
+            "accessgroup": "cn=graphite_users,ou=Groups,dc=example,dc=org",
+            "apachefilter": "uid?sub?(ObjectClass=*)",
+            "userdn": "ou=Users,dc=example,dc=org",
+            "port": 636
+        }
+    }
+}
+</code></pre><p>We are going to use these in the apache template.</p><p>Create a new cookbook:</p><pre><code>knife cookbook create wrapper-graphite
+</code></pre><p>Copy the template over from the graphite cookbook to the wrapper cookbook:</p><pre><code>cp cookbooks/graphite/templates/default/graphite-vhost.conf.erb cookbooks/wrapper-graphite/templates/default/graphite-vhost.conf.erb
+</code></pre><p>Add the LDAP settings to the template <code>graphite-vhost.conf.erb</code> in the wrapper-cookbook folder:</p><pre><code><Location />
+  Order deny,allow
+  Deny from All
+  AuthName "Authorization Required"
+  AuthType Basic
+  # Needed for require-valid-user
+  AuthzLDAPAuthoritative off
+  AuthBasicProvider ldap
+  AuthLDAPUrl "ldap://<%- @ldap_server %>/<%- @ldap_basedn %>?<%- @ldap_apachefilter %>"
+  AuthLDAPBindDN "<%- @ldap_binddn %>"
+  AuthLDAPBindPassword "<%- @ldap_password %>"
+  Require ldap-group <%- @ldap_accessgroup %>
+  Satisfy any
+</Location>
+</code></pre><p>Then edit your recipe, <code>cookbooks/wrapper-graphite/recipes/default.rb</code>. Add the basic header boilerplate and include the <code>graphite</code> recipe:</p><pre><code>#
+# Cookbook Name:: wrapper-graphite
+# Recipe:: default
+#
+# Copyright 2014, EXAMPLE COMPANY
+#
+# License: GPLv3
+
+include_recipe "graphite"
+</code></pre><p>Don't forget to also add it to the <code>metadata.rb</code> file:</p><pre><code>depends         "graphite"
+</code></pre><p>Add the following magic to the wrapper cookbook. This is the part that overrides the template in the normal cookbook with the template from the wrapper cookbook:</p><pre><code>begin
+    r = resources(:template => "#{node['apache']['dir']}/sites-available/graphite")
+    r.cookbook "wrapper-graphite"
+    r.source "graphite-vhost.conf.erb"
+    r.mode 0755
+    r.variables(:timezone => node['graphite']['timezone'],
+        :debug => node['graphite']['web']['debug'],
+        :base_dir => node['graphite']['base_dir'],
+        :doc_root => node['graphite']['doc_root'],
+        :storage_dir => node['graphite']['storage_dir'],
+        :cluster_servers => node['graphite']['web']['cluster_servers'],
+        :carbonlink_hosts => node['graphite']['web']['carbonlink_hosts'],
+        :memcached_hosts => node['graphite']['web']['memcached_hosts'],
+        :ldap_enabled => node['graphite']['ldap']['enabled'],
+        :ldap_server => node['graphite']['ldap']['server'],
+        :ldap_port => node['graphite']['ldap']['port'],
+        :ldap_binddn => node['graphite']['ldap']['binddn'],
+        :ldap_basedn => node['graphite']['ldap']['basedn'],
+        :ldap_accessgroup => node['graphite']['ldap']['access_group'],
+        :ldap_password => node['graphite']['ldap']['password'],
+        :ldap_apachefilter => node['graphite']['ldap']['apachefilter']
+    )
+    r.notifies :reload, "service[apache2]", :immediately
+    rescue Chef::Exceptions::ResourceNotFound
+        Chef::Log.warn "could not find template to override!"
+end
+</code></pre><p>As you can see we need to set all of the variables, even the ones that were already declared in the original cookbook. If you don't do this, it will bork.</p><p>Now by adding the wrapper-graphite recipe to a node instead of the graphite recipe, it will do all the things from the graphite recipe, except for the override we define here.</p><p>The big advantage of this approach for me is that I can update the upstream cookbook at any moment (for example, when a new graphite is releases or the upstream cookbook changes) while my own changes do not need to be backported in there. </p><hr/>Tags: <a class="link" href="../tags/chef.html">chef, </a><a class="link" href="../tags/deployment.html">deployment, </a><a class="link" href="../tags/devops.html">devops, </a><a class="link" href="../tags/graphite.html">graphite, </a><a class="link" href="../tags/ldap.html">ldap, </a><a class="link" href="../tags/ruby.html">ruby, </a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div> </div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&amp;lt;p&amp;gt;&amp;lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&amp;gt;&amp;lt;/p&amp;gt;</noscript></body></html>
