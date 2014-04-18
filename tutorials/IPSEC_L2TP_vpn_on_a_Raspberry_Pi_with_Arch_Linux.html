@@ -14,8 +14,8 @@ echo "net.ipv4.conf.default.rp_filter = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.conf.default.accept_source_route = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.conf.default.send_redirects = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" |  tee -a /etc/sysctl.conf
-</code></pre><p>Now apply these settings for other network interfaces:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 > $vpn/accept_redirects; echo 0 > $vpn/send_redirects; done
-</code></pre><p>And apply them:</p><pre><code>sysctl -p
+</code></pre><p>Set these settings for other network interfaces:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 > $vpn/accept_redirects; echo 0 > $vpn/send_redirects; done
+</code></pre><p>Apply them:</p><pre><code>sysctl -p
 </code></pre><h5>Persistent settings via systemd</h5><p>Arch Linux uses systemd. Init script functionality like rc.local is not available. To have these settings applied at boot we can however create a custom systemd service which starts at boot.</p><p>Add the following code to <code>/usr/local/bin/vpn-boot.sh</code>:</p><pre><code>#!/usr/bin/env bash
 for vpn in /proc/sys/net/ipv4/conf/*; do 
     echo 0 > $vpn/accept_redirects; 
@@ -66,7 +66,7 @@ conn L2TP-PSK-noNAT
     #Enable pfs
 
     auto=add
-    #add at ipsec startup
+    #the ipsec tunnel should be started and routes created when the ipsec daemon itself starts.
 
     keyingtries=3
     #Only negotiate a conn. 3 times.
