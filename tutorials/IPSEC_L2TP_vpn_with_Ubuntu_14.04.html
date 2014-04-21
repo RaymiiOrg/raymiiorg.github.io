@@ -99,12 +99,17 @@ Opportunistic Encryption Support                                [DISABLED]
 ipsec saref = yes
 saref refinfo = 30
 
+;debug avp = yes
+;debug network = yes
+;debug state = yes
+;debug tunnel = yes
+
 [lns default]
 ip range = 172.16.1.30-172.16.1.100
 local ip = 172.16.1.1
 refuse pap = yes
 require authentication = yes
-ppp debug = no
+;ppp debug = yes
 pppoptfile = /etc/ppp/options.xl2tpd
 length bit = yes
 </code></pre><ul><li>ip range = range of IPs to give to the connecting clients</li><li>local ip = IP of VPN server</li><li>refuse pap = refure pap authentication</li><li>ppp debug = yes when testing, no when in production</li></ul><h4>Local user (PAM / /etc/passwd) authentication</h4><p>To use local user accounts via pam (or /etc/passwd), and thus not having plain text user passwords in a text file you have to do a few extra steps.</p><p>In your <code>/etc/xl2tpd/xl2tpd.conf</code> add the following line:</p><pre><code>unix authentication = yes
