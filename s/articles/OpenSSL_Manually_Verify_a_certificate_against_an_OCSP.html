@@ -1,0 +1,351 @@
+<!-- nominify -->
+
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>OpenSSL: Manually verify a certificate against an OCSP - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/vpn.html" class="link">VPN</a></li><li><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>
+               <!-- advertisement start -->
+               
+                
+                <strong>Support this website:</strong><br />
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a><br />
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                <input type="hidden" name="cmd" value="_s-xclick">
+                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----MIIHLwYJKoZIhvcNAQcEoIIHIDCCBxwCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYB1lOyoMm13xLpyJ06VTAajIRPFl46+yfqSnLQLu1lFfVKmhLtM0Ql+JSnH+LzVuhHLTzXegaPClXjMvhTpp0byApM4YlCi1czJKxBGb2+qw6il53H1g7L1qlfm95Jd80s80C9r+b3ituTXuYhb4Eb7PQ6Cyy6ca9raUgYVv90pETELMAkGBSsOAwIaBQAwgawGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIS23AJUhGuB6AgYhcWUVn4DMqTx2Ai2Ql9TQjkiAC3tXScmjpq/10b0P6DTIIg5OSPIly9C2gLMEcMCZ8aNuLT3kp+2Hn+nDuzsdY/4QU8zOFC4STyDrAn1gqe8q4pPGADqE0KUiWRAJR8eTx9paclkiaxDicr3D0uF409IRLIe/v1S6ZV9JOlQk5Xys9cRfAuhTioIIDhzCCA4MwggLsoAMCAQICAQAwDQYJKoZIhvcNAQEFBQAwgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMB4XDTA0MDIxMzEwMTMxNVoXDTM1MDIxMzEwMTMxNVowgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBR07d/ETMS1ycjtkpkvjXZe9k+6CieLuLsPumsJ7QC1odNz3sJiCbs2wC0nLE0uLGaEtXynIgRqIddYCHx88pb5HTXv4SZeuv0Rqq4+axW9PLAAATU8w04qqjaSXgbGLP3NmohqM6bV9kZZwZLR/klDaQGo1u9uDb9lr4Yn+rBQIDAQABo4HuMIHrMB0GA1UdDgQWBBSWn3y7xm8XvVk/UtcKG+wQ1mSUazCBuwYDVR0jBIGzMIGwgBSWn3y7xm8XvVk/UtcKG+wQ1mSUa6GBlKSBkTCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb22CAQAwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOBgQCBXzpWmoBa5e9fo6ujionW1hUhPkOBakTr3YCDjbYfvJEiv/2P+IobhOGJr85+XHhN0v4gUkEDI8r2/rNk1m0GA8HKddvTjyGw/XqXa+LSTlDYkqI8OwR8GEYj4efEtcRpRYBxV8KxAW93YDWzFGvruKnnLbDAF6VR5w/cCMn5hzGCAZowggGWAgEBMIGUMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNvbQIBADAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTMwODAzMTQxNTQ2WjAjBgkqhkiG9w0BCQQxFgQUhdv5C5Xqr+zLV4qAlrYYqFV/fgYwDQYJKoZIhvcNAQEBBQAEgYBaGzom1dMP+CEmGQIZfP6ynZyRIc+4uQuvKoeRlkHwOj9F4c8QqXwBq/fyMogtZ/iES1oTifarxzQ3gesy/dSSs+IxG6YLICQXsAWNVnYL7u9of1xcCyJh3QoH/elgrjdHw0KCeBWNZPlbzEKSwTJ08yBsuKFR8zSqz8pIjC6XrQ==-----END PKCS7-----
+                ">
+                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                <img alt="" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
+                </form>
+                <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-7993642564731324";
+                google_ad_slot = "9322003332";
+                google_ad_width = 200;
+                google_ad_height = 200;
+                //-->
+                </script>
+                <script type="text/javascript"
+                src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+
+           <h2 class='headheader'>OpenSSL: Manually verify a certificate against an OCSP</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../articles" class="link">Articles</a></li><li><a href="OpenSSL_Manually_Verify_a_certificate_against_an_OCSP.html" class="link">OpenSSL: Manually verify a certificate against an OCSP</a></li></ul><p><small>07-04-2014</small> | <small>Remy van Elst</small></p><p>This article shows you how to manually verfify a certificate against an OCSP server. OCSP stands for the Online Certificate Status Protocol and is one way to validate a certificate status. It is an alternative to the CRL, certificate revocation list.</p>
+
+<p>Compared to CRL&#39;s:</p>
+
+<ul>
+<li>Since an OCSP response contains less information than a typical CRL (certificate revocation list), OCSP can use networks and client resources more efficiently.</li>
+<li>Using OCSP, clients do not need to parse CRLs themselves, saving client-side complexity. However, this is balanced by the practical need to maintain a cache. In practice, such considerations are of little consequence, since most applications rely on third-party libraries for all X.509 functions.</li>
+<li>OCSP discloses to the responder that a particular network host used a particular certificate at a particular time. OCSP does not mandate encryption, so other parties may intercept this information.</li>
+</ul>
+
+<p>You can read more about the OCSP on <a href="https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol">wikipedia</a></p>
+
+<p>We will be using OpenSSL in this article. I&#39;m using the following version:</p>
+
+<pre><code>$ openssl version
+OpenSSL 1.0.1g 7 Apr 2014
+</code></pre>
+
+<h3>Get a certificate with an OCSP</h3>
+
+<p>First we will need a certificate from a website. I&#39;ll be using Wikipedia as an example here. We can retreive this with the following openssl command:</p>
+
+<pre><code>openssl s_client -connect wikipedia.org:443 2&gt;&amp;1 &lt; /dev/null | sed -n &#39;/-----BEGIN/,/-----END/p&#39;
+</code></pre>
+
+<p>Save this output to a file, for example, wikipedia.pem:</p>
+
+<pre><code>openssl s_client -connect wikipedia.org:443 2&gt;&amp;1 &lt; /dev/null | sed -n &#39;/-----BEGIN/,/-----END/p&#39; &gt; wikipedia.pem
+</code></pre>
+
+<p>Now, check if this certificate has an OCSP URI:</p>
+
+<pre><code>openssl x509 -noout -ocsp_uri -in wikipedia.pem
+http://ocsp.digicert.com
+</code></pre>
+
+<p>If it does not give any output, the certificate has no OCSP URI. You cannot valdiate it against an OCSP.</p>
+
+<h3>Getting the certificate chain</h3>
+
+<p>It is required to send the certificate chain along with the certificate you want to validate. So, we need to get the certificate chain for our domain, wikipedia.org. Using the <code>-showcerts</code> option with <code>openssl s_client</code>, we can see all the certificates, including the chain:</p>
+
+<pre><code>openssl s_client -connect wikipedia.org:443 -showcerts 2&gt;&amp;1 &lt; /dev/null
+</code></pre>
+
+<p>Results in a boatload of output, but what we are interested in is the following:</p>
+
+<pre><code> 1 s:/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance CA-3
+   i:/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV Root CA
+-----BEGIN CERTIFICATE-----
+MIIGWDCCBUCgAwIBAgIQCl8RTQNbF5EX0u/UA4w/OzANBgkqhkiG9w0BAQUFADBs
+MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
+d3cuZGlnaWNlcnQuY29tMSswKQYDVQQDEyJEaWdpQ2VydCBIaWdoIEFzc3VyYW5j
+ZSBFViBSb290IENBMB4XDTA4MDQwMjEyMDAwMFoXDTIyMDQwMzAwMDAwMFowZjEL
+MAkGA1UEBhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3
+LmRpZ2ljZXJ0LmNvbTElMCMGA1UEAxMcRGlnaUNlcnQgSGlnaCBBc3N1cmFuY2Ug
+Q0EtMzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL9hCikQH17+NDdR
+CPge+yLtYb4LDXBMUGMmdRW5QYiXtvCgFbsIYOBC6AUpEIc2iihlqO8xB3RtNpcv
+KEZmBMcqeSZ6mdWOw21PoF6tvD2Rwll7XjZswFPPAAgyPhBkWBATaccM7pxCUQD5
+BUTuJM56H+2MEb0SqPMV9Bx6MWkBG6fmXcCabH4JnudSREoQOiPkm7YDr6ictFuf
+1EutkozOtREqqjcYjbTCuNhcBoz4/yO9NV7UfD5+gw6RlgWYw7If48hl66l7XaAs
+zPw82W3tzPpLQ4zJ1LilYRyyQLYoEt+5+F/+07LJ7z20Hkt8HEyZNp496+ynaF4d
+32duXvsCAwEAAaOCAvowggL2MA4GA1UdDwEB/wQEAwIBhjCCAcYGA1UdIASCAb0w
+ggG5MIIBtQYLYIZIAYb9bAEDAAIwggGkMDoGCCsGAQUFBwIBFi5odHRwOi8vd3d3
+LmRpZ2ljZXJ0LmNvbS9zc2wtY3BzLXJlcG9zaXRvcnkuaHRtMIIBZAYIKwYBBQUH
+AgIwggFWHoIBUgBBAG4AeQAgAHUAcwBlACAAbwBmACAAdABoAGkAcwAgAEMAZQBy
+AHQAaQBmAGkAYwBhAHQAZQAgAGMAbwBuAHMAdABpAHQAdQB0AGUAcwAgAGEAYwBj
+AGUAcAB0AGEAbgBjAGUAIABvAGYAIAB0AGgAZQAgAEQAaQBnAGkAQwBlAHIAdAAg
+AEMAUAAvAEMAUABTACAAYQBuAGQAIAB0AGgAZQAgAFIAZQBsAHkAaQBuAGcAIABQ
+AGEAcgB0AHkAIABBAGcAcgBlAGUAbQBlAG4AdAAgAHcAaABpAGMAaAAgAGwAaQBt
+AGkAdAAgAGwAaQBhAGIAaQBsAGkAdAB5ACAAYQBuAGQAIABhAHIAZQAgAGkAbgBj
+AG8AcgBwAG8AcgBhAHQAZQBkACAAaABlAHIAZQBpAG4AIABiAHkAIAByAGUAZgBl
+AHIAZQBuAGMAZQAuMBIGA1UdEwEB/wQIMAYBAf8CAQAwNAYIKwYBBQUHAQEEKDAm
+MCQGCCsGAQUFBzABhhhodHRwOi8vb2NzcC5kaWdpY2VydC5jb20wgY8GA1UdHwSB
+hzCBhDBAoD6gPIY6aHR0cDovL2NybDMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0SGln
+aEFzc3VyYW5jZUVWUm9vdENBLmNybDBAoD6gPIY6aHR0cDovL2NybDQuZGlnaWNl
+cnQuY29tL0RpZ2lDZXJ0SGlnaEFzc3VyYW5jZUVWUm9vdENBLmNybDAfBgNVHSME
+GDAWgBSxPsNpA/i/RwHUmCYaCALvY2QrwzAdBgNVHQ4EFgQUUOpzidsp+xCPnuUB
+INTeeZlIg/cwDQYJKoZIhvcNAQEFBQADggEBAB7ipUiebNtTOA/vphoqrOIDQ+2a
+vD6OdRvw/S4iWawTwGHi5/rpmc2HCXVUKL9GYNy+USyS8xuRfDEIcOI3ucFbqL2j
+CwD7GhX9A61YasXHJJlIR0YxHpLvtF9ONMeQvzHB+LGEhtCcAarfilYGzjrpDq6X
+dF3XcZpCdF/ejUN83ulV7WkAywXgemFhM9EZTfkI7qA5xSU1tyvED7Ld8aW3DiTE
+JiiNeXf1L/BXunwH1OH8zVowV36GEEfdMR/X/KLCvzB8XSSq6PmuX2p0ws5rs0bY
+Ib4p1I5eFdZCSucyb6Sxa1GDWL4/bcf72gMhy2oWGU4K8K2Eyl2Us1p292E=
+-----END CERTIFICATE-----
+</code></pre>
+
+<p>As you can see, this is number 1. Number 0 is the certificate for Wikipedia, we already have that. If your site has more certificates in its chain, you will see more here. Save them all, in the order OpenSSL sends them (as in, first the one which directly issued your server certificate, then the one that issues that certificate and so on, with the root or most-root at the end of the file) to a file, named <code>chain.pem</code>.</p>
+
+<h3>Sending the OCSP request</h3>
+
+<p>We now have all the data we need to do an OCSP request. Using the following Openssl command we can send an OCSP request and only get the text output:</p>
+
+<pre><code>openssl ocsp -issuer chain.pem -cert wikipedia.pem -text -url http://ocsp.digicert.com
+</code></pre>
+
+<p>Results in:</p>
+
+<pre><code>OCSP Request Data:
+    Version: 1 (0x0)
+    Requestor List:
+        Certificate ID:
+          Hash Algorithm: sha1
+          Issuer Name Hash: ED48ADDDCB7B00E20E842AA9B409F1AC3034CF96
+          Issuer Key Hash: 50EA7389DB29FB108F9EE50120D4DE79994883F7
+          Serial Number: 0114195F66FAFF8FD66E12496E516F4F
+    Request Extensions:
+        OCSP Nonce:
+            0410DA634F2ADC31DC48AE89BE64E8252D12
+OCSP Response Data:
+    OCSP Response Status: successful (0x0)
+    Response Type: Basic OCSP Response
+    Version: 1 (0x0)
+    Responder Id: 50EA7389DB29FB108F9EE50120D4DE79994883F7
+    Produced At: Apr  9 08:45:00 2014 GMT
+    Responses:
+    Certificate ID:
+      Hash Algorithm: sha1
+      Issuer Name Hash: ED48ADDDCB7B00E20E842AA9B409F1AC3034CF96
+      Issuer Key Hash: 50EA7389DB29FB108F9EE50120D4DE79994883F7
+      Serial Number: 0114195F66FAFF8FD66E12496E516F4F
+    Cert Status: good
+    This Update: Apr  9 08:45:00 2014 GMT
+    Next Update: Apr 16 09:00:00 2014 GMT
+
+    Signature Algorithm: sha1WithRSAEncryption
+         56:21:4c:dc:84:21:f7:a8:ac:a7:b9:bc:10:19:f8:19:f1:34:
+         c1:63:ca:14:7f:8f:5a:85:2a:cc:02:b0:f8:b5:05:4a:0f:28:
+         50:2a:4a:4d:04:01:b5:05:ef:a5:88:41:d8:9d:38:00:7d:76:
+         1a:aa:ff:21:50:68:90:d2:0c:93:85:49:e7:8e:f1:58:08:77:
+         a0:4e:e2:22:98:01:b7:e3:27:75:11:f5:b7:8f:e0:75:7d:19:
+         9b:74:cf:05:dc:ae:1c:36:09:95:b6:08:bc:e7:3f:ea:a2:e3:
+         ae:d7:8f:c0:9d:8e:c2:37:67:c7:5b:d8:b0:67:23:f1:51:53:
+         26:c2:96:b0:1a:df:4e:fb:4e:e3:da:a3:98:26:59:a8:d7:17:
+         69:87:a3:68:47:08:92:d0:37:04:6b:49:9a:96:9d:9c:b1:e8:
+         cb:dc:68:7b:4a:4d:cb:08:f7:92:67:41:99:b6:54:56:80:0c:
+         18:a7:24:53:ac:c6:da:1f:4d:f4:3c:7d:68:44:1d:a4:df:1d:
+         48:07:85:52:86:59:46:d1:35:45:1a:c7:6b:6b:92:de:24:ae:
+         c0:97:66:54:29:7a:c6:86:a6:da:9f:06:24:dc:ac:80:66:95:
+         e0:eb:49:fd:fb:d4:81:6a:2b:81:41:57:24:78:3b:e0:66:70:
+         d4:2e:52:92
+wikipedia.pem: good
+    This Update: Apr  9 08:45:00 2014 GMT
+    Next Update: Apr 16 09:00:00 2014 GMT
+</code></pre>
+
+<p>If you want to have a more summarized output, leave out the <code>-text</code> option. I most of the time include it to find out problems with an OCSP.</p>
+
+<p>This is how a good certificate status looks:</p>
+
+<pre><code>openssl ocsp -issuer chain.pem -cert wikipedia.pem -url http://ocsp.digicert.com
+wikipedia.pem: good
+    This Update: Apr  9 08:45:00 2014 GMT
+    Next Update: Apr 16 09:00:00 2014 GMT
+</code></pre>
+
+<h3>Revoked certificate</h3>
+
+<p>If you have a revoked certificate, you can also test it the same way as stated above. The response looks like this:</p>
+
+<pre><code>Response verify OK
+test-revoked.pem: revoked
+    This Update: Apr  9 03:02:45 2014 GMT
+    Next Update: Apr 10 03:02:45 2014 GMT
+    Revocation Time: Mar 25 15:45:55 2014 GMT
+</code></pre>
+
+<p>You can test this using the certificate and chain on the Verisign revoked certificate test page: <a href="https://test-sspev.verisign.com:2443/test-SSPEV-revoked-verisign.html">https://test-sspev.verisign.com:2443/test-SSPEV-revoked-verisign.html</a></p>
+
+<h3>Other errors</h3>
+
+<p>If we send this request to another OCSP, one who did not issued this certificate, we should receive an unauthorized error:</p>
+
+<pre><code>openssl ocsp -issuer chain.pem -cert wikipedia.pem -url http://rapidssl-ocsp.geotrust.com
+Responder Error: unauthorized (6)
+</code></pre>
+
+<p>The <code>-text</code> option here shows more information:</p>
+
+<pre><code>OCSP Request Data:
+    Version: 1 (0x0)
+    Requestor List:
+        Certificate ID:
+          Hash Algorithm: sha1
+          Issuer Name Hash: ED48ADDDCB7B00E20E842AA9B409F1AC3034CF96
+          Issuer Key Hash: 50EA7389DB29FB108F9EE50120D4DE79994883F7
+          Serial Number: 0114195F66FAFF8FD66E12496E516F4F
+    Request Extensions:
+        OCSP Nonce:
+            041015BB718C43C46C41122E841DB2282ECE
+Responder Error: unauthorized (6)
+</code></pre>
+
+<p>Some OCSP&#39;s are configured differently and give out this error:</p>
+
+<pre><code>openssl ocsp -issuer chain.pem -cert wikipedia.pem -url http://ocsp.digidentity.eu/L4/services/ocsp
+Response Verify Failure
+140735308649312:error:2706B06F:OCSP routines:OCSP_CHECK_IDS:response contains no revocation data:ocsp_vfy.c:269:
+140735308649312:error:2706B06F:OCSP routines:OCSP_CHECK_IDS:response contains no revocation data:ocsp_vfy.c:269:
+wikipedia.pem: ERROR: No Status found.
+</code></pre>
+
+<p>If we do include the <code>-text</code> option here we can see that a response is sent, however, that it has no data in it:</p>
+
+<pre><code>OCSP Response Data:
+    OCSP Response Status: successful (0x0)
+    Response Type: Basic OCSP Response
+    Version: 1 (0x0)
+    Responder Id: C = NL, O = Digidentity B.V., CN = Digidentity OCSP
+    Produced At: Apr  9 12:02:00 2014 GMT
+    Responses:
+    Response Extensions:
+OCSP Nonce:
+    0410EB540472EA2D8246E88F3317B014BEEF
+Signature Algorithm: sha256WithRSAEncryption
+</code></pre>
+
+<p>Other OCSP&#39;s give out the &quot;unknown&quot; status:</p>
+
+<pre><code>openssl ocsp -issuer chain.pem -cert wikipedia.pem  -url http://ocsp.quovadisglobal.com/
+Response Verify Failure
+140735308649312:error:27069070:OCSP routines:OCSP_basic_verify:root ca not trusted:ocsp_vfy.c:152:
+wikipedia.pem: unknown
+    This Update: Apr  9 12:09:18 2014 GMT
+</code></pre>
+
+<p>The <code>-text</code> options shows us more:</p>
+
+<pre><code>OCSP Response Data:
+    OCSP Response Status: successful (0x0)
+    Response Type: Basic OCSP Response
+    Version: 1 (0x0)
+    Responder Id: C = CH, O = QuoVadis Limited, OU = OCSP Responder, CN = QuoVadis OCSP Authority Signature
+    Produced At: Apr  9 12:09:10 2014 GMT
+    Responses:
+    Certificate ID:
+      Hash Algorithm: sha1
+      Issuer Name Hash: ED48ADDDCB7B00E20E842AA9B409F1AC3034CF96
+      Issuer Key Hash: 50EA7389DB29FB108F9EE50120D4DE79994883F7
+      Serial Number: 0114195F66FAFF8FD66E12496E516F4F
+    Cert Status: unknown
+    This Update: Apr  9 12:09:10 2014 GMT
+
+    Response Extensions:
+</code></pre>
+
+<h3>Sources</h3>
+
+<ul>
+<li><a href="https://www.openssl.org/docs/apps/s_client.html">https://www.openssl.org/docs/apps/s_client.html</a></li>
+<li><a href="https://www.openssl.org/docs/apps/ocsp.html">https://www.openssl.org/docs/apps/ocsp.html</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol">https://en.wikipedia.org/wiki/Online<em>Certificate</em>Status_Protocol</a></li>
+</ul>
+<hr>Tags: <a href="../tags/certificate.html" class="link">certificate, </a><a href="../tags/crl.html" class="link">crl, </a><a href="../tags/ocsp.html" class="link">ocsp, </a><a href="../tags/shell.html" class="link">shell, </a><a href="../tags/ssl.html" class="link">ssl, </a><a href="../tags/tls.html" class="link">tls, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
