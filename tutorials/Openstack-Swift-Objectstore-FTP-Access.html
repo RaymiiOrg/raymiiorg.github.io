@@ -1,0 +1,305 @@
+<!-- nominify -->
+
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Openstack Swift Objectstore Access via FTP - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/vpn.html" class="link">VPN</a></li><li><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>
+               <!-- advertisement start -->
+               
+                
+                <strong>Support this website:</strong><br />
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a><br />
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                <input type="hidden" name="cmd" value="_s-xclick">
+                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                ">
+                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                <img alt="" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
+                </form>
+                <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-7993642564731324";
+                google_ad_slot = "9322003332";
+                google_ad_width = 200;
+                google_ad_height = 200;
+                //-->
+                </script>
+                <script type="text/javascript"
+                src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+
+           <h2 class='headheader'>Openstack Swift Objectstore Access via FTP</h2><ul class="breadcrumb"><li><a href="../" class="link">Home</a></li><li><a href="../tutorials" class="link">Tutorials</a></li><li><a href="Openstack-Swift-Objectstore-FTP-Access.html" class="link">Openstack Swift Objectstore Access via FTP</a></li></ul><p><small>25-05-2014</small> | <small>Remy van Elst</small></p><p><img src="https://raymii.org/s/inc/img/openstack.jpg" alt="openStack Logo" /></p>
+
+<p>This is a guide on accessing the Openstack Swift Object Storage system using an FTP client. Openstack Swift has a beautiful API which you can program to. However, sometimes it is handy to quickly be able to access your Swift/Objectstore data without programming around it. We will use ftp-cloudfs to do this. There is also Softlayers swftp, but that does not support Keystone Authentication (2.0). ftp-cloudfs does support this. The OS X Cyberduck FTP client also has Openstack Swift support, however that is a native implementation, not using FTP. With ftp-cloudfs we can use any ftp client, from Filezilla to midnight commander.</p>
+
+<p>We will be using the Dutch provider <a href="http://www.cloudvps.com">CloudVPS</a>, which is the first European-only Openstack Public Cloud, therefore not bound to the Patriot Act, so your data is more safe than it is with a provider that is vulnerable to the Patriot Act. <a href="http://www.cloudvps.com/openstack/object-store/">CloudVPS</a> provides 10GB free ObjectStore, if you have VPS with them, the data is stored on at least 3 machines in 3 locations and they have a boatload of certifications (ISO 27001 etc).</p>
+
+<p>If you order a VPS or Objectstore at <a href="http://www.cloudvps.com/openstack/object-store/">CloudVPS</a>, please mention my name or this article. I&#39;ll get a little referal bonus, which will be used to keep this awesome website running.</p>
+
+<p><strong>Note that this article is not sponsored nor endorsed by <a href="http://www.cloudvps.com">CloudVPS</a>, nor am I speaking for or as <a href="http://www.cloudvps.com">CloudVPS</a>. They just happen to be the best Dutch Openstack provider.</strong></p>
+
+<p>Openstack is one of those cloudy cloud projects. Warning, keep your buzzword bingo cards ready for the <a href="https://en.wikipedia.org/wiki/OpenStack">Wikipedia</a> definition:</p>
+
+<pre><code>OpenStack is a free and open-source software cloud computing platform. It is primarily deployed as an infrastructure as a service (IaaS) solution. The technology consists of a series of interrelated projects that control pools of processing, storage, and networking resources throughout a data center, able to be managed or provisioned through a web-based dashboard, command-line tools, or a RESTful API. It is released under the terms of the Apache License.
+</code></pre>
+
+<p>Basically it is a very nice project which provides an easy and scalable way to:</p>
+
+<ol>
+<li>Virtualize (Compute / Nova) (KVM, VMWare, Xen)</li>
+<li>Provide scalable object access (Swift / Objectstore) (like s3)</li>
+<li>Manage it all using a nice dashboard (Horizon)</li>
+<li>Have a great API which lets people develop applications for it.</li>
+<li>Be open source. There is no vendor lock in, you can switch between any provider providing OpenStack.</li>
+</ol>
+
+<p>In this tutorial we will focus on the Swift part, which provides s3 like access to files, or, objects. </p>
+
+<p>You can see all my <a href="https://raymii.org/s/tags/openstack.html">Openstack related tutorials here</a>. For example, how to use <a href="https://raymii.org/s/tutorials/Encrypted_Duplicity_Backups_to_Openstack_Swift_Objectstore.html">Duplicity to create Encrypted backups to the Openstack Swift Object Store</a>.</p>
+
+<p>As said, Swift has a very nice API to program to. For example, you can create an app for a TV show which streams extra video related to the TV show. This will be a one time peak  in traffic, depending on the TV show it can get pretty high in volume. You don&#39;t want to set up all the capacity yourself, including scaling, distributing files over multiple servers and load balancing it all. Swift handles this for you. You do need to program to it, there is not an easy way (yet) to access it in your file browser for example.</p>
+
+<p>The project <a href="https://github.com/cloudfs/ftp-cloudfs">ftp-cloudfs</a> solves this partly by acting as a proxy between the Object Store API and an FTP client. Installation is easy, it can all be done via <a href="http://docs.openstack.org/api/quick-start/content/">pip</a>.</p>
+
+<h3>Requirements</h3>
+
+<p>You will need the following:</p>
+
+<ul>
+<li>access to an Openstack Swift instance (<a href="http://www.cloudvps.com/openstack/object-store/">CloudVPS</a> for example)</li>
+<li>python 2.7
+
+<ul>
+<li>python-keystoneclient (if you are going to use v2.0 authentication)</li>
+<li>python-swiftclient</li>
+</ul></li>
+<li>an ftp client</li>
+</ul>
+
+<p>This tutorial was written and tested on Ubuntu 12.04 and CentOS 6, but works everywhere the above requirements can be met.</p>
+
+<h3>Installing packages</h3>
+
+<p>We need to make sure we have python 2, pip and the keystone client installed. For Ubuntu/Debian:</p>
+
+<pre><code>apt-get install python-pip
+</code></pre>
+
+<p>For CentOS/RHEL:</p>
+
+<pre><code>yum install python-pip
+</code></pre>
+
+<p>Now we are going to install ftp-cloudfs, swiftclient and keystoneclient using <code>pip</code>. You should do this in a python virtualenv, however that goes beyond the scope of this tutorial.</p>
+
+<pre><code>pip install ftp-cloudfs python-keystoneclient python-swiftclient
+</code></pre>
+
+<h3>Running the FTP server</h3>
+
+<p>When that is all finished we can start the ftp proxy like so:</p>
+
+<pre><code>ftpcloudfs --foreground --keystone-auth --auth-url https://identity.stack.cloudvps.com/v2.0
+</code></pre>
+
+<p>This will start up the FTP server in the foreground on port 2021, talking to the <a href="http://www.cloudvps.com/openstack/object-store/">CloudVPS</a> Swift Object Store. </p>
+
+<p><code>ftp-cloudfs</code> has the following usage options:</p>
+
+<pre><code>Usage: ftpcloudfs [options]
+
+Options:
+  --version             show program&#39;s version number and exit
+  -h, --help            show this help message and exit
+  -p PORT, --port=PORT  Port to bind the server (default: 2021)
+  -b BIND_ADDRESS, --bind-address=BIND_ADDRESS
+                        Address to bind (default: 127.0.0.1)
+  -a AUTHURL, --auth-url=AUTHURL
+                        Authentication URL (required)
+  --memcache=MEMCACHE   Memcache server(s) to be used for cache (ip:port)
+  -v, --verbose         Be verbose on logging
+  -f, --foreground      Do not attempt to daemonize but run in foreground
+  -l LOG_FILE, --log-file=LOG_FILE
+                        Log File: Default stdout when in foreground
+  --syslog              Enable logging to the system logger (daemon facility)
+  --pid-file=PID_FILE   Pid file location when in daemon mode
+  --uid=UID             UID to drop the privilige to when in daemon mode
+  --gid=GID             GID to drop the privilige to when in daemon mode
+  --keystone-auth       Use auth 2.0 (Keystone, requires keystoneclient)
+  --keystone-region-name=REGION_NAME
+                        Region name to be used in auth 2.0
+  --keystone-tenant-separator=TENANT_SEPARATOR
+                        Character used to separate tenant_name/username in
+                        auth 2.0 (default: TENANT.USERNAME)
+  --keystone-service-type=SERVICE_TYPE
+                        Service type to be used in auth 2.0 (default: object-
+                        store)
+  --keystone-endpoint-type=ENDPOINT_TYPE
+                        Endpoint type to be used in auth 2.0 (default:
+                        publicURL)
+</code></pre>
+
+<p>For CloudVPS, the username will be in the form of: <code>TENANTNAME.EMAIL@ADDRESS.EXT</code>. For example, <code>BLA000066 Cinderella.user@example.org</code>. If you have a tenant (tenant means project in Openstack terminology) with a dot in the name, you can use the <code>--keystone-tenant-separator</code> option to change it in, for example, a <code>\</code> backslash.</p>
+
+<p>Now use your FTP client to connect to the server and there&#39;s your Object Store. There are some limitations: </p>
+
+<ul>
+<li>you can not place files in the top level folder, you need a subfolder. This is because top level are containers. </li>
+<li>you can not rename a non-empty directory. You will get a <code>550 Directory not empty.</code> error. </li>
+<li>you can not recursively delete a folder. That is handled by most clients, filezilla understands that it has to go in every folder and remove all the things and then remove the folder. </li>
+<li>top level folders are created as private containers. You will need to change them to public if that is needed.</li>
+</ul>
+
+<p>These limitations come from the fact that we are not talking to a file system block storage, but to object storage. Try to force a square through a circle, and then appreciate how well ftp-cloudfs handles this.</p>
+
+<h3>Authentication Data</h3>
+
+<p>If you are unsure about what data you should use to authenticate you can use the <a href="http://docs.openstack.org/api/quick-start/content/">Openstack API</a> to get that data. Your provider may for example not have it in a logical place. The Openstack Horizon dashboard provides all the required data and URLs under the &quot;Access and Security --&gt; API Access&quot;.</p>
+
+<p>First get an authentication token using cURL:</p>
+
+<pre><code>curl -i &#39;https://identity.stack.cloudvps.com/v2.0/tokens&#39; -X POST -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/json&quot;  -d &#39;{&quot;auth&quot;: {&quot;tenantName&quot;: &quot;&quot;, &quot;passwordCredentials&quot;: {&quot;username&quot;: &quot;user@example.com&quot;, &quot;password&quot;: &quot;passw0rd&quot;}}}&#39;
+</code></pre>
+
+<p>Response:</p>
+
+<pre><code>HTTP/1.1 200 OK
+Vary: X-Auth-Token
+Content-Type: application/json
+Content-Length: 543
+Connection: close
+
+{
+    &quot;access&quot;: {
+        &quot;token&quot;: {
+            &quot;issued_at&quot;: &quot;2014-05-19T03:24:50.971373&quot;,
+            &quot;expires&quot;: &quot;2014-05-20T03:24:50Z&quot;,
+            &quot;id&quot;: &quot;8g2CeQ3kM0tkRAEiu6KmGaI6M8NLFDJ8WQ&quot;
+        },
+        &quot;serviceCatalog&quot;: [],
+        &quot;user&quot;: {
+            &quot;username&quot;: &quot;user@example.com&quot;,
+            &quot;roles_links&quot;: [],
+            &quot;id&quot;: &quot;J0XPUWipImRpkFXAVxJYELAXnXx26jPPj9w&quot;,
+            &quot;roles&quot;: [],
+            &quot;name&quot;: &quot;user@example.com&quot;
+        },
+        &quot;metadata&quot;: {
+            &quot;is_admin&quot;: 0,
+            &quot;roles&quot;: []
+        }
+    }
+}
+</code></pre>
+
+<p>The token is the first <code>id</code>. In this case: <code>8g2CeQ3kM0tkRAEiu6KmGaI6M8NLFDJ8WQ</code>. </p>
+
+<p>Use the token to get a list of tenants for that token:</p>
+
+<pre><code>curl -i -X GET &#39;https://identity.stack.cloudvps.com/v2.0/tenants&#39; -H &quot;User-Agent: python-keystoneclient&quot; -H &quot;X-Auth-Token: 8g2CeQ3kM0tkRAEiu6KmGaI6M8NLFDJ8WQ&quot;
+</code></pre>
+
+<p>Response:</p>
+
+<pre><code>HTTP/1.1 200 OK
+Vary: X-Auth-Token
+Content-Type: application/json
+Content-Length: 523
+Connection: close
+
+{
+    &quot;tenants_links&quot;: [],
+    &quot;tenants&quot;: [
+        {
+            &quot;handle&quot;: &quot;HANDLE&quot;,
+            &quot;description&quot;: &quot;HANDLE Projectname&quot;,
+            &quot;enabled&quot;: true,
+            &quot;id&quot;: &quot;zORIDFV4ybpbV9bRg1gwNi7NNnTiCw&quot;,
+            &quot;name&quot;: &quot;HANDLE Projectname&quot;
+        },
+        {
+            &quot;handle&quot;: &quot;HANDLE&quot;,
+            &quot;description&quot;: &quot;Main Customer Tenant&quot;,
+            &quot;enabled&quot;: true,
+            &quot;id&quot;: &quot;vnsdmwzPSl8dHm2RQQe&quot;,
+            &quot;name&quot;: &quot;HANDLE&quot;
+        }
+    ]
+}
+</code></pre>
+
+<p>The part you want to have is the <code>&quot;name&quot;: &quot;HANDLE Projectname&quot;</code> part. That is your tenant.</p>
+
+<h3>Screenshot</h3>
+
+<p>Here is a screenshot of Filezilla uploading a copy of this website to the Object Store:</p>
+
+<p><img src="https://raymii.org/s/inc/img/filezilla-swift.png" alt=filezilla /></p>
+<hr>Tags: <a href="../tags/backup.html" class="link">backup, </a><a href="../tags/centos.html" class="link">centos, </a><a href="../tags/cloud.html" class="link">cloud, </a><a href="../tags/debian.html" class="link">debian, </a><a href="../tags/filezilla.html" class="link">filezilla, </a><a href="../tags/ftp.html" class="link">ftp, </a><a href="../tags/keystone.html" class="link">keystone, </a><a href="../tags/objectstore.html" class="link">objectstore, </a><a href="../tags/openstack.html" class="link">openstack, </a><a href="../tags/python.html" class="link">python, </a><a href="../tags/swift.html" class="link">swift, </a><a href="../tags/ubuntu.html" class="link">ubuntu, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
