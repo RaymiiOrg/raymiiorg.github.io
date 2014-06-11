@@ -365,7 +365,7 @@ quit;
 
 <p>The database also needs a schema. OSSEC provides a schema, it is located in the extracted OSSEC folder, <code>src/os_dbd</code>. Import it into MySQL:</p>
 
-<pre><code>mysql -u root -p ossec &amp;lt; src/os_dbd/mysql.schema
+<pre><code>mysql -u root -p ossec &lt; src/os_dbd/mysql.schema
 </code></pre>
 
 <p>That&#39;s it for the database setup. Continue to see the OSSEC configuration.</p>
@@ -374,15 +374,15 @@ quit;
 
 <p>We have to add the database config to <code>/var/ossec/etc/ossec.conf</code>:</p>
 
-<pre><code>&amp;lt;ossec_config&amp;gt;
-    &amp;lt;database_output&amp;gt;
-        &amp;lt;hostname&amp;gt;127.0.0.1&amp;lt;/hostname&amp;gt;
-        &amp;lt;username&amp;gt;ossec_u&amp;lt;/username&amp;gt;
-        &amp;lt;password&amp;gt;Passw0rd&amp;lt;/password&amp;gt;
-        &amp;lt;database&amp;gt;ossec&amp;lt;/database&amp;gt;
-        &amp;lt;type&amp;gt;mysql&amp;lt;/type&amp;gt;
-    &amp;lt;/database_output&amp;gt;
-&amp;lt;/ossec_config&amp;gt;
+<pre><code>&lt;ossec_config&gt;
+    &lt;database_output&gt;
+        &lt;hostname&gt;127.0.0.1&lt;/hostname&gt;
+        &lt;username&gt;ossec_u&lt;/username&gt;
+        &lt;password&gt;Passw0rd&lt;/password&gt;
+        &lt;database&gt;ossec&lt;/database&gt;
+        &lt;type&gt;mysql&lt;/type&gt;
+    &lt;/database_output&gt;
+&lt;/ossec_config&gt;
 </code></pre>
 
 <p>Save it, then enable the database in OSSEC:</p>
@@ -583,9 +583,9 @@ Added.
 
 <p>And then this needs to be in the <code>/var/ossec/etc/ossec.conf</code> file:</p>
 
-<pre><code>&amp;lt;client&amp;gt;
-  &amp;lt;server-hostname&amp;gt;ossec.raymii.nl&amp;lt;/server-hostname&amp;gt;
-&amp;lt;/client&amp;gt;
+<pre><code>&lt;client&gt;
+  &lt;server-hostname&gt;ossec.raymii.nl&lt;/server-hostname&gt;
+&lt;/client&gt;
 </code></pre>
 
 <p>Where <code>ossec.raymii.nl</code> is your OSSEC server URL or IP.</p>
@@ -626,26 +626,26 @@ Completed.
 
 <p>To very simply ignore rules based on rule id, add them to the XML file located in <code>/var/ossec/rules/local_rules/xml</code>, either on the ossec client for one machine or the ossec server to ignore on all machines:</p>
 
-<pre><code>&amp;lt;!-- Specify here a list of rules to ignore. --&amp;gt;
-&amp;lt;!-- 3334 postfix start  --&amp;gt;
-&amp;lt;!-- 3333 postfix stop --&amp;gt;
-&amp;lt;rule id=&quot;100030&quot; level=&quot;0&quot;&amp;gt;
-    &amp;lt;if_sid&amp;gt;3333, 3334&amp;lt;/if_sid&amp;gt;
-    &amp;lt;description&amp;gt;List of rules to be ignored.&amp;lt;/description&amp;gt;
-&amp;lt;/rule&amp;gt;
+<pre><code>&lt;!-- Specify here a list of rules to ignore. --&gt;
+&lt;!-- 3334 postfix start  --&gt;
+&lt;!-- 3333 postfix stop --&gt;
+&lt;rule id=&quot;100030&quot; level=&quot;0&quot;&gt;
+    &lt;if_sid&gt;3333, 3334&lt;/if_sid&gt;
+    &lt;description&gt;List of rules to be ignored.&lt;/description&gt;
+&lt;/rule&gt;
 </code></pre>
 
 <h4>Monitoring additional log files</h4>
 
 <p>The OSSEC agent by default only monitors a few log files. To add more, edit the <code>/var/ossec/etc/ossec.conf</code> file and add a line like this:</p>
 
-<pre><code>&amp;lt;localfile&amp;gt;
-    &amp;lt;location&amp;gt;/var/log/*&amp;lt;/location&amp;gt;
-    &amp;lt;log_format&amp;gt;syslog&amp;lt;/log_format&amp;gt;
-&amp;lt;/localfile&amp;gt;
+<pre><code>&lt;localfile&gt;
+    &lt;location&gt;/var/log/*&lt;/location&gt;
+    &lt;log_format&gt;syslog&lt;/log_format&gt;
+&lt;/localfile&gt;
 </code></pre>
 
-<p>This will add all files under <code>/var/log</code>. This might be a lot, you can also just add multiple <code>&amp;lt;localfile&amp;gt;</code> blocks with filenames.</p>
+<p>This will add all files under <code>/var/log</code>. This might be a lot, you can also just add multiple <code>&lt;localfile&gt;</code> blocks with filenames.</p>
 
 <h4>Firewall</h4>
 
