@@ -76,30 +76,13 @@
 
 <p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">This tutorial was tested on a DigitalOcean VPS. If you use this link you sponsor this website. (referral link)</a></p>
 
-<p>This tutorial covers the installation of the OSSEC 2.8.0 server, the standard OSSEC Web UI and the Analogi dashboard on Ubuntu 14.04. It also covers OSSEC setup with MySQL support, including a Makefile bugfix. Last but not least it shows you how to install the OSSEC agent on a *NIX system.</p>
+<p>This tutorial covers the installation of the OSSEC 2.8.0 server, the standard OSSEC Web UI and the Analogi dashboard on Ubuntu 14.04. It also covers OSSEC setup with MySQL support. Last but not least it shows you how to install the OSSEC agent on a *NIX system.</p>
 
 <p><a href="https://raymii.org/s/inc/img/ossec/analogi-2.8.png"><img src="https://raymii.org/s/inc/img/ossec/analogi-2.8.png" width="320" height="240" alt="OSSEC Analogi dashboard" /></a></p>
 
-<p>This tutorial is written for an ubuntu 14.04 OSSEC 2.8.0 server, but can be easily adapted to other *NIX operating systems. It only covers basic OSSEC client/server configuration, not automatic blocking or comprehensive configuration settings. It gets you started, the rest is available in the documentation: http://www.ossec.net/doc/</p>
+<p>This tutorial is written for an Ubuntu 14.04 OSSEC 2.8.0 server, but can be easily adapted to other *NIX operating systems. It only covers basic OSSEC client/server configuration. It gets you started, the rest is available in the documentation: http://www.ossec.net/doc/</p>
 
 <p>You can read the tutorial for <a href="https://raymii.org/s/tutorials/OSSEC_and_webui_and_analogi_dashboard_installation_on_Ubuntu.html">OSSEC 2.7 on Ubuntu 12.04 here.</a></p>
-
-<h3>Steps</h3>
-
-<ul>
-<li>Installing development packages</li>
-<li>Installing Apache, PHP and MySQL</li>
-<li>Configuring MySQL</li>
-<li>Compiling the OSSEC server
-
-<ul>
-<li>Makefile fix for Ubuntu</li>
-</ul></li>
-<li>Basic OSSEC setup with MySQL</li>
-<li>Installing OSSEC Web UI</li>
-<li><p>Installing Analogi Web Dashboard</p></li>
-<li><p>Installing and configuring a client</p></li>
-</ul>
 
 <h3>Requirements</h3>
 
@@ -123,7 +106,7 @@
 <pre><code>apt-get install mysql-server libmysqlclient-dev mysql-client apache2 php5 libapache2-mod-php5 php5-mysql php5-curl php5-gd php5-intl php-pear php5-imagick php5-imap php5-mcrypt php5-memcache php5-ming php5-ps php5-pspell php5-recode php5-snmp php5-sqlite php5-tidy php5-xmlrpc php5-xsl
 </code></pre>
 
-<p>Remember to give a strong root password for MySQL. Next finish MySQL with a secure installation:</p>
+<p>Remember to set a strong root password for MySQL. Next finish MySQL with a secure installation:</p>
 
 <pre><code>mysql_secure_installation
 </code></pre>
@@ -136,7 +119,7 @@
 
 <h3>Compiling the OSSEC server</h3>
 
-<p>Do note that OSSEC has Debian packages available. These do not include MySQL or Postgres support, therefore we need to compile that in. </p>
+<p>Do note that OSSEC has Debian packages available. These do not include MySQL or Postgres support, therefore we need to compile it. The packages are also at the moment only available for OSSEC 2.7. </p>
 
 <p>Download and verify OSSEC, either via wget or from the website: http://www.ossec.net/?page_id=19</p>
 
@@ -160,7 +143,7 @@ cd ossec-hids-2.8
 
 <h4>Database support</h4>
 
-<p>The Makefile error is no more, it is fixed in 2.8. </p>
+<p>The Makefile error is fixed in 2.8. </p>
 
 <p>This tutorial uses MySQL because the Analogi dashboard only supports MySQL. Instructions for Postgres are included.</p>
 
@@ -456,8 +439,6 @@ quit;
 <pre><code>mysql -u root -p ossec &lt; src/os_dbd/mysql.schema
 </code></pre>
 
-<p>That&#39;s it for the database setup.</p>
-
 <h3>OSSEC MySQL configuration</h3>
 
 <p>We have to add the database config to <code>/var/ossec/etc/ossec.conf</code>:</p>
@@ -485,7 +466,7 @@ quit;
 
 <p><a href="https://raymii.org/s/inc/img/ossec/webui-2.8.png"><img src="https://raymii.org/s/inc/img/ossec/webui-2.8.png" width="320" height="240" alt="OSSEC Web UI" /></a></p>
 
-<p>This is also quite simple. Because we&#39;ve already set up Apache and PHP, we can just download the web UI and extract to <code>/var/www/</code>:</p>
+<p>This is also quite simple. Because we&#39;ve already set up Apache and PHP, we can just download the web UI and extract to <code>/var/www/html</code>:</p>
 
 <pre><code>wget http://www.ossec.net/files/ossec-wui-0.8.tar.gz
 tar -xf ossec-wui-0.8.tar.gz
@@ -510,7 +491,7 @@ chmod 666 /var/www/html/ossec/tmp
 
 <p>The Analogi dashboard is a nice and informative dashboard around OSSEC, which provides more visual information then the standard Web UI. The standard Web UI has better search functions, the Dashboard can be used for example on a Wall Mounted monitor and such.</p>
 
-<p>Installation consists out of cloning the git repo and entering the settings file:</p>
+<p>Installation consists out of cloning the git repo and editing the settings file:</p>
 
 <pre><code>cd /var/www/html/
 git clone https://github.com/ECSC/analogi.git
