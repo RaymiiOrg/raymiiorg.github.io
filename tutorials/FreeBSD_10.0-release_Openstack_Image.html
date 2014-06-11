@@ -1,0 +1,287 @@
+<!-- nominify -->
+
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Build a FreeBSD 10.0-release Openstack Image with bsd-cloudinit - Raymii.org</title>
+        <link href="/s/inc/css/bootstrap.css" rel="stylesheet" />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/vpn.html" class="link">VPN</a></li><li><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>
+               <!-- advertisement start -->
+               
+                
+                <strong>Support this website:</strong><br />
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting VPS Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS Affiliate</a><br />
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                <input type="hidden" name="cmd" value="_s-xclick">
+                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                ">
+                <input type="image" src="https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                <img alt="" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
+                </form>
+                <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-7993642564731324";
+                google_ad_slot = "9322003332";
+                google_ad_width = 200;
+                google_ad_height = 200;
+                //-->
+                </script>
+                <script type="text/javascript"
+                src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+
+           <h2 class='headheader'>Build a FreeBSD 10.0-release Openstack Image with bsd-cloudinit</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="FreeBSD_10.0-release_Openstack_Image.html" class="link">Build a FreeBSD 10.0-release Openstack Image with bsd-cloudinit</a></li></ul><p><small>11-06-2014</small> | <small>Remy van Elst</small></p><p>We are going to prepare a FreeBSD image for Openstack deployment. We do this by creating a FreeBSD 10.0-RELEASE instance, installing it and converting it using <a href="http://pellaeon.github.io/bsd-cloudinit/">bsd-cloudinit</a>. We&#39;ll use the <a href="https://cloudvps.com">CloudVPS</a> public Openstack cloud for this. Create an account there and install the Openstack command line tools, like <code>nova</code>, <code>cinder</code> and <code>glance</code>. This tutorial is more a collection of notes than what you are used of me, it has less explanation and such, just right on steps to get started.</p>
+
+<p>You can see all my <a href="https://raymii.org/s/tags/openstack.html">Openstack related articles here</a>. For example, how to use <a href="https://raymii.org/s/tutorials/Encrypted_Duplicity_Backups_to_Openstack_Swift_Objectstore.html">Duplicity to create Encrypted backups to the Openstack Swift Object Store</a></p>
+
+<p>Set the correct environment variables:</p>
+
+<pre><code>export OS_AUTH_URL=&quot;https://identity.stack.cloudvps.com/v2.0&quot;
+export OS_TENANT_NAME=&quot;&lt;tenant name&gt;&quot;
+export OS_USERNAME=&quot;&lt;username&gt;&quot;
+export OS_PASSWORD=&quot;&lt;password&gt;&quot;
+export OS_TENANT_ID=&quot;&lt;tenant id&gt;&quot;
+</code></pre>
+
+<p>Start by downloading the 10.0-RELEASE iso:</p>
+
+<pre><code>wget http://ftp.freebsd.org/pub/FreeBSD/releases/amd64/amd64/ISO-IMAGES/10.0/FreeBSD-10.0-RELEASE-amd64-disc1.iso
+</code></pre>
+
+<p>Upload it to Openstack:</p>
+
+<pre><code>glance image-create --file Downloads/FreeBSD-10.0-RELEASE-amd64-disc1.iso --name &quot;FreeBSD-10.0-RELEASE-amd64-disc1.iso&quot; --disk-format iso --container-format bare --progress
+</code></pre>
+
+<p>Create the root volume for our FreeBSD preparation install:</p>
+
+<pre><code>cinder create --display-name &quot;freebsd-10-root&quot; 8
+</code></pre>
+
+<p>Boot a new instance from the ISO, attaching the volume we just created ad well:</p>
+
+<pre><code>nova boot --image &lt;freebsd iso image id&gt; --flavor &quot;Standard 1&quot; --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000 --block-device-mapping hdb=&lt;volume freebsd-10-root id&gt;:::0 FreeBSD-10.0-RELEASE-install
+</code></pre>
+
+<p>Do a standard install of FreeBSD 10:</p>
+
+<ul>
+<li>default keymap</li>
+<li>hostname: freebsd.public.cloudvps.com</li>
+<li>Just lib32 and ports, no doc, games or src</li>
+<li>Partition Layout:
+
+<ul>
+<li>ada0 GPT</li>
+<li>ada0p1 64kb freebsd-boot</li>
+<li>ada0p2 512MB freebsd-swap</li>
+<li>ada0p3 7GB freebsd-root mountpoint /</li>
+</ul></li>
+<li>Root password P@ssw0rd</li>
+<li>Network:
+
+<ul>
+<li>adapter: vtnet0</li>
+<li>ipv4: dhcp</li>
+<li>ipv6: slaac</li>
+<li>search: public.cloudvps.com</li>
+</ul></li>
+<li>UTC: no, timezone 8 EUROPE 34 NETHERLANDS</li>
+<li>Services at boot: sshd, ntpd, moused, dumpd</li>
+<li>Extra user:
+
+<ul>
+<li>Username: freebsd</li>
+<li>Full name: freebsd</li>
+<li>uid: default</li>
+<li>Login group: default</li>
+<li>Other groups: wheel</li>
+<li>Login class: default</li>
+<li>Shell: tcsh</li>
+<li>Home: default</li>
+<li>Home permissions: default</li>
+<li>Password auth: yes</li>
+<li>Empty password: no</li>
+<li>Random password: no</li>
+<li>Password: P@ssw0rd</li>
+<li>Lock out: no</li>
+<li>OK: yes</li>
+<li>Another user: no</li>
+</ul></li>
+<li>Exit</li>
+</ul>
+
+<p>After install, edit <code>/etc/fstab</code>, changing <code>ada0</code> to <code>vtbd0</code>. This is for VirtIO support.</p>
+
+<p>Shut the instance from FreeBSD using <code>shutdown -p now</code> and after that via nova:</p>
+
+<pre><code>nova stop &lt;install vm id&gt;
+</code></pre>
+
+<p>Detach the volume:</p>
+
+<pre><code>nova volume-detach &lt;install vm id&gt; &lt;install root volume id&gt;
+</code></pre>
+
+<p>Boot a new instance with the installed freebsd volume as the root volume:</p>
+
+<pre><code>nova boot --block-device source=volume,id=&lt;root volume id&gt;,dest=volume,shutdown=preserve,bootindex=0 --flavor &quot;Standard 1&quot; --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000  FreeBSD-10.0-RELEASE-configure
+</code></pre>
+
+<p>If you get a mountroot error, enter the following: ufs:/dev/vtbd0p3.</p>
+
+<p>Change <code>/etc/fstab</code> after the fact, change <code>ada0</code> to <code>vtbd0</code> for VirtIO support.</p>
+
+<p>Set the default route:</p>
+
+<pre><code>route add default `ifconfig vtnet0 | grep &quot;inet &quot; | cut -d&quot; &quot; -f 2 | awk -F. &#39;{print $1&quot;.&quot;$2&quot;.&quot;$3&quot;.1&quot; }&#39;`
+</code></pre>
+
+<p>Also put it in <code>/etc/rc.local</code> to make sure it works on bootup.</p>
+
+<p>Bootstrap pkg:</p>
+
+<pre><code>pkg
+</code></pre>
+
+<p>Enter y.</p>
+
+<p>Install vim and py27-setuptools (for bsd-cloudinit):</p>
+
+<pre><code>pkg install vim-lite py27-setuptools
+</code></pre>
+
+<p>Add your SSH key:</p>
+
+<pre><code>mkdir /root/.ssh
+chmod 700 /root/.ssh
+echo &quot;ssh-rsa AAAA[...] user@example.com&quot; &gt; /root/.ssh/authorized_keys
+chmod 600 /root/.ssh/authorized_keys
+</code></pre>
+
+<p>Install python modules for bsd-cloudinit:</p>
+
+<pre><code>rehash
+easy_install eventlet
+easy_install iso8601
+</code></pre>
+
+<p>Add the following to <code>/boot/loader.conf</code> to make sure the console works:</p>
+
+<pre><code>console=&quot;comconsole,vidconsole&quot;
+autoboot_delay=&quot;5&quot;
+</code></pre>
+
+<p>Now do any other customizations you want to have in your image.</p>
+
+<p>Do the bsd-cloudinit install:</p>
+
+<pre><code>fetch --no-verify-peer https://raw.github.com/pellaeon/bsd-cloudinit-installer/master/installer.sh
+chmod +x installer.sh
+./installer.sh
+set history = 0
+history -c
+</code></pre>
+
+<p>Turn the machine off:</p>
+
+<pre><code>shutdown -p now
+</code></pre>
+
+<p>Terminate the machine, otherwise you cannot detach the volume (ERROR: Can&#39;t detach root device volume (HTTP 403)):</p>
+
+<pre><code>nova delete &lt;id of freebsd-configure vm)
+</code></pre>
+
+<p>Convert the volume to an image:</p>
+
+<pre><code>cinder upload-to-image &lt;freebsd-10-root volume id&gt; FreeBSD-10.0-RELEASE-cloudinit
+</code></pre>
+
+<p>This might take a while.</p>
+
+<p>Set the min-disk and min-ram requirements, plus some more properties for the image:</p>
+
+<pre><code>glance image-update --min-disk 8 --min-ram 1024 --property architecture=x86_64 --property image_supports_keypair=true --property image_supports_password=true --property supported=false &lt;id from the converted volume image&gt;
+</code></pre>
+
+<p>If needed, make it public:</p>
+
+<pre><code>glance --name &quot;UNSUPPORTED: FreeBSD-10.0-RELEASE&quot; --is-public True &lt;id from the converted volume image&gt;
+</code></pre>
+
+<p>That&#39;s it. You are done and have a good workable freebsd image.</p>
+
+<p>Boot a new instance from your newly created image:</p>
+
+<pre><code>nova boot --image &lt;id from the converted volume image&gt; --flavor &quot;Standard 4&quot; --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000 --key-name &lt;your ssh key&gt; FreeBSD-10.0-RELEASE-cloudinit
+</code></pre>
+
+<p>When the instance has spawned you can login as the freebsd user, freebsd@ipaddress.</p>
+<hr>Tags: <a href="../tags/cloud.html" class="link">cloud, </a><a href="../tags/cloudinit.html" class="link">cloudinit, </a><a href="../tags/compute.html" class="link">compute, </a><a href="../tags/freebsd.html" class="link">freebsd, </a><a href="../tags/image.html" class="link">image, </a><a href="../tags/openstack.html" class="link">openstack, </a><a href="../tags/python.html" class="link">python, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
