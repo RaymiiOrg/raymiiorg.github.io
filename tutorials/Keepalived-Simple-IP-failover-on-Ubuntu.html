@@ -74,6 +74,9 @@ vrrp_instance VI_1 {
 &lt;h1&gt;Keepalived 2 - backup!&lt;/h1&gt;
 &lt;/body&gt;
 &lt;/html&gt;
+</code></pre><h4>sysctl</h4><p>In order to be able to bind on a IP which is not yet defined on the system, we need to enable non local binding at the kernel level.</p><p>Temporary:</p><pre><code>echo 1 &gt; /proc/sys/net/ipv4/ip_nonlocal_bind
+</code></pre><p>Permanent:</p><p>Add this to <code>/etc/sysctl.conf</code>:</p><pre><code>net.ipv4.ip_nonlocal_bind = 1
+</code></pre><p>Enable with:</p><pre><code>sysctl -p
 </code></pre><h3>Start &amp; Failover</h3><p>When the website is set up we can start both NGINX and Keepalived on both servers:</p><pre><code>service keepalived start
 service nginx start
 </code></pre><p>Visit the IP you configured as a failover IP in your browser. You should see the page for server 1.</p><p>Let's do a test failover. On server 1, stop keepalived:</p><pre><code>service keepalived stop
