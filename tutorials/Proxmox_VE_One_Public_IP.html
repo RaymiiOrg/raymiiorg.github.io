@@ -14,7 +14,9 @@
                             google_ad_height = 90;
                             //-->
                             </script><script src="//pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
-                            </script></div><br/><p>This guide will show you how to set up Proxmox with only one public IP. We will configure an extra interface bridge and make sure VM traffic is NATed. I have a few dedicated servers, some run Proxmox. Most of them however have only a few IP's. Therefore the VM's in proxmox cannot all have a public IP. For most of them that is not a problem. If needed I run a proxy or set up iptables to forward ports to the VM's.</p><p>This guide is tested on a proxmox machine running proxmox version 3.2.</p><p>What we will have at the end is a VM with an SSH port reachable on the public IP:</p><p>Container/VM ------------ Proxmox Server -------------- Public Internet 10.21.21.5:22 --- 10.21.21.5:22 NAT to 1.2.3.4:2222 --- 1.2.3.4:2222</p><p>Proxmox by default creates one interface, <code>vmbr0</code>. That config looks like this:</p><pre><code># /etc/network/interfaces
+                            </script></div><br/><p>This guide will show you how to set up Proxmox with only one public IP. We will configure an extra interface bridge and make sure VM traffic is NATed. I have a few dedicated servers, some run Proxmox. Most of them however have only a few IP's. Therefore the VM's in proxmox cannot all have a public IP. For most of them that is not a problem. If needed I run a proxy or set up iptables to forward ports to the VM's.</p><p>This guide is tested on a proxmox machine running proxmox version 3.2.</p><p>What we will have at the end is a VM with an SSH port reachable on the public IP:</p><pre><code>Container/VM ------------ Proxmox Server -------------- Public Internet
+10.21.21.5:22 --- 10.21.21.5:22 NAT to 1.2.3.4:2222 --- 1.2.3.4:2222
+</code></pre><p>Proxmox by default creates one interface, <code>vmbr0</code>. That config looks like this:</p><pre><code># /etc/network/interfaces
 auto vmbr0
 iface vmbr0 inet static
     address 1.2.3.4
