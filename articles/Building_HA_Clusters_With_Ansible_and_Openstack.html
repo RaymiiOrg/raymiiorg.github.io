@@ -84,7 +84,7 @@
                             <script type="text/javascript"
                             src="//pagead2.googlesyndication.com/pagead/show_ads.js">
                             </script>
-                        </div><br><p>This is an extensive guide on building high available clusters with Ansible and Openstack. We&#39;ll build a Highly available cluster consisting out of two load balancers, two database servers and two application servers. This is all done with Ansible, the cluster nodes are all on Openstack. Ansible is a super awesome orchestration tool and Openstack is a big buzzword filles software suite for datacenter virtualization.</p>
+                        </div><br><p>This is an extensive guide on building high available clusters with Ansible and Openstack. We&#39;ll build a Highly available cluster consisting out of two load balancers, two database servers and two application servers. This is all done with Ansible, the cluster nodes are all on Openstack. Ansible is a super awesome orchestration tool and Openstack is a big buzzword filled software suite for datacenter virtualization.</p>
 
 <h3>Summary</h3>
 
@@ -207,7 +207,7 @@ keepalived_lbs_passwd: &quot;m9RwFk3Mx&quot;
 
 <p>One of each these servers will be in Availability Zone NL1 and one in zone NL2. If your Openstack Provider has Availability Zones and you use them correctly then your cluster will be protected against one whole data center (Availability Zone) loss. </p>
 
-<p>I&#39;ve added the Availability Zone selection code to Ansible 1.7, <a href="https://github.com/ansible/ansible/pull/8182">see this pull request</a>. Make sure you run at least Ansible 1.7, otherwise it will complain about not knowing the parameter.</p>
+<p>I&#39;ve added the Availability Zone selection code to Ansible 1.7, <a href="https://github.com/ansible/ansible/pull/8182">see this pull request</a>. Make sure you run at least Ansible 1.7, otherwise it will complain about not knowing the parameter. You can also just comment out the availability zone parameter, apply the patch yourself or run the &quot;devel&quot; branch of Ansible (when it is merged).</p>
 
 <p>The play consists out of 6 times the following, one for each host:</p>
 
@@ -260,7 +260,8 @@ keepalived_lbs_passwd: &quot;m9RwFk3Mx&quot;
 
 <p>You can define multipe groups where a playbook should run with the <code>:</code> as you can see below, we run on <code>lbs:app</code>. The <code>when</code> statement makes sure the actual playbook only runs on the nodes in the <code>lbs</code> group.</p>
 
-<pre><code>- name: Configure LoadBalancers
+<pre><code># tasks/main.yml
+- name: Configure LoadBalancers
   hosts: lbs:app
   vars_files:
     - &quot;vars/main.yml&quot;
@@ -317,7 +318,8 @@ keepalived_lbs_passwd: &quot;m9RwFk3Mx&quot;
 
 <p>The template file looks like this:</p>
 
-<pre><code>upstream backend  {
+<pre><code># templates/nginx.conf.j2
+upstream backend  {
 {% for host in groups[&#39;app&#39;] %}
     server {{ hostvars[host][&#39;ansible_eth0&#39;][&#39;ipv4&#39;][&#39;address&#39;] }}:80 max_fails=5  fail_timeout=5s;
 {% endfor %}
@@ -456,13 +458,14 @@ proxy_cache_use_stale   error timeout invalid_header updating  http_500 http_502
 
 <h3>Database Cluster</h3>
 
-<p><img src="https://raymii.org/s/inc/img/dilbert-database.png" /></p>
+<p><img src="https://raymii.org/s/inc/img/database-dilbert.png" /></p>
 
 <p>Our database cluster will consist out of two MySQL servers running in Master Master mode. </p>
 
 <p>This play runs on the two database servers Ansible created earlier:</p>
 
-<pre><code>- name: Configure Databases
+<pre><code># tasks/main.yml
+- name: Configure Databases
   hosts: dbs
   vars_files:
     - &quot;vars/main.yml&quot;
@@ -478,7 +481,8 @@ proxy_cache_use_stale   error timeout invalid_header updating  http_500 http_502
 
 <p>We start with installing MySQL and the python module Ansible needs for MySQL:</p>
 
-<pre><code>---
+<pre><code># tasks/configure-dbs.yml
+---
 - apt: 
     name=&quot;{{ item }}&quot; 
     state=latest 
@@ -502,7 +506,8 @@ proxy_cache_use_stale   error timeout invalid_header updating  http_500 http_502
 
 <p>This is the config file:</p>
 
-<pre><code>[client]
+<pre><code># templates/my.cnf.j2
+[client]
 port        = 3306
 socket      = /var/run/mysqld/mysqld.sock
 
@@ -652,7 +657,8 @@ server_id                   = {{ sql_server_id }} # variable set during ansible 
 
 <p>The keepalive playbook is the same as the one we used in the load balancer setup. However, we check in which group the hostname is and based on that place a different config file:</p>
 
-<pre><code>- template:
+<pre><code># tasks/keepalived.yml
+- template:
     src: keepalived.lbs.conf.j2
     dest: /etc/keepalived/keepalived.conf
   when: inventory_hostname in groups[&#39;lbs&#39;]
@@ -679,7 +685,8 @@ server_id                   = {{ sql_server_id }} # variable set during ansible 
 
 <p>Glusterfs is set up first so that when we deploy the app the changes wil automagically arrive on the second node:</p>
 
-<pre><code>- name: Configure App Server
+<pre><code># tasks/main.yml
+- name: Configure App Server
   hosts: app
   vars_files:
     - &quot;vars/main.yml&quot;
@@ -695,7 +702,8 @@ server_id                   = {{ sql_server_id }} # variable set during ansible 
 
 <p>Little rant here, this bug was in some form in 12.04, you would think that 3 years and loads of bug reports would have fixed in 14.04, but that is still not the case. It seems that if you want a stable distro you still need Red Hat... End rant.</p>
 
-<pre><code>---
+<pre><code># tasks/configure-gluster-app.yml
+---
 # boot bug in standard 14.04 packages: https://bugs.launchpad.net/ubuntu/+source/glusterfs/+bug/1268064
 - apt_repository: 
     repo: &#39;ppa:semiosis/ubuntu-glusterfs-3.4&#39;
@@ -780,13 +788,18 @@ server_id                   = {{ sql_server_id }} # variable set during ansible 
   state: mounted</li>
 </ul>
 
-<p>If we now create a file on one node, for example <code>/var/www/html/test</code>, this file should appear on the other node as well. We can now deploy the actual application.</p>
+<p>If we now create a file on one node, for example <code>/var/www/html/test</code>, this file should appear on the other node as well. </p>
 
-<h4>Apache plus Deployment</h4>
+<p>Gluster cluster information can be found on either hosts with the <code>gluster volume info</code> or <code>gluster peer info</code> commands.</p>
+
+<p>We can now deploy the actual application.</p>
+
+<h4>Apache and Deployment</h4>
 
 <p>We start by installing the Apache webserver, php (mod_php) and a few tools and modules:</p>
 
-<pre><code>---
+<pre><code># tasks/configure-app.yml
+---
 - apt:
     name=&quot;{{ item }}&quot; 
     state=latest 
