@@ -22,9 +22,9 @@ echo "net.ipv4.conf.default.rp_filter = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.conf.default.accept_source_route = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.conf.default.send_redirects = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" |  tee -a /etc/sysctl.conf
-</code></pre><p>Now apply these settings for other network interfaces:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &amp;gt; $vpn/send_redirects; done
+</code></pre><p>Now apply these settings for other network interfaces:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &gt; $vpn/send_redirects; done
 </code></pre><p>And apply them:</p><pre><code>sysctl -p
-</code></pre><h5>Persistent settings via /etc/rc.local</h5><p>To make sure this keeps working at boot you might want to add the following to /etc/rc.local:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &amp;gt; $vpn/send_redirects; done
+</code></pre><h5>Persistent settings via /etc/rc.local</h5><p>To make sure this keeps working at boot you might want to add the following to /etc/rc.local:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &gt; $vpn/send_redirects; done
 iptables -t nat -A POSTROUTING -j SNAT --to-source %SERVERIP%
 </code></pre><p>Add it before the <code>exit 0</code> line and replace %SERVERIP% with the external IP of your VPS.</p><h4>Configure Openswan (IPSEC)</h4><p>Use your favorite editor to edit the following file:</p><pre><code>/etc/ipsec.conf  
 </code></pre><p>Replace the contents with the following:</p><p>(Most lines have a comment below it explaining what it does.)</p><pre><code>config setup

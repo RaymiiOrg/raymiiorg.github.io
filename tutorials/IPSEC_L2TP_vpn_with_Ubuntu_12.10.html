@@ -19,9 +19,9 @@
 </code></pre><p>Execute the below commands to enable kernel IP packet forwarding and disable ICP redirects.</p><pre><code>echo "net.ipv4.ip_forward = 1" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.conf.all.accept_redirects = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.conf.all.send_redirects = 0" |  tee -a /etc/sysctl.conf
-for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &amp;gt; $vpn/send_redirects; done
+for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &gt; $vpn/send_redirects; done
  sysctl -p
-</code></pre><h5>/etc/rc.local</h5><p>To make sure this keeps working at boot you might want to add the following to /etc/rc.local:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &amp;gt; $vpn/send_redirects; done
+</code></pre><h5>/etc/rc.local</h5><p>To make sure this keeps working at boot you might want to add the following to /etc/rc.local:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &gt; $vpn/send_redirects; done
 iptables --table nat --append POSTROUTING --jump MASQUERADE
 </code></pre><p>There are better ways to do this (via sysctl.conf and ufw for example) but this is something that just works.</p><h4>Configure Openswan (IPSEC)</h4><p>Use your favorite editor to edit the following file:</p><pre><code>/etc/ipsec.conf  
 </code></pre><p>Below is the contents of mine. Most lines have a comment below it explaining what it does.</p><pre><code>config setup
