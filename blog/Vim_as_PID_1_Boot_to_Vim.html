@@ -193,6 +193,8 @@ tty1::respawn:/sbin/getty 38400 tty1
 tty1::respawn:/bin/vim
 </code></pre>
 
+<p>Do note that this does not actually make Vim PID 1. Init will still manage Vim, and do stuff like <code>fsck</code> and mount the root partition read/write. If you want to go barebones, add <code>init=/bin/vim</code> to the bootloader (<code>isolinux.cfg</code>). Then, from Vim, do <code>:!fsck /dev/sda</code> and <code>mount -o remount,rw /</code>. </p>
+
 <h3>Building a new ISO</h3>
 
 <p>Make sure you are still in the <code>extract</code> folder. Issue the following command to build a new <code>tinycore.gz</code> file which the ISO will use as it&#39;s <code>initramfs</code>:</p>
