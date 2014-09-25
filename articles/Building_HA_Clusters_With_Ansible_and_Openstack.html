@@ -153,15 +153,14 @@
 
 <p>Create two floating IP&#39;s. Attach one to the Ansible Manager host.</p>
 
-<p>Ask your Openstack provider to create two ports in your private network for the two keepalived configurations. Also ask them to associate the floating IP with one of the ports.</p>
-
 <p><img src="https://raymii.org/s/inc/img/skyline-floating-ips.png" alt="keepalived" /></p>
 
-<p>These actions must be done by an Openstack admin (as of IceHouse). What they will do is create two ports in the private network with the choosen IP addresses we will use for Keepalived. The VM&#39;s in this network can bind and use these addresses. The floating IP will be associates with one of the ports so that we can bind and fail over the load balancers with one external (and internal) IP. The commands look like this:</p>
+<p>Create two ports in your private network for the two keepalived configurations. And associate the floating IP with one of these ports.</p>
 
-<pre><code>neutron port-create NETWORK-UUID --fixed_ip subnet_id=SUBNET-UUID,ip_address=PREFERED_INTERNAL_IPv4 --tenant-id YOUR_TENANT_ID
+<p>The first command will create a port in the private network and will return an port id and IP address which will be used for Keepalived. The VM&#39;s in this network can bind and use these addresses. The second command will associate the port we created previously with the floating ip address so that we can bind and fail over the load balancers with one external (and internal) IP. The commands look like this:</p>
 
-neutron floatingip-associate FLOATING_IP_UUID PORT_UUID 
+<pre><code>neutron port-create NETWORK-UUID --tenant-id YOUR_TENANT_ID
+neutron floatingip-associate FLOATING_IP_UUID PORT_UUID
 </code></pre>
 
 <p>The port-create should be done two times since we&#39;ll use keepalived on the database servers and on the load balancers.</p>
