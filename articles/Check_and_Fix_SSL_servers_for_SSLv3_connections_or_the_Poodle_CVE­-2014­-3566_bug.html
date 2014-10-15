@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Check and Fix SSL servers for SSLv3 connections or the Poodle (CVE-2014-3566) bug - Raymii.org</title>
+        <title>Check and Fix SSL servers for SSLv3 connections or the Poodle CVE-2014-3566 bug - Raymii.org</title>
         <link href="/s/inc/css/light.css" rel="stylesheet" title="light" />
         <link href="/s/inc/css/dark.css" rel="alternate stylesheet" title="dark" />
         <script src="/s/inc/js/jquery-2.1.1.min.js"></script>
@@ -70,7 +70,7 @@
            <div class="col-md-8 col-sm-8"> 
                 <div class="inner">
 
-           <h2 class='headheader'>Check and Fix SSL servers for SSLv3 connections or the Poodle (CVE-2014-3566) bug</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Check_and_Fix_SSL_servers_for_SSLv3_connections_or_the_Poodle_CVE­-2014­-3566_bug.html" class="link">Check and Fix SSL servers for SSLv3 connections or the Poodle (CVE-2014-3566) bug</a></li></ul><p><small>14-10-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
+           <h2 class='headheader'>Check and Fix SSL servers for SSLv3 connections or the Poodle CVE-2014-3566 bug</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Check_and_Fix_SSL_servers_for_SSLv3_connections_or_the_Poodle_CVE­-2014­-3566_bug.html" class="link">Check and Fix SSL servers for SSLv3 connections or the Poodle CVE-2014-3566 bug</a></li></ul><p><small>14-10-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
                             <script type="text/javascript"><!--
                             google_ad_client = "ca-pub-7993642564731324";
                             /* voorartikel */
@@ -100,7 +100,8 @@
 
 <p>Use the following command to check an IP or hostname:</p>
 
-<p>echo | timeout 3 openssl s<em>client -connect HOSTNAMEORIPADDRESS:443 &gt;/dev/null 2&gt;&1; if [[ $? != 0 ]]; then echo &quot;UNKNOWN: HOSTNAMEORIPADDRESS timeout or connection error&quot;; else echo | openssl s</em>client -connect HOSTNAMEORIPADDRESS:443 -ssl3 2&gt;&amp;1 | grep -qo &quot;sslv3 alert handshake failure&quot; &amp;&amp; echo &quot;OK: HOSTNAMEORIPADDRESS Not vulnerable&quot; || echo &quot;FAIL:  HOSTNAMEORIPADDRESS vulnerable; sslv3 connection accepted&quot;; fi</p>
+<pre><code>echo | timeout 3 openssl s_client -connect HOSTNAMEORIPADDRESS:443 &gt;/dev/null 2&gt;&amp;1; if [[ $? != 0 ]]; then echo &quot;UNKNOWN: HOSTNAMEORIPADDRESS timeout or connection error&quot;; else echo | openssl s_client -connect HOSTNAMEORIPADDRESS:443 -ssl3 2&gt;&amp;1 | grep -qo &quot;sslv3 alert handshake failure&quot; &amp;&amp; echo &quot;OK: HOSTNAMEORIPADDRESS Not vulnerable&quot; || echo &quot;FAIL:  HOSTNAMEORIPADDRESS vulnerable; sslv3 connection accepted&quot;; fi
+</code></pre>
 
 <p>Replace HOSTNAMEORIPADDRESS by the actual hostname or IP address.</p>
 

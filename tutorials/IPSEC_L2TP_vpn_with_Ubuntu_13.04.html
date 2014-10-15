@@ -1,189 +1,38 @@
-
-    <!DOCTYPE html>
-    <html lang="en">
-        <head>
-        <title>IPSEC/L2TP VPN on Ubuntu 13.04 with OpenSwan, xl2tpd and ppp - Raymii.org</title>
-        <link href="/s/inc/css/light.css" rel="stylesheet" title="light" />
-        <link href="/s/inc/css/dark.css" rel="alternate stylesheet" title="dark" />
-        <script src="/s/inc/js/jquery-2.1.1.min.js"></script>
-        <script src="/s/inc/js/bootstrap.3.2.0.min.js"></script>
-        <script src="/s/inc/js/styleswitcher.js"></script>
-        <script src="https://togetherjs.com/togetherjs-min.js"></script>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
-        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
-        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
-        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
-        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
-    </head>
-    <body>
-        <a id="top-of-page"></a>
-        <div class="container-fluid ">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="col-md-3 col-sm-3 max-200">
-                        <div class="well well-none"> 
-                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
-                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
-                            <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
-                        </div>
-          
-
-    
-    <form role="search" action="https://encrypted.google.com/search">
-        <div class="form-group">
-          <input type="hidden" name="as_sitesearch" value="raymii.org">
-          <input type="hidden" name="as_qdr" value="all">
-          <input type="text" name="as_q" class="form-control" placeholder="Search">
-        </div>
-      </form>
-      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li class="bottom-spacing special-menu"><a onclick="TogetherJS(this); return false;">TogetherJS</a></li><p></p><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/vpn.html" class="link">VPN</a></li><li><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>
-                <ul class="navbar-collapse nav navbar-nav">
-                <li class="dropdown">
-                <a data-toggle="dropdown" class="dropdown-toggle" href="#">Style<b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                <li><a href="#" onclick="setActiveStyleSheet('dark')">Dark</a></li>
-                <li><a href="#" onclick="setActiveStyleSheet('light')">Light</a></li>
-                </ul>
-                </li>
-                </ul>
-                <br><br>
-               <!-- advertisement start -->
-                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
-                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean  Affiliate Link</a><br />
-                <script type="text/javascript"><!--
+<!DOCTYPE html><html lang="en"><head><title>IPSEC/L2TP VPN on Ubuntu 13.04 with OpenSwan, xl2tpd and ppp - Raymii.org</title><link href="/s/inc/css/light.css" rel="stylesheet" title="light"/><link href="/s/inc/css/dark.css" rel="alternate stylesheet" title="dark"/><script src="/s/inc/js/jquery-2.1.1.min.js"></script><script src="/s/inc/js/bootstrap.3.2.0.min.js"></script><script src="/s/inc/js/styleswitcher.js"></script><script src="https://togetherjs.com/togetherjs-min.js"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="https://raymii.org/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Items</a></li><li class="bottom-spacing special-menu"><a onclick="TogetherJS(this); return false;">TogetherJS</a></li><p></p><li><a class="link" href="/s/tags/bash.html">Bash</a></li><li><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li><a class="link" href="/s/tags/ssl.html">SSL</a></li><li><a class="link" href="/s/tags/debian.html">Debian</a></li><li><a class="link" href="/s/tags/python.html">Python</a></li><li><a class="link" href="/s/tags/vpn.html">VPN</a></li><li><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li><a class="link" href="/s/tags/nginx.html">nginx</a></li><li><a class="link" href="/s/tags/apache.html">Apache</a></li><li><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><ul class="navbar-collapse nav navbar-nav"><li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Style<b class="caret"></b></a><ul class="dropdown-menu"><li><a href="#" onclick="setActiveStyleSheet('dark')">Dark</a></li><li><a href="#" onclick="setActiveStyleSheet('light')">Light</a></li></ul></li></ul><br/><br/><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link</a><br/><script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script>
-                <script type="text/javascript"
-                src="//pagead2.googlesyndication.com/pagead/show_ads.js">
-                </script>    
-                <!-- advertisement end -->
-                </div>
-           </div>  
-           <div class="col-md-8 col-sm-8"> 
-                <div class="inner">
-
-           <h2 class='headheader'>IPSEC/L2TP VPN on Ubuntu 13.04 with OpenSwan, xl2tpd and ppp</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="IPSEC_L2TP_vpn_with_Ubuntu_13.04.html" class="link">IPSEC/L2TP VPN on Ubuntu 13.04 with OpenSwan, xl2tpd and ppp</a></li></ul><p><small>03-11-2013</small> | <small>Remy van Elst</small></p><div class='ad'>
-                            <script type="text/javascript"><!--
+                </script><script src="//pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">IPSEC/L2TP VPN on Ubuntu 13.04 with OpenSwan, xl2tpd and ppp</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="IPSEC_L2TP_vpn_with_Ubuntu_13.04.html">IPSEC/L2TP VPN on Ubuntu 13.04 with OpenSwan, xl2tpd and ppp</a></li></ul><p><small>03-11-2013</small> | <small>Remy van Elst</small></p><div class="ad"><script type="text/javascript"><!--
                             google_ad_client = "ca-pub-7993642564731324";
                             /* voorartikel */
                             google_ad_slot = "6172324376";
                             google_ad_width = 728;
                             google_ad_height = 90;
                             //-->
-                            </script>
-                            <script type="text/javascript"
-                            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
-                            </script>
-                        </div><br><p>This is a guide on setting up an IPSEC/L2TP vpn server with Ubuntu 13.04 using Openswan as the IPsec server, xl2tpd as the l2tp provider and ppp or local users / PAM for authentication. It has a detailed explanation with every step. We choose the IPSEC/L2TP protocol stack because of recent vulnerabilities found in pptpd VPNs.</p>
-
-<p>This tutorial is available for the following platforms:</p>
-
-<ul>
-<li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_a_Raspberry_Pi_with_Arch_Linux.html">Raspberry Pi with Arch Linux ARM</a><br></li>
-<li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_CentOS_-_Red_Hat_Enterprise_Linux_or_Scientific_-_Linux_6.html">CentOS 6, Scientific Linux 6 or Red Hat Enterprise Linux 6</a><br></li>
-<li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_14.04.html">Ubuntu 14.04 LTS</a><br></li>
-<li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.10.html">Ubuntu 13.10</a><br></li>
-<li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.04.html">Ubuntu 13.04</a><br></li>
-<li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.10.html">Ubuntu 12.10</a><br></li>
-<li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html">Ubuntu 12.04 LTS</a><br></li>
-</ul>
-
-<p>This tutorial was written and tested on a Digital Ocean VPS. If you like this tutorial and want to support my website, use this link to order a Digital Ocean VPS: <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">https://www.digitalocean.com/?refcode=7435ae6b8212</a>   </p>
-
-<p>IPSec encrypts your IP packets to provide encryption and authentication, so no one can decrypt or forge data between your clients and your server. L2TP provides a tunnel to send data. It does not provide encryption and authentication though, that is why we need to use it together with IPSec.</p>
-
-<p>To work trough this tutorial you should have:  </p>
-
-<ul>
-<li>1 ubuntu 13.04 server with at least 1 public IP address and root access</li>
-<li>1 (or more) clients running an OS that support IPsec/L2tp vpns (Ubuntu, Mac OS, Windows, Android).</li>
-<li>Ports 1701 TCP, 4500 UDP and 500 UDP opened in the firewall.</li>
-</ul>
-
-<p>If you are not running Ubuntu 13.04 you might have to compile the packages manually because openswan and xl2tpd in the older repositories seem to have critical bugs which make this all fail.  </p>
-
-<p>I do all the steps as the root user. You should do to, but only via * -i* or * su -*. Do not allow root to login via SSH!  </p>
-
-<h4>Install ppp openswan and xl2tpd</h4>
-
-<p>First we will install the required packages:  </p>
-
-<pre><code>apt-get install openswan xl2tpd ppp 
-</code></pre>
-
-<p>The openswan installation will ask some questions, this tutorial works with the default answers (just enter through it).  </p>
-
-<p>If you do not have lsof installed you also need to install that, otherwise the ipsec verify will fail:  </p>
-
-<pre><code>apt-get install lsof
-</code></pre>
-
-<h4>Firewall and sysctl</h4>
-
-<p>We are going to set the firewall and make sure the kernel forwards IP packets:  </p>
-
-<p>Execute this command to enable the iptables firewall to allow vpn traffic:  </p>
-
-<pre><code>iptables -t nat -A POSTROUTING -j SNAT --to-source %SERVERIP%
-</code></pre>
-
-<p>Replace %SERVERIP% with the external IP of your VPS.</p>
-
-<p>Execute the below commands to enable kernel IP packet forwarding and disable ICP redirects.  </p>
-
-<pre><code>echo &quot;net.ipv4.ip_forward = 1&quot; |  tee -a /etc/sysctl.conf
-echo &quot;net.ipv4.conf.all.accept_redirects = 0&quot; |  tee -a /etc/sysctl.conf
-echo &quot;net.ipv4.conf.all.send_redirects = 0&quot; |  tee -a /etc/sysctl.conf
-echo &quot;net.ipv4.conf.default.rp_filter = 0&quot; |  tee -a /etc/sysctl.conf
-echo &quot;net.ipv4.conf.default.accept_source_route = 0&quot; |  tee -a /etc/sysctl.conf
-echo &quot;net.ipv4.conf.default.send_redirects = 0&quot; |  tee -a /etc/sysctl.conf
-echo &quot;net.ipv4.icmp_ignore_bogus_error_responses = 1&quot; |  tee -a /etc/sysctl.conf
-</code></pre>
-
-<p>Now apply these settings for other network interfaces:</p>
-
-<pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &gt; $vpn/send_redirects; done
-</code></pre>
-
-<p>And apply them:</p>
-
-<pre><code>sysctl -p
-</code></pre>
-
-<h5>Persistent settings via /etc/rc.local</h5>
-
-<p>To make sure this keeps working at boot you might want to add the following to /etc/rc.local:  </p>
-
-<pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &gt; $vpn/send_redirects; done
+                            </script><script src="//pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
+                            </script></div><br/><p>This is a guide on setting up an IPSEC/L2TP vpn server with Ubuntu 13.04 using Openswan as the IPsec server, xl2tpd as the l2tp provider and ppp or local users / PAM for authentication. It has a detailed explanation with every step. We choose the IPSEC/L2TP protocol stack because of recent vulnerabilities found in pptpd VPNs.</p><p>This tutorial is available for the following platforms:</p><ul><li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_a_Raspberry_Pi_with_Arch_Linux.html">Raspberry Pi with Arch Linux ARM</a><br/></li><li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_CentOS_-_Red_Hat_Enterprise_Linux_or_Scientific_-_Linux_6.html">CentOS 6, Scientific Linux 6 or Red Hat Enterprise Linux 6</a><br/></li><li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_14.04.html">Ubuntu 14.04 LTS</a><br/></li><li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.10.html">Ubuntu 13.10</a><br/></li><li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.04.html">Ubuntu 13.04</a><br/></li><li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.10.html">Ubuntu 12.10</a><br/></li><li><a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html">Ubuntu 12.04 LTS</a><br/></li></ul><p>This tutorial was written and tested on a Digital Ocean VPS. If you like this tutorial and want to support my website, use this link to order a Digital Ocean VPS: <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">https://www.digitalocean.com/?refcode=7435ae6b8212</a></p><p>IPSec encrypts your IP packets to provide encryption and authentication, so no one can decrypt or forge data between your clients and your server. L2TP provides a tunnel to send data. It does not provide encryption and authentication though, that is why we need to use it together with IPSec.</p><p>To work trough this tutorial you should have:</p><ul><li>1 ubuntu 13.04 server with at least 1 public IP address and root access</li><li>1 (or more) clients running an OS that support IPsec/L2tp vpns (Ubuntu, Mac OS, Windows, Android).</li><li>Ports 1701 TCP, 4500 UDP and 500 UDP opened in the firewall.</li></ul><p>If you are not running Ubuntu 13.04 you might have to compile the packages manually because openswan and xl2tpd in the older repositories seem to have critical bugs which make this all fail.</p><p>I do all the steps as the root user. You should do to, but only via * -i* or * su -*. Do not allow root to login via SSH!</p><h4>Install ppp openswan and xl2tpd</h4><p>First we will install the required packages:</p><pre><code>apt-get install openswan xl2tpd ppp 
+</code></pre><p>The openswan installation will ask some questions, this tutorial works with the default answers (just enter through it).</p><p>If you do not have lsof installed you also need to install that, otherwise the ipsec verify will fail:</p><pre><code>apt-get install lsof
+</code></pre><h4>Firewall and sysctl</h4><p>We are going to set the firewall and make sure the kernel forwards IP packets:</p><p>Execute this command to enable the iptables firewall to allow vpn traffic:</p><pre><code>iptables -t nat -A POSTROUTING -j SNAT --to-source %SERVERIP%
+</code></pre><p>Replace %SERVERIP% with the external IP of your VPS.</p><p>Execute the below commands to enable kernel IP packet forwarding and disable ICP redirects.</p><pre><code>echo "net.ipv4.ip_forward = 1" |  tee -a /etc/sysctl.conf
+echo "net.ipv4.conf.all.accept_redirects = 0" |  tee -a /etc/sysctl.conf
+echo "net.ipv4.conf.all.send_redirects = 0" |  tee -a /etc/sysctl.conf
+echo "net.ipv4.conf.default.rp_filter = 0" |  tee -a /etc/sysctl.conf
+echo "net.ipv4.conf.default.accept_source_route = 0" |  tee -a /etc/sysctl.conf
+echo "net.ipv4.conf.default.send_redirects = 0" |  tee -a /etc/sysctl.conf
+echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" |  tee -a /etc/sysctl.conf
+</code></pre><p>Now apply these settings for other network interfaces:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &gt; $vpn/send_redirects; done
+</code></pre><p>And apply them:</p><pre><code>sysctl -p
+</code></pre><h5>Persistent settings via /etc/rc.local</h5><p>To make sure this keeps working at boot you might want to add the following to /etc/rc.local:</p><pre><code>for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 &gt; $vpn/accept_redirects; echo 0 &gt; $vpn/send_redirects; done
 iptables -t nat -A POSTROUTING -j SNAT --to-source %SERVERIP%
-</code></pre>
-
-<p>Add it before the <code>exit 0</code> line and replace %SERVERIP% with the external IP of your VPS.</p>
-
-<h4>Configure Openswan (IPSEC)</h4>
-
-<p>Use your favorite editor to edit the following file:  </p>
-
-<pre><code>/etc/ipsec.conf  
-</code></pre>
-
-<p>Replace the contents with the following:  </p>
-
-<p>(Most lines have a comment below it explaining what it does.)</p>
-
-<pre><code>config setup
+</code></pre><p>Add it before the <code>exit 0</code> line and replace %SERVERIP% with the external IP of your VPS.</p><h4>Configure Openswan (IPSEC)</h4><p>Use your favorite editor to edit the following file:</p><pre><code>/etc/ipsec.conf  
+</code></pre><p>Replace the contents with the following:</p><p>(Most lines have a comment below it explaining what it does.)</p><pre><code>config setup
     dumpdir=/var/run/pluto/
     #in what directory should things started by setup (notably the Pluto daemon) be allowed to dump core?
     nat_traversal=yes
-    #whether to accept/offer to support NAT (NAPT, also known as &quot;IP Masqurade&quot;) workaround for IPsec
+    #whether to accept/offer to support NAT (NAPT, also known as "IP Masqurade") workaround for IPsec
     virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v6:fd00::/8,%v6:fe80::/10
     #contains the networks that are allowed as subnet= for the remote client. In other words, the address ranges that may live behind a NAT router through which a client connects.
     protostack=netkey
@@ -207,29 +56,9 @@ conn L2TP-PSK-noNAT
     leftprotoport=17/1701
     right=%any
     rightprotoport=17/%any
-</code></pre>
-
-<p>Replace %SERVERIP% with the external IP of your server.</p>
-
-<p><strong>Do note that the config file has changed with this Ubuntu release. If you have upgraded Ubuntu or followed an earlier tutorial, make sure you change the config for ipsec.</strong></p>
-
-<h5>The shared secret</h5>
-
-<p>The shared secret is defined in the <code>/etc/ipsec.secrets</code> file. Make sure it is long and random:  </p>
-
-<pre><code>%SERVERIP%  %any:   PSK &quot;69EA16F2C5DCED8B29E74A7D1B0FE99E69F6BDCD3E44&quot;
-</code></pre>
-
-<h5>Verify IPSEC Settings</h5>
-
-<p>Now to make sure IPSEC works, execute the following command:  </p>
-
-<pre><code>ipsec verify
-</code></pre>
-
-<p>My output looks like this:  </p>
-
-<pre><code>Checking your system to see if IPsec got installed and started correctly:
+</code></pre><p>Replace %SERVERIP% with the external IP of your server.</p><p><strong>Do note that the config file has changed with this Ubuntu release. If you have upgraded Ubuntu or followed an earlier tutorial, make sure you change the config for ipsec.</strong></p><h5>The shared secret</h5><p>The shared secret is defined in the <code>/etc/ipsec.secrets</code> file. Make sure it is long and random:</p><pre><code>%SERVERIP%  %any:   PSK "69EA16F2C5DCED8B29E74A7D1B0FE99E69F6BDCD3E44"
+</code></pre><h5>Verify IPSEC Settings</h5><p>Now to make sure IPSEC works, execute the following command:</p><pre><code>ipsec verify
+</code></pre><p>My output looks like this:</p><pre><code>Checking your system to see if IPsec got installed and started correctly:
 Version check and ipsec on-path                                 [OK]
 Linux Openswan U2.6.38/K3.8.0-19-generic (netkey)
 Checking for IPsec support in kernel                            [OK]
@@ -240,24 +69,12 @@ Checking for IPsec support in kernel                            [OK]
 Checking that pluto is running                                  [OK]
  Pluto listening for IKE on udp 500                             [OK]
  Pluto listening for NAT-T on udp 4500                          [OK]
-Checking for &#39;ip&#39; command                                       [OK]
+Checking for 'ip' command                                       [OK]
 Checking /bin/sh is not /bin/dash                               [WARNING]
-Checking for &#39;iptables&#39; command                                 [OK]
+Checking for 'iptables' command                                 [OK]
 Opportunistic Encryption Support                                [DISABLED]
-</code></pre>
-
-<p>The <code>/bin/sh</code> and <code>Opportunistic Encryption</code> warnings can be ignored. The first one is a openswan bug and the second one causes xl2tpd to trip.</p>
-
-<h4>Configure xl2tpd</h4>
-
-<p>Use your favorite editor to edit the following file:  </p>
-
-<pre><code>/etc/xl2tpd/xl2tpd.conf  
-</code></pre>
-
-<p>Replace the contents with the following:</p>
-
-<pre><code>[global]
+</code></pre><p>The <code>/bin/sh</code> and <code>Opportunistic Encryption</code> warnings can be ignored. The first one is a openswan bug and the second one causes xl2tpd to trip.</p><h4>Configure xl2tpd</h4><p>Use your favorite editor to edit the following file:</p><pre><code>/etc/xl2tpd/xl2tpd.conf  
+</code></pre><p>Replace the contents with the following:</p><pre><code>[global]
 ipsec saref = yes
 saref refinfo = 30
 
@@ -269,66 +86,17 @@ require authentication = yes
 ppp debug = yes
 pppoptfile = /etc/ppp/options.xl2tpd
 length bit = yes
-</code></pre>
-
-<ul>
-<li>ip range = range of IPs to give to the connecting clients</li>
-<li>local ip = IP of VPN server</li>
-<li>refuse pap = refure pap authentication</li>
-<li>ppp debug = yes when testing, no when in production</li>
-</ul>
-
-<p><strong>Do note that the config file has changed with this Ubuntu release. If you have upgraded Ubuntu or followed an earlier tutorial, make sure you change the config for xl2tpd.</strong></p>
-
-<h4>Local user (PAM//etc/passwd) authentication</h4>
-
-<p>To use local user accounts via pam (or /etc/passwd), and thus not having plain text user passwords in a text file you have to do a few extra steps. Huge thanks to <code>Sascha Scandella</code> for the hard work and troubleshooting.</p>
-
-<p>In your <code>/etc/xl2tpd/xl2tpd.conf</code> add the following line:</p>
-
-<pre><code>unix authentication = yes
-</code></pre>
-
-<p>and remove the following line:</p>
-
-<pre><code>refuse pap = yes
-</code></pre>
-
-<p>In the file <code>/etc/ppp/options.xl2tpd</code> make sure you do not add the following line (below it states to add it, but not if you want to use UNIX authentication):</p>
-
-<pre><code>require-mschap-v2
-</code></pre>
-
-<p>Also in that file (<code>/etc/ppp/options.xl2tpd</code>) add the following extra line:</p>
-
-<pre><code>login
-</code></pre>
-
-<p>Change <code>/etc/pam.d/ppp</code> to this:</p>
-
-<pre><code>auth    required        pam_nologin.so
+</code></pre><ul><li>ip range = range of IPs to give to the connecting clients</li><li>local ip = IP of VPN server</li><li>refuse pap = refure pap authentication</li><li>ppp debug = yes when testing, no when in production</li></ul><p><strong>Do note that the config file has changed with this Ubuntu release. If you have upgraded Ubuntu or followed an earlier tutorial, make sure you change the config for xl2tpd.</strong></p><h4>Local user (PAM//etc/passwd) authentication</h4><p>To use local user accounts via pam (or /etc/passwd), and thus not having plain text user passwords in a text file you have to do a few extra steps. Huge thanks to <code>Sascha Scandella</code> for the hard work and troubleshooting.</p><p>In your <code>/etc/xl2tpd/xl2tpd.conf</code> add the following line:</p><pre><code>unix authentication = yes
+</code></pre><p>and remove the following line:</p><pre><code>refuse pap = yes
+</code></pre><p>In the file <code>/etc/ppp/options.xl2tpd</code> make sure you do not add the following line (below it states to add it, but not if you want to use UNIX authentication):</p><pre><code>require-mschap-v2
+</code></pre><p>Also in that file (<code>/etc/ppp/options.xl2tpd</code>) add the following extra line:</p><pre><code>login
+</code></pre><p>Change <code>/etc/pam.d/ppp</code> to this:</p><pre><code>auth    required        pam_nologin.so
 auth    required        pam_unix.so
 account required        pam_unix.so
 session required        pam_unix.so
-</code></pre>
-
-<p>Add the following to <code>/etc/ppp/pap-secrets</code>:</p>
-
-<pre><code>*       l2tpd           &quot;&quot;              *
-</code></pre>
-
-<p>(And, skip the <code>chap-secrets</code> file below (adding users).)</p>
-
-<h4>Configuring PPP</h4>
-
-<p>Use your favorite editor to edit the following file:  </p>
-
-<pre><code>/etc/ppp/options.xl2tpd  
-</code></pre>
-
-<p>Replace the contents with the following:</p>
-
-<pre><code>require-mschap-v2
+</code></pre><p>Add the following to <code>/etc/ppp/pap-secrets</code>:</p><pre><code>*       l2tpd           ""              *
+</code></pre><p>(And, skip the <code>chap-secrets</code> file below (adding users).)</p><h4>Configuring PPP</h4><p>Use your favorite editor to edit the following file:</p><pre><code>/etc/ppp/options.xl2tpd  
+</code></pre><p>Replace the contents with the following:</p><pre><code>require-mschap-v2
 ms-dns 8.8.8.8
 ms-dns 8.8.4.4
 auth
@@ -341,56 +109,13 @@ name l2tpd
 proxyarp
 lcp-echo-interval 30
 lcp-echo-failure 4
-</code></pre>
-
-<ul>
-<li>ms-dns = The dns to give to the client. I use googles public DNS.</li>
-<li>proxyarp = Add an entry to this systems ARP [Address Resolution Protocol] table with the IP address of the peer and the Ethernet address of this system. This will have the effect of making the peer appear to other systems to be on the local ethernet.</li>
-<li>name l2tpd = is used in the ppp authentication file.</li>
-</ul>
-
-<h4>Adding users</h4>
-
-<p>Every user should be defined in the <code>/etc/ppp/chap-secrets</code> file. Below is an example file.  </p>
-
-<pre><code># Secrets for authentication using CHAP
+</code></pre><ul><li>ms-dns = The dns to give to the client. I use googles public DNS.</li><li>proxyarp = Add an entry to this systems ARP [Address Resolution Protocol] table with the IP address of the peer and the Ethernet address of this system. This will have the effect of making the peer appear to other systems to be on the local ethernet.</li><li>name l2tpd = is used in the ppp authentication file.</li></ul><h4>Adding users</h4><p>Every user should be defined in the <code>/etc/ppp/chap-secrets</code> file. Below is an example file.</p><pre><code># Secrets for authentication using CHAP
 # client       server  secret                  IP addresses
 alice          l2tpd   0F92E5FC2414101EA            *
 bob            l2tpd   DF98F09F74C06A2F             *
-</code></pre>
-
-<ul>
-<li>client = username for the user</li>
-<li>server = the name we define in the ppp.options file for xl2tpd</li>
-<li>secret = password for the user</li>
-<li>IP Address = leave to * for any address or define addresses from were a user can login.</li>
-</ul>
-
-<h4>Testing it</h4>
-
-<p>To make sure everything has the newest config files restart openswan and xl2tpd:  </p>
-
-<pre><code>/etc/init.d/ipsec restart 
+</code></pre><ul><li>client = username for the user</li><li>server = the name we define in the ppp.options file for xl2tpd</li><li>secret = password for the user</li><li>IP Address = leave to * for any address or define addresses from were a user can login.</li></ul><h4>Testing it</h4><p>To make sure everything has the newest config files restart openswan and xl2tpd:</p><pre><code>/etc/init.d/ipsec restart 
 /etc/init.d/xl2tpd restart
-</code></pre>
-
-<p>On the client connect to the server IP address (or add a DNS name) with a valid user, password and the shared secret. Test if you have internet access and which IP you have (via for example <a href="http://whatsmyip.org">http://whatsmyip.org</a>. If it is the VPN servers IP then it works.  </p>
-
-<p>If you experience problems make sure to check the client log files and the ubuntu <code>/var/log/syslog</code> and <code>/var/log/auth.log</code> files. If you google the error messages you most of the time get a good answer.  </p>
-<hr>Tags: <a href="../tags/debian.html" class="link">debian, </a><a href="../tags/ipsec.html" class="link">ipsec, </a><a href="../tags/l2tp.html" class="link">l2tp, </a><a href="../tags/openvpn.html" class="link">openvpn, </a><a href="../tags/pptp.html" class="link">pptp, </a><a href="../tags/ubuntu.html" class="link">ubuntu, </a><a href="../tags/vpn.html" class="link">vpn, </a><div class="footer">
-                <hr>
-                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
-                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
-                <a href="/s/static/About.html">About</a><br />
-                </div>
-            </div>
-        </div>
-    </div>  
-    </div>
-    </div>
-     
-    <!-- Piwik --> 
-    <script type="text/javascript">
+</code></pre><p>On the client connect to the server IP address (or add a DNS name) with a valid user, password and the shared secret. Test if you have internet access and which IP you have (via for example <a href="http://whatsmyip.org">http://whatsmyip.org</a>. If it is the VPN servers IP then it works.</p><p>If you experience problems make sure to check the client log files and the ubuntu <code>/var/log/syslog</code> and <code>/var/log/auth.log</code> files. If you google the error messages you most of the time get a good answer.</p><hr/>Tags: <a class="link" href="../tags/debian.html">debian,</a><a class="link" href="../tags/ipsec.html">ipsec,</a><a class="link" href="../tags/l2tp.html">l2tp,</a><a class="link" href="../tags/openvpn.html">openvpn,</a><a class="link" href="../tags/pptp.html">pptp,</a><a class="link" href="../tags/ubuntu.html">ubuntu,</a><a class="link" href="../tags/vpn.html">vpn,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -399,8 +124,4 @@ bob            l2tpd   DF98F09F74C06A2F             *
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
-    <!-- End Piwik Tracking Code -->
-    </body>
-    </html>
-    
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

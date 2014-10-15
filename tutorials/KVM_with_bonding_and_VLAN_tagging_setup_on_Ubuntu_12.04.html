@@ -1,150 +1,23 @@
-
-    <!DOCTYPE html>
-    <html lang="en">
-        <head>
-        <title>KVM host with bonding and VLAN tagged Virtual Machines setup on Ubuntu 12.04 - Raymii.org</title>
-        <link href="/s/inc/css/light.css" rel="stylesheet" title="light" />
-        <link href="/s/inc/css/dark.css" rel="alternate stylesheet" title="dark" />
-        <script src="/s/inc/js/jquery-2.1.1.min.js"></script>
-        <script src="/s/inc/js/bootstrap.3.2.0.min.js"></script>
-        <script src="/s/inc/js/styleswitcher.js"></script>
-        <script src="https://togetherjs.com/togetherjs-min.js"></script>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
-        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
-        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
-        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
-        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
-    </head>
-    <body>
-        <a id="top-of-page"></a>
-        <div class="container-fluid ">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="col-md-3 col-sm-3 max-200">
-                        <div class="well well-none"> 
-                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
-                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
-                            <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
-                        </div>
-          
-
-    
-    <form role="search" action="https://encrypted.google.com/search">
-        <div class="form-group">
-          <input type="hidden" name="as_sitesearch" value="raymii.org">
-          <input type="hidden" name="as_qdr" value="all">
-          <input type="text" name="as_q" class="form-control" placeholder="Search">
-        </div>
-      </form>
-      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li class="bottom-spacing special-menu"><a onclick="TogetherJS(this); return false;">TogetherJS</a></li><p></p><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/vpn.html" class="link">VPN</a></li><li><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>
-                <ul class="navbar-collapse nav navbar-nav">
-                <li class="dropdown">
-                <a data-toggle="dropdown" class="dropdown-toggle" href="#">Style<b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                <li><a href="#" onclick="setActiveStyleSheet('dark')">Dark</a></li>
-                <li><a href="#" onclick="setActiveStyleSheet('light')">Light</a></li>
-                </ul>
-                </li>
-                </ul>
-                <br><br>
-               <!-- advertisement start -->
-                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
-                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean  Affiliate Link</a><br />
-                <script type="text/javascript"><!--
+<!DOCTYPE html><html lang="en"><head><title>KVM host with bonding and VLAN tagged Virtual Machines setup on Ubuntu 12.04 - Raymii.org</title><link href="/s/inc/css/light.css" rel="stylesheet" title="light"/><link href="/s/inc/css/dark.css" rel="alternate stylesheet" title="dark"/><script src="/s/inc/js/jquery-2.1.1.min.js"></script><script src="/s/inc/js/bootstrap.3.2.0.min.js"></script><script src="/s/inc/js/styleswitcher.js"></script><script src="https://togetherjs.com/togetherjs-min.js"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="https://raymii.org/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Items</a></li><li class="bottom-spacing special-menu"><a onclick="TogetherJS(this); return false;">TogetherJS</a></li><p></p><li><a class="link" href="/s/tags/bash.html">Bash</a></li><li><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li><a class="link" href="/s/tags/ssl.html">SSL</a></li><li><a class="link" href="/s/tags/debian.html">Debian</a></li><li><a class="link" href="/s/tags/python.html">Python</a></li><li><a class="link" href="/s/tags/vpn.html">VPN</a></li><li><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li><a class="link" href="/s/tags/nginx.html">nginx</a></li><li><a class="link" href="/s/tags/apache.html">Apache</a></li><li><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><ul class="navbar-collapse nav navbar-nav"><li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Style<b class="caret"></b></a><ul class="dropdown-menu"><li><a href="#" onclick="setActiveStyleSheet('dark')">Dark</a></li><li><a href="#" onclick="setActiveStyleSheet('light')">Light</a></li></ul></li></ul><br/><br/><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link</a><br/><script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script>
-                <script type="text/javascript"
-                src="//pagead2.googlesyndication.com/pagead/show_ads.js">
-                </script>    
-                <!-- advertisement end -->
-                </div>
-           </div>  
-           <div class="col-md-8 col-sm-8"> 
-                <div class="inner">
-
-           <h2 class='headheader'>KVM host with bonding and VLAN tagged Virtual Machines setup on Ubuntu 12.04</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="KVM_with_bonding_and_VLAN_tagging_setup_on_Ubuntu_12.04.html" class="link">KVM host with bonding and VLAN tagged Virtual Machines setup on Ubuntu 12.04</a></li></ul><p><small>15-02-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
-                            <script type="text/javascript"><!--
+                </script><script src="//pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">KVM host with bonding and VLAN tagged Virtual Machines setup on Ubuntu 12.04</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="KVM_with_bonding_and_VLAN_tagging_setup_on_Ubuntu_12.04.html">KVM host with bonding and VLAN tagged Virtual Machines setup on Ubuntu 12.04</a></li></ul><p><small>15-02-2014</small> | <small>Remy van Elst</small></p><div class="ad"><script type="text/javascript"><!--
                             google_ad_client = "ca-pub-7993642564731324";
                             /* voorartikel */
                             google_ad_slot = "6172324376";
                             google_ad_width = 728;
                             google_ad_height = 90;
                             //-->
-                            </script>
-                            <script type="text/javascript"
-                            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
-                            </script>
-                        </div><br><h3>Preface</h3>
-
-<p><img src="https://raymii.org/s/inc/img/kvm-1.png" alt="kvm" /></p>
-
-<p>I want to set up a KVM host which is only reachable from the management network (VLAN 10). It is going to run VM&#39;s in two other VLAN&#39;s, VLAN 11 (accept) and VLAN 12 (production). The KVM host itself should not be reachable on the two latter VLAN&#39;s, only on the management network. </p>
-
-<p>The KVM host has 2 NIC&#39;s, which are plugged in to two switches who support LACP. The switch ports for the KVM host are trunk ports for the above VLAN&#39;s (11, 10 and 12). The two NIC&#39;s are bonded in balance-xor (bond mode 3) for fault tolerance and load balancing. </p>
-
-<p>We are going to create three interfaces using the linux vlan config, <code>bond0.11</code>, <code>bond0.10</code> and <code>bond0.12</code>. We need to do this for the VLAN tagging. </p>
-
-<p>On those interfaces we are going to create bridges for use with KVM: <code>vmbr11</code>, <code>vmbr10</code> and <code>vmbr12</code>. Only <code>vmbr10</code> will get an IP address, which we will use for connecting over ssh for management. The other two bridges only serve as bridges for the virtual machine nic&#39;s. Because we do it this way, it will appear to the virtual machines as if they were only in the network they are bridged in and they require no further configuration themselves.</p>
-
-<p>We are using Ubuntu&#39;s vmbuilder to build a test VM. Instructions for adding a serial console for troubleshooting are also included.</p>
-
-<p>My management VLAN (10) has the IP range <code>192.168.10.0/24</code>. The accept VLAN (11) has the IP range <code>192.168.11.0/24</code>. My production VLAN, as you might have guessed, has the range <code>192.168.12.0/24</code>. </p>
-
-<p>This is an example situation to keep the tutorial simple. I actually use a <code>environment-dmz</code>, <code>environment-frontend</code> and <code>environment-backend</code> setup with corresponding VLANs.</p>
-
-<h3>Requirements</h3>
-
-<ul>
-<li>Server with Ubuntu 12.04 </li>
-<li>Switch with VLAN and LACP support</li>
-<li>Hardware Virtualization support</li>
-</ul>
-
-<p>You can check hardware virtualization support with the following command:</p>
-
-<pre><code>egrep &#39;(vmx|svm)&#39; /proc/cpuinfo
-</code></pre>
-
-<p>If it results in output like this:</p>
-
-<pre><code>flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc extd_apicid aperfmperf pni pclmulqdq monitor ssse3 cx16 sse4_1 sse4_2 popcnt aes xsave avx lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs xop skinit wdt lwp fma4 nodeid_msr topoext perfctr_core arat cpb hw_pstate npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold
-</code></pre>
-
-<p>Your CPU is able to run KVM virtual machines.</p>
-
-<h3>Install required packages</h3>
-
-<p>The below command installs all the required packages for KVM virtualization, bridged networking and VLAN support:</p>
-
-<pre><code>apt-get install vlan ifenslave ubuntu-virt-server python-vm-builder kvm-ipxe bridge-utils libguestfs-tools guestfish
-</code></pre>
-
-<h3>Set up NIC bonding</h3>
-
-<p>Read this article I wrote for a lot more info on NIC bonding: <a href="https://raymii.org/s/tutorials/NIC_Bonding_on_Ubuntu_12.04.html">https://raymii.org/s/tutorials/NIC<em>Bonding</em>on<em>Ubuntu</em>12.04.html</a></p>
-
-<h3>Set up network bridge for VLAN</h3>
-
-<p>We are going to add an interface definition for each VLAN to <code>/etc/network/interfaces</code>. The VLAN interface names must follow one of the naming conventions supported by vconfig. The one used and recommended here is of the form <code>ethx.y</code>, where ethx is the physical interface name and y is the VLAN number.</p>
-
-<p>As stated above, we are bonding/teaming <code>eth0</code> and <code>eth1</code> together in <code>balance-xor</code> mode. This provides load balancing and fault tolerance.</p>
-
-<p>We add an interface for every VLAN on the <code>bond0</code> interface. This interface is used for the bridge to the KVM VM&#39;s. The bridge for the management vlan (VLAN 10) will have an IP address and all the other regular network configuration required. The other two bridges have the IP stub of 0.0.0.0, if this is not defined, your VM&#39;s will not have network connectivity. The KVM server itself however is not reachable on that network. If you would want that, you would need to change the IP address to something for that VLAN.</p>
-
-<pre><code>vim /etc/network/interfaces
-</code></pre>
-
-<p>Contents:</p>
-
-<pre><code># The loopback network interface
+                            </script><script src="//pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
+                            </script></div><br/><h3>Preface</h3><p><img alt="kvm" src="https://raymii.org/s/inc/img/kvm-1.png"/></p><p>I want to set up a KVM host which is only reachable from the management network (VLAN 10). It is going to run VM's in two other VLAN's, VLAN 11 (accept) and VLAN 12 (production). The KVM host itself should not be reachable on the two latter VLAN's, only on the management network.</p><p>The KVM host has 2 NIC's, which are plugged in to two switches who support LACP. The switch ports for the KVM host are trunk ports for the above VLAN's (11, 10 and 12). The two NIC's are bonded in balance-xor (bond mode 3) for fault tolerance and load balancing.</p><p>We are going to create three interfaces using the linux vlan config, <code>bond0.11</code>, <code>bond0.10</code> and <code>bond0.12</code>. We need to do this for the VLAN tagging.</p><p>On those interfaces we are going to create bridges for use with KVM: <code>vmbr11</code>, <code>vmbr10</code> and <code>vmbr12</code>. Only <code>vmbr10</code> will get an IP address, which we will use for connecting over ssh for management. The other two bridges only serve as bridges for the virtual machine nic's. Because we do it this way, it will appear to the virtual machines as if they were only in the network they are bridged in and they require no further configuration themselves.</p><p>We are using Ubuntu's vmbuilder to build a test VM. Instructions for adding a serial console for troubleshooting are also included.</p><p>My management VLAN (10) has the IP range <code>192.168.10.0/24</code>. The accept VLAN (11) has the IP range <code>192.168.11.0/24</code>. My production VLAN, as you might have guessed, has the range <code>192.168.12.0/24</code>.</p><p>This is an example situation to keep the tutorial simple. I actually use a <code>environment-dmz</code>, <code>environment-frontend</code> and <code>environment-backend</code> setup with corresponding VLANs.</p><h3>Requirements</h3><ul><li>Server with Ubuntu 12.04</li><li>Switch with VLAN and LACP support</li><li>Hardware Virtualization support</li></ul><p>You can check hardware virtualization support with the following command:</p><pre><code>egrep '(vmx|svm)' /proc/cpuinfo
+</code></pre><p>If it results in output like this:</p><pre><code>flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc extd_apicid aperfmperf pni pclmulqdq monitor ssse3 cx16 sse4_1 sse4_2 popcnt aes xsave avx lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs xop skinit wdt lwp fma4 nodeid_msr topoext perfctr_core arat cpb hw_pstate npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold
+</code></pre><p>Your CPU is able to run KVM virtual machines.</p><h3>Install required packages</h3><p>The below command installs all the required packages for KVM virtualization, bridged networking and VLAN support:</p><pre><code>apt-get install vlan ifenslave ubuntu-virt-server python-vm-builder kvm-ipxe bridge-utils libguestfs-tools guestfish
+</code></pre><h3>Set up NIC bonding</h3><p>Read this article I wrote for a lot more info on NIC bonding: <a href="https://raymii.org/s/tutorials/NIC_Bonding_on_Ubuntu_12.04.html">https://raymii.org/s/tutorials/NIC<em>Bonding</em>on<em>Ubuntu</em>12.04.html</a></p><h3>Set up network bridge for VLAN</h3><p>We are going to add an interface definition for each VLAN to <code>/etc/network/interfaces</code>. The VLAN interface names must follow one of the naming conventions supported by vconfig. The one used and recommended here is of the form <code>ethx.y</code>, where ethx is the physical interface name and y is the VLAN number.</p><p>As stated above, we are bonding/teaming <code>eth0</code> and <code>eth1</code> together in <code>balance-xor</code> mode. This provides load balancing and fault tolerance.</p><p>We add an interface for every VLAN on the <code>bond0</code> interface. This interface is used for the bridge to the KVM VM's. The bridge for the management vlan (VLAN 10) will have an IP address and all the other regular network configuration required. The other two bridges have the IP stub of 0.0.0.0, if this is not defined, your VM's will not have network connectivity. The KVM server itself however is not reachable on that network. If you would want that, you would need to change the IP address to something for that VLAN.</p><pre><code>vim /etc/network/interfaces
+</code></pre><p>Contents:</p><pre><code># The loopback network interface
 auto lo
 iface lo inet loopback
 
@@ -162,7 +35,7 @@ iface bond0 inet manual
         bond-miimon 100 # Specifies the MII link monitoring frequency in milliseconds. This determines how often the link state of each slave is inspected for link failures. 
         bond-downdelay 200 # Specifies the time, in milliseconds, to wait before disabling a slave after a link failure has been detected.
         bond-updelay 200 # Specifies the time, in milliseconds, to wait before enabling a slave after a link recovery has been detected.
-        bond-mode 3 # balance-xor; XOR policy: Transmit based on the selected transmit hash policy.  The default policy is a simple [(source MAC address XOR&#39;d with destination MAC address) modulo slave count].  Alternate transmit policies may be selected via the xmit_hash_policy option, described below.
+        bond-mode 3 # balance-xor; XOR policy: Transmit based on the selected transmit hash policy.  The default policy is a simple [(source MAC address XOR'd with destination MAC address) modulo slave count].  Alternate transmit policies may be selected via the xmit_hash_policy option, described below.
         bond-slaves none # we already defined the interfaces above with bond-master
 
 
@@ -217,125 +90,44 @@ iface vmbr12 inet manual
         bridge_stp off
         bridge_fd 9
         up /sbin/ifconfig $IFACE up || /bin/true
-</code></pre>
-
-<p>We want to delete the default libvirt interface which is created by default to be used for guests (It uses NAT, I never use it).</p>
-
-<pre><code>virsh net-destroy default
+</code></pre><p>We want to delete the default libvirt interface which is created by default to be used for guests (It uses NAT, I never use it).</p><pre><code>virsh net-destroy default
 virsh net-autostart --disable default
-</code></pre>
-
-<p>Also add the following items to <code>/etc/sysctl.conf</code>:</p>
-
-<pre><code>net.bridge.bridge-nf-call-ip6tables = 0
+</code></pre><p>Also add the following items to <code>/etc/sysctl.conf</code>:</p><pre><code>net.bridge.bridge-nf-call-ip6tables = 0
 net.bridge.bridge-nf-call-iptables = 0
 net.bridge.bridge-nf-call-arptables = 0
 net.bridge.bridge-nf-filter-pppoe-tagged = 0
 net.bridge.bridge-nf-filter-vlan-tagged = 0
-</code></pre>
-
-<p>And apply them:</p>
-
-<pre><code>sysctl -p; 
+</code></pre><p>And apply them:</p><pre><code>sysctl -p; 
 ebtables -F
-</code></pre>
-
-<p>We do this to make sure that <code>iptables</code> and <code>ebtables</code> (iptables for arp) do not interfere with the virtual networking setup.</p>
-
-<p>After all the configuration is set up, restart <code>libvirtd</code>:</p>
-
-<pre><code>/etc/init.d/libvirtd restart
+</code></pre><p>We do this to make sure that <code>iptables</code> and <code>ebtables</code> (iptables for arp) do not interfere with the virtual networking setup.</p><p>After all the configuration is set up, restart <code>libvirtd</code>:</p><pre><code>/etc/init.d/libvirtd restart
 /etc/init.d/libvirt-bin restart
 /etc/init.d/qemu-kvm restart
-</code></pre>
-
-<h3>Add root user to right groups</h3>
-
-<p>The root user needs to be in the <code>libvirtd</code> and <code>kvm</code> groups to be able to work with <code>virsh</code> and related tools. Add it to the groups:</p>
-
-<pre><code>adduser `id -un` libvirtd
+</code></pre><h3>Add root user to right groups</h3><p>The root user needs to be in the <code>libvirtd</code> and <code>kvm</code> groups to be able to work with <code>virsh</code> and related tools. Add it to the groups:</p><pre><code>adduser `id -un` libvirtd
 adduser `id -un` kvm
-</code></pre>
-
-<h3>First VM with VMBuilder</h3>
-
-<p>We will use the vmbuilder tool to create VMs. vmbuilder uses a template to create virtual machines, this template is located in the /etc/vmbuilder/libvirt/ directory. First we create a copy for the new vm, which we will name <code>vm1</code>:</p>
-
-<pre><code>mkdir -p /var/lib/libvirt/images/vm1/mytemplates/libvirt
+</code></pre><h3>First VM with VMBuilder</h3><p>We will use the vmbuilder tool to create VMs. vmbuilder uses a template to create virtual machines, this template is located in the /etc/vmbuilder/libvirt/ directory. First we create a copy for the new vm, which we will name <code>vm1</code>:</p><pre><code>mkdir -p /var/lib/libvirt/images/vm1/mytemplates/libvirt
 cp /etc/vmbuilder/libvirt/* /var/lib/libvirt/images/vm1/mytemplates/libvirt/
-</code></pre>
-
-<p>Edit the following file to define the VM disk partitions and size:</p>
-
-<pre><code>vim /var/lib/libvirt/images/vm1/vmbuilder.partition
-</code></pre>
-
-<p>Contents:</p>
-
-<pre><code>root 10000
+</code></pre><p>Edit the following file to define the VM disk partitions and size:</p><pre><code>vim /var/lib/libvirt/images/vm1/vmbuilder.partition
+</code></pre><p>Contents:</p><pre><code>root 10000
 swap 2000
 ---
 /var 10000
-</code></pre>
-
-<p>This defines a 10 GB root partition, a 2 GB swap area and the <code>---</code> makes that the 10 GB /var partition gets its own disk image.</p>
-
-<p>Create a script which will be executed on (and only on) the first boot of the VM. I use this to regenerate the SSH host key, otherwise it will have the SSH host key from the vmbuilder template:</p>
-
-<pre><code>vim /var/lib/libvirt/images/vm1/boot.sh
-</code></pre>
-
-<p>Contents:</p>
-
-<pre><code># This script will run the first time the virtual machine boots as root
+</code></pre><p>This defines a 10 GB root partition, a 2 GB swap area and the <code>---</code> makes that the 10 GB /var partition gets its own disk image.</p><p>Create a script which will be executed on (and only on) the first boot of the VM. I use this to regenerate the SSH host key, otherwise it will have the SSH host key from the vmbuilder template:</p><pre><code>vim /var/lib/libvirt/images/vm1/boot.sh
+</code></pre><p>Contents:</p><pre><code># This script will run the first time the virtual machine boots as root
 # Expire the user account
 passwd -e remy
 # regenerate ssh host key
 rm -rf /etc/ssh/ssh_host_*
 dpkg-reconfigure openssh-server
-</code></pre>
-
-<p>Now create the VM:</p>
-
-<pre><code>cd /var/lib/libvirt/images/vm1/
+</code></pre><p>Now create the VM:</p><pre><code>cd /var/lib/libvirt/images/vm1/
 
 vmbuilder kvm ubuntu --suite=precise --flavour=virtual --arch=amd64 --mirror=http://nl.archive.ubuntu.com/ubuntu -o --libvirt=qemu:///system --ip=192.168.12.20 --gw=192.168.12.1 --part=vmbuilder.partition --templates=mytemplates --user=remy --name=Remy --pass=example --addpkg=vim-nox --addpkg=unattended-upgrades --addpkg=acpid --addpkg=openssh-server --firstboot=/var/lib/libvirt/images/vm1/boot.sh --mem=512 --hostname=vm1 --bridge=vmbr12
-</code></pre>
-
-<p>The options explained:</p>
-
-<ul>
-<li>kvm: the hypervisor image format (Valid  options: xen kvm vmw6 vmserver)</li>
-<li>ubuntu: the distribution (Valid options: ubuntu)</li>
-<li>suite: distribution version</li>
-<li>flavour: specifies the virtual kernel</li>
-<li>arch: architecture of the VM</li>
-<li>mirror: the ubuntu mirror you want to use</li>
-<li>o: overwrite the previous version of the VM</li>
-<li>libvirt: add the resulting VM to the list of available machines</li>
-<li>ip: IP for the VM</li>
-<li>gw: gateway for the VM</li>
-<li>part: defines the partition file</li>
-<li>templates: specifies the directory that holds the template file, relative to our working directory</li>
-<li>user: username for the new user</li>
-<li>pass: password for the new user</li>
-<li>name: full name for the new user</li>
-<li>firstboot: specifies the firstboot script.</li>
-<li>addpkg: specify Ubuntu packages that you want to have installed during the VM creation</li>
-<li>mem: VM RAM</li>
-<li>hostname: VM Hostname</li>
-<li>bridge: The bridge interface the VM will be attached to</li>
-</ul>
-
-<p>Example output:</p>
-
-<pre><code>2014-02-14 19:13:03,541 INFO    : Calling hook: preflight_check
+</code></pre><p>The options explained:</p><ul><li>kvm: the hypervisor image format (Valid options: xen kvm vmw6 vmserver)</li><li>ubuntu: the distribution (Valid options: ubuntu)</li><li>suite: distribution version</li><li>flavour: specifies the virtual kernel</li><li>arch: architecture of the VM</li><li>mirror: the ubuntu mirror you want to use</li><li>o: overwrite the previous version of the VM</li><li>libvirt: add the resulting VM to the list of available machines</li><li>ip: IP for the VM</li><li>gw: gateway for the VM</li><li>part: defines the partition file</li><li>templates: specifies the directory that holds the template file, relative to our working directory</li><li>user: username for the new user</li><li>pass: password for the new user</li><li>name: full name for the new user</li><li>firstboot: specifies the firstboot script.</li><li>addpkg: specify Ubuntu packages that you want to have installed during the VM creation</li><li>mem: VM RAM</li><li>hostname: VM Hostname</li><li>bridge: The bridge interface the VM will be attached to</li></ul><p>Example output:</p><pre><code>2014-02-14 19:13:03,541 INFO    : Calling hook: preflight_check
 2014-02-14 19:13:03,545 INFO    : Calling hook: set_defaults
 2014-02-14 19:13:03,546 INFO    : Calling hook: bootstrap
 2014-02-14 19:20:11,227 INFO    : Calling hook: configure_os
 2014-02-14 19:21:40,418 INFO    : invoke-rc.d: policy-rc.d denied execution of start.
 2014-02-14 19:22:02,081 INFO    :
-2014-02-14 19:22:02,082 INFO    : Current default time zone: &#39;Etc/UTC&#39;
+2014-02-14 19:22:02,082 INFO    : Current default time zone: 'Etc/UTC'
 2014-02-14 19:22:02,085 INFO    : Local time is now:      Fri Feb 14 18:22:02 UTC 2014.
 2014-02-14 19:22:02,085 INFO    : Universal Time is now:  Fri Feb 14 18:22:02 UTC 2014.
 2014-02-14 19:22:02,086 INFO    :
@@ -344,24 +136,24 @@ Extracting templates from packages: 100%
 2014-02-14 19:24:36,398 INFO    : invoke-rc.d: policy-rc.d denied execution of start.
 2014-02-14 19:24:39,584 INFO    : invoke-rc.d: policy-rc.d denied execution of restart.
 2014-02-14 19:25:13,496 INFO    :
-2014-02-14 19:25:13,496 INFO    : Current default time zone: &#39;Etc/UTC&#39;
+2014-02-14 19:25:13,496 INFO    : Current default time zone: 'Etc/UTC'
 2014-02-14 19:25:13,502 INFO    : Local time is now:      Fri Feb 14 18:25:13 UTC 2014.
 2014-02-14 19:25:13,502 INFO    : Universal Time is now:  Fri Feb 14 18:25:13 UTC 2014.
-2014-02-14 19:25:13,502 INFO    : Run &#39;dpkg-reconfigure tzdata&#39; if you wish to change it.
+2014-02-14 19:25:13,502 INFO    : Run 'dpkg-reconfigure tzdata' if you wish to change it.
 2014-02-14 19:25:13,502 INFO    :
 2014-02-14 19:25:16,014 INFO    : invoke-rc.d: policy-rc.d denied execution of stop.
-2014-02-14 19:25:46,843 INFO    : gpg: key 437D05B5: &quot;Ubuntu Archive Automatic Signing Key &lt;ftpmaster@ubuntu.com&gt;&quot; not changed
-2014-02-14 19:25:46,847 INFO    : gpg: key FBB75412: &quot;Ubuntu CD Image Automatic Signing Key &lt;cdimage@ubuntu.com&gt;&quot; not changed
-2014-02-14 19:25:46,849 INFO    : gpg: key C0B21F32: public key &quot;Ubuntu Archive Automatic Signing Key (2012) &lt;ftpmaster@ubuntu.com&gt;&quot; imported
-2014-02-14 19:25:46,850 INFO    : gpg: key EFE21092: public key &quot;Ubuntu CD Image Automatic Signing Key (2012) &lt;cdimage@ubuntu.com&gt;&quot; imported
+2014-02-14 19:25:46,843 INFO    : gpg: key 437D05B5: "Ubuntu Archive Automatic Signing Key &lt;ftpmaster@ubuntu.com&gt;" not changed
+2014-02-14 19:25:46,847 INFO    : gpg: key FBB75412: "Ubuntu CD Image Automatic Signing Key &lt;cdimage@ubuntu.com&gt;" not changed
+2014-02-14 19:25:46,849 INFO    : gpg: key C0B21F32: public key "Ubuntu Archive Automatic Signing Key (2012) &lt;ftpmaster@ubuntu.com&gt;" imported
+2014-02-14 19:25:46,850 INFO    : gpg: key EFE21092: public key "Ubuntu CD Image Automatic Signing Key (2012) &lt;cdimage@ubuntu.com&gt;" imported
 2014-02-14 19:25:46,812 INFO    : gpg: Total number processed: 4
 2014-02-14 19:25:46,812 INFO    : gpg:               imported: 2  (RSA: 2)
 2014-02-14 19:25:46,812 INFO    : gpg:              unchanged: 2
 2014-02-14 19:25:46,852 INFO    : gpg: no ultimately trusted keys found
-2014-02-14 19:25:58,038 INFO    : gpg: key 437D05B5: &quot;Ubuntu Archive Automatic Signing Key &lt;ftpmaster@ubuntu.com&gt;&quot; not changed
-2014-02-14 19:25:58,042 INFO    : gpg: key FBB75412: &quot;Ubuntu CD Image Automatic Signing Key &lt;cdimage@ubuntu.com&gt;&quot; not changed
-2014-02-14 19:25:58,044 INFO    : gpg: key C0B21F32: &quot;Ubuntu Archive Automatic Signing Key (2012) &lt;ftpmaster@ubuntu.com&gt;&quot; not changed
-2014-02-14 19:25:58,045 INFO    : gpg: key EFE21092: &quot;Ubuntu CD Image Automatic Signing Key (2012) &lt;cdimage@ubuntu.com&gt;&quot; not changed
+2014-02-14 19:25:58,038 INFO    : gpg: key 437D05B5: "Ubuntu Archive Automatic Signing Key &lt;ftpmaster@ubuntu.com&gt;" not changed
+2014-02-14 19:25:58,042 INFO    : gpg: key FBB75412: "Ubuntu CD Image Automatic Signing Key &lt;cdimage@ubuntu.com&gt;" not changed
+2014-02-14 19:25:58,044 INFO    : gpg: key C0B21F32: "Ubuntu Archive Automatic Signing Key (2012) &lt;ftpmaster@ubuntu.com&gt;" not changed
+2014-02-14 19:25:58,045 INFO    : gpg: key EFE21092: "Ubuntu CD Image Automatic Signing Key (2012) &lt;cdimage@ubuntu.com&gt;" not changed
 2014-02-14 19:25:58,046 INFO    : gpg: Total number processed: 4
 2014-02-14 19:25:58,046 INFO    : gpg:              unchanged: 4
 2014-02-14 19:25:58,094 INFO    : No packages found matching linux-image-[0-9]*.
@@ -376,7 +168,7 @@ Extracting templates from packages: 100%
 2014-02-14 19:27:33,950 INFO    : Calling hook: configure_mounting
 2014-02-14 19:27:33,979 INFO    : Calling hook: mount_partitions
 2014-02-14 19:27:33,980 INFO    : Mounting target filesystems
-2014-02-14 19:27:33,980 INFO    : Creating disk image: &quot;/tmp/tmpd08iAo&quot; of size: 12001MB
+2014-02-14 19:27:33,980 INFO    : Creating disk image: "/tmp/tmpd08iAo" of size: 12001MB
 2014-02-14 19:27:10,070 INFO    : Adding partition table to disk image: /tmp/tmpd08iAo
 2014-02-14 19:27:10,537 INFO    : Adding type 4 partition to disk image: /tmp/tmpd08iAo
 2014-02-14 19:27:10,538 INFO    : Partition at beginning of disk - reserving first cylinder
@@ -385,7 +177,7 @@ Extracting templates from packages: 100%
 2014-02-14 19:27:10,693 INFO    : Creating loop devices corresponding to the created partitions
 2014-02-14 19:27:10,769 INFO    : Creating file systems
 2014-02-14 19:27:10,849 INFO    : mke2fs 1.42 (11-Nov-2011)
-2014-02-14 19:27:37,331 INFO    : mkswap: /dev/mapper/loop0p2: warning: don&#39;t erase bootbits sectors
+2014-02-14 19:27:37,331 INFO    : mkswap: /dev/mapper/loop0p2: warning: don't erase bootbits sectors
 2014-02-14 19:27:37,332 INFO    :         on whole disk. Use -f to force.
 2014-02-14 19:27:44,301 INFO    : Calling hook: install_bootloader
 2014-02-14 19:28:23,227 INFO    : Removing update-grub hooks from /etc/kernel-img.conf in favour of
@@ -438,155 +230,47 @@ Extracting templates from packages: 100%
 2014-02-14 19:11:35,992 INFO    : Converting /tmp/tmpd08iAo to qcow2, format ubuntu-kvm/tmpd08iAo.qcow2
 2014-02-14 19:11:54,187 INFO    : Calling hook: fix_ownership
 2014-02-14 19:11:54,188 INFO    : Calling hook: deploy
-</code></pre>
-
-<h3>Managing the first VM</h3>
-
-<p>We are using <code>virsh</code> to manage the VM. <code>virsh</code> is a hypervisor agnostic way to manage virtual machines, it work with Xen, KVM and others.</p>
-
-<p>First define it so that <code>virsh</code> knows abot it:</p>
-
-<pre><code>virsh define /etc/libvirt/qemu/vm1.xml
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>Domain vm1 defined from /etc/libvirt/qemu/vm1.xml
-</code></pre>
-
-<p>Then start it:</p>
-
-<pre><code>virsh start vm1
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>Domain vm1 started
-</code></pre>
-
-<p>Check if it is running:</p>
-
-<pre><code>virsh list
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code> Id Name                 State
+</code></pre><h3>Managing the first VM</h3><p>We are using <code>virsh</code> to manage the VM. <code>virsh</code> is a hypervisor agnostic way to manage virtual machines, it work with Xen, KVM and others.</p><p>First define it so that <code>virsh</code> knows abot it:</p><pre><code>virsh define /etc/libvirt/qemu/vm1.xml
+</code></pre><p>Output:</p><pre><code>Domain vm1 defined from /etc/libvirt/qemu/vm1.xml
+</code></pre><p>Then start it:</p><pre><code>virsh start vm1
+</code></pre><p>Output:</p><pre><code>Domain vm1 started
+</code></pre><p>Check if it is running:</p><pre><code>virsh list
+</code></pre><p>Output:</p><pre><code> Id Name                 State
 ----------------------------------
   1 vm1                  running
-</code></pre>
-
-<p>Other commands to manage virtual machines with <code>virsh</code> are listed below:</p>
-
-<p>Shutdown the VM:</p>
-
-<pre><code>virsh shutdown vm1
-</code></pre>
-
-<p>Pull the power plug from the VM:</p>
-
-<pre><code>virsh destroy vm1
-</code></pre>
-
-<p>The difference between <code>shutdown</code> and <code>destroy</code> is that the first sends a ACPI signal to the VM so that it can shut down itself cleanly (like pressing the power button) and the latter just bluntly pulls the power plug.</p>
-
-<p>Suspend or resume the VM:</p>
-
-<pre><code>virsh suspend vm1
+</code></pre><p>Other commands to manage virtual machines with <code>virsh</code> are listed below:</p><p>Shutdown the VM:</p><pre><code>virsh shutdown vm1
+</code></pre><p>Pull the power plug from the VM:</p><pre><code>virsh destroy vm1
+</code></pre><p>The difference between <code>shutdown</code> and <code>destroy</code> is that the first sends a ACPI signal to the VM so that it can shut down itself cleanly (like pressing the power button) and the latter just bluntly pulls the power plug.</p><p>Suspend or resume the VM:</p><pre><code>virsh suspend vm1
 virsh resume vm1
-</code></pre>
-
-<p>Remove the VM from the virsh list:</p>
-
-<pre><code>virsh undefine vm1
-</code></pre>
-
-<p>You need to manually remove the KVM disk image after this.</p>
-
-<p>Autostart the vm on hypervisor host boot:</p>
-
-<pre><code>virsh autostart vm1
-</code></pre>
-
-<p>This way, when the machine has a reboot or power loss, the VM will autostart when the machine is booted.</p>
-
-<p>You should now be able to SSH in to your virtual machine from another host (which has access to the correct VLAN). The KVM host itself is only managable from the management VLAN and the VM&#39;s cannot access either the KVM host or the management VLAN.</p>
-
-<p>Repeat the above steps to create more virtual machines. Remember to change the name, IP address and VLAN, otherwise they override existing configuration.</p>
-
-<h3>Console access to a VM</h3>
-
-<p>You might have a network configuration error or any other reason to get console access to your VM. To access your VM&#39;s &quot;serial console&quot; use the following command:</p>
-
-<pre><code>virsh console vm1
-</code></pre>
-
-<p>If you only get blank output like this:</p>
-
-<pre><code>Connected to domain vm1
+</code></pre><p>Remove the VM from the virsh list:</p><pre><code>virsh undefine vm1
+</code></pre><p>You need to manually remove the KVM disk image after this.</p><p>Autostart the vm on hypervisor host boot:</p><pre><code>virsh autostart vm1
+</code></pre><p>This way, when the machine has a reboot or power loss, the VM will autostart when the machine is booted.</p><p>You should now be able to SSH in to your virtual machine from another host (which has access to the correct VLAN). The KVM host itself is only managable from the management VLAN and the VM's cannot access either the KVM host or the management VLAN.</p><p>Repeat the above steps to create more virtual machines. Remember to change the name, IP address and VLAN, otherwise they override existing configuration.</p><h3>Console access to a VM</h3><p>You might have a network configuration error or any other reason to get console access to your VM. To access your VM's "serial console" use the following command:</p><pre><code>virsh console vm1
+</code></pre><p>If you only get blank output like this:</p><pre><code>Connected to domain vm1
 Escape character is ^]
-</code></pre>
-
-<p>You might need to set up a serial console. This can be the case on an Ubuntu 12.04 guest. Here are instructions to set up a serial console on Ubuntu 12.04. We do a dirty grub hack because we cannot access the VM to do it the clean way. </p>
-
-<p>Use <code>virt-edit</code> on the KVM host machine to edit a few files in the guest:</p>
-
-<pre><code># first stop the VM
+</code></pre><p>You might need to set up a serial console. This can be the case on an Ubuntu 12.04 guest. Here are instructions to set up a serial console on Ubuntu 12.04. We do a dirty grub hack because we cannot access the VM to do it the clean way.</p><p>Use <code>virt-edit</code> on the KVM host machine to edit a few files in the guest:</p><pre><code># first stop the VM
 virsh destroy vm1
 
 # edit the VM config
 virsh edit vm1
-</code></pre>
-
-<p>Place the following inside the <device></device> section:</p>
-
-<pre><code>&amp;lt;serial type=&#39;pty&#39;&amp;gt;
-  &amp;lt;target port=&#39;0&#39;/&amp;gt;
+</code></pre><p>Place the following inside the<device></device>section:</p><pre><code>&amp;lt;serial type='pty'&amp;gt;
+  &amp;lt;target port='0'/&amp;gt;
 &amp;lt;/serial&amp;gt;
-&amp;lt;console type=&#39;pty&#39;&amp;gt;
-  &amp;lt;target type=&#39;serial&#39; port=&#39;0&#39;/&amp;gt;
+&amp;lt;console type='pty'&amp;gt;
+  &amp;lt;target type='serial' port='0'/&amp;gt;
 &amp;lt;/console&amp;gt;
 
 # then edit the boot menu in the vm:
 virt-edit vm1 /boot/grub/menu.lst
-</code></pre>
-
-<p>Add this to the top of the file:</p>
-
-<pre><code>serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1
+</code></pre><p>Add this to the top of the file:</p><pre><code>serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1
 terminal --timeout=15 serial console
-</code></pre>
-
-<p>Add the following after the kernel line of the boot entry:</p>
-
-<pre><code>console=ttyS0,19200 earlyprint=serial,ttyS0,19200
-</code></pre>
-
-<p>I also removed the <code>quiet</code> and <code>splash</code> parts.</p>
-
-<p>My entry looks like this:</p>
-
-<pre><code>title           Ubuntu 12.04.4 LTS, kernel 3.2.0-58-virtual
+</code></pre><p>Add the following after the kernel line of the boot entry:</p><pre><code>console=ttyS0,19200 earlyprint=serial,ttyS0,19200
+</code></pre><p>I also removed the <code>quiet</code> and <code>splash</code> parts.</p><p>My entry looks like this:</p><pre><code>title           Ubuntu 12.04.4 LTS, kernel 3.2.0-58-virtual
 uuid            5a17ce36-580b-47ab-95b2-ff9be5d5d6d8
 kernel          /boot/vmlinuz-3.2.0-58-virtual root=UUID=5a17ce36-580b-47ab-95b2-ff9be5d5d6d8 ro console=ttyS0,19200 earlyprint=serial,ttyS0,19200
 initrd          /boot/initrd.img-3.2.0-58-virtual
-</code></pre>
-
-<p>The output from grub will go to the normal console unless input is received from the serial port. Whichever receives input first becomes the default console. This gives you the best of both worlds. </p>
-
-<p>We also need to create a file in the VM for the console itself. We&#39;ll use <code>guestfish</code> for that because <code>virt-edi</code>t does not support creating files in the disk image:</p>
-
-<pre><code>guestfish --rw -a ubuntu-kvm/tmpIrlKJF.qcow2 -i write /etc/init/ttyS0.conf &quot; &quot;
-</code></pre>
-
-<p>Change <code>ubuntu-kvm/tmpIrlKJF.qcow2</code> to the path to your disk image. We can now use <code>virt-edit</code> to edit the file again:</p>
-
-<pre><code>virt-edit vm1 /etc/init/ttyS0.conf
-</code></pre>
-
-<p>Write the following to the file:</p>
-
-<pre><code># ttyS0 - getty
+</code></pre><p>The output from grub will go to the normal console unless input is received from the serial port. Whichever receives input first becomes the default console. This gives you the best of both worlds.</p><p>We also need to create a file in the VM for the console itself. We'll use <code>guestfish</code> for that because <code>virt-edi</code>t does not support creating files in the disk image:</p><pre><code>guestfish --rw -a ubuntu-kvm/tmpIrlKJF.qcow2 -i write /etc/init/ttyS0.conf " "
+</code></pre><p>Change <code>ubuntu-kvm/tmpIrlKJF.qcow2</code> to the path to your disk image. We can now use <code>virt-edit</code> to edit the file again:</p><pre><code>virt-edit vm1 /etc/init/ttyS0.conf
+</code></pre><p>Write the following to the file:</p><pre><code># ttyS0 - getty
 #
 # This service maintains a getty on ttyS0 from the point the system is
 # started until it is shut down again.
@@ -596,18 +280,8 @@ stop on runlevel [!2105]
 
 respawn
 exec /sbin/getty -L 115200 ttyS0 xterm
-</code></pre>
-
-<p>This will start a serial console on the VM. If you do not do this you will only see the GRUB boot prompt and not the OS output.</p>
-
-<p>Now boot the machine with the console attached:</p>
-
-<pre><code>virsh start vm1 --console
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>Domain vm1 started
+</code></pre><p>This will start a serial console on the VM. If you do not do this you will only see the GRUB boot prompt and not the OS output.</p><p>Now boot the machine with the console attached:</p><pre><code>virsh start vm1 --console
+</code></pre><p>Output:</p><pre><code>Domain vm1 started
 Connected to domain vm1
 Escape character is ^]
 Press any key to continue.
@@ -620,34 +294,7 @@ Booting system without full network configuration...
 Ubuntu 12.04.4 LTS vm1 ttyS0
 
 vm1 login:
-</code></pre>
-
-<p>If the machine is not reachable via ssh you can use the console to do recovery or maintenance. </p>
-
-<h3>Sources</h3>
-
-<ul>
-<li><a href="http://manpages.ubuntu.com/manpages/precise/en/man1/vmbuilder.1.html">vmbuilder manpage</a></li>
-<li><a href="https://help.ubuntu.com/community/SerialConsoleHowto">ubuntu serial console</a></li>
-<li><a href="http://libvirt.org/formatnetwork.html">libvirt network format</a></li>
-<li><a href="https://www.kernel.org/doc/Documentation/networking/bonding.txt">linux kernel bonding documentation</a></li>
-<li><a href="http://www.linuxfoundation.org/collaborate/workgroups/networking/bridge">linux bridge utils documentation</a></li>
-<li><a href="http://www.linux-kvm.org/page/Networking">kvm network documentation</a></li>
-</ul>
-<hr>Tags: <a href="../tags/bonding.html" class="link">bonding, </a><a href="../tags/failover.html" class="link">failover, </a><a href="../tags/kvm.html" class="link">kvm, </a><a href="../tags/lacp.html" class="link">lacp, </a><a href="../tags/network.html" class="link">network, </a><a href="../tags/teaming.html" class="link">teaming, </a><a href="../tags/ubuntu.html" class="link">ubuntu, </a><a href="../tags/virsh.html" class="link">virsh, </a><a href="../tags/virtualization.html" class="link">virtualization, </a><a href="../tags/vlan.html" class="link">vlan, </a><div class="footer">
-                <hr>
-                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
-                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
-                <a href="/s/static/About.html">About</a><br />
-                </div>
-            </div>
-        </div>
-    </div>  
-    </div>
-    </div>
-     
-    <!-- Piwik --> 
-    <script type="text/javascript">
+</code></pre><p>If the machine is not reachable via ssh you can use the console to do recovery or maintenance.</p><h3>Sources</h3><ul><li><a href="http://manpages.ubuntu.com/manpages/precise/en/man1/vmbuilder.1.html">vmbuilder manpage</a></li><li><a href="https://help.ubuntu.com/community/SerialConsoleHowto">ubuntu serial console</a></li><li><a href="http://libvirt.org/formatnetwork.html">libvirt network format</a></li><li><a href="https://www.kernel.org/doc/Documentation/networking/bonding.txt">linux kernel bonding documentation</a></li><li><a href="http://www.linuxfoundation.org/collaborate/workgroups/networking/bridge">linux bridge utils documentation</a></li><li><a href="http://www.linux-kvm.org/page/Networking">kvm network documentation</a></li></ul><hr/>Tags: <a class="link" href="../tags/bonding.html">bonding,</a><a class="link" href="../tags/failover.html">failover,</a><a class="link" href="../tags/kvm.html">kvm,</a><a class="link" href="../tags/lacp.html">lacp,</a><a class="link" href="../tags/network.html">network,</a><a class="link" href="../tags/teaming.html">teaming,</a><a class="link" href="../tags/ubuntu.html">ubuntu,</a><a class="link" href="../tags/virsh.html">virsh,</a><a class="link" href="../tags/virtualization.html">virtualization,</a><a class="link" href="../tags/vlan.html">vlan,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -656,8 +303,4 @@ vm1 login:
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
-    <!-- End Piwik Tracking Code -->
-    </body>
-    </html>
-    
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
