@@ -1,45 +1,263 @@
-<!DOCTYPE html><html lang="en"><head><title>Set up your own distributed, redundant, and encrypted storage grid with Tahoe-LAFS - Raymii.org</title><link href="/s/inc/css/light.css" rel="stylesheet" title="light"/><link href="/s/inc/css/dark.css" rel="alternate stylesheet" title="dark"/><script src="/s/inc/js/jquery-2.1.1.min.js"></script><script src="/s/inc/js/bootstrap.3.2.0.min.js"></script><script src="/s/inc/js/styleswitcher.js"></script><script src="https://togetherjs.com/togetherjs-min.js"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="http://feeds.feedburner.com/Raymiiorg" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="https://raymii.org/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Items</a></li><li class="bottom-spacing special-menu"><a onclick="TogetherJS(this); return false;">TogetherJS</a></li><p></p><li><a class="link" href="/s/tags/bash.html">Bash</a></li><li><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li><a class="link" href="/s/tags/ssl.html">SSL</a></li><li><a class="link" href="/s/tags/debian.html">Debian</a></li><li><a class="link" href="/s/tags/python.html">Python</a></li><li><a class="link" href="/s/tags/vpn.html">VPN</a></li><li><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li><a class="link" href="/s/tags/nginx.html">nginx</a></li><li><a class="link" href="/s/tags/apache.html">Apache</a></li><li><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><ul class="navbar-collapse nav navbar-nav"><li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Style<b class="caret"></b></a><ul class="dropdown-menu"><li><a href="#" onclick="setActiveStyleSheet('dark')">Dark</a></li><li><a href="#" onclick="setActiveStyleSheet('light')">Light</a></li></ul></li></ul><br/><br/><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link</a><br/><script type="text/javascript"><!--
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Set up your own distributed, redundant, and encrypted storage grid with Tahoe-LAFS - Raymii.org</title>
+        <link href="/s/inc/css/light.css" rel="stylesheet" title="light" />
+        <link href="/s/inc/css/dark.css" rel="alternate stylesheet" title="dark" />
+        <script src="/s/inc/js/jquery-2.1.1.min.js"></script>
+        <script src="/s/inc/js/bootstrap.3.2.0.min.js"></script>
+        <script src="/s/inc/js/styleswitcher.js"></script>
+        <script src="https://togetherjs.com/togetherjs-min.js"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="http://feeds.feedburner.com/Raymiiorg" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="http://feeds.feedburner.com/Raymiiorg">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li class="bottom-spacing special-menu"><a onclick="TogetherJS(this); return false;">TogetherJS</a></li><p></p><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/vpn.html" class="link">VPN</a></li><li><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/apache.html" class="link">Apache</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>
+                <ul class="navbar-collapse nav navbar-nav">
+                <li class="dropdown">
+                <a data-toggle="dropdown" class="dropdown-toggle" href="#">Style<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                <li><a href="#" onclick="setActiveStyleSheet('dark')">Dark</a></li>
+                <li><a href="#" onclick="setActiveStyleSheet('light')">Light</a></li>
+                </ul>
+                </li>
+                </ul>
+                <br><br>
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean  Affiliate Link</a><br />
+                <script type="text/javascript"><!--
                 google_ad_client = "ca-pub-7993642564731324";
                 google_ad_slot = "9322003332";
                 google_ad_width = 200;
                 google_ad_height = 200;
                 //-->
-                </script><script src="//pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
-                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Set up your own distributed, redundant, and encrypted storage grid with Tahoe-LAFS</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="Tahoe_LAFS_Storage_Grid.html">Set up your own distributed, redundant, and encrypted storage grid with Tahoe-LAFS</a></li></ul><p><small>08-11-2012</small> | <small>Sven Slootweg</small></p><div class="ad"><script type="text/javascript"><!--
+                </script>
+                <script type="text/javascript"
+                src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Set up your own distributed, redundant, and encrypted storage grid with Tahoe-LAFS</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="Tahoe_LAFS_Storage_Grid.html" class="link">Set up your own distributed, redundant, and encrypted storage grid with Tahoe-LAFS</a></li></ul><p><small>08-11-2012</small> | <small>Sven Slootweg</small></p><div class='ad'>
+                            <script type="text/javascript"><!--
                             google_ad_client = "ca-pub-7993642564731324";
                             /* voorartikel */
                             google_ad_slot = "6172324376";
                             google_ad_width = 728;
                             google_ad_height = 90;
                             //-->
-                            </script><script src="//pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
-                            </script></div><br/><blockquote><p>Note: this guide was written by Sven Slootweg, AKA joepie91, and is released by him under the <a href="http://sam.zoy.org/wtfpl/">WTFPL</a></p></blockquote><p>If you have a few different VPSes, you'll most likely have a significant amount of unused storage space across all of them. This guide will be a quick introduction to setting up and using <a href="http://tahoe-lafs.org/">Tahoe-LAFS</a>, a distributed, redundant, and encrypted storage system - some may call it 'cloud storage'.</p><p><a href="http://clients.inceptionhosting.com/aff.php?aff=083">If you need VPS to set up your own Tahoe-LAFS storage grid, try InceptionHosting</a></p><ul><li>At least 2 VPSes required, at least 3 VPSes recommended. More is better.</li><li>Each VPS should have at least 256MB RAM (for OpenVZ burstable), or 128MB RAM (for OpenVZ vSwap and other virtualization technologies with proper memory accounting).</li><li>Reading comprehension and an hour of your time or so :)</li></ul><p>From the <a href="http://tahoe-lafs.org/">Tahoe-LAFS website</a>:</p><blockquote><p>Tahoe-LAFS is a Free and Open cloud storage system. It distributes your data across multiple servers. Even if some of the servers fail or are taken over by an attacker, the entire filesystem continues to function correctly, including preservation of your privacy and security.</p></blockquote><p>The short version: Tahoe-LAFS uses a RAID-like mechanism to store 'shares' (parts of a file) across the storage grid, according to the settings you specified. When a file is retrieved, all storage servers will be asked for shares of this file, and those that responded fastest will be used to retrieve the data from. The shares are reconstructed by the requesting client into the original file.</p><p>All shares are encrypted and checksummed; storage servers cannot possibly know or modify the contents of a share, or the file it derives from.</p><p>There are (roughly) two types of files: immutable (these cannot be changed afterwards) and mutable (these can be changed). Immutable files will result in a "read capability" (an encoded string that tells Tahoe-LAFS how to find it and how to decrypt it) and a "verify capability" (that can be used for verifying or repairing the file). A mutable file will also yield a "write capability" that can be used to modify the file. This way, it is possible to have a mutable file, but restrict the write capability to yourself, while sharing the read capability with others.</p><p>There is also a pseudo-filesystem with directories; while it isn't required to use this, it makes it possible to for example mount part of a Tahoe-LAFS filesystem via FUSE.</p><p>For more specifics, <a href="https://tahoe-lafs.org/trac/tahoe-lafs/browser/git/docs/architecture.rst">read this documentation entry</a>.</p><h4>1. Install dependencies</h4><p>Follow the below instructions for all VPSes.</p><p>To install and run Tahoe-LAFS, you will need Python (with development files), setuptools, and the usual tools for compiling software. On Debian, this can be installed by running <code>apt-get install python python-dev python-setuptools build-essential</code>. If you use a different distro, your package manager or package names may differ.</p><p>Python setuptools comes with a Python package manager (or installer, rather) named easy_install. We'd rather have pip as our Python package manager, so we'll install that instead: <code>easy_install pip</code>.</p><p>After installing pip, we'll install the last dependency we need to install manually (<code>pip install twisted</code>), and then we can install Tahoe-LAFS itself: <code>pip install allmydata-tahoe</code>.</p><p>When you're done installing all of the above, you'll have to make a new user (<code>adduser tahoe</code>) that you're going to use to run Tahoe-LAFS under. From this point on, run all commands as the <code>tahoe</code> user.</p><h4>2. Setting up an introducer</h4><p>First of all, you'll need an 'introducer' - this is basically the central server that all other nodes connect to, to be made aware of other nodes in the storage grid. While the storage grid will continue to function if the introducer goes down, no new nodes will be discovered, and there will be no reconnections to nodes that went down until the introducer is back up.</p><p>Preferably, this introducer should be installed on a server that is not a storage node, but it's possible to run an introducer and a storage node alongside each other.</p><p>Run the following on the VPS you wish to use as an introducer, as the <code>tahoe</code> user:</p><pre><code>tahoe create-introducer ~/.tahoe-introducer
-tahoe start ~/.tahoe-introducer
-</code></pre><p>Your introducer should now be started successfully. Read out the file <code>~/.tahoe-introducer/introducer.furl</code> and note the entire contents down somewhere. You will need this later to connect the other nodes.</p><h4>3. Setting up storage nodes</h4><p>Now it's time to set up the actual storage nodes. This will involve a little more configuration than the introducer node. On each storage node, run the following command: <code>tahoe create-node</code>.</p><p>If all went well, a storage node should now be created. Now edit ~/.tahoe/tahoe.cfg in your editor of choice. I will explain all the important configuration values - you can leave the rest of the values unchanged. Note that the 'shares' settings all apply to uploads from that particular server - each machine connected to the network can pick their own encoding settings.</p><ul><li><strong>nickname</strong>: The name for this particular storage node, as it will appear in the web panel.</li><li><strong>introducer.furl</strong>: The FURL for the introducer node - this is the address that you noted down before.</li><li><strong>shares.needed</strong>: This is the amount of shares that will be needed to reconstruct a file.</li><li><strong>shares.happy</strong>: This is the amount of different servers that have to be available for storing shares, for an upload to succeed.</li><li><strong>shares.total</strong>: The total amount of shares that should be created on upload. One storage node may hold more than one share, as long as it doesn't violate the shares.happy setting.</li><li><strong>reserved_space</strong>: The amount of space that should be reserved for <em>other applications</em> on this server.</li></ul><h5>Reserved space</h5><p>Tahoe-LAFS has a somewhat interesting way of counting space - instead of keeping track of how much space it can use for itself, it will try to make sure that a certain amount of space is available for other applications. What this means in practice is, that if another application fills up 1GB of disk space, this 1GB will be subtracted from the amount of space that Tahoe-LAFS <em>can</em> use, not from the amount of space that it <em>can't</em> use. The end result is Tahoe-LAFS being very conservative in the way it uses disk space. This means that you can typically set the amount of reserved space to a very low value like 1GB to 5GB, because by the time you hit that amount of free space, you will still have plenty of time to clean up your VPS, before the last gigabytes are used up by other applications.</p><h5>Share settings</h5><p>At first, share settings may seem very tricky to configure correctly. My advice would be to set it as the following:</p><ul><li><strong>shares.total</strong>: about 80% of the amount of servers you have available.</li><li><strong>shares.happy</strong>: 2 lower than shares.total</li><li><strong>shares.needed</strong>: half of shares.total</li></ul><p>This means that if you have for example 10 storage servers, shares.total = 8, shares.happy = 6, shares.needed = 4.</p><p>Now you can't just set any arbitrary values here - your share settings will influence the 'expansion factor' - how many times more space you use than the file would take up on its own. You can calculate the expansion factor by doing <code>shares.total / shares.needed</code> - for example, with the above suggested setup the expansion factor would be 2, meaning that a 100MB file would take up 200MB of space.</p><p>The level of redundancy can be calculated quite easily as well: the amount of servers you can lose while being guaranteed to still have access to your data, is <code>shares.happy - shares.needed</code> (this assumes worst case scenario). In most cases, the amount of servers you can lose will be <code>shares.total - shares.needed</code>.</p><h4>4. Starting your storage nodes</h4><p>On each node, simply run the command <code>tahoe start</code> as the <code>tahoe</code> user, and you should be in business!</p><h4>5. (optional) Install a local client</h4><p>To more easily use Tahoe-LAFS, you may want to install a Tahoe-LAFS client on your local machine. To do this, you should basically follow the instructions in step 3 - however, instead of running <code>tahoe create-node</code>, you should run <code>tahoe create-client</code>. Configuring and starting works the same, but you don't need to fill in the <code>reserved_space</code> option (as you're not storing files).</p><h5>Using your new storage grid</h5><p>There are several ways to use your storage grid:</p><h6>Via the web interface</h6><p>Simply make sure you have a client (or storage node) installed, and point your browser at - you will see the web interface for Tahoe-LAFS, which will allow you to use it. The "More info" link on a directory page (or for a file) will give you the read, write, and verify capability URIs that you need to work with them using other methods.</p><h5>Using Python</h5><p>I recently started working on a Python module named <code>pytahoe</code>, that you can use to easily interface with Tahoe-LAFS from a Python application or shell. To install it, simply run <code>pip install pytahoe</code> as root - you'll need to make sure that you have libfuse/libfuse2 installed. There is no real documentation for now other than in the code itself, but the below code gives you an idea of how it works:</p><pre><code>&gt;&gt;&gt; import pytahoe
-&gt;&gt;&gt; fs = pytahoe.Filesystem()
-&gt;&gt;&gt; d = fs.Directory("URI:DIR2:hnncfsbzsxv5fhdymxhycm3xc4:qjipiqg3bozb5evb6krdwfmsgks6j4ymivopgx7eoxcjb3avslqq")
-&gt;&gt;&gt; d.upload("devilskitchen.tar.gz")
-</code></pre><p>The result of this is <a href="http://owely.com/04swmf">something like this</a>.</p><h4>Mounting a directory</h4><p>You can also mount a directory as a local filesystem using FUSE (on OpenVZ, make sure your host supports FUSE). Right now, the easiest way appears to be using pytahoe (this can be done from a Python shell as well). Example:</p><pre><code>&gt;&gt;&gt; import pytahoe
-&gt;&gt;&gt; fs = pytahoe.Filesystem()
-&gt;&gt;&gt; d = fs.Directory("URI:DIR2:hnncfsbzsxv5fhdymxhycm3xc4:qjipiqg3bozb5evb6krdwfmsgks6j4ymivopgx7eoxcjb3avslqq")
-&gt;&gt;&gt; d.mount("http://www.lowendtalk.com/mnt/something")
-</code></pre><h5>Via the web API</h5><p>If you're using something that is not Python, or want a bit more control over what you do, you may want to use the Tahoe-LAFS WebAPI directly - documentation for this can be found <a href="https://tahoe-lafs.org/trac/tahoe-lafs/browser/docs/frontends/webapi.rst">here</a>.</p><h3>Extra info</h3><p>HalfEatenPie November 8:</p><pre><code>Out of curiosity @joepie91, what if one of the servers suddenly just "disappear" from the network? What happens to the files?
-</code></pre><p>joepie91 November 8:</p><pre><code>This doesn't really matter; if you have set up your share settings as I advised above, for example, you can usually lose half the servers before it becomes a problem. It's usually worth repairing (via a deep check) now and then if you often lose nodes, because this will redistribute shares over new nodes to meet the original settings again.
+                            </script>
+                            <script type="text/javascript"
+                            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+                            </script>
+                        </div><br><blockquote>
+<p>Note: this guide was written by Sven Slootweg, AKA joepie91, and is released by him under the <a href="http://sam.zoy.org/wtfpl/">WTFPL</a></p>
+</blockquote>
 
-From a practical viewpoint, I've had many (and I mean MANY) nodes disappear from my storage grid over time, and barely ever had an issue with it. If you get to the point where you have 20 shares spread over 20 nodes and you only need 10 to reconstruct the file... your storage grid is pretty much practically invincible. Just be sure to do a deep check now and then :)
-</code></pre><hr/><p>rm_ November 8:</p><pre><code>okay assuming I have 10 nodes with 10 GB of space each, with your recommended settings:  
+<p>If you have a few different VPSes, you&#39;ll most likely have a significant amount of unused storage space across all of them. This guide will be a quick introduction to setting up and using <a href="http://tahoe-lafs.org/">Tahoe-LAFS</a>, a distributed, redundant, and encrypted storage system - some may call it &#39;cloud storage&#39;.</p>
+
+<p><a href="http://clients.inceptionhosting.com/aff.php?aff=083">If you need VPS to set up your own Tahoe-LAFS storage grid, try InceptionHosting</a></p>
+
+<ul>
+<li>  At least 2 VPSes required, at least 3 VPSes recommended. More is better.</li>
+<li>  Each VPS should have at least 256MB RAM (for OpenVZ burstable), or 128MB RAM (for OpenVZ vSwap and other virtualization technologies with proper memory accounting).</li>
+<li>  Reading comprehension and an hour of your time or so :)</li>
+</ul>
+
+<p>From the <a href="http://tahoe-lafs.org/">Tahoe-LAFS website</a>:</p>
+
+<blockquote>
+<p>Tahoe-LAFS is a Free and Open cloud storage system. It distributes your data across multiple servers. Even if some of the servers fail or are taken over by an attacker, the entire filesystem continues to function correctly, including preservation of your privacy and security.</p>
+</blockquote>
+
+<p>The short version: Tahoe-LAFS uses a RAID-like mechanism to store &#39;shares&#39; (parts of a file) across the storage grid, according to the settings you specified. When a file is retrieved, all storage servers will be asked for shares of this file, and those that responded fastest will be used to retrieve the data from. The shares are reconstructed by the requesting client into the original file.</p>
+
+<p>All shares are encrypted and checksummed; storage servers cannot possibly know or modify the contents of a share, or the file it derives from.</p>
+
+<p>There are (roughly) two types of files: immutable (these cannot be changed afterwards) and mutable (these can be changed). Immutable files will result in a &quot;read capability&quot; (an encoded string that tells Tahoe-LAFS how to find it and how to decrypt it) and a &quot;verify capability&quot; (that can be used for verifying or repairing the file). A mutable file will also yield a &quot;write capability&quot; that can be used to modify the file. This way, it is possible to have a mutable file, but restrict the write capability to yourself, while sharing the read capability with others.</p>
+
+<p>There is also a pseudo-filesystem with directories; while it isn&#39;t required to use this, it makes it possible to for example mount part of a Tahoe-LAFS filesystem via FUSE.</p>
+
+<p>For more specifics, <a href="https://tahoe-lafs.org/trac/tahoe-lafs/browser/git/docs/architecture.rst">read this documentation entry</a>.</p>
+
+<h4>1. Install dependencies</h4>
+
+<p>Follow the below instructions for all VPSes.</p>
+
+<p>To install and run Tahoe-LAFS, you will need Python (with development files), setuptools, and the usual tools for compiling software. On Debian, this can be installed by running <code>apt-get install python python-dev python-setuptools build-essential</code>. If you use a different distro, your package manager or package names may differ.</p>
+
+<p>Python setuptools comes with a Python package manager (or installer, rather) named easy_install. We&#39;d rather have pip as our Python package manager, so we&#39;ll install that instead: <code>easy_install pip</code>.</p>
+
+<p>After installing pip, we&#39;ll install the last dependency we need to install manually (<code>pip install twisted</code>), and then we can install Tahoe-LAFS itself: <code>pip install allmydata-tahoe</code>.</p>
+
+<p>When you&#39;re done installing all of the above, you&#39;ll have to make a new user (<code>adduser tahoe</code>) that you&#39;re going to use to run Tahoe-LAFS under. From this point on, run all commands as the <code>tahoe</code> user.</p>
+
+<h4>2. Setting up an introducer</h4>
+
+<p>First of all, you&#39;ll need an &#39;introducer&#39; - this is basically the central server that all other nodes connect to, to be made aware of other nodes in the storage grid. While the storage grid will continue to function if the introducer goes down, no new nodes will be discovered, and there will be no reconnections to nodes that went down until the introducer is back up.</p>
+
+<p>Preferably, this introducer should be installed on a server that is not a storage node, but it&#39;s possible to run an introducer and a storage node alongside each other.</p>
+
+<p>Run the following on the VPS you wish to use as an introducer, as the <code>tahoe</code> user:</p>
+
+<pre><code>tahoe create-introducer ~/.tahoe-introducer
+tahoe start ~/.tahoe-introducer
+</code></pre>
+
+<p>Your introducer should now be started successfully. Read out the file <code>~/.tahoe-introducer/introducer.furl</code> and note the entire contents down somewhere. You will need this later to connect the other nodes.</p>
+
+<h4>3. Setting up storage nodes</h4>
+
+<p>Now it&#39;s time to set up the actual storage nodes. This will involve a little more configuration than the introducer node. On each storage node, run the following command: <code>tahoe create-node</code>.</p>
+
+<p>If all went well, a storage node should now be created. Now edit ~/.tahoe/tahoe.cfg in your editor of choice. I will explain all the important configuration values - you can leave the rest of the values unchanged. Note that the &#39;shares&#39; settings all apply to uploads from that particular server - each machine connected to the network can pick their own encoding settings.</p>
+
+<ul>
+<li>  <strong>nickname</strong>: The name for this particular storage node, as it will appear in the web panel.</li>
+<li>  <strong>introducer.furl</strong>: The FURL for the introducer node - this is the address that you noted down before.</li>
+<li>  <strong>shares.needed</strong>: This is the amount of shares that will be needed to reconstruct a file.</li>
+<li>  <strong>shares.happy</strong>: This is the amount of different servers that have to be available for storing shares, for an upload to succeed.</li>
+<li>  <strong>shares.total</strong>: The total amount of shares that should be created on upload. One storage node may hold more than one share, as long as it doesn&#39;t violate the shares.happy setting.</li>
+<li>  <strong>reserved_space</strong>: The amount of space that should be reserved for <em>other applications</em> on this server.</li>
+</ul>
+
+<h5>Reserved space</h5>
+
+<p>Tahoe-LAFS has a somewhat interesting way of counting space - instead of keeping track of how much space it can use for itself, it will try to make sure that a certain amount of space is available for other applications. What this means in practice is, that if another application fills up 1GB of disk space, this 1GB will be subtracted from the amount of space that Tahoe-LAFS <em>can</em> use, not from the amount of space that it <em>can&#39;t</em> use. The end result is Tahoe-LAFS being very conservative in the way it uses disk space. This means that you can typically set the amount of reserved space to a very low value like 1GB to 5GB, because by the time you hit that amount of free space, you will still have plenty of time to clean up your VPS, before the last gigabytes are used up by other applications.</p>
+
+<h5>Share settings</h5>
+
+<p>At first, share settings may seem very tricky to configure correctly. My advice would be to set it as the following:</p>
+
+<ul>
+<li>  <strong>shares.total</strong>: about 80% of the amount of servers you have available.</li>
+<li>  <strong>shares.happy</strong>: 2 lower than shares.total</li>
+<li>  <strong>shares.needed</strong>: half of shares.total</li>
+</ul>
+
+<p>This means that if you have for example 10 storage servers, shares.total = 8, shares.happy = 6, shares.needed = 4.</p>
+
+<p>Now you can&#39;t just set any arbitrary values here - your share settings will influence the &#39;expansion factor&#39; - how many times more space you use than the file would take up on its own. You can calculate the expansion factor by doing <code>shares.total / shares.needed</code> - for example, with the above suggested setup the expansion factor would be 2, meaning that a 100MB file would take up 200MB of space.</p>
+
+<p>The level of redundancy can be calculated quite easily as well: the amount of servers you can lose while being guaranteed to still have access to your data, is <code>shares.happy - shares.needed</code> (this assumes worst case scenario). In most cases, the amount of servers you can lose will be <code>shares.total - shares.needed</code>.</p>
+
+<h4>4. Starting your storage nodes</h4>
+
+<p>On each node, simply run the command <code>tahoe start</code> as the <code>tahoe</code> user, and you should be in business!</p>
+
+<h4>5. (optional) Install a local client</h4>
+
+<p>To more easily use Tahoe-LAFS, you may want to install a Tahoe-LAFS client on your local machine. To do this, you should basically follow the instructions in step 3 - however, instead of running <code>tahoe create-node</code>, you should run <code>tahoe create-client</code>. Configuring and starting works the same, but you don&#39;t need to fill in the <code>reserved_space</code> option (as you&#39;re not storing files).</p>
+
+<h5>Using your new storage grid</h5>
+
+<p>There are several ways to use your storage grid:</p>
+
+<h6>Via the web interface</h6>
+
+<p>Simply make sure you have a client (or storage node) installed, and point your browser at  - you will see the web interface for Tahoe-LAFS, which will allow you to use it. The &quot;More info&quot; link on a directory page (or for a file) will give you the read, write, and verify capability URIs that you need to work with them using other methods.</p>
+
+<h5>Using Python</h5>
+
+<p>I recently started working on a Python module named <code>pytahoe</code>, that you can use to easily interface with Tahoe-LAFS from a Python application or shell. To install it, simply run <code>pip install pytahoe</code> as root - you&#39;ll need to make sure that you have libfuse/libfuse2 installed. There is no real documentation for now other than in the code itself, but the below code gives you an idea of how it works:</p>
+
+<pre><code>&gt;&gt;&gt; import pytahoe
+&gt;&gt;&gt; fs = pytahoe.Filesystem()
+&gt;&gt;&gt; d = fs.Directory(&quot;URI:DIR2:hnncfsbzsxv5fhdymxhycm3xc4:qjipiqg3bozb5evb6krdwfmsgks6j4ymivopgx7eoxcjb3avslqq&quot;)
+&gt;&gt;&gt; d.upload(&quot;devilskitchen.tar.gz&quot;)
+</code></pre>
+
+<p>The result of this is <a href="http://owely.com/04swmf">something like this</a>.</p>
+
+<h4>Mounting a directory</h4>
+
+<p>You can also mount a directory as a local filesystem using FUSE (on OpenVZ, make sure your host supports FUSE). Right now, the easiest way appears to be using pytahoe (this can be done from a Python shell as well). Example:</p>
+
+<pre><code>&gt;&gt;&gt; import pytahoe
+&gt;&gt;&gt; fs = pytahoe.Filesystem()
+&gt;&gt;&gt; d = fs.Directory(&quot;URI:DIR2:hnncfsbzsxv5fhdymxhycm3xc4:qjipiqg3bozb5evb6krdwfmsgks6j4ymivopgx7eoxcjb3avslqq&quot;)
+&gt;&gt;&gt; d.mount(&quot;http://www.lowendtalk.com/mnt/something&quot;)
+</code></pre>
+
+<h5>Via the web API</h5>
+
+<p>If you&#39;re using something that is not Python, or want a bit more control over what you do, you may want to use the Tahoe-LAFS WebAPI directly - documentation for this can be found <a href="https://tahoe-lafs.org/trac/tahoe-lafs/browser/docs/frontends/webapi.rst">here</a>.</p>
+
+<h3>Extra info</h3>
+
+<p>HalfEatenPie November 8: </p>
+
+<pre><code>Out of curiosity @joepie91, what if one of the servers suddenly just &quot;disappear&quot; from the network? What happens to the files?
+</code></pre>
+
+<p>joepie91 November 8:</p>
+
+<pre><code>This doesn&#39;t really matter; if you have set up your share settings as I advised above, for example, you can usually lose half the servers before it becomes a problem. It&#39;s usually worth repairing (via a deep check) now and then if you often lose nodes, because this will redistribute shares over new nodes to meet the original settings again.
+
+From a practical viewpoint, I&#39;ve had many (and I mean MANY) nodes disappear from my storage grid over time, and barely ever had an issue with it. If you get to the point where you have 20 shares spread over 20 nodes and you only need 10 to reconstruct the file... your storage grid is pretty much practically invincible. Just be sure to do a deep check now and then :)
+</code></pre>
+
+<hr>
+
+<p>rm_ November 8:</p>
+
+<pre><code>okay assuming I have 10 nodes with 10 GB of space each, with your recommended settings:  
 - how many of those 10 can disappear with data still intact?  
 - what is the amount of usable space out of the raw 10x10GB capacity?
-</code></pre><p>joepie91 November 8:</p><pre><code>- how many of those 10 can disappear with data still intact?
+</code></pre>
 
-    Total shares would be 8, happy would be 6, and needed would be 4 - this means you can lose 6 - 4 = 2 servers (worst case scenario) without losing access to your data. It's likely possible to lose 3 or 4 servers (this depends on whether the servers you are losing hold 1 or more shares). In this, with "losing" servers I only mean the (max.) 8 servers that you uploaded a share to, to start with. Since your total amount of servers is 10, you could lose 2 more servers without any issues if those servers happen to not hold any shares for this file.
+<p>joepie91 November 8:</p>
 
-    Summary: worst case scenario, you can lose any 2 servers. Best case scenario, you can lose 6 servers. It'll usually be somewhere in the middle.
+<pre><code>- how many of those 10 can disappear with data still intact?
+
+    Total shares would be 8, happy would be 6, and needed would be 4 - this means you can lose 6 - 4 = 2 servers (worst case scenario) without losing access to your data. It&#39;s likely possible to lose 3 or 4 servers (this depends on whether the servers you are losing hold 1 or more shares). In this, with &quot;losing&quot; servers I only mean the (max.) 8 servers that you uploaded a share to, to start with. Since your total amount of servers is 10, you could lose 2 more servers without any issues if those servers happen to not hold any shares for this file.
+
+    Summary: worst case scenario, you can lose any 2 servers. Best case scenario, you can lose 6 servers. It&#39;ll usually be somewhere in the middle.
 
 - what is the amount of usable space out of the raw 10x10GB capacity?
     Since your expansion factor is 8 / 4 = 2, and every storage server has an equal amount of space available, you should be able to use 100 / 2 = 50GB of practical space.
-</code></pre><p>pubcrawler November 8:</p><pre><code>how much space are you combing in nodes and doing so all over internet?
-</code></pre><p>joepie91 November 8:</p><pre><code>    iqj5wkzuo2x3tdcjhauzsafpe5gwcojq    [name removed] CA       13.41GB
+</code></pre>
+
+<p>pubcrawler November 8:</p>
+
+<pre><code>how much space are you combing in nodes and doing so all over internet?
+</code></pre>
+
+<p>joepie91 November 8:</p>
+
+<pre><code>    iqj5wkzuo2x3tdcjhauzsafpe5gwcojq    [name removed] CA       13.41GB
     a2bjjtujmabiwfqungzlywzyjszm2gyp    [name removed]      265.96GB
     fzu6dmqq23u2km6ywtlym4tvmtefn25b    Box     3.35GB
     oywsltqtxm6su6gu54j6bxmgh5qf6o5r    Git     4.29GB
@@ -66,13 +284,54 @@ From a practical viewpoint, I've had many (and I mean MANY) nodes disappear from
 
 The nodes are distributed geographically fairly evenly.
 
-The 600.95GB node is a bit lost, because it's connected to the old introducer address (which no longer exists), so I can't use that space right now. I'm having some issues tracking down the owner :) 
-</code></pre><p>pubcrawler November 8:</p><pre><code>Fascinating post with the storage amounts. So Tahoe doesn't care that nodes have different storage amounts available? No sort of disclaimer or worry or best case against such?
-</code></pre><p>joepie91 November 8:</p><pre><code>No, the actual amount of storage space that you have available doesn't really matter. The only caveat is that you won't be able to use up all of it in all situations - say that you, for example, have total/happy shares set to 10, but only 2 servers offer more than 30GB of space, then your ceiling for storing files will be at about 30GB - after all, at some point, you simply only have 2 servers left that have more space to store files, and that wouldn't satisfy shares.happy.
-</code></pre><p>craigb November 8:</p><pre><code>also, isn't it the case that by default, nodes closest in latency terms get filled up faster on average?
-</code></pre><p>joepie91 November 8:</p><pre><code>No. Nodes are, as far as I am aware, only chosen by latency when downloading. Uploading will happen with deterministic randomness - as it should, because if the storage servers were picked on basis of latency, it would create a single (geographical) point of failure.
-That being said, if you're planning on for example building a CDN with Tahoe-LAFS as backend, you'll probably want to make sure that you either have an expansion factor of at least 3, or heavy caching, so that it's likely that data can be retrieved entirely from the same geographical area as the request originates from :)
-</code></pre><h3>Need more help?</h3><p>There's plenty more (very clear) documentation on the <a href="http://tahoe-lafs.org/">Tahoe-LAFS website</a>! :)</p><p>EDIT: For those interested in copying this guide - it's released under the <a href="http://sam.zoy.org/wtfpl/">WTFPL</a>, meaning you can basically do with it whatever you want, including copying it elsewhere. Credits or a donation are both appreciated, but neither is required :)</p><h3>Joepie91</h3><p><a href="http://www.lowendtalk.com/discussion/5813/how-to-set-up-your-own-distributed-redundant-and-encrypted-storage-grid-in-a-few-easy-steps">Original Thread</a><br/> <a href="http://cryto.net/%7Ejoepie91/donate.html">Donate to joepie91, the author of this guide</a></p><hr/>Tags: <a class="link" href="../tags/cluster.html">cluster,</a><a class="link" href="../tags/distributed.html">distributed,</a><a class="link" href="../tags/encrypted.html">encrypted,</a><a class="link" href="../tags/joepie91.html">joepie91,</a><a class="link" href="../tags/raid.html">raid,</a><a class="link" href="../tags/storage.html">storage,</a><a class="link" href="../tags/tahoe-lafs.html">tahoe-lafs,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+The 600.95GB node is a bit lost, because it&#39;s connected to the old introducer address (which no longer exists), so I can&#39;t use that space right now. I&#39;m having some issues tracking down the owner :) 
+</code></pre>
+
+<p>pubcrawler November 8: </p>
+
+<pre><code>Fascinating post with the storage amounts. So Tahoe doesn&#39;t care that nodes have different storage amounts available? No sort of disclaimer or worry or best case against such?
+</code></pre>
+
+<p>joepie91 November 8:    </p>
+
+<pre><code>No, the actual amount of storage space that you have available doesn&#39;t really matter. The only caveat is that you won&#39;t be able to use up all of it in all situations - say that you, for example, have total/happy shares set to 10, but only 2 servers offer more than 30GB of space, then your ceiling for storing files will be at about 30GB - after all, at some point, you simply only have 2 servers left that have more space to store files, and that wouldn&#39;t satisfy shares.happy.
+</code></pre>
+
+<p>craigb November 8:</p>
+
+<pre><code>also, isn&#39;t it the case that by default, nodes closest in latency terms get filled up faster on average?
+</code></pre>
+
+<p>joepie91 November 8:</p>
+
+<pre><code>No. Nodes are, as far as I am aware, only chosen by latency when downloading. Uploading will happen with deterministic randomness - as it should, because if the storage servers were picked on basis of latency, it would create a single (geographical) point of failure.
+That being said, if you&#39;re planning on for example building a CDN with Tahoe-LAFS as backend, you&#39;ll probably want to make sure that you either have an expansion factor of at least 3, or heavy caching, so that it&#39;s likely that data can be retrieved entirely from the same geographical area as the request originates from :)
+</code></pre>
+
+<h3>Need more help?</h3>
+
+<p>There&#39;s plenty more (very clear) documentation on the <a href="http://tahoe-lafs.org/">Tahoe-LAFS website</a>! :)</p>
+
+<p>EDIT: For those interested in copying this guide - it&#39;s released under the <a href="http://sam.zoy.org/wtfpl/">WTFPL</a>, meaning you can basically do with it whatever you want, including copying it elsewhere. Credits or a donation are both appreciated, but neither is required :)</p>
+
+<h3>Joepie91</h3>
+
+<p><a href="http://www.lowendtalk.com/discussion/5813/how-to-set-up-your-own-distributed-redundant-and-encrypted-storage-grid-in-a-few-easy-steps">Original Thread</a><br>
+<a href="http://cryto.net/%7Ejoepie91/donate.html">Donate to joepie91, the author of this guide</a></p>
+<hr>Tags: <a href="../tags/cluster.html" class="link">cluster, </a><a href="../tags/distributed.html" class="link">distributed, </a><a href="../tags/encrypted.html" class="link">encrypted, </a><a href="../tags/joepie91.html" class="link">joepie91, </a><a href="../tags/raid.html" class="link">raid, </a><a href="../tags/storage.html" class="link">storage, </a><a href="../tags/tahoe-lafs.html" class="link">tahoe-lafs, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -81,4 +340,8 @@ That being said, if you're planning on for example building a CDN with Tahoe-LAF
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
