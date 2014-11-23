@@ -5,7 +5,7 @@
                 google_ad_height = 200;
                 //-->
                 </script><script src="//pagead2.googlesyndication.com/pagead/show_ads.js" type="text/javascript">
-                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">HTTP Strict Transport Security for Apache, NGINX and Lighttpd</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="HTTP_Strict_Transport_Security_for_Apache_NGINX_and_Lighttpd.html">HTTP Strict Transport Security for Apache, NGINX and Lighttpd</a></li></ul><p><small>22-04-2013</small> | <small>Remy van Elst</small></p><div class="ad"><script type="text/javascript"><!--
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">HTTP Strict Transport Security for Apache, NGINX and Lighttpd</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="HTTP_Strict_Transport_Security_for_Apache_NGINX_and_Lighttpd.html">HTTP Strict Transport Security for Apache, NGINX and Lighttpd</a></li></ul><p><small>22-10-2014</small> | <small>Remy van Elst</small></p><div class="ad"><script type="text/javascript"><!--
                             google_ad_client = "ca-pub-7993642564731324";
                             /* voorartikel */
                             google_ad_slot = "6172324376";
@@ -27,11 +27,19 @@ LoadModule headers_module modules/mod_headers.so
 &lt;VirtualHost 67.89.123.45:443&gt;
     Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains"
 &lt;/VirtualHost&gt;
-</code></pre><p>Now your website will set the header every time someone visits, with an expiration date of two years (in seconds). It sets it at every visit. So tomorrow, it will say two years again.<br/> You do have to set it on the HTTPS vhost only. It cannot be in the http vhost.</p><p>To redirect your visitors to the HTTPS version of your website, use the mod_rewrite:</p><pre><code>&lt;IfModule mod_rewrite.c&gt;
-  RewriteEngine On
-  RewriteCond %{HTTPS} off
-  RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
-&lt;/IfModule&gt;
+</code></pre><p>Now your website will set the header every time someone visits, with an expiration date of two years (in seconds). It sets it at every visit. So tomorrow, it will say two years again.<br/> You do have to set it on the HTTPS vhost only. It cannot be in the http vhost.</p><p>To redirect your visitors to the HTTPS version of your website, use the following configuration:</p><pre><code>&lt;VirtualHost *:80&gt;
+  [...]
+  ServerName example.com
+  Redirect permanent / https://example.com/
+&lt;/VirtualHost&gt;
+</code></pre><p>If you only redirect, you dont even need a document root.</p><p>You can also use mod<em>rewrite, however the above method is simpler and safer. However, mod</em>rewrite below redirects the user to the page they were visiting over https, the above config just redirects to /:</p><pre><code>&lt;VirtualHost *:80&gt;
+  [...]
+  &lt;IfModule mod_rewrite.c&gt;
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+  &lt;/IfModule&gt;
+&lt;/VirtualHost&gt;
 </code></pre><p>And don't forget to restart Apache.</p><h3>Lighttpd</h3><p>The lighttpd variant is just as simple. Add it to your Lighttpd configuration file (<code>/etc/lighttpd/lighttpd.conf</code> for example):</p><pre><code>server.modules += ( "mod_setenv" )
 $HTTP["scheme"] == "https" {
     setenv.add-response-header  = ( "Strict-Transport-Security" =&gt; "max-age=63072000")
