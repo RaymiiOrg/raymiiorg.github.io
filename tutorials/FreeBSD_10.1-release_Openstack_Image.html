@@ -97,12 +97,13 @@
 
 <p>Make sure you have the Openstack command line tools installed. Follow the official openstack guide <a href="http://docs.openstack.org/user-guide/content/install_clients.html">here</a>. If you have <code>pip</code> installed you can use that to install the tools:</p>
 
-<p>pip install python-novaclient
-  pip install python-cinderclient
-  pip install python-glanceclient
-  pip install python-keystoneclient
-  pip install python-neutronclient
-  pip install python-swiftclient</p>
+<pre><code>pip install python-novaclient
+pip install python-cinderclient
+pip install python-glanceclient
+pip install python-keystoneclient
+pip install python-neutronclient
+pip install python-swiftclient
+</code></pre>
 
 <p>Save yourself some time and create a file named <code>computerc</code> with the below contents:</p>
 
@@ -157,7 +158,7 @@ export OS_TENANT_ID=&quot;&lt;tenant id&gt;&quot;
 
 <p>Start by uploading the FreeBSD 10.1-RELEASE ISO to Openstack using the Glance client:</p>
 
-<pre><code>glance image-create --name &quot;FreeBSD-10.0-RELEASE-amd64-dvd1.iso&quot; --disk-format iso --container-format bare --copy-from &quot;http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-amd64-dvd1.iso&quot;
+<pre><code>glance image-create --name &quot;FreeBSD-10.1-RELEASE-amd64-dvd1.iso&quot; --disk-format iso --container-format bare --copy-from &quot;http://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/10.1/FreeBSD-10.1-RELEASE-amd64-dvd1.iso&quot;
 </code></pre>
 
 <p>If your Openstack provider does not support the <code>--copy-from</code> parameter you will have to download the ISO yourself:</p>
@@ -167,7 +168,7 @@ export OS_TENANT_ID=&quot;&lt;tenant id&gt;&quot;
 
 <p>And upload it as an image. That can take a while:</p>
 
-<pre><code>glance image-create --file Downloads/FreeBSD-11.0-RELEASE-amd64-dvd1.iso --name &quot;FreeBSD-10.1-RELEASE-amd64-dvd1.iso&quot; --disk-format iso --container-format bare --progress
+<pre><code>glance image-create --file Downloads/FreeBSD-10.1-RELEASE-amd64-dvd1.iso --name &quot;FreeBSD-10.1-RELEASE-amd64-dvd1.iso&quot; --disk-format iso --container-format bare --progress
 </code></pre>
 
 <p>The result of the glance command should be something like below:</p>
@@ -185,7 +186,7 @@ export OS_TENANT_ID=&quot;&lt;tenant id&gt;&quot;
 | is_public        | False                                |
 | min_disk         | 0                                    |
 | min_ram          | 0                                    |
-| name             | FreeBSD-10.1-RELEASE-amd64-disc1.iso |
+| name             | FreeBSD-10.1-RELEASE-amd64-dvd1.iso  |
 | owner            | 0                                    |
 | protected        | False                                |
 | size             | 2585028608                           |
@@ -263,7 +264,7 @@ export OS_TENANT_ID=&quot;&lt;tenant id&gt;&quot;
 | flavor                               | Standard 1 (111)                                                            |
 | hostId                               |                                                                             |
 | id                                   | dad95c7d-f921-4e89-8ea7-99e1654d65fe                                        |
-| image                                | FreeBSD-10.1-RELEASE-amd64-disc1.iso (5b74bee7-c05e-4102-9dd2-349dec4adee2) |
+| image                                | FreeBSD-10.1-RELEASE-amd64-dvd1.iso (5b74bee7-c05e-4102-9dd2-349dec4adee2)   |
 | key_name                             | -                                                                           |
 | metadata                             | {}                                                                          |
 | name                                 | FreeBSD-10.1-RELEASE-install                                                |
@@ -493,7 +494,7 @@ rm /bla
 
 <p>Boot a new instance from your newly created image:</p>
 
-<pre><code>nova boot --image &lt;id from the converted volume image&gt; --flavor &quot;Standard 4&quot; --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000 --key-name &lt;your ssh key&gt; FreeBSD-10.0-RELEASE-cloudinit
+<pre><code>nova boot --image &lt;id from the converted volume image&gt; --flavor &quot;Standard 4&quot; --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000 --key-name &lt;your ssh key&gt; FreeBSD-10.1-RELEASE-cloudinit
 </code></pre>
 
 <p>When the instance has spawned you can login as the freebsd user, freebsd@ipaddress. Or, if you set another default username, use that.</p>
