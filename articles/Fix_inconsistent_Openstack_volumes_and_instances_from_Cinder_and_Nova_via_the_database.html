@@ -1,0 +1,202 @@
+<!-- nominify -->
+
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Fix inconsistent Openstack volumes and instances from Cinder and Nova via the database - Raymii.org</title>
+        <link href="/s/inc/css/light.css" rel="stylesheet" title="light" />
+        <link href="/s/inc/css/dark.css" rel="alternate stylesheet" title="dark" />
+        <script src="/s/inc/js/jquery-2.1.1.min.js"></script>
+        <script src="/s/inc/js/bootstrap.3.2.0.min.js"></script>
+        <script src="/s/inc/js/styleswitcher.js"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="https://raymii.org/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Items</a></li><li><a href="/s/tags/bash.html" class="link">Bash</a></li><li><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li><a href="/s/tags/ssl.html" class="link">SSL</a></li><li><a href="/s/tags/debian.html" class="link">Debian</a></li><li><a href="/s/tags/python.html" class="link">Python</a></li><li><a href="/s/tags/vpn.html" class="link">VPN</a></li><li><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li><a href="/s/tags/nginx.html" class="link">nginx</a></li><li><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>
+                <ul class="navbar-collapse nav navbar-nav">
+                <li class="dropdown">
+                <a data-toggle="dropdown" class="dropdown-toggle" href="#">Style<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                <li><a href="#" onclick="setActiveStyleSheet('dark')">Dark</a></li>
+                <li><a href="#" onclick="setActiveStyleSheet('light')">Light</a></li>
+                </ul>
+                </li>
+                </ul>
+                <br><br>
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean  Affiliate Link</a><br />
+                <script type="text/javascript"><!--
+                google_ad_client = "ca-pub-7993642564731324";
+                google_ad_slot = "9322003332";
+                google_ad_width = 200;
+                google_ad_height = 200;
+                //-->
+                </script>
+                <script type="text/javascript"
+                src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+                </script>    
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Fix inconsistent Openstack volumes and instances from Cinder and Nova via the database</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Fix_inconsistent_Openstack_volumes_and_instances_from_Cinder_and_Nova_via_the_database.html" class="link">Fix inconsistent Openstack volumes and instances from Cinder and Nova via the database</a></li></ul><p><small>22-12-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script type="text/javascript"><!--
+                            google_ad_client = "ca-pub-7993642564731324";
+                            /* voorartikel */
+                            google_ad_slot = "6172324376";
+                            google_ad_width = 728;
+                            google_ad_height = 90;
+                            //-->
+                            </script>
+                            <script type="text/javascript"
+                            src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+                            </script>
+                        </div><br><p>When running Openstack, sometimes the state of a volume or an instance can be inconsistent on the cluster. Nova might find a volume attached while Cinder says the volume is detached or otherwise. Sometimes a volume deletion hangs, or a detach does not work. If you&#39;ve found and fixed the underlying issue (lvm, iscsi, ceph, nfs etc...) you need to bring the database up to date with the new consistent state. Most of the time a reset-state works, sometimes you need to manually edit the database to correct the state. These snippets show you how.</p>
+
+<p><em>Please note that it is important to find and fix the underlying issue.</em> If you for example have a volume which hangs on detaching, resetting the database is a quick hack and not a real fix. Make sure you first fix the underlying issue and cause before you update the database.</p>
+
+<p>These examples were tested with all components on Juno and on Icehouse with MySQL as the backing database.</p>
+
+<p><em>Please be extermely carefull with these examples.</em></p>
+
+<h3>Delete an instance</h3>
+
+<p>Your NFS backing storage might have crashed halfway during a VM delete. You&#39;ve manually deleted all the related files (disk, config etc) and removed the VM domain from the backing hypervisor (virsh, esxi etc). However <code>nova show</code> still sees the VM as active (or error). A <code>nova reset-state --active</code> doesn&#39;t fix the delete part. The following query can be used to set an instance as deleted:</p>
+
+<pre><code>$ mysql nova_db
+&gt; update instances set deleted=&#39;1&#39;, vm_state=&#39;deleted&#39;, deleted_at=&#39;now()&#39;&#39; where uuid=&#39;$vm_uuid&#39; and project_id=&#39;$project_uuid&#39;;
+</code></pre>
+
+<p>Normaly a <code>nova delete $uuid</code> is the correct way to delete a VM.</p>
+
+<p>If you want to actually delete a from the database instead of marking it as deleted, the following queries should do that:</p>
+
+<pre><code>$ mysql nova_db
+&gt; delete from instance_faults where instance_faults.instance_uuid = &#39;$vm_uuid&#39;;
+&gt; delete from instance_id_mappings where instance_id_mappings.uuid = &#39;$vm_uuid&#39;;
+&gt; delete from instance_info_caches where instance_info_caches.instance_uuid = &#39;$vm_uuid&#39;;
+&gt; delete from instance_system_metadata where instance_system_metadata.instance_uuid = &#39;$vm_uuid&#39;;
+&gt; delete from security_group_instance_association where security_group_instance_association.instance_uuid = &#39;$vm_uuid&#39;;
+&gt; delete from block_device_mapping where block_device_mapping.instance_uuid = &#39;$vm_uuid&#39;;
+&gt; delete from fixed_ips where fixed_ips.instance_uuid = &#39;$vm_uuid&#39;;
+&gt; delete from instance_actions_events where instance_actions_events.action_id in (select id from instance_actions where instance_actions.instance_uuid = &#39;$vm_uuid&#39;);
+&gt; delete from instance_actions where instance_actions.instance_uuid = &#39;$vm_uuid&#39;;
+&gt; delete from virtual_interfaces where virtual_interfaces.instance_uuid = &#39;$vm_uuid&#39;;
+&gt; delete from instances where instances.uuid = &#39;$vm_uuid&#39;;
+</code></pre>
+
+<h3>Change the compute host of a VM</h3>
+
+<p>A <code>nova migrate</code> or <code>nova resize</code> might have failed. The disk could be already migrated or still on your shared storage but nova is confused. Make sure the VM domain is only on one compute node (preferably the on it came from, use <code>nova migration-list</code> to find that out) and the backing disk/config files are also only on one hypervisor node (lsof and tgt-adm are your friends here). The following query changes the VM hypervisor host for nova:</p>
+
+<pre><code>$ mysql nova_db
+&gt; update instances set host=&#39;compute-hostname.domain&#39;,node=&#39;compute-hostname.domain&#39; where uuid=&#39;$vm_uuid&#39; and project_id=&#39;$project_uuid&#39;;
+</code></pre>
+
+<p>Normally a <code>nova migrate $vm_uuid</code> or a <code>nova resize $vm_uuid $flavor</code> should be enough.</p>
+
+<h3>Set a volume as detached in Cinder</h3>
+
+<p>Your backing cinder storage might have issues or bugs which cause <code>nova volume-detach $vm_uuid $volume_uuid</code> to fail sometimes. It might be detached in Nova but still have the state <code>Detaching</code> in Cinder. Make sure the VM domain has the actual disk removed. Also check our backing storage (ceph, lvm, iscsi etc..) to make sure it is actually detached and not in use anymore. </p>
+
+<p>Try a <code>cinder reset-state --state available $volume_uuid</code> first. If that fails, the following <code>cinder</code> mysql query sets the Cinder state to available:</p>
+
+<pre><code>$ mysql cinder_db
+&gt; update cinder.volumes set attach_status=&#39;detached&#39;,status=&#39;available&#39; where id =&#39;$volume_uuid&#39;;
+</code></pre>
+
+<p>Absolutely make sure that there is no data being written from to the volume, it might cause data loss otherwise.</p>
+
+<p>Do note that the cinder python api (<code>import cinderclient.v2</code>) also has the <code>cinder.volumes.detach(volume_id)</code> call. You do need to write some tooling around that. (<a href="http://docs.openstack.org/developer/cinder/devref/volume.html?highlight=detach_volume">http://docs.openstack.org/developer/cinder/devref/volume.html?highlight=detach_volume</a>).</p>
+
+<h3>Detach a volume from Nova</h3>
+
+<p>Sometimes the volume is detached from Cinder but Nova still shows it as attached. Same caution warnings as above count, make sure you check your backing storage first to see if the volume is actually detached and not in use, data loss otherwise.</p>
+
+<p>The followng query removes the nova block device mapping:</p>
+
+<pre><code>$ mysql nova_db
+&gt; delete from block_device_mapping where not deleted and volume_id=&#39;$volume_uuid&#39; and project_id=&#39;$project_uuid&#39;;
+</code></pre>
+
+<p>The correct way is, of course, <code>nova volume_detach $vm_uuid $volume_uuid</code>.</p>
+
+<p>If you use <code>virsh</code> make sure you also <code>nova reboot --hard $vm_uuid</code> to rebuild the <code>virsh</code> domain. If you don&#39;t do that, the volume might fail to attach because <code>virsh</code> can&#39;t attach it at the mount point (<code>/dev/vdX</code>) since it thinks it is already in use.</p>
+
+<h3>Delete a volume from Cinder</h3>
+
+<p>It might be that a volume has an error deleting. It ends up in the <code>Error_deleting</code> state. Try a <code>cinder reset-state --state available $volume_uuid</code> first. If all fails, check your backing storage to see what happened and if the volume is actually removed or not. If not, remove it. Then you can update the cinder database to set it as deleted:</p>
+
+<pre><code>$ mysql cinder_db
+&gt; update volumes set deleted=1,status=&#39;deleted&#39;,deleted_at=now(),updated_at=now() where deleted=0 and id=&#39;$volume_uuid&#39;;
+</code></pre>
+
+<p>The correct way is <code>cinder delete $volume_uuid</code>.</p>
+
+<h3>Word of caution</h3>
+
+<p>If you have these inconsistencies you have bigger problems you need to fix instead of manually setting state and updating components. Openstack should make that part easier, remember? </p>
+
+<p>If you execute these queries wrong you can cause serious data loss!</p>
+
+<p>Check your logging, set it to debug everywhere and get a reproducable scenario. Then find a solution, report a bug, test the fix and deploy it in your test, accept and then production environment.</p>
+<hr>Tags: <a href="../tags/cinder.html" class="link">cinder, </a><a href="../tags/cloud.html" class="link">cloud, </a><a href="../tags/compute.html" class="link">compute, </a><a href="../tags/iscsi.html" class="link">iscsi, </a><a href="../tags/lvm.html" class="link">lvm, </a><a href="../tags/mysql.html" class="link">mysql, </a><a href="../tags/nfs.html" class="link">nfs, </a><a href="../tags/nova.html" class="link">nova, </a><a href="../tags/openstack.html" class="link">openstack, </a><a href="../tags/volume.html" class="link">volume, </a><a href="../tags/zfs.html" class="link">zfs, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
