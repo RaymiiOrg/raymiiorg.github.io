@@ -384,7 +384,7 @@ alice : EAP &quot;YzCgnveYuL429fH&quot;
 bob : EAP &quot;E23pOjvW8z248iAp&quot; 
 </code></pre>
 
-<p>In the example above the RSA private key file vpnHostKey.der stored in the <code>/etc/ipsec.d/private/</code> directory is not protected by symmetric encryption (a password).</p>
+<p>In the example above the RSA private key file vpnHostKey.der stored in the <code>/etc/openswan/ipsec.d/private/</code> directory is not protected by symmetric encryption (a password).</p>
 
 <p>The format of the EAP MSCHAPv2 user credentials is:</p>
 
@@ -392,6 +392,12 @@ bob : EAP &quot;E23pOjvW8z248iAp&quot;
 </code></pre>
 
 <p>Add as many users as you like there. The first line allows all users with a valid certificate to use the VPN, the other lines allow users without a certificate to login with a username and password. The space between the username, the colon (:) and EAP needs to be there.</p>
+
+<p>If you need to generate password, OpenSSL can help you there:</p>
+
+<pre><code> openssl rand -base64 24
+ jzHMIj6sqBbSI6LFmXINrwZWkXG9O8GW
+</code></pre>
 
 <h3>Firewall &amp; Packet Routing</h3>
 

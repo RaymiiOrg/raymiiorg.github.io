@@ -120,7 +120,7 @@
 
 <h3>Change the compute host of a VM</h3>
 
-<p>A <code>nova migrate</code> or <code>nova resize</code> might have failed. The disk could be already migrated or still on your shared storage but nova is confused. Make sure the VM domain is only on one compute node (preferably the on it came from, use <code>nova migration-list</code> to find that out) and the backing disk/config files are also only on one hypervisor node (lsof and tgt-adm are your friends here). The following query changes the VM hypervisor host for nova:</p>
+<p>A <code>nova migrate</code> or <code>nova resize</code> might have failed. The disk could be already migrated or still on your shared storage but nova is confused. Make sure the VM domain is only one compute node (preferably the on it came from, use <code>nova migration-list</code> to find that out) and the backing disk/config files are also only on one hypervisor node (lsof and tgt-adm are your friends here). The following query changes the VM hypervisor host for nova:</p>
 
 <pre><code>$ mysql nova_db
 &gt; update instances set host=&#39;compute-hostname.domain&#39;,node=&#39;compute-hostname.domain&#39; where uuid=&#39;$vm_uuid&#39; and project_id=&#39;$project_uuid&#39;;
