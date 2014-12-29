@@ -71,7 +71,7 @@
            <div class="col-md-8 col-sm-8"> 
                 <div class="inner">
 
-           <h2 class='headheader'>IPSEC VPN on Centos 7 with StrongSwan</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="IPSEC_vpn_with_CentOS_7.html" class="link">IPSEC VPN on Centos 7 with StrongSwan</a></li></ul><p><small>25-12-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
+           <h2 class='headheader'>IPSEC VPN on Centos 7 with StrongSwan</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="IPSEC_vpn_with_CentOS_7.html" class="link">IPSEC VPN on Centos 7 with StrongSwan</a></li></ul><p><small>30-12-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
                             <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                             <!-- voorartikel -->
                             <ins class="adsbygoogle"
@@ -115,6 +115,13 @@
 </ul>
 
 <p>I do all the steps as the root user. You should do to, but only via * -i* or * su -*.</p>
+
+<h4>Version History:</h4>
+
+<ul>
+<li>30-12-2014: updated iOS config</li>
+<li>25-12-2014: Initial version</li>
+</ul>
 
 <h3>No L2TP?</h3>
 
@@ -355,12 +362,18 @@ conn IPSec-IKEv2-EAP
 conn CiscoIPSec
     keyexchange=ikev1
     forceencaps=yes
-    rightauth=pubkey
-    rightauth2=xauth
+    authby=xauthrsasig
+    xauth=server
     auto=add
 </code></pre>
 
 <p>This configuration has settings for three types of VPN services: IKEv2 + RSA certificate, IKEv2 + EAP, and IKEv1 + Xauth RSA, thus providing compatibility for a wide range of IPsec clients.</p>
+
+<p>iOS clients below iOS 8 need to use <code>ikev1</code>. Apple added support for IKEv2 in iOS 8, but it needs to be configured using a <a href="https://wiki.strongswan.org/projects/strongswan/wiki/AppleIKEv2Profile">custom configuration profile</a>.</p>
+
+<p>OS X does not support IKEv2 (not on 10.10 or lower) so they need to use <code>ikev1</code> as well.</p>
+
+<p>Android 4+ and Windows 7+ support IKEv2 and can use that.</p>
 
 <p>Clients will get the Google DNS servers and an IP address in the <code>10.42.42.0/24</code> range. We use a strong ciphersuite.</p>
 
@@ -379,6 +392,7 @@ conn CiscoIPSec
 
 alice : EAP &quot;YzCgnveYuL429fH&quot; 
 bob : EAP &quot;E23pOjvW8z248iAp&quot; 
+hipster: XAUTH &quot;xauth_ikev1_example_password&quot;
 </code></pre>
 
 <p>In the example above the RSA private key file vpnHostKey.der stored in the <code>/etc/openswan/ipsec.d/private/</code> directory is not protected by symmetric encryption (a password).</p>
@@ -389,6 +403,8 @@ bob : EAP &quot;E23pOjvW8z248iAp&quot;
 </code></pre>
 
 <p>Add as many users as you like there. The first line allows all users with a valid certificate to use the VPN, the other lines allow users without a certificate to login with a username and password. The space between the username, the colon (:) and EAP needs to be there.</p>
+
+<p>If you have users that need to use IKEv1 with a password and XAUTH you need to seperately configure those. Note that certificate authentication is prefersed, those users do not have to be configured there.</p>
 
 <p>If you need to generate password, OpenSSL can help you there:</p>
 
@@ -404,8 +420,11 @@ bob : EAP &quot;E23pOjvW8z248iAp&quot;
 firewall-cmd --zone=dmz --permanent --add-port=51/udp # AH (authenticated headers)
 firewall-cmd --zone=dmz --permanent --add-port=500/udp #IKE  (security associations)
 firewall-cmd --zone=dmz --permanent --add-port=4500/udp # IKE NAT Traversal (IPsec between natted devices)
+firewall-cmd --permanent --add-service=&quot;ipsec&quot;
 firewall-cmd --zone=dmz --permanent --add-masquerade
 firewall-cmd --permanent --set-default-zone=dmz
+firewall-cmd --reload
+firewall-cmd --list-all
 </code></pre>
 
 <p>Configure <code>sysctl</code> to allow packet forwarding:</p>
@@ -578,6 +597,17 @@ store.</p>
  IPSec-IKEv2{2}:  INSTALLED, TUNNEL, ESP in UDP SPIs: c6eadabb_i 58998789_o
  IPSec-IKEv2{2}:   0.0.0.0/0 === 10.42.42.1/32
 </code></pre>
+
+<h3>Sources</h3>
+
+<p>Thanks to:</p>
+
+<ul>
+<li><a href="https://wiki.strongswan.org/projects/strongswan">StrongSwan Wiki</a> and the </li>
+<li><a href="https://wiki.strongswan.org/projects/strongswan/wiki/IpsecConf">StrongSwan ipsec.conf reference</a> for most of the configuration.</li>
+<li><a href="http://members.shaw.ca/bertan/">bertran</a> for the iOS examples.</li>
+<li><a href="https://www.zeitgeist.se/2013/11/22/strongswan-howto-create-your-own-vpn/">zeitgeist</a> for the certificate setup.</li>
+</ul>
 <hr>Tags: <a href="../tags/centos.html" class="link">centos, </a><a href="../tags/ikev2.html" class="link">ikev2, </a><a href="../tags/ipsec.html" class="link">ipsec, </a><a href="../tags/openswan.html" class="link">openswan, </a><a href="../tags/openvpn.html" class="link">openvpn, </a><a href="../tags/pptp.html" class="link">pptp, </a><a href="../tags/redhat.html" class="link">redhat, </a><a href="../tags/rhel.html" class="link">rhel, </a><a href="../tags/strongswan.html" class="link">strongswan, </a><a href="../tags/vpn.html" class="link">vpn, </a><div class="footer">
                 <hr>
                 <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
