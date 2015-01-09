@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="en"><head><title>Broken Corrupted Raspberry Pi SD Card - Raymii.org</title><link href="/s/inc/css/light.css" rel="stylesheet" title="light"/><link href="/s/inc/css/dark.css" rel="alternate stylesheet" title="dark"/><script async="" src="/s/inc/js/jquery-2.1.1.min.js"></script><script async="" src="/s/inc/js/bootstrap.3.2.0.min.js"></script><script async="" src="/s/inc/js/styleswitcher.js"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Items</a></li><li><a class="link" href="/s/tags/bash.html">Bash</a></li><li><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li><a class="link" href="/s/tags/ssl.html">SSL</a></li><li><a class="link" href="/s/tags/debian.html">Debian</a></li><li><a class="link" href="/s/tags/python.html">Python</a></li><li><a class="link" href="/s/tags/vpn.html">VPN</a></li><li><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li><a class="link" href="/s/tags/nginx.html">nginx</a></li><li><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><ul class="navbar-collapse nav navbar-nav"><li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Style<b class="caret"></b></a><ul class="dropdown-menu"><li><a href="#" onclick="setActiveStyleSheet('dark')">Dark</a></li><li><a href="#" onclick="setActiveStyleSheet('light')">Light</a></li></ul></li></ul><br/><br/><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Broken Corrupted Raspberry Pi SD Card</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../blog/index.html">Blog</a></li><li><a class="link" href="Broken_Corrupted_Raspberry_Pi_SD_Card.html">Broken Corrupted Raspberry Pi SD Card</a></li></ul><p><small>09-01-2015</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><p><img alt="Pi" src="https://raymii.org/s/inc/img/small-pcs/raspberry-pi.jpg"/></p><p>One of my Raspberry Pi's would not boot up after a reboot. The SD card was corrupted, sadly beyond repair. This article walks you through the steps I took to try to fix the SD card, including fsck, badblocks and other filesystem utilities. It also has tips to reduce the writing on the Raspberry Pi, this to save SD cards from some amount of wear and thus possible corruption.</p><p>The machine was running as an <a href="http://www.icrobotics.co.uk/wiki/index.php/Turning_the_Raspberry_Pi_Into_an_FM_Transmitter">FM transmitter</a> so that my regular sound system could play podcasts (Please note that it is probably illegal to transmit without having your HAM license). I't would sync up my feeds and, when turned on, started playing them.</p><p>However, after the last reboot it would not start up again. I rigged up the UART to my machine and found out why, there were files that the system could not read, therefore init would not boot up.</p><h3>fsck</h3><p>The file system consistency check utility most of the time is able to find and recover damaged filesystems. My systems do a filesystem check at every boot, and they get a reboot regularly. The SD card has an ext4 filesystem and is 16 GB in size.</p><p>Since most of the time you can fix broken filesystems with an fsck I hooked up the card to my machine and started the fsck:</p><pre><code># fsck /dev/mmcblk0p2
+</code></pre><p>And it failed right away:</p><pre><code>fsck from util-linux 2.25.2
+e2fsck 1.42.12 (29-Aug-2014)
+fsck.ext4: Filesystem revision too high while trying to open /dev/mmcblk0p2
+The filesystem revision is apparently too high for this version of e2fsck.
+(Or the filesystem superblock is corrupt)
+
+
+The superblock could not be read or does not describe a valid ext2/ext3/ext4
+filesystem.  If the device is valid and it really contains an ext2/ext3/ext4
+filesystem (and not swap or ufs or something else), then the superblock
+is corrupt, and you might try running e2fsck with an alternate superblock:
+    e2fsck -b 8193 &lt;device&gt;
+ or
+    e2fsck -b 32768 &lt;device&gt;
+</code></pre><p>The superblock contains information about the file system such as the file system type, size, status, information about other metadata structures, block counts, inode counts, supported features, maintenance information, and more and so on (<a href="https://ext4.wiki.kernel.org/index.php/Ext4_Disk_Layout#The_Super_Block">source</a>). It is an important piece of information for the filesystem.</p><p>So the card is so broken that the first superblock is not readable. An ext4 filesystem has multiple copies of it's superblock, so lets find them and use them to try the fsck again. To find the other superblocks we can use the following command:</p><pre><code>mke2fs -n /dev/mmcblk0p2
+</code></pre><p>Output</p><pre><code>mke2fs 1.42.12 (29-Aug-2014)
+/dev/mmcblk0p2 contains a ext4 file system
+Proceed anyway? (y,n) y
+Creating filesystem with 3794688 4k blocks and 950272 inodes
+Filesystem UUID: a56c8a06-9907-41a2-86a0-dd601212880b
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208
+</code></pre><p>We also need to find the block size, the above command shows it as 4k, which is 4096. With this information we can retry the fsck with the alternate superblock:</p><pre><code>fsck -b 163840 -B 4096 /dev/mmcblk0p2
+</code></pre><p>Where <code>-b</code> is the alternative superblock and <code>-B</code> is the blocksize.</p><p>It didn't help much, after a lot of questions I decided to automatically fix everything it found:</p><pre><code>fsck from util-linux 2.25.2
+e2fsck 1.42.12 (29-Aug-2014)
+Superblock has an invalid journal (inode 8).
+Clear&lt;y&gt;? yes
+*** ext3 journal has been deleted - filesystem is now ext2 only ***
+
+Resize inode not valid.  Recreate&lt;y&gt;? yes
+Pass 1: Checking inodes, blocks, and sizes
+yInode 1 has EXTENTS_FL flag set on filesystem without extents support.
+Clear&lt;y&gt;? yes
+Root inode has dtime set (probably due to old mke2fs).  Fix&lt;y&gt;? yes
+Quota inode is not in use, but contains data.  Clear&lt;y&gt;? yes
+Quota inode is not in use, but contains data.  Clear&lt;y&gt;? yes
+Inode 5, i_size is 2305843009213693952, should be 0.  Fix&lt;y&gt;? yes
+Inode 5, i_blocks is 131072, should be 0.  Fix&lt;y&gt;? yes
+Reserved inode 6 (&lt;The undelete directory inode&gt;) has invalid mode.  Clear&lt;y&gt;? yes
+Inode 6 has a bad extended attribute block 2064.  Clear&lt;y&gt;? yes
+Inode 6, i_size is 666532745924706320, should be 0.  Fix&lt;y&gt;? yes
+Journal inode is not in use, but contains data.  Clear&lt;y&gt;? yes
+Reserved inode 9 (&lt;Reserved inode 9&gt;) has invalid mode.  Clear&lt;y&gt;? yes
+Reserved inode 10 (&lt;Reserved inode 10&gt;) has invalid mode.  Clear&lt;y&gt;?
+Recreate journal&lt;y&gt;? cancelled!
+/dev/mmcblk0p2: e2fsck canceled.
+
+/dev/mmcblk0p2: ***** FILE SYSTEM WAS MODIFIED *****
+</code></pre><p>Adding the <code>-y</code> option to the command will automatically answer yes to everything:</p><pre><code>fsck -y -b 163840 -B 4096 /dev/mmcblk0p2
+</code></pre><h3>Scratch Files</h3><p>This goes well for a while, but fails after some time with the following error:</p><pre><code>Error storing directory block information (inode=5542, block=0, num=33754683): Memory allocation failed
+
+/dev/mmcblk0p2: ***** FILE SYSTEM WAS MODIFIED *****
+Recreate journal? yes
+
+Creating journal (32768 blocks):  Done.
+
+*** journal has been re-created - filesystem is now ext3 again ***
+e2fsck: aborted
+</code></pre><p>Searching around on the web results in multiple topics suggesting to add the following:</p><pre><code>[scratch_files]
+directory = /var/cache/e2fsck
+</code></pre><p>To the file <code>/etc/e2fsck.conf</code>. The <a href="http://manpages.ubuntu.com/manpages/precise/man5/e2fsck.conf.5.html">man page</a> describes it like so:</p><pre><code>   [scratch_files]
+      This  stanza  controls  when  e2fsck will attempt to use scratch
+      files to reduce the need for memory.
+</code></pre><p>Ted Tso explains what this option does on <a href="https://www.redhat.com/archives/ext3-users/2008-June/msg00015.html">this mailinglist topic</a>:</p><blockquote><p>This will cause e2fsck to store certain data structures which grow large with backup servers that have a vast number of hard-linked files in /var/cache/e2fsck instead of in memory. This will slow down e2fsck by approximately 25%, but for large filesystems where you couldn't otherwise get e2fsck to complete because you're exhausting the 2GB VM per-process limitation for 32-bit systems, it should allow you to run through to completion.</p></blockquote><p>You have to create the <code>/var/cache/e2fsck</code> folder if it does not exist yet before running the fsck:</p><pre><code>mkdir -p /var/cache/e2fsck
+</code></pre><p>The <code>scratch_files</code> stanza has more options, two of which might be important, <code>set dirinfo</code> and <code>set icount</code>.</p><p>You configure <code>set dirinfo</code> to false if your filesystem had an large number of individual files and not that many directories. You configure <code>set icount</code> to false if the reverse were true. Otherwise, you configure them both on true.</p><p>There was also a good explanation of where the Out of Memory error comes from on <a href="https://unix.stackexchange.com/a/100805">Stack Exchange</a>, it might not be out of memory.</p><p>The <code>scratch_files</code> setting did not improve the check. It still gave the same error, out of memory.</p><p>Even after playing with the dirinfo settings, or adding a 200 GB swapfile the fsck would still fail. <code>dmesg</code> was also full with these kinds of logs:</p><pre><code>[12343.5678] end_request: I/O error, dev mmcblk0, sector 50944
+</code></pre><h3>Spinrite</h3><p>My last guess would be to try <a href="https://www.grc.com/sr/spinrite.htm">Spinrite</a>. Spinrite is a hard drive recovery and maintenande utility written by Steve Gibson from <a href="https://grc.com">Gibson Research Corporation</a>. I configured a KVM VM with the card reader device as a second block device and tried to run Spinrite on Level 2. However, even spinrite failed:</p><p><a href="https://raymii.org/s/inc/img/spinrite-fail.png"><img height="240" src="https://raymii.org/s/inc/img/spinrite-fail.png" width="320"/></a></p><p>Booting Spinrite on a spare laptop with a cardreader with this SD card gave the same error. It sees the device, but fails to run on it.</p><p>Spinrite has helped me multiple times recover drives, but this one might be to much for it.</p><h3>Badblocks</h3><p>Badblocks is a *NIX utility to search for bad blocks on a device. While it is not usefull for creating a list of bad blocks on the SD card because SD cards do not report actual physical addresses (because of wear levelling) it does tell us if the card is broken or not.</p><p>The following badblocks command will scan and report bad blocks for the device. <strong>It is a destructive write operation, you will lose your data</strong>.</p><pre><code>badblocks -o ./badblocks.list -w -s -v -b 4096 -c 16 /dev/mmcblk0
+</code></pre><p><code>-o</code> to output the badblocks list to the file <code>./badblocks.list</code>, <code>-w</code> for the write operation, <code>-s</code> to show progress, <code>-v</code> to be verbose, <code>-b 4096</code> for the blocksize of 4K and <code>-c 16</code> to test 16 blocks at once (default is 64).</p><p>It showed me that a lot of writes were failing:</p><pre><code>Checking for bad blocks in read-write mode
+From block 0 to 3799039
+Testing with pattern 0xaa: 0.01% done, 1:57 elapsed. (0/292/0 errors)
+^C
+Interrupted at block 294
+</code></pre><p>The error output format means the following:</p><pre><code>number of read errors/number of write errors/number of corruption errors
+</code></pre><p>So most of the writes (292 of 294) failed, meaning the SD card is broken, beyond repair I guess.</p><h3>Less writing</h3><p>This SD card is a lost case. To prevent your Raspberry Pi's from writing a lot of data, and thus, wearing the SD card, you can do a couple of things.</p><h4>tmpfs</h4><p>The first one is to mount a few folders in RAM as <code>tmpfs</code>. The folders are the folders where temp files and logging is written to. This means that you won't have syslog available, but most of the time that is not a problem.</p><p>Edit <code>/etc/fstab</code> and add the following:</p><pre><code>none        /var/run        tmpfs   size=1M,noatime         00
+none        /var/log        tmpfs   size=1M,noatime         00
+none        /var/tmp        tmpfs   size=1M,noatime         00
+none        /tmp            tmpfs   size=1M,noatime         00
+</code></pre><p>This will mount the above folders in RAM, with a max size of 1 megabyte. The <code>noatime</code> option means that the access time of a file is not updated, saving a lot of writes as well. You should also add the <code>noatime</code> option to your other partitions, for example on a standard Raspbian:</p><pre><code>proc            /proc           proc    defaults          0       0
+/dev/mmcblk0p1  /boot           vfat    ro,noatime        0       2
+/dev/mmcblk0p2  /               ext4    defaults,noatime  0       1
+</code></pre><p>Here the <code>/boot</code> partition is also mounted read only (<code>ro</code>). The <code>noatime</code> option is added.</p><p>Issue a <code>mount -a</code> command or reboot the machine to make this active.</p><h4>Disable swap</h4><p>Linux divides its physical RAM (random access memory) into chucks of memory called pages. Swapping is the process whereby a page of memory is copied to the preconfigured space on the hard disk, called swap space, to free up that page of memory. The combined sizes of the physical memory and the swap space is the amount of virtual memory available.</p><p>Swappig causes a lot of writes to the SD card. You would want to turn it off to save writes. The downside of this is that when there is not enough RAM available the linux OOM killer will randomly kill processes to save RAM.</p><p>Raspbian by default has a swap file, dynamically managed by the <code>dphsys-swapfile</code> utility. You can turn off this utility by issueing the following commands:</p><pre><code>dphys-swapfile swapoff
+dphys-swapfile uninstall
+update-rc.d dphys-swapfile remove
+</code></pre><p>After a reboot the swap will be gone, which you can check with the <code>free -m</code> command:</p><pre><code>             total       used       free     shared    buffers     cached
+Mem:           484        243        241          0         42        162
+-/+ buffers/cache:         38        446
+Swap:            0          0          0
+</code></pre><h4>fsck at every boot</h4><p>My Raspberry Pi's have a cronjob which reboots them once every seven days. This to apply kernel updates and just a general good procedure to see if all still works after a reboot. By default, fsck checks a filesystem every 30 boots (counted individually for each partition). I decided to change this to every boot, so problems will be found and possibly fixed earlier.</p><p>To set up an fsck at every boot, execute the following command:</p><pre><code>tune2fs -c 1 /dev/sda1
+</code></pre><p>Where <code>/dev/sda1</code> is the device or partition.</p><h3>Conclusion</h3><p>This SD card was so corrupt I threw it away. The Raspberry Pi was reinstalled and the <code>pifm</code> software was set up again. The music came from another machine, so that did not have to be copied again.</p><p>With the tips above you might be able to save your SD card if it ever gets corrupted. These tips also work on regular disks and SSD's.</p><hr/>Tags: <a class="link" href="../tags/badblocks.html">badblocks,</a><a class="link" href="../tags/ext4.html">ext4,</a><a class="link" href="../tags/filesystem.html">filesystem,</a><a class="link" href="../tags/fsck.html">fsck,</a><a class="link" href="../tags/mkfs.html">mkfs,</a><a class="link" href="../tags/raspberry-pi.html">raspberry-pi,</a><a class="link" href="../tags/sd.html">sd,</a><a class="link" href="../tags/swap.html">swap,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
