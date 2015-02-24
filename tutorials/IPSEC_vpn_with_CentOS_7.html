@@ -403,8 +403,8 @@ hipster: XAUTH &quot;xauth_ikev1_example_password&quot;
 
 <p>Configure the firewall to allow the below ports on the VM. CentOS 7 uses <code>firewalld</code> to configure <code>iptables</code>, so lets use that. Add the required ports to the <code>dmz</code> zone, make sure the server NAT&#39;s our traffic and activate that zone:</p>
 
-<pre><code>firewall-cmd --zone=dmz --permanent --add-port=50/udp # ESP (the encrypted data packets)
-firewall-cmd --zone=dmz --permanent --add-port=51/udp # AH (authenticated headers)
+<pre><code>firewall-cmd --zone=dmz --permanent --add-rich-rule=&#39;rule protocol value=&quot;esp&quot; accept&#39; # ESP (the encrypted data packets)
+firewall-cmd --zone=dmz --permanent --add-rich-rule=&#39;rule protocol value=&quot;ah&quot; accept&#39; # AH (authenticated headers)
 firewall-cmd --zone=dmz --permanent --add-port=500/udp #IKE  (security associations)
 firewall-cmd --zone=dmz --permanent --add-port=4500/udp # IKE NAT Traversal (IPsec between natted devices)
 firewall-cmd --permanent --add-service=&quot;ipsec&quot;

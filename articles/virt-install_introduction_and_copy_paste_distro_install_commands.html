@@ -176,7 +176,7 @@
  winxp                | Microsoft Windows XP                               | 5.1      | http://microsoft.com/win/xp  
 </code></pre><h3>Kickstart and debootstrap</h3><p>If you have a kickstart file set up you can give it directly to the vm using the <code>--extra-args</code> parameter:</p><pre><code> --extra-args "ks=http://server/vm.ks" 
 </code></pre><p>If you don't have a server set up you can inject a file into the <code>initrd</code> and use that for kickstarting:</p><pre><code>--initrd-inject=vm.ks --extra-args "ks=file:/vm.ks" 
-</code></pre><p>Here is another, rather boring, image of a Debian install via virt-install:</p><p><img alt="debian" src="https://raymii.org/s/inc/img/virt-install-debian.png
+</code></pre><p><code>preseed.cfg</code> is a regular preseed file (as described in the Debian Wiki) in your local filesystem. It must be named preseed.cfg in order for d-i to pick it up from the initrd.</p><p>Here is another, rather boring, image of a Debian install via virt-install:</p><p><img alt="debian" src="https://raymii.org/s/inc/img/virt-install-debian.png
 "/></p><h3>Starting a VM</h3><p>To start a VM you've just created after the installation, use the <code>virsh start NAME</code> command:</p><pre><code>virsh start centos7
 </code></pre><p>Use the <code>virsh list --all</code> to list all available virtual machines, including powered off ones:</p><pre><code>$ virsh list --all
  Id    Name                           State
