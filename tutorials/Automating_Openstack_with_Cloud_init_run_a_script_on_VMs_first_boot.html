@@ -29,13 +29,14 @@ exit 0
 # Author: Remy van Elst, https://raymii.org
 # License: GNU GPLv3
 
+printf "\033c"
 echo "userdata running on hostname: $(uname -n)"
 
-echo "Installing dependencies for Ansible"
-yum -y install python-pip python-markupsafe python-paramiko 2&gt;&amp;1
+echo "Installing EPEL"
+rpm -Uvh http://cdn.duplicity.so/utils/epel-release-6.noarch.rpm 2&gt;&amp;1
 
-echo "Using pip to install Ansible"
-pip install --upgrade ansible 2&gt;&amp;1
+echo "Installing Ansible"
+yum -y install ansible git gmp 2&gt;&amp;1
 
 echo "Cloning repo with example code"
 git clone https://github.com/RaymiiOrg/ansible-examples.git /tmp/app
