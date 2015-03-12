@@ -22,7 +22,33 @@ pushd /tmp/app
 ansible-playbook ./our-app.yml
 popd
 exit 0
-</code></pre><p>You can also use Python, Ruby or any of your favorite language. As long as the <code>user_data</code> starts with <code>#!</code> cloud-init will see it as a script and not as specific cloud-init modules. You do need to make sure that your base image has the interpreter installed (Python, Ruby etc.) or bootstrap that via the script.</p><h3>Re-execute or debugging</h3><p>The script only runs at first boot of the machine via <code>cloud-init</code>. If you execute the <code>cloud-init</code> command again it will not execute the script because it already did it. Testing and debugging the script can be quite intensive if you need to boot up a machine every time.</p><p>We can however fool <code>cloud-init</code> by letting it think the machine did a fresh first boot. We need to remove the following two files:</p><pre><code>/var/lib/cloud/instances/$UUID/boot-finished
+</code></pre><p>You can also use Python, Ruby or any of your favorite language. As long as the <code>user_data</code> starts with <code>#!</code> cloud-init will see it as a script and not as specific cloud-init modules. You do need to make sure that your base image has the interpreter installed (Python, Ruby etc.) or bootstrap that via the script.</p><p>Here is another script that installs Wordpress on CentOS, including nginx, php-fpm and mysql:</p><pre><code>#!/bin/bash
+# Example script to run at first boot via Openstack
+# using the user_data and cloud-init.
+# This example installs Wordpress, nginx, MySQL and PHP-FPM.
+# Author: Remy van Elst, https://raymii.org
+# License: GNU GPLv3
+
+echo "userdata running on hostname: $(uname -n)"
+
+echo "Installing dependencies for Ansible"
+yum -y install python-pip python-markupsafe python-paramiko 2&gt;&amp;1
+
+echo "Using pip to install Ansible"
+pip install --upgrade ansible 2&gt;&amp;1
+
+echo "Cloning repo with example code"
+git clone https://github.com/RaymiiOrg/ansible-examples.git /tmp/app
+
+echo "Creating Ansible inventory file"
+echo -e "[wordpress-server]\n127.0.0.1" &gt; /tmp/app/wordpress-nginx/inventory
+
+echo "Starting playbook"
+pushd /tmp/app/wordpress-nginx
+ansible-playbook -i inventory ./site.yml
+popd
+exit 0
+</code></pre><p>The repository was forked from Ansible's example repo and changed so that the <code>site.yml</code> playbook includes the <code>connection: local</code> line. That way we don't use SSH to run the playbook.</p><h3>Re-execute or debugging</h3><p>The script only runs at first boot of the machine via <code>cloud-init</code>. If you execute the <code>cloud-init</code> command again it will not execute the script because it already did it. Testing and debugging the script can be quite intensive if you need to boot up a machine every time.</p><p>We can however fool <code>cloud-init</code> by letting it think the machine did a fresh first boot. We need to remove the following two files:</p><pre><code>/var/lib/cloud/instances/$UUID/boot-finished
 /var/lib/cloud/instances/$UUID/sem/config_scripts_user
 </code></pre><p>Replace <code>$UUID</code> by your instance's UUID.</p><p>Execute the following command to run the cloud-init final module again:</p><pre><code>cloud-init modules --mode final
 </code></pre><p>The <code>final</code> module will execute our <code>user_data</code> script again. Before every new test run you need to remove the two files listed above.</p><p>Keep in mind as well that if you for example touch a file and run the script again, the file will still be there. Changes are persistent, build your code idempotent so that it handles that.</p><p>If you've by accident deleted to much cloud-init data you can re-initialize it with the following command:</p><pre><code>cloud-init init
