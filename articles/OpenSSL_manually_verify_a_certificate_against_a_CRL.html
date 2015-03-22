@@ -73,6 +73,8 @@
 
 <p>You can read more about CRL&#39;s on <a href="https://en.wikipedia.org/wiki/Revocation_list">Wikipedia</a>.</p>
 
+<p>If you want to validate a certificate against an OCSP, see <a href="https://raymii.org/s/articles/OpenSSL_Manually_Verify_a_certificate_against_an_OCSP.html">my article on that here</a>.</p>
+
 <p>We will be using OpenSSL in this article. I&#39;m using the following version:</p>
 
 <pre><code>$ openssl version
@@ -103,7 +105,8 @@ X509v3 CRL Distribution Points:
 
 <p>Download the CRL:</p>
 
-<p>wget -O crl.der http://crl.globalsign.com/gs/gsorganizationvalsha2g2.crl</p>
+<pre><code>wget -O crl.der http://crl.globalsign.com/gs/gsorganizationvalsha2g2.crl
+</code></pre>
 
 <p>The CRL will be in <code>DER</code> (binary) format. The OpenSSL command needs it in PEM (base64 encoded DER) format, so convert it:</p>
 
