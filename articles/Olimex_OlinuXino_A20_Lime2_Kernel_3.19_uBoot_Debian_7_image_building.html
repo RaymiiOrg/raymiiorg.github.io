@@ -5,7 +5,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Olimex OlinuXino A20 LIME2 mainline 3.19 kernel, u-boot and debian rootfs image building tutorial - Raymii.org</title>
+        <title>Olimex OlinuXino A20 LIME2 mainline 4.0.0 kernel, u-boot and debian rootfs image building tutorial - Raymii.org</title>
         <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
         <link href="/s/inc/css/light.css" rel="stylesheet"  />
         <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
@@ -59,7 +59,7 @@
            <div class="col-md-8 col-sm-8"> 
                 <div class="inner">
 
-           <h2 class='headheader'>Olimex OlinuXino A20 LIME2 mainline 3.19 kernel, u-boot and debian rootfs image building tutorial</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Olimex_OlinuXino_A20_Lime2_Kernel_3.19_uBoot_Debian_7_image_building.html" class="link">Olimex OlinuXino A20 LIME2 mainline 3.19 kernel, u-boot and debian rootfs image building tutorial</a></li></ul><p><small>06-02-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
+           <h2 class='headheader'>Olimex OlinuXino A20 LIME2 mainline 4.0.0 kernel, u-boot and debian rootfs image building tutorial</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Olimex_OlinuXino_A20_Lime2_Kernel_3.19_uBoot_Debian_7_image_building.html" class="link">Olimex OlinuXino A20 LIME2 mainline 4.0.0 kernel, u-boot and debian rootfs image building tutorial</a></li></ul><p><small>21-03-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
                             <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                             <!-- voorartikel -->
                             <ins class="adsbygoogle"
@@ -71,7 +71,7 @@
                             </script>
                         </div><br><p><img src="https://raymii.org/s/inc/img/A20-OLinuXino-LIME.jpeg" alt=olimex></img></p>
 
-<p>This is a guide to build a linux image with Debian and the mainline 3.19 kernel for the Olimex A20-Lime2 board, from scratch. By default it comes with an 3.4 kernel with binary blobs and patches from Allwinner. Recently the mainline kernel has gained support for these boards, you can now run and use the mainline kernel without these awfull non-free binary blobs.</p>
+<p>This is a guide to build a linux image with Debian and the mainline 4.0 kernel for the Olimex A20-Lime2 board, from scratch. By default it comes with an 3.4 kernel with binary blobs and patches from Allwinner. Recently the mainline kernel has gained support for these boards, you can now run and use the mainline kernel without these awfull non-free binary blobs.</p>
 
 <p>I have an Olimex A10 LIME board for which I&#39;ve made a minimal image, see <a href="https://raymii.org/s/articles/Olimex_A10-OLinuXino-LIME_minimal_debian_7_image.html">this page for details</a>. It is a very awesome and powerfull ARM dev board with open source hardware. I like it so much that I decided to also get the A20. </p>
 
@@ -85,13 +85,13 @@
 
 <p>This tutorial is inspired by the build scripts of Igor Pecovnik, <a href="www.igorpecovnik.com">www.igorpecovnik.com</a>. They&#39;ve made a script which does this all for you in one easy go. If you just want an image and do not want to learn anything or experience the fun, enjoyment and fullfillment of doing it yourself you can use it.</p>
 
-<h3>Kernel 3.19 and Allwinner</h3>
+<h3>Kernel 4.0 and Allwinner</h3>
 
 <p>Allwinner has done a code dump of the 3.4 kernel with specifics for their devices. 3.4 is quite an old kernel nowdays. If you run your Olimex (or other ARM) board as a server you might want to upgrade to a more recent kernel. This will have a few benefits, speed and newer features for example. </p>
 
-<p>There are a few downsides, mostly driver and hardware support. For example, if you need graphical output (hdmi) or sound it will not work with the 3.19 kernel. </p>
+<p>There are a few downsides, mostly driver and hardware support. For example, if you need graphical output (hdmi) or sound it will not work with the 4.0 kernel. </p>
 
-<p>The 3.19 kernel does have basic support so you can run the A20-Lime2 as a server and use the GPIO&#39;s without problems. </p>
+<p>The 4.0 kernel does have basic support so you can run the A20-Lime2 as a server and use the GPIO&#39;s without problems. </p>
 
 <p>This tutorial is easily adaptable to newer kernels, other distributions or other boards. The instructions are largely the same.</p>
 
@@ -99,7 +99,7 @@
 
 <p>If you want to build an image with the 3.4 kernel provided by Olimex/Allwinner, you can read my <a href="https://raymii.org/s/articles/Olimex_OlinuXino%20_10%20Lime_uBoot_Kernel.html">tutorial on it</a>.</p>
 
-<p>We are building the 3.19 rc-7 version of the kernel, when 3.19 will be released this guide will be updated so that the commands and such are up to date.</p>
+<p>We are building the 4.0.0-rc4 version of the kernel, when 4.0 will be released this guide will be updated so that the commands and such are up to date.</p>
 
 <p>This tutorial was tested on Ubuntu 14.04.</p>
 
@@ -135,7 +135,7 @@ make -j12 CROSS_COMPILE=arm-linux-gnueabihf-
 
 <p>When the compile is finished we create a tar archive of the u-boot binary:</p>
 
-<pre><code>tar cPfz /root/Lime-Debian/output/u-boot/lime2_next_u-boot_3.19.0-rc7.tgz u-boot-sunxi-with-spl.bin
+<pre><code>tar cPfz /root/Lime-Debian/output/u-boot/lime2_next_u-boot_4.0.0-rc4.tgz u-boot-sunxi-with-spl.bin
 </code></pre>
 
 <p>Go back to the working directory:</p>
@@ -226,12 +226,12 @@ make -j12 CROSS_COMPILE=arm-linux-gnueabihf-
 <p>Create a tar archive of the kernel, headers, libc and other packages and place it in the folder:</p>
 
 <pre><code>cd ..
-tar -cPf /root/Lime-Debian/output/kernel/3.19.0-rc7-lime2-next.tar linux-headers-3.19.0-rc7-lime2_1.5_armhf.deb linux-image-3.19.0-rc7-lime2_1.5_armhf.deb linux-libc-dev_1.5_armhf.deb
+tar -cPf /root/Lime-Debian/output/kernel/4.0.0-rc4-lime2-next.tar linux-headers-4.0.0-rc4-lime2_1.5_armhf.deb linux-image-4.0.0-rc4-lime2_1.5_armhf.deb linux-libc-dev_1.5_armhf.deb
 </code></pre>
 
 <p>If you need to save some space, you can now remove the packages from the working directory:</p>
 
-<pre><code>rm linux-headers-3.19.0-rc7-lime2_1.5_armhf.deb linux-image-3.19.0-rc7-lime2_1.5_armhf.deb linux-libc-dev_1.5_armhf.deb
+<pre><code>rm linux-headers-4.0.0-rc4-lime2_1.5_armhf.deb linux-image-4.0.0-rc4-lime2_1.5_armhf.deb linux-libc-dev_1.5_armhf.deb
 </code></pre>
 
 <h3>Bootstrap Debian</h3>
@@ -452,27 +452,27 @@ ff02::2     ip6-allrouters
 <pre><code>rm -rf /tmp/kernel
 mkdir -p /tmp/kernel
 cd /tmp/kernel
-tar -xPf /root/Lime-Debian/output/kernel/3.19.0-rc7-lime2-next.tar
+tar -xPf /root/Lime-Debian/output/kernel/4.0.0-rc4-lime2-next.tar
 mount --bind /tmp/kernel/ /root/Lime-Debian/output/sdcard/tmp
 chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;dpkg -i /tmp/*.deb&#39;
 </code></pre>
 
 <p>Once the kernel is installed in the chroot we can build some kernel header scripts:</p>
 
-<pre><code>chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;cd /usr/src/linux-headers-3.19.0-rc7-lime2 &amp;&amp; make scripts&#39;
+<pre><code>chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;cd /usr/src/linux-headers-4.0.0-rc4-lime2 &amp;&amp; make scripts&#39;
 </code></pre>
 
 <p>We are going to build and setup a new device tree. This is, as said earlier, the hardware layout of the board needed for the bootloader. </p>
 
-<pre><code>rm -rf /root/Lime-Debian/output/sdcard/boot/dtb/3.19.0-rc7-lime2.old
+<pre><code>rm -rf /root/Lime-Debian/output/sdcard/boot/dtb/4.0.0-rc4-lime2.old
 vim /root/Lime-Debian/output/sdcard/boot/boot-next.cmd
 </code></pre>
 
 <p>Contents:</p>
 
 <pre><code>setenv bootargs console=tty1 root=/dev/mmcblk0p1 rootwait panic=10
-ext4load mmc 0 0x49000000 /boot/dtb/3.19.0-rc7-lime2${fdtfile}
-ext4load mmc 0 0x46000000 /boot/vmlinuz-3.19.0-rc7-lime2
+ext4load mmc 0 0x49000000 /boot/dtb/4.0.0-rc4-lime2${fdtfile}
+ext4load mmc 0 0x46000000 /boot/vmlinuz-4.0.0-rc4-lime2
 env set fdt_high ffffffff
 bootz 0x46000000 - 0x49000000
 </code></pre>
@@ -521,7 +521,7 @@ umount -l /root/Lime-Debian/output/sdcard/sys
 
 <pre><code>cd /root/Lime-Debian/
 
-tar xvfz /root/Lime-Debian/output/u-boot/lime2_next_u-boot_3.19.0-rc7.tgz
+tar xvfz /root/Lime-Debian/output/u-boot/lime2_next_u-boot_4.0.0-rc4.tgz
 
 losetup /dev/loop1 /root/Lime-Debian/output/rootfs/wheezy.raw
 
@@ -537,25 +537,25 @@ dd if=u-boot-sunxi-with-spl.bin of=/dev/loop1 bs=1024 seek=8 status=noxfer
 
 <p>We are going to create a zip file with the image and the md5sum of the image for easy shipping. Copy the image and create the md5sum:</p>
 
-<pre><code>mv /root/Lime-Debian/output/rootfs/wheezy.raw /root/Lime-Debian/output/Lime2_Debian_1.5_wheezy_3.19.0-rc7.raw
+<pre><code>mv /root/Lime-Debian/output/rootfs/wheezy.raw /root/Lime-Debian/output/Lime2_Debian_1.5_wheezy_4.0.0-rc4.raw
 
 cd /root/Lime-Debian/output/
 
-md5sum Lime2_Debian_1.5_wheezy_3.19.0-rc7.raw &gt; Lime2_Debian_1.5_wheezy_3.19.0-rc7.md5
+md5sum Lime2_Debian_1.5_wheezy_4.0.0-rc4.raw &gt; Lime2_Debian_1.5_wheezy_4.0.0-rc4.md5
 </code></pre>
 
 <p>Create a zip file of the two files:</p>
 
-<pre><code>zip Lime2_Debian_1.5_wheezy_3.19.0-rc7.zip Lime2_Debian_1.5_wheezy_3.19.0-rc7.md5 Lime2_Debian_1.5_wheezy_3.19.0-rc7.raw
+<pre><code>zip Lime2_Debian_1.5_wheezy_4.0.0-rc4.zip Lime2_Debian_1.5_wheezy_4.0.0-rc4.md5 Lime2_Debian_1.5_wheezy_4.0.0-rc4.raw
 </code></pre>
 
 <p>And that&#39;s it. You now have a fully working image for the Olimex a20-Lime2. You can copy and distribute the zipfile anywhere you like.</p>
 
 <h3>Installing the image</h3>
 
-<p>To install the image on your SD card, we take the zip file and extract it, so that we have the <code>Lime2_Debian_1.5_wheezy_3.19.0-rc7.raw</code> file. We use <code>dd</code> to put it on our SD card, which is at device <code>/dev/mmcblk0</code>:</p>
+<p>To install the image on your SD card, we take the zip file and extract it, so that we have the <code>Lime2_Debian_1.5_wheezy_4.0.0-rc4.raw</code> file. We use <code>dd</code> to put it on our SD card, which is at device <code>/dev/mmcblk0</code>:</p>
 
-<pre><code>dd if=Lime2_Debian_1.5_wheezy_3.19.0-rc7.raw of=/dev/mmcblk0 bs=1M
+<pre><code>dd if=Lime2_Debian_1.5_wheezy_4.0.0-rc4.raw of=/dev/mmcblk0 bs=1M
 </code></pre>
 
 <p>Put the SD card in the machine and boot it up. You can hook up UART to your machine or wait for the board to get DHCP. The SSH server will start up and you can login using your set root password.</p>
