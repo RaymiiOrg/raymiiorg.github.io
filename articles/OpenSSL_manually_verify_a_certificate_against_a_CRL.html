@@ -1,0 +1,222 @@
+<!-- nominify -->
+
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>OpenSSL: Manually verify a certificate against a CRL - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>OpenSSL: Manually verify a certificate against a CRL</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="OpenSSL_manually_verify_a_certificate_against_a_CRL.html" class="link">OpenSSL: Manually verify a certificate against a CRL</a></li></ul><p><small>22-03-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div><br><p>This article shows you how to manually verfify a certificate against a CRL. CRL stands for Certificate Revocation List and is one way to validate a certificate status. It is an alternative to the OCSP, Online Certificate Status Protocol.</p>
+
+<p>You can read more about CRL&#39;s on <a href="https://en.wikipedia.org/wiki/Revocation_list">Wikipedia</a>.</p>
+
+<p>We will be using OpenSSL in this article. I&#39;m using the following version:</p>
+
+<pre><code>$ openssl version
+OpenSSL 1.0.2 22 Jan 2015
+</code></pre>
+
+<h3>Get a certificate with a CRL</h3>
+
+<p>First we will need a certificate from a website. I&#39;ll be using Wikipedia as an example here. We can retreive this with the following openssl command:</p>
+
+<pre><code>openssl s_client -connect wikipedia.org:443 2&gt;&amp;1 &lt; /dev/null | sed -n &#39;/-----BEGIN/,/-----END/p&#39;
+</code></pre>
+
+<p>Save this output to a file, for example, wikipedia.pem:</p>
+
+<pre><code>openssl s_client -connect wikipedia.org:443 2&gt;&amp;1 &lt; /dev/null | sed -n &#39;/-----BEGIN/,/-----END/p&#39; &gt; wikipedia.pem
+</code></pre>
+
+<p>Now, check if this certificate has an CRL URI:</p>
+
+<pre><code>openssl x509 -noout -text -in wikipedia.pem | grep -A 4 &#39;X509v3 CRL Distribution Points&#39;
+X509v3 CRL Distribution Points: 
+    Full Name:
+      URI:http://crl.globalsign.com/gs/gsorganizationvalsha2g2.crl
+</code></pre>
+
+<p>If it does not give any output, the certificate has no CRL URI. You cannot valdiate it against a CRL.</p>
+
+<p>Download the CRL:</p>
+
+<p>wget -O crl.der http://crl.globalsign.com/gs/gsorganizationvalsha2g2.crl</p>
+
+<p>The CRL will be in <code>DER</code> (binary) format. The OpenSSL command needs it in PEM (base64 encoded DER) format, so convert it:</p>
+
+<pre><code>openssl crl -inform DER -in crl.der -outform PEM -out crl.pem
+</code></pre>
+
+<h3>Getting the certificate chain</h3>
+
+<p>It is required to have the certificate chain together with the certificate you want to validate. So, we need to get the certificate chain for our domain, <code>wikipedia.org</code>. Using the <code>-showcerts</code> option with <code>openssl s_client</code>, we can see all the certificates, including the chain:</p>
+
+<pre><code>openssl s_client -connect wikipedia.org:443 -showcerts 2&gt;&amp;1 &lt; /dev/null
+</code></pre>
+
+<p>Results in a lot of output, but what we are interested in is the following:</p>
+
+<pre><code> 1 s:/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance CA-3
+   i:/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV Root CA
+-----BEGIN CERTIFICATE-----
+MIIGWDCCBUCgAwIBAgIQCl8RTQNbF5EX0u/UA4w/OzANBgkqhkiG9w0BAQUFADBs
+MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
+d3cuZGlnaWNlcnQuY29tMSswKQYDVQQDEyJEaWdpQ2VydCBIaWdoIEFzc3VyYW5j
+ZSBFViBSb290IENBMB4XDTA4MDQwMjEyMDAwMFoXDTIyMDQwMzAwMDAwMFowZjEL
+MAkGA1UEBhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3
+LmRpZ2ljZXJ0LmNvbTElMCMGA1UEAxMcRGlnaUNlcnQgSGlnaCBBc3N1cmFuY2Ug
+Q0EtMzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL9hCikQH17+NDdR
+CPge+yLtYb4LDXBMUGMmdRW5QYiXtvCgFbsIYOBC6AUpEIc2iihlqO8xB3RtNpcv
+KEZmBMcqeSZ6mdWOw21PoF6tvD2Rwll7XjZswFPPAAgyPhBkWBATaccM7pxCUQD5
+BUTuJM56H+2MEb0SqPMV9Bx6MWkBG6fmXcCabH4JnudSREoQOiPkm7YDr6ictFuf
+1EutkozOtREqqjcYjbTCuNhcBoz4/yO9NV7UfD5+gw6RlgWYw7If48hl66l7XaAs
+zPw82W3tzPpLQ4zJ1LilYRyyQLYoEt+5+F/+07LJ7z20Hkt8HEyZNp496+ynaF4d
+32duXvsCAwEAAaOCAvowggL2MA4GA1UdDwEB/wQEAwIBhjCCAcYGA1UdIASCAb0w
+ggG5MIIBtQYLYIZIAYb9bAEDAAIwggGkMDoGCCsGAQUFBwIBFi5odHRwOi8vd3d3
+LmRpZ2ljZXJ0LmNvbS9zc2wtY3BzLXJlcG9zaXRvcnkuaHRtMIIBZAYIKwYBBQUH
+AgIwggFWHoIBUgBBAG4AeQAgAHUAcwBlACAAbwBmACAAdABoAGkAcwAgAEMAZQBy
+AHQAaQBmAGkAYwBhAHQAZQAgAGMAbwBuAHMAdABpAHQAdQB0AGUAcwAgAGEAYwBj
+AGUAcAB0AGEAbgBjAGUAIABvAGYAIAB0AGgAZQAgAEQAaQBnAGkAQwBlAHIAdAAg
+AEMAUAAvAEMAUABTACAAYQBuAGQAIAB0AGgAZQAgAFIAZQBsAHkAaQBuAGcAIABQ
+AGEAcgB0AHkAIABBAGcAcgBlAGUAbQBlAG4AdAAgAHcAaABpAGMAaAAgAGwAaQBt
+AGkAdAAgAGwAaQBhAGIAaQBsAGkAdAB5ACAAYQBuAGQAIABhAHIAZQAgAGkAbgBj
+AG8AcgBwAG8AcgBhAHQAZQBkACAAaABlAHIAZQBpAG4AIABiAHkAIAByAGUAZgBl
+AHIAZQBuAGMAZQAuMBIGA1UdEwEB/wQIMAYBAf8CAQAwNAYIKwYBBQUHAQEEKDAm
+MCQGCCsGAQUFBzABhhhodHRwOi8vb2NzcC5kaWdpY2VydC5jb20wgY8GA1UdHwSB
+hzCBhDBAoD6gPIY6aHR0cDovL2NybDMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0SGln
+aEFzc3VyYW5jZUVWUm9vdENBLmNybDBAoD6gPIY6aHR0cDovL2NybDQuZGlnaWNl
+cnQuY29tL0RpZ2lDZXJ0SGlnaEFzc3VyYW5jZUVWUm9vdENBLmNybDAfBgNVHSME
+GDAWgBSxPsNpA/i/RwHUmCYaCALvY2QrwzAdBgNVHQ4EFgQUUOpzidsp+xCPnuUB
+INTeeZlIg/cwDQYJKoZIhvcNAQEFBQADggEBAB7ipUiebNtTOA/vphoqrOIDQ+2a
+vD6OdRvw/S4iWawTwGHi5/rpmc2HCXVUKL9GYNy+USyS8xuRfDEIcOI3ucFbqL2j
+CwD7GhX9A61YasXHJJlIR0YxHpLvtF9ONMeQvzHB+LGEhtCcAarfilYGzjrpDq6X
+dF3XcZpCdF/ejUN83ulV7WkAywXgemFhM9EZTfkI7qA5xSU1tyvED7Ld8aW3DiTE
+JiiNeXf1L/BXunwH1OH8zVowV36GEEfdMR/X/KLCvzB8XSSq6PmuX2p0ws5rs0bY
+Ib4p1I5eFdZCSucyb6Sxa1GDWL4/bcf72gMhy2oWGU4K8K2Eyl2Us1p292E=
+-----END CERTIFICATE-----
+</code></pre>
+
+<p>As you can see, this is number 1. Number 0 is the certificate for Wikipedia, we already have that. If your site has more certificates in its chain, you will see more here. Save them all, in the order OpenSSL sends them (as in, first the one which directly issued your server certificate, then the one that issues that certificate and so on, with the root or most-root at the end of the file) to a file, named <code>chain.pem</code>.</p>
+
+<p>You can use the following command to save all the certificates OpenSSL command returns to a file named <code>chain.pem</code>. See [this article for more information)[https://raymii.org/s/articles/OpenSSL<em>-</em>Get<em>all</em>certificates<em>from</em>a<em>website</em>in<em>plain</em>text.html).</p>
+
+<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect wikipedia.org:443 -showcerts -tlsextdebug -tls1 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo $certificate | tee -a chain.pem ; done; IFS=$OLDIFS 
+</code></pre>
+
+<h3>Combining the CRL and the Chain</h3>
+
+<p>The Openssl command needs both the certificate chain and the CRL, in PEM format concatenated together for the validation to work. You can omit the CRL, but then the CRL check will not work, it will just validate the certificate against the chain.</p>
+
+<pre><code>cat chain.pem crl.pem &gt; crl_chain.pem
+</code></pre>
+
+<h3>OpenSSL Verify</h3>
+
+<p>We now have all the data we need can validate the certificate. </p>
+
+<pre><code>$ openssl verify -crl_check -CAfile crl_chain.pem wikipedia.pem 
+wikipedia.pem: OK
+</code></pre>
+
+<p>Above shows a good certificate status.</p>
+
+<h3>Revoked certificate</h3>
+
+<p>If you have a revoked certificate, you can also test it the same way as stated above. The response looks like this:</p>
+
+<pre><code>$ openssl verify -crl_check -CAfile crl_chain.pem revoked-test.pem 
+revoked-test.pem: OU = Domain Control Validated, OU = PositiveSSL, CN = xs4all.nl
+error 23 at 0 depth lookup:certificate revoked
+</code></pre>
+
+<p>You can test this using the certificate and chain on the Verisign revoked certificate test page: <a href="https://test-sspev.verisign.com:2443/test-SSPEV-revoked-verisign.html">https://test-sspev.verisign.com:2443/test-SSPEV-revoked-verisign.html</a>.</p>
+<hr>Tags: <a href="../tags/certificate.html" class="link">certificate, </a><a href="../tags/crl.html" class="link">crl, </a><a href="../tags/ocsp.html" class="link">ocsp, </a><a href="../tags/openssl.html" class="link">openssl, </a><a href="../tags/shell.html" class="link">shell, </a><a href="../tags/ssl.html" class="link">ssl, </a><a href="../tags/tls.html" class="link">tls, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
