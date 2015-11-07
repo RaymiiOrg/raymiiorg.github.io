@@ -138,6 +138,8 @@ cd letsencrypt
 service httpd stop
 </code></pre>
 
+<p>If you don&#39;t want or are not able to take down all sites or bind to port 80, scroll down below for a manual command.</p>
+
 <p>Now execute the Let&#39;s Encrypt command to get the certificate:</p>
 
 <pre><code>./letsencrypt-auto  --agree-dev-preview --server https://acme-v01.api.letsencrypt.org/directory certonly
@@ -184,6 +186,45 @@ service httpd start
 </code></pre>
 
 <p>You now have the certificate from Let&#39;s Encrypt. Lets proceed with the installation.</p>
+
+<h3>Manual mode</h3>
+
+<p>If you don&#39;t want, or are not able to take a site offline to bind to port 80, maybe you have a loadbalancer or something, you can use the <code>-a manual</code> command line flag. You enter your email and domain, then the program displays the following:</p>
+
+<pre><code>Make sure your web server displays the following content at
+http://www.certificatemonitor.org/.well-known/acme-challenge/1Qm[...]NHr0 before continuing:
+
+1Qm[...]SA8
+
+Content-Type header MUST be set to text/plain.
+
+If you don&#39;t have HTTP server configured, you can run the following
+command on the target server (as root):
+
+mkdir -p /tmp/letsencrypt/public_html/.well-known/acme-challenge
+cd /tmp/letsencrypt/public_html
+printf &quot;%s&quot; 1Qm[...]SA8 &gt; .well-known/acme-challenge/1Qm[...]Hr0
+# run only once per server:
+$(command -v python2 || command -v python2.7 || command -v python2.6) -c \
+&quot;import BaseHTTPServer, SimpleHTTPServer; \
+SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map = {&#39;&#39;: &#39;text/plain&#39;}; \
+s = BaseHTTPServer.HTTPServer((&#39;&#39;, 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \
+s.serve_forever()&quot; 
+</code></pre>
+
+<p>You need not to press ENTER just yet. Create or upload the page requested to your domain and test it in a browser (via SFTP, for example). You might want to use the python command. You can also use <code>curl</code>:</p>
+
+<pre><code>curl http://www.certificatemonitor.org/.well-known/acme-challenge/1Qm[...]NHr0
+</code></pre>
+
+<p>If you get the requested string back you&#39;re good to go. Press ENTER on the prompt and the validation will occur. If you placed the file on the correct place, it will succeed with the same output as above. If it failed, you will receive an <code>Authorization Error</code>.</p>
+
+<p>If you use the python script or watch your logs, you&#39;ll see something like this doing the verification:</p>
+
+<pre><code>outbound1.letsencrypt.org - - [07/Nov/2015 15:34:01] &quot;GET /.well-known/acme-challenge/1Qm[...]Hr0 HTTP/1.1&quot; 200 -
+</code></pre>
+
+<p>After succeeding, read on to install the certificates.</p>
 
 <h3>Installing the certificates</h3>
 
