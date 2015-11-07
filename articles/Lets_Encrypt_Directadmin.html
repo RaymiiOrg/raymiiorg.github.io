@@ -1,0 +1,283 @@
+<!-- nominify -->
+
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Let's Encrypt with DirectAdmin or other Web Control Panels - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Let's Encrypt with DirectAdmin or other Web Control Panels</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Lets_Encrypt_Directadmin.html" class="link">Let's Encrypt with DirectAdmin or other Web Control Panels</a></li></ul><p><small>7-11-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div><br><p>Let&#39;s Encrypt is a new certificate authority, recognized by all major browsers. They make it a breeze to set up TLS certificates for your web server. And for free! Let&#39;s Encrypt is supported by major players like Mozilla, Akamai, Cisco, the EFF, the Internet Security Research Group and others. Let&#39;s Encrypt provides free, automatic and secure certificates so that every website can be secured with an SSL certificate. </p>
+
+<p>This article shows you how to setup Let&#39;s Encrypt with the DirectAdmin web control panel. The guide is generic, so it works for other controlpanels as well. </p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
+
+<p>First we talk a little bit on what Let&#39;s Encrypt is and how it works. Then we sign up for the beta program. We close off with the actual certificate generation and installation.</p>
+
+<p>For now it works with the beta, and required some linux knowledge and root access to the hosting server. So this guide might change later on when the final version is released. Also, Let&#39;s Encrypt tries to be as automatic as possible. It however is not able to update the Apache (webserver) configuration for Directadmin just yet. We therefore manually generate the certificate and use Directadmin to place it under a website. In the future this will hopefully be automated away.</p>
+
+<p>This guide also works for any generic web service where you need a certificate (PEM) and a private key (PEM) file. The tutorial uses the <code>certOnly</code> option which gets us these files. You can skip the DirectAdmin part and place (symlink) the files in your Apache, NGINX or Lighttpd configuration and be done with it.</p>
+
+<h3>What is Let&#39;s Encrypt</h3>
+
+<p>Let&#39;s Encrypt is a new certificate authority, recognized by all major browsers. They make it a breeze to set up TLS certificates for your web server. And for free! Let&#39;s Encrypt is supported by major players like Mozilla, Akamai, Cisco, the EFF, the Internet Security Research Group and others. Let&#39;s Encrypt provides free, automatic and secure certificates so that every website can be secured with an SSL certificate. </p>
+
+<p>For Let&#39;s Encrypt to issue you a certificate, you must prove to them that you control the domain. If we own the domain, we can do this with a series of <a href="https://en.wikipedia.org/wiki/Challenge%E2%80%93response_authentication">challenge-response</a> transactions, which is part of the <a href="https://github.com/letsencrypt/acme-spec">ACME protocol</a>. Let&#39;s Encrypt <a href="https://letsencrypt.org/howitworks/technology/">explains this process well</a>.</p>
+
+<p>With the ACME protocol there is an automated way to securely generate, renew and revoke certificates.</p>
+
+<p><img src="https://raymii.org/s/inc/img/letsencrypt_howitworks.png" alt="hiw"></p>
+
+<p>The key principles behind Lets Encrypt are:</p>
+
+<ul>
+<li>Free: Anyone who owns a domain name can use Lets Encrypt to obtain a trusted certificate at zero cost.</li>
+<li>Automatic: Software running on a web server can interact with Lets Encrypt to painlessly obtain a certificate, securely configure it for use, and automatically take care of renewal.</li>
+<li>Secure: Lets Encrypt will serve as a platform for advancing TLS security best practices, both on the CA side and by helping site operators properly secure their servers.</li>
+<li>Transparent: All certificates issued or revoked will be publicly recorded and available for anyone to inspect.</li>
+<li>Open: The automatic issuance and renewal protocol will be published as an open standard that others can adopt.</li>
+<li>Cooperative: Much like the underlying Internet protocols themselves, Lets Encrypt is a joint effort to benefit the community, beyond the control of any one organization.</li>
+</ul>
+
+<p><a href="https://letsencrypt.org/about/">Source</a></p>
+
+<h3>Signing up for the beta</h3>
+
+<p>Let&#39;s Encrypt is in beta right now. This means it might not work, or might not work as expected. So don&#39;t use it on production just yet. </p>
+
+<p>If you really need an SSL certificate, https://gogetssl.com provides the cheapest ones, $3 something for a whole year comodo domain validation certificate. Other providers as well, no sponsoring here. </p>
+
+<p>Read the article here on the beta program: <a href="https://community.letsencrypt.org/t/beta-program-announcements/1631">https://community.letsencrypt.org/t/beta-program-announcements/1631</a> and follow the instructions to sign up. I&#39;ve got my invitation about 3 days after I signed up, yours might be faster.</p>
+
+<h3>Installing the Let&#39;s Encrypt Client</h3>
+
+<p>The installation is pretty straightforward. It does require SSH access to your Directadmin host, so that might not be available if you&#39;re on a shared hosting server. You can then ask your host for Let&#39;s Encrypt. In the future there might be a rootless way for Let&#39;s Encrypt.</p>
+
+<p>First make sure you have git installed:</p>
+
+<pre><code># ubuntu &amp; debian
+apt-get install git
+# centos &amp; redhat
+yum install git
+</code></pre>
+
+<p>Clone the Let&#39;s Encrypt code:</p>
+
+<pre><code>git clone https://github.com/letsencrypt/letsencrypt
+cd letsencrypt
+</code></pre>
+
+<p>Now, Let&#39;s Encrypt binds to the HTTP port (80) to do the Domain Validatiopn sequence. You must stop your web server for a few moments to do this. Your website will be offline, but it will be for a minute at max. </p>
+
+<p>Directadmin also has a service monitor where we must indicate that HTTPD is offline, otherwise it will restart it and the process might fail:</p>
+
+<pre><code>sed -i &#39;s/httpd=ON/httpd=OFF/g&#39; /usr/local/directadmin/data/admin/services.status
+service httpd stop
+</code></pre>
+
+<p>Now execute the Let&#39;s Encrypt command to get the certificate:</p>
+
+<pre><code>./letsencrypt-auto  --agree-dev-preview --server https://acme-v01.api.letsencrypt.org/directory certonly
+</code></pre>
+
+<p>If you are using an older Python version, for example Python 2.6 on CentOS 6, add the <code>--debug</code> option as the client will tell you.</p>
+
+<p>First it will ask you for your email address. Use the email address you signed up with the beta:</p>
+
+<p><img src="https://raymii.org/s/inc/img/le-email.png"></p>
+
+<p>Agree with the terms of service, if you&#39;ve read them of course:</p>
+
+<p><img src="https://raymii.org/s/inc/img/le-tos.png"></p>
+
+<p>Enter your domain name(s):</p>
+
+<p><img src="https://raymii.org/s/inc/img/le-domain.png"></p>
+
+<p>Wait for it to be finished:</p>
+
+<p><img src="https://raymii.org/s/inc/img/le-done.png"></p>
+
+<p>If all goes well it will print out the message in the screenshot:</p>
+
+<pre><code>IMPORTANT NOTES:
+ - Congratulations! Your certificate and chain have been saved at
+   /etc/letsencrypt/live/certificatemonitor.org/fullchain.pem. Your
+   cert will expire on 2016-02-05. To obtain a new version of the
+   certificate in the future, simply run Let&#39;s Encrypt again.
+</code></pre>
+
+<p>If not, try again. Otherwise you might be hit by a beta bug.</p>
+
+<p>Now turn on the webserver:</p>
+
+<pre><code>sed -i &#39;s/httpd=OFF/httpd=ON/g&#39; /usr/local/directadmin/data/admin/services.status
+service httpd start
+</code></pre>
+
+<p>I had to disable the CloudFlare protection service, before that I got the following error:</p>
+
+<pre><code>FailedChallenges: Failed authorization procedure. www.certificatemonitor.org (dvsni): tls :: The server experienced a TLS error during DV :: Failed to connect to host for DVSNI challenge, certificatemonitor.org (dvsni): tls :: The server experienced a TLS error during DV :: Failed to connect to host for DVSNI challenge
+</code></pre>
+
+<p>You now have the certificate from Let&#39;s Encrypt. Lets proceed with the installation.</p>
+
+<h3>Installing the certificates</h3>
+
+<p>We generated a certificate, Let&#39;s Encrypt validated us and returned the certificates, all automatically. The certificates are placed on your system and you can check them with the following command:</p>
+
+<pre><code>ls -la /etc/letsencrypt/live/certificatemonitor.org/
+</code></pre>
+
+<p>Replace certificatemonitor.org with your own domain. Output:</p>
+
+<pre><code>total 8
+drwx------ 3 root root 4096 Nov  7 07:26 ..
+lrwxrwxrwx 1 root root   49 Nov  7 07:34 privkey.pem -&gt; ../../archive/certificatemonitor.org/privkey2.pem
+lrwxrwxrwx 1 root root   51 Nov  7 07:34 fullchain.pem -&gt; ../../archive/certificatemonitor.org/fullchain2.pem
+lrwxrwxrwx 1 root root   47 Nov  7 07:34 chain.pem -&gt; ../../archive/certificatemonitor.org/chain2.pem
+lrwxrwxrwx 1 root root   46 Nov  7 07:34 cert.pem -&gt; ../../archive/certificatemonitor.org/cert2.pem
+</code></pre>
+
+<p>As we can see they symlinked the files there. If you configure your own webserver manually, you can give these files as the location in your apace or nginx config. When you renew the certificate later on, you don&#39;t have to update the webserver config, just a reload/restart. </p>
+
+<p>Get the contents of the certificate, private key and chain with the following commands. Remember to replace certificatemonitor.org with your domain:</p>
+
+<pre><code>cat /etc/letsencrypt/live/certificatemonitor.org/cert.pem
+cat /etc/letsencrypt/live/certificatemonitor.org/privkey.pem
+cat /etc/letsencrypt/live/certificatemonitor.org/chain.pem
+</code></pre>
+
+<p>Save the contents in a text editor somewhere, you need these in DirectAdmin.</p>
+
+<p>Login to your Directadmin control panel and navigate to your website. Under &quot;Advanced Features&quot; click &quot;SSL Certificates&quot;. </p>
+
+<p>Select the radio button for the <code>Paste a pre-generated certificate and key</code> option. In the textfield below, first paste the contents of the <code>cert.pem</code> file. Below that, paste the contents of the <code>privkey.pem</code> file.</p>
+
+<p><img src="https://raymii.org/s/inc/img/le-da-1.png"></p>
+
+<p>Click the Save button. Now go back to the main domain screen, and navigate to &quot;Advanced Features&quot; --&gt; &quot;SSL Certificates&quot; again. Scroll down and open the link <code>Click Here to paste a CA Root Certificate</code>. Mark the checkbox <code>Use a CA Cert.</code> and paste the contents of the <code>chain.pem</code> file there:</p>
+
+<p><img src="https://raymii.org/s/inc/img/le-da-2.png"></p>
+
+<p>Click the Save button.</p>
+
+<p>If you haven&#39;t already enabled SSL for your domain, do that now. Navigate to the main domain screen. Click &quot;Domain Setup&quot;. Open your domain. Mark the <code>Secure SSL</code> checkbox and click the Save button. Now, under <code>private_html setup for certificatemonitor.org - (SSL must be enabled above)</code> mark the radio button <code>Use a symbolic link from private_html to public_html - allows for same data in http and https</code> and click the save button again:</p>
+
+<p><img src="https://raymii.org/s/inc/img/le-da-3.png"></p>
+
+<p>Now navigate to <code>https://yourdomain</code> and behold Let&#39;s Encrypt in all it&#39;s glory. Well, actually, you should just see your own website with a valid SSL certificate:</p>
+
+<p><img src="https://raymii.org/s/inc/img/le-valid.png"></p>
+
+<p>You can check it with an SSL validator like <a href="https://ssllabs.com/">the SSL server test from qually labs</a> or my own SSL test: <a href="https://ssldecoder.org">https://ssldecoder.org</a>.</p>
+
+<p>Make sure to also setup a secure cipherlist and other secure SSL settings. Read up on the current best practice here: <a href="https://cipherli.st">https://cipherli.st</a>.</p>
+
+<p>For other Control Panels, like cPanel, Plesk and Webmin, this process is the same. Look up their documentation on installing a certificate, and use the files Let&#39;s Encrypt generated for you.</p>
+
+<p>Tha&#39;s it! You&#39;re done, you&#39;ve installed a valid Lets Encrypt certificate for your domain. Awesome!.</p>
+
+<p>Just one more important thing. </p>
+
+<h3>Renewing your certificate</h3>
+
+<p>After 90 day&#39;s, your certificate expires. With Let&#39;s Encrypt, that is not a problem. Why? Because the goal of the project is to automate this whole process. When the product is finished and out of beta, it will renew the certificate automatically when it is about to expire, so you don&#39;t have to do anything.</p>
+
+<p>For now, that is not the case, since we&#39;re running the beta. Your certificate will expire in 90 days. Make sure to setup a reminder in your calendar a few days before, or use my certificate expiry reminder service: <a href="https://certificatemonitor.org/">https://certificatemonitor.org/</a>. (That will send you a few mails before your certificate expires).</p>
+
+<p>When the 90 days are almost up, come back to this page and do the entire tutorial again. Including cloning the Let&#39;s Encrypt code, there might be fixes and better stuff. Also, the certificate generation, and the placing in DirectAdmin. Then you&#39;re safe. Otherwise, you might get an error about an expired certificate.</p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
+
+<p>If you still have any questions or suggestions, shoot me a message. Check the About page for my details.</p>
+<hr>Tags: <a href="../tags/apache.html" class="link">apache, </a><a href="../tags/centos.html" class="link">centos, </a><a href="../tags/certificate.html" class="link">certificate, </a><a href="../tags/cpanel.html" class="link">cpanel, </a><a href="../tags/directadmin.html" class="link">directadmin, </a><a href="../tags/nginx.html" class="link">nginx, </a><a href="../tags/openssl.html" class="link">openssl, </a><a href="../tags/plesk.html" class="link">plesk, </a><a href="../tags/ssl.html" class="link">ssl, </a><a href="../tags/tls.html" class="link">tls, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
