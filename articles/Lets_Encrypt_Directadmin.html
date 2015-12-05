@@ -71,13 +71,20 @@
                             </script>
                         </div><br><p>Let&#39;s Encrypt is a new certificate authority, recognized by all major browsers. They make it a breeze to set up TLS certificates for your web server. And for free! Let&#39;s Encrypt is supported by major players like Mozilla, Akamai, Cisco, the EFF, the Internet Security Research Group and others. Let&#39;s Encrypt provides free, automatic and secure certificates so that every website can be secured with an SSL certificate. </p>
 
+<p>Changelog:</p>
+
+<ul>
+<li>5-12-2015: add symlink part and client is out of closed beta.</li>
+<li>7-11-2015: first tutorial</li>
+</ul>
+
 <p>This article shows you how to setup Let&#39;s Encrypt with the DirectAdmin web control panel. The guide is generic, so it works for other controlpanels as well. </p>
 
 <p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
 
 <p>First we talk a little bit on what Let&#39;s Encrypt is and how it works. Then we sign up for the beta program. We close off with the actual certificate generation and installation.</p>
 
-<p>For now it works with the beta, and required some linux knowledge and root access to the hosting server. So this guide might change later on when the final version is released. Also, Let&#39;s Encrypt tries to be as automatic as possible. It however is not able to update the Apache (webserver) configuration for Directadmin just yet. We therefore manually generate the certificate and use Directadmin to place it under a website. In the future this will hopefully be automated away.</p>
+<p>For now it works with the beta, and required some linux knowledge and root access to the hosting server. So this guide might change later on when the final version is released. Also, Let&#39;s Encrypt tries to be as automatic as possible. It however is not able to update the Apache (webserver) configuration for Directadmin just yet. We therefore manually generate the certificate and use Directadmin to place it under a website. In the future this will hopefully be automated away. We do symlink the certificate files after creation so that will make renewing them easier.</p>
 
 <p>This guide also works for any generic web service where you need a certificate (PEM) and a private key (PEM) file. The tutorial uses the <code>certOnly</code> option which gets us these files. You can skip the DirectAdmin part and place (symlink) the files in your Apache, NGINX or Lighttpd configuration and be done with it.</p>
 
@@ -110,7 +117,14 @@
 
 <p>If you really need an SSL certificate, https://gogetssl.com provides the cheapest ones, $3 something for a whole year comodo domain validation certificate. Other providers as well, no sponsoring here. </p>
 
-<p>Read the article here on the beta program: <a href="https://community.letsencrypt.org/t/beta-program-announcements/1631">https://community.letsencrypt.org/t/beta-program-announcements/1631</a> and follow the instructions to sign up. I&#39;ve got my invitation about 3 days after I signed up, yours might be faster.</p>
+<p>Since the 3rd of december 2015 the closed beta is over and you don&#39;t need an invite anymore. There are limit&#39;s on the API though:</p>
+
+<ul>
+<li>Rate limit on registrations per IP: 10 per 3 hours</li>
+<li>Rate limit on certificates per Domain: 5 per 7 days</li>
+</ul>
+
+<p><del>Read the article here on the beta program: <a href="https://community.letsencrypt.org/t/beta-program-announcements/1631">https://community.letsencrypt.org/t/beta-program-announcements/1631</a> and follow the instructions to sign up. I&#39;ve got my invitation about 3 days after I signed up, yours might be faster.<del></p>
 
 <h3>Installing the Let&#39;s Encrypt Client</h3>
 
@@ -254,6 +268,8 @@ cat /etc/letsencrypt/live/certificatemonitor.org/chain.pem
 
 <p>Save the contents in a text editor somewhere, you need these in DirectAdmin.</p>
 
+<p>After you&#39;ve installed the certificates in the controlpanel (DirectAdmin), we need to symlink those files to the Lets Encrypt files so that auto renewal works better. We do need to first install them via the control panel so that the configuration gets updated in the correct way. Most controlpanels overwrite manual changes.</p>
+
 <p>Login to your Directadmin control panel and navigate to your website. Under &quot;Advanced Features&quot; click &quot;SSL Certificates&quot;. </p>
 
 <p>Select the radio button for the <code>Paste a pre-generated certificate and key</code> option. In the textfield below, first paste the contents of the <code>cert.pem</code> file. Below that, paste the contents of the <code>privkey.pem</code> file.</p>
@@ -279,6 +295,41 @@ cat /etc/letsencrypt/live/certificatemonitor.org/chain.pem
 <p>Make sure to also setup a secure cipherlist and other secure SSL settings. Read up on the current best practice here: <a href="https://cipherli.st">https://cipherli.st</a>.</p>
 
 <p>For other Control Panels, like cPanel, Plesk and Webmin, this process is the same. Look up their documentation on installing a certificate, and use the files Let&#39;s Encrypt generated for you.</p>
+
+<p>We&#39;re now going to symlink the certificates so that auto renewal works when the Let&#39;s Encrypt client supports it. Because we symlink, the files will be updated automatically. We do need to first install the certificates the control-panel way, otherwise our manual changes might be overwritten.</p>
+
+<p>You need to check the apache configuration to find the certificate file paths. Use <code>httpd -S</code> to get the current configuration in use. Some distro&#39;s use <code>apachectl -S</code> instead of `httpd -S&#39;:</p>
+
+<pre><code>httpd -S 2&gt;&amp;1 | grep 443 | grep certificatemonitor
+</code></pre>
+
+<p>Example output:</p>
+
+<pre><code>port 443 namevhost www.certificatemonitor.org (/usr/local/directadmin/data/users/certmon/httpd.conf:55)
+</code></pre>
+
+<p>Use the following command to get the SSL certificate file locations from the config file:</p>
+
+<pre><code>grep SSL /usr/local/directadmin/data/users/certmon/httpd.conf
+</code></pre>
+
+<p>Example output:</p>
+
+<pre><code>SSLEngine on
+SSLCertificateFile /usr/local/directadmin/data/users/certmon/domains/certificatemonitor.org.cert
+SSLCertificateKeyFile /usr/local/directadmin/data/users/certmon/domains/certificatemonitor.org.key
+SSLCACertificateFile /usr/local/directadmin/data/users/certmon/domains/certificatemonitor.org.cacert
+</code></pre>
+
+<p>With the following commands we symlink the certificates to the Let&#39;s Encrypt path:</p>
+
+<pre><code># remember, ln -s syntax is: ln -s /path/to/file /path/to/symlink
+ln -s /etc/letsencrypt/live/certificatemonitor.org/cert.pem /usr/local/directadmin/data/users/certmon/domains/certificatemonitor.org.cert
+ln -s /etc/letsencrypt/live/certificatemonitor.org/privkey.pem /usr/local/directadmin/data/users/certmon/domains/certificatemonitor.org.key
+ln -s /etc/letsencrypt/live/certificatemonitor.org/chain.pem /usr/local/directadmin/data/users/certmon/domains/certificatemonitor.org.cacert 
+</code></pre>
+
+<p>If you get an error about a file already existing, remove the files first before creating the symlink.</p>
 
 <p>Tha&#39;s it! You&#39;re done, you&#39;ve installed a valid Lets Encrypt certificate for your domain. Awesome!.</p>
 
