@@ -59,7 +59,7 @@
            <div class="col-md-8 col-sm-8"> 
                 <div class="inner">
 
-           <h2 class='headheader'>Let's Encrypt with DirectAdmin or other Web Control Panels</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Lets_Encrypt_Directadmin.html" class="link">Let's Encrypt with DirectAdmin or other Web Control Panels</a></li></ul><p><small>7-12-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
+           <h2 class='headheader'>Let's Encrypt with DirectAdmin or other Web Control Panels</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Lets_Encrypt_Directadmin.html" class="link">Let's Encrypt with DirectAdmin or other Web Control Panels</a></li></ul><p><small>10-12-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
                             <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                             <!-- voorartikel -->
                             <ins class="adsbygoogle"
@@ -74,9 +74,10 @@
 <p>Changelog:</p>
 
 <ul>
-<li>7-12-2015: add <code>--webroot</code> option so you don&#39;t have to stop the server</li>
-<li>5-12-2015: add symlink part and client is out of closed beta.</li>
-<li>7-11-2015: first tutorial</li>
+<li>10-12-2015: add <code>-d</code> multiple times for SAN certificate</li>
+<li>07-12-2015: add <code>--webroot</code> option so you don&#39;t have to stop the server</li>
+<li>05-12-2015: add symlink part and client is out of closed beta.</li>
+<li>07-11-2015: first tutorial</li>
 </ul>
 
 <p>This article shows you how to setup Let&#39;s Encrypt with the DirectAdmin web control panel. The guide is generic, so it works for other controlpanels as well. </p>
@@ -166,10 +167,12 @@ cd letsencrypt
 
 <p>Execute the Let&#39;s Encrypt command to get the certificate:</p>
 
-<pre><code>./letsencrypt-auto --server https://acme-v01.api.letsencrypt.org/directory certonly --webroot --webroot-path &#39;/home/certmon/domains/certificatemonitor.org/public_html/&#39; -d certificatemonitor.org
+<pre><code>./letsencrypt-auto --server https://acme-v01.api.letsencrypt.org/directory certonly --webroot --webroot-path &#39;/home/certmon/domains/certificatemonitor.org/public_html/&#39; -d certificatemonitor.org -d www.certificatemonitor.org
 </code></pre>
 
 <p>If you are using an older Python version, for example Python 2.6 on CentOS 6, add the <code>--debug</code> option as the client will tell you.</p>
+
+<p>If you need a certificate with multiple subdomains or with <code>www.domain.tld</code> and <code>domain.tld</code>, specify the <code>-d domain</code> option multiple times. Make sure the webroot is the same. If you only need one domain, change the example and remove the last <code>-d</code> option.</p>
 
 <p>The client will then do a bit of work with the Lets Encrypt service to validate domain ownership.</p>
 
