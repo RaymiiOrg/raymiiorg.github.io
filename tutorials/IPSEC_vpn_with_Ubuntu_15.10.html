@@ -5,7 +5,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>IPSEC VPN on Ubuntu 15.04 with StrongSwan - Raymii.org</title>
+        <title>IPSEC VPN on Ubuntu 15.10 with StrongSwan - Raymii.org</title>
         <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
         <link href="/s/inc/css/light.css" rel="stylesheet"  />
         <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
@@ -59,7 +59,7 @@
            <div class="col-md-8 col-sm-8"> 
                 <div class="inner">
 
-           <h2 class='headheader'>IPSEC VPN on Ubuntu 15.04 with StrongSwan</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="IPSEC_vpn_with_Ubuntu_15.04.html" class="link">IPSEC VPN on Ubuntu 15.04 with StrongSwan</a></li></ul><p><small>20-12-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
+           <h2 class='headheader'>IPSEC VPN on Ubuntu 15.10 with StrongSwan</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="IPSEC_vpn_with_Ubuntu_15.10.html" class="link">IPSEC VPN on Ubuntu 15.10 with StrongSwan</a></li></ul><p><small>20-12-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
                             <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                             <!-- voorartikel -->
                             <ins class="adsbygoogle"
@@ -69,7 +69,7 @@
                             <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
                             </script>
-                        </div><br><p>This is a guide on setting up an IPSEC VPN server on Ubuntu 15.04 using StrongSwan as the IPsec server and for authentication. It has a detailed explanation with every step. We choose the IPSEC protocol stack because of vulnerabilities found in pptpd VPNs and because it is supported on all recent operating systems by default. </p>
+                        </div><br><p>This is a guide on setting up an IPSEC VPN server on Ubuntu 15.10 using StrongSwan as the IPsec server and for authentication. It has a detailed explanation with every step. We choose the IPSEC protocol stack because of vulnerabilities found in pptpd VPNs and because it is supported on all recent operating systems by default. </p>
 
 <h3>Why a VPN?</h3>
 
@@ -101,7 +101,7 @@
 <p>To work trough this tutorial you should have:  </p>
 
 <ul>
-<li>1 Ubuntu 15.04 server with at least 1 public IP address and root access</li>
+<li>1 Ubuntu 15.10 server with at least 1 public IP address and root access</li>
 <li>1 (or more) clients running an OS that support IPsec IKEv2 vpns (Ubuntu, Mac OS, Windows 7+, Android 4+).</li>
 <li>Ports 4500/UDP, 500/UDP, 51/UDP and 50/UDP opened in the firewall.</li>
 </ul>
@@ -110,7 +110,7 @@
 
 <h3>No L2TP?</h3>
 
-<p>The previous tutorials all used L2TP to set up the VPN tunnel and use IPSEC only for the encryption. With the IKEv2 protocol and newer operating systems (like OS X 10.8+, Android 4+, iOS 6+ and Windows 7+) supporting IKEv2 we can also use IPSEC to set up the tunnel, before we used IPSEC to do that.</p>
+<p>A few of the previous tutorials used L2TP to set up the VPN tunnel and use IPSEC only for the encryption. With the IKEv2 protocol and newer operating systems (like OS X 10.8+, Android 4+, iOS 6+ and Windows 7+) supporting IKEv2 we can also use IPSEC to set up the tunnel, before we used IPSEC to do that.</p>
 
 <p>This VPN will therefore not work out of the box on older operating systems. See my other tutorials with L2TP on how to do that.</p>
 
@@ -136,9 +136,9 @@
 
 <h3>Certificates</h3>
 
-<p>The VPN server will identify itself with a certificate to the clients. The clients can use a certificate to authenticate themself, this tutorial however keeps it simple and sets up username and password authentication as well.</p>
+<p>The VPN server will identify itself with a certificate to the clients. The clients should use a certificate to authenticate themself. Previous tutorials also configured usernames and password and pre-shared keys, this tutorial does not. Certificates are easier to use, can be revoked and are less hassle than managing usernames and passwords.</p>
 
-<p>On Android with the StrongSwan Application you can just import the <code>.p12</code> we are going to create later on. On Windows 7, we&#39;ll use <code>EAP</code> to configure a username and password for our client.</p>
+<p>On Android with the StrongSwan Application you can just import the <code>.p12</code> we are going to create later on. OS X and iOS from 10.10 and 9 upwards also support this authentication method. </p>
 
 <p>You might want to install <code>haveged</code> to speed up the key generation process:</p>
 
@@ -304,11 +304,7 @@ openssl x509 -inform DER -in cacerts/strongswanCert.der -out cacerts/strongswanC
 <p>If a certificate is lost or stolen, it must be revoked so nobody can use it to connect to your VPN server. Assuming the certificate from the previous step got stolen, we revoke it with:</p>
 
 <pre><code>cd /etc/ipsec.d/
-ipsec pki --signcrl --reason key-compromise \
-    --cacert cacerts/strongswanCert.der \
-    --cakey private/strongswanKey.der \
-    --cert certs/JohnCert.der \
-    --outform der &gt; crls/crl.der
+ipsec pki --signcrl --reason key-compromise --cacert cacerts/strongswanCert.der --cakey private/strongswanKey.der --cert certs/JohnCert.der --outform der &gt; crls/crl.der
 </code></pre>
 
 <p>Restart ipsec afterwards:</p>
@@ -327,12 +323,7 @@ ipsec pki --signcrl --reason key-compromise \
 
 <pre><code>cd /etc/ipsec.d/
 cp crls/crl.der crl.der.tmp
-ipsec pki --signcrl --reason key-compromise \
-  --cacert cacerts/strongswanCert.der \
-  --cakey private/strongswanKey.der \
-  --cert certs/OtherStolenCert.der \
-  --lastcrl crl.der.tmp \
-  --outform der &gt; crls/crl.der
+ipsec pki --signcrl --reason key-compromise --cacert cacerts/strongswanCert.der --cakey private/strongswanKey.der --cert certs/OtherStolenCert.der --lastcrl crl.der.tmp --outform der &gt; crls/crl.der
 rm crl.der.tmp
 </code></pre>
 
@@ -353,7 +344,7 @@ rm crl.der.tmp
 <pre><code># ipsec.conf - strongSwan IPsec configuration file
 
 config setup
-    charondebug=&quot;ike 4, knl 4, cfg 4, net 4, esp 4, dmn 4,  mgr 4&quot;
+    charondebug=&quot;ike 2, knl 2, cfg 2, net 2, esp 2, dmn 2,  mgr 2&quot;
 
 conn %default
     keyexchange=ikev2
@@ -361,35 +352,18 @@ conn %default
     esp=aes128-aes256-sha1-sha256-modp2048-modp4096-modp1024,aes128-sha1,aes128-sha1-modp1024,aes128-sha1-modp1536,aes128-sha1-modp2048,aes128-sha256,aes128-sha256-ecp256,aes128-sha256-modp1024,aes128-sha256-modp1536,aes128-sha256-modp2048,aes128gcm12-aes128gcm16-aes256gcm12-aes256gcm16-modp2048-modp4096-modp1024,aes128gcm16,aes128gcm16-ecp256,aes256-sha1,aes256-sha256,aes256-sha256-modp1024,aes256-sha256-modp1536,aes256-sha256-modp2048,aes256-sha256-modp4096,aes256-sha384,aes256-sha384-ecp384,aes256-sha384-modp1024,aes256-sha384-modp1536,aes256-sha384-modp2048,aes256-sha384-modp4096,aes256gcm16,aes256gcm16-ecp384,3des-sha1!
     dpdaction=clear
     dpddelay=300s
-    rekey=no
+    authby=pubkey
     left=%any
     leftid=vpn.example.org
     leftsubnet=0.0.0.0/0
     leftcert=vpnHostCert.der
+    leftsendcert=always
     right=%any
     rightsourceip=10.42.42.0/24,2002:25f7:7489:3::/112
     rightdns=8.8.8.8,2001:4860:4860::8888
 
 conn IPSec-IKEv2
     keyexchange=ikev2
-    leftauth=pubkey
-    rightauth=pubkey
-    leftsendcert=always
-    auto=add
-
-conn IPSec-IKEv2-EAP
-    keyexchange=ikev2
-    leftauth=pubkey
-    leftsendcert=always
-    rightauth=eap-mschapv2
-    rightsendcert=never
-    eap_identity=%any
-    auto=add
-
-conn CiscoIPSec
-    keyexchange=ikev1
-    rightauth=pubkey
-    rightauth2=xauth
     auto=add
 </code></pre>
 
@@ -399,11 +373,11 @@ conn CiscoIPSec
 ln -s /etc/strongswan.d/VPN.conf /etc/ipsec.conf
 </code></pre>
 
-<p>This configuration has settings for three types of VPN services: IKEv2 + RSA certificate, IKEv2 + EAP and IKEv1 + Xauth, thus providing compatibility for a wide range of recent IPsec clients.</p>
+<p>The configuration has settings for IKEv2 + RSA certificates. This is, as stated above, the most secure method. Older tutorials also set up IKEv1 (xauth) and username-password combo, but that is considered insecure.</p>
 
-<p>Apple added support for IKEv2 in iOS 8, but it needs to be configured using a <a href="https://wiki.strongswan.org/projects/strongswan/wiki/AppleIKEv2Profile">custom configuration profile</a>.</p>
+<p>Apple added support for IKEv2 in iOS 8, but it needs to be configured using a <a href="https://wiki.strongswan.org/projects/strongswan/wiki/AppleIKEv2Profile">custom configuration profile</a>. OS X 10.9 and lower do not support IKEv2. </p>
 
-<p>OS X does not support IKEv2 (not on 10.10 or lower). </p>
+<p>Beginning with iOS 9, IKEv2 connections are natively supported. However, iOS9 only supports the use of certificates or username/password, but not both. </p>
 
 <p>For iOS 9+ and OS X 10.10+ you need to make sure the <code>leftid=</code> is the same as the <code>CN</code> in your certificate. You also need to enter that on the devices, otherwise you&#39;ll get a <code>no matching peer config found</code> log error.</p>
 
@@ -412,47 +386,6 @@ ln -s /etc/strongswan.d/VPN.conf /etc/ipsec.conf
 <p>Clients will get the Google DNS servers and an IP address in the <code>10.42.42.0/24</code> range. We use a strong ciphersuite.</p>
 
 <p>The <code>leftcert=vpnHostCert.der</code> expands to the path <code>/etc/ipsec.d/certs/vpnHostCert.der</code>.</p>
-
-<h3>VPN user accounts and secrets</h3>
-
-<p>The users are configured in the <code>/etc/ipsec.secrets</code> file.</p>
-
-<pre><code>vim /etc/ipsec.secrets
-</code></pre>
-
-<p>Example content:</p>
-
-<pre><code>: RSA vpnHostKey.der
-: PSK 0sv+NkxY9LLZvwj4qCC2o/gGrWDF2d21jL
-
-alice : EAP &quot;YzCgnveYuL429fH&quot; 
-bob : EAP &quot;E23pOjvW8z248iAp&quot; 
-hipster: XAUTH &quot;xauth_ikev1_example_password&quot;
-</code></pre>
-
-<p>In the example above the RSA private key file vpnHostKey.der stored in the <code>/etc/openswan.d/private/</code> directory is not protected by symmetric encryption (a password).</p>
-
-<p>The PSK for IKEv1 connections is also defined.</p>
-
-<p>The format of the EAP MSCHAPv2 user credentials is:</p>
-
-<pre><code>[&lt;domain&gt;\]&lt;username&gt; : EAP &quot;&lt;plaintext password&gt;&quot; 
-</code></pre>
-
-<p>Add as many users as you like there. The first line allows all users with a valid certificate to use the VPN, the other lines allow users without a certificate to login with a username and password. The space between the username, the colon (:) and EAP needs to be there.</p>
-
-<p>I strongly suggest adding NO users here, and setting NO PSK. Use certificates, they are much more secure.</p>
-
-<p>Whenever you edit <code>/etc/ipsec.secrets</code> while strongSwan is running, you must reload the file:</p>
-
-<pre><code>ipsec rereadsecrets
-</code></pre>
-
-<p>If you need to generate password, OpenSSL can help you there:</p>
-
-<pre><code> openssl rand -base64 24
- jzHMIj6sqBbSI6LFmXINrwZWkXG9O8GW
-</code></pre>
 
 <h3>Firewall &amp; Packet Routing</h3>
 
@@ -502,7 +435,7 @@ iptables -A INPUT -p udp --dport 4500 --j ACCEPT
 iptables -A INPUT -p esp -j ACCEPT
 </code></pre>
 
-<p>Add it before the <code>exit 0</code> line and replace %SERVERIP% with the external IP of your VPS.</p>
+<p>Add it before the <code>exit 0</code> line and replace %SERVERIP% with the external IP of your server.</p>
 
 <h3>Start the VPN</h3>
 
@@ -540,14 +473,22 @@ apparmor_parser -R /etc/apparmor.d/usr.lib.ipsec.stroke
 
 <p>Output:</p>
 
-<pre><code>Status of IKE charon daemon (strongSwan 5.1.2, Linux 3.19.0-41-generic, x86_64):
-  uptime: 94 seconds, since Dec 20 08:27:24 2015
-  malloc: sbrk 1859584, mmap 266240, used 693200, free 1166384
+<pre><code>Status of IKE charon daemon (strongSwan 5.1.2, Linux 4.2.0-21-generic, x86_64):
+  uptime: 4 minutes, since Dec 20 15:51:48 2015
+  malloc: sbrk 1814528, mmap 266240, used 758000, free 1056528
   worker threads: 11 of 16 idle, 5/0/0/0 working, job queue: 0/0/0/0, scheduled: 0
-  loaded plugins: charon test-vectors curl unbound ldap pkcs11 aes rc2 sha1 sha2 md4 md5 random nonce x509 revocation constraints pubkey pkcs1 pkcs7 pkcs8 pkcs12 pgp sshkey ipseckey pem openssl gcrypt af-alg fips-prf gmp xcbc cmac hmac ctr ccm gcm ntru attr kernel-netlink resolve socket-default farp stroke updown eap-identity eap-aka eap-aka-3gpp2 eap-gtc eap-mschapv2 eap-dynamic eap-radius eap-tls eap-ttls eap-peap xauth-generic xauth-eap xauth-noauth tnc-imc tnc-tnccs tnccs-20 tnccs-11 tnccs-dynamic dhcp whitelist lookip error-notify certexpire led duplicheck radattr addrblock
+  loaded plugins: charon test-vectors curl unbound ldap pkcs11 aes rc2 sha1 sha2 md4 md5 random nonce x509 revocation constraints pubkey pkcs1 pkcs7 pkcs8 pkcs12 pgp sshkey ipseckey pem gcrypt af-alg fips-prf gmp agent xcbc cmac hmac ctr ccm gcm ntru attr kernel-netlink resolve socket-default farp stroke updown eap-identity eap-aka eap-aka-3gpp2 eap-gtc eap-mschapv2 eap-dynamic eap-radius eap-tls eap-ttls eap-peap xauth-generic xauth-eap xauth-pam xauth-noauth tnc-imc tnc-tnccs tnccs-20 tnccs-11 tnccs-dynamic dhcp whitelist lookip error-notify certexpire led duplicheck radattr addrblock
+Virtual IP pools (size/online/offline):
+  10.42.42.0/24: 254/0/0
+  2002:25f7:7489:3::/112: 65534/0/0
 Listening IP addresses:
-  10.41.170.21
+  85.222.224.56
 Connections:
+ IPSec-IKEv2:  %any...%any  IKEv2, dpddelay=300s
+ IPSec-IKEv2:   local:  [vpn.raymii.nl] uses public key authentication
+ IPSec-IKEv2:    cert:  &quot;C=NL, O=Example Company, CN=vpn.raymii.nl&quot;
+ IPSec-IKEv2:   remote: uses public key authentication
+ IPSec-IKEv2:   child:  0.0.0.0/0 === dynamic TUNNEL, dpdaction=clear
 Security Associations (0 up, 0 connecting):
   none
 </code></pre>
