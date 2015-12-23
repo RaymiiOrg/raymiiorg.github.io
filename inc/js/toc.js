@@ -1,5 +1,6 @@
 //https://stackoverflow.com/questions/187619/is-there-a-javascript-solution-to-generating-a-table-of-contents-for-a-page
 //http://magnetiq.com/exports/toc.htm#Tomato
+//http://www.whitsoftdev.com/articles/toc.html#section2.1
 
 
 window.onload = function () {
