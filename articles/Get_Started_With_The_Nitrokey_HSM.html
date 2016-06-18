@@ -82,7 +82,7 @@ Version              : 2.0
 User PIN tries left  : 3
 DKEK shares          : 1
 DKEK key check value : 53CA37CEED5B227F
-</code></pre><p>Now that the HSM is initialized, we can start using it.</p><h3>Create a keypair</h3><p>Use the below command to generate an 2048 bit RSA keypair in the HSM:</p><pre><code>pkcs11-tool --module opensc-pkcs11.so --login --keypairgen --key-type rsa:2048 --id 10 --label "HSM RSA Key Remy"
+</code></pre><p>Now that the HSM is initialized, we can start using it.</p><h3>Create a keypair</h3><p>The HSM supports the <a href="https://www.nitrokey.com/documentation/frequently-asked-questions#which-algorithms-and-maximum-key-length-are-supported">following</a> key types:</p><p>RSA:</p><ul><li>1024 bit</li><li>2048 bit</li></ul><p>ECDSA GF(p) 192-320 bit, elliptic curves:</p><ul><li>secp192r1 (aka prime192v1)</li><li>secp256r1 (aka prime256v1)</li><li>brainpoolP192r1</li><li>brainpoolP224r1</li><li>brainpoolP256r1</li><li>brainpoolP320r1</li><li>secp192k1</li><li>secp256k1 (the Bitcoin curve)</li></ul><p>Use the below command to generate an 2048 bit RSA keypair in the HSM:</p><pre><code>pkcs11-tool --module opensc-pkcs11.so --login --keypairgen --key-type rsa:2048 --id 10 --label "HSM RSA Key Remy"
 </code></pre><p>Output:</p><pre><code>Using slot 1 with a present token (0x1)
 Logging in to "SmartCard-HSM (UserPIN)".
 Please enter User PIN: &lt;648219&gt;
@@ -328,7 +328,21 @@ Public Key Object; RSA 2048 bits
 </code></pre><p>We need to use <code>pkcs15-tool</code> to get the public key in a format usable by openSSH. 30 is the ID we gave, you might need to use the <code>pkcs15-tool --dump</code> command to lookup the ID if you don't know it.</p><pre><code>pkcs15-tool --read-ssh-key 30
 </code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/HG1cG6ecGnadde9g4aZCWuL1dzsgOKUstyP7yUAclEtd1GwgQKSrVPixp7jllvoW0kCCtvsT8JMV+pEytcenOpfO06n4DvqjJ1aNMqQK6xw3CeJXz1TXJe7Z7L722/w96bHioZuSRBWumAAcGUoANd/WQ3MXNAmocgvW/WGSnl3kb9Vif7hzirecmcFSaU3djeEXpu42wZG6GGdw9WlvrXV1AsrE0mLQxyZmCEOs6CF0/cyaHuUE24Jz6oOfKkeYjCQgvBUK0D1MU3odnisbvfVLGJuF9RPMBY20Hey8z6dUXQV2WMeknV9/vN2n7Nk7pxOSViIQQ3w9rc7y1f4J HSM SSH Key Remy
-</code></pre><p>This public key can be placed in the <code>~/.ssh/authorized_keys</code> file on your servers. I spun up a new <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS to test it. With this referral link you'll get a $5 VPS for 2 months free (as in, you get $10 credit).</a></p><p>Digital Ocean automatically places the ssh key in the authorized_keys file, if you need to do that yourself you can use the following command:</p><pre><code>echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/HG1cG6ecGnadde9g4aZCWuL1dzsgOKUstyP7yUAclEtd1GwgQKSrVPixp7jllvoW0kCCtvsT8JMV+pEytcenOpfO06n4DvqjJ1aNMqQK6xw3CeJXz1TXJe7Z7L722/w96bHioZuSRBWumAAcGUoANd/WQ3MXNAmocgvW/WGSnl3kb9Vif7hzirecmcFSaU3djeEXpu42wZG6GGdw9WlvrXV1AsrE0mLQxyZmCEOs6CF0/cyaHuUE24Jz6oOfKkeYjCQgvBUK0D1MU3odnisbvfVLGJuF9RPMBY20Hey8z6dUXQV2WMeknV9/vN2n7Nk7pxOSViIQQ3w9rc7y1f4J HSM SSH Key Remy' &gt;&gt; ~/.ssh/authorized_keys
+</code></pre><h4>EC keys to OpenSSH</h4><p>For EC generated keys the <code>pkcs15-tool</code> doesn't seem to work. However, because all keys can be converted one way or another we can dump the EC public key and convert it into an SSH compatible key. First dump the EC public key to a file. In this case I generated an EC private key with ID 2 and used the following command to get the public key:</p><pre><code>pkcs15-tool --read-public-key 2 &gt; eckey.pub
+</code></pre><p>Then convert the <code>eckey.pub</code> file into something OpenSSH can handle:</p><pre><code>ssh-keygen -i -m PKCS8 -f eckey.pub 
+</code></pre><p>Output:</p><pre><code>ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKsWLJkl1Dr7IdLPrLpCBtoEFy+qYd/fEu9Mpga1utwMbCU671NWGH3Ppo2q/tzYFq4Fm/jgRHBHFGJ5HrwL1nM= hsm
+</code></pre><p>Although using that doesn't seem to work:</p><pre><code>$ pkcs15-tool --verbose --read-ssh-key 2 
+Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Connecting to card in reader Nitrokey Nitrokey HSM (010000000000000000000000) 00 00...
+Using card driver SmartCard-HSM.
+Trying to find a PKCS#15 compatible card...
+Found SmartCard-HSM!
+Reading ssh key with ID '2'
+</code></pre><p>And logging in fails as well with EC keys:</p><pre><code>$ ssh -o "PKCS11Provider opensc-pkcs11.so" root@server
+C_GetAttributeValue failed: 18
+no keys
+root@server's password: 
+</code></pre><p>I've <a href="https://github.com/OpenSC/OpenSC/issues/803">raised an issue</a> to see how to get EC keys and OpenSSH working.</p><p>This public key can be placed in the <code>~/.ssh/authorized_keys</code> file on your servers. I spun up a new <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS to test it. With this referral link you'll get a $5 VPS for 2 months free (as in, you get $10 credit).</a></p><p>Digital Ocean automatically places the ssh key in the authorized_keys file, if you need to do that yourself you can use the following command:</p><pre><code>echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/HG1cG6ecGnadde9g4aZCWuL1dzsgOKUstyP7yUAclEtd1GwgQKSrVPixp7jllvoW0kCCtvsT8JMV+pEytcenOpfO06n4DvqjJ1aNMqQK6xw3CeJXz1TXJe7Z7L722/w96bHioZuSRBWumAAcGUoANd/WQ3MXNAmocgvW/WGSnl3kb9Vif7hzirecmcFSaU3djeEXpu42wZG6GGdw9WlvrXV1AsrE0mLQxyZmCEOs6CF0/cyaHuUE24Jz6oOfKkeYjCQgvBUK0D1MU3odnisbvfVLGJuF9RPMBY20Hey8z6dUXQV2WMeknV9/vN2n7Nk7pxOSViIQQ3w9rc7y1f4J HSM SSH Key Remy' &gt;&gt; ~/.ssh/authorized_keys
 </code></pre><p>If I try to login without specifying the HSM I will be prompted for a password or be rejected:</p><p>When we tell OpenSSH to use the HSM, we get asked for the HSM pin and are logged in:</p><pre><code>$ ssh -o "PKCS11Provider opensc-pkcs11.so" root@testdroplet
 C_GetAttributeValue failed: 18
 Enter PIN for 'SmartCard-HSM (UserPIN)': &lt;648219&gt;
