@@ -797,6 +797,29 @@ Remy is awesome
 
 <p>Some HSM manufacturers have the option to stream the transportkey over the network to another device, or to use a smartcard to transfer the key. I do suspect that they have a private key somewhere that protects the encrypted (wrapped) backup key and that it would be hard to reverse engineer their process. But, a nation-state level actor would surely have the resources to reverse engineer the backup process, just as we did here.</p>
 
+<p>I&#39;ve also received feedback from Andreas, verbatim copy:</p>
+
+<ul>
+<li><p>The security relies on the cryptographic strength of the mechanisms
+employed, and of course by obtaining the DKEK key you could break the
+mechanism.</p></li>
+<li><p>The DKEK mechanism is optional, so you could choose not to use it if
+you want to protect your keys from disclosure. We strongly advise to use
+the DKEK scheme only for keys where the cost of recreating the key is
+unacceptable high (e.g. Root-CAs in schemes not support Cross-Certificates).</p></li>
+<li><p>You can generate a DKEK solely internally using the HSMs random number
+generator. That way the DKEK is never exposed, but you can still export
+keys to a secure backup and re-import into the same device.</p></li>
+<li><p>The DKEK mechanism shifts responsibility to a group of key custodians.
+If they don&#39;t take that responsibility (for whatever reason), then it
+would surely sacrifice security.</p></li>
+<li><p>In contrast to big HSMs one could evaluate the key import / export
+mechanism, which you couldn&#39;t in a closed-sourced / NDA protected
+systems. There is of course no guarantee (and the past has proven so)
+that the engineers of those large HSMs did a good job designing their
+mechanisms.</p></li>
+</ul>
+
 <h3>sc-hsm-tool.c code</h3>
 
 <p>The full <code>sc-hsm-tool.c</code> file with the DKEK print option, is downloadable from <a href="https://raymii.org/s/inc/downloads/sc-hsm-tool.c.txt">here</a>.</p>
