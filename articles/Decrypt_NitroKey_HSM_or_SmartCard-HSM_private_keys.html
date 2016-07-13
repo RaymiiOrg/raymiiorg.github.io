@@ -5,7 +5,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>Decrypt/Extract NitroKey HSM/SmartCard-HSM RSA private keys - Raymii.org</title>
+        <title>Decrypt/Extract Nitrokey HSM/SmartCard-HSM RSA private keys - Raymii.org</title>
         <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
         <link href="/s/inc/css/light.css" rel="stylesheet"  />
         <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
@@ -60,7 +60,7 @@
            <div class="col-md-8 col-sm-8"> 
                 <div class="inner">
 
-           <h2 class='headheader'>Decrypt/Extract NitroKey HSM/SmartCard-HSM RSA private keys</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Decrypt_NitroKey_HSM_or_SmartCard-HSM_private_keys.html" class="link">Decrypt/Extract NitroKey HSM/SmartCard-HSM RSA private keys</a></li></ul><p><small>10-07-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
+           <h2 class='headheader'>Decrypt/Extract Nitrokey HSM/SmartCard-HSM RSA private keys</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Decrypt_NitroKey_HSM_or_SmartCard-HSM_private_keys.html" class="link">Decrypt/Extract Nitrokey HSM/SmartCard-HSM RSA private keys</a></li></ul><p><small>13-07-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
                             <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                             <!-- voorartikel -->
                             <ins class="adsbygoogle"
@@ -70,39 +70,87 @@
                             <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
                             </script>
-                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>This is a guide which shows you how to extract private RSA key material from the NitroKey HSM / SmartCard-HSM using the DKEK. This way you can get the private key out of the HSM in an unencrypted form. It does require access to the HSM device, all the DKEK share and their passwords. Do note that doing this defeats the entire purpose of a HSM, namely that you never have access to the keys. In the article I&#39;ll go over some explanation why this might be a feature you need and why it might be a case of security over convinience.</p>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>This is a guide which shows you how to extract private RSA key material from the Nitrokey HSM / SmartCard-HSM using the DKEK. This way you can get the private key out of the HSM in an unencrypted form. It does require access to the HSM device, all the DKEK share and their passwords. Do note that doing this defeats the entire purpose of a HSM, namely that you never have access to the keys. In the article I&#39;ll go over some explanation why this might be a feature you need and why it might be a case of security over convinience.</p>
+
+<p><strong>This is not a vulnerability, zero day or exploit. The HSM provides a way to do secure backups of private key material and we utilize that in this article. To decrypt the keys you need to have all the DKEK files used when the HSM was initialized, know all the DKEK passwords and have access to the HSM itself.</strong> </p>
+
+<p>You can prevent decryption by not setting up a DKEK, thus using the random internal DKEK of the HSM.</p>
 
 <h3>Recap of a HSM</h3>
 
 <p><img src="https://raymii.org/s/inc/img/nitrokey1.jpg" width="500" height="600"></p>
 
 <blockquote>
-<p>The NitroKey HSM in a sealed package</p>
+<p>The Nitrokey HSM in a sealed package</p>
 </blockquote>
 
 <p>A Hardware Security Module, HSM, is a device where secure key material is stored. This private data only be accessed by the HSM, it can never leave the device. Most HSM devices are also tamper-resistant. This means that when opened, moved or otherwise (software) tampered with, they wipe the key material. HSM&#39;s come in a variety of formfactors, ranging from SmartCards and small USB devices, to full size PCI cards and even 19&quot; rackmountable server-like devices. The difference between all those devices is speed and storage capacity. Most commercial HSM&#39;s are certified to the <a href="https://en.wikipedia.org/wiki/FIPS_140-2">FIPS-140-2</a>  standard.</p>
 
-<p>I have multiple <a href="https://raymii.org/s/articles/Get_Started_With_The_Nitrokey_HSM.html">articles on</a> the <a href="https://raymii.org/s/articles/Nitrokey_HSM_in_Apache_with_mod_nss.html">NitroKey HSM/SmartCard-HSM</a>. I also have a lot of professional experience with large expensive HSM hardware. </p>
+<p>I have multiple <a href="https://raymii.org/s/articles/Get_Started_With_The_Nitrokey_HSM.html">articles on</a> the <a href="https://raymii.org/s/articles/Nitrokey_HSM_in_Apache_with_mod_nss.html">Nitrokey HSM/SmartCard-HSM</a>. I also have a lot of professional experience with large expensive HSM hardware. </p>
 
-<p>If you want to know more on the NitroKey HSM then please read the <a href="https://raymii.org/s/articles/Get_Started_With_The_Nitrokey_HSM.html">getting started articles</a>. </p>
+<p>If you want to know more on the Nitrokey HSM then please read the <a href="https://raymii.org/s/articles/Get_Started_With_The_Nitrokey_HSM.html">getting started articles</a>. </p>
 
 <p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
 
 <p>The main purpose of the HSM is to protect key material. It allows you to make sure that the private key material can never be stolen or compromised. It does allow you to wrap a key for export/transport to another HSM, for example, to create redundancy or backup. We use this mechanism to decrypt the keys outside of the HSM.</p>
 
-<p>At the end of the article you can read the rationale, where I hope to explain why this is both a security issue as well as how to mitigate it.</p>
+<p>In the next section you can read the rationale, where I hope to explain why this is both a security issue as well as how to mitigate it.</p>
 
-<p>In this article I&#39;ll use the terms HSM, NitroKey HSM and SmartCard-HSM, but when I do I mean the same device. </p>
+<p>In this article I&#39;ll use the terms HSM, Nitrokey HSM and SmartCard-HSM, but when I do I mean the same device. </p>
 
 <p>The <a href="http://nitrokey.com">Nitrokey HSM</a> is an open hardware and open software device. It is a USB version of the <a href="http://www.smartcard-hsm.com/">SmartCard-HSM</a>. Both the <a href="http://www.smartcard-hsm.com/opensource.html">SmartCard-HSM</a> as the <a href="https://github.com/nitrokey">Nitrokey HSM</a> have sources available and are fully supported by the <a href="https://github.com/OpenSC/OpenSC/wiki/SmartCardHSM">OpenSC</a> project.</p>
 
-<p>The NitroKey is as far as I know one of the few fully open source devices. All the big HSM&#39;s I&#39;ve used were either under NDA or completely closed source. In my opinion a device like this can only be secure when they are open source. The device supports up to 60 ECC GF(p) 256-bit keys and up to 48 RSA 2048-bit keys. </p>
+<p>The Nitrokey is as far as I know one of the few fully open source devices. All the big HSM&#39;s I&#39;ve used were either under NDA or completely closed source. In my opinion a device like this can only be secure when they are open source. The device supports up to 60 ECC GF(p) 256-bit keys and up to 48 RSA 2048-bit keys. </p>
+
+<h3>Rationale</h3>
+
+<p>As said above, having access to the unencrypted private keys defeats the entire purpose of an HSM, namely that you never have access to the private key. This decrypted key can be stolen or abused.</p>
+
+<p>However, to decrypt the wrapped key you need access to:</p>
+
+<ul>
+<li>All the DKEK shares</li>
+<li>All the DKEK passwords</li>
+<li>The HSM device</li>
+<li>SO pin</li>
+<li>User pin</li>
+</ul>
+
+<p>In a production environment you would not use the default pins. You change those. You also don&#39;t have one DKEK share with one password, you have multiple DKEK shares where each DKEK share has multiple passwords (n-of-m scheme). These DKEK shares are stored in a secure place (keepass, printed in a bank safe, etc). Then multiple people and multiple passwords are required to initialize the HSM (or to calculate the unencrypted DKEK share).</p>
+
+<p>This is a convinience because you might need to export the key out of the HSM when you are migrating to another HSM, from a different manufacturer. Or, you are decomissioning this HSM and the software attached to it, but want to archive the key because it might be needed later. You might even just want to use the same key in different software that does not support PKCS#11.</p>
+
+<p>Since it requires so many steps and so much access, I don&#39;t think this is a huge risk, but a rather nice convinience.</p>
+
+<p>I do am of the opinion that HSM&#39;s should not offer this option (getting access to the private key). But then you would also not be able to backup and transfer the wrapped keys, since that can be reverse engineered. I&#39;ve seen multiple big-name HSM&#39;s where their support was able to decrypt the key and transfer it to another HSM model, but since I&#39;ve signed an NDA I cannot tell which ones that were. You will have to take my word for it.</p>
+
+<p>That does pose the question, how will you make sure you have a backup? Since these devices can fail, just as any device, you would want to make sure you have a backup, since your business probably depends on the availability of a HSM. I find it a hard problem and I don&#39;t know an actual solution to both provide backup possibilities and disallow access of the private key.</p>
+
+<p>Some HSM manufacturers have the option to stream the transportkey over the network to another device, or to use a smartcard to transfer the key. I do suspect that they have a private key somewhere that protects the encrypted (wrapped) backup key and that it would be hard to reverse engineer their process. But, a nation-state level actor would surely have the resources to reverse engineer the backup process, just as we did here.</p>
+
+<p>I&#39;ve also received feedback from Andreas, verbatim copy:</p>
+
+<ul>
+<li><p>The security relies on the cryptographic strength of the mechanisms
+employed, and of course by obtaining the DKEK key you could break the
+mechanism.</p></li>
+<li><p>The DKEK mechanism is optional, so you could choose not to use it if
+you want to protect your keys from disclosure. We strongly advise to use
+the DKEK scheme only for keys where the cost of recreating the key is
+unacceptable high (e.g. Root-CAs in schemes not support Cross-Certificates).</p></li>
+<li><p>You can generate a DKEK solely internally using the HSMs random number
+generator. That way the DKEK is never exposed, but you can still export
+keys to a secure backup and re-import into the same device.</p></li>
+<li><p>The DKEK mechanism shifts responsibility to a group of key custodians.
+If they don&#39;t take that responsibility (for whatever reason), then it
+would surely sacrifice security.</p></li>
+</ul>
 
 <h3>Access to the CardContact SDK</h3>
 
 <p>The process requires access to the CardContact SDK. This is a collection of software you can use in your own projects (SDK, software development kit). It also includes examples to use the HSM, like a key manager or a .p12 importer.</p>
 
-<p>To get access to the SDK you need a SmartCardHSM/NitroKey HSM. You need to generate a keypair in the device that will be used for accessing the content network and git repositories.</p>
+<p>To get access to the SDK you need a SmartCardHSM/Nitrokey HSM. You need to generate a keypair in the device that will be used for accessing the content network and git repositories.</p>
 
 <p>Access to the SDK does not cost money, but it does require you to have a HSM device. </p>
 
@@ -124,7 +172,7 @@
 
 <p>The DKEK, device key encryption key, is used when initializing the HSM. Initializing a HSM means that you remove all the keys and other data stored in it, basically formatting it. Simply said, the DKEK encrypts the keys on the device and the keys you export out of the device (wrap).</p>
 
-<p>The NitroKey HSM generates a DKEK when the device is initialized, but is also allows you go generate one or more DKEK&#39;s beforehand and import those in the device during the initialization process. You can have multiple DKEK&#39;s, spread over multiple persons. A DKEK can even have multiple passwords (using <a href="https://www.nitrokey.com/ru/news/2015/new-nitrokey-hsm-supports-n-m-threshold-scheme-and-sophisticated-key-management">an n-of-m</a> threshold scheme.)</p>
+<p>The Nitrokey HSM generates a DKEK when the device is initialized, but is also allows you go generate one or more DKEK&#39;s beforehand and import those in the device during the initialization process. You can have multiple DKEK&#39;s, spread over multiple persons. A DKEK can even have multiple passwords (using <a href="https://www.nitrokey.com/ru/news/2015/new-nitrokey-hsm-supports-n-m-threshold-scheme-and-sophisticated-key-management">an n-of-m</a> threshold scheme.)</p>
 
 <p>If you use the device in production you will (hopefully) have selected strong user and SO PIN&#39;s, as well as have multiple DKEK shares with strong passwords on them. </p>
 
@@ -776,50 +824,6 @@ fCz66jLobiDBbX5ubdAkLbzot9LXbAAEE1eChUjNfJQs
 Enter PIN [UserPIN]: 648219
 Remy is awesome
 </code></pre>
-
-<h3>Rationale</h3>
-
-<p>As said above, having access to the unencrypted private keys defeats the entire purpose of an HSM, namely that you never have access to the private key. This decrypted key can be stolen or abused.</p>
-
-<p>However, to decrypt the wrapped key you need access to:</p>
-
-<ul>
-<li>All the DKEK shares</li>
-<li>All the DKEK passwords</li>
-<li>The HSM device</li>
-<li>SO pin</li>
-<li>User pin</li>
-</ul>
-
-<p>In a production environment you would not use the default pins. You change those. You also don&#39;t have one DKEK share with one password, you have multiple DKEK shares where each DKEK share has multiple passwords (n-of-m scheme). These DKEK shares are stored in a secure place (keepass, printed in a bank safe, etc). Then multiple people and multiple passwords are required to initialize the HSM (or to calculate the unencrypted DKEK share).</p>
-
-<p>This is a convinience because you might need to export the key out of the HSM when you are migrating to another HSM, from a different manufacturer. Or, you are decomissioning this HSM and the software attached to it, but want to archive the key because it might be needed later. You might even just want to use the same key in different software that does not support PKCS#11.</p>
-
-<p>Since it requires so many steps and so much access, I don&#39;t think this is a huge risk, but a rather nice convinience.</p>
-
-<p>I do am of the opinion that HSM&#39;s should not offer this option (getting access to the private key). But then you would also not be able to backup and transfer the wrapped keys, since that can be reverse engineered. I&#39;ve seen multiple big-name HSM&#39;s where their support was able to decrypt the key and transfer it to another HSM model, but since I&#39;ve signed an NDA I cannot tell which ones that were. You will have to take my word for it.</p>
-
-<p>That does pose the question, how will you make sure you have a backup? Since these devices can fail, just as any device, you would want to make sure you have a backup, since your business probably depends on the availability of a HSM. I find it a hard problem and I don&#39;t know an actual solution to both provide backup possibilities and disallow access of the private key.</p>
-
-<p>Some HSM manufacturers have the option to stream the transportkey over the network to another device, or to use a smartcard to transfer the key. I do suspect that they have a private key somewhere that protects the encrypted (wrapped) backup key and that it would be hard to reverse engineer their process. But, a nation-state level actor would surely have the resources to reverse engineer the backup process, just as we did here.</p>
-
-<p>I&#39;ve also received feedback from Andreas, verbatim copy:</p>
-
-<ul>
-<li><p>The security relies on the cryptographic strength of the mechanisms
-employed, and of course by obtaining the DKEK key you could break the
-mechanism.</p></li>
-<li><p>The DKEK mechanism is optional, so you could choose not to use it if
-you want to protect your keys from disclosure. We strongly advise to use
-the DKEK scheme only for keys where the cost of recreating the key is
-unacceptable high (e.g. Root-CAs in schemes not support Cross-Certificates).</p></li>
-<li><p>You can generate a DKEK solely internally using the HSMs random number
-generator. That way the DKEK is never exposed, but you can still export
-keys to a secure backup and re-import into the same device.</p></li>
-<li><p>The DKEK mechanism shifts responsibility to a group of key custodians.
-If they don&#39;t take that responsibility (for whatever reason), then it
-would surely sacrifice security.</p></li>
-</ul>
 
 <h3>sc-hsm-tool.c code</h3>
 
