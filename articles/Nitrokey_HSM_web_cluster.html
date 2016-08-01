@@ -80,7 +80,7 @@
 
 <p>You want to put your private key material inside an HSM because it cannot be stolen that way. A HSM does not allow key material to be exported, so nobody can secretly copy the keys and use them without your knowledge. If the HSM is tampered with, it will also wipe itself, so brute forcing it will not work.</p>
 
-<p>The cluster consists of Raspberry Pi&#39;s and Nitrokey HSM&#39;s and SmartCard-HSM&#39;s, softwarewise we use Apache, mod_nss and haproxy. </p>
+<p>The cluster consists of Raspberry Pi&#39;s and Nitrokey HSM&#39;s and SmartCard-HSM&#39;s, softwarewise we use Apache, <code>mod_nss</code> and haproxy. </p>
 
 <p>This is the first time I had an actual use case for Raspberry Pi&#39;s in a cluster, and I really enjoyed doing it. I might even, in the future, add some more Pi&#39;s on top and do some more benchmarks. But I already spent about two weeks working on this single article so three was just fine for now.</p>
 
@@ -135,7 +135,7 @@
 <p>Three Nitrokey&#39;s in their bags</p>
 </blockquote>
 
-<p>This guide uses three Nitrokey HSM devices. I&#39;ve generated three keypairs on one of the HSM&#39;s, one RSA 1024, one RSA 2048 and one EC key, just as we did in <a href="https://raymii.org/s/articles/Use_the_Nitrokey_HSM_or_SmartCard-HSM_with_sc-hsm-embedded_mod_nss_and_Apache_read_only_module.html">the mod_nss tutorial</a>. Please consult that article first, since the key generation and certificate loading part is not included in this guide.</p>
+<p>This guide uses three Nitrokey HSM devices. I&#39;ve generated three keypairs on one of the HSM&#39;s, one RSA 1024, one RSA 2048 and one EC key, just as we did in <a href="https://raymii.org/s/articles/Use_the_Nitrokey_HSM_or_SmartCard-HSM_with_sc-hsm-embedded_mod_nss_and_Apache_read_only_module.html">the <code>mod_nss</code> tutorial</a>. Please consult that article first, since the key generation and certificate loading part is not included in this guide.</p>
 
 <p>I&#39;ll refer to the HSM where the DKEK was initialized and the keys were generated as HSM 1. The other two HSM&#39;s are referred two as HSM 2 and HSM 3.  </p>
 
@@ -181,7 +181,7 @@
 <li>MySQL 5.6.30-1 (Raspbian)</li>
 <li>php-fpm / fcgi</li>
 <li>Wordpress 4.5.3</li>
-<li>mod_nss 1.0.12-2</li>
+<li><code>mod_nss</code> 1.0.12-2</li>
 </ul>
 
 <p>I&#39;m using <code>mpm_event</code> and <code>php-fpm</code> instead of <code>mpm_prefork</code> and <code>mod-php</code> because of issues with the initialization of the HSM by all the workers. See <a href="https://www.redhat.com/archives/mod_nss-list/2016-July/msg00000.html">the mailinglist thread here</a> for more information. Otherwise all kinds of errors like <code>SSL Library Error: -8152 The key does not support the requested operation</code> and <code>SSL Library Error: -8023 Unknown</code> and <code>SSL Library Error: -12216 Attempt to write encrypted data to underlying socket failed</code> and <code>SSL input filter
@@ -327,9 +327,9 @@ Slot 3 (0xc): Nitrokey Nitrokey HSM (010000000000000000000000) 03 00
 
 <ul>
 <li>HSM driver installation (OpenSC)</li>
-<li>Apache and mod_nss installation</li>
+<li>Apache and <code>mod_nss</code> installation</li>
 <li>NSS Certificate database setup</li>
-<li>Apache and mod_nss configuration</li>
+<li>Apache and <code>mod_nss</code> configuration</li>
 </ul>
 
 <p>Please consult the <a href="https://raymii.org/s/articles/Nitrokey_HSM_in_Apache_with_mod_nss.html">mod_nss opensc</a> guide or the <a href="https://raymii.org/s/articles/Use_the_Nitrokey_HSM_or_SmartCard-HSM_with_sc-hsm-embedded_mod_nss_and_Apache_read_only_module.html">mod_nss with sc-hsm-embedded</a> guide for the specific setup and repeat that on all the Raspberry Pi&#39;s. I&#39;m not going to cover the setup here any further.</p>
@@ -441,7 +441,7 @@ stream {
 <li>Concurrency is average number of simultaneous connections, a number which rises as server performance decreases.</li>
 </ul>
 
-<h4>mod_ssl, no HSM</h4>
+<h4><code>mod_ssl</code>. no HSM</h4>
 
 <p><img src="https://raymii.org/s/inc/img/hsm/no-hsm-mod_ssl.png"></p>
 
@@ -455,7 +455,7 @@ stream {
 
 <p><img src="https://raymii.org/s/inc/img/hsm/1024-bit-rsa.png"></p>
 
-<p>We can see that the HSM is around 8 times slower than using regular mod<em>ssl. But, we knew that already. Adding a HSM to the loadbalancer doubles the performance, and adding two HSM&#39;s to the loadbalancer triples it, as we would expect. So, going down that route, if we have 8 HSM&#39;s, it would be just as fast as regular mod</em>ssl.</p>
+<p>We can see that the HSM is around 8 times slower than using regular <code>mod_ssl</code>. But, we knew that already. Adding a HSM to the loadbalancer doubles the performance, and adding two HSM&#39;s to the loadbalancer triples it, as we would expect. So, going down that route, if we have 8 HSM&#39;s, it would be just as fast as regular <code>mod_ssl</code>.</p>
 
 <p>Something that caught my eye was that with one HSM the <code>OpenSC</code> module was faster. (Remember, best of three for the tests, every test is done three times, best result is kept.). When using multiple HSM&#39;s we see a small gain in transactions when using <code>sc-hsm-embedded</code>. I&#39;m not quite sure why that is, but it&#39;s something that steps out.</p>
 
@@ -469,7 +469,7 @@ stream {
 
 <p><img src="https://raymii.org/s/inc/img/hsm/2048-bit-rsa.png"></p>
 
-<p>2048 bit keys are way harder for the HSM, but not at all for regular mod_ssl. In this case it is about 26 times slower when using a HSM, comparing to no HSM. Here we see again that the transaction rate is doubled and trippled when adding HSM&#39;s to the cluster. The same thing here with sc-hsm-embedded, when used with 1 HSM it&#39;s slower, but when scaling up it becomes a little bit faster.</p>
+<p>2048 bit keys are way harder for the HSM, but not at all for regular <code>mod_ssl</code>. In this case it is about 26 times slower when using a HSM, comparing to no HSM. Here we see again that the transaction rate is doubled and trippled when adding HSM&#39;s to the cluster. The same thing here with sc-hsm-embedded, when used with 1 HSM it&#39;s slower, but when scaling up it becomes a little bit faster.</p>
 
 <p>Here is the same data with only the HSM&#39;s so that you can see the differences better between OpenSC and sc-embedded-hsm:</p>
 
@@ -591,7 +591,7 @@ plot for [COL=2:4] &#39;siegedata&#39; using COL:xticlabels(1) title columnheade
 
 <p>All the benchmarks were done three times and the best result is used. The machine that runs haproxy wasn&#39;t doing anything else at the time, measured with nethogs. No spotify or skype skewing the benchmarks. All was done via a wired gigabit network, cat6 cabling.</p>
 
-<p>I&#39;ve also done benchmarks without the HSM, just regular apache with mod<em>ssl. Why not mod</em>nss you might ask? Well, because nobody will setup mod<em>nss when they can use mod</em>ssl. All the guides use mod<em>ssl and the most sites online are using it. Only if you have special software or need PKCS#11 you need to use mod</em>nss.</p>
+<p>I&#39;ve also done benchmarks without the HSM, just regular apache with <code>mod_ssl</code>. Why not <code>mod_nss</code> you might ask? Well, because nobody will setup <code>mod_nss</code> when they can use <code>mod_ssl</code>. All the guides use <code>mod_ssl</code>.and the most sites online are using it. Only if you have special software or need PKCS#11 you need to use mod_nss.</p>
 
 <h3>Benchmarks without the HSM</h3>
 
