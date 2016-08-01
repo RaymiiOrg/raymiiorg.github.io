@@ -1,27 +1,171 @@
-<!DOCTYPE html><html lang="en"><head><title>Openstack Affinity Groups, make sure instances are on the same or different compute hypervisor hosts - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Openstack Affinity Groups, make sure instances are on the same or different compute hypervisor hosts - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
-                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Openstack Affinity Groups, make sure instances are on the same or different compute hypervisor hosts</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../articles/index.html">Articles</a></li><li><a class="link" href="Openstack_Affinity_Groups-make-sure-instances-are-on-the-same-or-a-different-hypervisor-host.html">Openstack Affinity Groups, make sure instances are on the same or different compute hypervisor hosts</a></li></ul><p><small>29-11-2014</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Openstack Affinity Groups, make sure instances are on the same or different compute hypervisor hosts</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Openstack_Affinity_Groups-make-sure-instances-are-on-the-same-or-a-different-hypervisor-host.html" class="link">Openstack Affinity Groups, make sure instances are on the same or different compute hypervisor hosts</a></li></ul><p><small>29-11-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
-                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>This guide shows you how to use Openstack Affinity groups. Affinity or Anti-Affinity groups allow you to make sure instances (VM/VPS) are on the same hypervisor host or on a different one. There are cases when you want two instances on different compute nodes, for example, when they are clustered servers like a load balancer or a database master-master setup. All VM's in each Affinity group are hosted in the same hypervisor, while no two VM's of a same Anti-Affinity group are hosted in the same hypervisor.</p><p>Affinity is supported since Openstack IceHouse. You can only add an instance to an affinity group when you create the instance with <code>nova boot</code>. You can not add existing instances. You can however create an image of an instance and boot a new server from that image, in the new affinity group.</p><p>You can see all my <a href="https://raymii.org/s/tags/openstack.html">Openstack related articles here</a>. For example, how to build a <a href="https://raymii.org/s/articles/Building_HA_Clusters_With_Ansible_and_Openstack.html">High Available cluster with Ansible and Openstack</a>.</p><p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you'll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p><h3>Create an Affinity Group</h3><p>Make sure you have the Openstack Command Line Tools installed. Also make sure you have a <code>computerc</code> file. See the first part of <a href="https://raymii.org/s/tutorials/FreeBSD_10.1-release_Openstack_Image.html">this page</a> to find out how to do that.</p><p>The command syntax to create an affinity group with the novaclient:</p><pre><code>nova server-group-create $group-name $policy
-</code></pre><ul><li><code>$group-name</code> is a name you choose</li><li><code>$policy</code> is either <code>affinity</code> or <code>anti-affinity</code>.</li></ul><p>If you want all servers to run on the same hypervisor host, create a group with an <code>affinity</code> policy.</p><p>If you want all servers to run on different hypervisor host, create a group with an <code>anti-affinity</code> policy. This means that if you have 5 servers in this group, they will be on 5 different hypervisor (compute) nodes, never will a VM be on a host node where another VM from this affinity policy is.</p><p>You can see all available affinity groups with <code>server-group-list</code>:</p><pre><code>$ nova server-group-list
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>This guide shows you how to use Openstack Affinity groups. Affinity or Anti-Affinity groups allow you to make sure instances (VM/VPS) are on the same hypervisor host or on a different one. There are cases when you want two instances on different compute nodes, for example, when they are clustered servers like a load balancer or a database master-master setup. All VM&#39;s in each Affinity group are hosted in the same hypervisor, while no two VM&#39;s of a same Anti-Affinity group are hosted in the same hypervisor.</p>
+
+<p>Affinity is supported since Openstack IceHouse. You can only add an instance to an affinity group when you create the instance with <code>nova boot</code>. You can not add existing instances. You can however create an image of an instance and boot a new server from that image, in the new affinity group.</p>
+
+<p>You can see all my <a href="https://raymii.org/s/tags/openstack.html">Openstack related articles here</a>. For example, how to build a <a href="https://raymii.org/s/articles/Building_HA_Clusters_With_Ansible_and_Openstack.html">High Available cluster with Ansible and Openstack</a>.</p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p>
+
+<h3>Create an Affinity Group</h3>
+
+<p>Make sure you have the Openstack Command Line Tools installed. Also make sure you have a <code>computerc</code> file. See the first part of <a href="https://raymii.org/s/tutorials/FreeBSD_10.1-release_Openstack_Image.html">this page</a> to find out how to do that.</p>
+
+<p>The command syntax to create an affinity group with the novaclient:</p>
+
+<pre><code>nova server-group-create $group-name $policy
+</code></pre>
+
+<ul>
+<li><code>$group-name</code> is a name you choose</li>
+<li><code>$policy</code> is either <code>affinity</code> or <code>anti-affinity</code>.</li>
+</ul>
+
+<p>If you want all servers to run on the same hypervisor host, create a group with an <code>affinity</code> policy.  </p>
+
+<p>If you want all servers to run on different hypervisor host, create a group with an <code>anti-affinity</code> policy. This means that if you have 5 servers in this group, they will be on 5 different hypervisor (compute) nodes, never will a VM be on a host node where another VM from this affinity policy is.</p>
+
+<p>You can see all available affinity groups with <code>server-group-list</code>:</p>
+
+<pre><code>$ nova server-group-list
 +--------------------------------------+------+--------------------+---------+----------+
 | Id                                   | Name | Policies           | Members | Metadata |
 +--------------------------------------+------+--------------------+---------+----------+
-| 415eea22-4e37-44e0-a4c9-59c395688fc8 | Anti | [u'anti-affinity'] | []      | {}       |
+| 415eea22-4e37-44e0-a4c9-59c395688fc8 | Anti | [u&#39;anti-affinity&#39;] | []      | {}       |
 +--------------------------------------+------+--------------------+---------+----------+
-</code></pre><p>You can delete a server group with <code>server-group-delete</code>. Deleting a server group does not delete all the vm's in that group. The policy is removed from the vm's, so they can be on the same node, or on different ones. Exclusivity is not guaranteed anymore.</p><h3>Add instance to affinity group</h3><p>You can only add a server to an affinity group when you create the instance. Not afterwards. To add an instance to an affinity group, use the following extra option when executing <code>nova boot</code>:</p><pre><code>--hint group=$affinity-group-uuid
-</code></pre><p>Example commands:</p><pre><code>nova boot --image "CloudVPS Ubuntu 14.04" --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor "Standard 1" "Anti-Affinity 1-1"
+</code></pre>
 
-nova boot --image "CloudVPS Ubuntu 14.04" --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor "Standard 1" "Anti-Affinity 1-2"
+<p>You can delete a server group with <code>server-group-delete</code>. Deleting a server group does not delete all the vm&#39;s in that group. The policy is removed from the vm&#39;s, so they can be on the same node, or on different ones. Exclusivity is not guaranteed anymore.</p>
 
-nova boot --image "CloudVPS Ubuntu 14.04" --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor "Standard 1" "Anti-Affinity 1-3"
+<h3>Add instance to affinity group</h3>
 
-nova boot --image "CloudVPS Ubuntu 14.04" --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor "Standard 1" "Anti-Affinity 1-4"
-</code></pre><p>These 4 servers will be on different hypervisor hosts. You can check this with the <code>nova show</code> command:</p><pre><code>nova show $instance_uuid
-</code></pre><p>Look for the <code>hostId</code> value:</p><pre><code>| hostId     | 4b499ffc320810e06891d15fca10a4ac76a50eae788d2f28a990fbbf     |
-</code></pre><p>This is the hostId of the hosting compute hypervisor node. With an Anti-Affinity policy, these are different. With an Affinity Policy, these are the same.</p><h3>No valid host was found</h3><p>If you reveive the <code>No valid host was found</code> error during the <code>nova boot</code> command, that means that there are no hosts that have the capacity to host that VM and guarantee there will not be another VM from that anti-affinity group on it (in the case of an anti affinity group). It can also mean that the hypervisor has not enoigh free capacity (in the case of an affinity group).</p><p>This might mean that your Openstack provider has put restrictions on the filters or is low on free capacity. Affinity policies are limited by the available resources of the current hypervisor that hosts the group, while Anti-Affinity policies are limited by the number of available hypervisors in the datacenter (after filtering).</p><p>If you want your load balancers, app servers and database servers on different compute nodes from each other (with the same role) then you can create 3 anti-affinity groups, one for the load balancers, one for the app servers and one for the database servers. Your app server might be on a host node with a load balancer, but not with another app server.</p><h3>How to enable Affinity/Anti-Affinity (Admin Only)</h3><p>Enabling Affinity and Anti-Afiinity is simply done by adding <code>ServerGroupAffinityFilter</code> and <code>ServerGroupAntiAffinityFilter</code> into <code>scheduler_default_filters</code>. By default these filters are already enabled:</p><pre><code># nova.conf
+<p>You can only add a server to an affinity group when you create the instance. Not afterwards. To add an instance to an affinity group, use the following extra option when executing <code>nova boot</code>:</p>
+
+<pre><code>--hint group=$affinity-group-uuid
+</code></pre>
+
+<p>Example commands:</p>
+
+<pre><code>nova boot --image &quot;CloudVPS Ubuntu 14.04&quot; --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor &quot;Standard 1&quot; &quot;Anti-Affinity 1-1&quot;
+
+nova boot --image &quot;CloudVPS Ubuntu 14.04&quot; --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor &quot;Standard 1&quot; &quot;Anti-Affinity 1-2&quot;
+
+nova boot --image &quot;CloudVPS Ubuntu 14.04&quot; --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor &quot;Standard 1&quot; &quot;Anti-Affinity 1-3&quot;
+
+nova boot --image &quot;CloudVPS Ubuntu 14.04&quot; --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor &quot;Standard 1&quot; &quot;Anti-Affinity 1-4&quot;
+</code></pre>
+
+<p>These 4 servers will be on different hypervisor hosts. You can check this with the <code>nova show</code> command:</p>
+
+<pre><code>nova show $instance_uuid
+</code></pre>
+
+<p>Look for the <code>hostId</code> value:</p>
+
+<pre><code>| hostId     | 4b499ffc320810e06891d15fca10a4ac76a50eae788d2f28a990fbbf     |
+</code></pre>
+
+<p>This is the hostId of the hosting compute hypervisor node. With an Anti-Affinity policy, these are different. With an Affinity Policy, these are the same.</p>
+
+<h3>No valid host was found</h3>
+
+<p>If you reveive the <code>No valid host was found</code> error during the <code>nova boot</code> command, that means that there are no hosts that have the capacity to host that VM and guarantee there will not be another VM from that anti-affinity group on it (in the case of an anti affinity group). It can also mean that the hypervisor has not enoigh free capacity (in the case of an affinity group).</p>
+
+<p>This might mean that your Openstack provider has put restrictions on the filters or is low on free capacity. Affinity policies are limited by the available resources of the current hypervisor that hosts the group, while Anti-Affinity policies are limited by the number of available hypervisors in the datacenter (after filtering).</p>
+
+<p>If you want your load balancers, app servers and database servers on different compute nodes from each other (with the same role) then you can create 3 anti-affinity groups, one for the load balancers, one for the app servers and one for the database servers. Your app server might be on a host node with a load balancer, but not with another app server.</p>
+
+<h3>How to enable Affinity/Anti-Affinity (Admin Only)</h3>
+
+<p>Enabling Affinity and Anti-Afiinity is simply done by adding <code>ServerGroupAffinityFilter</code> and <code>ServerGroupAntiAffinityFilter</code> into <code>scheduler_default_filters</code>. By default these filters are already enabled:</p>
+
+<pre><code># nova.conf
 scheduler_default_filters = ServerGroupAffinityFilter,ServerGroupAntiAffinityFilter
-</code></pre><p>To read more about the Openstack filtering options, see the official documentation: <a href="http://docs.openstack.org/juno/config-reference/content/section_compute-scheduler.html">http://docs.openstack.org/juno/config-reference/content/section_compute-scheduler.html</a>.</p></div><hr/>Tags: <a class="link" href="../tags/affinity.html">affinity,</a><a class="link" href="../tags/anti-affinity.html">anti-affinity,</a><a class="link" href="../tags/cloud.html">cloud,</a><a class="link" href="../tags/cluster.html">cluster,</a><a class="link" href="../tags/compute.html">compute,</a><a class="link" href="../tags/nova.html">nova,</a><a class="link" href="../tags/openstack.html">openstack,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+</code></pre>
+
+<p>To read more about the Openstack filtering options, see the official documentation: <a href="http://docs.openstack.org/juno/config-reference/content/section_compute-scheduler.html">http://docs.openstack.org/juno/config-reference/content/section_compute-scheduler.html</a>.</p>
+</div><hr>Tags: <a href="../tags/affinity.html" class="link">affinity, </a><a href="../tags/anti-affinity.html" class="link">anti-affinity, </a><a href="../tags/cloud.html" class="link">cloud, </a><a href="../tags/cluster.html" class="link">cluster, </a><a href="../tags/compute.html" class="link">compute, </a><a href="../tags/nova.html" class="link">nova, </a><a href="../tags/openstack.html" class="link">openstack, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -30,4 +174,8 @@ scheduler_default_filters = ServerGroupAffinityFilter,ServerGroupAntiAffinityFil
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    

@@ -1,23 +1,174 @@
-<!DOCTYPE html><html lang="en"><head><title>Encrypt and decrypt files to public keys via the OpenSSL Command Line - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Encrypt and decrypt files to public keys via the OpenSSL Command Line - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
-                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Encrypt and decrypt files to public keys via the OpenSSL Command Line</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="Encrypt_and_decrypt_files_to_public_keys_via_the_OpenSSL_Command_Line.html">Encrypt and decrypt files to public keys via the OpenSSL Command Line</a></li></ul><p><small>10-11-2015</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Encrypt and decrypt files to public keys via the OpenSSL Command Line</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="Encrypt_and_decrypt_files_to_public_keys_via_the_OpenSSL_Command_Line.html" class="link">Encrypt and decrypt files to public keys via the OpenSSL Command Line</a></li></ul><p><small>10-11-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
-                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>This small tutorial will show you how to use the openssl command line to encrypt and decrypt a file using a public key. We will first generate a random key, encrypt that random key against the public key of the other person and use that random key to encrypt the actual file with using symmetric encryption.</p><p>If you like this website and want to support it AND get $10 Digital Ocean credit (2 months free), use this link to order: <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">https://www.digitalocean.com/?refcode=7435ae6b8212</a> (referral link).</p><p>Because of how the RSA algorithm works it is not possible to encrypt large files. If you create a key of <code>n</code> bits, then the file you want to encrypt must not larger than (<code>n</code> minus 11) bits. The most effective use of RSA crypto is to encrypt a random generated password, then encrypt the file with the password using symmetric crypto. If the file is larger then the key size the encryption command will fail:</p><pre><code>RSA operation error:  020:error:0406D06E:rsa routines:RSA_padding_add_PKCS1_type_2:data too large for key size:.\crypto\rsa\rsa_pk1.c:151:
-</code></pre><p>We generate a random file and use that as the key to encrypt the large file with symmetric crypto. That random file acts as the password so to say. We encrypt the large file with the small password file as password. Then we send the encrypted file and the encrypted key to the other party and then can decrypt the key with their public key, the use that key to decrypt the large file.</p><p>The following commands are relevant when you work with RSA keys:</p><ul><li><code>openssl genrsa</code>: Generates an RSA private keys.</li><li><code>openssl rsa</code>: Manage RSA private keys (includes generating a public key from it).</li><li><code>openssl rsautl</code>: Encrypt and decrypt files with RSA keys.</li></ul><p>The key is just a string of random bytes. We use a base64 encoded string of 128 bytes, which is 175 characters. Since 175 characters is 1400 bits, even a small RSA key will be able to encrypt it.</p><h3>Get the public key</h3><p>Let the other party send you a certificate or their public key. If they send to a certificate you can extract the public key using this command:</p><pre><code>openssl rsa -in certificate.pem -out publickey.pem -outform PEM -pubout
-</code></pre><h3>Generate the random password file</h3><p>Use the following command to generate the random key:</p><pre><code>openssl rand -base64 128 -out key.bin
-</code></pre><p>Do this every time you encrypt a file. Use a new key every time!</p><h3>Encrypt the file with the random key</h3><p>Use the following command to encrypt the large file with the random key:</p><pre><code>openssl enc -aes-256-cbc -salt -in largefile.pdf -out largefile.pdf.enc -pass file:./bin.key
-</code></pre><p>The file size doesn't grows that much:</p><pre><code>  $ ls -larth
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>This small tutorial will show you how to use the openssl command line to encrypt and decrypt a file using a public key. We will first generate a random key, encrypt that random key against the public key of the other person and use that random key to encrypt the actual file with using symmetric encryption.</p>
+
+<p>If you like this website and want to support it AND get $10 Digital Ocean credit (2 months free), use this link to order: <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">https://www.digitalocean.com/?refcode=7435ae6b8212</a> (referral link).</p>
+
+<p>Because of how the RSA algorithm works it is not possible to encrypt large files. If you create a key of <code>n</code> bits, then the file you want to encrypt must not larger than (<code>n</code> minus 11) bits. The most effective use of RSA crypto is to encrypt a random generated password,  then encrypt the file with the password using symmetric crypto. If the file is larger then the key size the encryption command will fail:</p>
+
+<pre><code>RSA operation error:  020:error:0406D06E:rsa routines:RSA_padding_add_PKCS1_type_2:data too large for key size:.\crypto\rsa\rsa_pk1.c:151:
+</code></pre>
+
+<p>We generate a random file and use that as the key to encrypt the large file with symmetric crypto. That random file acts as the password so to say. We encrypt the large file with the small password file as password. Then we send the encrypted file and the encrypted key to the other party and then can decrypt the key with their public key, the use that key to decrypt the large file.</p>
+
+<p>The following commands are relevant when you work with RSA keys:</p>
+
+<ul>
+<li><code>openssl genrsa</code>: Generates an RSA private keys.</li>
+<li><code>openssl rsa</code>: Manage RSA private keys (includes generating a public key from it).</li>
+<li><code>openssl rsautl</code>: Encrypt and decrypt files with RSA keys.</li>
+</ul>
+
+<p>The key is just a string of random bytes. We use a base64 encoded string of 128 bytes, which is 175 characters. Since 175 characters is 1400 bits, even a small RSA key will be able to encrypt it.</p>
+
+<h3>Get the public key</h3>
+
+<p>Let the other party send you a certificate or their public key. If they send to a certificate you can extract the public key using this command:</p>
+
+<pre><code>openssl rsa -in certificate.pem -out publickey.pem -outform PEM -pubout
+</code></pre>
+
+<h3>Generate the random password file</h3>
+
+<p>Use the following command to generate the random key:</p>
+
+<pre><code>openssl rand -base64 128 -out key.bin
+</code></pre>
+
+<p>Do this every time you encrypt a file. Use a new key every time!</p>
+
+<h3>Encrypt the file with the random key</h3>
+
+<p>Use the following command to encrypt the large file with the random key:</p>
+
+<pre><code>openssl enc -aes-256-cbc -salt -in largefile.pdf -out largefile.pdf.enc -pass file:./bin.key
+</code></pre>
+
+<p>The file size doesn&#39;t grows that much:</p>
+
+<pre><code>  $ ls -larth
   -rw-r--r-- 1 user group  40M Nov  9 21:14 Linux-Voice-Issue-020.pdf
   -rw-r--r-- 1 user group  40M Nov  9 22:03 Linux-Voice-Issue-020.pdf.enc
-</code></pre><p>It's encrypted however:</p><pre><code>$ file Linux-Voice-Issue-020.pdf
+</code></pre>
+
+<p>It&#39;s encrypted however:</p>
+
+<pre><code>$ file Linux-Voice-Issue-020.pdf
 Linux-Voice-Issue-020.pdf: PDF document, version 1.4
 
 $ file Linux-Voice-Issue-020.pdf.enc 
 Linux-Voice-Issue-020.pdf.enc: data
-</code></pre><h3>Encrypt the random key with the public keyfile</h3><p>Use the following command to encrypt the random keyfile with the other persons public key:</p><pre><code>openssl rsautl -encrypt -inkey publickey.pem -pubin -in key.bin -out key.bin.enc
-</code></pre><p>You can safely send the <code>key.bin.enc</code> and the <code>largefile.pdf.enc</code> to the other party.</p><p>You might want to <a href="https://raymii.org/s/tutorials/Sign_and_verify_text_files_to_public_keys_via_the_OpenSSL_Command_Line.html">sign the two files with your public key as well</a>.</p><h3>Decrypt the random key with our private key file</h3><p>If you want to decrypt a file encrypted with this setup, use the following command with your privte key (beloning to the pubkey the random key was crypted to) to decrypt the random key:</p><pre><code>openssl rsautl -decrypt -inkey privatekey.pem -in key.bin.enc -out key.bin
-</code></pre><p>This will result in the decrypted random key we encrypted the file in.</p><h3>Decrypt the large file with the random key</h3><p>Once you have the random key, you can decrypt the encrypted file with the decrypted key:</p><pre><code>openssl enc -d -aes-256-cbc -in largefile.pdf.enc -out largefile.pdf -pass file:./bin.key
-</code></pre><p>This will result in the decrypted large file.</p></div><hr/>Tags: <a class="link" href="../tags/ca.html">ca,</a><a class="link" href="../tags/certificate.html">certificate,</a><a class="link" href="../tags/decrypt.html">decrypt,</a><a class="link" href="../tags/encrypt.html">encrypt,</a><a class="link" href="../tags/openssl.html">openssl,</a><a class="link" href="../tags/pki.html">pki,</a><a class="link" href="../tags/ssl.html">ssl,</a><a class="link" href="../tags/tls.html">tls,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+</code></pre>
+
+<h3>Encrypt the random key with the public keyfile</h3>
+
+<p>Use the following command to encrypt the random keyfile with the other persons public key:</p>
+
+<pre><code>openssl rsautl -encrypt -inkey publickey.pem -pubin -in key.bin -out key.bin.enc
+</code></pre>
+
+<p>You can safely send the <code>key.bin.enc</code> and the <code>largefile.pdf.enc</code> to the other party.</p>
+
+<p>You might want to <a href="https://raymii.org/s/tutorials/Sign_and_verify_text_files_to_public_keys_via_the_OpenSSL_Command_Line.html">sign the two files with your public key as well</a>.</p>
+
+<h3>Decrypt the random key with our private key file</h3>
+
+<p>If you want to decrypt a file encrypted with this setup, use the following command with your privte key (beloning to the pubkey the random key was crypted to) to decrypt the random key:</p>
+
+<pre><code>openssl rsautl -decrypt -inkey privatekey.pem -in key.bin.enc -out key.bin
+</code></pre>
+
+<p>This will result in the decrypted random key we encrypted the file in.</p>
+
+<h3>Decrypt the large file with the random key</h3>
+
+<p>Once you have the random key, you can decrypt the encrypted file with the decrypted key:</p>
+
+<pre><code>openssl enc -d -aes-256-cbc -in largefile.pdf.enc -out largefile.pdf -pass file:./bin.key
+</code></pre>
+
+<p>This will result in the decrypted large file.</p>
+</div><hr>Tags: <a href="../tags/ca.html" class="link">ca, </a><a href="../tags/certificate.html" class="link">certificate, </a><a href="../tags/decrypt.html" class="link">decrypt, </a><a href="../tags/encrypt.html" class="link">encrypt, </a><a href="../tags/openssl.html" class="link">openssl, </a><a href="../tags/pki.html" class="link">pki, </a><a href="../tags/ssl.html" class="link">ssl, </a><a href="../tags/tls.html" class="link">tls, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -26,4 +177,8 @@ Linux-Voice-Issue-020.pdf.enc: data
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    

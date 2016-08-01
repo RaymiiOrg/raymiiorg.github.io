@@ -1,38 +1,238 @@
-<!DOCTYPE html><html lang="en"><head><title>HTTP Public Key Pinning Extension HPKP for Apache, NGINX and Lighttpd - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>HTTP Public Key Pinning Extension HPKP for Apache, NGINX and Lighttpd - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
-                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">HTTP Public Key Pinning Extension HPKP for Apache, NGINX and Lighttpd</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../articles/index.html">Articles</a></li><li><a class="link" href="HTTP_Public_Key_Pinning_Extension_HPKP.html">HTTP Public Key Pinning Extension HPKP for Apache, NGINX and Lighttpd</a></li></ul><p><small>30-12-2014</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>HTTP Public Key Pinning Extension HPKP for Apache, NGINX and Lighttpd</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="HTTP_Public_Key_Pinning_Extension_HPKP.html" class="link">HTTP Public Key Pinning Extension HPKP for Apache, NGINX and Lighttpd</a></li></ul><p><small>30-12-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
-                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>Public Key Pinning means that a certificate chain must include a whitelisted public key. It ensures only whitelisted Certificate Authorities (CA) can sign certificates for <code>*.example.com</code>, and not any CA in your browser store. This article has background theory and configuration examples for Apache, Lighttpd and NGINX.</p><h3>HTTP Public Key Pinning Extension</h3><p>An example might be your bank, which always have their certificate from CA Company A. With the current certificate system, CA Company B, CA Company C and the NSA CA can all create a certificate for your bank, which your browser will hapily accept because those companies are also trusted root CA's.</p><p>If the bank implements HPKP and pin's their first intermidiate certificate (from CA Company A), browsers will not accept certificates from CA Company B and CA Company C, even if they have a valid trust path. HPKP also allows your browser to report back the failure to the bank, so that they know they are under attack.</p><p>Public Key Pinning Extension for HTTP (HPKP) is a standard for public key pinning for HTTP user agents that's been in development since 2011. It was started by Google, which, even though it had implemented pinning in Chrome, understood that manually maintaining a list of pinned sites can't scale.</p><p>Here is a quick feature overview of HPKP:</p><ul><li>HPKP is set at the HTTP level, using the <code>Public-Key-Pins</code> response header.</li><li>The policy retention period is set with the <code>max-age</code> parameter, it specifies duration in seconds.</li><li>The PKP header can only be used over an error-free secure encryption.</li><li>If multiple headers are seen, only the first one is processed.</li><li>Pinning can be extended to subdomains with the <code>includeSubDomains</code> parameter.</li><li>When a new PKP header is received, it overwrites previously stored pins and metadata.</li><li>A pin consists out of the hashing algorithm and an "Subject Public Key Info" fingerprint.</li></ul><p>This article first has some theory about the workings of HPKP, down below you'll find the part which shows you how to get the required fingerprints and has web server configuration.</p><h3>SPKI Fingerprint - Theory</h3><p>As explained by Adam Langley in <a href="http://www.imperialviolet.org/2011/05/04/pinning.html">his post</a>, we hash a public key, not a certificate:</p><blockquote><p>In general, hashing certificates is the obvious solution, but the wrong one. The problem is that CA certificates are often reissued: there are multiple certificates with the same public key, subject name etc but different extensions or expiry dates. Browsers build certificates chains from a pool of certificates, bottom up, and an alternative version of a certificate might be substituted for the one that you expect.</p><p>For example, StartSSL has two root certificates: one signed with SHA1 and the other with SHA256. If you wished to pin to StartSSL as your CA, which certificate hash would you use? You would have to use both, but how would you know about the other root if I hadn't just told you?</p><p>Conversely, public key hashes must be correct:</p><p>Browsers assume that the leaf certificate is fixed: it's always the starting point of the chain. The leaf certificate contains a signature which must be a valid signature, from its parent, for that certificate. That implies that the public key of the parent is fixed by the leaf certificate. So, inductively, the chain of public keys is fixed, modulo truncation.</p><p>The only sharp edge is that you mustn't pin to a cross-certifying root. For example, GoDaddy's root is signed by Valicert so that older clients, which don't recognise GoDaddy as a root, still trust those certificates. However, you wouldn't want to pin to Valicert because newer clients will stop their chain at GoDaddy.</p><p>Also, we're hashing the SubjectPublicKeyInfo not the public key bit string. The SPKI includes the type of the public key and some parameters along with the public key itself. This is important because just hashing the public key leaves one open to misinterpretation attacks. Consider a Diffie-Hellman public key: if one only hashes the public key, not the full SPKI, then an attacker can use the same public key but make the client interpret it in a different group. Likewise one could force an RSA key to be interpreted as a DSA key etc.</p></blockquote><h3>Where to Pin</h3><p>Where should you pin? Pinning your own public key is not the best idea. The key might change or get compromised. You might have multiple certificates in use. The key might change because you rotate your certificates every so often. It might key compromised because the web server was hacked.</p><p>The easiest, but not most secure place to pin is the first intermediate CA certificate. The signature of that certificate is on your websites certificate so the issuing CA's public key must always be in the chain.</p><p>This way you can renew your end certificate from the same CA and have no pinning issues. If the CA issues a different root, then you have a problem, there is no clear solution for this yet. There is one thing you can do to mitigate this:</p><ul><li>Always have a backup pin and a spare certificate from a different CA.</li></ul><p>The RFC states that you need to provide at least two pins. One of the pins must be present in the chain used in the connection over which the pins were received, the other pin <em>must not</em> be present.</p><p>This other pin is your backup public key. It can also be the SPKI fingerprint of a different CA where you have a certificate issued.</p><p>An alternative and <strong>more secure</strong> take on this issue is to create at least three seperate public keys beforehand (using OpenSSL, see <a href="https://raymii.org/s/software/OpenSSL_Command_Generator.html">this page</a> for a Javascript OpenSSL command generator) and to keep two of those keys as a backup in a safe place, offline and off-site.</p><p>You create the SPKI hashes for the three certificates and pin those. You only use the first key as the active certificate. When it is needed, you can then use one of the alternative keys. You do however need to let that certificate sign by a CA to create a certificate pair and that process can take a few days depending on the certificate.</p><p>This is not a problem for the HPKP because we take the SPKI hash of the public key, and not of the certificate. Expiration or a different chain of CA signer do not matter in this case.</p><p>If you have the means and procedures to create and securely save at least three seperate keys as described above and pin those, it would also protect you from your CA provider getting compromised and giving out a fake certificate for your specific website.</p><h3>SPKI Fingerprint</h3><p>To get the SPKI fingerprint from a certificate we can use the following OpenSSL command, as shown in <a href="https://tools.ietf.org/html/draft-ietf-websec-key-pinning-21#appendix-A">the RFC draft</a>:</p><pre><code>openssl x509 -noout -in certificate.pem -pubkey | \
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>Public Key Pinning means that a certificate chain must include a whitelisted public key. It ensures only whitelisted Certificate Authorities (CA) can sign certificates for <code>*.example.com</code>, and not any CA in your browser store. This article has background theory and configuration examples for Apache, Lighttpd and NGINX.</p>
+
+<h3>HTTP Public Key Pinning Extension</h3>
+
+<p>An example might be your bank, which always have their certificate from CA Company A. With the current certificate system, CA Company B, CA Company C and the NSA CA can all create a certificate for your bank, which your browser will hapily accept because those companies are also trusted root CA&#39;s.</p>
+
+<p>If the bank implements HPKP and pin&#39;s their first intermidiate certificate (from CA Company A), browsers will not accept certificates from CA Company B and CA Company C, even if they have a valid trust path. HPKP also allows your browser to report back the failure to the bank, so that they know they are under attack.</p>
+
+<p>Public Key Pinning Extension for HTTP (HPKP) is a standard for public key pinning for HTTP user agents that&#39;s been in development since 2011. It was started by Google, which, even though it had implemented pinning in Chrome, understood that
+manually maintaining a list of pinned sites can&#39;t scale. </p>
+
+<p>Here is a quick feature overview of HPKP:</p>
+
+<ul>
+<li>HPKP is set at the HTTP level, using the <code>Public-Key-Pins</code> response header. </li>
+<li>The policy retention period is set with the <code>max-age</code> parameter, it specifies duration in seconds. </li>
+<li>The PKP header can only be used over an error-free secure encryption. </li>
+<li>If multiple headers are seen, only the first one is processed. </li>
+<li>Pinning can be extended to subdomains with the <code>includeSubDomains</code> parameter.</li>
+<li>When a new PKP header is received, it overwrites previously stored pins and metadata. </li>
+<li>A pin consists out of the hashing algorithm and an &quot;Subject Public Key Info&quot; fingerprint.</li>
+</ul>
+
+<p>This article first has some theory about the workings of HPKP, down below you&#39;ll find the part which shows you how to get the required fingerprints and has web server configuration.</p>
+
+<h3>SPKI Fingerprint - Theory</h3>
+
+<p>As explained by Adam Langley in <a href="http://www.imperialviolet.org/2011/05/04/pinning.html">his post</a>, we hash a public key, not a certificate:</p>
+
+<blockquote>
+<p>In general, hashing certificates is the obvious solution, but the wrong one. The problem is that CA certificates are often reissued: there are multiple certificates with the same public key, subject name etc but different extensions or expiry dates. Browsers build certificates chains from a pool of certificates, bottom up, and an alternative version of a certificate might be substituted for the one that you expect.</p>
+
+<p>For example, StartSSL has two root certificates: one signed with SHA1 and the other with SHA256. If you wished to pin to StartSSL as your CA, which certificate hash would you use? You would have to use both, but how would you know about the other root if I hadn&#39;t just told you?</p>
+
+<p>Conversely, public key hashes must be correct:</p>
+
+<p>Browsers assume that the leaf certificate is fixed: it&#39;s always the starting point of the chain. The leaf certificate contains a signature which must be a valid signature, from its parent, for that certificate. That implies that the public key of the parent is fixed by the leaf certificate. So, inductively, the chain of public keys is fixed, modulo truncation.</p>
+
+<p>The only sharp edge is that you mustn&#39;t pin to a cross-certifying root. For example, GoDaddy&#39;s root is signed by Valicert so that older clients, which don&#39;t recognise GoDaddy as a root, still trust those certificates. However, you wouldn&#39;t want to pin to Valicert because newer clients will stop their chain at GoDaddy.</p>
+
+<p>Also, we&#39;re hashing the SubjectPublicKeyInfo not the public key bit string. The SPKI includes the type of the public key and some parameters along with the public key itself. This is important because just hashing the public key leaves one open to misinterpretation attacks. Consider a Diffie-Hellman public key: if one only hashes the public key, not the full SPKI, then an attacker can use the same public key but make the client interpret it in a different group. Likewise one could force an RSA key to be interpreted as a DSA key etc.</p>
+</blockquote>
+
+<h3>Where to Pin</h3>
+
+<p>Where should you pin? Pinning your own public key is not the best idea. The key might change or get compromised. You might have multiple certificates in use. The key might change because you rotate your certificates every so often. It might key compromised because the web server was hacked.</p>
+
+<p>The easiest, but not most secure place to pin is the first intermediate CA certificate. The signature of that certificate is on your websites certificate so the issuing CA&#39;s public key must always be in the chain.</p>
+
+<p>This way you can renew your end certificate from the same CA and have no pinning issues. If the CA issues a different root, then you have a problem, there is no clear solution for this yet. There is one thing you can do to mitigate this:</p>
+
+<ul>
+<li>Always have a backup pin and a spare certificate from a different CA. </li>
+</ul>
+
+<p>The RFC states that you need to provide at least two pins. One of the pins must be present in the chain used in the connection over which the pins were received, the other pin <em>must not</em> be present. </p>
+
+<p>This other pin is your backup public key. It can also be the SPKI fingerprint of a different CA where you have a certificate issued.</p>
+
+<p>An alternative and <strong>more secure</strong> take on this issue is to create at least three seperate public keys beforehand (using OpenSSL, see <a href="https://raymii.org/s/software/OpenSSL_Command_Generator.html">this page</a> for a Javascript OpenSSL command generator) and to keep two of those keys as a backup in a safe place, offline and off-site.</p>
+
+<p>You create the SPKI hashes for the three certificates and pin those. You only use the first key as the active certificate. When it is needed, you can then use one of the alternative keys. You do however need to let that certificate sign by a CA to create a certificate pair and that process can take a few days depending on the certificate.</p>
+
+<p>This is not a problem for the HPKP because we take the SPKI hash of the public key, and not of the certificate. Expiration or a different chain of CA signer do not matter in this case.</p>
+
+<p>If you have the means and procedures to create and securely save at least three seperate keys as described above and pin those, it would also protect you from your CA provider getting compromised and giving out a fake certificate for your specific website.</p>
+
+<h3>SPKI Fingerprint</h3>
+
+<p>To get the SPKI fingerprint from a certificate we can use the following OpenSSL command, as shown in <a href="https://tools.ietf.org/html/draft-ietf-websec-key-pinning-21#appendix-A">the RFC draft</a>: </p>
+
+<pre><code>openssl x509 -noout -in certificate.pem -pubkey | \
 openssl asn1parse -noout -inform pem -out public.key;
 openssl dgst -sha256 -binary public.key | openssl enc -base64
-</code></pre><p>Result:</p><pre><code>klO23nT2ehFDXCfx3eHTDRESMz3asj1muO+4aIdjiuY=
-</code></pre><p>The input <code>certificate.pem</code> file is the first certificate in the chain for this website. (At the time of writing, <code>COMODO RSA Domain Validation Secure Server CA</code>, Serial <code>2B:2E:6E:EA:D9:75:36:6C:14:8A:6E:DB:A3:7C:8C:07</code>.)</p><p>You need to also do this with your backup public key, ending up with two fingerprints.</p><h3>Bugs</h3><p>At the time of writing this article (2015-Jan) the only browser supporting HPKP (Chrome) has a serious issue where Chrome doesn't treat the max-age and includeSubdomains directives from HSTS and HPKP headers as mutually exclusive. This means that if you have HSTS and HPKP with different policiesfor max-age or includeSubdomains they will be interchanged. See this bug for more info: <a href="https://code.google.com/p/chromium/issues/detail?id=444511">https://code.google.com/p/chromium/issues/detail?id=444511</a>. Thanks to Scott Helme from <a href="https://scotthelme.co.uk">https://scotthelme.co.uk</a> for finding and notifying me and the Chromium project about it.</p><h3>Webserver configuration</h3><p>Below you'll find configuration instructions for the three most populair web servers. Since this is just a HTTP header, almost all web servers will allow you to set this. It needs to be set for the HTTPS website.</p><p>The example below pins the <code>COMODO RSA Domain Validation Secure Server CA</code> and the <code>Comodo PositiveSSL CA 2</code> as a backup, with a 30 day expire time including all subdomains.</p><h4>Apache</h4><p>Edit your apache configuration file (<code>/etc/apache2/sites-enabled/website.conf</code> or <code>/etc/apache2/httpd.conf</code> for example) and add the following to your <code>VirtualHost</code>:</p><pre><code># Optionally load the headers module:
+</code></pre>
+
+<p>Result:</p>
+
+<pre><code>klO23nT2ehFDXCfx3eHTDRESMz3asj1muO+4aIdjiuY=
+</code></pre>
+
+<p>The input <code>certificate.pem</code> file is the first certificate in the chain for this website. (At the time of writing, <code>COMODO RSA Domain Validation Secure Server CA</code>, Serial <code>2B:2E:6E:EA:D9:75:36:6C:14:8A:6E:DB:A3:7C:8C:07</code>.)</p>
+
+<p>You need to also do this with your backup public key, ending up with two fingerprints.</p>
+
+<h3>Bugs</h3>
+
+<p>At the time of writing this article (2015-Jan) the only browser supporting HPKP (Chrome) has a serious issue where Chrome doesn&#39;t treat the max-age and includeSubdomains directives from HSTS and HPKP headers as mutually exclusive. This means that if you have HSTS and HPKP with different policiesfor max-age or includeSubdomains they will be interchanged. See this bug for more info: <a href="https://code.google.com/p/chromium/issues/detail?id=444511">https://code.google.com/p/chromium/issues/detail?id=444511</a>. Thanks to Scott Helme from <a href="https://scotthelme.co.uk">https://scotthelme.co.uk</a> for finding and notifying me and the Chromium project about it.</p>
+
+<h3>Webserver configuration</h3>
+
+<p>Below you&#39;ll find configuration instructions for the three most populair web servers. Since this is just a HTTP header, almost all web servers will allow you to set this. It needs to be set for the HTTPS website.</p>
+
+<p>The example below pins the <code>COMODO RSA Domain Validation Secure Server CA</code> and the <code>Comodo PositiveSSL CA 2</code> as a backup, with a 30 day expire time including all subdomains.</p>
+
+<h4>Apache</h4>
+
+<p>Edit your apache configuration file (<code>/etc/apache2/sites-enabled/website.conf</code> or <code>/etc/apache2/httpd.conf</code> for example) and add the following to your <code>VirtualHost</code>:</p>
+
+<pre><code># Optionally load the headers module:
 LoadModule headers_module modules/mod_headers.so
 
-Header set Public-Key-Pins "pin-sha256=\"klO23nT2ehFDXCfx3eHTDRESMz3asj1muO+4aIdjiuY=\"; pin-sha256=\"633lt352PKRXbOwf4xSEa1M517scpD3l5f79xMD9r9Q=\"; max-age=2592000; includeSubDomains"
-</code></pre><h4>Lighttpd</h4><p>The lighttpd variant is just as simple. Add it to your Lighttpd configuration file (<code>/etc/lighttpd/lighttpd.conf</code> for example):</p><pre><code>server.modules += ( "mod_setenv" )
-$HTTP["scheme"] == "https" {
-    setenv.add-response-header  = ( "Public-Key-Pins" =&gt; "pin-sha256=\"klO23nT2ehFDXCfx3eHTDRESMz3asj1muO+4aIdjiuY=\"; pin-sha256=\"633lt352PKRXbOwf4xSEa1M517scpD3l5f79xMD9r9Q=\"; max-age=2592000; includeSubDomains")
+Header set Public-Key-Pins &quot;pin-sha256=\&quot;klO23nT2ehFDXCfx3eHTDRESMz3asj1muO+4aIdjiuY=\&quot;; pin-sha256=\&quot;633lt352PKRXbOwf4xSEa1M517scpD3l5f79xMD9r9Q=\&quot;; max-age=2592000; includeSubDomains&quot;
+</code></pre>
+
+<h4>Lighttpd</h4>
+
+<p>The lighttpd variant is just as simple. Add it to your Lighttpd configuration file (<code>/etc/lighttpd/lighttpd.conf</code> for example):</p>
+
+<pre><code>server.modules += ( &quot;mod_setenv&quot; )
+$HTTP[&quot;scheme&quot;] == &quot;https&quot; {
+    setenv.add-response-header  = ( &quot;Public-Key-Pins&quot; =&gt; &quot;pin-sha256=\&quot;klO23nT2ehFDXCfx3eHTDRESMz3asj1muO+4aIdjiuY=\&quot;; pin-sha256=\&quot;633lt352PKRXbOwf4xSEa1M517scpD3l5f79xMD9r9Q=\&quot;; max-age=2592000; includeSubDomains&quot;)
 }
-</code></pre><h4>NGINX</h4><p>NGINX is even shorter with its config. Add this in the server block for your HTTPS configuration:</p><pre><code>add_header Public-Key-Pins 'pin-sha256="klO23nT2ehFDXCfx3eHTDRESMz3asj1muO+4aIdjiuY="; pin-sha256="633lt352PKRXbOwf4xSEa1M517scpD3l5f79xMD9r9Q="; max-age=2592000; includeSubDomains';
-</code></pre><h3>Reporting</h3><p>HPKP reporting allows the user-agent to report any failures back to you.</p><p>If you add an aditional <code>report-uri="http://example.org/hpkp-report"</code> parameter to the header and set up a listener there, clients will send reports if they encounter a failure. A report is sent as a POST request to the <code>report-uri</code> with a JSON body like this:</p><pre><code>{
-    "date-time": "2014-12-26T11:52:10Z",
-    "hostname": "www.example.org",
-    "port": 443,
-    "effective-expiration-date": "2014-12-31T12:59:59",
-    "include-subdomains": true,
-    "served-certificate-chain": [
-        "-----BEGINCERTIFICATE-----\nMIIAuyg[...]tqU0CkVDNx\n-----ENDCERTIFICATE-----"
+</code></pre>
+
+<h4>NGINX</h4>
+
+<p>NGINX is even shorter with its config. Add this in the server block for your HTTPS configuration:</p>
+
+<pre><code>add_header Public-Key-Pins &#39;pin-sha256=&quot;klO23nT2ehFDXCfx3eHTDRESMz3asj1muO+4aIdjiuY=&quot;; pin-sha256=&quot;633lt352PKRXbOwf4xSEa1M517scpD3l5f79xMD9r9Q=&quot;; max-age=2592000; includeSubDomains&#39;;
+</code></pre>
+
+<h3>Reporting</h3>
+
+<p>HPKP reporting allows the user-agent to report any failures back to you. </p>
+
+<p>If you add an aditional <code>report-uri=&quot;http://example.org/hpkp-report&quot;</code> parameter to the header and set up a listener there, clients will send reports if they encounter a failure. A report is sent as a POST request to the <code>report-uri</code> with a JSON body like this:</p>
+
+<pre><code>{
+    &quot;date-time&quot;: &quot;2014-12-26T11:52:10Z&quot;,
+    &quot;hostname&quot;: &quot;www.example.org&quot;,
+    &quot;port&quot;: 443,
+    &quot;effective-expiration-date&quot;: &quot;2014-12-31T12:59:59&quot;,
+    &quot;include-subdomains&quot;: true,
+    &quot;served-certificate-chain&quot;: [
+        &quot;-----BEGINCERTIFICATE-----\nMIIAuyg[...]tqU0CkVDNx\n-----ENDCERTIFICATE-----&quot;
     ],
-    "validated-certificate-chain": [
-        "-----BEGINCERTIFICATE-----\nEBDCCygAwIBA[...]PX4WecNx\n-----ENDCERTIFICATE-----"
+    &quot;validated-certificate-chain&quot;: [
+        &quot;-----BEGINCERTIFICATE-----\nEBDCCygAwIBA[...]PX4WecNx\n-----ENDCERTIFICATE-----&quot;
     ],
-    "known-pins": [
-        "pin-sha256=\"dUezRu9zOECb901Md727xWltNsj0e6qzGk\"",
-        "pin-sha256=\"E9CqVKB9+xZ9INDbd+2eRQozqbQ2yXLYc\""
+    &quot;known-pins&quot;: [
+        &quot;pin-sha256=\&quot;dUezRu9zOECb901Md727xWltNsj0e6qzGk\&quot;&quot;,
+        &quot;pin-sha256=\&quot;E9CqVKB9+xZ9INDbd+2eRQozqbQ2yXLYc\&quot;&quot;
     ]
 }
-</code></pre><h3>No Enforcment, report only</h3><p>HPKP can be set up without enforcement, in reporting mode by using the <code>Public-Key-Pins-Report-Only</code> response header.</p><p>This approach allows you to set up pinning without your site being unreachable or HPKP being configured incorrectly. You can later move to enforcement by changing the header back to <code>Public-Key-Pins</code>.</p></div><hr/>Tags: <a class="link" href="../tags/apache.html">apache,</a><a class="link" href="../tags/hpkp.html">hpkp,</a><a class="link" href="../tags/https.html">https,</a><a class="link" href="../tags/lighttpd.html">lighttpd,</a><a class="link" href="../tags/nginx.html">nginx,</a><a class="link" href="../tags/security.html">security,</a><a class="link" href="../tags/ssl.html">ssl,</a><a class="link" href="../tags/tls.html">tls,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+</code></pre>
+
+<h3>No Enforcment, report only</h3>
+
+<p>HPKP can be set up without enforcement, in reporting mode by using the <code>Public-Key-Pins-Report-Only</code> response header. </p>
+
+<p>This approach allows you to set up pinning without your site being unreachable or HPKP being configured incorrectly. You can later move to enforcement by changing the header back to <code>Public-Key-Pins</code>. </p>
+</div><hr>Tags: <a href="../tags/apache.html" class="link">apache, </a><a href="../tags/hpkp.html" class="link">hpkp, </a><a href="../tags/https.html" class="link">https, </a><a href="../tags/lighttpd.html" class="link">lighttpd, </a><a href="../tags/nginx.html" class="link">nginx, </a><a href="../tags/security.html" class="link">security, </a><a href="../tags/ssl.html" class="link">ssl, </a><a href="../tags/tls.html" class="link">tls, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -41,4 +241,8 @@ $HTTP["scheme"] == "https" {
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    

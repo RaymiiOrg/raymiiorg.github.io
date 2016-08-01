@@ -1,39 +1,172 @@
-<!DOCTYPE html><html lang="en"><head><title>Ansible - Add an apt-repository on Debian and Ubuntu - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Ansible - Add an apt-repository on Debian and Ubuntu - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
-                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Ansible - Add an apt-repository on Debian and Ubuntu</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="Ansible_-_Add_an_apt-repository_on_Debian_and_Ubuntu.html">Ansible - Add an apt-repository on Debian and Ubuntu</a></li></ul><p><small>15-05-2016</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Ansible - Add an apt-repository on Debian and Ubuntu</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="Ansible_-_Add_an_apt-repository_on_Debian_and_Ubuntu.html" class="link">Ansible - Add an apt-repository on Debian and Ubuntu</a></li></ul><p><small>15-05-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
-                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>This is a guide that shows you how to add an apt repository to Debian and Ubuntu using Ansible. It includes both the old way, when the apt modules only worked on Ubuntu, and the new way, now that the apt-modules also support Debian, plus some other tricks.</p><p><img alt="ansible" src="https://raymii.org/s/inc/img/ansible_meme.jpg"/></p><p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you'll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p><h3>Introduction</h3><p>Ansible allows you to add apt repositories and apt repository signing keys easily using the two modules <code>apt_repository</code> and <code>apt_key</code>. You can use this when you need to install packages from an external location, for example, <code>nginx</code> or <code>goaccess</code>. Both of these packages are in the repositories, but not the latest version.</p><p>Using Ansible you can add the repository and the signing key, and then install the package from the new repo. This guide will show you a few ways to do that in playbooks.</p><h3>The new way</h3><p>The easy way is to first add the repository key, then add the repository and finally install the package. Here's an example for nginx:</p><pre><code># always try to use HTTPS. I'm not sure why the nginx folks don't provide it.
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>This is a guide that shows you how to add an apt repository to Debian and Ubuntu using Ansible. It includes both the old way, when the apt modules only worked on Ubuntu, and the new way, now that the apt-modules also support Debian, plus some other tricks.</p>
+
+<p><img src="https://raymii.org/s/inc/img/ansible_meme.jpg" alt=ansible></p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
+
+<h3>Introduction</h3>
+
+<p>Ansible allows you to add apt repositories and apt repository signing keys easily using the two modules <code>apt_repository</code> and <code>apt_key</code>. You can use this when you need to install packages from an external location, for example, <code>nginx</code> or <code>goaccess</code>. Both of these packages are in the repositories, but not the latest version. </p>
+
+<p>Using Ansible you can add the repository and the signing key, and then install the package from the new repo. This guide will show you a few ways to do that in playbooks.</p>
+
+<h3>The new way</h3>
+
+<p>The easy way is to first add the repository key, then add the repository and finally install the package. Here&#39;s an example for nginx:</p>
+
+<pre><code># always try to use HTTPS. I&#39;m not sure why the nginx folks don&#39;t provide it.
 - apt_key: url=http://nginx.org/keys/nginx_signing.key state=present 
 
-- apt_repository: repo='deb deb http://nginx.org/packages/mainline/ubuntu/ xenial nginx' state=present filename='nginx' update_cache='yes'
+- apt_repository: repo=&#39;deb deb http://nginx.org/packages/mainline/ubuntu/ xenial nginx&#39; state=present filename=&#39;nginx&#39; update_cache=&#39;yes&#39;
 
-- apt: name='nginx' state='present' update_cache='yes'
-</code></pre><p>This is a three line playbook which will download and install the repository key, add the repository to a seperate file in <code>/etc/apt/sources.list.d/</code> and install the package while also doing an <code>apt-get update</code> to refresh the apt cache with the new repository.</p><p>This is the recommended way to add a repo and install packages from there. Read on to find out the workarounds in ye olden days.</p><h3>The old way</h3><p>In the past the <code>apt_key</code> module and behaved wonky on Debian installations, but not on Ubuntu. The <code>apt_key</code> module also did not support downloading keys from external locations and was tailored more to PPA's, which are nonexistent on Debian. Here's the same NGINX example, using the older way, which still works by the way.</p><pre><code>- name: 'add nginx repository'
-  template: src='nginx.list.j2' dest='/etc/apt/sources.list.d/nginx.list'
+- apt: name=&#39;nginx&#39; state=&#39;present&#39; update_cache=&#39;yes&#39;
+</code></pre>
 
-- name: 'make sure folder /var/keys exists'
-  file: path='/var/keys' state='directory' owner='root'
+<p>This is a three line playbook which will download and install the repository key, add the repository to a seperate file in <code>/etc/apt/sources.list.d/</code> and install the package while also doing an <code>apt-get update</code> to refresh the apt cache with the new repository.</p>
 
-- name: 'get nginx package signing key'
-  get_url: url='http://nginx.org/keys/nginx_signing.key' dest='/var/keys/nginx_signing.key'
+<p>This is the recommended way to add a repo and install packages from there. Read on to find out the workarounds in ye olden days.</p>
+
+<h3>The old way</h3>
+
+<p>In the past the <code>apt_key</code> module and behaved wonky on Debian installations, but not on Ubuntu. The <code>apt_key</code> module also did not support downloading keys from external locations and was tailored more to PPA&#39;s, which are nonexistent on Debian. Here&#39;s the same NGINX example, using the older way, which still works by the way.</p>
+
+<pre><code>- name: &#39;add nginx repository&#39;
+  template: src=&#39;nginx.list.j2&#39; dest=&#39;/etc/apt/sources.list.d/nginx.list&#39;
+
+- name: &#39;make sure folder /var/keys exists&#39;
+  file: path=&#39;/var/keys&#39; state=&#39;directory&#39; owner=&#39;root&#39;
+
+- name: &#39;get nginx package signing key&#39;
+  get_url: url=&#39;http://nginx.org/keys/nginx_signing.key&#39; dest=&#39;/var/keys/nginx_signing.key&#39;
   register: result
 
-- name: 'add nginx apt-key'
-  command: "apt-key add '/var/keys/nginx_signing.key'"
+- name: &#39;add nginx apt-key&#39;
+  command: &quot;apt-key add &#39;/var/keys/nginx_signing.key&#39;&quot;
   when: result.changed
 
-- name: 'apt-get update'
+- name: &#39;apt-get update&#39;
   apt: update_cache=yes
 
-- name: 'install nginx'
-  action: apt name='nginx' state='latest'
-</code></pre><p>The nginx repository template contains the following:</p><pre><code># {{ ansible_managed }}
+- name: &#39;install nginx&#39;
+  action: apt name=&#39;nginx&#39; state=&#39;latest&#39;
+</code></pre>
+
+<p>The nginx repository template contains the following:</p>
+
+<pre><code># {{ ansible_managed }}
 deb http://nginx.org/packages/mainline/{{ ansible_lsb.id|lower }}/ {{ ansible_lsb.codename|lower }} nginx
 
 deb-src http://nginx.org/packages/mainline/{{ ansible_lsb.id|lower }}/ {{ ansible_lsb.codename|lower }} nginx
-</code></pre><p>This is quite a nice trick, because it works on both Debian and Ubuntu, all versions. On the latest Ubuntu 16.04 the resulting repository line is this:</p><pre><code>deb http://nginx.org/packages/mainline/ubuntu/ xenial nginx
-</code></pre><p>But on an onder Debian installation, the result is this:</p><pre><code>deb http://nginx.org/packages/mainline/debian/ wheezy nginx
-</code></pre><p>You do need to make sure the upstream repository also follows this structure. In the nginx case, it does.</p><p>First a directory is created for the keyfile. The apt-key is downloaded manually to there, the result is registered. If the key already exists or is the same, we don't do anything. If the key isn't there or has changed, we execute the <code>apt-key add</code> command manually to add the repository signing key. If that's all done, we update the apt-cache and install nginx.</p><p>That's quite a bit more steps and ways to break stuff, plus, less idempotent due to the manual command. My playbook was so old, it still used the <code>action: apt</code> instead of just <code>apt:</code>.</p><p>This is not the recommended way, but it still works just fine. If you add repositories this way, no problem, but you might want to consider rewriting the playbooks to the newer way.</p><p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you'll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p><h3>More documentation</h3><p>The official documentation for the two modules can be found on the Ansible docs site: <a href="https://docs.ansible.com/ansible/apt_repository_module.html">apt_repository</a> and <a href="https://docs.ansible.com/ansible/apt_key_module.html">apt_key</a>.</p><p>You can also check out my other <a href="https://raymii.org/s/tags/ansible.html">Ansible articles</a></p></div><hr/>Tags: <a class="link" href="../tags/ansible.html">ansible,</a><a class="link" href="../tags/apt.html">apt,</a><a class="link" href="../tags/deb.html">deb,</a><a class="link" href="../tags/nginx.html">nginx,</a><a class="link" href="../tags/packages.html">packages,</a><a class="link" href="../tags/python.html">python,</a><a class="link" href="../tags/repo.html">repo,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+</code></pre>
+
+<p>This is quite a nice trick, because it works on both Debian and Ubuntu, all versions. On the latest Ubuntu 16.04 the resulting repository line is this:</p>
+
+<pre><code>deb http://nginx.org/packages/mainline/ubuntu/ xenial nginx
+</code></pre>
+
+<p>But on an onder Debian installation, the result is this:</p>
+
+<pre><code>deb http://nginx.org/packages/mainline/debian/ wheezy nginx
+</code></pre>
+
+<p>You do need to make sure the upstream repository also follows this structure. In the nginx case, it does.</p>
+
+<p>First a directory is created for the keyfile. The apt-key is downloaded manually to there, the result is registered. If the key already exists or is the same, we don&#39;t do anything. If the key isn&#39;t there or has changed, we execute the <code>apt-key add</code> command manually to add the repository signing key. If that&#39;s all done, we update the apt-cache and install nginx.</p>
+
+<p>That&#39;s quite a bit more steps and ways to break stuff, plus, less idempotent due to the manual command. My playbook was so old, it still used the <code>action: apt</code> instead of just <code>apt:</code>. </p>
+
+<p>This is not the recommended way, but it still works just fine. If you add repositories this way, no problem, but you might want to consider rewriting the playbooks to the newer way.</p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
+
+<h3>More documentation</h3>
+
+<p>The official documentation for the two modules can be found on the Ansible docs site: <a href="https://docs.ansible.com/ansible/apt_repository_module.html">apt_repository</a> and <a href="https://docs.ansible.com/ansible/apt_key_module.html">apt_key</a>. </p>
+
+<p>You can also check out my other <a href="https://raymii.org/s/tags/ansible.html">Ansible articles</a></p>
+</div><hr>Tags: <a href="../tags/ansible.html" class="link">ansible, </a><a href="../tags/apt.html" class="link">apt, </a><a href="../tags/deb.html" class="link">deb, </a><a href="../tags/nginx.html" class="link">nginx, </a><a href="../tags/packages.html" class="link">packages, </a><a href="../tags/python.html" class="link">python, </a><a href="../tags/repo.html" class="link">repo, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -42,4 +175,8 @@ deb-src http://nginx.org/packages/mainline/{{ ansible_lsb.id|lower }}/ {{ ansibl
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    

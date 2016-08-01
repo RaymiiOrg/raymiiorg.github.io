@@ -1,63 +1,286 @@
-<!DOCTYPE html><html lang="en"><head><title>Olimex OlinuXino a10 Lime uBoot, Kernel and root image guide - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Olimex OlinuXino a10 Lime uBoot, Kernel and root image guide - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
-                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Olimex OlinuXino a10 Lime uBoot, Kernel and root image guide</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../articles/index.html">Articles</a></li><li><a class="link" href="Olimex_OlinuXino _10 Lime_uBoot_Kernel.html">Olimex OlinuXino a10 Lime uBoot, Kernel and root image guide</a></li></ul><p><small>20-12-2014</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Olimex OlinuXino a10 Lime uBoot, Kernel and root image guide</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Olimex_OlinuXino _10 Lime_uBoot_Kernel.html" class="link">Olimex OlinuXino a10 Lime uBoot, Kernel and root image guide</a></li></ul><p><small>20-12-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
-                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p><img alt="olimex" src="https://raymii.org/s/inc/img/A10-OLinuXino-LIME.jpeg"/></p><p>The Olimex OlinuXino A10 LIME is an amazing, powerfull and cheap open source ARM development board. It costs EUR 30, and has 160 GPIO. This guide is a cleaned up version of theirs with instructions to build your own kernel and u-boot image on Ubuntu 14.04</p><p>Buy the board here: <a href="https://www.olimex.com/Products/OLinuXino/A10/A10-OLinuXino-LIME/open-source-hardware">https://www.olimex.com/Products/OLinuXino/A10/A10-OLinuXino-LIME/open-source-hardware</a> and see my other tutorials and a small image here: <a href="https://raymii.org/s/tags/olimex.html">https://raymii.org/s/tags/olimex.html</a></p><p>The original guide can be found here: <a href="http://olimex.wordpress.com/2013/12/13/building-debian-linux-image-for-a10-olinuxino-lime-with-kernel-3-4-67/">http://olimex.wordpress.com/2013/12/13/building-debian-linux-image-for-a10-olinuxino-lime-with-kernel-3-4-67/</a></p><p>This guide has been adapted to work on Ubuntu 14.04, some package names, instructions and commands were incorrect. Also, all the files are not on Google drive anymore, but on my servers. The original bad english has been cleaned up to be less bad. The guide however is of less quality than you normally get from me.</p><p>For Allwinner Kernel related questions please ask on Linux Sunxi Mailing List in Google Groups: <a href="https://groups.google.com/forum/#!forum/linux-sunxi">https://groups.google.com/forum/#!forum/linux-sunxi</a></p><p>For Uboot related questions please ask on Linux Sunxi Mailing List in Google Groups: <a href="https://groups.google.com/forum/#!forum/linux-sunxi">https://groups.google.com/forum/#!forum/linux-sunxi</a></p><hr/><h3>Contents</h3><ul><li>Building u-boot (boat loader)</li><li>Building the kernel</li><li>Partitioning the SD card</li><li>Placing the bootloader, kernel and kernel modules</li><li>Placing the root filesystem</li></ul><h3>Install required packages</h3><p>Install the toolchain and other required development packages:</p><pre><code>apt-get update
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p><img src="https://raymii.org/s/inc/img/A10-OLinuXino-LIME.jpeg" alt="olimex"></p>
+
+<p>The Olimex OlinuXino A10 LIME is an amazing, powerfull and cheap open source ARM development board. It costs EUR 30, and has 160 GPIO. This guide is a cleaned up version of theirs with instructions to build your own kernel and u-boot image on Ubuntu 14.04</p>
+
+<p>Buy the board here: <a href="https://www.olimex.com/Products/OLinuXino/A10/A10-OLinuXino-LIME/open-source-hardware">https://www.olimex.com/Products/OLinuXino/A10/A10-OLinuXino-LIME/open-source-hardware</a> and see my other tutorials and a small image here: <a href="https://raymii.org/s/tags/olimex.html">https://raymii.org/s/tags/olimex.html</a></p>
+
+<p>The original guide can be found here: <a href="http://olimex.wordpress.com/2013/12/13/building-debian-linux-image-for-a10-olinuxino-lime-with-kernel-3-4-67/">http://olimex.wordpress.com/2013/12/13/building-debian-linux-image-for-a10-olinuxino-lime-with-kernel-3-4-67/</a></p>
+
+<p>This guide has been adapted to work on Ubuntu 14.04, some package names, instructions and commands were incorrect. Also, all the files are not on Google drive anymore, but on my servers. The original bad english has been cleaned up to be less bad. The guide however is of less quality than you normally get from me.</p>
+
+<p>For Allwinner Kernel related questions please ask on Linux Sunxi Mailing List in Google Groups: <a href="https://groups.google.com/forum/#!forum/linux-sunxi">https://groups.google.com/forum/#!forum/linux-sunxi</a></p>
+
+<p>For Uboot related questions please ask on Linux Sunxi Mailing List in Google Groups: <a href="https://groups.google.com/forum/#!forum/linux-sunxi">https://groups.google.com/forum/#!forum/linux-sunxi</a></p>
+
+<hr>
+
+<h3>Contents</h3>
+
+<ul>
+<li>Building u-boot (boat loader)</li>
+<li>Building the kernel</li>
+<li>Partitioning the SD card</li>
+<li>Placing the bootloader, kernel and kernel modules</li>
+<li>Placing the root filesystem</li>
+</ul>
+
+<h3>Install required packages</h3>
+
+<p>Install the toolchain and other required development packages:</p>
+
+<pre><code>apt-get update
 apt-get install gcc-4.7-arm-linux-gnueabihf ncurses-dev build-essential git u-boot-tools gcc-arm-linux-gnueabihf
-</code></pre><p>If you want to cross compile on Debian instead of Ubuntu, you need the following set of packages:</p><pre><code>apt-get install binutils-arm-linux-gnueabihf ncurses-dev build-essential git u-boot-tools gcc-arm-linux-gnueabihf
-</code></pre><p>Create a working directory and go in to it:</p><pre><code>mkdir A10_kernel_3.4/
+</code></pre>
+
+<p>If you want to cross compile on Debian instead of Ubuntu, you need the following set of packages:</p>
+
+<pre><code>apt-get install binutils-arm-linux-gnueabihf ncurses-dev build-essential git u-boot-tools gcc-arm-linux-gnueabihf
+</code></pre>
+
+<p>Create a working directory and go in to it:</p>
+
+<pre><code>mkdir A10_kernel_3.4/
 cd A10_kernel_3.4/
-</code></pre><h3>Building Uboot</h3><p>u-boot is the bootloader, it is a GRUB alternative for small/embedded systems.</p><p>Download u-boot sources:</p><pre><code>git clone -b sunxi https://github.com/linux-sunxi/u-boot-sunxi.git
+</code></pre>
+
+<h3>Building Uboot</h3>
+
+<p>u-boot is the bootloader, it is a GRUB alternative for small/embedded systems. </p>
+
+<p>Download u-boot sources:</p>
+
+<pre><code>git clone -b sunxi https://github.com/linux-sunxi/u-boot-sunxi.git
 cd u-boot-sunxi/
-</code></pre><p>Note that this guide was written with the revision below:</p><pre><code>git rev-parse --verify HEAD
+</code></pre>
+
+<p>Note that this guide was written with the revision below: </p>
+
+<pre><code>git rev-parse --verify HEAD
 44b53fd3928f15c34993ec8c6b8c2efcb79769ee
-</code></pre><p>Start the uboot build:</p><pre><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean
+</code></pre>
+
+<p>Start the uboot build:</p>
+
+<pre><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- A10-OLinuXino-Lime_config
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
-</code></pre><p>At the end of the process you should have at least the following files:</p><pre><code># ls u-boot.bin u-boot-sunxi-with-spl.bin spl/sunxi-spl.bin
+</code></pre>
+
+<p>At the end of the process you should have at least the following files:</p>
+
+<pre><code># ls u-boot.bin u-boot-sunxi-with-spl.bin spl/sunxi-spl.bin
 spl/sunxi-spl.bin  u-boot.bin  u-boot-sunxi-with-spl.bin
-</code></pre><p>Go back into the working directory:</p><pre><code>cd ..
-</code></pre><h3>Building the kernel</h3><p>Kernel sources for A10 are available on GitHub. Use git to download the kernel sources for the board:</p><pre><code>git clone https://github.com/linux-sunxi/linux-sunxi
+</code></pre>
+
+<p>Go back into the working directory:</p>
+
+<pre><code>cd ..
+</code></pre>
+
+<h3>Building the kernel</h3>
+
+<p>Kernel sources for A10 are available on GitHub. Use git to download the kernel sources for the board:</p>
+
+<pre><code>git clone https://github.com/linux-sunxi/linux-sunxi
 cd linux-sunxi/
-</code></pre><p>Note that this guide was written with the revision below:</p><pre><code>git rev-parse --verify HEAD
+</code></pre>
+
+<p>Note that this guide was written with the revision below: </p>
+
+<pre><code>git rev-parse --verify HEAD
 e37d760b363888f3a65cd6455c99a75cac70a7b8
-</code></pre><p>The following file contains all the kernel config settings. If you've ever built your own kernel you can use <code>make menuconfig</code> etc to change the settings. For now, download it:</p><pre><code>wget https://raymii.org/s/inc/downloads/olinux/a10/a10lime_defconfig
-</code></pre><p>Their kernel contains weird choices, for example iptables is not available, but wireless drivers are. You can save space on the kernel by removing things like that. If you want to run it as a server, you need to compile most of the network settings back in. I use the following config, with network stuff included so that I can use <code>lxc</code> containers on the board (<code>veth</code>, <code>bridge</code> and <code>vlan</code> support etc.):</p><pre><code>wget https://raymii.org/s/inc/downloads/olinux/a10/kernel_config_raymii
-</code></pre><p>Copy a10lime_defconfig file to config directory:</p><pre><code>cp a10lime_defconfig linux-sunxi/arch/arm/configs/
+</code></pre>
+
+<p>The following file contains all the kernel config settings. If you&#39;ve ever built your own kernel you can use <code>make menuconfig</code> etc to change the settings. For now, download it:</p>
+
+<pre><code>wget https://raymii.org/s/inc/downloads/olinux/a10/a10lime_defconfig
+</code></pre>
+
+<p>Their kernel contains weird choices, for example iptables is not available, but wireless drivers are. You can save space on the kernel by removing things like that. If you want to run it as a server, you need to compile most of the network settings back in. I use the following config, with network stuff included so that I can use <code>lxc</code> containers on the board (<code>veth</code>, <code>bridge</code> and <code>vlan</code> support etc.):</p>
+
+<pre><code>wget https://raymii.org/s/inc/downloads/olinux/a10/kernel_config_raymii
+</code></pre>
+
+<p>Copy a10lime_defconfig file to config directory:</p>
+
+<pre><code>cp a10lime_defconfig linux-sunxi/arch/arm/configs/
 # or my config:
 cp kernel_config_raymii linux-sunxi/arch/arm/configs/
-</code></pre><p>Prepare the config file:</p><pre><code>make ARCH=arm a10lime_defconfig
-</code></pre><p>The result should be:</p><pre><code>configuration written to .config
-</code></pre><p>If you wish to make your changes in the kernel configuration do:</p><pre><code>make ARCH=arm menuconfig
-</code></pre><p>You can add or remove different modules for the different peripherials in the kernel with <code>menuconfig</code>. Be careful with this as it may cause the kernel to not work properly.</p><p>Compile the kernel:</p><pre><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 uImage
-</code></pre><p>The result after a while should be like this:</p><pre><code>Image Name:   Linux-3.4.90+
+</code></pre>
+
+<p>Prepare the config file:</p>
+
+<pre><code>make ARCH=arm a10lime_defconfig
+</code></pre>
+
+<p>The result should be:</p>
+
+<pre><code>configuration written to .config
+</code></pre>
+
+<p>If you wish to make your changes in the kernel configuration do:</p>
+
+<pre><code>make ARCH=arm menuconfig
+</code></pre>
+
+<p>You can add or remove different modules for the different peripherials in the kernel with <code>menuconfig</code>. Be careful with this as it may cause the kernel to not work properly.</p>
+
+<p>Compile the kernel:</p>
+
+<pre><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 uImage
+</code></pre>
+
+<p>The result after a while should be like this: </p>
+
+<pre><code>Image Name:   Linux-3.4.90+
 Created:      Fri Jun 13 16:28:39 2014
 Image Type:   ARM Linux Kernel Image (uncompressed)
 Data Size:    4447440 Bytes = 4343.20 kB = 4.24 MB
 Load Address: 40008000
 Entry Point:  40008000
 Image arch/arm/boot/uImage is ready
-</code></pre><p>Compile the kernel modules:</p><pre><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 uImage
+</code></pre>
+
+<p>Compile the kernel modules:</p>
+
+<pre><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 uImage
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 INSTALL_MOD_PATH=out modules
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 INSTALL_MOD_PATH=out modules_install
-</code></pre><p>After the compilations are finished the uImage file is located in:</p><pre><code>linux-sunxi/arch/arm/boot/
-</code></pre><p>The kernel modules are located in:</p><pre><code>linux-sunxi/out/lib/modules/3.x.xx
-</code></pre><p>where 3.x.xx is kernel version</p><p>in our case the directory with modules is:</p><pre><code>linux-sunxi/out/lib/modules/3.4.90+
-</code></pre><h3>Format and setup the SD-card</h3><p>First we have to partition the SD card with fdisk. Plug SD card into your SD card reader. Use a command like <code>dmesg</code> to get the correct device. If you select the wrong device you might overwrite your own hard drive, so make sure you have the correct one.</p><p>Start fdisk on the correct device:</p><pre><code>fdisk /dev/sdX
-</code></pre><p>List the partitions:</p><pre><code>p
-</code></pre><p>If there are already partitions on the card you should delete them. This will erase the data on the SD card:</p><pre><code>d 
+</code></pre>
+
+<p>After the compilations are finished the uImage file is located in:</p>
+
+<pre><code>linux-sunxi/arch/arm/boot/
+</code></pre>
+
+<p>The kernel modules are located in:</p>
+
+<pre><code>linux-sunxi/out/lib/modules/3.x.xx
+</code></pre>
+
+<p>where 3.x.xx is kernel version</p>
+
+<p>in our case the directory with modules is:</p>
+
+<pre><code>linux-sunxi/out/lib/modules/3.4.90+
+</code></pre>
+
+<h3>Format and setup the SD-card</h3>
+
+<p>First we have to partition the SD card with fdisk. Plug SD card into your SD card reader. Use a command like <code>dmesg</code> to get the correct device. If you select the wrong device you might overwrite your own hard drive, so make sure you have the correct one.</p>
+
+<p>Start fdisk on the correct device:</p>
+
+<pre><code>fdisk /dev/sdX
+</code></pre>
+
+<p>List the partitions:</p>
+
+<pre><code>p
+</code></pre>
+
+<p>If there are already partitions on the card you should delete them. This will erase the data on the SD card:</p>
+
+<pre><code>d 
 1
-</code></pre><p>If you have more than one partitition press d again and provide the number, like 2, 3 etc.</p><p>Create the first partition, starting from 2048</p><pre><code>n
+</code></pre>
+
+<p>If you have more than one partitition press d again and provide the number, like 2, 3 etc.</p>
+
+<p>Create the first partition, starting from 2048 </p>
+
+<pre><code>n
 p
 1
 # enter twice
 +16M
-</code></pre><p>Create the second partition</p><pre><code>n
+</code></pre>
+
+<p>Create the second partition</p>
+
+<pre><code>n
 p
 2 
 # enter three times
-</code></pre><p>List the created partitions:</p><pre><code>p 
-</code></pre><p>if you did everything correctly on 4GB card you should see something like:</p><pre><code>Disk /dev/sdX: 3980 MB, 3980394496 bytes
+</code></pre>
+
+<p>List the created partitions:</p>
+
+<pre><code>p 
+</code></pre>
+
+<p>if you did everything correctly on 4GB card you should see something like:</p>
+
+<pre><code>Disk /dev/sdX: 3980 MB, 3980394496 bytes
 123 heads, 62 sectors/track, 1019 cylinders, total 7774208 sectors
 Units = sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -67,31 +290,133 @@ Disk identifier: 0x00000000
    Device Boot      Start         End      Blocks   Id  System
 /dev/sdX1            2048       34815       16384   83  Linux
 /dev/sdX2           34816     7774207     3869696   83  Linux
-</code></pre><p>Write it to the SD card:</p><pre><code>w
-</code></pre><p>Create the file system on the first partition. This should be vfat as this is filesystem which the Allwinner bootloader understands:</p><pre><code>mkfs.vfat /dev/sdX1
-</code></pre><p>The second should be a Linux ext4 partition:</p><pre><code>mkfs.ext4 /dev/sdX2
-</code></pre><h3>Writing the bootloader and related files</h3><p>You should be in the ~/A10<em>kernel</em>3.4/ folder.</p><p>The image <code>u-boot-sunxi-with-spl.bin</code> should be written to the device <code>/dev/sdX</code> (not a partition like <code>sdX1</code> or <code>sdX2</code>).</p><p>Use <code>dd</code> to write the image we built earlier to the sd card:</p><pre><code>dd if=u-boot-sunxi/u-boot-sunxi-with-spl.bin of=/dev/sdX bs=1024 seek=8
-</code></pre><p>Mount the first partition:</p><pre><code># mkdir /mnt/sd
+</code></pre>
+
+<p>Write it to the SD card:</p>
+
+<pre><code>w
+</code></pre>
+
+<p>Create the file system on the first partition. This should be vfat as this is filesystem which the Allwinner bootloader understands:</p>
+
+<pre><code>mkfs.vfat /dev/sdX1
+</code></pre>
+
+<p>The second should be a Linux ext4 partition:</p>
+
+<pre><code>mkfs.ext4 /dev/sdX2
+</code></pre>
+
+<h3>Writing the bootloader and related files</h3>
+
+<p>You should be in the ~/A10<em>kernel</em>3.4/ folder.</p>
+
+<p>The image <code>u-boot-sunxi-with-spl.bin</code> should be written to the device <code>/dev/sdX</code> (not a partition like <code>sdX1</code> or <code>sdX2</code>).</p>
+
+<p>Use <code>dd</code> to write the image we built earlier to the sd card:</p>
+
+<pre><code>dd if=u-boot-sunxi/u-boot-sunxi-with-spl.bin of=/dev/sdX bs=1024 seek=8
+</code></pre>
+
+<p>Mount the first partition:</p>
+
+<pre><code># mkdir /mnt/sd
 mount /dev/sdX1 /mnt/sd
-</code></pre><p>Copy the kernel uImage to root directory of partition 1:</p><pre><code>cp linux-sunxi/arch/arm/boot/uImage /mnt/sd
-</code></pre><p>script.bin is a file with configuration parameters like port GPIO assignments, DDR memory parameters, video resolution etc,</p><p>Download the file and place it on the SD card:</p><pre><code>wget -O /mnt/sd/script.bin https://raymii.org/s/inc/downloads/olinux/a10/script.bin
-</code></pre><p>boot.scr has the uboot commands to load script.bin, kernel, initrd, set kernel parameters and booting the device.</p><p>If you want to change it you can read this guide: <a href="https://github.com/linux-sunxi/u-boot-sunxi/wiki">https://github.com/linux-sunxi/u-boot-sunxi/wiki</a></p><p>Download boot.scr and place it on the SD card:</p><pre><code>wget -O /mnt/sd/boot.scr https://raymii.org/s/inc/downloads/olinux/a10/boot.scr
-</code></pre><p>Unmount the partition:</p><pre><code>sync
+</code></pre>
+
+<p>Copy the kernel uImage to root directory of partition 1:</p>
+
+<pre><code>cp linux-sunxi/arch/arm/boot/uImage /mnt/sd
+</code></pre>
+
+<p>script.bin is a file with configuration parameters like port GPIO assignments, DDR memory parameters, video resolution etc, </p>
+
+<p>Download the file and place it on the SD card:</p>
+
+<pre><code>wget -O /mnt/sd/script.bin https://raymii.org/s/inc/downloads/olinux/a10/script.bin
+</code></pre>
+
+<p>boot.scr has the uboot commands to load script.bin, kernel, initrd, set kernel parameters and booting the device.</p>
+
+<p>If you want to change it you can read this guide: <a href="https://github.com/linux-sunxi/u-boot-sunxi/wiki">https://github.com/linux-sunxi/u-boot-sunxi/wiki</a></p>
+
+<p>Download boot.scr and place it on the SD card:</p>
+
+<pre><code>wget -O /mnt/sd/boot.scr https://raymii.org/s/inc/downloads/olinux/a10/boot.scr
+</code></pre>
+
+<p>Unmount the partition:</p>
+
+<pre><code>sync
 umount /dev/sdX1
-</code></pre><h3>Debian rootfs</h3><p>You can download my own image from here: <a href="https://raymii.org/s/articles/Olimex_A10-OLinuXino-LIME_minimal_debian_7_image.html">https://raymii.org/s/articles/Olimex<em>A10-OLinuXino-LIME</em>minimal<em>debian</em>7_image.html</a>. It is smaller than the Olimex image, but has no GUI etc. The standard olimex Debian image is quite large and has weird software choices.</p><p>The image provided by Olimex is mirrored here. Download it:</p><pre><code>wget https://2162bb74000a471eb2839a7f1648771a.objectstore.eu/olimex/a10_lime_debian_3_4_90_rel_3.tgz
-</code></pre><p>Mount the second partition on the SD card:</p><pre><code>mount /dev/sdX2 /mnt/sd
-</code></pre><p>Unpack the rootfs to the SD card:</p><pre><code>tar xzvf a10_lime_debian_3_4_90_rel_3.tgz -C /mnt/sd
-</code></pre><p>The unpacked filesystem looks like below:</p><pre><code># ls /mnt/sd
+</code></pre>
+
+<h3>Debian rootfs</h3>
+
+<p>You can download my own image from here: <a href="https://raymii.org/s/articles/Olimex_A10-OLinuXino-LIME_minimal_debian_7_image.html">https://raymii.org/s/articles/Olimex<em>A10-OLinuXino-LIME</em>minimal<em>debian</em>7_image.html</a>. It is smaller than the Olimex image, but has no GUI etc. The standard olimex Debian image is quite large and has weird software choices.</p>
+
+<p>The image provided by Olimex is mirrored here. Download it:</p>
+
+<pre><code>wget https://2162bb74000a471eb2839a7f1648771a.objectstore.eu/olimex/a10_lime_debian_3_4_90_rel_3.tgz
+</code></pre>
+
+<p>Mount the second partition on the SD card:</p>
+
+<pre><code>mount /dev/sdX2 /mnt/sd
+</code></pre>
+
+<p>Unpack the rootfs to the SD card:</p>
+
+<pre><code>tar xzvf a10_lime_debian_3_4_90_rel_3.tgz -C /mnt/sd
+</code></pre>
+
+<p>The unpacked filesystem looks like below:</p>
+
+<pre><code># ls /mnt/sd
 bin   dev  home  lost+found  mnt  proc  run   selinux  sys  usr
 boot  etc  lib   media       opt  root  sbin  srv      tmp  var
-</code></pre><p>You have to replace the new generated kernel modules from <code>~/A10_kernel_3.4/linux-sunxi/out/lib/modules/</code> to the debian file system we've just unpacked:</p><pre><code>rm -rf /mnt/sd/lib/modules/*
+</code></pre>
+
+<p>You have to replace the new generated kernel modules from <code>~/A10_kernel_3.4/linux-sunxi/out/lib/modules/</code> to the debian file system we&#39;ve just unpacked:</p>
+
+<pre><code>rm -rf /mnt/sd/lib/modules/*
 cp -rfv linux-sunxi/out/lib/modules/3.x.xx+/ /mnt/sd/lib/modules/
-</code></pre><p>where x.xx is the kernel version, in our case:</p><pre><code>cp -rfv linux-sunxi/out/lib/modules/3.4.90+/ /mnt/sd/lib/modules/
-</code></pre><p>Replace /lib/firmware folder with the generated /linux-sunxi/out/firmware</p><pre><code>rm -rf /mnt/sd/lib/firmware/
+</code></pre>
+
+<p>where x.xx is the kernel version, in our case:</p>
+
+<pre><code>cp -rfv linux-sunxi/out/lib/modules/3.4.90+/ /mnt/sd/lib/modules/
+</code></pre>
+
+<p>Replace /lib/firmware folder with the generated /linux-sunxi/out/firmware</p>
+
+<pre><code>rm -rf /mnt/sd/lib/firmware/
 cp -rfv linux-sunxi/out/lib/firmware/ /mnt/sd/lib/
-</code></pre><p>Unmount the SD card:</p><pre><code>sync
+</code></pre>
+
+<p>Unmount the SD card:</p>
+
+<pre><code>sync
 umount /mnt/sdX2
-</code></pre><p>Connect USB-SERIAL-CABLE-F to UEXT Tx.Rx and GND, or connect a HDMI screen. Put the SD-card in A10-OLinuXino-Lime and apply 5V power, you should see Uboot and then Kernel messages on the console.</p><p>The default username/password is : root / olimex</p></div><hr/>Tags: <a class="link" href="../tags/allwinner.html">allwinner,</a><a class="link" href="../tags/arm.html">arm,</a><a class="link" href="../tags/debian.html">debian,</a><a class="link" href="../tags/gpio.html">gpio,</a><a class="link" href="../tags/minimal.html">minimal,</a><a class="link" href="../tags/olimex.html">olimex,</a><a class="link" href="../tags/olinuxino.html">olinuxino,</a><a class="link" href="../tags/raspberry-pi.html">raspberry-pi,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+</code></pre>
+
+<p>Connect USB-SERIAL-CABLE-F to UEXT Tx.Rx and GND, or connect a HDMI screen. Put the SD-card in A10-OLinuXino-Lime and apply 5V power, you should see Uboot and then Kernel messages on the console.</p>
+
+<p>The default username/password is : root / olimex</p>
+</div><hr>Tags: <a href="../tags/allwinner.html" class="link">allwinner, </a><a href="../tags/arm.html" class="link">arm, </a><a href="../tags/debian.html" class="link">debian, </a><a href="../tags/gpio.html" class="link">gpio, </a><a href="../tags/minimal.html" class="link">minimal, </a><a href="../tags/olimex.html" class="link">olimex, </a><a href="../tags/olinuxino.html" class="link">olinuxino, </a><a href="../tags/raspberry-pi.html" class="link">raspberry-pi, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -100,4 +425,8 @@ umount /mnt/sdX2
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    

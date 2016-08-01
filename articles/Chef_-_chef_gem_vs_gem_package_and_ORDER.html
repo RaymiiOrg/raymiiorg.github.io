@@ -1,19 +1,112 @@
-<!DOCTYPE html><html lang="en"><head><title>Chef: chef_gem vs gem_package and ORDER - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Chef: chef_gem vs gem_package and ORDER - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
-                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Chef: chef_gem vs gem_package and ORDER</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../articles/index.html">Articles</a></li><li><a class="link" href="Chef_-_chef_gem_vs_gem_package_and_ORDER.html">Chef: chef_gem vs gem_package and ORDER</a></li></ul><p><small>01-04-2014</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Chef: chef_gem vs gem_package and ORDER</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Chef_-_chef_gem_vs_gem_package_and_ORDER.html" class="link">Chef: chef_gem vs gem_package and ORDER</a></li></ul><p><small>01-04-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
-                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>One of my clients use <a href="http://www.getchef.com/">Chef</a> and have a cookbook which builds a postgresql database node. It should install the <a href="https://rubygems.org/gems/pg">pg</a> ruby gem. However, it uses the chef_gem resource to do that, and it keeps failing.</p><p>They use a <a href="http://support.rightscale.com/12-Guides/Chef_Cookbooks_Developer_Guide/04-Developer/06-Development_Resources/Chef_Cookbook_Design_Patterns/Wrapper_Cookbook_Pattern">wrapper-cookbook</a> around the regular <a href="http://community.opscode.com/cookbooks/postgresql">postgresql</a> cookbook. The wrapper cookbook installs some extra packages required by their HA setup, plus it places a few other templates than the regular templates.</p><p>First they pin on a specific postgresql version and remove any other version:</p><pre><code>package "postgresql-client-common" do
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>One of my clients use <a href="http://www.getchef.com/">Chef</a> and have a cookbook which builds a postgresql database node. It should install the <a href="https://rubygems.org/gems/pg">pg</a> ruby gem. However, it uses the chef_gem resource to do that, and it keeps failing.</p>
+
+<p>They use a <a href="http://support.rightscale.com/12-Guides/Chef_Cookbooks_Developer_Guide/04-Developer/06-Development_Resources/Chef_Cookbook_Design_Patterns/Wrapper_Cookbook_Pattern">wrapper-cookbook</a> around the regular <a href="http://community.opscode.com/cookbooks/postgresql">postgresql</a> cookbook. The wrapper cookbook installs some extra packages required by their HA setup, plus it places a few other templates than the regular templates.</p>
+
+<p>First they pin on a specific postgresql version and remove any other version:</p>
+
+<pre><code>package &quot;postgresql-client-common&quot; do
   action :purge
-  not_if "psql --version | grep 9.1"
+  not_if &quot;psql --version | grep 9.1&quot;
 end
-</code></pre><p>The postgresql apt-repository is enabled:</p><pre><code>include_recipe 'postgresql::apt_pgdg_postgresql'
-</code></pre><p>The <code>postgresql::server</code> recipe is included:</p><pre><code>include_recipe "postgresql::server"
-</code></pre><p>Then a few templates from the postgresql cookbook are overwritten by templates from the wrapper-cookbook:</p><pre><code>r = resources(:template =&gt; "#{node['postgresql']['dir']}/pg_hba.conf")
-r.source "pg_hba.conf.erb"
-r.cookbook "wrapper-postgresql"
-</code></pre><p>This goes on for a few templates and files. Then the culprit comes along:</p><pre><code>chef_gem "pg"
-</code></pre><p>Now what we want to happen is that first the postgresql apt-repository is enabled. Then the correct packages are installed. This includes the <code>libpq-dev</code> package. This is installed in the regular postgres cookbook.</p><p>This cookbook however, on a new node, fails with the following error messages:</p><pre><code>================================================================================
-Error executing action `install` on resource 'chef_gem[pg]'
+</code></pre>
+
+<p>The postgresql apt-repository is enabled:</p>
+
+<pre><code>include_recipe &#39;postgresql::apt_pgdg_postgresql&#39;
+</code></pre>
+
+<p>The <code>postgresql::server</code> recipe is included:</p>
+
+<pre><code>include_recipe &quot;postgresql::server&quot;
+</code></pre>
+
+<p>Then a few templates from the postgresql cookbook are overwritten by templates from the wrapper-cookbook:</p>
+
+<pre><code>r = resources(:template =&gt; &quot;#{node[&#39;postgresql&#39;][&#39;dir&#39;]}/pg_hba.conf&quot;)
+r.source &quot;pg_hba.conf.erb&quot;
+r.cookbook &quot;wrapper-postgresql&quot;
+</code></pre>
+
+<p>This goes on for a few templates and files. Then the culprit comes along:</p>
+
+<pre><code>chef_gem &quot;pg&quot;
+</code></pre>
+
+<p>Now what we want to happen is that first the postgresql apt-repository is enabled. Then the correct packages are installed. This includes the <code>libpq-dev</code> package. This is installed in the regular postgres cookbook.</p>
+
+<p>This cookbook however, on a new node, fails with the following error messages:</p>
+
+<pre><code>================================================================================
+Error executing action `install` on resource &#39;chef_gem[pg]&#39;
 ================================================================================
 
 Gem::Installer::ExtensionBuildError
@@ -26,11 +119,43 @@ No pg_config... trying anyway. If building fails, please try again with
  --with-pg-config=/path/to/pg_config
 checking for libpq-fe.h... no
 [...]
-</code></pre><p>This is before any of the other things from the run list (other roles etc) run. Just boom, right away, it fails.</p><p>At first I thought it had something to do with <code>chef_gem</code> being <a href="https://raymii.org/s/tutorials/Chef_include_recipe_only_if_not_if.html">a method instead of a resource</a> but that is not the case. On the <a href="http://docs.opscode.com/resource_chef_gem.html">chef_gem documentation</a> we read the following:</p><pre><code>The chef_gem and gem_package resources are both used to install Ruby gems. For any machine on which the chef-client is installed, there are two instances of Ruby. One is the standard, system-wide instance of Ruby and the other is a dedicated instance that is available only to the chef-client. Use the chef_gem resource to install gems into the instance of Ruby that is dedicated to the chef-client. Use the gem_package resource to install all other gems (i.e. install gems system-wide).
-</code></pre><p>And, more important for this problem:</p><pre><code>The chef_gem resource works with all of the same attributes and options as the gem_package resource, but does not accept the gem_binary attribute because it always uses the CurrentGemEnvironment under which the chef-client is running. In addition to performing actions similar to the gem_package resource, the chef_gem resource does the following:
+</code></pre>
+
+<p>This is before any of the other things from the run list (other roles etc) run. Just boom, right away, it fails.</p>
+
+<p>At first I thought it had something to do with <code>chef_gem</code> being <a href="https://raymii.org/s/tutorials/Chef_include_recipe_only_if_not_if.html">a method instead of a resource</a> but that is not the case. On the <a href="http://docs.opscode.com/resource_chef_gem.html">chef_gem documentation</a> we read the following:</p>
+
+<pre><code>The chef_gem and gem_package resources are both used to install Ruby gems. For any machine on which the chef-client is installed, there are two instances of Ruby. One is the standard, system-wide instance of Ruby and the other is a dedicated instance that is available only to the chef-client. Use the chef_gem resource to install gems into the instance of Ruby that is dedicated to the chef-client. Use the gem_package resource to install all other gems (i.e. install gems system-wide).
+</code></pre>
+
+<p>And, more important for this problem:</p>
+
+<pre><code>The chef_gem resource works with all of the same attributes and options as the gem_package resource, but does not accept the gem_binary attribute because it always uses the CurrentGemEnvironment under which the chef-client is running. In addition to performing actions similar to the gem_package resource, the chef_gem resource does the following:
 
     Runs its actions immediately, before convergence, allowing a gem to be used in a recipe immediately after it is installed
-</code></pre><p>So, this resource is executed before anything else. Exactly the problem we have. It cannot install because the needed packages are not there yet and those will never be installed because of this.</p><p>I asked around and it turns out the <code>pg</code> gem is not needed in the Ruby instance dedicated to chef-client, but system wide. There is only one ruby and they install <code>chef-client</code> via <code>gem install chef-client</code> with that ruby, so this has always worked worked for them. Therefore, changing it to <code>gem_package</code> should also have the same result.</p><p>It also turns out the other admins just did some things manually because they did not get time from management to fix this issue...</p><p>In the end I changed the <code>chef_gem</code> to <code>gem_package</code>. The cookbook now works on a new node without this issue.</p></div><hr/>Tags: <a class="link" href="../tags/chef.html">chef,</a><a class="link" href="../tags/deployment.html">deployment,</a><a class="link" href="../tags/devops.html">devops,</a><a class="link" href="../tags/gem.html">gem,</a><a class="link" href="../tags/postgresql.html">postgresql,</a><a class="link" href="../tags/ruby.html">ruby,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+</code></pre>
+
+<p>So, this resource is executed before anything else. Exactly the problem we have. It cannot install because the needed packages are not there yet and those will never be installed because of this.</p>
+
+<p>I asked around and it turns out the <code>pg</code> gem is not needed in the Ruby instance dedicated to chef-client, but system wide. There is only one ruby and they install <code>chef-client</code> via <code>gem install chef-client</code> with that ruby, so this has always worked worked for them. Therefore, changing it to <code>gem_package</code> should also have the same result.</p>
+
+<p>It also turns out the other admins just did some things manually because they did not get time from management to fix this issue... </p>
+
+<p>In the end I changed the <code>chef_gem</code> to <code>gem_package</code>. The cookbook now works on a new node without this issue.</p>
+</div><hr>Tags: <a href="../tags/chef.html" class="link">chef, </a><a href="../tags/deployment.html" class="link">deployment, </a><a href="../tags/devops.html" class="link">devops, </a><a href="../tags/gem.html" class="link">gem, </a><a href="../tags/postgresql.html" class="link">postgresql, </a><a href="../tags/ruby.html" class="link">ruby, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -39,4 +164,8 @@ checking for libpq-fe.h... no
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    

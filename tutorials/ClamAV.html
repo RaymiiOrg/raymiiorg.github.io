@@ -1,23 +1,165 @@
-<!DOCTYPE html><html lang="en"><head><title>ClamAV installation and daily scan + report on Ubuntu - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>ClamAV installation and daily scan + report on Ubuntu - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
-                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">ClamAV installation and daily scan + report on Ubuntu</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="ClamAV.html">ClamAV installation and daily scan + report on Ubuntu</a></li></ul><p><small>01-12-2012</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>ClamAV installation and daily scan + report on Ubuntu</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="ClamAV.html" class="link">ClamAV installation and daily scan + report on Ubuntu</a></li></ul><p><small>01-12-2012</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
-                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>ClamAV is a virus scanner for Linux/Unix like systems. This tutorial will show you how to install it and how to set it up to auto-update and do a daily scan. It will only report if threats are found. It is tested on Ubuntu 10.04 and up. It also covers if, and why you might need a virus scanner for Linux/Unix. As an extra, it also covers scans for specific folders which remove infected files automatically.</p><h4>Do you need a virus scanner on Linux/Unix?</h4><p>Short answer, it depends on your situation.</p><p>Long answer:<br/> You might want to run a virus scanner on a server where files are uploaded, or where users login and manipulate files.<br/> Lets say you host a file upload site, you want to run a scan on the upload folder which auto removes infected files.<br/> It can also be that your mailserver runs Linux, but people sometimes mail executables or infected pdf files. Then you also want a scanner.<br/> Or you might run a source control server (gitolite, mercurial) where sometimes binary files are checked in. (although ClamAV might not find things in bare-git repositories, only in working directories.)</p><p>If you however only run a static HTML website, or an rsync backup server, or a Rougelike via telnet, where there are no uploads or like, you might be wasting resources.</p><p>My advice is to look at your situation and then decide if you need ClamAV, and if you only need to scan a few folders, the entire system and if you want to auto-remove the virusses or not.</p><h4>Install ClamAV</h4><p>First we update the package repository:</p><pre><code>sudo apt-get update
-</code></pre><p>Now we install the clamav scanner, the daemon and the database updater.</p><pre><code>sudo apt-get install clamav clamav-daemon clamav-freshclam
-</code></pre><p>You can also install the clamav-data package, but the clamav-freshclam package is another (easier) way to update your virus definitions.</p><p>On RHEL, CentOS or Scientific Linux, you only need to install the <code>clamav</code> package:</p><pre><code>yum install clamav
-</code></pre><h4>Update the database</h4><p>The below two commands will restart the freshclam daemon (which auto updates the database) and then does a manual update of the definitions.</p><pre><code>sudo /etc/init.d/clamav-freshclam restart
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>ClamAV is a virus scanner for Linux/Unix like systems. This tutorial will show you how to install it and how to set it up to auto-update and do a daily scan. It will only report if threats are found. It is tested on Ubuntu 10.04 and up. It also covers if, and why you might need a virus scanner for Linux/Unix. As an extra, it also covers scans for specific folders which remove infected files automatically.</p>
+
+<h4>Do you need a virus scanner on Linux/Unix?</h4>
+
+<p>Short answer, it depends on your situation.</p>
+
+<p>Long answer:<br>
+You might want to run a virus scanner on a server where files are uploaded, or where users login and manipulate files.<br>
+Lets say you host a file upload site, you want to run a scan on the upload folder which auto removes infected files.<br>
+It can also be that your mailserver runs Linux, but people sometimes mail executables or infected pdf files. Then you also want a scanner.<br>
+Or you might run a source control server (gitolite, mercurial) where sometimes binary files are checked in. (although ClamAV might not find things in bare-git repositories, only in working directories.)</p>
+
+<p>If you however only run a static HTML website, or an rsync backup server, or a Rougelike via telnet, where there are no uploads or like, you might be wasting resources.</p>
+
+<p>My advice is to look at your situation and then decide if you need ClamAV, and if you only need to scan a few folders, the entire system and if you want to auto-remove the virusses or not. </p>
+
+<h4>Install ClamAV</h4>
+
+<p>First we update the package repository:</p>
+
+<pre><code>sudo apt-get update
+</code></pre>
+
+<p>Now we install the clamav scanner, the daemon and the database updater. </p>
+
+<pre><code>sudo apt-get install clamav clamav-daemon clamav-freshclam
+</code></pre>
+
+<p>You can also install the clamav-data package, but the clamav-freshclam package is another (easier) way to update your virus definitions.</p>
+
+<p>On RHEL, CentOS or Scientific Linux, you only need to install the <code>clamav</code> package:</p>
+
+<pre><code>yum install clamav
+</code></pre>
+
+<h4>Update the database</h4>
+
+<p>The below two commands will restart the freshclam daemon (which auto updates the database) and then does a manual update of the definitions.</p>
+
+<pre><code>sudo /etc/init.d/clamav-freshclam restart
 sudo /usr/bin/freshclam
-</code></pre><h4>The daily scan</h4><p>The below cronjob will run a virus database definition update (so that the scan always has the most recent definitions) and afterwards run a full scan which will only report when there are infected files on the system. It also does not remove the infected files automatically, you have to do this manually. This way you make sure that it does not delete /bin/bash by accident.</p><pre><code>## This should be a root cronjob.
+</code></pre>
+
+<h4>The daily scan</h4>
+
+<p>The below cronjob will run a virus database definition update (so that the scan always has the most recent definitions) and afterwards run a full scan which will only report when there are infected files on the system. It also does not remove the infected files automatically, you have to do this manually. This way you make sure that it does not delete /bin/bash by accident.</p>
+
+<pre><code>## This should be a root cronjob.
 30 01 * * * /usr/bin/freshclam --quiet; /usr/bin/clamscan --recursive --no-summary --infected / 2&gt;/dev/null
-</code></pre><p>The <code>2&gt;/dev/null</code> options keeps the /proc and such access denied errors out of the report. The infected files however are still found and reported.</p><p>Also make sure that your cron is configured so that it mails you the output of the cronjobs. The manual page will help you with that.</p><p>This is how a sample email looks if you have an infection:</p><pre><code>/home/remy/eicar.zip: Eicar-Test-Signature FOUND
+</code></pre>
+
+<p>The <code>2&gt;/dev/null</code> options keeps the /proc and such access denied errors out of the report. The infected files however are still found and reported.</p>
+
+<p>Also make sure that your cron is configured so that it mails you the output of the cronjobs. The manual page will help you with that.</p>
+
+<p>This is how a sample email looks if you have an infection:</p>
+
+<pre><code>/home/remy/eicar.zip: Eicar-Test-Signature FOUND
 /home/remy/eicar.com: Eicar-Test-Signature FOUND
-</code></pre><h4>Extra: the targeted scan</h4><p>The below cronjob is an example and you should adapt it. It updates the virus definitions and scans the folder <code>/var/www/sites/uploader.com/public-html/uploads/</code> two times per hour, and if it found any files it removes them.</p><pre><code>    ## This should be a root cronjob.
+</code></pre>
+
+<h4>Extra: the targeted scan</h4>
+
+<p>The below cronjob is an example and you should adapt it. It updates the virus definitions and scans the folder <code>/var/www/sites/uploader.com/public-html/uploads/</code> two times per hour, and if it found any files it removes them. </p>
+
+<pre><code>    ## This should be a root cronjob.
     */29 * * * * /usr/bin/freshclam --quiet; /usr/bin/clamscan --recursive --no-summary --infected --remove /var/www/sites/uploader.com/public-html/uploads 2&gt;/dev/null
-</code></pre><p>This is how a sample email might look like:</p><pre><code>/var/www/sites/uploader.com/public-html/uploads/eicar.zip: Eicar-Test-Signature FOUND
+</code></pre>
+
+<p>This is how a sample email might look like:</p>
+
+<pre><code>/var/www/sites/uploader.com/public-html/uploads/eicar.zip: Eicar-Test-Signature FOUND
 /var/www/sites/uploader.com/public-html/uploads/eicar.zip: Removed.
 /var/www/sites/uploader.com/public-html/uploads/eicar.com: Eicar-Test-Signature FOUND
 /var/www/sites/uploader.com/public-html/uploads/eicar.com: Removed.
-</code></pre><p>raymii.org romeo alpha yankee mike india india dot org</p></div><hr/>Tags: <a class="link" href="../tags/anti-virus.html">anti-virus,</a><a class="link" href="../tags/clamav.html">clamav,</a><a class="link" href="../tags/malware.html">malware,</a><a class="link" href="../tags/ubuntu.html">ubuntu,</a><a class="link" href="../tags/virus.html">virus,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+</code></pre>
+
+<p>raymii.org
+romeo alpha yankee mike india india dot org</p>
+</div><hr>Tags: <a href="../tags/anti-virus.html" class="link">anti-virus, </a><a href="../tags/clamav.html" class="link">clamav, </a><a href="../tags/malware.html" class="link">malware, </a><a href="../tags/ubuntu.html" class="link">ubuntu, </a><a href="../tags/virus.html" class="link">virus, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -26,4 +168,8 @@ sudo /usr/bin/freshclam
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    

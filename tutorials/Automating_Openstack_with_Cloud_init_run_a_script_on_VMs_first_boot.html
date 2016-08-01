@@ -1,82 +1,247 @@
-<!DOCTYPE html><html lang="en"><head><title>Automating Openstack with cloud init run a script on VM's first boot - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Automating Openstack with cloud init run a script on VM's first boot - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
-                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Automating Openstack with cloud init run a script on VM's first boot</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="Automating_Openstack_with_Cloud_init_run_a_script_on_VMs_first_boot.html">Automating Openstack with cloud init run a script on VM's first boot</a></li></ul><p><small>11-03-2015</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Automating Openstack with cloud init run a script on VM's first boot</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="Automating_Openstack_with_Cloud_init_run_a_script_on_VMs_first_boot.html" class="link">Automating Openstack with cloud init run a script on VM's first boot</a></li></ul><p><small>11-03-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
-                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p><img alt="openstack" src="https://raymii.org/s/inc/img/openstack-software-diagram.png"/></p><p>This tutorial will show you how to create a VM in Openstack and execute a script at the first boot using <code>cloud-init</code>'s <code>user-data</code> feature. This way you can eliminate some more manual labor and keep a small base image, instead of requiring all kinds of specific images for specific tasks.</p><p>This tutorial will also give you a few example scripts to use with <code>cloud-init</code> and to create Openstack virtual machines from the command line.</p><p>You can see all my <a href="https://raymii.org/s/tags/openstack.html">Openstack related articles here</a>. For example, how to build <a href="https://raymii.org/s/articles/Building_HA_Clusters_With_Ansible_and_Openstack.html">an automated High Available website cluster with Ansible and Openstack</a>.</p><p>If you like this article and want to support it AND get $10 Digital Ocean credit (free VPS for 2 months), use this link to order: <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">https://www.digitalocean.com/?refcode=7435ae6b8212</a> (referral link).</p><p>For this tutorial I've used the <a href="https://cloudvps.com">CloudVPS Openstack platform</a>. It will also work with any other openstack or cloud provider/software that supports <code>cloud-init</code> and the specific <code>user_data</code> feature. If you build your own images then make sure they have <code>cloud-init</code> enabled to support this.</p><p>Note that this article is not sponsored nor endorsed by CloudVPS, nor am I speaking for or as CloudVPS.</p><h3>cloud-init</h3><p>Instead of manually creating a VM, logging in to it and executing a few commands to set it up, you can automate all these steps. The creation of the VM and the stuff you do when it is up can all be scripted. You can use a programming language like Python to do this, but simple Bash scripts also work just as well.</p><p>cloud-init is a piece of software created to help with initializing virtual machines on multiple different cloud software platforms. It is a collection of Python scripts that run on a VM's first boot.</p><p>It understands and talks to different data providers like Amazons or the Openstack metadata service.</p><p>It uses that information to, for example, set a root password, grow the root filesystem, setup an SSH key, do a callback to an URL when a VM is finished booting or execute commands at boot. All those things and many more are provided by so called cloud-init modules. Therefor it can be extended easily.</p><p>The metadata provided by the cloud provided can contain things like the VM's name, its IP addres(es), a root password or an SSH key. You can also provide your own metadata using the so called <code>user_data</code>.</p><p><code>cloud-init</code> has a nifty feature that allows us to place a script in the <code>user_data</code> which it will execute at the end of the first boot of the machine. It can be a bash script, or any other script as long as it starts with <code>#!</code>.</p><p>This tutorial was tested with <code>cloud-init</code> versions 0.7.4 up to 0.7.7. The <code>/etc/cloud/cloud.cfg</code> config file needs the following enabled:</p><pre><code>cloud_final_modules:
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p><img src="https://raymii.org/s/inc/img/openstack-software-diagram.png" alt="openstack"></p>
+
+<p>This tutorial will show you how to create a VM in Openstack and execute a script at the first boot using <code>cloud-init</code>&#39;s <code>user-data</code> feature. This way you can eliminate some more manual labor and keep a small base image, instead of requiring all kinds of specific images for specific tasks. </p>
+
+<p>This tutorial will also give you a few example scripts to use with <code>cloud-init</code> and to create Openstack virtual machines from the command line. </p>
+
+<p>You can see all my <a href="https://raymii.org/s/tags/openstack.html">Openstack related articles here</a>. For example, how to build <a href="https://raymii.org/s/articles/Building_HA_Clusters_With_Ansible_and_Openstack.html">an automated High Available website cluster with Ansible and Openstack</a>.</p>
+
+<p>If you like this article and want to support it AND get $10 Digital Ocean credit (free VPS for 2 months), use this link to order: <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">https://www.digitalocean.com/?refcode=7435ae6b8212</a> (referral link).</p>
+
+<p>For this tutorial I&#39;ve used the <a href="https://cloudvps.com">CloudVPS Openstack platform</a>. It will also work with any other openstack or cloud provider/software that supports <code>cloud-init</code> and the specific <code>user_data</code> feature. If you build your own images then make sure they have <code>cloud-init</code> enabled to support this.</p>
+
+<p>Note that this article is not sponsored nor endorsed by CloudVPS, nor am I speaking for or as CloudVPS.</p>
+
+<h3>cloud-init</h3>
+
+<p>Instead of manually creating a VM, logging in to it and executing a few commands to set it up, you can automate all these steps. The creation of the VM and the stuff you do when it is up can all be scripted. You can use a programming language like Python to do this, but simple Bash scripts also work just as well.</p>
+
+<p>cloud-init is a piece of software created to help with initializing virtual machines on multiple different cloud software platforms. It is a collection of Python scripts that run on a VM&#39;s first boot. </p>
+
+<p>It understands and talks to different data providers like Amazons or the Openstack metadata service. </p>
+
+<p>It uses that information to, for example, set a root password, grow the root filesystem, setup an SSH key, do a callback to an URL when a VM is finished booting or execute commands at boot. All those things and many more are provided by so called cloud-init modules. Therefor it can be extended easily.</p>
+
+<p>The metadata provided by the cloud provided can contain things like the VM&#39;s name, its IP addres(es), a root password or an SSH key. You can also provide your own metadata using the so called <code>user_data</code>. </p>
+
+<p><code>cloud-init</code> has a nifty feature that allows us to place a script in the <code>user_data</code> which it will execute at the end of the first boot of the machine. It can be a bash script, or any other script as long as it starts with <code>#!</code>.</p>
+
+<p>This tutorial was tested with <code>cloud-init</code> versions 0.7.4 up to 0.7.7. The <code>/etc/cloud/cloud.cfg</code> config file needs the following enabled:</p>
+
+<pre><code>cloud_final_modules:
   - scripts-user
-</code></pre><h3>Providing user_data to a new VM in Openstack</h3><p>To provide the <code>user_data</code> script to a new VM you need to place your <code>user_data</code> script in a file, in this example <code>user_data.file</code>. See below for an example script</p><p>Make sure you have the <a href="http://docs.openstack.org/user-guide/content/install_clients.html">Openstack Command Line Tools</a> installed. For convinience, also create a <code>computerc</code> file which holds your credentials and <code>source</code> it in your shell.</p><p>The parameter to supply the user data is <code>--user-data $filename</code>. To boot up a small Ubuntu machine at CloudVPS with our <code>user_data</code> file we can use this command:</p><pre><code>nova boot --image "CloudVPS Ubuntu 14.04"  --key-name $ssh_key --flavor "Standard 1" --availability-zone NL1 --user-data user_data.file "Example VPS 1"
-</code></pre><p>If you have the console of the machine open (<code>nova get-vnc-console $UUID novnc</code>) then you should see your script executed at the end of the cloud-init run at boot.</p><h3>Example user_data cloud-init script</h3><p>This is an example bash script you can push via the <code>user_data</code>. It gives you a generic idea of what can be done. You could install and setup your configuration management framework like Puppet or Chef, or just use plain commands. This example uses Ansible to deploy the imaginary Example App for your company at first boot:</p><pre><code>#!/bin/bash
+</code></pre>
+
+<h3>Providing user_data to a new VM in Openstack</h3>
+
+<p>To provide the <code>user_data</code> script to a new VM you need to place your <code>user_data</code> script in a file, in this example <code>user_data.file</code>. See below for an example script</p>
+
+<p>Make sure you have the <a href="http://docs.openstack.org/user-guide/content/install_clients.html">Openstack Command Line Tools</a> installed. For convinience, also create a <code>computerc</code> file which holds your credentials and <code>source</code> it in your shell.</p>
+
+<p>The parameter to supply the user data is <code>--user-data $filename</code>. To boot up a small Ubuntu machine at CloudVPS with our <code>user_data</code> file we can use this command:</p>
+
+<pre><code>nova boot --image &quot;CloudVPS Ubuntu 14.04&quot;  --key-name $ssh_key --flavor &quot;Standard 1&quot; --availability-zone NL1 --user-data user_data.file &quot;Example VPS 1&quot;
+</code></pre>
+
+<p>If you have the console of the machine open (<code>nova get-vnc-console $UUID novnc</code>) then you should see your script executed at the end of the cloud-init run at boot.</p>
+
+<h3>Example user_data cloud-init script</h3>
+
+<p>This is an example bash script you can push via the <code>user_data</code>. It gives you a generic idea of what can be done. You could install and setup your configuration management framework like Puppet or Chef, or just use plain commands. This example uses Ansible to deploy the imaginary Example App for your company at first boot:</p>
+
+<pre><code>#!/bin/bash
 # Example script to run at first boot via Openstack
 # using the user_data and cloud-init.
 # This example installs Ansible and deploys your 
-# org's example App.
+# org&#39;s example App.
 
-echo "userdata running on hostname: $(uname -n)"
-echo "Using pip to install Ansible"
+echo &quot;userdata running on hostname: $(uname -n)&quot;
+echo &quot;Using pip to install Ansible&quot;
 pip2 install --upgrade ansible 2&gt;&amp;1
 
-echo "Cloning repo with example code"
+echo &quot;Cloning repo with example code&quot;
 git clone https://gitlab.mycompany.org/ansible/example-app.git /tmp/app
 
 pushd /tmp/app
 ansible-playbook ./our-app.yml
 popd
 exit 0
-</code></pre><p>You can also use Python, Ruby or any of your favorite language. As long as the <code>user_data</code> starts with <code>#!</code> cloud-init will see it as a script and not as specific cloud-init modules. You do need to make sure that your base image has the interpreter installed (Python, Ruby etc.) or bootstrap that via the script.</p><p>Here is another script that installs Wordpress on CentOS, including nginx, php-fpm and mysql:</p><pre><code>#!/bin/bash
+</code></pre>
+
+<p>You can also use Python, Ruby or any of your favorite language. As long as the <code>user_data</code> starts with <code>#!</code> cloud-init will see it as a script and not as specific cloud-init modules. You do need to make sure that your base image has the interpreter installed (Python, Ruby etc.) or bootstrap that via the script.</p>
+
+<p>Here is another script that installs Wordpress on CentOS, including nginx, php-fpm and mysql:</p>
+
+<pre><code>#!/bin/bash
 # Example script to run at first boot via Openstack using the user_data and cloud-init. This example installs Wordpress, nginx, MySQL and PHP-FPM.
 # Author: Remy van Elst, https://raymii.org; License: GNU GPLv3
 
-printf "\033c" #clear screen
-VERSION="$(grep -Eo "[0-9]\.[0-9]" /etc/redhat-release | cut -d . -f 1)"
+printf &quot;\033c&quot; #clear screen
+VERSION=&quot;$(grep -Eo &quot;[0-9]\.[0-9]&quot; /etc/redhat-release | cut -d . -f 1)&quot;
 
-echo "Installing EPEL"
+echo &quot;Installing EPEL&quot;
 rpm -Uvh http://cdn.duplicity.so/utils/epel-release-${VERSION}.noarch.rpm 2&gt;&amp;1
 
-echo "Installing Ansible and Git"
+echo &quot;Installing Ansible and Git&quot;
 yum -y install ansible git gmp 2&gt;&amp;1
 
-echo "Cloning repo with Wordpress Playbook"
+echo &quot;Cloning repo with Wordpress Playbook&quot;
 git clone https://github.com/RaymiiOrg/ansible-examples.git /tmp/app 2&gt;&amp;1
 
-echo "Creating Ansible inventory file"
-echo -e "[wordpress-server]\n127.0.0.1" &gt; /tmp/app/wordpress-nginx/inventory
+echo &quot;Creating Ansible inventory file&quot;
+echo -e &quot;[wordpress-server]\n127.0.0.1&quot; &gt; /tmp/app/wordpress-nginx/inventory
 
-echo "Starting playbook"
+echo &quot;Starting playbook&quot;
 cd /tmp/app/wordpress-nginx
 ansible-playbook -i inventory ./site.yml 2&gt;&amp;1
 
 exit 0
-</code></pre><p>The repository was forked from Ansible's example repo and changed so that the <code>site.yml</code> playbook includes the <code>connection: local</code> line. That way we don't use SSH to run the playbook. It also randomly generates the database password instead of using a variable.</p><h3>Re-execute or debugging</h3><p>The script only runs at first boot of the machine via <code>cloud-init</code>. If you execute the <code>cloud-init</code> command again it will not execute the script because it already did it. Testing and debugging the script can be quite intensive if you need to boot up a machine every time.</p><p>We can however fool <code>cloud-init</code> by letting it think the machine did a fresh first boot. We need to remove the following two files:</p><pre><code>/var/lib/cloud/instances/$UUID/boot-finished
+</code></pre>
+
+<p>The repository was forked from Ansible&#39;s example repo and changed so that the <code>site.yml</code> playbook includes the <code>connection: local</code> line. That way we don&#39;t use SSH to run the playbook. It also randomly generates the database password instead of using a variable.</p>
+
+<h3>Re-execute or debugging</h3>
+
+<p>The script only runs at first boot of the machine via <code>cloud-init</code>. If you execute the <code>cloud-init</code> command again it will not execute the script because it already did it. Testing and debugging the script can be quite intensive if you need to boot up a machine every time. </p>
+
+<p>We can however fool <code>cloud-init</code> by letting it think the machine did a fresh first boot. We need to remove the following two files:</p>
+
+<pre><code>/var/lib/cloud/instances/$UUID/boot-finished
 /var/lib/cloud/instances/$UUID/sem/config_scripts_user
-</code></pre><p>Replace <code>$UUID</code> by your instance's UUID.</p><p>Execute the following command to run the cloud-init final module again:</p><pre><code>cloud-init modules --mode final
-</code></pre><p>The <code>final</code> module will execute our <code>user_data</code> script again. Before every new test run you need to remove the two files listed above.</p><p>Keep in mind as well that if you for example touch a file and run the script again, the file will still be there. Changes are persistent, build your code idempotent so that it handles that.</p><p>If you've by accident deleted to much cloud-init data you can re-initialize it with the following command:</p><pre><code>cloud-init init
-</code></pre><h3>Command Line script to create VM's</h3><p>Here is an example script you can use to create an amount of VM's using the command line. It will wait until the VM is active before creating the next one, and it passes through a <code>user_data</code> file. You can use this, for example, to easily start up 20 servers and set them up as Apache webservers to scale up when your site gets a lot of traffic and needs to scale up.</p><p>You do need to place a credentials file named <code>computerc</code> in your home folder.</p><pre><code>#!/bin/bash
-KEY="SSH Key Name"
-BOOTIMG="IMAGE UUID"
-ZONE="NL1"
-FLAVOR="Standard 1"
+</code></pre>
+
+<p>Replace <code>$UUID</code> by your instance&#39;s UUID.</p>
+
+<p>Execute the following command to run the cloud-init final module again:</p>
+
+<pre><code>cloud-init modules --mode final
+</code></pre>
+
+<p>The <code>final</code> module will execute our <code>user_data</code> script again. Before every new test run you need to remove the two files listed above.</p>
+
+<p>Keep in mind as well that if you for example touch a file and run the script again, the file will still be there. Changes are persistent, build your code idempotent so that it handles that.</p>
+
+<p>If you&#39;ve by accident deleted to much cloud-init data you can re-initialize it with the following command:</p>
+
+<pre><code>cloud-init init
+</code></pre>
+
+<h3>Command Line script to create VM&#39;s</h3>
+
+<p>Here is an example script you can use to create an amount of VM&#39;s using the command line. It will wait until the VM is active before creating the next one, and it passes through a <code>user_data</code> file. You can use this, for example, to easily start up 20 servers and set them up as Apache webservers to scale up when your site gets a lot of traffic and needs to scale up.</p>
+
+<p>You do need to place a credentials file named <code>computerc</code> in your home folder.</p>
+
+<pre><code>#!/bin/bash
+KEY=&quot;SSH Key Name&quot;
+BOOTIMG=&quot;IMAGE UUID&quot;
+ZONE=&quot;NL1&quot;
+FLAVOR=&quot;Standard 1&quot;
 
 source ~/computerc 
 
 for RUN in {1..20}; do
-    echo "Creating VM ${RUN}""
+    echo &quot;Creating VM ${RUN}&quot;&quot;
     VMUUID=$(nova boot \
-        --image "${BOOTIMG}" \
-        --flavor "${FLAVOR}" \
-        --availability-zone "${ZONE}" \
+        --image &quot;${BOOTIMG}&quot; \
+        --flavor &quot;${FLAVOR}&quot; \
+        --availability-zone &quot;${ZONE}&quot; \
         --nic net-id=00000000-0000-0000-0000-000000000000 \
-        --key-name "${KEY}" \
+        --key-name &quot;${KEY}&quot; \
         --user-data user_data.file \
-        "VPS-${RUN}-${ZONE}" | awk '/id/ {print $4}' | head -n 1);
+        &quot;VPS-${RUN}-${ZONE}&quot; | awk &#39;/id/ {print $4}&#39; | head -n 1);
 
-    until [[ "$(nova show ${VMUUID} | awk '/status/ {print $4}')" == "ACTIVE" ]]; do
+    until [[ &quot;$(nova show ${VMUUID} | awk &#39;/status/ {print $4}&#39;)&quot; == &quot;ACTIVE&quot; ]]; do
         :
     done
 
-    echo "VM ${RUN} (${VMUUID}) is active."
+    echo &quot;VM ${RUN} (${VMUUID}) is active.&quot;
 
 done
-</code></pre></div><hr/>Tags: <a class="link" href="../tags/bash.html">bash,</a><a class="link" href="../tags/cloud.html">cloud,</a><a class="link" href="../tags/cloud-init.html">cloud-init,</a><a class="link" href="../tags/nova.html">nova,</a><a class="link" href="../tags/openstack.html">openstack,</a><a class="link" href="../tags/python.html">python,</a><a class="link" href="../tags/user-data.html">user-data,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+</code></pre>
+</div><hr>Tags: <a href="../tags/bash.html" class="link">bash, </a><a href="../tags/cloud.html" class="link">cloud, </a><a href="../tags/cloud-init.html" class="link">cloud-init, </a><a href="../tags/nova.html" class="link">nova, </a><a href="../tags/openstack.html" class="link">openstack, </a><a href="../tags/python.html" class="link">python, </a><a href="../tags/user-data.html" class="link">user-data, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
     var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
     document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
     </script><script type="text/javascript">
@@ -85,4 +250,8 @@ done
     piwikTracker.trackPageView();
     piwikTracker.enableLinkTracking();
     } catch( err ) {}
-    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
