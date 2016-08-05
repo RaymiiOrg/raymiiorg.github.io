@@ -67,7 +67,7 @@
                             <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
                             </script>
-                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>This is a guide to get started with the Nitrokey HSM (or SmartCard-HSM). It covers what a HSM is and what it can be used for. It also goes over software installation and initializing the device including backups of the device and keys. Finally we do some actual crypto operatons via pkcs11, OpenSSH, Apache and OpenSSL.</p>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>This is a guide to get started with the Nitrokey HSM (or SmartCard-HSM). It covers what a HSM is and what it can be used for. It also goes over software installation and initializing the device including backups of the device and keys. Finally we do some actual crypto operatons via pkcs11, OpenSSH, Apache and OpenSSL. We also cover usage in Thunderbird (S/MIME), Elementary Files (EF), a Web cluster with Apache and mod_nss and the decryption of the keys.</p>
 
 <p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
 
@@ -1070,7 +1070,29 @@ Certificate Object, type = X.509 cert
 <p><img src="https://raymii.org/s/inc/img/hsm-icon.png"></p>
 
 <p>I&#39;ve written a seperate guide on using the HSM with Apache. Please <a href="https://raymii.org/s/articles/Nitrokey_HSM_in_Apache_with_mod_nss.html">read the full guide here</a>.</p>
-</div><hr>Tags: <a href="../tags/cryptoki.html" class="link">cryptoki, </a><a href="../tags/hsm.html" class="link">hsm, </a><a href="../tags/nitrokey.html" class="link">nitrokey, </a><a href="../tags/openssl.html" class="link">openssl, </a><a href="../tags/pkcs11.html" class="link">pkcs11, </a><a href="../tags/safenet.html" class="link">safenet, </a><a href="../tags/smartcard.html" class="link">smartcard, </a><a href="../tags/smartcard-hsm.html" class="link">smartcard-hsm, </a><div class="footer">
+
+<p>There is a different module you can use next to the OpenSC module, named <code>sc-hsm-embedded</code>. This module provides fast, read only access to the HSM, and is better suited for production use, since on a production machine you don&#39;t need to manage keys on the HSM, you do that on your offline management workstation.</p>
+
+<p>The guide for mod_nss, Apache and the read-only-module <code>sc-hsm-embedded</code> is <a href="https://raymii.org/s/articles/Use_the_Nitrokey_HSM_or_SmartCard-HSM_with_sc-hsm-embedded_mod_nss_and_Apache_read_only_module.html">on a seperate page</a> as well.</p>
+
+<h3>Decrypting the private keys of the HSM</h3>
+
+<p>This is a guide which shows you how to extract private RSA key material from the Nitrokey HSM / SmartCard-HSM using the DKEK. This way you can get the private key out of the HSM in an unencrypted form. It does require access to the HSM device, all the DKEK share and their passwords. Do note that doing this defeats the entire purpose of a HSM, namely that you never have access to the keys. In the article I&#39;ll go over some explanation why this might be a feature you need and why it might be a case of security over convinience.</p>
+
+<p>*** This is not a vulnerability, zero day or exploit. The HSM provides a way to do secure backups of private key material and we utilize that in this article. To decrypt the keys you need to have all the DKEK files used when the HSM was initialized, know all the DKEK passwords and have access to the HSM itself. **</p>
+
+<p>You can prevent decryption by not setting up a DKEK, thus using the random internal DKEK of the HSM.</p>
+
+<p>This guide is on <a href="https://raymii.org/s/articles/Decrypt_NitroKey_HSM_or_SmartCard-HSM_private_keys.html">a seperate page</a> as well.</p>
+
+<h3>Storing arbitraty data in Elementary Files (EF)</h3>
+
+<p>This is a guide which shows you how to write small elementary files to a nitrokey HSM. This can be usefull if you want to securely store data protected by a user pin. You can enter the wrong pin only three times, so offline brute forcing is out of the picture.</p>
+
+<p>You could for example, store a file in the HSM and send it via the old-fashioned mail to someone, without sending the required pin. You send that via a different channel, preferably privately in person. The other person then can read the file of the HSM using the PIN. Since you only have 3 tries for the correct PIN, you know that an offline brute force attack is not likely to happen. If you encrypted a file an placed it on a regular USB drive, the post could be intercepted and stored for offline cracking by a government agency, without you knowing it. Because the pin entries are recorded, you know immidiately when the device has been tampered with. </p>
+
+<p>This guide is on <a href="https://raymii.org/s/articles/Storing_arbitraty_data_in_the_Nitrokey_HSM.html">a seperate page</a> like the others.</p>
+</div><hr>Tags: <a href="../tags/cryptoki.html" class="link">cryptoki, </a><a href="../tags/hsm.html" class="link">hsm, </a><a href="../tags/nitrokey.html" class="link">nitrokey, </a><a href="../tags/nitrokey-hsm.html" class="link">nitrokey-hsm, </a><a href="../tags/openssl.html" class="link">openssl, </a><a href="../tags/pkcs11.html" class="link">pkcs11, </a><a href="../tags/safenet.html" class="link">safenet, </a><a href="../tags/smartcard.html" class="link">smartcard, </a><a href="../tags/smartcard-hsm.html" class="link">smartcard-hsm, </a><div class="footer">
                 <hr>
                 <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
                 <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 

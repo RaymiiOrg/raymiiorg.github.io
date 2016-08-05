@@ -107,7 +107,7 @@
 
 <h3>Introduction</h3>
 
-<p><img src="https://raymii.org/s/inc/img/sc-hsm-nitrokey.jpg"></p>
+<p><img src="https://raymii.org/s/inc/img/sc-hsm-nitrokey.jpg" height=300></p>
 
 <blockquote>
 <p>The Nitrokey HSM and the SmartCard-HSM</p>
@@ -117,7 +117,7 @@
 
 <p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
 
-<p><img src="https://raymii.org/s/inc/img/sc-hsm.jpg"></p>
+<p><img src="https://raymii.org/s/inc/img/sc-hsm.jpg" height=300></p>
 
 <blockquote>
 <p>The SmartCard-HSM</p>
@@ -129,7 +129,7 @@
 
 <h3>How many HSM&#39;s?</h3>
 
-<p><img src="https://raymii.org/s/inc/img/3hsm.jpg" width="750" height="480"></p>
+<p><img src="https://raymii.org/s/inc/img/3hsm.jpg" width="500" height="300"></p>
 
 <blockquote>
 <p>Three Nitrokey&#39;s in their bags</p>
@@ -195,7 +195,7 @@ read failed.</code> occur.</p>
 
 <p>How do you keep the HSM&#39;s apart? Well, I&#39;ve used a very high-tech solution for that, namely using three different coloured key-cords:</p>
 
-<p><img src="https://raymii.org/s/inc/img/hsmkeycord.jpg" width="750" height="480"></p>
+<p><img src="https://raymii.org/s/inc/img/hsmkeycord.jpg" height="300"></p>
 
 <p>Stickers might also be an option.</p>
 
@@ -443,7 +443,7 @@ stream {
 
 <h4><code>mod_ssl</code>. no HSM</h4>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/no-hsm-mod_ssl.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/no-hsm-mod_ssl.png" height=300></p>
 
 <p>As we can see here the 1024 bit RSA key is the fastest. 2048 bit RSA is just a tidbit slower, but still acceptable. 4096 bit RSA keys take a huge dump down in transactions and the response time and concurrency go up. </p>
 
@@ -453,7 +453,7 @@ stream {
 
 <h4>1024 bit RSA key</h4>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/1024-bit-rsa.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/1024-bit-rsa.png" height=300></p>
 
 <p>We can see that the HSM is around 8 times slower than using regular <code>mod_ssl</code>. But, we knew that already. Adding a HSM to the loadbalancer doubles the performance, and adding two HSM&#39;s to the loadbalancer triples it, as we would expect. So, going down that route, if we have 8 HSM&#39;s, it would be just as fast as regular <code>mod_ssl</code>.</p>
 
@@ -463,21 +463,21 @@ stream {
 
 <p>Here is the same data with only the HSM&#39;s so that you can see the differences better between OpenSC and sc-embedded-hsm:</p>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/1024-bit-rsa-hsm.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/1024-bit-rsa-hsm.png" height=300></p>
 
 <h4>2048 bit RSA key</h4>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/2048-bit-rsa.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/2048-bit-rsa.png" height=300></p>
 
 <p>2048 bit keys are way harder for the HSM, but not at all for regular <code>mod_ssl</code>. In this case it is about 26 times slower when using a HSM, comparing to no HSM. Here we see again that the transaction rate is doubled and trippled when adding HSM&#39;s to the cluster. The same thing here with sc-hsm-embedded, when used with 1 HSM it&#39;s slower, but when scaling up it becomes a little bit faster.</p>
 
 <p>Here is the same data with only the HSM&#39;s so that you can see the differences better between OpenSC and sc-embedded-hsm:</p>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/2048-bit-rsa-hsm.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/2048-bit-rsa-hsm.png" height=300></p>
 
 <h4>prime256v1 EC key</h4>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/prime256v1-ec.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/prime256v1-ec.png" height=300></p>
 
 <p>I think the Pi&#39;s have trouble with the prime256v1 EC key. When using just one HSM, the performance almost doubles. When we use three HSM&#39;s the performance is almost as good as with the 1024 bit RSA key. In all cases OpenSC was slower than the sc-hsm-embedded module. </p>
 
@@ -485,7 +485,7 @@ stream {
 
 <h4>Different keysizes, 1 HSM</h4>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/different-keys-hsms.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/different-keys-hsms.png" height=300></p>
 
 <p>This is an interesting one. We see that the EC prime256v1 key is almost as fast as the RSA 1024 bit key. Also, OpenSC is slower here with the EC keypair. <a href="https://security.stackexchange.com/a/78624">Most browsers</a> support prime256v1, also named NIST curve P-256. There however are some concerns <a href="https://www.nsa.gov/ia/programs/suiteb_cryptography/">since the NSA is involved</a>. Keep that in mind. Still, the fastest modern algorithm in this HSM. </p>
 
@@ -497,27 +497,27 @@ stream {
 
 <p>The burst benchmark doesn&#39;t hit the wordpress site but the small text file.</p>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/60-1024.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/60-1024.png" height=300></p>
 
 <p>The chart above is for an 1024 bit RSA key. We see that without the HSM it is the fastest, topping a whopping 7000+ transactions. Here is the picture without that, so make it more clear what the differences with HSM are.</p>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/60-1024-hsm.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/60-1024-hsm.png" height=300></p>
 
 <p>Same results as above, adding more HSM&#39;s gives better performance. Note that sc-hsm-embedded is only faster in the 3 HSM test.</p>
 
 <p>This is the score for 2048 bit keys, including the test without the HSM:</p>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/60-2048.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/60-2048.png" height=300></p>
 
 <p>Same as above, more HSM makes stuff faster, without the HSM we see an enourmus speed bump. Here&#39;s the graph without the last part:</p>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/60-2048-hsm.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/60-2048-hsm.png" height=300></p>
 
 <p>Strange, sc-embedded-hsm is only faster here with 2 HSM&#39;s and OpenSC was significantly lower with 2 HSM&#39;s. I did rone this specific test again a few times but all gave comparable results. </p>
 
 <p>Last but not least, the prime256v1 EC key. This is the only time where the HSM is faster, I suspect because it provides offloading (the Pi lacks crypto hardware?). </p>
 
-<p><img src="https://raymii.org/s/inc/img/hsm/60-prime256v1.png"></p>
+<p><img src="https://raymii.org/s/inc/img/hsm/60-prime256v1.png" height=300></p>
 
 <p>Using the HSM here almost doubles the performance, using three HSM&#39;s you get almost 6 times the performance of no HSM. I did not expect this at all, but I do find it awesome.</p>
 
@@ -3626,7 +3626,7 @@ Failed transactions:               0
 Longest transaction:            3.71
 Shortest transaction:           0.04
 </code></pre>
-</div><hr>Tags: <a href="../tags/apache.html" class="link">apache, </a><a href="../tags/cluster.html" class="link">cluster, </a><a href="../tags/cryptoki.html" class="link">cryptoki, </a><a href="../tags/haproxy.html" class="link">haproxy, </a><a href="../tags/hsm.html" class="link">hsm, </a><a href="../tags/mod_nss.html" class="link">mod_nss, </a><a href="../tags/nginx.html" class="link">nginx, </a><a href="../tags/nitrokey.html" class="link">nitrokey, </a><a href="../tags/openssl.html" class="link">openssl, </a><a href="../tags/pkcs11.html" class="link">pkcs11, </a><a href="../tags/safenet.html" class="link">safenet, </a><a href="../tags/smartcard.html" class="link">smartcard, </a><a href="../tags/smartcard-hsm.html" class="link">smartcard-hsm, </a><div class="footer">
+</div><hr>Tags: <a href="../tags/apache.html" class="link">apache, </a><a href="../tags/cluster.html" class="link">cluster, </a><a href="../tags/cryptoki.html" class="link">cryptoki, </a><a href="../tags/haproxy.html" class="link">haproxy, </a><a href="../tags/hsm.html" class="link">hsm, </a><a href="../tags/mod_nss.html" class="link">mod_nss, </a><a href="../tags/nginx.html" class="link">nginx, </a><a href="../tags/nitrokey.html" class="link">nitrokey, </a><a href="../tags/nitrokey-hsm.html" class="link">nitrokey-hsm, </a><a href="../tags/openssl.html" class="link">openssl, </a><a href="../tags/pkcs11.html" class="link">pkcs11, </a><a href="../tags/safenet.html" class="link">safenet, </a><a href="../tags/smartcard.html" class="link">smartcard, </a><a href="../tags/smartcard-hsm.html" class="link">smartcard-hsm, </a><div class="footer">
                 <hr>
                 <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
                 <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
