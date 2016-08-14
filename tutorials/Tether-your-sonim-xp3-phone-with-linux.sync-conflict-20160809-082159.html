@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="en"><head><title>Tether your Sonim XP3 phone with Linux - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Tether your Sonim XP3 phone with Linux</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="Tether-your-sonim-xp3-phone-with-linux.html">Tether your Sonim XP3 phone with Linux</a></li></ul><p><small>08-02-2011</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>This guide works for the Sonim XP3.20 Quest (Pro).<br/> I also have an Android Phone which had an option to share the Internet Connection via USB and/or Wifi.<br/> This was one of the features I missed on the Sonim. The phone itself is awesome, but that is not in the scope of this guide.<br/> It is also tested with the newer Sonim XP1300 Core. (Yes, I have three Sonim phones). Please note that some providers not allow you to tether your phones internet connection, and this may cost you a lot of money if you go over your monthly bundle. Also you need to have internet setup on your phone already. This guide was written and tested on <strong>Arch Linux with Kernel 2.6.36-ARCH</strong>, but I think it will be usable on more distributions.<br/> First install wvdial:</p><pre><code>pacman -S wvdial
+</code></pre><p>Then plugin you Sonim and see on which tty it is detected:</p><pre><code>dmesg | grep tty 
+</code></pre><p>You need to see something like this:</p><pre><code>cdc_acm 5-1:1.1: ttyACM0: USB ACM device
+usbcore: registered new interface driver cdc_acm
+cdc_acm: v0.26:USB Abstract Control Model driver for USB modems and ISDN adapters
+scsi 8:0:0:0: Direct-Access     Philips  Dev. 0 LUN 0     1.0  PQ: 0 ANSI: 0 
+</code></pre><p>Now we have the tty (/dev/ttyACM0). This is all we need for the wvdial.conf file:</p><pre><code>sudo nano /etc/wvdial.conf 
+</code></pre><p>Paste this in there:</p><pre><code>[Dialer Defaults]
+Modem = /dev/ttyACM0
+Modem Type = Analog Modem
+ISDN = 0
+Baud = 115200
+Username = tmobile
+Password = tmobile
+Init1 = ATZ
+Init2 = AT&amp;&amp;F E1 V1 X1 &amp;&amp;D2 &amp;&amp;C1 S0=0
+Dial Attempts = 1
+
+[Dialer internet]
+Phone = *99***1#
+Stupid Mode = 1
+Init3 = AT+CGDCONT=1,"IP","internet" 
+</code></pre><p>My provider is T-Mobile NL, and their APN is "internet", with login "tmobile" and password: "tmobile".</p><p>Change any of these values to your needs, look for them on your providers website. Now save with CTRL+O and quit with CTRL+X, and see if it works:</p><pre><code>sudo wvdial internet 
+</code></pre><p>Result:</p><pre><code>[remy@solaris3 ~]$ sudo wvdial internet
+--&gt; WvDial: Internet dialer version 1.61
+--&gt; Cannot get information for serial port.
+--&gt; Initializing modem.
+--&gt; Sending: ATZ
+ATZ
+OK
+--&gt; Sending: AT&amp;&amp;F E1 V1 X1 &amp;&amp;D2 &amp;&amp;C1 S0=0
+AT&amp;&amp;F E1 V1 X1 &amp;&amp;D2 &amp;&amp;C1 S0=0
+OK
+--&gt; Sending: AT+CGDCONT=1,"IP","internet"
+AT+CGDCONT=1,"IP","internet"
+OK
+--&gt; Modem initialized.
+--&gt; Sending: ATDT*99***1#
+--&gt; Waiting for carrier.
+ATDT*99***1#
+CONNECT
+~[7f]}#@!}!}!} }2}"}&amp;&amp;} }*} } }#}$@#}'}"}(}"U[03]~
+--&gt; Carrier detected.  Starting PPP immediately.
+--&gt; Starting pppd at Thu Jan 13 23:20:32 2012
+--&gt; Pid of pppd: 14319
+--&gt; Using interface ppp0
+--&gt; local  IP address 21.98.132.87
+--&gt; remote IP address 10.32.32.32
+--&gt; primary   DNS address 8.8.8.8
+--&gt; secondary DNS address 8.8.4.4 
+</code></pre><p>Bazinga! You can now surf via your Sonim phone via your 3g / 2g / egde or GSM connection. (Check via /sbin/ifconfig).</p></div><hr/>Tags: <a class="link" href="../tags/arch-linux.html">arch-linux,</a><a class="link" href="../tags/modem.html">modem,</a><a class="link" href="../tags/ppp.html">ppp,</a><a class="link" href="../tags/sonim.html">sonim,</a><a class="link" href="../tags/sonim-xp3.html">sonim-xp3,</a><a class="link" href="../tags/tether.html">tether,</a><a class="link" href="../tags/wvdial.html">wvdial,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

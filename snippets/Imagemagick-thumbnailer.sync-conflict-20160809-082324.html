@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="en"><head><title>Imagemagick thumbnailer - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Imagemagick thumbnailer</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../snippets/index.html">Snippets</a></li><li><a class="link" href="Imagemagick-thumbnailer.html">Imagemagick thumbnailer</a></li></ul><p><small>29-11-2007</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>Below you'll find the script that makes nice thumbnails from a bunch of images. I've used it on the links page on this website. (Which is not around anymore).<br/> First I made screenshots of the website's I wanted, with the firefox add-on screengrab. It also works with pictures, but then you'll have to change the png to jpg in the script. The script also makes a HTML page with a 2 collumn table witth the thumbs in it.</p><p>Make sure you have imagemagick installed:</p><pre><code>sudo apt-get install imagemagick
+</code></pre><p>or</p><pre><code>sudo pacman -S imagemagick
+</code></pre><p>The script:</p><pre><code>#####################################
+## Raymii.org Thumbr script        ##
+## Version 0.2. Just bugfixes...   ##
+#####################################
+
+#!/bin/bash
+NUMMR=1
+
+EXTENSION="jpg";
+mkdir work
+mkdir -p finished/pics 
+
+GALL=./finished/gallery.html
+rm -rf $GALL 
+echo "Made with raymii.orgs gallery thumber" &gt; $GALL 
+tabhead=" &lt;table border="0" bordercolor="0" &gt;" 
+tabfeet=" &lt;/table &gt;" 
+echo $tabhead &gt;&gt; $GALL 
+
+
+for i in *.$EXTENSION; 
+do cp -rf -v "$i" "./work/$NUMMR.$EXTENSION"; 
+
+convert ./work/$NUMMR.$EXTENSION -auto-orient 
+ -thumbnail 160x160 -unsharp 0x.5 ./work/$NUMMR.w1.png 
+
+
+convert ./work/$NUMMR.w1.png 
+ -bordercolor white -border 6 
+ -bordercolor grey60 -border 1 
+ -bordercolor none -background none 
+ ( -clone 0 -rotate `convert null: -format '%[fx:rand()*30-15]' info:` ) 
+ ( -clone 0 -rotate `convert null: -format '%[fx:rand()*30-15]' info:` ) 
+ ( -clone 0 -rotate `convert null: -format '%[fx:rand()*30-15]' info:` ) 
+ ( -clone 0 -rotate `convert null: -format '%[fx:rand()*30-15]' info:` ) 
+ -delete 0 -border 100x100 -gravity center 
+ -crop 200x200+0+0 +repage -flatten -trim +repage 
+ -background black ( +clone -shadow 60x4+4+4 ) +swap 
+ -background none -flatten 
+ "./work/$NUMMR.thumb.png" 
+
+cp ./work/$NUMMR.thumb.png ./finished/pics/$NUMMR.png
+
+evenline=" &lt;tr &gt; &lt;td &gt; &lt;a href=""&gt;&lt;img src="pics/$NUMMR.png" alt=" pic $NUMMR - made by raymii.org script" / &gt; &lt;/a&gt;&lt;/td &gt;" 
+oddline=" &lt;td &gt; &lt;a href=""&gt;&lt;img src="pics/$NUMMR.png" alt=" pic $NUMMR - made by raymii.org script" / &gt; &lt;/td &gt; &lt;/a&gt;&lt;/tr &gt;" 
+
+ slot=$(( $NUMMR % 2 )) 
+if [ $slot -eq 0 ] 
+then 
+ echo $oddline &gt;&gt; $GALL 
+else 
+ echo $evenline &gt;&gt; $GALL 
+fi 
+let "NUMMR += 1" 
+done 
+
+echo $tabfeet &gt;&gt; $GALL 
+rm -rf ./work 
+exit 0 
+</code></pre><p>The thumbing effect was copied from the example pages from imagemagick.</p></div><hr/>Tags: <a class="link" href="../tags/bash.html">bash,</a><a class="link" href="../tags/imagemagick.html">imagemagick,</a><a class="link" href="../tags/thumbnails.html">thumbnails,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

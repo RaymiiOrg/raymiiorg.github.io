@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="en"><head><title>Set up a Collectd server with web frontend - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Set up a Collectd server with web frontend</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="Collectd_server_setup_tutorial_with_web_frontend.html">Set up a Collectd server with web frontend</a></li></ul><p><small>09-04-2013</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>This tutorial shows you how to set up a collectd server. It also shows you how to set up the collectd-web frontend, an interactive gui for collectd and has it all firewalled. What is collectd? collectd gathers statistics about the system it is running on and stores this information. Those statistics can then be used to find current performance bottlenecks (i.e. performance analysis) and predict future system load (i.e. capacity planning). Or if you just want pretty graphs of your private server and are fed up with some homegrown solution you're at the right place, too ;). A collectd server is able to receive data from collectd clients.</p><p><a href="https://raymii.org/s/tutorials/Collectd_client_setup_tutorial.html">The collectd client tutorial can be found here</a> and a <a href="http://ansible.cc">Ansible</a> playbook to set this up can be found <a href="http://github.com/RaymiiOrg/ansible/">here</a></p><p>We will first set up Collectd on the server, and configure it to listen on the network. Then we will enable the web GUI, and use NGINX to reverse proxy it. <em>Collectd client configuration is not handled by this tutorial. <a href="">It is handled in this tutorial</a>.</em> This tutorial is tested on Debian 6, Debian 7, Ubuntu 10.04 and Ubuntu 12.04. However, the configuration works on any other distro.</p><h4>Installing Collectd</h4><p>First install all the required packages:</p><pre><code>sudo apt-get install collectd librrds-perl libconfig-general-perl libhtml-parser-perl libregexp-common-perl liburi-perl libjson-perl restartd python nginx
+</code></pre><p>The collectd web interface has a few perl dependencies. Restartd will be used to make sure the webinterface is running, and NGINX will be used to proxy the webinterface to the outside.</p><h4>Configuring Collectd as a network server</h4><p>Open your favorite editor and edit the <code>/etc/collectd/collectd.conf</code> file. Read it, then remove it all and make sure it looks like the below config file:</p><pre><code>## /etc/collectd/collectd.conf 
+
+Hostname $HOSTNAME$
+FQDNLookup false
+## This can be higher if you have a more powerfull box
+Interval 30
+## This can be higher if you have a more powerfull box
+ReadThreads 1
+LoadPlugin syslog
+&lt;Plugin syslog&gt;
+        LogLevel info
+&lt;/Plugin&gt;
+
+LoadPlugin cpu
+LoadPlugin df
+LoadPlugin disk
+LoadPlugin entropy
+LoadPlugin interface
+LoadPlugin irq
+LoadPlugin load
+LoadPlugin memory
+LoadPlugin processes
+LoadPlugin rrdtool
+LoadPlugin swap
+LoadPlugin users
+LoadPlugin network
+
+## Server config
+&lt;Plugin "network"&gt;
+  # Can also be "*" "25826" to listen on 0.0.0.0
+  Listen "$EXTERNAL_IPV4$" "25826"
+  Listen "$EXTERNAL_IPV6$" "25826"
+  ReportStats true
+  SecurityLevel None 
+&lt;/Plugin&gt;
+
+## Extra Plugins
+## remove to disable
+LoadPlugin nginx
+LoadPlugin iptables
+LoadPlugin uptime
+LoadPlugin dns
+LoadPlugin ping
+
+
+&lt;Plugin rrdtool&gt;
+        DataDir "/var/lib/collectd/rrd"
+&lt;/Plugin&gt;
+
+Include "/etc/collectd/filters.conf"
+Include "/etc/collectd/plugins.conf"
+Include "/etc/collectd/thresholds.conf"
+</code></pre><p>The configuration file is relatively simple. Make sure to replace $VARIABLE$ by the correct on for your server. You load plugins via <code>"LoadPlugin $name"</code>. The network part is important, this defines the server. Collectd supports both IPv4 and IPv6, I have a few IPv6 IP's in the listen part, and "0.0.0.0" as IPv4 address. <em>Make sure the file has a blank newline at the end. If it has not, collectd will fail to start/run correctly</em>.</p><h4>Configure collectd plugins</h4><p>Now create the following file: <code>/etc/collectd/plugins.conf</code>, it doesn't exist by default. This will house the plugin config. Add the following content to it, but make sure it matches your LoadPlugin settings above. If you don't have the ping plugin, you also don't need the config for it.</p><pre><code>## /etc/collectd/plugins.conf 
+
+## Static Plugins (every host has them)
+&lt;Plugin swap&gt;
+       ReportByDevice false
+&lt;/Plugin&gt;
+
+
+## Dynamic Plugins (loaded by Ansible based on options)
+&lt;Plugin nginx&gt;
+       URL "http://127.0.0.1/nginx_status"
+&lt;/Plugin&gt;
+
+&lt;Plugin ntpd&gt;
+       Host "localhost"
+       Port 123
+       ReverseLookups false
+&lt;/Plugin&gt;
+
+&lt;Plugin ping&gt;
+       Host "google.com"
+&lt;/Plugin&gt;
+
+&lt;Plugin sensors&gt;
+       SensorConfigFile "/etc/sensors3.conf"
+       Sensor "it8712-isa-0290/temperature-temp1"
+       Sensor "it8712-isa-0290/fanspeed-fan3"
+       Sensor "it8712-isa-0290/voltage-in8"
+       IgnoreSelected false
+&lt;/Plugin&gt;
+
+&lt;Plugin write_graphite&gt;
+       &lt;Carbon&gt;
+               Host "$GRAPHITE_HOST$"
+               Port "2003"
+               Prefix "collectd"
+               Postfix "collectd"
+               StoreRates false
+               AlwaysAppendDS false
+               EscapeCharacter "_"
+       &lt;/Carbon&gt;
+&lt;/Plugin&gt;
+</code></pre><p>Collectd server is now set up in "server" mode. To test it we restart the service:</p><pre><code>/etc/init.d/collectd restart
+</code></pre><p>And then check the <code>/var/lib/collectd/rrd/</code> folder and you should see some files and folders (rrd libraries). If not then your collectd is setup wrong, see syslog for more info.</p><h4>Set up the web frontend</h4><p>Clone the git repository to your home directory, or any other folder, but remember the path:</p><pre><code>git://github.com/RaymiiOrg/collectd-web.git
+</code></pre><p>Move into the folder and start the app:</p><pre><code>cd collectd-web
+python runserver.py
+</code></pre><p>You should now be able to go to "localhost:8888" on the host and see the web interface. If you need to test it from the outside, use an ssh tunnel:</p><pre><code>ssh -t -t -L 8888:localhost:8888 USER@SERVER.COM
+</code></pre><p>You can now view the app in your local web browser via <code>http://localhost:8888</code></p><h4>Set up restartd</h4><p>We will use restartd to make sure the app works even after reboot or when it crashes. This could also be done with a nice init script, but this works the easiest way.</p><p>Edit <code>/etc/restartd.conf</code> and make sure it has the following in it:</p><pre><code>collectd-web ".*runserver.py" "su $USER -l -c 'pushd /home/$USER/collectd-web/ &amp;amp;&amp;amp; /usr/bin/python /home/$USER/collectd-web/runserver.py' &gt;&gt; /var/log/$USER-collectd-server.log" "/bin/echo 'collectd-server running' &gt;&gt; /var/log/$USER-collectd-server.log"
+</code></pre><p>Make sure you change $USER to the username which has the application, and check if the paths are correct. If so then restart restartd:</p><pre><code>/etc/init.d/restartd restart
+</code></pre><p>(Funny isn't that? Restarting restartd?)</p><h4>Use NGINX as a reverse proxy</h4><p>If you want to make your collectd publicly available the you should follow this part. If you don't want that and you find the SSH port forwarding tunnel works for you, then use that.</p><p>Add the following to your NGINX configuration to set it up as reverse proxy for the collectd server:</p><h1>It should be in a server {} block.</h1><pre><code>location /collectd {
+    rewrite ^/collectd(/.*)$ $1 break;
+    proxy_pass  http://127.0.0.1:8888/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_redirect    off;
+}
+</code></pre><p>Restart NGINX:</p><pre><code>/etc/init.d/nginx configtest
+/etc/init.d/nginx restart
+</code></pre><p>Now you can reach the collectd at http://your-server/collectd.</p><h4>Configuring the firewall</h4><p>You should only allow hosts you set up to connect and send data to collectd. Collectd supports authentication and singing, but I've had performance issues with that on &lt;512MB VPS servers, so that's why I firewall. The following <code>iptables</code> and <code>ip6tables</code> rules should be added for all the hosts, so change the IP address every time:</p><pre><code>/sbin/iptables -A INPUT -p udp -s 1.2.3.4 --dport 25826 -j ACCEPT
+/sbin/ip6tables -A INPUT -p udp -s fe80::feda:6cc1 --dport 25826 -j ACCEPT
+</code></pre><p>If you have set up all the collectd client IP addresses in iptables, close the gate:</p><pre><code>/sbin/iptables -A INPUT -p -udp --dport 25826 -j REJECT --reject-with udp-reset
+/sbin/ip6tables -A INPUT -p -udp --dport 25826 -j REJECT --reject-with udp-reset
+</code></pre><p>Now you have a fully working collectd server set up. <a href="https://raymii.org/s/tutorials/Collectd_client_setup_tutorial.html">The collectd client tutorial can be found here</a>, and a <a href="http://ansible.cc">Ansible</a> playbook to set this up can be found <a href="http://github.com/RaymiiOrg/ansible/">here</a></p></div><hr/>Tags: <a class="link" href="../tags/collectd.html">collectd,</a><a class="link" href="../tags/collectd-web.html">collectd-web,</a><a class="link" href="../tags/monitoring.html">monitoring,</a><a class="link" href="../tags/munin.html">munin,</a><a class="link" href="../tags/nginx.html">nginx,</a><a class="link" href="../tags/restartd.html">restartd,</a><a class="link" href="../tags/rrd.html">rrd,</a><a class="link" href="../tags/rrdtool.html">rrdtool,</a><a class="link" href="../tags/statistics.html">statistics,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

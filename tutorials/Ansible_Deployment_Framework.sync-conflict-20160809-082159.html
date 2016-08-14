@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="en"><head><title>Ansible - pure ssh based configuration management and deployment - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Ansible - pure ssh based configuration management and deployment</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../tutorials/index.html">Tutorials</a></li><li><a class="link" href="Ansible_Deployment_Framework.html">Ansible - pure ssh based configuration management and deployment</a></li></ul><p><small>09-03-2013</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>Ansible is a radically simple model-driven configuration management, deployment, and command execution framework. Other tools in this space have been too complicated for too long, require too much bootstrapping, and have too much learning curve. By comparison, Ansible is dead simple and painless to extend. Puppet and Chef have about 60k lines of code. Ansibles core is a little over 2000 lines.</p><h4>How do I use Ansible</h4><p>I used chef to deploy and manage all my vps servers which host the cluster on which raymii.org is hosted. I've written a chef-bootstrap script to make sure all the packages to build and compile rvm, ruby and chef are installed, and I've got my entire cluster in chef cookbooks. It works well, but it is bloated. It requires ruby on the server nodes, and that sometimes gives problems on the vps servers I have, since none of them have more than 128MB ram.</p><p>I discovered Ansible via reddit, and I'm sold. I've converted the scripts I used with chef to ansible format, and not only are they shorter, the biggest advantage is that Ansible does not require ruby on the host. I can start with a newly installed vps with ssh installed. Nothing more.</p><p><em>Update 2013-03-09</em> I've also contributed a few pieces of code to Ansible, namely for the apt and yum modules. It is such a great project!</p><p><a href="http://ansible.github.com/">You can find more about Ansible on their website</a>.</p><p>Below I'll explain how to install and setup ansible (on debian 6), and I'll give some examples on how to use it.</p><h3>Install ansible</h3><pre><code>git clone git://github.com/ansible/ansible.git
+cd ./ansible
+sudo make install
+</code></pre><h4>You might need some python modules</h4><pre><code>sudo easy_install jinja2 
+sudo easy_install pyyaml
+sudo easy_install paramiko
+</code></pre><h4>Add localhost to test</h4><pre><code>source ./hacking/env-setup
+echo "127.0.0.1" &gt; ~/ansible_hosts
+export ANSIBLE_HOSTS=~/ansible_hosts
+</code></pre><h4>Setup ssh-agent</h4><pre><code>ssh-agent bash
+ssh-add ~/.ssh/id_rsa
+</code></pre><h4>Add servers/hosts</h4><p>Edit the <code>~/ansible_hosts</code> file:</p><pre><code>[spcs]
+vps1.sparklingclouds.nl:2222
+vps3.sparklingclouds.nl:2222
+vps5.sparklingclouds.nl:2222
+
+[raymii]
+raymii.nl:7777
+ssh.raymii.org:7777
+
+[hostedpiwik]
+vps7.sparklingclouds.nl:2233
+vps17.sparklingclouds.nl:2222
+
+[z1s.org]
+vps21.sparklingclouds.nl:2222
+</code></pre><h5>Make sure to add the ssh-key to the host</h5><pre><code>ssh-copy-id -i ~/.ssh/id_rsa.pub '-p 2222 vps3.sparklingclouds.nl'    
+</code></pre><h4>Test if it works</h4><pre><code> ansible all -m ping
+
+
+vps1.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps.raymii.org | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps3.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps5.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps6.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps17.sparklingclouds.nl | success &gt;&gt; {
+"ping": "pong"
+}
+
+vps7.sparklingclouds.nl | FAILED =&gt; FAILED: timed out
+</code></pre><p>It is working. Server vps7 is down, so it reports it correct.</p><h3>Examples</h3><h6>Get external IP of hosts in groups "nodes" and "master"</h6><pre><code>ansible nodes:master -a "wget -qO - http://ifconfig.me/ip" -f 10     
+
+vps8.sparklingclouds.nl | success | rc=0 &gt;&gt;
+84.200.77.167
+
+vps11.sparklingclouds.nl | success | rc=0 &gt;&gt;
+192.71.245.64
+
+[...]
+</code></pre><h6>Install a package on all hosts in group "nodes" using apt</h6><pre><code>ansible nodes -m apt -a "pkg=nano state=latest"
+
+vps11.sparklingclouds.nl | FAILED &gt;&gt; {
+    "failed": true, 
+    "msg": "Could not import python modules: apt, apt_pkg. Please install python-apt package."
+}
+
+vps1.sparklingclouds.nl | success &gt;&gt; {
+    "changed": false
+}    
+</code></pre><h6>Fix the above error</h6><p>Install package python-apt manually using the "apt-get -y install python-apt" command. Run it via sudo (-s) as user remy (-u remy) and ask me for the sudo password (-K)</p><pre><code>ansible -v vps11.sparklingclouds.nl -a "apt-get -y install python-apt" -f 10 -u remy -s -K
+
+sudo password: 
+vps11.sparklingclouds.nl | success | rc=0 &gt;&gt;
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following extra packages will be installed:
+iso-codes python-apt-common 
+[...]
+Setting up python-apt-common (0.7.100.1+squeeze1) ...
+Setting up python-apt (0.7.100.1+squeeze1) ...
+Setting up iso-codes (3.23-1) ...
+</code></pre><h3>My Playbooks</h3><p><a href="https://github.com/RaymiiOrg/ansible">I've got my playbooks on my github account. You can see them and use them as reference, and if you want, improve them.</a>.</p><h4>Playbook tips</h4><p>Get the network inteface (eth0, venet0) in a value (item [0] is lo):</p><pre><code>vars:
+  interface: ${ansible_interfaces[1]}
+</code></pre><p>Variables with quotes:</p><pre><code>vars:
+  compress: '( "application/x-javascript", "text/css", "text/html", "text/plain" )'
+</code></pre><p>Result of a command in a variable:</p><pre><code>vars:
+  date: $PIPE(date)
+  hard_command: $PIPE("this_is_a_long_command | which gets piped | and grepped")
+</code></pre><p>Running on CentOS and Debian and have a yum and an apt statement with an if? Use the pkg_mgr variable:</p><pre><code>vars:
+  pkg_mgr: ${ansible_pkg_mgr}
+
+tasks:
+  - name: Install vim and git with ${pkg_mgr}
+    action: $pkg_mgr name=$item state=latest
+    with_items:
+      - vim
+      - git
+</code></pre><p>Have special IPv6 config? Or want general if execution based on variables? Define a variable (this is in the ansible_hosts file)</p><pre><code>vps5.sparklingclouds.nl:444 ipv6=True
+vps6.sparklingclouds.nl:444 ipv6=True
+vps12.sparklingclouds.nl:444 
+vps13.sparklingclouds.nl:444 
+</code></pre><p>Now in a template (example for nginx):</p><pre><code>{% if ipv6 == "True" %}
+  listen [::]:80 default_server; # ipv6only=on;  
+{% else %}
+  listen 80 default_server;
+{% endif %}
+</code></pre><p>This makes sure nginx runs on non-ipv6 nodes.</p></div><hr/>Tags: <a class="link" href="../tags/ansible.html">ansible,</a><a class="link" href="../tags/chef.html">chef,</a><a class="link" href="../tags/configuration-management.html">configuration-management,</a><a class="link" href="../tags/deployment.html">deployment,</a><a class="link" href="../tags/devops.html">devops,</a><a class="link" href="../tags/featured-one.html">featured-one,</a><a class="link" href="../tags/puppet.html">puppet,</a><a class="link" href="../tags/python.html">python,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

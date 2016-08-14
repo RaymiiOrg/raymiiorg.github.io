@@ -1,0 +1,258 @@
+<!-- nominify -->
+
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Storing arbitraty data in the Nitrokey HSM/SmartCard-HSM with Elementary Files (EF) - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Storing arbitraty data in the Nitrokey HSM/SmartCard-HSM with Elementary Files (EF)</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Storing_arbitraty_data_in_the_Nitrokey_HSM.html" class="link">Storing arbitraty data in the Nitrokey HSM/SmartCard-HSM with Elementary Files (EF)</a></li></ul><p><small>17-07-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p><img src="https://raymii.org/s/inc/img/3hsm.jpg" width="750" height="480"></p>
+
+<blockquote>
+<p>Three Nitrokey&#39;s in their bags</p>
+</blockquote>
+
+<p>This is a guide which shows you how to write small elementary files to a nitrokey HSM. This can be usefull if you want to securely store data protected by a user pin. You can enter the wrong pin only three times, so offline brute forcing is out of the picture.</p>
+
+<h3>Introduction</h3>
+
+<p>The <a href="http://nitrokey.com">Nitrokey HSM</a> is an open hardware and open software device. It is a USB version of the <a href="http://www.smartcard-hsm.com/">SmartCard-HSM</a>. Both the <a href="http://www.smartcard-hsm.com/opensource.html">SmartCard-HSM</a> as the <a href="https://github.com/nitrokey">Nitrokey HSM</a> have sources available and are fully supported by the <a href="https://github.com/OpenSC/OpenSC/wiki/SmartCardHSM">OpenSC</a> project.</p>
+
+<p>I have multiple <a href="https://raymii.org/s/articles/Get_Started_With_The_Nitrokey_HSM.html">articles on</a> the <a href="https://raymii.org/s/articles/Nitrokey_HSM_in_Apache_with_mod_nss.html">Nitrokey HSM/SmartCard-HSM</a>. I also have a lot of professional experience with large expensive HSM hardware. </p>
+
+<p>If you want to know more on the Nitrokey HSM then please read the <a href="https://raymii.org/s/articles/Get_Started_With_The_Nitrokey_HSM.html">getting started articles</a>. </p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
+
+<p>You could for example, store a file in the HSM and send it via the old-fashioned mail to someone, without sending the required pin. You send that via a different channel, preferably privately in person. The other person then can read the file of the HSM using the PIN. Since you only have 3 tries for the correct PIN, you know that an offline brute force attack is not likely to happen. If you encrypted a file an placed it on a regular USB drive, the post could be intercepted and stored for offline cracking by a government agency, without you knowing it. Because the pin entries are recorded, you know immidiately when the device has been tampered with. </p>
+
+<p>THe documentation states that for different PIN lengths there are different retry counters:</p>
+
+<ul>
+<li>The SmartCard-HSM enforces a retry counter &lt;= 3 for PIN length 6</li>
+<li>The SmartCard-HSM enforces a retry counter &lt;= 5 for PIN length 7</li>
+<li>The SmartCard-HSM enforces a retry counter &lt;= 10 for PIN length larger than 7</li>
+</ul>
+
+<p>The Nitrokey HSM/SmartCard-HSM implements a smartcard over USB. They allow, next to certificates, private keys and public keys, also arbitrary data to be stored in so called <a href="http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-4_5_basic_organizations.aspx#chap5_1_3">elementary files (EF)</a>.</p>
+
+<p>Do note that the filesize is limited and this is not meant to store your photo collection. At the end of the page the exact filesize limit is specified for the Nitrokey HSM/SmartCard-HSM.</p>
+
+<p>I will be using a test file, 16 bytes long, containing the line <code>Remy is awesome</code>.</p>
+
+<h3>Writing files to the HSM</h3>
+
+<p>Using the <code>pkcs11-tool</code> we can write data to the HSM:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --write-object ~/tmp/hsm/smallfile --type data --id 5 --label &#39;data2&#39;
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 0 with a present token (0x0)
+Created Data Object:
+Data object 26411536
+  label:          &#39;data2&#39;
+  application:    &#39;data2&#39;
+  app_id:         &lt;empty&gt;
+  flags:           modifiable
+</code></pre>
+
+<p>Make sure to specify a <code>--label</code>, otherwise you cannot access it later on. (You can, the label will be empty (<code>&#39;&#39;</code>) but just set a label.)</p>
+
+<p>Set the <code>--private</code> flag when writing to make sure you need to login first before getting access to the stored data:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --write-object ~/tmp/hsm/smallfile --type data --id 5 --label &#39;data2&#39; --private
+</code></pre>
+
+<p>Otherwise the data will be accessible to everone that has access to the device.</p>
+
+<h3>Viewing the data</h3>
+
+<p>Both the <code>pkcs15-tool</code> and the <code>pkcs11-tool</code> can be used to view the data. The <code>pkcs11-tool</code> is the most convinient way:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --read-object --type data --label &#39;data2&#39;
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 0 with a present token (0x0)
+Remy is awesome
+</code></pre>
+
+<p>Using <code>pkcs15-tool</code> gives you the HEX output:</p>
+
+<pre><code>pkcs15-tool --dump
+Data object &#39;data&#39;
+  applicationName: data
+  Path:            e82b0601040181c31f0201::cf00
+  Data (16 bytes): 52656D7920697320617765736F6D650A
+</code></pre>
+
+<h4>PKCS#15 HEX to ASCII</h4>
+
+<p><code>pkcs15-tool</code> can specifically read the data object but it dumps the data in HEX:</p>
+
+<pre><code>pkcs15-tool --read-data-object data 
+</code></pre>
+
+<p>Output</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Data Object (16 bytes): &lt; 52 65 6D 79 20 69 73 20 61 77 65 73 6F 6D 65 0A &gt;
+</code></pre>
+
+<p>If you&#39;ve set the private flag you will need to enter the pin:</p>
+
+<pre><code>$ pkcs15-tool --read-data-object data2
+Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Please enter PIN [UserPIN]: 
+Data Object (16 bytes): &lt; 52 65 6D 79 20 69 73 20 61 77 65 73 6F 6D 65 0A &gt;
+</code></pre>
+
+<p>This data can be converted to ascii with the <code>xxd</code> command:</p>
+
+<pre><code>$ echo &#39;52 65 6D 79 20 69 73 20 61 77 65 73 6F 6D 65 0A&#39; |  xxd -r
+emy is awesome
+</code></pre>
+
+<p>But there is data missing here. As the manual states, (<code>SmartCard-HSM, AGD User Manual for Version V2.3</code> section 5.2.2 <code>Read binary</code>):</p>
+
+<pre><code>There is a known incompatibility with the READ BINARY variant defined in [ISO7816-4]:The SmartCard-HSM returns the raw data contained in the EF and does not prefix a tag 53 and the length.
+</code></pre>
+
+<p>By prefixing the data returned with <code>00</code> we get the full string back:</p>
+
+<pre><code>$ echo &#39;00 52 65 6D 79 20 69 73 20 61 77 65 73 6F 6D 65 0A&#39; |  xxd -r
+Remy is awesome
+</code></pre>
+
+<p>Here is a one liner that uses <code>awk</code> to print text between <code>&lt;</code> and <code>&gt;</code> with a <code>00</code> prefix, piped to <code>xxd</code>:</p>
+
+<pre><code>pkcs15-tool --read-data-object data 2&gt;&amp;1 | awk -F&#39;[&lt;|&gt;]&#39; &#39;/Data Object/ {print &quot;00&quot;$2}&#39; | xxd -r
+</code></pre>
+
+<p>The one liner doesn&#39;t work if you&#39;ve got <code>--private</code> data, since you can&#39;t enter the PIN.</p>
+
+<h3>Output to a file</h3>
+
+<p>The data can be placed in a file as well by using the <code>--output-file</code> flag:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --read-object --type data --label data --output-file test
+
+$ cat test 
+Remy is awesome
+</code></pre>
+
+<h3>Deleting data</h3>
+
+<p>You create space on the HSM or just to remove data you don&#39;t need anymore, use the <code>--delete-object</code> flag with the correct label:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type data --application-label data
+</code></pre>
+
+<p>Make sure you delete the correct data, otherwise you might just have removed your keypair.</p>
+
+<h3>Maximum file size</h3>
+
+<p>The files I wrote are all small files. Tests show that the maximum filesize for these elementary files (EF) is <code>5000 bytes</code>.  </p>
+
+<p>Specifically tested by writing a file larger than 5000 bytes (<code>test</code>) to the HSM and reading it back to an output file (<code>test2</code>):</p>
+
+<pre><code>$ du -b test*
+5008  test
+5000  test2
+</code></pre>
+
+<p>That means that in this case you must make sure to write less than 5 KB to the HSM. Plenty of space for some sensitive text files.</p>
+</div><hr>Tags: <a href="../tags/cryptoki.html" class="link">cryptoki, </a><a href="../tags/dkek.html" class="link">dkek, </a><a href="../tags/elementary-files.html" class="link">elementary-files, </a><a href="../tags/hsm.html" class="link">hsm, </a><a href="../tags/nitrokey.html" class="link">nitrokey, </a><a href="../tags/openssl.html" class="link">openssl, </a><a href="../tags/pkcs11.html" class="link">pkcs11, </a><a href="../tags/safenet.html" class="link">safenet, </a><a href="../tags/sc-hsm.html" class="link">sc-hsm, </a><a href="../tags/smartcard.html" class="link">smartcard, </a><a href="../tags/smartcard-hsm.html" class="link">smartcard-hsm, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    

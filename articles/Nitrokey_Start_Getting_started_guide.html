@@ -1,0 +1,1197 @@
+<!-- nominify -->
+
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Nitrokey Start: Getting started guide (gnuk openpgp token) - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Nitrokey Start: Getting started guide (gnuk openpgp token)</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../articles/index.html" class="link">Articles</a></li><li><a href="Nitrokey_Start_Getting_started_guide.html" class="link">Nitrokey Start: Getting started guide (gnuk openpgp token)</a></li></ul><p><small>14-08-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>The Nitrokey Start is an OpenPGP USB token. It supports three 2048 bit GPG keys and is based on <code>gnuk</code> version 1.0.4. Gnuk is an implementation of USB cryptographic token for GPG. A cryptographic token is a store of private keys and it computes cryptographic functions on the device. The main difference with other GPG cards like the Nitrokey Pro, Yubikey or the OpenPGP card is that this device does not use a smartcard. Whereas the other devices are basically USB smartcard readers, the Nitrokey Start has everything in it&#39;s firmware. Therefore it is a very cheap device ($29) and a great choice if you want token based GPG security but don&#39;t want to spend much on an expensive other key.</p>
+
+<p><img src="https://raymii.org/s/inc/img/nitrokey_family_start.png"></p>
+
+<p>Compared with for example the Yubikey, the Nitrokey&#39;s big advantage is that both the software (firmware) and the hardware are open source. If you want you can buy the microcontroller, flash the firmware and print the case from the Cad file. </p>
+
+<p><img src="https://raymii.org/s/inc/img/nitrokey_start_pro.png"></p>
+
+<blockquote>
+<p>Two Nitrokey Pro&#39;s and the Nitrokey Start</p>
+</blockquote>
+
+<p>This article is a getting started guide where I talk about the initial setup of the device, setting up a user PIN, an admin PIN and a reset code, generating the key and subkeys on the device, or loading external keys into the device and usage examples with GPG, OpenSSH and Thunderbird.</p>
+
+<p>This article is largely compatible with other gnuk tokens and other OpenPGP Smartcards like the Nitrokey Pro or the Yubikey.</p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
+
+<p>Nitrokey has multiple models like the Start, Storage, Pro and HSM. I&#39;m especially fond of the Nitrokey HSM. I&#39;ve written a <a href="https://raymii.org/s/articles/Get_Started_With_The_Nitrokey_HSM.html">getting started</a> article for that as well. It explains what the HSM is, how to set it up and how to use it with OpenSSH for example.</p>
+
+<p>The build quality of the device is excellent. Sturdy and quality. It doesn&#39;t feel like flimsy chinese crap at all, since it isn&#39;t that. Durable Germany made quality here.</p>
+
+<p>I have <a href="https://raymii.org/s/tags/nitrokey.html">multiple articles</a> on the Nitrokeys, so make sure to check out the other articles as well. </p>
+
+<h3>Initial setup</h3>
+
+<p>On Ubuntu, install the following packages:</p>
+
+<pre><code>apt-get install opensc pcscd paperkey haveged gnupg2 gnupg-agent pinentry-curses libccid scdaemon libksba8 libpth20
+</code></pre>
+
+<p>On Arch linux, follow <a href="https://wiki.archlinux.org/index.php/GnuPG">the Wiki</a>.</p>
+
+<p>If the software is installed, plug in the Nitrokey Start and execute the following command:</p>
+
+<pre><code>gpg --card-status
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Reader ...........: Nitrokey Nitrokey Start (FSIJ-1.0.4-52FF6E06) 00 00
+Application ID ...: D276000124010200FFFE52FF6E060000
+Version ..........: 2.0
+Manufacturer .....: unmanaged S/N range
+Serial number ....: 52FF6E06
+Name of cardholder: [not set]
+Language prefs ...: [not set]
+Sex ..............: unspecified
+URL of public key : [not set]
+Login data .......: [not set]
+Signature PIN ....: forced
+Key attributes ...: rsa2048 rsa2048 rsa2048
+Max. PIN lengths .: 127 127 127
+PIN retry counter : 3 3 3
+Signature counter : 0
+Signature key ....: [none]
+Encryption key....: [none]
+Authentication key: [none]
+General key info..: [none]
+</code></pre>
+
+<p>The output above is of an uninitialized token. As you can see, it&#39;s a OpenPGP Card version 2 compatible token. Three keys are supported, the max pin length is listed and the PIN error counters are all at three (default value). </p>
+
+<h3>Setting up a user PIN, an admin PIN and a reset code</h3>
+
+<p>The Nitrokey Start, actually <code>gnuk</code>, has a few different options when it comes to PIN codes. There is the User PIN (PW1), which you use for day to day operations like unlocking the token, signing and encrypting things. The minimum length for the User pin is 6 characters.</p>
+
+<p>The Admin PIN (PW3) is used for card/token administration, like loading keys onto the device, generating keys or changing information like the owner data on the card. The minimum length for the Admin PIN is 8 characters.</p>
+
+<p>If you enter the wrong user PIN three times the card is blocked. It can then only be reset with the Admin PIN or reset code. If you enter the wrong Admin pin three times the card will become unusable.</p>
+
+<p>Last is the reset code, this code can be used only to reset the user PIN. The minimum length for the Reset Code is 8 characters. The reset code error counter can be reset with the Admin PIN.</p>
+
+<p>So what is the difference between the Admin PIN and reset code? If you receive a card from, for example your employer, it will have data and keys filled in (name, organization, public key url etc). Generally it will not be the case that you are allowed to change that, so you will not know the Admin PIN. If you entered the user PIN wrong three times, you cannot use the Admin PIN to reset the User PIN. This is where the RESET CODE comes in. This code can only be used to reset the User PIN (PW1).</p>
+
+<p>If you give the wrong PIN two times and then the correct PIN, the error counter is reset. (Both admin and user PIN.)</p>
+
+<h4>Admin-less PIN</h4>
+
+<p><code>gnuk</code> has a special option that allows you to use the same PIN for user and admin. This <a href="http://www.fsij.org/doc-gnuk/gnuk-passphrase-setting.html#set-up-pw1-pw3-and-reset-code">is in their documentation</a> and will be active if you set the User PIN BEFORE the Admin PIN. They state that for day to day operations it&#39;s more convinient, but it is also less secure. </p>
+
+<p>Admin-less mode is incompatible with the official GnuPG card specification.</p>
+
+<h4>Admin PIN reset</h4>
+
+<p>If you ever enter the admin PIN wrong three times in a row the device is unusable. The above reset code can only be used to reset the User PIN. In a normal GnuPG Smartcard you can send special reset ADPU commands to the smartcard and make it usable again, although all the keys are wiped.</p>
+
+<p>For a gnuk token like the Nitrokey the procedure is different. You need to store a public key first and then later on, if the token is hosed, upgrade the firmware. That public key you stored will be used to sign the update.</p>
+
+<p>I&#39;m having some compile issues for the firmware and the key upload since all my versions (gcc, libusb, python) are way to new. I&#39;ll create a seperate article for this once I got it all figured out and working.</p>
+
+<!--
+
+First download the `gnuk` source via git:
+
+    git clone git://git.gniibe.org/gnuk/gnuk.git/
+    cd gnuk
+    git submodule init
+    git submodule update
+
+Get the version of your Nitrokey's firmware with `gpg --card-status` and look for a line like below:
+
+    Reader ...........: Nitrokey Nitrokey Start (FSIJ-1.0.4-52FF6E06) 00 00
+
+My firmware is `1.0.4`. 
+
+Inside the git repo, checkout the correct tag:
+
+    git checkout release/1.0.4
+
+Get your USB device ID. In case of the Nitrokey it is via `Clay Logic`:
+
+    lsusb
+
+Output:    
+
+    Bus 001 Device 004: ID 20a0:4211 Clay Logic 
+
+Get more info from that specific device:
+
+    lsusb -vd 20a0:4211
+
+Output:
+
+    [...]
+    idVendor           0x20a0 Clay Logic
+    idProduct          0x4211 
+    [...]
+    bInterfaceClass        11 Chip/SmartCard
+
+Add your USB device ID to the firmware. Make sure to use TABS in that file:
+
+    $ cat ../GNUK_USB_DEVICE_ID 
+
+Output:
+
+    # VID:PID   bcdDev  Product_STRING  Vender_STRING
+    234b:0000   0200    Gnuk Token  Free Software Initiative of Japan
+    20a0:4211   0200    Nitrokey Start  Nitrokey  
+    ##########<TAB> ##<TAB> ##########<TAB> #################
+
+As you can see, my specific device is added.
+
+
+/-- 
+
+Nitrokey's are Open Source, so their firmware is provided [here](https://github.com/Nitrokey/nitrokey-start-firmware). 
+
+Make sure you have an ARM compile toolchain installed. On Arch I had to install `arm-none-eabi-gcc` and `arm-none-eabi-newlib`. Ubuntu has the `gcc-arm-none-eabi` and `libnewlib-arm-none-eabi` packages.
+
+Clone the git repo:
+
+    git clone https://github.com/Nitrokey/nitrokey-start-firmware.git
+    cd nitrokey-start-firmware
+
+Go into the source folder and start the compile:
+
+    cd src/
+    ./configure --target=NITROKEY_START --vidpid="20a0:4211" --enable-keygen --enable-certdo
+
+Output:
+
+    Configured for target: NITROKEY_START
+    Debug option disabled
+    Configured for bare system (no-DFU)
+    PIN pad option disabled
+    CERT.3 Data Object is supported
+    Key generation on device is supported
+
+Start the make:
+
+    make
+
+Output:
+
+    [...]
+    o-warn-mismatch,--gc-sections  -mno-thumb-interwork -mthumb   -o gnuk.elf
+    arm-none-eabi-objcopy -O ihex gnuk.elf gnuk.hex
+    arm-none-eabi-objcopy -O binary gnuk.elf gnuk.bin
+    arm-none-eabi-objdump -x --syms gnuk.elf > gnuk.dmp
+
+Do note that on Arch with gcc 6 the compile fails. [Ubuntu 16.04 did work](https://github.com/Nitrokey/nitrokey-start-firmware/issues/1)
+
+Go into the `regnual` folder, that is the tool used for firmware updates.
+
+    cd ../regnual
+    make
+
+Output:
+
+    [...]
+    arm-none-eabi-gcc -Tregnual.ld -nostartfiles -mcpu=cortex-m3 -mfix-cortex-m3-ldrd -mthumb -DTHUMB -mno-thumb-interwork -o regnual.elf regnual.o usb_lld.o sys.o
+    arm-none-eabi-objcopy -Obinary regnual.elf regnual.bin
+    arm-none-eabi-objcopy -Oihex regnual.elf regnual.hex
+
+
+These compiles result in a few files we need, `regnual.bin` and `gnuk.bin`. 
+
+If you already have a GPG key, you can load it into the Nitrokey. Otherwise generate a key first.
+
+We need the `keygrip` of the key. Use the following command to get that:
+
+    gpg --with-keygrip --list-secret-keys
+
+Output:
+
+    [...]
+          Keygrip = A3[...]853
+
+On older versions of gnupg this option is not available. 
+
+Go out of the `src` folder and use the provided `python2` script to get the raw public key:
+
+    cd ..
+    python2 tool/get_raw_public_key.py A3[...]853
+
+This results in a file named `A3[...].bin`. 
+
+Kill the `scdaemon` since we need full control over the token:
+
+    gpg-connect-agent "SCD KILLSCD" "SCD BYE" /bye
+
+Output:
+
+    OK
+    ERR 67125247 End of file <GPG Agent>
+
+
+
+-->
+
+<h3>Initialize the Nitrokey</h3>
+
+<p>We&#39;re going to set up the card for the first time. Fire up GPG and get started:</p>
+
+<pre><code>gpg --card-edit
+</code></pre>
+
+<p>The same output as from <code>--card-status</code>  but now it gives you an interactive prompt:</p>
+
+<pre><code>gpg/card&gt; 
+</code></pre>
+
+<p>Using the <code>help</code> command to see the available commands:</p>
+
+<pre><code>quit           quit this menu
+admin          show admin commands
+help           show this help
+list           list all available data
+fetch          fetch the key specified in the card URL
+passwd         menu to change or unblock the PIN
+verify         verify the PIN and list all data
+unblock        unblock the PIN using a Reset Code
+</code></pre>
+
+<p>We are going to set values, so switch to <code>admin</code> mode:</p>
+
+<pre><code>gpg/card&gt; admin
+Admin commands are allowed
+</code></pre>
+
+<p>There are a lot more commands available now:</p>
+
+<pre><code>gpg/card&gt; help
+quit           quit this menu
+admin          show admin commands
+help           show this help
+list           list all available data
+name           change card holder&#39;s name
+url            change URL to retrieve key
+fetch          fetch the key specified in the card URL
+login          change the login name
+lang           change the language preferences
+sex            change card holder&#39;s sex
+cafpr          change a CA fingerprint
+forcesig       toggle the signature force PIN flag
+generate       generate new keys
+passwd         menu to change or unblock the PIN
+verify         verify the PIN and list all data
+unblock        unblock the PIN using a Reset Code
+factory-reset  destroy all keys and data
+</code></pre>
+
+<p>The first thing you want to do is set the Admin PIN. Make sure it&#39;s only known to you.</p>
+
+<pre><code>gpg/card&gt; passwd
+gpg: OpenPGP card no. D276000124010200FFFE52FF6E060000 detected
+
+1 - change PIN
+2 - unblock PIN
+3 - change Admin PIN
+4 - set the Reset Code
+Q - quit
+
+Your selection? 3
+</code></pre>
+
+<p>In my case a dialog box popped up to ask for the current Admin PIN (12345678). Then it asks you twice for the new Admin PIN.</p>
+
+<p>Set up a user PIN, choice <code>1 - change PIN</code>. Same thing, it will ask you for the current user PIN (123456) and for a new PIN two times.</p>
+
+<p>Finally set up a reset code, choice <code>4 - set the Reset Code</code>. It will ask you for the current admin PIN, then two times for a new reset code.</p>
+
+<p>We continue on to further personalize the card. Let it know your name:</p>
+
+<pre><code>gpg/card&gt; name
+Cardholder&#39;s surname: van Elst
+Cardholder&#39;s given name: Remy
+</code></pre>
+
+<p>Your gender:</p>
+
+<pre><code>gpg/card&gt; sex
+Sex ((M)ale, (F)emale or space): F
+</code></pre>
+
+<p>Your preferred country code / language:</p>
+
+<pre><code>gpg/card&gt; lang
+Language preferences: nl
+</code></pre>
+
+<p>If you want, you can place your public key on a website and let people download it:</p>
+
+<pre><code>gpg/card&gt; url
+URL to retrieve public key: https://raymii.org/s/inc/current_gpg.key 
+</code></pre>
+
+<p>At any point you can list the current data:</p>
+
+<pre><code>gpg/card&gt; list
+
+Reader ...........: Nitrokey Nitrokey Start (FSIJ-1.0.4-52FF6E06) 00 00
+Application ID ...: D276000124010200FFFE52FF6E060000
+Version ..........: 2.0
+Manufacturer .....: unmanaged S/N range
+Serial number ....: 52FF6E06
+Name of cardholder: Remy van Elst
+Language prefs ...: nl
+Sex ..............: female
+URL of public key : https://raymii.org/s/inc/current_gpg.key
+Login data .......: [not set]
+Signature PIN ....: forced
+Key attributes ...: rsa2048 rsa2048 rsa2048
+Max. PIN lengths .: 127 127 127
+PIN retry counter : 3 3 3
+Signature counter : 0
+Signature key ....: [none]
+Encryption key....: [none]
+Authentication key: [none]
+General key info..: [none]
+</code></pre>
+
+<p>When done, save and quit with the <code>quit</code> command. Next we will discuss GPG key generation and some things to keep in mind when deciding to generate keys on the card or load external keys.</p>
+
+<h3>A note on GPG keys and subkeys</h3>
+
+<p>GnuPG keys can have attributes to limit their usage. You can have a key which you can only use for signing data, and one that you can only use to encrypt data, or one key that has both attributes.</p>
+
+<p>GnuPG has the concept of subkeys. Subkeys just like normal keys, except that they are bound to a master keypair. A subkey can be used for signing, authentication or for encryption. Subkeys can be revoked independently of their master keypair and can be stored seperately from the master keypair. Subkeys are associated to your master keypair.</p>
+
+<p>When generating a new keypair, GnuPG creates a keypair with the signing-only attribute as the master key. It then generates a subkey with the encryption-only attribute. </p>
+
+<p>For key management it is extremely useful to be able to independently revoke a subkeypair. Imagine that you do not use subkeys and your laptop gets stolen. You didn&#39;t set up full-disk-encryption, because of time or effort required, and now you&#39;re toast. The thief has your master GPG key and can, if they brute force your passphrase, decrypt anything and impersonate you via the identity. You can use your revocation certificate (which you hopefully saved) to revoke the keypair, but now you need to visit all the people that signed your key to get a new key signed. </p>
+
+<p>If you generate your master keypair offline, for example, via a Debian Live CD (<a href="https://tails.boum.org/">Tails</a>) and save it to a secure place (use <code>paperkey</code> to print it and place it in a vault, next to an encrypted USB disk), you can later use the master keypair to revoke your laptop-subkey and generate a new one. Your master key is still safe in the safe and all the people that signed your key don&#39;t have to re-sign your new key.</p>
+
+<p>To sign other people&#39;s keys you do need to boot up your offline setup and use your primary master keypair to sign other keypairs. </p>
+
+<p>I also recommend to set an expiry date of a year or two on your master public key. Do note that private keys never expire, only public keys do. You can extend the date on a pubkey easily with <code>gpg --edit-key 0xKEY_ID</code> and then <code>expire</code>. </p>
+
+<p>The <a href="https://wiki.debian.org/Subkeys">Debian Wiki</a> has a very extensive guide on GPG subkeys.</p>
+
+<p>If you want to convert your current key to subkeys, <a href="http://www.macfreek.nl/memory/Convert_GPG_keys_to_subkeys">here</a> is a good guide.</p>
+
+<h3>Generating the key and subkeys on the device</h3>
+
+<p>You can choose to generate an entirely new keypair on this device. Do note that you cannot get the keypair out, so if the token is lost or broken, your keys are lost. It is also possible to load an external key on the device, we&#39;ll cover that later in the guide. </p>
+
+<p>If you want to generate a key only on the device, make sure you use an existing key to sign that key, and use this key to sign the existing key so that you have a cross-signature and people know that keypair belongs to you.</p>
+
+<p>After you&#39;ve initialised the Nitrokey we can generate a key on the device. Start up gpg:</p>
+
+<pre><code>gpg --card-edit
+admin
+generate
+</code></pre>
+
+<p>The first question is:</p>
+
+<pre><code>Make off-card backup of encryption key? (Y/n) 
+</code></pre>
+
+<p>This will create a file on your host machine with the private key. In the specific case you are generating keys on the device and not on your machine, you might not want to do this.</p>
+
+<p>It will then ask you for the Admin PIN and the User PIN. Enter those.</p>
+
+<p>It will ask you for a key expiry date. Note that this is the public key only and can be updated later on easily. Set an expiry of 1 year so that if you don&#39;t use this key, it doesn&#39;t linger on the keyservers:</p>
+
+<pre><code>Please specify how long the key should be valid.
+         0 = key does not expire
+      &lt;n&gt;  = key expires in n days
+      &lt;n&gt;w = key expires in n weeks
+      &lt;n&gt;m = key expires in n months
+      &lt;n&gt;y = key expires in n years
+Key is valid for? (0) 1y
+
+Key expires at Mon Aug 14 08:15:42 2017 CEST
+
+Is this correct? (y/N) y
+</code></pre>
+
+<p>Enter your user data for the GPG key:</p>
+
+<pre><code>    GnuPG needs to construct a user ID to identify your key.
+
+    Real name: Remy van Elst Nitrokey
+    Email address: 
+    Comment: Nitrokey Start Key
+    You selected this USER-ID:
+        &quot;Remy van Elst Nitrokey (Nitrokey Start Key) &lt;email@domain.tld&gt;&quot;
+
+    Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+</code></pre>
+
+<p>The on-device key generation takes a while, my key took about 4 minutes.</p>
+
+<p>You will be asked for a passphrase for the key. Enter that twice.</p>
+
+<p>When the generation is finished the following message appears:</p>
+
+<pre><code>We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: key 0x7237395DC5696F9F marked as ultimately trusted
+gpg: revocation certificate stored as &#39;/home/remy/.gnupg/openpgp-revocs.d/D78A0B1E407EBD678435CCC77237395DC5696F9F.rev&#39;
+public and secret key created and signed.
+</code></pre>
+
+<p>Using the <code>list</code> command in the <code>gpg</code> prompt you can now see the keypairs:</p>
+
+<pre><code>[...]
+Signature counter : 4
+Signature key ....: D78A 0B1E 407E BD67 8435  CCC7 7237 395D C569 6F9F
+      created ....: 2016-08-14 06:17:48
+Encryption key....: 2E7D 26B3 5D9E B690 4C56  3174 78F9 DDE9 9FFF 73F2
+      created ....: 2016-08-14 06:17:48
+Authentication key: D91C 38A7 294C BD63 275F  0D87 7AC8 3DB0 C0EB 9447
+      created ....: 2016-08-14 06:17:48
+General key info..: pub  rsa2048/0x7237395DC5696F9F 2016-08-14 Remy van Elst Nitrokey (Nitrokey Start Key) &lt;user@domain.tld&gt;
+sec&gt;  rsa2048/0x7237395DC5696F9F  created: 2016-08-14  expires: 2017-08-14
+                                  card-no: FFFE 52FF6E06
+ssb&gt;  rsa2048/0x7AC83DB0C0EB9447  created: 2016-08-14  expires: 2017-08-14
+                                  card-no: FFFE 52FF6E06
+ssb&gt;  rsa2048/0x78F9DDE99FFF73F2  created: 2016-08-14  expires: 2017-08-14
+                                  card-no: FFFE 52FF6E06
+</code></pre>
+
+<p>If you want you can now sign your new key with the old key. My new key id is <code>7237395DC5696F9F</code>. My regular key ID is <code>2B6755BD1B7F88DC</code>:</p>
+
+<pre><code>gpg -u 2B6755BD1B7F88DC  --sign-key 7237395DC5696F9F
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code> Primary key fingerprint: D78A 0B1E 407E BD67 8435  CCC7 7237 395D C569 6F9F
+
+     Remy van Elst Nitrokey (Nitrokey Start Key) &lt;user@domain.tld&gt;
+
+This key is due to expire on 2017-08-14.
+Are you sure that you want to sign this key with your
+key &quot;Remy van Elst &lt;user@domain.tld&gt;&quot; (0x2B6755BD1B7F88DC)
+</code></pre>
+
+<p>You will then be asked for your password.</p>
+
+<p>To cross-sign, reverse the process:</p>
+
+<pre><code>gpg -u 7237395DC5696F9F --sign-key 2B6755BD1B7F88DC
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code> Primary key fingerprint: 4DDE 73DB 5030 B539 2681  3A50 2B67 55BD 1B7F 88DC
+
+     Remy van Elst &lt;user@domain.tld&gt;
+
+This key is due to expire on 2019-05-31.
+Are you sure that you want to sign this key with your
+key &quot;Remy van Elst Nitrokey (Nitrokey Start Key) &lt;user@domain.tld&gt;&quot; (0x7237395DC5696F9F)
+
+Really sign? (y/N) y
+</code></pre>
+
+<p>You will be asked for your USER PIN for the Nitrokey.</p>
+
+<p>Afterwards send both keys to the keyserver:</p>
+
+<pre><code>gpg --send-key 7237395DC5696F9F
+gpg --send-key 2B6755BD1B7F88DC
+</code></pre>
+
+<p>If, for whatever reason, you need to revoke this keypair, import the revocation certificate that GnuPG generated for you:</p>
+
+<pre><code>gpg: revocation certificate stored as &#39;/home/remy/.gnupg/openpgp-revocs.d/D78A0B1E407EBD678435CCC77237395DC5696F9F.rev&#39;
+</code></pre>
+
+<p>But, you need to edit the file first:</p>
+
+<pre><code>To avoid an accidental use of this file, a colon has been inserted
+before the 5 dashes below.  Remove this colon with a text editor
+before importing and publishing this revocation certificate.
+
+:-----BEGIN PGP PUBLIC KEY BLOCK-----
+</code></pre>
+
+<p>After you&#39;ve done that, import the revocation certificate:</p>
+
+<pre><code>gpg --import /home/remy/.gnupg/openpgp-revocs.d/D78A0B1E407EBD678435CCC77237395DC5696F9F.rev
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>gpg: key 0x7237395DC5696F9F: &quot;Remy van Elst Nitrokey (Nitrokey Start Key) &lt;user@domain.tld&gt;&quot; revocation certificate imported
+gpg: Total number processed: 1
+gpg:    new key revocations: 1
+gpg: public key of ultimately trusted key 0xB9073AEB64937870 not found
+gpg: marginals needed: 3  completes needed: 1  trust model: pgp
+gpg: depth: 0  valid:   3  signed:  13  trust: 0-, 0q, 0n, 0m, 0f, 3u
+gpg: depth: 1  valid:  13  signed:   4  trust: 12-, 0q, 0n, 0m, 1f, 0u
+gpg: next trustdb check due at 2016-09-01
+</code></pre>
+
+<p>Send the updated and revoked key to the keyservers:</p>
+
+<pre><code>gpg --send-key 7237395DC5696F9F
+</code></pre>
+
+<h3>Loading external keys into the device</h3>
+
+<p>If you already have a keypair and subkeys, you can import those to the device. <a href="https://blog.josefsson.org/2014/06/23/offline-gnupg-master-key-and-subkeys-on-yubikey-neo-smartcard/">This</a> is a good guide for setting up a machine for offline key generation and subkeys. I already have my master key so I won&#39;t cover it here.</p>
+
+<p>I will add my key with key ID <code>2B6755BD1B7F88DC</code> to the card. Fire up gpg for this key:</p>
+
+<pre><code>gpg --expert --edit-key 2B6755BD1B7F88DC
+</code></pre>
+
+<p>We provice <code>--expert</code> since we are going to add three different subkeys to this key to load on the card. If you already have these subkeys, then it&#39;s not required. </p>
+
+<p>My master key is 4096 bit, which the Nitrokey doesn&#39;t support. Therefore we also need to generate these specific subkeys, they must be 2048 bit.</p>
+
+<p>Add an <code>Authentication</code> subkey:</p>
+
+<pre><code>gpg&gt; addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+Your selection? 8
+</code></pre>
+
+<p>Disable the <code>Encrypt</code> and <code>Sign</code> attributes:</p>
+
+<pre><code>Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: Sign Encrypt 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? S
+
+
+Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: Encrypt 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? E
+</code></pre>
+
+<p>Add the <code>Authenticate</code> attribute:</p>
+
+<pre><code>Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? A
+</code></pre>
+
+<p>Continue on with the keysize (<code>2048</code>) and the expiry date (1 year):</p>
+
+<pre><code>Your selection? Q
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (2048) 
+Requested keysize is 2048 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      &lt;n&gt;  = key expires in n days
+      &lt;n&gt;w = key expires in n weeks
+      &lt;n&gt;m = key expires in n months
+      &lt;n&gt;y = key expires in n years
+Key is valid for? (0) 1y
+Key expires at Mon Aug 14 09:47:19 2017 CEST
+Is this correct? (y/N) y
+Really create? (y/N) y
+</code></pre>
+
+<p>The key is now being generated:</p>
+
+<pre><code>We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+
+sec  rsa4096/0xD4A50E9CC37ACA81
+     created: 2014-09-02  expires: 2017-08-14  usage: SCA 
+     trust: unknown       validity: full
+ssb  rsa4096/0x107F143B25325ED6
+     created: 2014-09-02  expires: 2016-09-01  usage: E   
+ssb  rsa2048/0x168C7E40842796D4
+     created: 2016-08-14  expires: 2017-08-14  usage: A   
+[  full  ] (1). R. van Elst &lt;remy@cloudvps.com&gt;
+</code></pre>
+
+<p>Repeat the above process and generate two more keys. One with ONLY the Encrypt (E) attribute and one with only the Sign (S) attribute. When that&#39;s done, the <code>list</code> command should look like this:</p>
+
+<pre><code>ssb  rsa2048/0x168C7E40842796D4
+     created: 2016-08-14  expires: 2017-08-14  usage: A   
+ssb  rsa2048/0x76E7BD244019228B
+     created: 2016-08-14  expires: 2017-08-14  usage: E   
+ssb  rsa2048/0xDB3C494B3DF91C55
+     created: 2016-08-14  expires: 2017-08-14  usage: S 
+</code></pre>
+
+<p>Select the key to transfer to the card. We need to do all three the new keys. In my case, it&#39;s key 2:</p>
+
+<pre><code>gpg&gt; key 2
+</code></pre>
+
+<p>The key gets a <code>*</code> added:</p>
+
+<pre><code>ssb* rsa2048/0x168C7E40842796D4
+     created: 2016-08-14  expires: 2017-08-14  usage: A 
+</code></pre>
+
+<p>Transfer the key to the Nitrokey:</p>
+
+<pre><code>gpg&gt; keytocard
+</code></pre>
+
+<p>Confirm the key position in the card:</p>
+
+<pre><code>Please select where to store the key:
+   (3) Authentication key
+Your selection? 3
+</code></pre>
+
+<p>You will be asked for the key passphrase and the Admin PIN.</p>
+
+<p>If you issue the <code>gpg --card-status</code> command in another terminal you can see that this key is added:</p>
+
+<pre><code>Signature counter : 0
+Signature key ....: [none]
+Encryption key....: [none]
+Authentication key: 80A9 C670 8CF2 26BB 0B05  BB11 168C 7E40 8427 96D4
+      created ....: 2016-08-14 07:45:16
+General key info..: [none]
+</code></pre>
+
+<p>Issue the <code>key 2</code> command on the GPG prompt again to unselect this key, and continue with the next key:</p>
+
+<pre><code>gpg&gt; key 2
+gpg&gt; key 3
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>ssb* rsa2048/0x76E7BD244019228B
+     created: 2016-08-14  expires: 2017-08-14  usage: E  
+</code></pre>
+
+<p>Place it on the Nitrokey:</p>
+
+<pre><code>gpg&gt; keytocard
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Please select where to store the key:
+   (2) Encryption key
+Your selection? 2
+</code></pre>
+
+<p>Again you will be asked for the Key passphrase. Afterwards in another terminal, validate that this key is loaded:</p>
+
+<pre><code>gpg --card-status
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Signature counter : 0
+Signature key ....: [none]
+Encryption key....: CDBD 9425 CA43 1FA0 D433  9976 76E7 BD24 4019 228B
+      created ....: 2016-08-14 07:49:25
+Authentication key: 80A9 C670 8CF2 26BB 0B05  BB11 168C 7E40 8427 96D4
+      created ....: 2016-08-14 07:45:16
+General key info..: [none]
+</code></pre>
+
+<p>Repeat the process for the last key, unselect key 3 and select key 4:</p>
+
+<pre><code>gpg&gt; key 3
+gpg&gt; key 4
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>ssb* rsa2048/0xDB3C494B3DF91C55
+     created: 2016-08-14  expires: 2017-08-14  usage: S 
+</code></pre>
+
+<p>Place it on the card:</p>
+
+<pre><code>Please select where to store the key:
+   (1) Signature key
+   (3) Authentication key
+Your selection? 1
+</code></pre>
+
+<p>Save and quit the prompt:</p>
+
+<pre><code>gpg&gt; save
+</code></pre>
+
+<p>Check with <code>gpg --card-status</code> that all the keys are loaded:</p>
+
+<pre><code>Signature counter : 0
+Signature key ....: 8832 C6F8 2D1C D75C 9507  25A4 DB3C 494B 3DF9 1C55
+      created ....: 2016-08-14 07:50:28
+Encryption key....: CDBD 9425 CA43 1FA0 D433  9976 76E7 BD24 4019 228B
+      created ....: 2016-08-14 07:49:25
+Authentication key: 80A9 C670 8CF2 26BB 0B05  BB11 168C 7E40 8427 96D4
+      created ....: 2016-08-14 07:45:16
+General key info..: sub  rsa2048/0xDB3C494B3DF91C55 2016-08-14 R. van Elst &lt;remy@cloudvps.com&gt;
+sec   rsa4096/0xD4A50E9CC37ACA81  created: 2014-09-02  expires: 2017-08-14
+ssb   rsa4096/0x107F143B25325ED6  created: 2014-09-02  expires: 2016-09-01
+ssb&gt;  rsa2048/0x168C7E40842796D4  created: 2016-08-14  expires: 2017-08-14
+                                  card-no: FFFE 52FF6E06
+ssb&gt;  rsa2048/0x76E7BD244019228B  created: 2016-08-14  expires: 2017-08-14
+                                  card-no: FFFE 52FF6E06
+ssb&gt;  rsa2048/0xDB3C494B3DF91C55  created: 2016-08-14  expires: 2017-08-14
+                                  card-no: FFFE 52FF6E06
+</code></pre>
+
+<p>Export your public key:</p>
+
+<pre><code>gpg --export --armor D4A50E9CC37ACA81
+</code></pre>
+
+<p>Save this on your filesystem. We are going to remove the private keys from your machine, since they are on the Nitrokey. You do need your public key later on.</p>
+
+<p>Just to make sure, before removing any GPG keys, make a backup of your <code>~/.gnupg</code> folder:</p>
+
+<pre><code>cp -ar ~/.gnupg ~/.gnupg-backup-$(date +%s)
+</code></pre>
+
+<p>Unplug the Nitrokey. Then delete the secret keys for this keypair:</p>
+
+<pre><code>gpg --delete-secret-key D4A50E9CC37ACA81
+</code></pre>
+
+<p>Confirm it a few times. </p>
+
+<p>To use the smartcard on another PC, you first need to import the public key first. On the current machine, to use the keys, first run:</p>
+
+<pre><code>gpg --card-status
+</code></pre>
+
+<p>To test, create a small test file:</p>
+
+<pre><code>echo &#39;this is a small test file&#39; &gt; test
+</code></pre>
+
+<p>Sign that with this specific key:</p>
+
+<pre><code>gpg --sign -u D4A50E9CC37ACA81 test
+</code></pre>
+
+<p>You will be asked for the User PIN of the Nitrokey. Afterwards there is a <code>test.gpg</code> file. You can verify that file is signed:</p>
+
+<pre><code>gpg --verify -u 2B6755BD1B7F88DC  test.gpg 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>gpg: Signature made Sun Aug 14 10:56:48 2016 CEST
+gpg:                using RSA key 0xDB3C494B3DF91C55
+gpg: Good signature from &quot;R. van Elst &lt;remy@cloudvps.com&gt;&quot; [full]
+Primary key fingerprint: 5DD7 711A F8C4 72D7 BEEF  03D0 D4A5 0E9C C37A CA81
+     Subkey fingerprint: 8832 C6F8 2D1C D75C 9507  25A4 DB3C 494B 3DF9 1C55
+</code></pre>
+
+<p>If the Nitrokey is not present when you want to sign, gpg will tell you to please insert the correct smartcard.</p>
+
+<h3>Overwriting (deleting) keys on the Nitrokey</h3>
+
+<p>Nitrokey Start (actually gnuk) doesn&#39;t support overriding keys. Once generated or written, you should use a Python script provided by GnuK, <a href="https://raw.githubusercontent.com/Nitrokey/nitrokey-start-firmware/master/tool/gnuk_remove_keys_libusb.py">gnuk<em>remove</em>keys_libusb.py</a> to remove keys before trying to write a new one. </p>
+
+<p>Do note that I got <a href="https://github.com/Nitrokey/nitrokey-start-firmware/issues/2">errors</a> while using this script. There is a non <code>libusb</code> versio that did work for me. First make sure you have <code>pyscard</code> installed:</p>
+
+<pre><code>pip2 install pyscard
+</code></pre>
+
+<p>Clone the git repository:</p>
+
+<pre><code>git clone https://github.com/Nitrokey/nitrokey-start-firmware.git
+cd nitrokey-start-firmware
+</code></pre>
+
+<p><strong>IF YOU EXECUTE THE BELOW SCRIPT ALL YOUR KEYS WILL BE REMOVED</strong></p>
+
+<p>Execute the non libusb removal script:</p>
+
+<pre><code>python2 tool/gnuk_remove_keys.py -p
+</code></pre>
+
+<p>It will ask you for the ADMIN PIN:</p>
+
+<pre><code>Admin password: &lt;12345678&gt;
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Token: Nitrokey Nitrokey Start (FSIJ-1.0.4-52FF6E06) 00 00
+ATR: 3B DA 11 FF 81 B1 FE 55 1F 03 00 31 84 73 80 01 80 00 90 00 E4
+</code></pre>
+
+<p>You can afterwards check that all the keys are removed:</p>
+
+<pre><code>gpg --card-status
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Signature counter : 0
+Signature key ....: [none]
+Encryption key....: [none]
+Authentication key: [none]
+General key info..: [none]
+</code></pre>
+
+<p>If you receive errors like:</p>
+
+<pre><code>smartcard.Exceptions.CardConnectionException: Unable to connect with protocol: T0 or T1. Sharing violation.
+</code></pre>
+
+<p>Or</p>
+
+<pre><code>  File &quot;tool/gnuk_remove_keys.py&quot;, line 54, in cmd_verify
+    raise ValueError, (&quot;%02x%02x&quot; % (sw1, sw2))
+ValueError: 6982
+</code></pre>
+
+<p>Then just remove and insert the key and try again.</p>
+
+<h3>Usage examples with GPG</h3>
+
+<p>To encrypt a file for recipient with key <code>2B6755BD1B7F88DC</code>, use the following command:</p>
+
+<pre><code>gpg --sign --encrypt  -u D4A50E9CC37ACA81 -r 2B6755BD1B7F88DC test
+</code></pre>
+
+<p>If you want to just encrypt the file, remove the <code>--sign</code> flag. <code>-r</code> is the recipient, <code>-u</code> is your key. If you remove the sign flag, the other person cannot validate that the file came from you.</p>
+
+<p>To sign a message and have the ASCII output, use the following command:</p>
+
+<pre><code>gpg --sign --armor -u D4A50E9CC37ACA81   test
+</code></pre>
+
+<p>Enter the User PIN, and afterwards check the output:</p>
+
+<pre><code>$ cat test.asc 
+-----BEGIN PGP MESSAGE-----
+
+owEBVAGr/pANAwAKAds8SUs9+RxVAawkYgR0ZXN0V7AzN3RoaXMgaXMgYSBzbWFs
+bCB0ZXN0IGZpbGUKiQEcBAABCgAGBQJXsDM3AAoJENs8SUs9+RxV9zwH/R/CFYzt
+FJ/TniMWEwUOQ8YvyM2b7Sj4mcw+7yI/db1J6jsdGuoisWrIhvs0tp3i6qtKIjWV
+SrGSHcnv+Ur6k2YYqfAEpybw1ixAa/XwVZjUJaSfLm8uqYDD4pMhBupky/OVfZTl
+aI/hhZuaPShAt3f8Zg6ZwqIk8OqM6HCe+eSSflC/HVDyt4WKtq0JcZtIjzKbvsGD
+jfHrtabzoKdGLmG2y1GT5wrDIM8nInn66Q3uPm/jNlnEH1M93Z4DnY3/jm/+hu+3
+DjJFximcSlt3H0kQ7c1y2FXNiufXP+LPmB5QooZouZ5ILSaIiQenoi28T5/aQPv4
+P9BiMreZVKzZ6IQ=
+=Ztv5
+-----END PGP MESSAGE-----
+</code></pre>
+
+<p>If you receive an encrypted and signed message, you can decypt it with the following command:</p>
+
+<pre><code>gpg --decrypt test.gpg 
+</code></pre>
+
+<p>You will be asked to enter your user PIN. Output:</p>
+
+<pre><code>gpg: encrypted with 2048-bit RSA key, ID 0x76E7BD244019228B, created 2016-08-14
+      &quot;R. van Elst &lt;remy@cloudvps.com&gt;&quot;
+this is a small test file
+gpg: Signature made Sun Aug 14 12:12:35 2016 CEST
+gpg:                using RSA key 0x2B6755BD1B7F88DC
+gpg: Good signature from &quot;Remy van Elst &lt;relst@relst.nl&gt;&quot; [ultimate]
+Primary key fingerprint: 4DDE 73DB 5030 B539 2681  3A50 2B67 55BD 1B7F 88DC
+</code></pre>
+
+<h3>Usage examples with OpenSSH</h3>
+
+<p>OpenSSH requires to have a subkey with the Authentication attribute. We don&#39;t use a complicated GPG agent setup or key conversion, but we utilize <code>OpenSC</code>. The Nitrokey Start can also be used with OpenSC just as the Nitrokey HSM. </p>
+
+<p>Make sure the Nitrokey is plugged in. Execute the following command to add the module to the <code>ssh-agent</code>:</p>
+
+<pre><code>ssh-add -s opensc-pkcs11.so
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Enter passphrase for PKCS#11: 
+Card added: opensc-pkcs11.so
+</code></pre>
+
+<p>You can check that the keys are available now with the <code>-l</code> flag:</p>
+
+<pre><code>ssh-add -l
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>2048 SHA256:INvUw/LHzO/loNzzAu99FYlvYpq1o3IgPgjJJuDt/FE opensc-pkcs11.so (RSA)
+2048 SHA256:rb0keTL7bQFtr1C5Rii/c6hTcTIM+OYeZ/aqHWJf9+0 opensc-pkcs11.so (RSA)
+2048 SHA256:QR/Wr8YAvRQW1rA6Y9UnORZvbXflFB6uG9l2PqxRS2A opensc-pkcs11.so (RSA)
+</code></pre>
+
+<p>With the <code>-L</code> flag you also get the public keys for use in <code>~/.ssh/authorized_keys</code>:</p>
+
+<pre><code>ssh-add -l
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDuDJUnbB81eUOZ+I0FZk35Yk9S4MyAPIJIcpN5jywNUcX5DJdgXNv/k4gm2grCIAdhACMK6sxnH2jd7e23Iq3LhDLz+I8Stc3qzKqnl1agD87IG2+trCCz2Odd7nIxRr3me5eutEDhvwqLX1aXiH/UEcUOOWGQ6Vu7iDOlia2s5p5qr5F4tbiD0TwdmiTvqtgMPyiXMIk4OCttB5dLyY/7hplfBSYXGgGujQEx6Q7OaHeGc983ZbfLnWvSWqEEfHnQG4IemhgHGU4ZuPdgfc8BgYDBPBFXtcG5lv3SREpupFVnWXm5L8bh3y3j7twlZamlCA7Sk7Vf29UDsbZ/1COT opensc-pkcs11.so
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDgfplUpYCDOGGU9hnZdiHYvetm6Fz7vflcTh/PdQl+9E20ocOXK7IEmm70ABv5Sp5wESIrzyrchUfKo1mvALdxy3Xb1Qc1WC7NQfmUOpMJ4ztNwTB8Jy+Qs2XzMRXGq6RU8RlZcrer7gj0QQIzIxkDrwLG21SByt/hyVUqSI31tQwqs/SKP9cKxcZLAIzReeu2JAqr6U2O62O6/SVYWTa5XV6HKs3PLBsNfjojfGHPYfheSEdY7tMkAZ6uaQsW0FelwdSYoVjhejk29H9AsIuz6Ivp5oscHZhIR9kesnhPj7SBZV2/CFEWSvwmuyNlH3UNr8kvZbdcWPZbLCeLlDTj opensc-pkcs11.so
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyDuf4vqd4G0CboNKqOOV8UMsYRF/KvPnKO2bZHS46PFMOjBLz0eDQku+YFeNu9wE4uEuBN1eAkvArp5cBTEds8F+qHAoj7C6lRNGrevxBBG/i5m8N6WLl6Ser1P7SZBRv+YF7ErDWDvuHm5GzrD7DU/sVH15ZT+MUDPZ5ANL0PcCYUafxBVigBTNb1siab86sHLDsv+JqYvVyY7qwnog57WyG3C51+GfxmglwDYZeCtBVrP0FKnnaWXnsJIDiE8YlaaUmvQErEDr5NEzNQj5pKcP9Di0IXdPkjBp0AcHZE2u34nT6L0YXKreaWPcyq1eUJC83+x8YRhgQ+C9u1Yip opensc-pkcs11.so
+</code></pre>
+
+<p>But which key is the Authentication key? Find out with <code>pkcs15-tool</code>:</p>
+
+<pre><code>pkcs15-tool --list-keys
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey Start (FSIJ-1.0.4-52FF6E06) 00 00
+Private RSA Key [Signature key]
+    Object Flags   : [0x3], private, modifiable
+    Usage          : [0x20C], sign, signRecover, nonRepudiation
+    Access Flags   : [0x1D], sensitive, alwaysSensitive, neverExtract, local
+    ModLength      : 2048
+    Key ref        : 0 (0x0)
+    Native         : yes
+    Auth ID        : 01
+    ID             : 01
+    MD:guid        : 2c444dd0-08c1-0684-5f26-4eb852d0bb81
+
+Private RSA Key [Encryption key]
+    Object Flags   : [0x3], private, modifiable
+    Usage          : [0x22], decrypt, unwrap
+    Access Flags   : [0x1D], sensitive, alwaysSensitive, neverExtract, local
+    ModLength      : 2048
+    Key ref        : 1 (0x1)
+    Native         : yes
+    Auth ID        : 02
+    ID             : 02
+    MD:guid        : f4238588-7a7d-29bd-c130-27a565150066
+
+Private RSA Key [Authentication key]
+    Object Flags   : [0x3], private, modifiable
+    Usage          : [0x222], decrypt, unwrap, nonRepudiation
+    Access Flags   : [0x1D], sensitive, alwaysSensitive, neverExtract, local
+    ModLength      : 2048
+    Key ref        : 2 (0x2)
+    Native         : yes
+    Auth ID        : 02
+    ID             : 03
+    MD:guid        : d2f08102-b940-3efe-9e91-50f8d377a1d7
+</code></pre>
+
+<p>The key with ID 3 is the authentication key. Get the SSH key for that ID:</p>
+
+<pre><code>pkcs15-tool --read-ssh-key 3
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey Start (FSIJ-1.0.4-52FF6E06) 00 00
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyDuf4vqd4G0CboNKqOOV8UMsYRF/KvPnKO2bZHS46PFMOjBLz0eDQku+YFeNu9wE4uEuBN1eAkvArp5cBTEds8F+qHAoj7C6lRNGrevxBBG/i5m8N6WLl6Ser1P7SZBRv+YF7ErDWDvuHm5GzrD7DU/sVH15ZT+MUDPZ5ANL0PcCYUafxBVigBTNb1siab86sHLDsv+JqYvVyY7qwnog57WyG3C51+GfxmglwDYZeCtBVrP0FKnnaWXnsJIDiE8YlaaUmvQErEDr5NEzNQj5pKcP9Di0IXdPkjBp0AcHZE2u34nT6L0YXKreaWPcyq1eUJC83+x8YRhgQ+C9u1Yip Authentication key
+</code></pre>
+
+<p>Add that to a server&#39;s <code>~/.ssh/authorized_keys</code> file and you are able to login without being asked a password:</p>
+
+<pre><code>$ ssh root@85.222.224.108
+Warning: Permanently added &#39;85.222.224.108&#39; (ECDSA) to the list of known hosts.
+Welcome to Ubuntu 16.04.1 LTS (GNU/Linux 4.4.0-31-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+root@smartcard:~# cat /var/log/auth.log 
+Aug 14 12:41:48 ubuntu sshd[1754]: Accepted password for root from 192.168.20.332 port 50330 ssh2
+Aug 14 12:41:48 ubuntu sshd[1754]: pam_unix(sshd:session): session opened for user root by (uid=0)
+Aug 14 12:42:06 ubuntu sshd[1754]: Received disconnect from 192.168.20.332 port 50330:11: disconnected by user
+Aug 14 12:42:06 ubuntu sshd[1754]: Disconnected from 192.168.20.332 port 50330
+[...]
+Aug 14 12:42:08 ubuntu sshd[1776]: Postponed publickey for root from 192.168.20.332 port 50366 ssh2 [preauth]
+Aug 14 12:42:09 ubuntu sshd[1776]: Accepted publickey for root from 192.168.20.332 port 50366 ssh2: RSA SHA256:QR/Wr8YAvRQW1rA6Y9UnORZvbXflFB6uG9l2PqxRS2A
+Aug 14 12:42:09 ubuntu sshd[1776]: pam_unix(sshd:session): session opened for user root by (uid=0)
+</code></pre>
+
+<p>When you&#39;re done with all the sessions, close them and remove the Nitrokey from the ssh-agent:</p>
+
+<pre><code>ssh-add -e opensc-pkcs11.so
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Card removed: opensc-pkcs11.so
+</code></pre>
+
+<p><code>ssh-add -l</code> shouldn&#39;t show the keys anymore.</p>
+
+<h3>Usage examples with Thunderbird</h3>
+
+<p>Using <a href="https://www.enigmail.net/index.php/en/">Enigmail</a> with Thunderbird is very easy. If you&#39;ve set up the Nitrokey Start as shown above with OpenPGP, Enigmail will automatically find the key and use it, if it&#39;s inserted, no further setup required. Here&#39;s the smartcard information screen:</p>
+
+<p><img src="https://raymii.org/s/inc/img/gpg_tbird_nitrokey.png"></p>
+
+<p>When sending an email, it will automatically ask you for the PIN:</p>
+
+<p><img src="https://raymii.org/s/inc/img/gpg_tbird_nitrokey_2.png"></p>
+
+<p>If you receive an encrypted email, it will also automatically ask you for the PIN and decrypt the email:</p>
+
+<p><img src="https://raymii.org/s/inc/img/gpg_tbird_nitrokey_3.png"></p>
+
+<p>Literally no setup required. I&#39;ve rarely seen this kind of encrypton be so easily setup, major props to Thunderbird, Enigmail and GPG here.</p>
+
+<!--
+
+### Backup your secret key
+
+If you want to create a long term archive you can use the `paperkey` package to print your secret key on paper and put it into your bank vault. Read more over at their [homepage](http://www.jabberwocky.com/software/paperkey/). (Awesome domain btw.) Quoting their page:
+
+    The goal with paper is not secure storage. There are countless ways to store something securely. A paper backup also isn't a replacement for the usual machine readable (tape, CD-R, DVD-R, etc) backups, but rather as an if-all-else-fails method of restoring a key. Most of the storage media in use today do not have particularly good long-term (measured in years to decades) retention of data. If and when the CD-R and/or tape cassette and/or USB key and/or hard drive the secret key is stored on becomes unusable, the paper copy can be used to restore the secret key.
+
+And, regarding security:
+
+    Note that paperkey does not change the security requirements of storing a secret key. In fact, paperkey doesn't do any crypto at all, but just saves and restores the original secret key, whether it is encryped or not. So, if your key has a passphrase on it (i.e. is encrypted), the paper copy is similarly encrypted. If your key has no passphrase, neither does the paper copy. Whatever the passphrase (or lack thereof) was on the original secret key will be the same on the reconstructed key. Also note that as with any backup or archiving system, it is prudent to verify you can restore the key from your paper copy before filing the paper away.
+
+
+Export your GPG secret key:
+
+    gpg --export-secret-key  2B6755BD1B7F88DC > key
+
+Convert it:
+
+    paperkey --secret-key ./key --output print.txt
+
+Now print that text file and save it securely.
+
+To restore:
+
+-->
+</div><hr>Tags: <a href="../tags/gnupg.html" class="link">gnupg, </a><a href="../tags/gpg.html" class="link">gpg, </a><a href="../tags/nitrokey.html" class="link">nitrokey, </a><a href="../tags/nitrokey-start.html" class="link">nitrokey-start, </a><a href="../tags/openssh.html" class="link">openssh, </a><a href="../tags/smartcard.html" class="link">smartcard, </a><a href="../tags/ssh.html" class="link">ssh, </a><a href="../tags/start.html" class="link">start, </a><a href="../tags/thunderbird.html" class="link">thunderbird, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    

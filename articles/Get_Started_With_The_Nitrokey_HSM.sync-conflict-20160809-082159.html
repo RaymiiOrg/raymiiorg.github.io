@@ -1,0 +1,421 @@
+<!DOCTYPE html><html lang="en"><head><title>Get started with the Nitrokey HSM or SmartCard-HSM - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Get started with the Nitrokey HSM or SmartCard-HSM</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../articles/index.html">Articles</a></li><li><a class="link" href="Get_Started_With_The_Nitrokey_HSM.html">Get started with the Nitrokey HSM or SmartCard-HSM</a></li></ul><p><small>19-06-2016</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>This is a guide to get started with the Nitrokey HSM (or SmartCard-HSM). It covers what a HSM is and what it can be used for. It also goes over software installation and initializing the device including backups of the device and keys. Finally we do some actual crypto operatons via pkcs11, OpenSSH, Apache and OpenSSL.</p><p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you'll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p><p><img height="600" src="https://raymii.org/s/inc/img/nitrokey1.jpg" width="500"/></p><blockquote><p>The Nitrokey HSM in a sealed package</p></blockquote><h3>What is an HSM (Hardware Security Module)</h3><p>A Hardware Security Module, HSM, is a device where secure key material is stored. This private data only be accessed by the HSM, it can never leave the device. Most HSM devices are also tamper-resistant. This means that when opened, moved or otherwise (software) tampered with, they wipe the key material. HSM's come in a variety of formfactors, ranging from SmartCards and small USB devices, to full size PCI cards and even 19" rackmountable server-like devices. The difference between all those devices is speed and storage capacity. Most commercial HSM's are certified to the <a href="https://en.wikipedia.org/wiki/FIPS_140-2">FIPS-140-2</a> standard.</p><p><img src="https://raymii.org/s/inc/img/eracom.jpg"/></p><blockquote><p>An Eracom HSM PCI card</p></blockquote><p>Since the private key material never leaves the device, all crypto operations are done on the device as well. The software usually communicates via <a href="https://en.wikipedia.org/wiki/PKCS_11">PKCS#11</a>, sometimes named <code>Cryptoki</code>. PKCS#11 is a software API for accessing cryptographic hardware like smart cards or HSM. PKCS#11 is NOT a hardware standard or hardware interface. PKCS#15 is a format of on-card structures that defines a "filesystem layout" for smart cards. PKCS#15 does not define how those structures are generated or written to the card. <code>OpenSSL</code> supports this, as well as CA software like <code>Dogtag/Redhat Certificate System</code> and <code>EJBCA</code> by using a driver/module. The software doesn't use the actual key files themselves but asks the device to do the operation. For example, the software asks the HSM to sign this data with the private key and the HSM returns the signed data. It can also encrypt and decrypt data using the keys. In most HSM's you have one or more so called <code>slots</code>. Each slot can have a keypair, RSA, EC, DSA, depending on the software on the HSM.</p><p><img src="https://raymii.org/s/inc/img/ultimaco.jpg"/></p><blockquote><p>An Ultimaco HSM device</p></blockquote><p>For example, when you <a href="https://raymii.org/s/software/OpenSSL_Command_Generator.html">generate a certificate for your website with OpenSSL</a> you get both a private key and a certificate. The latter might also be called the public key (RSA). By using the public key, others can verify that the connection is signed and encrypted with the private key. The server software, Apache for example, uses the two files directly to do the crypto. Now, when a HSM is used, the webserver has a driver loaded and asks the HSM to do the operation (signing, encrypting) instead of doing it itself. It uses the data the HSM returned, and thus never has access to the private key.</p><p><img src="https://raymii.org/s/inc/img/safenetpci.jpg"/></p><blockquote><p>An SafeNet Luna PCI 7000 HSM</p></blockquote><p>All major Certificate Authorities use HSM's to store their private keys. By doing so, they make sure the private keys used to sign certificates never get stolen or leak out. <a href="https://community.letsencrypt.org/t/ca-software-and-hsms-used/14600">Let's Encrypt</a> uses Gemalto HSM's. I've worked at a dutch certificate authority where <a href="http://www.safenet-inc.com/data-encryption/hardware-security-modules-hsms/protectserver-security-module/#tab2">Safenet Protectserver</a> devices were used. Actually, Eracom Protectserver, before they got bought up, then Safenet Protectserver. For this dutch CA, it was required to store keying material in an HSM by the CA/Browser forum and the <a href="https://cert.pkioverheid.nl/">Staat Der Nederlanden CA hierarchy, PKIOverheid</a>. A company doing public traffic transaction management (OV Chipkaart) uses devices by Thales, <a href="https://www.thales-esecurity.com/products-and-services/products-and-services/hardware-security-modules">nShield HSM's</a>.</p><p><img src="https://raymii.org/s/inc/img/safenethsm.jpg"/></p><blockquote><p>An SafeNet Luna 19" rack model HSM</p></blockquote><p>As you can see on the pictures, most HSM's have a COM port. These COM ports can be used to attach a smartcard reader. Most HSM's offer the option to backup the keying material inside the HSM to a smartcard.</p><p><img height="200" src="https://raymii.org/s/inc/img/omnikey.png" width="200"/></p><blockquote><p>An Omnikey 3121 USB Smartcard reader</p></blockquote><p>These backups are made in such a way that only another HSM, often only the same type of HSM device, can import these keys with a special password. The Safenet Protectservers called this a Transport Key, which was a long (32 bit) password used to export and import the key.</p><h3>Nitrokey and SmartCard HSM</h3><p><img height="500" src="https://raymii.org/s/inc/img/nitrokey2.jpg" width="600"/></p><blockquote><p>The Nitrokey HSM plugged into my ThinkPad</p></blockquote><p>The <a href="http://nitrokey.com">Nitrokey HSM</a> is an open hardware and open software device. It is a USB version of the <a href="http://www.smartcard-hsm.com/">SmartCard-HSM</a>. Both the <a href="http://www.smartcard-hsm.com/opensource.html">SmartCard-HSM</a> as the <a href="https://github.com/nitrokey">Nitrokey HSM</a> have sources available and are fully supported by the <a href="https://github.com/OpenSC/OpenSC/wiki/SmartCardHSM">OpenSC</a> project.</p><p>The Nitrokey is as far as I know one of the few fully open source devices. All the big HSM's I've used were either under NDA or completely closed source. In my opinion a device like this can only be secure when they are open source. The device supports up to 60 ECC GF(p) 256-bit keys and up to 48 RSA 2048-bit keys.</p><p>The device came in a sealed bag. The bag has only the device in it and a link to <a href="http://www.nitrokey.com/start">www.nitrokey.com/start</a> printed on it. The size is about that of an AA battery in height and around 1.5 cm width. It is black, the back has the FCC and CE logo's printed in white and the front has the Nitrokey logo and the text "Nitrokey HSM" printed. The device feels like a quality product and is very sturdy. Inserting the device in a USB port also keeps it secure and still, it all fits very well. Not loose or wiggly at all. When the device is inserted a red LED blinks once.</p><p>Do note that I'm not sponsored nor endorsed by Nitrokey or CardContact. <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you'll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p><h3>Software installation</h3><p>On Arch Linux you need to install the following packages:</p><pre><code>pacman -Sy ccid opensc pcsc-tools 
+</code></pre><p>Afterwards you need to start the <code>pcscd</code> service:</p><pre><code>systemctl enable pcscd
+systemctl start pcscd
+</code></pre><p>If you forgot to do so and already insterted the HSM, remove it, start pcscd and plug the device back in.</p><p>See the <a href="https://wiki.archlinux.org/index.php/Common_Access_Card">Arch Wiki</a> for more information.</p><p>On Ubuntu you need to install some software as well:</p><pre><code>apt-get install ccid pcscd pcsc-tools
+</code></pre><p>See the <a href="https://help.ubuntu.com/community/CommonAccessCard">Ubuntu Wiki</a> for more info.</p><p>After you've installed all the software and started services, plug the device in and check if it all went well.</p><p><code>dmesg</code> output when inserting the device:</p><pre><code>[701858.879567] usbhid: USB HID core driver
+[701858.890463] input: Nitrokey Nitrokey HSM as /devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.1/1-1.1:1.0/0003:20A0:4230.0001/input/input20
+[701858.942115] hid-generic 0003:20A0:4230.0001: input,hidraw0: USB HID v1.10 Keyboard [Nitrokey Nitrokey HSM] on usb-0000:00:1a.0-1.1/input0
+</code></pre><p><code>pcsc_scan</code> output on my laptop which also has a built-in Lenovo cardreader:</p><pre><code># pcsc_scan
+PC/SC device scanner
+V 1.4.26 (c) 2001-2011, Ludovic Rousseau &lt;ludovic.rousseau@free.fr&gt;
+Compiled with PC/SC lite version: 1.8.16
+Using reader plug'n play mechanism
+Scanning present readers...
+0: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+1: Lenovo Integrated Smart Card Reader 01 00
+
+Fri Jun 17 19:55:36 2016
+Reader 0: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+  Card state: Card inserted,
+</code></pre><p><code>opensc-tool</code> output:</p><pre><code># opensc-tool --list-readers
+# Detected readers (pcsc)
+Nr.  Card  Features  Name
+0    Yes             Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+1    No              Lenovo Integrated Smart Card Reader 01 00
+</code></pre><p>If you get no output but an error like:</p><pre><code>No smart card readers found.
+</code></pre><p>It might mean that <code>pcscd</code> is not running. Make sure it's started.</p><p>You can check the exact hardware and software revision of the device using the <code>pkcs11-tool --list-slots</code> command:</p><pre><code># pkcs11-tool --list-slots 
+Available slots:
+Slot 0 (0xffffffffffffffff): Virtual hotplug slot
+  (empty)
+Slot 1 (0x1): Lenovo Integrated Smart Card Reader 00 00
+  (empty)
+Slot 2 (0x5): Nitrokey Nitrokey HSM (010000000000000000000000) 01 00
+  token label        : SmartCard-HSM (UserPIN)
+  token manufacturer : www.CardContact.de
+  token model        : PKCS#15 emulated
+  token flags        : rng, login required, PIN initialized, token initialized
+  hardware version   : 24.13
+  firmware version   : 2.0
+  serial num         : DENK0100186
+</code></pre><h3>PKCS#11, #15 and OpenSC</h3><p>PKCS#11 is, as said, a software API for accessing cryptographic hardware like smart cards or HSM. PKCS#11 is NOT a hardware standard or hardware interface. PKCS#15 is a format of on-card structures that defines a "filesystem layout" for smart cards. PKCS#15 does not define how those structures are generated or written to the card.</p><h3>SO and User Pins</h3><p>Some functions on the HSM are protected by PIN codes. There are different access levels, most common SO (security officer) and user. Each slot can have a different user pin, but the SO pin remains the same for the HSM. You could say that the SO pin is like the root user.</p><p>An HSM needs to be initialized before it can be used. Initialization is a factory reset, where all keys, certificates and data elements are erased and you set up a new SO pin. When you receive an HSM it has factory default settings. For the Nitrokey HSM the SO pin is <code>3537363231383830</code>. This is not secure since it's a publicly known code. Therefore it needs to be changed to something else. But before we do that, first a few warnings.</p><h3>Warnings</h3><p>Please read the below parts. You might render your device bricked if you use it wrong, and there is no way of recovering a blocked/bricked Nitrokey HSM.</p><ul><li>The SO pin must be exactly 16 hexadecimal characters. It will be stored internally as an 8-byte key.</li><li>Store the SO pin in a safe place.</li><li>The user pin can be any length from 4 up to 16 ASCII characters.</li><li>You need the SO pin to (re)-initialize the device.</li><li>Wrong SO pins are counted. When you have entered 15 wrong SO pins, the device is forever blocked and unusable. This is non-recoverable. The counter can not be reset as well.</li><li>HSM firmware versions up to 1.0 will not allow you to change this SO PIN ever again. Check with <code>pkcs11-tool --list-slots</code>.</li></ul><p>So, TL;DR: NEVER ENTER THE WRONG SO PIN AND NEVER FORGET THE SO PIN.</p><h3>HSM Backups with a DKEK</h3><p>As said earlier, most HSM's offer a backup option. You can export the key material in a specific format readably by other HSM's of that type. The Safenet Protectserver wraps the material with a Transport Key.</p><p>The Nitrokey HSM and the SmartCard-HSM use a 'Device Key Encryption Key'. The DKEK is a 256-Bit AES key.</p><p>The DKEK must be set during initialization and before any other keys are generated. For a device initialized without a DKEK, keys can never be exported.</p><p>A DKEK is imported into a SmartCard-HSM using a preselected number of key shares. Each key share is given to a key custodian and only all key shares together assemble the DKEK. Key shares are individually imported and are assembled within the SmartCard-HSM. Key shares can be imported independently of time and location, allowing to pass a half-initialized device between key custodians until all shares have been imported.</p><p>The HSM supports an arbitrary number of DKEK shares. Typical values for the number of shares are:</p><ul><li>0: The HSM generates an internal DKEK (no backups).</li><li>1: The HSM requests one external DKEK share to be imported.</li><li>3: The HSM requests three external DKEK shares to be imported by three different key custodians.</li></ul><p>If you want to enable the option to create a backup, you must do so first, before initializing the HSM. In this example I will create one key share, but repeating the commands allows you to create more.</p><p>Create a DKEK share with the following command:</p><pre><code>sc-hsm-tool --create-dkek-share dkek-share-1.pbe
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+
+The DKEK share will be enciphered using a key derived from a user supplied password.
+The security of the DKEK share relies on a well chosen and sufficiently long password.
+The recommended length is more than 10 characters, which are mixed letters, numbers and
+symbols.
+
+Please keep the generated DKEK share file in a safe location. We also recommend to keep a
+paper printout, in case the electronic version becomes unavailable. A printable version
+of the file can be generated using "openssl base64 -in &lt;filename&gt;".
+Enter password to encrypt DKEK share : &lt;long password&gt;
+
+Please retype password to confirm : 
+
+Enciphering DKEK share, please wait...
+DKEK share created and saved to dkek-share-1.pbe
+</code></pre><p>The printable version looks like this:</p><pre><code># openssl base64 -in dkek-share-1.pbe 
+U2FsdGVkX19TK+VuViUAPOKAfVPE9puwK7yvJSInvPeBSld+Uh2hHli8RazbFVd3
+dGgOu7ahEjm6YzzYWtxMnA==
+</code></pre><p>For testing purposes, the password used above is: 123456789.</p><p>Create more key shares if needed.</p><h3>Initialize the HSM</h3><p>The following command initializes the HSM. The default SO pin for the Nitrokey HSM is <code>3537363231383830</code>. The initialization will be done with one DKEK share as described above.</p><p>Use the following command to initialize the HSM. If you have a different SO pin, please change the command. The user pin we provide will be set as the user pin.</p><pre><code>sc-hsm-tool --initialize --so-pin 3537363231383830 --pin 648219 --dkek-shares 1
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+</code></pre><p>The card is not initialized yet if you enabled DKEK shares. You can check how many DKEK shares need to be imported using the below command:</p><pre><code># sc-hsm-tool
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Version              : 2.0
+User PIN tries left  : 3
+DKEK shares          : 1
+DKEK import pending, 1 share(s) still missing
+</code></pre><p>Import the share(s) with the following command:</p><pre><code># sc-hsm-tool --import-dkek-share dkek-share-1.pbe 
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Enter password to decrypt DKEK share : &lt;long password&gt;
+
+Deciphering DKEK share, please wait...
+DKEK share imported
+DKEK shares          : 1
+DKEK key check value : 53CA37CEED5B227F
+</code></pre><p>The HSM is initialized now:</p><pre><code># sc-hsm-tool
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Version              : 2.0
+User PIN tries left  : 3
+DKEK shares          : 1
+DKEK key check value : 53CA37CEED5B227F
+</code></pre><p>Now that the HSM is initialized, we can start using it.</p><h3>Create a keypair</h3><p>The HSM supports the <a href="https://www.nitrokey.com/documentation/frequently-asked-questions#which-algorithms-and-maximum-key-length-are-supported">following</a> key types:</p><p>RSA:</p><ul><li>1024 bit</li><li>2048 bit</li></ul><p>ECDSA GF(p) 192-320 bit, elliptic curves:</p><ul><li>secp192r1 (aka prime192v1)</li><li>secp256r1 (aka prime256v1)</li><li>brainpoolP192r1</li><li>brainpoolP224r1</li><li>brainpoolP256r1</li><li>brainpoolP320r1</li><li>secp192k1</li><li>secp256k1 (the Bitcoin curve)</li></ul><p>Use the below command to generate an 2048 bit RSA keypair in the HSM:</p><pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --keypairgen --key-type rsa:2048 --id 10 --label "HSM RSA Key Remy"
+</code></pre><p>Output:</p><pre><code>Using slot 1 with a present token (0x1)
+Logging in to "SmartCard-HSM (UserPIN)".
+Key pair generated:
+Private Key Object; RSA 
+  label:      HSM RSA Key Remy
+  ID:         10
+  Usage:      decrypt, sign, unwrap
+Public Key Object; RSA 2048 bits
+  label:      HSM RSA Key Remy
+  ID:         10
+  Usage:      encrypt, verify, wrap
+</code></pre><p>If you want to generate an EC key, you can do that as well:</p><pre><code>pkcs11-tool --module opensc-pkcs11.so -l --keypairgen --key-type EC:prime256v1 --id 20 --label "HSM EC Key Remy"
+</code></pre><p>Output:</p><pre><code>Using slot 1 with a present token (0x1)
+Logging in to "SmartCard-HSM (UserPIN)".
+Please enter User PIN: 
+Key pair generated:
+Private Key Object; EC
+  label:      HSM EC Key Remy
+  ID:         20
+  Usage:      sign, derive
+Public Key Object; EC  EC_POINT 256 bits
+  EC_POINT:   044104a98140c570507d0fcd9e0d3bbe2b2eea22a591b5b1862a700d1bddfebd85b3708744c870da457f45c23bef634a941ab344b933a74bbf8e3772b77150afcc4f08
+  EC_PARAMS:  06082a8648ce3d030107
+  label:      HSM EC Key Remy
+  ID:         20
+  Usage:      verify
+</code></pre><p>You can save more than one key by specifying a different ID. You can list all the current objects as well:</p><pre><code># pkcs11-tool --list-objects
+</code></pre><p>Output:</p><pre><code>Using slot 1 with a present token (0x1)
+Public Key Object; RSA 2048 bits
+  label:      HSM RSA Key Remy
+  ID:         10
+  Usage:      none
+Public Key Object; EC  EC_POINT 256 bits
+  EC_POINT:   044104a98140c570507d0fcd9e0d3bbe2b2eea22a591b5b1862a700d1bddfebd85b3708744c870da457f45c23bef634a941ab344b933a74bbf8e3772b77150afcc4f08
+  EC_PARAMS:  06082a8648ce3d030107
+  label:      HSM EC Key Remy
+  ID:         20
+  Usage:      none
+</code></pre><p>You can use the <code>test</code> option as well to make sure everything works correctly:</p><pre><code>pkcs11-tool --test --login --pin 648219
+</code></pre><p>Output:</p><pre><code>Using slot 1 with a present token (0x1)
+C_SeedRandom() and C_GenerateRandom():
+  seeding (C_SeedRandom) not supported
+  seems to be OK
+Digests:
+  all 4 digest functions seem to work
+  MD5: OK
+  SHA-1: OK
+  RIPEMD160: OK
+Signatures (currently only RSA signatures)
+  testing key 0 (HSM RSA Key Remy) 
+  all 4 signature functions seem to work
+  testing signature mechanisms:
+    RSA-X-509: OK
+    RSA-PKCS: OK
+    SHA1-RSA-PKCS: OK
+    MD5-RSA-PKCS: OK
+    RIPEMD160-RSA-PKCS: OK
+    SHA256-RSA-PKCS: OK
+warning: PKCS11 function C_GetAttributeValue(MODULUS_BITS) failed: rv = CKR_ATTRIBUTE_TYPE_INVALID (0x12)
+
+  testing key 1 (0 bits, label=HSM EC Key Remy) with 1 signature mechanism -- can't be used to sign/verify, skipping: can't obtain modulus
+Verify (currently only for RSA):
+  testing key 0 (HSM RSA Key Remy)
+    RSA-X-509: OK
+    RSA-PKCS: OK
+    SHA1-RSA-PKCS: OK
+    MD5-RSA-PKCS: OK
+    RIPEMD160-RSA-PKCS: OK
+  testing key 1 (HSM EC Key Remy) with 1 mechanism
+warning: PKCS11 function C_GetAttributeValue(MODULUS_BITS) failed: rv = CKR_ATTRIBUTE_TYPE_INVALID (0x12)
+
+ -- can't get the modulus length, skipping
+Unwrap: not implemented
+Decryption (RSA)
+  testing key 0 (HSM RSA Key Remy) 
+    RSA-X-509: OK
+    RSA-PKCS: OK
+  testing key 1 (HSM EC Key Remy)  -- can't be used to decrypt, skipping
+No errors
+</code></pre><h3>Backing up and restoring the keys with a DKEK</h3><p>Now that we have some keys in the HSM, we want to make a backup. Since we've generated a DKEK earlier, we can use that to create a backup of the material in the HSM. If you are restoring a backup to another HSM, make sure you (re)initialize the HSM and import the correct DKEK first.</p><p>The backup and restore require that we know the key reference identifier (key ref). We can find that with the <code>pkcs15-dump</code> command:</p><pre><code>pkcs15-tool --dump
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+PKCS#15 Card [SmartCard-HSM]:
+  Version        : 0
+  Serial number  : DENK0100186
+  Manufacturer ID: www.CardContact.de
+  Flags          : 
+
+[...]
+
+Private RSA Key [HSM RSA Key Remy]
+  Object Flags   : [0x3], private, modifiable
+  Usage          : [0x2E], decrypt, sign, signRecover, unwrap
+  Access Flags   : [0x1D], sensitive, alwaysSensitive, neverExtract, local
+  ModLength      : 2048
+  Key ref        : 1 (0x1)
+  Native         : yes
+  Path           : e82b0601040181c31f0201::
+  Auth ID        : 01
+  ID             : 10
+  MD:guid        : {984bcc96-6524-74f8-535a-83c920612f39}
+    :cmap flags  : 0x0
+    :sign        : 0
+    :key-exchange: 0
+
+Private EC Key [HSM EC Key Remy]
+  Object Flags   : [0x3], private, modifiable
+  Usage          : [0x10C], sign, signRecover, derive
+  Access Flags   : [0x1D], sensitive, alwaysSensitive, neverExtract, local
+  FieldLength    : 256
+  Key ref        : 2 (0x2)
+  Native         : yes
+  Path           : e82b0601040181c31f0201::
+  Auth ID        : 01
+  ID             : 20
+  MD:guid        : {5c924cee-37e3-865e-951b-975cfaf95cad}
+    :cmap flags  : 0x0
+    :sign        : 0
+    :key-exchange: 0
+
+[...]
+</code></pre><p>In my example the RSA keypair has key ref 1 and the EC keypair has key ref 2. To wrap key 1 to an encrypted file use the following command:</p><pre><code>sc-hsm-tool --wrap-key wrap-key-1.bin --key-reference 1 --pin 648219
+</code></pre><p>To restore the key, use the unwap command:</p><pre><code>sc-hsm-tool --unwrap-key wrap-key-1.bin --key-reference 1 --pin 648219
+</code></pre><p>Replace the key ref to backup other keys.</p><p>We can test the backup by, after creating a backup first, deleting the key material in the slot:</p><pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type cert --id 10
+pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type privkey --id 10
+pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type data --label "HSM RSA Key Remy"
+</code></pre><p>If you use the <code>pkcs15-tool --dump</code> command or the <code>pkcs11-tool --list-objects</code> command you see that the key is gone:</p><pre><code>pkcs11-tool --list-objects
+</code></pre><p>Output:</p><pre><code>Using slot 1 with a present token (0x1)
+Public Key Object; EC  EC_POINT 256 bits
+  EC_POINT:   044104a98140c570507d0fcd9e0d3bbe2b2eea22a591b5b1862a700d1bddfebd85b3708744c870da457f45c23bef634a941ab344b933a74bbf8e3772b77150afcc4f08
+  EC_PARAMS:  06082a8648ce3d030107
+  label:      HSM EC Key Remy
+  ID:         20
+  Usage:      none
+</code></pre><p>Restore the key using the above command and it should be back:</p><pre><code>sc-hsm-tool --unwrap-key wrap-key-1.bin --key-reference 1 --pin 648219
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Wrapped key contains:
+  Key blob
+  Private Key Description (PRKD)
+  Certificate
+Key successfully imported
+</code></pre><p>The restore worked, the key is back an can be used again:</p><pre><code>pkcs11-tool --list-objects
+</code></pre><p>Output:</p><pre><code>Using slot 1 with a present token (0x1)
+Public Key Object; RSA 2048 bits
+  label:      HSM RSA Key Remy
+  ID:         10
+  Usage:      none
+Public Key Object; EC  EC_POINT 256 bits
+  EC_POINT:   044104a98140c570507d0fcd9e0d3bbe2b2eea22a591b5b1862a700d1bddfebd85b3708744c870da457f45c23bef634a941ab344b933a74bbf8e3772b77150afcc4f08
+  EC_PARAMS:  06082a8648ce3d030107
+  label:      HSM EC Key Remy
+  ID:         20
+  Usage:      none
+</code></pre><h3>Using the keys</h3><p>You can get the public keys out of the device by using the <code>pkcs15-tool</code> command:</p><pre><code># pkcs15-tool --read-public-key 10
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzmCaH0j9ujAo83EIZBlK
+U7rJGcoKd4l93HJd7flufUlrwN7QaGuyzO4scgUps97fgWFML7ZIn1RJaJBIPExb
+Mh9dHRlxsAmJoPNmiqFD86wbegRZJsvsfe/HlEZDUuDa25Ef52cOLipetJ7dUWP8
+rsXART+7Ferl9yjMEMcfciaTPGuyo5V1Jvk1xh7DR5pMk0YGk5ZZVbIha79Ya8ut
+gj3nxR58Je63iHcY9RGpb/96UpRKJ2D98LCTQKPUZvF6wY3PPkWroLdZIvwZGd3D
+HgSw/bw9nFTgMXHbvw/xJ2B4aDmnRlY27gKzMXicEEbEqZcuMWVOKaatcaD+kmOV
+cQIDAQAB
+-----END PUBLIC KEY-----
+</code></pre><p>EC Key:</p><pre><code># pkcs15-tool --read-public-key 20
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEqYFAxXBQfQ/Nng07visu6iKlkbWx
+hipwDRvd/r2Fs3CHRMhw2kV/RcI772NKlBqzRLkzp0u/jjdyt3FQr8xPCA==
+-----END PUBLIC KEY-----
+</code></pre><p>To use the HSM with OpenSSL we need to create a config file first. Plate the contents of the below file in, for example, <code>hsm.conf</code>:</p><pre><code># PKCS11 engine config
+openssl_conf = openssl_def
+
+[openssl_def]
+engines = engine_section
+
+[req]
+distinguished_name = req_distinguished_name
+
+[req_distinguished_name]
+# empty.
+
+[engine_section]
+pkcs11 = pkcs11_section
+
+[pkcs11_section]
+engine_id = pkcs11
+dynamic_path = /usr/lib/engines/engine_pkcs11.so
+MODULE_PATH = /usr/lib/opensc-pkcs11.so
+PIN = 648219
+init = 0
+</code></pre><p>You can omit the <code>PIN</code> variable if you don't want to include that in a config file. I had to check the filenames in <code>/usr/lib/engines/</code> to make sure that the correct one was loaded. Test it using OpenSSL:</p><pre><code>OPENSSL_CONF=./hsm.conf openssl engine  
+</code></pre><p>Output:</p><pre><code>(dynamic) Dynamic engine loading support
+(pkcs11) pkcs11 engine
+</code></pre><p>We can create a new certificate signing request, The <code>1:10</code> is a form of <code>slotid:keyid</code>.</p><pre><code>OPENSSL_CONF=./hsm.conf openssl req -engine pkcs11 -keyform engine -new -key 1:10 -sha256 -out "raymii.org.csr" -subj "/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Dept/CN=raymii.org"
+</code></pre><p>Change the parameters to fit your subject. You can send this CSR to a CA to get it signed, but you can also generate a self signed certificate:</p><pre><code>OPENSSL_CONF=./hsm.conf openssl req -engine pkcs11 -keyform engine -new -key 1:10 -nodes -days 3560 -x509 -sha256 -out "raymii.org.pem" -subj "/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Dept/CN=raymii.org"
+</code></pre><p>The difference in the last command is that the <code>-nodes</code>, <code>-x509</code> and -<code>days</code> parameters are added, which generate a self singed certificate instead of a CSR.</p><p>You can view the CSR with the following command:</p><pre><code>openssl req -noout -text -in raymii.org.csr 
+</code></pre><p>Output:</p><pre><code>Certificate Request:
+    Data:
+        Version: 0 (0x0)
+        Subject: C=NL, ST=Zuid Holland, L=Rotterdam, O=Sparkling Network, OU=IT Dept, CN=raymii.org
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+[...]
+</code></pre><p>You can view the self signed certificate with the following command:</p><pre><code>openssl x509 -noout -text -in raymii.org.pem 
+</code></pre><p>Output:</p><pre><code>Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number: 18137581533109102111 (0xfbb5a24eada7261f)
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=NL, ST=Zuid Holland, L=Rotterdam, O=Sparkling Network, OU=IT Dept, CN=raymii.org
+        Validity
+            Not Before: Jun 18 09:26:45 2016 GMT
+            Not After : Mar 18 09:26:45 2026 GMT
+        Subject: C=NL, ST=Zuid Holland, L=Rotterdam, O=Sparkling Network, OU=IT Dept, CN=raymii.org
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+[...]
+</code></pre><p>Sadly, both Apache and NGINX do not support PKCS#11 in their ssl module. For Apache you can use <code>mod_nss</code> to use the certificates from the HSM.</p><p>You can however use the HSM to encrypt and decrypt data. Please <a href="https://raymii.org/s/tutorials/Encrypt_and_decrypt_files_to_public_keys_via_the_OpenSSL_Command_Line.html">read my article on encryption with OpenSSL first</a> since that covers basics like why an RSA key is not suitable for large files.</p><p>I've also written an article on <a href="https://raymii.org/s/tutorials/Sign_and_verify_text_files_to_public_keys_via_the_OpenSSL_Command_Line.html">Signing data with OpenSSL</a>. Read that as well.</p><p>To encrypt data using your HSM public key (which we exported earlier with <code>pkcs15-tool --read-public-key 10</code>), use the following command:</p><pre><code>openssl rsautl -inkey publickey.pem -pubin -encrypt -pkcs -in smallfile -out encryptedsmallfile.pkcs1
+</code></pre><p>The data will be wrapped in a PKCS#1 (binary) format.</p><p>If you want to decrypt the data, use the following command:</p><pre><code>pkcs15-crypt --decipher --key 10 --input encryptedsmallfile.pkcs1 --pkcs1 --raw &gt; decryptedsmallfile
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Enter PIN [UserPIN]: &lt;648219&gt;
+</code></pre><p>The two files should be the same:</p><pre><code>$ sha256sum decryptedsmallfile 
+609ac352197628e57552aac9e66562be9bb8d746826107e15ff4b04e0efdcbdb  decryptedsmallfile
+
+$ sha256sum smallfile 
+609ac352197628e57552aac9e66562be9bb8d746826107e15ff4b04e0efdcbdb  smallfile
+</code></pre><p>As described in the two articles, you need to create a small random file and use that as the key to encrypt a file using symmetric encryption. asymmetric encryption like RSA is not suitable for large files. Please make sure you read both the articles to understand the subject, and then use this article to use the HSM.</p><h3>SSH Keys with the HSM</h3><p>OpenSSH has support for PKCS#11, so we can use the HSM for SSH Key based authentication. The private key never leaves the HSM so this is more secure than a password on a file. You will know when someone is brute forcing your HSM, because you lost possession of it. When someone steals your private key, you might not even know it. <a href="https://blog.mozilla.org/security/2015/08/06/firefox-exploit-found-in-the-wild/">Remember the firefox exploit</a> that steals private keys and passwords? If you are using the HSM this will never be possible.</p><p>It's best to create a seperate key for SSH:</p><pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --keypairgen --key-type rsa:2048 --id 30 --label "HSM SSH Key Remy"
+</code></pre><p>Output:</p><pre><code>Using slot 1 with a present token (0x1)
+Logging in to "SmartCard-HSM (UserPIN)".
+Key pair generated:
+Private Key Object; RSA 
+  label:      HSM SSH Key Remy
+  ID:         30
+  Usage:      decrypt, sign, unwrap
+Public Key Object; RSA 2048 bits
+  label:      HSM SSH Key Remy
+  ID:         30
+  Usage:      encrypt, verify, wrap
+</code></pre><p>We need to use <code>pkcs15-tool</code> to get the public key in a format usable by openSSH. 30 is the ID we gave, you might need to use the <code>pkcs15-tool --dump</code> command to lookup the ID if you don't know it.</p><pre><code>pkcs15-tool --read-ssh-key 30
+</code></pre><p>Output:</p><pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/HG1cG6ecGnadde9g4aZCWuL1dzsgOKUstyP7yUAclEtd1GwgQKSrVPixp7jllvoW0kCCtvsT8JMV+pEytcenOpfO06n4DvqjJ1aNMqQK6xw3CeJXz1TXJe7Z7L722/w96bHioZuSRBWumAAcGUoANd/WQ3MXNAmocgvW/WGSnl3kb9Vif7hzirecmcFSaU3djeEXpu42wZG6GGdw9WlvrXV1AsrE0mLQxyZmCEOs6CF0/cyaHuUE24Jz6oOfKkeYjCQgvBUK0D1MU3odnisbvfVLGJuF9RPMBY20Hey8z6dUXQV2WMeknV9/vN2n7Nk7pxOSViIQQ3w9rc7y1f4J HSM SSH Key Remy
+</code></pre><h4>EC keys to OpenSSH</h4><p>For EC generated keys the <code>pkcs15-tool</code> doesn't seem to work. However, because all keys can be converted one way or another we can dump the EC public key and convert it into an SSH compatible key. First dump the EC public key to a file. In this case I generated an EC private key with ID 2 and used the following command to get the public key:</p><pre><code>pkcs15-tool --read-public-key 2 &gt; eckey.pub
+</code></pre><p>Then convert the <code>eckey.pub</code> file into something OpenSSH can handle:</p><pre><code>ssh-keygen -i -m PKCS8 -f eckey.pub 
+</code></pre><p>Output:</p><pre><code>ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKsWLJkl1Dr7IdLPrLpCBtoEFy+qYd/fEu9Mpga1utwMbCU671NWGH3Ppo2q/tzYFq4Fm/jgRHBHFGJ5HrwL1nM= hsm
+</code></pre><p>Although using that doesn't seem to work:</p><pre><code>$ pkcs15-tool --verbose --read-ssh-key 2 
+Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Connecting to card in reader Nitrokey Nitrokey HSM (010000000000000000000000) 00 00...
+Using card driver SmartCard-HSM.
+Trying to find a PKCS#15 compatible card...
+Found SmartCard-HSM!
+Reading ssh key with ID '2'
+</code></pre><p>And logging in fails as well with EC keys:</p><pre><code>$ ssh -o "PKCS11Provider opensc-pkcs11.so" root@server
+C_GetAttributeValue failed: 18
+no keys
+root@server's password: 
+</code></pre><p>I've <a href="https://github.com/OpenSC/OpenSC/issues/803">raised an issue</a> to see how to get EC keys and OpenSSH working.</p><p><strong>Update:</strong> <code>Unfortunately OpenSSH PKCS#11 interface does not support ECC</code>. The issue was updated and we now know that OpenSSH doesn't support ECC via PKCS#11.</p><p>This public key can be placed in the <code>~/.ssh/authorized_keys</code> file on your servers. I spun up a new <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS to test it. With this referral link you'll get a $5 VPS for 2 months free (as in, you get $10 credit).</a></p><p>Digital Ocean automatically places the ssh key in the authorized_keys file, if you need to do that yourself you can use the following command:</p><pre><code>echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/HG1cG6ecGnadde9g4aZCWuL1dzsgOKUstyP7yUAclEtd1GwgQKSrVPixp7jllvoW0kCCtvsT8JMV+pEytcenOpfO06n4DvqjJ1aNMqQK6xw3CeJXz1TXJe7Z7L722/w96bHioZuSRBWumAAcGUoANd/WQ3MXNAmocgvW/WGSnl3kb9Vif7hzirecmcFSaU3djeEXpu42wZG6GGdw9WlvrXV1AsrE0mLQxyZmCEOs6CF0/cyaHuUE24Jz6oOfKkeYjCQgvBUK0D1MU3odnisbvfVLGJuF9RPMBY20Hey8z6dUXQV2WMeknV9/vN2n7Nk7pxOSViIQQ3w9rc7y1f4J HSM SSH Key Remy' &gt;&gt; ~/.ssh/authorized_keys
+</code></pre><p>If I try to login without specifying the HSM I will be prompted for a password or be rejected:</p><p>When we tell OpenSSH to use the HSM, we get asked for the HSM pin and are logged in:</p><pre><code>$ ssh -o "PKCS11Provider opensc-pkcs11.so" root@testdroplet
+C_GetAttributeValue failed: 18
+Enter PIN for 'SmartCard-HSM (UserPIN)': &lt;648219&gt;
+Welcome to Ubuntu 16.04 LTS (GNU/Linux 4.4.0-22-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com/
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+
+root@hsmtest:~# 
+</code></pre><p>If you add the below line to the top of your <code>~/.ssh/config</code> file, OpenSSH will automatically use the HSM if needed:</p><pre><code># vim ~/.ssh/config
+PKCS11Provider opensc-pkcs11.so
+</code></pre><p>A short form for the command line is the <code>-I</code> flag, which is the same as the long <code>-o</code> flag:</p><pre><code>ssh -I opensc-pkcs11.so root@testdroplet
+</code></pre><p>You can also add the key to your <code>ssh-agent</code> if you happen to use an agent:</p><pre><code>ssh-add -s opensc-pkcs11.so
+</code></pre><p>Output:</p><pre><code>Enter passphrase for PKCS#11: &lt;648219&gt;
+Card added: opensc-pkcs11.so
+</code></pre><p>The passphrase is the user pin. You can now login to machines without entering the HSM pin every time. Check all the keys in the agent with the following command:</p><pre><code>ssh-add -l                 
+</code></pre><p>Output:</p><pre><code>2048 SHA256:ycaGD3Sdnt82yTnPs14uncaGDjDwEqCMOdnVM /home/remy/.ssh/id_rsa (RSA)
+2048 SHA256:gRJCXat84Ad56Q8qtLxdNjswdZDFLy8w/7N3ObreV5M opensc-pkcs11.so (RSA)
+2048 SHA256:eXXaUUVJzjI6rm8H9/qIB51UWhZCIp+hqi5JEhVGB40 opensc-pkcs11.so (RSA)
+</code></pre><p>My own private key is in there as well as the two slots we created earlier.</p><p>When you are done, remove the key from the ssh-agent:</p><pre><code>ssh-add -e opensc-pkcs11.so
+</code></pre><p>Output:</p><pre><code>Card removed: opensc-pkcs11.so
+</code></pre><h3>Using the HSM for Thunderbird with S/MIME</h3><p>If you want to sign your email using S/MIME and the HSM you need to generate a keypair and a certificate. Make sure your email address is in the label:</p><pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --keypairgen --key-type rsa:2048 --id 40 --label "antispam@relst.nl"
+</code></pre><p>Output:</p><pre><code>Using slot 1 with a present token (0x1)
+Logging in to "SmartCard-HSM (UserPIN)".
+Key pair generated:
+Private Key Object; RSA 
+  label:      antispam@relst.nl
+  ID:         40
+  Usage:      decrypt, sign, unwrap
+Public Key Object; RSA 2048 bits
+  label:      antispam@relst.nl
+  ID:         40
+  Usage:      encrypt, verify, wrap
+</code></pre><p>Create a certficate signing request based on this key. Make sure you have the <code>hsm.conf</code> file for OpenSSL loaded as we did above.</p><pre><code>OPENSSL_CONF=./hsm.conf openssl req -engine pkcs11 -keyform engine -new -key 1:40 -sha256 -out "antispam.relst.nl.csr" -subj "/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Dept/CN=relst.nl/emailAddress=antispam@relst.nl"
+</code></pre><p>Note the extra <code>emailAddress</code> value in the certificate subject. Make sure that the <code>CN</code> domain is the same as the domain in the email addres. Also make sure you specify the correct <code>slot:id</code>, in our case, slot 1 and ID 40.</p><p>You can now send this certificate signing request to a certificate authority and get an actual certificate back. Comodo and Globalsign provide certificates for S/MIME.</p><p>If you want to generate a self singed certificate you can do that as well:</p><pre><code>OPENSSL_CONF=./hsm.conf openssl req -engine pkcs11 -keyform engine -new -key 1:40 -nodes -x509 -days 3650 -sha256 -out "antispam.relst.nl.pem" -subj "/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Dept/CN=relst.nl/emailAddress=antispam@relst.nl"
+</code></pre><p>I've got an actual certificate from Comodo via <a href="https://xolphin.nl">Xolphin</a>, which you can inspect with the following command:</p><pre><code>openssl x509 -noout -text -inform der -in antispam.relst.nl.pem 
+</code></pre><p>Output:</p><pre><code>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            ff:93:fe:11:a3:e2:c2:58:a8:b3:e9:07:cb:d5:94:2b
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=GB, ST=Greater Manchester, L=Salford, O=COMODO CA Limited, CN=COMODO SHA-256 Client Authentication and Secure Email CA
+        Validity
+            Not Before: Jun 18 00:00:00 2016 GMT
+            Not After : Jun 18 23:59:59 2017 GMT
+        Subject: C=NL, CN=Remy van Elst/emailAddress=antispam@relst.nl
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+</code></pre><p>If you have completed the validation of the certificate at the certificate provider or you have the self signed certificate ready, we can proceed to load the certificate into the HSM. We need to load the certificate in the HSM so that Thunderbird is able to use it. Otherwise there would just be a public key.</p><p>The HSM only accepts <code>DER</code> format, so first convert the <code>PEM</code> file you generated or received from your CA to <code>DER</code>:</p><pre><code>openssl x509 -in antispam.relst.nl.pem -out antispam.relst.nl.der -outform der
+</code></pre><p>The below command writes the certificate into the HSM:</p><pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --write-object antispam.relst.nl.der --type cert --id 40
+</code></pre><p>Output:</p><pre><code>Using slot 1 with a present token (0x1)
+Created certificate:
+Certificate Object, type = X.509 cert
+  label:      Certificate
+  ID:         40
+</code></pre><p>Make sure the ID is correct.</p><p>Start up Thunderbird and go to the <code>Settings/Preferences</code> menu. Open the <code>Advanced</code> tab and select the <code>Security</code> Tab. Click the <code>Security Devices</code> button:</p><p><img src="https://raymii.org/s/inc/img/tbhsm2.png"/></p><p>Select the <code>SmartCard-HSM (UserPIN)</code> under <code>opensc</code> and click the <code>Login</code> button. Enter the User PIN (648219). The status should change from <code>Not logged in</code> to <code>Logged in</code> Click the <code>OK</code> button.</p><p><img src="https://raymii.org/s/inc/img/tbhsm1.png"/></p><p>To view the certificate, select the <code>View Certificates</code> button. Your certificate should be loaded under the <code>Your Certificates</code> tab, with <code>SmartCard-HSM</code> as it's Security Device.</p><p><img src="https://raymii.org/s/inc/img/tbhsm3.png"/></p><p>Open up the <code>Account Settings</code> window and under the correct email account, select <code>Security</code>. Under <code>Digital Signing</code> and <code>Encryption</code> select the correct certificate in the HSM:</p><p><img src="https://raymii.org/s/inc/img/tbhsm4.png"/></p><p>Save all settings and send yourself a test email. You should be able to sign (or encrypt if you have someone elses S/MIME key) the message and while sending your HSM LED turns on.</p><h3>Deleting objects from the HSM</h3><p>If you are done with testing or want to free up space on the HSM you can remove objects from it. You can delete certificates and the private keys, either by ID or label. For example, when your S/MIME certificate is expired and you need to load up a new one, delete the old one first.</p><p>The below command removes a certificate from ID 10:</p><pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type cert --id 10
+</code></pre><p>The below command removes a private key from ID 10:</p><pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type privkey --id 10
+</code></pre><p>The below command removes the data from label 'HSMdata':</p><pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type data --label HSMdata
+</code></pre><p>You can check before and after a delete command if the object is gone with the below command:</p><pre><code>pkcs11-tool --list-objects
+</code></pre><p>Do note that when you remove a privkey you also remove the certificate and any data.</p><h3>Apache with mod_nss</h3><p><img src="https://raymii.org/s/inc/img/hsm-icon.png"/></p><p>I've written a seperate guide on using the HSM with Apache. Please <a href="https://raymii.org/s/articles/Nitrokey_HSM_in_Apache_with_mod_nss.html">read the full guide here</a>.</p></div><hr/>Tags: <a class="link" href="../tags/cryptoki.html">cryptoki,</a><a class="link" href="../tags/hsm.html">hsm,</a><a class="link" href="../tags/nitrokey.html">nitrokey,</a><a class="link" href="../tags/openssl.html">openssl,</a><a class="link" href="../tags/pkcs11.html">pkcs11,</a><a class="link" href="../tags/safenet.html">safenet,</a><a class="link" href="../tags/smartcard.html">smartcard,</a><a class="link" href="../tags/smartcard-hsm.html">smartcard-hsm,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="en"><head><title>Clear Uncluttered SSH client config with Ansible - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Clear Uncluttered SSH client config with Ansible</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../blog/index.html">Blog</a></li><li><a class="link" href="Clear_Uncluttered_SSH_client_config_with_Ansible.html">Clear Uncluttered SSH client config with Ansible</a></li></ul><p><small>21-12-2014</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>Openssh allows you to configure parameters like username, port, proxycommand, key and more in the ~/.ssh/config file. If you have many servers this file can become cluttered and maintaining it can become a not so nice task. This simple guide shows you how you can use a conf.d directory with seperate smaller files which gets converted to the big config file by Ansible.</p><p>I need to manage a lot of linux servers. With a lot I mean almost a thousand servers. Some of those servers require VPN, some of those servers are clusters and some of those servers require a seperate key, username, port or configuration. I don't like the big <code>~/.ssh/config</code> file which, in my case, is extremely large.</p><p>I much rather prefer the <code>conf.d</code> type structure with a lot of small files. OpenSSH does not support this, however, Ansible has the <a href="http://docs.ansible.com/assemble_module.html">assemble</a> module which, given a set of files or a folder, assembles a configuration file based on all the given files.</p><p>Using this Ansible module together with a <code>local connection</code> we can assemble the configuration file on our own machine.</p><p>Create the <code>~/.ssh/conf.d</code> folder:</p><pre><code>mkdir ~/.ssh/conf.d/ 
+</code></pre><p>Split your configuration up in smaller parts, like below:</p><pre><code>$ ls -larth ~/.ssh/conf.d
+total 36M
+-rw-r--r-- 1 user user  396 Sep 27 14:07 defaults
+-rw-r--r-- 1 user user  216 Sep 27 14:07 client1
+-rw-r--r-- 1 user user 4812 Dec 10 04:03 client2
+-rw-r--r-- 1 user user  216 oct  5 08:37 client3
+</code></pre><p>Copy the following Ansible playbook locally:</p><pre><code>- name: SSH config assembler
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+
+  - assemble: src=/home/user/.ssh/conf.d dest=/home/user/.ssh/config
+</code></pre><p>Don't forget to change the username to yours.</p><p>And run it:</p><pre><code>ansible local_ssh.yml
+</code></pre><p>You now have the big <code>~/.ssh/config</code> file generated out of the small files.</p><p>My <code>defaults</code> file contains the following:</p><pre><code>###################################
+# Start Defaults                  #
+###################################
+
+ForwardX11 yes
+GSSAPIAuthentication no
+HashKnownHosts yes
+
+Host *
+  ConnectTimeout 90
+  ServerAliveInterval 10
+  ControlMaster auto
+  ControlPersist yes
+  ControlPath ~/.ssh/socket-%r@%h:%p
+  RemoteForward 8022 localhost:22
+</code></pre><p>The <code>clientX</code> files contain specific client configuration:</p><pre><code>Host web-jumphost
+  Hostname 10.39.179.2
+  User remy
+  IdentityFile ~/.ssh/id_rsa_clientX
+  Port 22
+
+Host web22 web22.example.org
+  Hostname 10.39.100.5
+  ProxyCommand ssh -W %h:%p -i ~/.ssh/id_rsa web-jumphost
+  User remy
+  IdentityFile ~/.ssh/id_rsa_clientX
+  Port 22
+</code></pre><p>To read more about the ssh client config file, see the manual page: <a href="http://linux.die.net/man/5/ssh_config">http://linux.die.net/man/5/ssh_config</a></p></div><hr/>Tags: <a class="link" href="../tags/ansible.html">ansible,</a><a class="link" href="../tags/bash.html">bash,</a><a class="link" href="../tags/openssh.html">openssh,</a><a class="link" href="../tags/ssh.html">ssh,</a><a class="link" href="../tags/ubuntu.html">ubuntu,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

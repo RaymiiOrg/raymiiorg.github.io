@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="en"><head><title>Running Adventure on the DEC PDP-8 with SIMH - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Running Adventure on the DEC PDP-8 with SIMH</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../articles/index.html">Articles</a></li><li><a class="link" href="Running_ADVENT-on-the-PDP-8-with-SIMH.html">Running Adventure on the DEC PDP-8 with SIMH</a></li></ul><p><small>23-07-2015</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p><a href="https://raymii.org/s/inc/img/pdp-8-i.jpg"><img alt="pdp-8" height="320" src="https://raymii.org/s/inc/img/pdp-8-i.jpg" width="480"/></a></p><ul><li>An original PDP-8/i.</li></ul><p>In this guide I'll show you how run the classic Colossal Cave Adventure game on a PDP-8, emulated by the SIMH emulator. The PDP-8 was an 12 bit minicomputer made in 1964 by DEC, the Digital Equipment Corporation. We will install and set up SIMH, the emulator with a RK05 diskimage running OS/8. We will use FORTRAN on OS/8 to load ADVENTURE, then we use our brain to play the game. As a bonus, I also show you how to edit files using EDIT, and show you a bit of the OS/8 system.</p><h3>Introduction</h3><p>I've recently accuired a PDP-8 remake, the <a href="http://obsolescence.wix.com/obsolescence#!pidp-8/cbie">PiDP-8/i by Oscar Vermeulen</a>. This beautiful piece of hand made hardware uses a Raspberry Pi to emulate a PDP-8 with SIMH. The front panel actually works, you can use the switched to load paper tapes, the RIM and BIN loader and all the other legacy goodness. It is a bit smaller than a real PDP-8, it is scale 2:3. The real PDP-8 has 1.5 cm switched, the PiDP-8 has 1.0 cm switches.</p><p>I have an interest in legacy systems like the PDP-11, VAX/VMS and other mainframes and minicomputers. The PiDP-8/i allows me to have a small piece of this legacy myself. It also motivated me to learn more about the PDP-8 and it's hard and software. It also inspired me to write this article about it. Since these systems are way older than me, emulation and recreation are the only way for me to use them, sadly.</p><p>I really encourage you to check out the PiDP-8. Order one as well, you can either get a kit to construct yourself, or order an assembled version. Support this beautiful piece of work!</p><p><a href="https://raymii.org/s/inc/img/pidp-8-i.jpg"><img alt="pidp-8" height="320" src="https://raymii.org/s/inc/img/pidp-8-i.jpg" width="480"/></a></p><ul><li>The <a href="http://obsolescence.wix.com/obsolescence#!pidp-8/cbie">PiDP-8/i remake by Oscar Vermeulen</a>.</li></ul><p>SIMH is an emulator which not only emulates a PDP-8, but a lot more older mainframes and minicomputers. See the <a href="http://simh.trailing-edge.com/">website</a> for more information about SIMH.</p><p>This guide shows you how to run the classic Colossal Cave ADVENTURE game on an emulated PDP-8 with SIMH. We will use Ubuntu 14.04 as our host operating system, but any OS that runs SIMH will do.</p><p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you'll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p><p>Colossal Cave was written by Willie Crowther and quickly became one of the most popular games of that time. Because it was written in FORTRAN it was ported to various machines, even to the IBM-PC and the Apple II.</p><p>The PDP-8 can run plain paper tapes with software, but later in it's lifetime it got access to magnetic disks and therefore is able to run actual operating systems. The ADVENTURE game runs, via FORTRAN, on the OS/8 operating system for the PDP-8. Wikipedia has more information on <a href="https://en.wikipedia.org/wiki/OS/8">OS/8</a>, that is a very interesting read.</p><p><a href="https://raymii.org/s/inc/img/pdp-8-i-big.jpg"><img alt="pdp-11" src="https://raymii.org/s/inc/img/pdp-8-i-big.jpg"/></a></p><ul><li>An original PDP-8/i with attached periferals.</li></ul><p>We will use a disk image graciously provided by Rick Murphy with both OS/8 and the adventure program already compiled in it. You can download it from <a href="http://www.rickmurphy.net/advent/advent.rk05">Rick Murphy's website</a> or from <a href="https://raymii.org/s/inc/downloads/pdp/advent.rk05">here</a>. This is a disk image in the <a href="https://en.wikipedia.org/wiki/RK05">RK05 DECpak</a> disk format. The RK05 is a moving head magnetic disk drive approximately 2.5 MB on a 14", single-platter IBM-2315-style front-loading removable disk cartridge.</p><p><a href="https://raymii.org/s/inc/img/RK05.jpg"><img alt="RK05" height="320" src="https://raymii.org/s/inc/img/RK05.jpg" width="480"/></a></p><ul><li>An original RK05 drive with a mounted RT-11 disk pack.</li></ul><h3>Installing and configuring SIMH</h3><p>First create a folder where you will store the disk image and the configuration files, and go in that folder:</p><pre><code>mkdir pdp8
+cd pdp8
+</code></pre><p>Ubuntu, and many other operating systems, have packages available for SIMH. We can use the built in package manager to install simh:</p><pre><code>apt-get install simh
+</code></pre><p>If your distro doesn't have simh, see their website for installation instructions.</p><p>Download the prepared disk image:</p><pre><code>wget https://raymii.org/s/inc/downloads/pdp/advent.rk05
+</code></pre><p>To make the start up proces easier you can set up an 'pdp8.ini' file with a few commands in it. SIMH will load and run these commands at startup if you execute the <code>pdp8</code> command.</p><p>Our <code>pdp8.ini</code> file has the following in it:</p><pre><code>set cpu 32K
+set cpu idle
+attach rk0 advent.rk05
+boot rk0
+exit
+</code></pre><p>First it sets up the CPU. Then it attached the <code>advent.rk05</code> file as the first disk and finally it boots up from that attached disk.</p><p>Do note that you don't need to create this file, you can also enter these commands manually at the simh prompt.</p><h3>Running the PDP-8</h3><p>In the current folder, execute the following command to start up simh with our configuration file:</p><pre><code>pdp8
+</code></pre><p>If all goes well, you should see something like below:</p><pre><code>$ pdp8
+
+PDP-8 simulator V3.8-1
+
+.
+</code></pre><p>Some distributions, like Arch name the command <code>simh-pdp8</code>. It does the same thing.</p><p>Congratiulations, you are now in a 1960's era operating system. Look around a bit, for example, execute the <code>DIR</code> command:</p><pre><code>.DIR
+
+DIRECT.SV   7            FRTS  .SV  26            BASIC .WS  11
+PIP   .SV  11            PASS2 .SV  20            SET   .SV  20
+FOTP  .SV   8            PASS2O.SV   5            RTFLOP.SV  15
+[...]
+BRTS  .SV  15            LCSYS .BI   3            ADVENT.LD 145
+F4    .SV  20            UCSYS .BI   3            LOAD  .LS   8
+
+ 162 FILES IN 2648 BLOCKS -  544 FREE BLOCKS
+</code></pre><p>You can get help at any moment using the <code>HELP</code> command:</p><pre><code>.HELP
+&lt;[?3L[?4L[?5L[?5LHJ\
+OS/8 MONITOR COMMANDS
+
+CMD     PROG    EXPL
+
+ASSIGN  KBM     ASSIGNS LOGICAL NAME
+BACKSP  CAMP    BACKSPACES DEV
+BASIC   BASIC   ENTERS BASIC SYSTEM
+BOOT    BOOT    BOOTSTRAPS TO DEV
+CCL     CCL     DISABLES CCL
+COMPARE SRCCOM  COMPARES FILES
+COMPILE PAL8    COMPILES PROG
+    F4/FORT
+    BASIC
+    RALF
+    SABR
+COPY    FOTP     COPIES FILES
+CREATE  EDIT     OPENS FILE FOR EDITING
+[...]
+#NNN    TAKE INTERNAL OCTAL FORM OF FILENAME
+@FILE   REPLACE IN CMD LINE BY FILE'S CONTENTS
+$       COMPLEMENT DEFAULT ALTMODE SWITCH
+</code></pre><h3>Editing files on OS/8 with EDIT</h3><p>If you just want to run adventure, skip this section.</p><p>You can edit a file for example, using a LINE EDITOR. First create the file, in this example, <code>A.PA</code>.</p><pre><code>.CREATE A.PA
+
+#
+</code></pre><p>You can edit files with the <code>EDIT</code> command later on.</p><p>Your prompt changes from a <code>.</code> to a <code>#</code>. If this is an existing file, you must read the first page into the buffer by typing</p><pre><code>#R
+</code></pre><p>To insert text at the top of the buffer, use <code>I</code>. To append to the end, use <code>A</code>.</p><pre><code>#I
+THIS IS A TEST
+</code></pre><p>Press <code>CTRL+L</code> to exit the edit prompt.</p><p>You can start inserting before any line by typing <code>$nI</code> where <code>$n</code> is the line number (which is never displayed). For example, to insert a line before line 20, use <code>20I</code>.</p><p>The <code>L</code> command lists the current buffer:</p><pre><code>#L
+THIS IS A TEST
+</code></pre><p><code>5L</code> displays line 5 and <code>1,5L</code> displays lines 1 through 5. <code>.</code> indicates the current line. If you type <code>.L</code> the current line is displayed.</p><p>To delete a line, use <code>$nD</code> where <code>$n</code> is <code>.</code> or a line number. To change a line use <code>$nC</code> where <code>$n</code> is <code>.</code> or a line number. It deletes the line indicated by <code>$n</code>, then waits for you to type in a replacement.</p><p>As said, EDIT reads a page from disk into the buffer. When you are done with that page and ready to move to the next type <code>N</code>. This writes the existing page to the output file (<code>P</code> command), clears the buffer (<code>K</code> command), and reads the next page from the input file (<code>R</code> command). You can use the <code>P</code>, <code>K</code>, and <code>R</code> commands individually, but be careful. Doing these commands out of sequence can mess up your file.</p><p>When you are done editing, use the <code>E</code> command to exit. This will write the current buffer to the output file, then copy all remaining pages from the input to the output file if you aren't already on the last page.</p><pre><code>#E
+</code></pre><p>You can use the <code>TYPE</code> command to see the contents of a file:</p><pre><code>.TYPE A.PA
+THIS IS A TEST
+</code></pre><p>See <a href="https://bigdanzblog.wordpress.com/2014/05/23/editing-files-on-a-pdp-8-using-os8-edit/">this page</a> for a detailed guide on using PDP-8 EDIT.</p><h3>Running Adventure</h3><p>To run Adventure we first need to run the FORTRAN environment. Start it up with the following command <code>R FRTS</code>:</p><pre><code>.R FRTS
+*
+</code></pre><p>Your prompt changes to a <code>*</code>. The <code>HELP</code> command explains what the <code>R</code> command does:</p><pre><code>R   KBM   RUNS PROGRAM FROM SYS:
+</code></pre><p>Tell the FORTRAN system we want to load Adventure with the following command, <code>ADVENT.LD</code>:</p><pre><code>*ADVENT.LD
+</code></pre><p>Press the ESCAPE key on your keyboard to start the execution. Below you'll find the full sequence of commands plus some ADVENTURE output:</p><pre><code>$ pdp8
+
+PDP-8 simulator V3.8-1
+
+.R FRTS
+*ADVENT
+*$
+WELCOME TO ADVENTURE!!  WOULD YOU LIKE INSTRUCTIONS? 
+
+&gt; NO
+YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK BUILDING. 
+AROUND YOU IS A FOREST.  A SMALL STREAM FLOWS OUT OF THE BUILDING AND
+DOWN A GULLY.
+
+&gt; ENTER 
+YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
+
+THERE ARE SOME KEYS ON THE GROUND HERE.
+
+THERE IS A SHINY BRASS LAMP NEARBY.
+
+THERE IS FOOD HERE.
+
+THERE IS A BOTTLE OF WATER HERE. 
+
+&gt; TAKE LAMP
+TAKEN. 
+
+&gt; 
+</code></pre><p>To exit SIMH and the PDP-8, press <code>CTRL+E</code>. SIMH will stop and you will be back at your command prompt.</p><p>You can view some more help on the PDP-8 SIMH version by executing (in OS/8) the following command:</p><pre><code>.TYPE ADVENT.DC
+</code></pre><p>Enjoy!</p></div><hr/>Tags: <a class="link" href="../tags/adventure.html">adventure,</a><a class="link" href="../tags/dec.html">dec,</a><a class="link" href="../tags/fortran.html">fortran,</a><a class="link" href="../tags/os-8.html">os-8,</a><a class="link" href="../tags/pdp.html">pdp,</a><a class="link" href="../tags/pdp-8.html">pdp-8,</a><a class="link" href="../tags/pidp8.html">pidp8,</a><a class="link" href="../tags/simh.html">simh,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

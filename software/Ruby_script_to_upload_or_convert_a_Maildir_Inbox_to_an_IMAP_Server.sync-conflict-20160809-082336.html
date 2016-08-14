@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="en"><head><title>Ruby script to upload or convert a Maildir Inbox to an IMAP server - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Ruby script to upload or convert a Maildir Inbox to an IMAP server</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../software/index.html">Software</a></li><li><a class="link" href="Ruby_script_to_upload_or_convert_a_Maildir_Inbox_to_an_IMAP_Server.html">Ruby script to upload or convert a Maildir Inbox to an IMAP server</a></li></ul><p><small>01-01-2013</small> | <small>Thibaut Colar</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p><strong>Note: The original page is often offline, so therefore the script is mirrored here. Credits to the original author: wiki.colar.net/ruby<em>script</em>to<em>upload</em>convert<em>a</em>maildir<em>inbox</em>to<em>an</em>imap_server</strong></p><p>I decided to change email server for several reasons, anyway, long story short I was using postfix(qmail before that) and decided to switch to citadel, which is much easier to deal with (simple config).</p><p>Anyway, Citadel use it's own format for emails (Berkeley DB), so you can't just copy over the existing emails stored in Maildir format (8 years worth !), but since Citadel provides an IMAP server, all I need is a tool that can copy/upload The IMAP folder(s) content to an IMAP server.</p><p>I thought that would already exist, easy to find, but did not seem to find one. I found one made in PERL, but as usual Perl / CPAN failed me completely :(</p><p>I found another one that was really bare bone but usable here: http://www.robsayers.com/computing/MaildirToImap.html</p><p>It's quite compact and easy to use, tanks to ruby, but it was kinda hard coded to copy just the Inbox folder ... in my case I had many subfolders (Sent, archives and so on) that I wanted to copy as well, so I modified it a little to make it "parameterizable", so i could run it against other sub folders of my choice.</p><p>Usage</p><ul><li>Prerequisite: You need a ruby install (<code>apt-get install ruby</code>)</li><li>Save the script (scroll down) to your machine (MaildirToImap.rb)</li><li>Edit the script ans set the variables IMAP<em>HOST, IMAP</em>USER, and IMAP_PASS to correct values.</li><li>Use the script with 2 params(absolute directory of a Maildir Inbox, IMAP box name), see examples:</li></ul><p>Example: Copy the Inbox</p><pre><code>ruby MaildirToImap.rb /home/tcolar/Maildir/cur/ INBOX
+</code></pre><p>Example: Copy an Inbox sub-folder (ex: 'Sent')</p><pre><code>ruby MaildirToImap.rb /home/tcolar/Maildir/.Sent/cur/ INBOX/Sent
+</code></pre><p>Repeat for all the sub-folders you want to copy.</p><p>It takes about 0.5 seconds per email (on a local server), so if you have many emails it can take a while.</p><p>The script:</p><pre><code># Thibaut Colar
+# http://wiki.colar.net/
+# &amp;quot;Upload&amp;quot; a local Maildir folder onto an IMAP server
+# Inspired by: http://www.robsayers.com/computing/MaildirToImap.html
+# WARNING: Come with no warranties of any kind whatsoever, use at your own risk !
+#
+# Use, Example: ruby MaildirToImap.rb /home/tcolar/Maildir/cur INBOX
+# Example(sub-box): ruby MaildirToImap.rb /home/tcolar/Maildir/.Sent/cur/ INBOX/Sent
+
+#vars - set accordingly
+IMAP_HOST = 'localhost'
+IMAP_USER = 'me'
+IMAP_PASS = 'my_password'
+TEST_MODE = 0 # Set to 0 to actually do it
+
+# program
+require 'net/imap'
+
+def upload_dir(imap, mail_dir, imap_dir)
+        imap.examine(imap_dir)
+        msgs = Dir.entries(mail_dir).each do |f|
+        if !File.directory?(f) then
+                print &amp;quot;Will add &amp;quot;, mail_dir, f, &amp;quot;t to: &amp;quot;, imap_dir, &amp;quot;n&amp;quot;
+                if TEST_MODE == 0 then
+                        imap.append(imap_dir,File.open(mail_dir+f).read,[:Seen])
+                end
+        end
+        end
+end
+
+# Main
+if ARGV.length &amp;lt; 2 then
+        print &amp;quot;Expecting 2 params: - maildir directory (usually ends with /cur) - IMAP dirn&amp;quot;
+        exit
+end
+
+mail_dir=ARGV[0]
+imap_dir=ARGV[1]
+imap = Net::IMAP.new(IMAP_HOST)
+imap.authenticate('LOGIN', IMAP_USER, IMAP_PASS)
+begin
+        imap.create(imap_dir)
+rescue
+        print &amp;quot;Failed creating: &amp;quot;, imap_dir, &amp;quot;, that's probably OKn&amp;quot;
+end
+upload_dir(imap, mail_dir, imap_dir)
+</code></pre></div><hr/>Tags: <a class="link" href="../tags/email.html">email,</a><a class="link" href="../tags/imap.html">imap,</a><a class="link" href="../tags/nopriv.html">nopriv,</a><a class="link" href="../tags/ruby.html">ruby,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

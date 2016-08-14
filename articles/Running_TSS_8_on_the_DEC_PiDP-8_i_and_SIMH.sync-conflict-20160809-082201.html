@@ -1,0 +1,167 @@
+<!DOCTYPE html><html lang="en"><head><title>Running TSS/8 on the DEC PiDP-8/i and SIMH - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Running TSS/8 on the DEC PiDP-8/i and SIMH</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../articles/index.html">Articles</a></li><li><a class="link" href="Running_TSS_8_on_the_DEC_PiDP-8_i_and_SIMH.html">Running TSS/8 on the DEC PiDP-8/i and SIMH</a></li></ul><p><small>26-07-2015</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>In this guide I'll show you how run the TSS/8 operating system on the PiDP replica by Oscar Vermeulen, and on SIMH on any other computer. I'll also cover a few basic commands like the editor, user management and system information.</p><p>TSS-8 was a little time-sharing operating system released in 1968 and requires a minimum of 12K words of memory and a swapping device; on a 24K word machine, it supports up to 17 users. Each user gets a virtual 4K PDP-8; many of the utilities users ran on these virtual machines were only slightly modified versions of utilities from the Disk Monitor System or paper-tape environments. Internally, TSS-8 consists of RMON, the resident monitor, DMON, the disk monitor (file system), and KMON, the keyboard monitor (command shell). BASIC was well supported, while restricted (4K) versions of FORTRAN D and Algol were available</p><h3>Introduction</h3><p><a href="https://raymii.org/s/inc/img/pidp-8-i.jpg"><img alt="pidp-8" height="320" src="https://raymii.org/s/inc/img/pidp-8-i.jpg" width="480"/></a></p><ul><li>The <a href="http://obsolescence.wix.com/obsolescence#!pidp-8/cbie">PiDP-8/i remake by Oscar Vermeulen</a>.</li></ul><p>I've recently accuired a PDP-8 remake, the <a href="http://obsolescence.wix.com/obsolescence#!pidp-8/cbie">PiDP-8/i by Oscar Vermeulen</a>. This beautiful piece of hand made hardware uses a Raspberry Pi to emulate a PDP-8 with SIMH. The front panel actually works, you can use the switched to load paper tapes, the RIM and BIN loader and all the other legacy goodness. It is a bit smaller than a real PDP-8, it is scale 2:3. The real PDP-8 has 1.5 cm switched, the PiDP-8 has 1.0 cm switches.</p><p>I have an interest in legacy systems like the PDP-11, VAX/VMS and other mainframes and minicomputers. The PiDP-8/i allows me to have a small piece of this legacy myself. It also motivated me to learn more about the PDP-8 and it's hard and software. It also inspired me to write this article about it. Since these systems are way older than me, emulation and recreation are the only way for me to use them, sadly.</p><p>I really encourage you to check out the PiDP-8. Order one as well, you can either get a kit to construct yourself, or order an assembled version. Support this beautiful piece of work!</p><p>SIMH is an emulator which not only emulates a PDP-8, but a lot more older mainframes and minicomputers. See the <a href="http://simh.trailing-edge.com/">website</a> for more information about SIMH.</p><p>This guide shows you how to run the TSS/8 operating system on the PiDP-8/i remake, and on a regular SIMH emulator. We will use Ubuntu 14.04 as our host operating system, but any OS that runs SIMH will do.</p><p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you'll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p><p>You can see all my PDP-8 <a href="https://raymii.org/s/tags/pdp.html">related articles here</a>.</p><p>The official TSS/8 Users Guide manual can be downloaded online from <a href="http://bitsavers.trailing-edge.com/pdf/dec/pdp8/tss8/DEC-T8-MRFB-D_UserGde_Feb70.pdf">here</a>, and I've <a href="https://raymii.org/s/inc/downloads/pdp/DEC-T8-MRFB-D_UserGde_Feb70.pdf">mirrored it on this website as well</a>.</p><p>The official Systems Managers guide can be found <a href="http://www.textfiles.com/bitsavers/pdf/dec/pdp8/tss8/TSS8MgrsGuide.pdf">here</a> and is mirrored <a href="https://raymii.org/s/inc/downloads/pdp/TSS8MgrsGuide.pdf">on this website here</a></p><p>You can read through the two guides to find out everything on TSS/8, including loading tapes, assembler programming and more. This guide focusses on getting you up and running with TSS/8.</p><h3>Preparing the PiDP-8/i</h3><p>If you use the default software with the PiDP-8/i from Oscar you can set the IF switches to octal 1 and toggle the Single Step switch to boot into TSS/8. The IF switches are the leftmost white switches. The DF (Data Field) switches can be used to mount USB sticks as different storage media. The DF switches are the leftmost brown switches. See the image below:</p><p><img alt="pidp" src="https://raymii.org/s/inc/img/pidp-panel_funcs.png"/></p><p>Boot up the PiDP-8/i and hit the middle white switch. Toggle the single step counter, the OS/8 will reboot to TSS/8.</p><p>Make sure you are logged in via SSH or the serial console, and connected to the screen session.</p><p>If you receive an error message, check the <code>/opt/pidp8/bootscripts/2.script</code> file. Make sure it is the same as the below SIMH config file.</p><h3>Installing and configuring SIMH</h3><p>If you have a PiDP-8/i and want to run from there, skip this section. If you don't and use your regular computer, read on to set up SIMH.</p><p>First create a folder where you will store the disk image and the configuration files, and go in that folder:</p><pre><code>mkdir pdp8
+cd pdp8
+</code></pre><p>Ubuntu, and many other operating systems, have packages available for SIMH. We can use the built in package manager to install simh:</p><pre><code>apt-get install simh
+</code></pre><p>If your distro doesn't have simh, see their website for installation instructions.</p><p>Download the prepared disk image and loader:</p><pre><code>wget https://raymii.org/s/inc/downloads/pdp/tss8_init.bin
+wget https://raymii.org/s/inc/downloads/pdp/tss8_rf.dsk
+</code></pre><p>To make the start up proces easier you can set up an 'pdp8.ini' file with a few commands in it. SIMH will load and run these commands at startup if you execute the <code>pdp8</code> command.</p><p>Our <code>pdp8.ini</code> file has the following in it:</p><pre><code>load tss8_init.bin
+set rf enabled
+set df disabled
+attach rf tss8_rf.dsk
+attach ttix 4000
+run 24200
+</code></pre><p>It first loads the paper tape bootstrap. It mounts the TSS/8 disk image of the RF08 and it assigns a TCP/IP port to the Telnet listener for the extra terminals. It then runs the bootstrap.</p><p>Do note that you don't need to create this file, you can also enter these commands manually at the simh prompt.</p><p>In the current folder, execute the following command to start up SIMH with our configuration file:</p><pre><code>pdp8
+</code></pre><h3>Running TSS/8</h3><p>If all goes well, you should see something like below on the screen, PiDP-8/i output:</p><pre><code>Rebooting /opt/pidp8/bootscripts/2.script
+
+
+HALT instruction, PC: 20512 (JMP 511)
+RX: writing buffer to file
+RX: buffering file in memory
+Listening on port 4000 (socket 7)
+
+LOAD, DUMP, START, ETC? 
+</code></pre><p>Type START followed by ENTER to begin the boot process of TSS/8.</p><p>You will be asked for a date and time:</p><pre><code>MONTH-DAY-YEAR: mm:dd:yy    -- numeric, yy in range [74:85]
+HR:MIN - hh:mm          -- numeric, 24 hour format
+</code></pre><p>Enter for example <code>02:24:75</code> and <code>22:10</code>. Then type <code>cr</code> to continue to the login prompt.</p><h3>Logging in</h3><p>Login using the following command:</p><pre><code>LOGIN USERNAME PASSWORD    
+</code></pre><p>The login command does not display or echo.</p><p>The list of accounts and passwords in this specific image:</p><pre><code> PPN  Password
+[0,1]   VH3M
+[0,2]   LXHE
+[0,3]   SHUG
+[77,77]
+[1,10]  WBCN
+[20,1]  DT
+[20,2]  PT
+[20,3]  TSS8
+[20,4]  EDIT
+[20,5]  4TH
+[1,50]  JERK
+</code></pre><p>We cover more on user management later on in the article, including how to create and modify users.</p><p>To login as user 1, the system user enter this:</p><pre><code>LOGIN 1 VH3M
+</code></pre><p>To login as user 1,10, (project 1, user 10) enter this:</p><pre><code>LOGIN 1,10 WBCN
+</code></pre><p>You will receive the following prompt after logging in:</p><pre><code>.
+TSS/8.24  JOB 01  [01,10]  K00    12:12:36
+
+SYSTEM IS DOWN, INC.
+</code></pre><h3>Primitive ls, CAT (catalog)</h3><p>TSS/8 Monitor maintains a library of disk files for each user. The System Library Program CAT is used to obtain a catalog of the contents of this library. For each file, CAT types the size of the File in units of disk segments. The size of a disk segment may vary among installations. Generally, it is 256 (decimal) words of disk storage. The protection code for the file is also given. (See the section on the PROTECT Monitor command (Chapter 9 of the manual) for a precise explanation of protection codes.) If the program was created by any of the System Library Programs, it has a protection code of l2, meaning that other users can read the File, but only the owner can change it.</p><p>When the CAT program is used by the SYSTEM ADMINISTRATOR (user 1), it prints out accounting information. This report consists out of the accumulated time (in hours, minutes and seconds) for central processor usage and connect time as well as the number of disk segments currently being used.</p><p>To see the contents of a users library, run the <code>.R CAT:L</code> command. It will ask for an account number, after which it prints out the users directory. This way you can trace which user is using an abnormal amount of diskspace.</p><p>If you login as the user 2, you can execute the following command to see the contents of the disk:</p><pre><code>.R CAT
+</code></pre><p>Output:</p><pre><code>DISK FILES FOR USER  0, 2 ON  1-JAN-75
+
+NAME      SIZE  PROT    DATE
+PALD  .SAV  16   12  31-MAR-76
+LOADER.SAV   4   12  31-MAR-76
+FORT  .SAV   6   12  31-MAR-76
+FOSL  .SAV   6   12  31-MAR-76
+PIP   .SAV  10   12  31-MAR-76
+TSTLPT.SAV   2   12  31-MAR-76
+LOGOUT.SAV   6   12  31-MAR-76
+SYSTAT.SAV   5   12  31-MAR-76
+EDIT  .SAV   8   12  31-MAR-76
+FOCAL .SAV  16   12  31-MAR-76
+BASIC .SAV  38   12  31-MAR-76
+COPY  .SAV  10   12  31-MAR-76
+CAT   .SAV   6   12  31-MAR-76
+GRIPE .SAV   5   12  31-MAR-76
+LOGID .SAV   4   12  31-MAR-76
+PUTR  .SAV  21   12   3-FEB-84
+ODTHI .SAV   2   12  29-FEB-84
+FLAP  .SAV   1   12   7-APR-84
+PTLOAD.SAV   1   12  29-APR-84
+BLANK .SAV   1   12   9-JUN-84
+DTTEST.SAV   2   12  26-JUN-84
+INIT  .SAV  17   12  29-JUL-84
+BAS000.TMP   1   17   1-JAN-84
+BAS100.TMP   1   17   1-JAN-84
+INTER .BAS   1   12   1-JAN-75
+REMY  .ASC   1   12   1-JAN-75
+
+
+TOTAL DISK SEGMENTS:  189    QUOTA: 1575
+</code></pre><h3>System Status</h3><p>With the <code>SYSTAT</code> command you get a full printout of what the system is doing, who is logged in and more:</p><pre><code>SYSTAT
+
+STATUS OF TSS/8.24 DEC PDP-8 #1 AT 12:19:14 ON  1 JAN 75
+
+UPTIME 00:07:14
+
+JOB      WHO     WHERE      WHAT       STATUS     RUNTIME
+
+ 1      0, 2      K00      FOCAL      ^BS   ^Q    00:00:01
+ 2      1,50      K01      SYSTAT     RUN   ^Q    00:00:00
+
+AVAILABLE CORE 16K   FREE CORE=312
+
+BUSY DEVICES    NONE
+
+ 103 FREE DISK SEGMENTS
+</code></pre><p>There are two users logged in, user 2 on teletype 0, user 50 on teletype 1. User 2 is was FOCAL but is now on the prompt (<code>STATUS ^BS</code> means monitor mode, that is the prompt), user 50 is executing the <code>SYSTAT</code> command.</p><p>The manual has more information on SYSTAT, listed here for convinience.</p><p>It is frequently useful to know the status of the system as a whole; how many users are online, where they are, what they are doing, etc. The SYSTAT program provides this capability.</p><p>SYSTAT responds by printing on the first line: the version of the TSS/8 Monitor being run, the time, and the date. SYSTAT reports the uptime which is the length of time in hours, minutes, and seconds since the system was last put online.</p><p>SYSTAT lists all online users. Each user is identified by his account number. The job number assigned to him and the number of the console he is using are indicated, as is the particular System Program he is running. The exact running state of each user, whether he is actually running (RUN), typing in (KEY) or out (TTY), doing input/output on another system device (IO or FIP), or not running (iB), is indicated.</p><p>The amount of computer time used by each user since he logged in is given.</p><p>It more users are online than the system has core Fields to hold them, the Fact that the system is swapping is reported. The number of Free core blocks used internally by TSS/8 Monitor for Teletype buffering and various other purposes is typed out.</p><p>Then SYSTAT reports any unavailable devices, i.e. , devices which are assigned to individual users. The job to which they are attached and their status (AS if they are assigned but not active, AS+INIT if they are assigned and active) is also indicated.</p><p>Finally, the number of available segments of disk storage is reported.</p><p>To see the time that you have been logged in:</p><pre><code>.TIME
+00:00:20
+</code></pre><p>To see the system time:</p><pre><code>.TIME 0
+12:20:44
+</code></pre><h3>FOCAL69</h3><p>You can start up the FOCAL69 programming environment with the <code>R FOCAL</code> command, output below:</p><pre><code>.R FOCAL
+
+SHALL I RETAIN LOG, EXP, ATN ?:NO
+
+SHALL I RETAIN SINE, COSINE ?:NO
+
+PROCEED.
+
+*_TYPE "HELLO WORLD"
+HELLO WORLD*
+</code></pre><p>To exit FOCAL, press <code>CTRL+B</code> followed by the <code>S</code>. Your prompt will be back to a dot (<code>.</code>):</p><pre><code>*^BS
+.
+</code></pre><h3>Chatting</h3><p>You can use the <code>TALK</code> command to talk to other users logged in. Fire up TELNET on port 4000 on a terminal or two and login with the users <code>2</code>, and <code>1,50</code> (password JERK). On the <code>1,50</code> terminal, enter the following command to talk to the system administrator (on teletype 0):</p><pre><code>.TALK 0 PLEASE HELP
+</code></pre><p>On the <code>2</code> telnet session you will see this:</p><pre><code>** K01  [01,50] **
+ PLEASE HELP
+</code></pre><p>You can talk back:</p><pre><code>.TALK 1 WHATS UP DOG
+</code></pre><p>Telnet <code>1,50</code> will see this:</p><pre><code>** K00  [00,02] **
+ WHATS UP DOG
+</code></pre><p>As the system administror (user 1) you can also send a message to all users at one with the <code>BROADCAST</code> command. The following command:</p><pre><code>.BROADCAST THE SYSTEM WILL SHTUDOWN IN 5 MINUTES
+</code></pre><p>Will result in the following messages on all terminals (they are interupted):</p><pre><code>*** THE SYSTEM WILL SHTUDOWN IN 5 MINUTES
+</code></pre><h3>BASIC-8</h3><p>TSS/8 has a BASIC programming environment. Start it up with the <code>R BASIC</code> command. It will ask you if you want to create a NEW file or load an OLD one.</p><p>Here's an example program, from the TSS/8 manual, to calculate loan interest. We first enter a line number, then the instruction. Afterwards we save the file as INTER.BAS with the <code>SAVE</code> command. We then run the script with the <code>RUN</code> command.</p><pre><code>.R BASIC
+NEW OR OLD--NEW
+NEW PROGRAM NAME--INTER
+
+READY
+
+
+10 REM - PROGRAM TO COMPUTE INTEREST ON A LOAD
+20 PRINT "INTEREST IN PERCENT";
+30 INPUT J
+40 LET J=J/100
+50 PRINT "AMOUNT OF LOAN";
+60 INPUT A
+70 PRINT "NUMBER OF YEARS";
+80 INPUT N
+90 print "NUMBER OF PAYMENTS PER YEAR";
+100 INPUT M
+110 LET N=N*M
+120 LET I=J/M
+130 LET B=1+I
+140 LET R = A*I/(1-1/B^N)
+150 PRINT "MONTHLY PAYMENT ="R
+160 PRINT "TOTAL INTEREST ="R*N-A
+170 END
+
+SAVE INTER
+
+RUN
+</code></pre><p>Output:</p><pre><code>INTEREST IN PERCENT? 8
+AMOUNT OF LOAN? 25000
+NUMBER OF YEARS? 20
+NUMBER OF PAYMENTS PER YEAR? 12
+MONTHLY PAYMENT = 209.1103
+TOTAL INTEREST = 25186.46
+
+
+READY
+</code></pre><p>Exit BASIC with the <code>BYE</code> command.</p><h3>EDIT, the line editor</h3><blockquote><p>TSS/8 Editor provides the user with a powerful tool for creating and modifying source files on-line. EDIT allows the user to insert, change and append lines of text; and then obtain a clean listing of the updated file. EDIT also contains commands for searching the file for a given character.</p></blockquote><ul><li>Page 56, 6-1, DEC TSS/8 User guide</li></ul><p>EDIT considers a file to be divided into logical units, called pages. A page of text is geranlly 50-60 lines long, and hence corresponds to a physical page of program listing. A FORTRAN-D program is generally 1-3 pages in length; a program prepared for PAL-D (the assembler) may be several pages in length. EDIT operates on one page of text at a time, allowing the user to relate his editing to the physical pages of his listing. EDIT reads a page of text from the input file into its internal buffer where the page becomes available for editing. When a page has been completely updated, it is written onto the output file and the next page of input is made available. EDIT provides several powerful commands for "paging" through the source file quickly and conveniently.</p><p>The end of a page of text is marked by a form feed (<code>CTRL+L</code>) character. Form feed is ignored by all TSS/8 language processors.</p><p>Here is the EDIT Command summary table from the manual.</p><table><tbody><tr><th>Command</th><th>Format(s)</th><th>Meaning</th></tr><tr><td>READ</td><td>R</td><td>Read text from the input file and append to buffer until a formfeed is encountered.</td></tr><tr><td>APPEND</td><td>A</td><td>Append incoming text from keyboard to any already in buffer untila form feed is encountered.</td></tr><tr><td>LIST</td><td>L<br/>nL<br/>m,nL</td><td>List the entire buffer.<br/>List line n.<br/>List lines m through n inclusive.</td></tr><tr><td>PROCEED</td><td>P<br/>nP<br/>n,mP</td><td>Output the contents of the buffer to the output file, followed by a form feed.<br/>Output line n, followed by a form feed.<br/>Output lines m through n inclusive followed by a form feed.</td></tr><tr><td>TERMINATE</td><td>T</td><td>Close out the output file and return to TSS/8 Monitor.</td></tr><tr><td>NEXT</td><td>N<br/>nN</td><td>Output the entire buffer and a form feed, kill the buffer and read the next page.<br/>Repeat the above sequence n times.</td></tr><tr><td>KILL</td><td>nD<br/>n,mD</td><td>Delete line n of the text.<br/>Delete lines m through n inclusive.</td></tr><tr><td>INSERT</td><td>I<br/>nI</td><td>Insert before line 1 all the text from the keyboarduntil a form feed is entered.<br/>Insert before line n until a form feed is entered.</td></tr><tr><td>CHANGE</td><td>nC<br/>m,nC</td><td>Delete line n, replace it with any number of lines from the keyboard until a form feed is entered.<br/>Delete lines m through n, replace from keyboard as above until form feed is entered.</td></tr><tr><td>MOVE</td><td>m,n$kM</td><td>Move lines m through n inclusive to before line k.</td></tr><tr><td>GET</td><td>G</td><td>Get and list the next line beginning with a tag.</td></tr><tr><td>SEARCH</td><td>S<br/><br/><br/>nS<br/>m,nS</td><td>Search the entire buffer for the character specified (but not echoed) after the carriage return. Allow modification when found. TSS/8Editor outputs a slash (/) before beginning a SEARCH.<br/><br/>Search line n, as above, allow modification.<br/>Search lines m through n inclusive, allow modification.</td></tr><tr><td>END</td><td>E</td><td>Output the contents of the buffer. Read in any pages remaining in the input file, outputting them to the output file. When everythingin the input file has been moved to the output file, close it out and retum to the TSS/8 Monitor. `E` is equivalent to a sufficient number of `N`'s followed by a `T` command.</td></tr><tr><td>^C</td><td>CTRL+C</td><td>Stop listing and return to Command Mode.</td></tr></tbody></table><p>You can download the two pages from the manual PDF as well <a href="https://raymii.org/s/inc/downloads/pdp/tss-8-edit.pdf">from here</a>.</p><p>Using the <code>I</code> command you can enter text, with a <code>CTRL+L</code> you exit insert mode. Save your file with <code>E</code>.</p><h3>User management</h3><p>Above in the article there was a list of users for this image. Here below we cover the users, projects and permissions in more detail.</p><p>The account number is actually two numbers, a project number and a programmer number. Account number 5440 is project number 54 and programmer number 40. Account number 102 is project 1, programmer 2. For this reason, account numbers may be specified as two numbers seperated by comma's (i.e. 1,2), as wel as a single number (102). Users may specify that all other user may share their files, only users whose project number is the same, or no users at all.</p><p>The library account number (2 or 0,2) is no different from any other account number. Users logged in as account number 2 may use TSS/8 just as any other user would. The one thing that makes it special is that the R command automatically fetches the specified program from the library of account number 2. In this way users may get programs from this library without knowing specifically its account number. The reason the library password is kept secret is to prevent users other than the system manager from altering its contents.</p><p>The system account number (1 or 0,1) is privileged. When logged in with this account number and, password, the user has access to several unique capabilities, such as defining new passwords. It is, therefore, quite important that the system password remain secret.</p><p><code>LOGID</code> is the program used to create new account number, password combinations. It is only usable by a user logged in with the system password. Therefore, the next step in the system building process is to log in with this password (the account number is 1).</p><p>LOGID is then called by typing:</p><pre><code>.R LOGID
+</code></pre><p>LOGID prints opening instructions, then an asterisk, and waits for you to specify the user's account number and password separated by a space. As usual, terminate the line with the RETURN key. After entering the combination, LOGID prints an asterisk and waits for another user account number-password combination.</p><p>When all desired users and passwords have been defined, type <code>CTRL+B</code> and then <code>S</code>. Complete the process by logging out with the <code>LOGOUT</code> command followed by RETURN.</p><p>To delete (close) a user, open the <code>LOGID</code> program like above, and enter the username and password (can be any password), followed by the <code>ESC</code> key (ALT mode). The account number and all the files will be deleted, LOGID will print DELETED and another asterisk.</p><h3>Conclusion</h3><p>This concludes my overview of TSS/8. You are now able to edit files and users, gather some system information and run BASIC programs. This should get you started with the system and allow you to explore it more yourself.</p><p>The two manuals cover way more on the system, like a full assembler, FORTRAN and BASIC programming guide, and all aspects of interacting with peripherals like disks, tape readers and teletypes. They both are quite an interesting read.</p></div><hr/>Tags: <a class="link" href="../tags/adventure.html">adventure,</a><a class="link" href="../tags/dec.html">dec,</a><a class="link" href="../tags/fortran.html">fortran,</a><a class="link" href="../tags/os-8.html">os-8,</a><a class="link" href="../tags/pdp.html">pdp,</a><a class="link" href="../tags/pdp-8.html">pdp-8,</a><a class="link" href="../tags/pidp8.html">pidp8,</a><a class="link" href="../tags/simh.html">simh,</a><a class="link" href="../tags/tss-8.html">tss-8,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="en"><head><title>FreeBSD 10, Converting from RELEASE to STABLE - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">FreeBSD 10, Converting from RELEASE to STABLE</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../blog/index.html">Blog</a></li><li><a class="link" href="FreeBSD_10_Converting_from_RELEASE_to_STABLE.html">FreeBSD 10, Converting from RELEASE to STABLE</a></li></ul><p><small>17-04-2014</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>Because of a <a href="www.freebsd.org/cgi/query-pr.cgi?pr=185876&amp;cat=">bug in mpd</a> which is fixed in 10-STABLE I wanted to move one of my FreeBSD machines from 10.0-RELEASE to 10.0-STABLE. The process to do so is fairly simple. Basically, you check out the new source code, build the world, build the kernel, install the kernel, install the world, merge some stuff and reboot.</p><p>Make sure you have a backup of important stuff on the system.</p><h3>Stable?</h3><p>The name "-STABLE" is frequently misunderstood. It does not mean solid or steady. -STABLE means that while code can change, the ABI (Application Binary Interface) will remain stable and not change. Programs compiled to run on FreeBSD 9.0-RELEASE, or 9.1-RELEASE, or 9.2-RELEASE will continue to work on FreeBSD 9-STABLE. Effectively, -STABLE is the latest version of FreeBSD you can get without breaking installed software. <a href="http://www.wonkity.com/%7Ewblock/docs/html/stable.html">[source]</a></p><h3>Procedure</h3><p>Move the current source code to a backup folder to be sure to get only -STABLE code:</p><pre><code>mv /usr/src /usr/src-RELEASE
+</code></pre><p>Do the same thing for the ports tree:</p><pre><code>mv /usr/ports /usr/ports-RELEASE
+</code></pre><p>When I did not moved the <code>/usr/src</code> folder and continued this article, everytime I would be back in 10.0-RELEASE...</p><p>Check out the STABLE source code:</p><pre><code>svn checkout https://svn0.us-west.freebsd.org/base/stable/10 /usr/src
+</code></pre><p>Also for the ports tree:</p><pre><code>svn checkout https://svn0.us-west.freebsd.org/ports/head /usr/ports
+</code></pre><p>Then cd in to the correct folder</p><pre><code>cd /usr/src
+</code></pre><p>Build the world:</p><pre><code>make buildworld -j4
+</code></pre><p>The <code>-j 4</code> part means that it should run 4 jobs at once. I have a quad core CPU so all the cores will be used.</p><p>Build the kernel:</p><pre><code>make buildkernel KERNCONF=VPN
+make installkernel KERNCONF=VPN
+</code></pre><p>I have a different kernel file for the VPN setup.</p><p>Now reboot in to the new kernel:</p><pre><code>shutdown -r now
+</code></pre><p>Next, it was time to install the world. However, <code>make installworld</code> complained:</p><pre><code>make installworld
+ERROR: Required unbound user is missing, see /usr/src/UPDATING.
+*** Error code 1
+
+Stop.
+make[1]: stopped in /usr/src
+*** Error code 1
+
+Stop.
+make: stopped in /usr/src
+</code></pre><p><code>/usr/src/UPDATING</code> to the rescue:</p><pre><code>20130916:
+        With the addition of unbound(8), a new unbound user is now
+        required during installworld.  "mergemaster -p" can be used to
+        add the user prior to installworld, as documented in the handbook.
+</code></pre><p>However, <code>mergemaster -p</code> did not create the user:</p><pre><code>mergemaster -p
+
+*** Creating the temporary root environment in /var/tmp/temproot
+ *** /var/tmp/temproot ready for use
+ *** Creating and populating directory structure in /var/tmp/temproot
+
+
+
+*** Beginning comparison
+
+ *** Temp ./etc/group and installed have the same Id, deleting
+ *** Temp ./etc/master.passwd and installed have the same Id, deleting
+
+*** Comparison complete
+
+*** /var/tmp/temproot is empty, deleting
+</code></pre><p>I already am on FreeBSD 10, but this box is updated from 8 to 9 to 10, so maybe that didn't work out quite well. Installing unbound via pkg did work:</p><pre><code>pkg install unbound
+</code></pre><p>It seemed that it was half done:</p><pre><code>Proceed with installing packages [y/N]: y
+ldns-1.6.17.txz 
+unbound-1.4.22.txz
+Checking integrity... done
+[1/2] Installing ldns-1.6.17... done
+[2/2] Installing unbound-1.4.22...===&gt; Creating users and/or groups.
+Using existing group 'unbound'.
+Creating user 'unbound' with uid '59'.
+ done
+</code></pre><p>Oh wel... Now the <code>make installworld</code> continues;</p><pre><code>make installworld
+</code></pre><p>After that finished we can do another mergemaster:</p><pre><code>mergemaster -Ui 
+</code></pre><p>Only <code>/etc/motd</code> changed, so, no big things.</p><p>Time to reboot:</p><pre><code>shutdown -r now
+</code></pre><p>Remove old files and libraries:</p><pre><code>cd /usr/src
+make check-old
+&gt;&gt;&gt; Checking for old files
+&gt;&gt;&gt; Checking for old libraries
+&gt;&gt;&gt; Checking for old directories
+To remove old files and directories run 'make delete-old'.
+To remove old libraries run 'make delete-old-libs'.
+
+make delete-old
+&gt;&gt;&gt; Removing old files (only deletes safe to delete libs)
+remove /usr/include/clang/3.3/__wmmintrin_aes.h? y
+remove /usr/include/clang/3.3/__wmmintrin_pclmul.h? y
+remove /usr/include/clang/3.3/altivec.h? y
+remove /usr/include/clang/3.3/ammintrin.h? y
+[...]
+&gt;&gt;&gt; Old files removed
+&gt;&gt;&gt; Removing old directories
+&gt;&gt;&gt; Old directories removed
+To remove old libraries run 'make delete-old-libs'.
+
+
+
+make delete-old-libs
+&gt;&gt;&gt; Removing old libraries
+Please be sure no application still uses those libraries, else you
+can not start such an application. Consult UPDATING for more
+information regarding how to cope with the removal/revision bump
+of a specific library.
+&gt;&gt;&gt; Old libraries removed
+</code></pre><p>Note that freebsd-update does not work with the STABLE branch. Therefore this process is required...</p><p>That's it. Run <code>freebsd-version</code> to see that you are now on stable:</p><pre><code>freebsd-version
+10.0-STABLE
+</code></pre><h3>Sources</h3><p><a href="http://www.wonkity.com/%7Ewblock/docs/html/buildworld.html">http://www.wonkity.com/~wblock/docs/html/buildworld.html</a><br/> <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/makeworld.html">http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/makeworld.html</a><br/> <a href="https://forums.freebsd.org/viewtopic.php?&amp;t=42776">https://forums.freebsd.org/viewtopic.php?&amp;t=42776</a></p></div><hr/>Tags: <a class="link" href="../tags/bsd.html">bsd,</a><a class="link" href="../tags/freebsd.html">freebsd,</a><a class="link" href="../tags/make.html">make,</a><a class="link" href="../tags/pkg.html">pkg,</a><a class="link" href="../tags/ports.html">ports,</a><a class="link" href="../tags/release.html">release,</a><a class="link" href="../tags/stable.html">stable,</a><a class="link" href="../tags/upgrade.html">upgrade,</a><a class="link" href="../tags/version.html">version,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>

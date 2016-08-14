@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="en"><head><title>Bash script to list all changed files in certain period - Raymii.org</title><link href="/s/inc/css/custom-first.css" rel="stylesheet"/><link href="/s/inc/css/light.css" rel="stylesheet"/><link href="/s/inc/css/custom.css" rel="stylesheet" title="custom"/><script src="/s//inc/js/toc.js" type="text/javascript"></script><meta content="text/html;charset=utf-8" http-equiv="Content-Type"/><link href="inc/img/icons/iphone.png" rel="apple-touch-icon"/><link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76"/><link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120"/><link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="/s/inc/opensearch.xml" rel="search" type="application/opensearchdescription+xml"/><link href="https://raymii.org/s/feed.xml" rel="alternate" title="RSS Feed for Raymii.org" type="application/rss+xml"/></head><body><a id="top-of-page"></a><div class="container-fluid "><div class="row"><div class="col-md-12"><div class="col-md-3 col-sm-3 max-200"><div class="well well-none"><h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org<img alt="IEC Resistor logo" src="/s/inc/img/resistor-50.png"/></a></h3><h6 class="headheader">Quis custodiet ipsos custodes?</h6><h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6></div><form action="https://encrypted.google.com/search" role="search"><div class="form-group"><input name="as_sitesearch" type="hidden" value="raymii.org"/><input name="as_qdr" type="hidden" value="all"/><input class="form-control" name="as_q" placeholder="Search" type="text"/></div></form><div class="menu"><ul class="nav nav-pills nav-stacked"><li><a class="special-menu" href="/s/index.html">Home</a></li><li class="bottom-spacing"><a class="special-menu" href="/s/everything.html">All Pages</a></li><li class="hideifsmall"><a class="link" href="/s/tags/bash.html">Bash</a></li><li class="hideifsmall"><a class="link" href="/s/tags/monitoring.html">Monitoring</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ssl.html">SSL</a></li><li class="hideifsmall"><a class="link" href="/s/tags/debian.html">Debian</a></li><li class="hideifsmall"><a class="link" href="/s/tags/python.html">Python</a></li><li class="hideifsmall"><a class="link" href="/s/tags/vpn.html">VPN</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ubuntu.html">Ubuntu</a></li><li class="hideifsmall"><a class="link" href="/s/tags/nginx.html">nginx</a></li><li class="hideifsmall"><a class="link" href="/s/tags/openstack.html">Openstack</a></li><li class="hideifsmall"><a class="link" href="/s/tags/ansible.html">Ansible</a></li></ul><a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br/> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br/><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="9322003332" style="display:inline-block;width:200px;height:200px"></ins><script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script></div></div><div class="col-md-8 col-sm-8"><div class="inner"><h2 class="headheader">Bash script to list all changed files in certain period</h2><ul class="breadcrumb"><li><a class="link" href="../index.html">Home</a></li><li><a class="link" href="../software/index.html">Software</a></li><li><a class="link" href="List-all-changed-files-in-a-certain-period.html">Bash script to list all changed files in certain period</a></li></ul><p><small>13-05-2012</small> | <small>Remy van Elst</small></p><div class="ad"><script async="" src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><ins class="adsbygoogle" data-ad-client="ca-pub-7993642564731324" data-ad-slot="6172324376" style="display:inline-block;width:728px;height:90px"></ins><script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script></div><br/><div id="toc"><h3>Table of Contents</h3></div><hr/><div id="contents"><p>This is a little script I wrote and use to get a daily report of all the files that have changed on my servers. What it does is list all the files that are modified within a certain time period from a given directory. It can also be run from a desktop machine, or any machine which runs bash, find and ls. Usage is simple, save the script, chmod +x it, then run (./report.sh). If you want a specific directory to be scanned run it like ./report.sh /var/www/my/dir</p><p>This is the script:</p><pre><code>#!/bin/bash
+### Copyright (c) 2012 Remy van Elst
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
+#Change these values to your need
+#Exclude hidden directories, 0=exclude,1=include
+HIDDEN=0
+#Time parameter in days for modified files
+MTIME="-1"
+#Directory to look for files, if unset use current dir
+FILEDIR=$1
+if [ -z "$FILEDIR" ]; then
+FILEDIR="./";
+fi
+SVERSION="0.2"
+HOSTPC=`hostname`
+HOSTUSER=`whoami`
+
+#Now do the  find thing
+
+case "$HIDDEN" in
+
+    0) echo "Reporting all files modified in last "$MTIME" period in directory "$FILEDIR" for system "$HOSTPC", running as user "$HOSTUSER" excluding hidden files."
+    echo "Date: `date`"
+    echo "START OF FILE REPORT"
+    find $FILEDIR -type f -mtime $MTIME ! -path "*/.*" | xargs -r ls -lh 2&gt;/dev/null
+    echo "END OF FILE REPORT"
+    echo "Report script version $SVERSION by raymii.org"
+    ;;
+
+    1) echo "Reporting all files modified in last "$MTIME" period in directory "$FILEDIR" for system "$HOSTPC", running as user "$HOSTUSER"."
+    echo "Date: `date`"
+    echo "START OF FILE REPORT"
+    find $FILEDIR -type f -mtime $MTIME | xargs -r ls -lh 2&gt;/dev/null
+    echo "END OF FILE REPORT"
+    echo "Report script version $SVERSION by raymii.org"
+    ;;
+
+esac
+#END OF SCRIPT
+</code></pre><p>Sample output looks like this:</p><pre><code>remy@USN4 ~/test $ ./report.sh ~
+Reporting all files modified in last "-1" period in directory "/home/remy" for system "USN4" excluding hidden files.
+Date: Fri Mar 30 13:20:59 CEST 2012
+START OF FILE REPORT
+-rw-rw-r-- 1 remy remy    6 2012-03-30 12:54 /home/remy/hoi.test
+-rw-rw-r-- 1 remy remy    0 2012-03-30 12:55 /home/remy/test/hallo
+-rw-rw-r-- 1 remy remy    0 2012-03-30 12:55 /home/remy/test/i
+-rw-rw-r-- 1 remy remy    0 2012-03-30 13:15 /home/remy/test/me.f
+-rwxrwxr-x 1 remy remy 1.2K 2012-03-30 13:20 /home/remy/test/report.sh
+END OF FILE REPORT
+Report script version 0.2 by raymii.org
+</code></pre><p>If you want to filter out certain directories you can add grep to the find line in the script to filter out directories:</p><pre><code>find $FILEDIR -type f -mtime $MTIME ! -path "*/.*" | grep -v "/sys/" | grep -v "/proc/" | grep -v "/run/" | grep -v "/dev/" | xargs -r ls -lh 2&gt;/dev/null
+</code></pre><p>The above command wil filter out the /sys/ /proc/ /run/ and /dev/ directories. Edit it to your needs. I've got a crontab like this, it saves it to the /var/log/freport/ directory so you can check it later or email it:</p><pre><code>00 */8 * * * /root/report.sh / &gt; /var/log/freport/filereport`date +%F`.txt
+</code></pre></div><hr/>Tags: <a class="link" href="../tags/auditing.html">auditing,</a><a class="link" href="../tags/bash.html">bash,</a><a class="link" href="../tags/changed-files.html">changed-files,</a><div class="footer"><hr/><p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | <a href="/s/static/About.html">About</a><br/></p></div></div></div></div></div></div><script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript>&lt;p&gt;&lt;img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /&gt;&lt;/p&gt;</noscript></body></html>
