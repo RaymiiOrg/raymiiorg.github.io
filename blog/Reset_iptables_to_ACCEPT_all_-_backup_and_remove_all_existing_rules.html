@@ -2,7 +2,7 @@
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <title>firewall - Raymii.org</title>
+        <title>Reset iptables to ACCEPT all (backup and remove all existing rules) - Raymii.org</title>
         <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
         <link href="/s/inc/css/light.css" rel="stylesheet"  />
         <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
@@ -15,7 +15,7 @@
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
-        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/tags/firewall.xml" />
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
     </head>
     <body>
         <a id="top-of-page"></a>
@@ -26,7 +26,7 @@
                         <div class="well well-none"> 
                             <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
                             <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
-                            <h6><a href="https://raymii.org/s/tags/firewall.xml">RSS Feed</a></h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
                         </div>
           
 
@@ -57,7 +57,57 @@
            <div class="col-md-8 col-sm-8"> 
                 <div class="inner">
 
-           <h2>Tag firewall</h2><p>Tag pages have a different RSS feed with just the items per tag.</p><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tags/index.html" class="link">Tags</a></li><li><a href="firewall.html" class="link">firewall</a></li></ul><ul class='list-group'><li class='list-group-item'><a href="../tutorials/Autossh_persistent_tunnels.html" class="link">Persistent reverse (NAT bypassing) SSH tunnel access with autossh</a></li><li class='list-group-item'><a href="../snippets/CentOS_Save_iptables_restorecon_error.html" class="link">Fix CentOS IPTables rule saving (iptables: Saving firewall rules to /etc/sysconfig/iptables: /etc/init.d/iptables: line 274: restorecon: command not found)</a></li><li class='list-group-item'><a href="../articles/Configserver_Firewall_and_Security_CSF_LFD.html" class="link">Configserver Firewall and Security (CSF and LFD)</a></li><li class='list-group-item'><a href="../snippets/Get_all_IP_ranges_from_an_AS_number.html" class="link">Get all IP ranges from an AS number</a></li><li class='list-group-item'><a href="../snippets/OS_X_-_Turn_firewall_on_or_off_from_the_command_line.html" class="link">OS X: Turn firewall on or off from the command line</a></li><li class='list-group-item'><a href="../blog/Reset_iptables_to_ACCEPT_all_-_backup_and_remove_all_existing_rules.html" class="link">Reset iptables to ACCEPT all (backup and remove all existing rules)</a></li><li class='list-group-item'><a href="../tutorials/Restore-iptables-rules-after-a-reboot-on-debian.html" class="link">Restore iptables rules after a reboot on debian</a></li><li class='list-group-item'><a href="../snippets/pfSense_allow_web_interface_access_on_WAN_from_specific_IP.html" class="link">pfSense allow web interface access on WAN from specific IP</a></li></ul><div class="footer">
+           <h2 class='headheader'>Reset iptables to ACCEPT all (backup and remove all existing rules)</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../blog/index.html" class="link">Blog</a></li><li><a href="Reset_iptables_to_ACCEPT_all_-_backup_and_remove_all_existing_rules.html" class="link">Reset iptables to ACCEPT all (backup and remove all existing rules)</a></li></ul><p><small>02-09-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>Here&#39;s a small bash script that removes all <code>iptables</code> rules and sets up a default ACCEPT ALL state. Before the reset, it creates a backup of the current rules. I use this often to troubleshoot servers with networking issues. If you just blindly do an <code>iptables -F</code> you might lock yourself out of a server since the INPUT policy might be DROP. </p>
+
+<p>Save the script to something like <code>iptables-reset.sh</code> and run it:</p>
+
+<pre><code>    #!/bin/bash
+
+    iptables-save &gt; iptables.$(date +%s)
+
+    echo &quot;iptables saves to iptables.$(date +%s)&quot;
+
+    echo &#39;iptables -P INPUT ACCEPT&#39;
+    echo &#39;iptables -P FORWARD ACCEPT&#39;
+    echo &#39;iptables -P OUTPUT ACCEPT&#39;
+    echo &#39;iptables -F&#39;
+    echo &#39;iptables -X&#39;
+    echo &#39;iptables -t nat -F&#39;
+    echo &#39;iptables -t nat -X&#39;
+    echo &#39;iptables -t mangle -F&#39;
+    echo &#39;iptables -t mangle -X&#39;
+    echo &#39;iptables -P INPUT ACCEPT&#39;
+    echo &#39;iptables -P FORWARD ACCEPT&#39;
+    echo &#39;iptables -P OUTPUT ACCEPT&#39;
+
+    iptables -P INPUT ACCEPT
+    iptables -P FORWARD ACCEPT
+    iptables -P OUTPUT ACCEPT
+    iptables -F
+    iptables -X
+    iptables -t nat -F
+    iptables -t nat -X
+    iptables -t mangle -F
+    iptables -t mangle -X
+    iptables -P INPUT ACCEPT
+    iptables -P FORWARD ACCEPT
+    iptables -P OUTPUT ACCEPT
+
+    echo done
+</code></pre>
+
+<p>It will not only save the current rules, but it will also echo out all the commands so you can see what happened in your terminal history.</p>
+</div><hr>Tags: <a href="../tags/bash.html" class="link">bash, </a><a href="../tags/firewall.html" class="link">firewall, </a><a href="../tags/iptables.html" class="link">iptables, </a><div class="footer">
                 <hr>
                 <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
                 <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
