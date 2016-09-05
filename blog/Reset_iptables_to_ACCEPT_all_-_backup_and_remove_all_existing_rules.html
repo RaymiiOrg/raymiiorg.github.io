@@ -57,7 +57,7 @@
            <div class="col-md-8 col-sm-8"> 
                 <div class="inner">
 
-           <h2 class='headheader'>Reset iptables to ACCEPT all (backup and remove all existing rules)</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../blog/index.html" class="link">Blog</a></li><li><a href="Reset_iptables_to_ACCEPT_all_-_backup_and_remove_all_existing_rules.html" class="link">Reset iptables to ACCEPT all (backup and remove all existing rules)</a></li></ul><p><small>02-09-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
+           <h2 class='headheader'>Reset iptables to ACCEPT all (backup and remove all existing rules)</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../blog/index.html" class="link">Blog</a></li><li><a href="Reset_iptables_to_ACCEPT_all_-_backup_and_remove_all_existing_rules.html" class="link">Reset iptables to ACCEPT all (backup and remove all existing rules)</a></li></ul><p><small>03-09-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
                             <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                             <!-- voorartikel -->
                             <ins class="adsbygoogle"
@@ -71,37 +71,27 @@
 
 <p>Save the script to something like <code>iptables-reset.sh</code> and run it:</p>
 
-<pre><code>    #!/bin/bash
+<pre><code>#!/bin/bash
+set -x # Echo
+set -e # Stop on error
+set -o noclobber # Dont overwrite files with redirection
 
-    iptables-save &gt; iptables.$(date +%s)
+iptables-save &gt; iptables.$(date +%s)
 
-    echo &quot;iptables saves to iptables.$(date +%s)&quot;
+echo &quot;iptables saves to iptables.$(date +%s)&quot;
 
-    echo &#39;iptables -P INPUT ACCEPT&#39;
-    echo &#39;iptables -P FORWARD ACCEPT&#39;
-    echo &#39;iptables -P OUTPUT ACCEPT&#39;
-    echo &#39;iptables -F&#39;
-    echo &#39;iptables -X&#39;
-    echo &#39;iptables -t nat -F&#39;
-    echo &#39;iptables -t nat -X&#39;
-    echo &#39;iptables -t mangle -F&#39;
-    echo &#39;iptables -t mangle -X&#39;
-    echo &#39;iptables -P INPUT ACCEPT&#39;
-    echo &#39;iptables -P FORWARD ACCEPT&#39;
-    echo &#39;iptables -P OUTPUT ACCEPT&#39;
-
-    iptables -P INPUT ACCEPT
-    iptables -P FORWARD ACCEPT
-    iptables -P OUTPUT ACCEPT
-    iptables -F
-    iptables -X
-    iptables -t nat -F
-    iptables -t nat -X
-    iptables -t mangle -F
-    iptables -t mangle -X
-    iptables -P INPUT ACCEPT
-    iptables -P FORWARD ACCEPT
-    iptables -P OUTPUT ACCEPT
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
 
     echo done
 </code></pre>
