@@ -1,0 +1,370 @@
+<!-- nominify -->
+
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>FST-01 gnuk firmware update via USB - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>FST-01 gnuk firmware update via USB</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="FST-01_firmware_upgrade_via_usb.html" class="link">FST-01 gnuk firmware update via USB</a></li></ul><p><small>09-09-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>The FST-01 (Flying Stone 1) (<a href="http://wiki.seeedstudio.com/wiki/FST-01">wiki link</a>), <a href="http://www.gniibe.org/FST-01/fst-01.html">niibe link</a> is a small STM32F103TB based USB device designed to run <code>gnuk</code> and <code>neug</code> (gpg usb token or true random number generator). (<a href="https://www.seeedstudio.com/FST-01-with-White-Enclosure-p-1279.html">order here</a>, no affiliate link). This guide shows you how to upgrade the firmware on the FST-01 so that you can enjoy newer gnuk features like 4096 bit RSA keys.</p>
+
+<p>I&#39;m a huge fan of <a href="https://raymii.org/s/tags/nitrokey.html">the Nitrokey</a> line of devices. The <a href="https://raymii.org/s/articles/Nitrokey_Start_Getting_started_guide.html">Nitrokey Start</a> is a software-only USB token for gnupg. The other Nitrokey devices all use a smartcard (SmartCard-HSM for the Nitrokey HSM and OpenGPG Card for the Nitrokey Pro) for their key storage, but the Nitrokey Start does that all in the microcontroller. The Nitrokey Start is based on the FST-01 device, as are the other Nitrokeys, since the Nitrokey Start runs the same firmware, gnuk 1.0.4.</p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
+
+<p><img src="https://raymii.org/s/inc/img/FST-01_board.jpg"></p>
+
+<blockquote>
+<p>The FST-01 device</p>
+</blockquote>
+
+<p>This guide will show you how to compile and upgrade the latest firmware onto the device via USB. The recommended way is to upgrade via the ST-Link protocol, but that requires opening the device, soldering wires and a special adapter. The USB upgrade works most of the time.</p>
+
+<h3>Why upgrade?</h3>
+
+<p>If your device is working as intended, then don&#39;t upgrade. But, a lot has changes since the 1.0.1 firmware that came on my FST-01. A small list from the <a href="https://anonscm.debian.org/cgit/gnuk/gnuk/gnuk.git/tree/ChangeLog">git commit log</a> and the <a href="http://www.fsij.org/gnuk/version1_2_1.html">website</a>:</p>
+
+<ul>
+<li>Support for 4096 bit RSA keys </li>
+<li>ECDSA, ECDH, Curve25519, secp256k1 and Ed25519 support (experimental)</li>
+<li>More boards supported (STM32 Nucleo, Maple Mini and ST Dongle)</li>
+<li>Replaced thread library from ChibiOS/RT to ChopSTX </li>
+<li>OpenPGPcard specification v3.0 compatibility</li>
+<li>Upgrade of the NeuG routine to the one of NeuG 1.0 (TRNG)</li>
+<li>an incompatible change to support overriding key</li>
+<li>Improvements in the RSA code (Prime number generation is done by Fouque-Tibouchi method, changes from upstream PolarSSL 1.2.10</li>
+</ul>
+
+<p>You could also flash the NeuG firmware onto the device so that you get a True random number generator instead of a crypto token.</p>
+
+<h3>A word of caution</h3>
+
+<p><img src="https://raymii.org/s/inc/img/caution.png"></p>
+
+<p><strong>Do not try to upgrade the Nitrokey.</strong> It <a href="https://lists.alioth.debian.org/pipermail/gnuk-users/2016q3/000369.html">fails at the moment</a>.</p>
+
+<p>Also, <strong>do not try to upgrade if you don&#39;t have a backup of the key material</strong>. The upgrade will WIPE the entire device.</p>
+
+<p>Last, <strong>you will probably brick the device</strong>. Make sure you have another way to access and recover the device, like an ST-Link V2 adapter <a href="https://www.aliexpress.com/item/FREE-SHIPPING-1PCS-ST-Link-V2-stlink-mini-STM8STM32-STLINK-simulator-download-programming-With-Cover/32329418477.html">link</a>.</p>
+
+<p>So to wrap up, if you&#39;re not comfortable with a few bricked devices and all key material wiped, then don&#39;t try to upgrade.</p>
+
+<h3>Build dependencies</h3>
+
+<p>You need to install the entire arm cross compilation toolchain. On Arch Linux this requires installing the entire <code>base-dev</code> group and the following packages:</p>
+
+<pre><code>pacman -Sy arm-none-eabi-gcc arm-none-eabi-newlib arm-none-eabi-binutils python2-pyusb
+</code></pre>
+
+<p>You also need <code>git</code> installed. On Ubuntu the package names are the same, so you can install those as well:</p>
+
+<pre><code>apt-get install git build-essential arm-none-eabi-gcc arm-none-eabi-newlib arm-none-eabi-binutils python-usb
+</code></pre>
+
+<p>To make sure we can update the token as a regular user, we need to add some <code>udev</code> rules:</p>
+
+<pre><code>vim /etc/udev/rules.d/69-gnuk.rules
+</code></pre>
+
+<p>Contents:</p>
+
+<pre><code># Gnuk Token by FSIJ
+
+SUBSYSTEMS==&quot;usb&quot;, ACTION==&quot;add&quot;, \
+  ATTRS{idVendor}==&quot;234b&quot;, ATTRS{idProduct}==&quot;0000&quot;, \
+  ENV{ID_SMARTCARD_READER}=&quot;1&quot;, ENV{ID_SMARTCARD_READER_DRIVER}=&quot;gnupg&quot;
+</code></pre>
+
+<p>Reboot the machine, or on Arch do a <code>systemctl restart systemd-udevd.service</code>.</p>
+
+<h3>Compile gnuk</h3>
+
+<p>The first thing we need to do is get the source code. Clone the repositories:</p>
+
+<pre><code>git clone https://anonscm.debian.org/cgit/gnuk/gnuk/gnuk.git gnuk
+cd gnuk
+rm -rf chopstx
+git clone https://anonscm.debian.org/cgit/gnuk/chopstx/chopstx.git chopstx
+</code></pre>
+
+<p>They use git submodules upstream but that fails for me, therefore the chopstx folder is removed and the repository is cloned over.</p>
+
+<p>This guide uses commit <code>452c15c908b1d10fe14d71c3314c6550c3e3a471</code>, (<code>* 452c15c - (HEAD -&gt; master, tag: release/1.2.1, origin/master, origin/HEAD) Version 1.2.1 (8 weeks ago) &lt;NIIBE Yutaka&gt;</code>).</p>
+
+<p>Go in the <code>src</code> folder and start the compile:</p>
+
+<pre><code>cd src
+./configure --target=FST_01 --vidpid=&quot;234b:0000&quot;
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Header file is: board-fst-01.h
+Debug option disabled
+Configured for bare system (no-DFU)
+PIN pad option disabled
+CERT.3 Data Object is NOT supported
+Card insert/removal by HID device is NOT supported
+</code></pre>
+
+<p>If you want to see the other target options you can do a <code>./configure -h</code>:</p>
+
+<pre><code>$ ./configure -h
+Usage: ./configure [OPTION]...
+
+Defaults for the options are specified in brackets.
+
+Configuration:
+  -h, --help    display this help and exit  [no]
+  --vidpid=VID:PID  specify vendor/product ID [&lt;NONE&gt;]
+  --target=TARGET specify target      [FST_01]
+      supported targets are:
+         FST_01
+         OLIMEX_STM32_H103
+         STM32_PRIMER2
+         STBEE
+         STBEE_MINI
+         MAPLE_MINI
+         ST_DONGLE
+         ST_NUCLEO_F103
+         NITROKEY_START
+         CQ_STARM
+         FST_01_00 (unreleased version with 8MHz XTAL)
+</code></pre>
+
+<p>Start the make, this might take some time. It will end with output like below:</p>
+
+<pre><code>arm-none-eabi-objcopy -O binary build/gnuk.elf build/gnuk.bin
+</code></pre>
+
+<p><code>ReGNUal</code> is the firmware update tool, we need to compile that as well:</p>
+
+<pre><code>cd ../regnual/
+make
+</code></pre>
+
+<p>The make ends with:</p>
+
+<pre><code>arm-none-eabi-objcopy -Obinary regnual.elf regnual.bin
+arm-none-eabi-objcopy -Oihex regnual.elf regnual.hex
+</code></pre>
+
+<p>All the required compilations are done now. The next step is testing the token before we use it.</p>
+
+<h3>Test the token</h3>
+
+<p>It is important to test if the scripts and GPG recognize the token before we upgrade, so that we know that it worked. </p>
+
+<p>In the <code>gnuk/tools</code> folder is a script called <code>usb_strings.py</code>:</p>
+
+<pre><code>$ python2 usb_strings.py 
+Device: 
+    Vendor: Free Software Initiative of Japan
+   Product: FSIJ USB Token
+    Serial: FSIJ-1.0.1-87022326
+  Revision: release/1.0.1
+    Config: FST_01:dfu=no:debug=no:pinpad=no:certdo=yes:keygen=yes
+       Sys: 1.0
+</code></pre>
+
+<p>And you can use GnuPG:</p>
+
+<pre><code>$ gpg --card-status
+Reader ...........: 234B:0000:FSIJ-1.0.1-87022326:0
+Application ID ...: D276000124010200FFFE870223260000
+Version ..........: 2.0
+Manufacturer .....: unmanaged S/N range
+Serial number ....: 87022326
+Name of cardholder: [not set]
+Language prefs ...: [not set]
+Sex ..............: unspecified
+URL of public key : [not set]
+Login data .......: [not set]
+Signature PIN ....: forced
+Key attributes ...: rsa2048 rsa2048 rsa2048
+Max. PIN lengths .: 127 127 127
+PIN retry counter : 3 3 3
+Signature counter : 0
+Signature key ....: [none]
+Encryption key....: [none]
+Authentication key: [none]
+General key info..: [none]
+</code></pre>
+
+<h3>The upgrade</h3>
+
+<p>Go in the <code>gnuk/tools</code> folder. Execute the actual upgrade:</p>
+
+<pre><code>$ python2 ./upgrade_by_passwd.py ../regnual/regnual.bin ../src/build/gnuk.bin 
+</code></pre>
+
+<p>It will ask you for the admin password. The output afterwars is like below, if the upgrade goes correct:</p>
+
+<pre><code>../regnual/regnual.bin: 4412
+../src/build/gnuk.bin: 110592
+CRC32: 303d2f62
+
+Device: 
+Configuration: 1
+Interface: 0
+20001400:20004a00
+Downloading flash upgrade program...
+start 20001400
+end   20002500
+Run flash upgrade program...
+Wait 1 seconds...
+Device: 
+08001000:08020000
+Downloading the program
+start 08001000
+end   0801b000
+</code></pre>
+
+<p>After the upgrade you can check if it succeeded:</p>
+
+<pre><code>$ python2 usb_strings.py 
+Device: 
+    Vendor: Free Software Initiative of Japan
+   Product: Gnuk Token
+    Serial: FSIJ-1.2.1-87022326
+  Revision: release/1.2.1-1-g2b784cb-modified
+    Config: FST_01:dfu=no:debug=no:pinpad=no:certdo=no
+       Sys: 1.0
+</code></pre>
+
+<p>The version went from 1.0.1 to 1.2.1. For reference, here is my <code>dmesg</code>:
+`
+    [  294.977933] thinkpad_acpi: EC reports that Thermal Table has changed
+    [  726.481249] usb 1-1.1: new full-speed USB device number 3 using ehci-pci
+    [ 1408.628722] usb 1-1.1: USB disconnect, device number 3
+    [ 1412.817498] usb 2-1.2: new full-speed USB device number 4 using ehci-pci
+    [ 1461.011520] usb 2-1.2: USB disconnect, device number 4
+    [ 1464.014677] usb 2-1.2: new full-speed USB device number 5 using ehci-pci
+    [ 1469.705384] usb 2-1.2: USB disconnect, device number 5
+    [ 1469.893972] usb 2-1.2: new full-speed USB device number 6 using ehci-pci</p>
+
+<p>You can also use GPG to check the new firmware:</p>
+
+<pre><code>[20:20:18] [remy@gateway] [ ~ ]
+$ gpg --card-status
+Reader ...........: 234B:0000:FSIJ-1.2.1-87022326:0
+Application ID ...: D276000124010200FFFE870223260000
+Version ..........: 2.0
+Manufacturer .....: unmanaged S/N range
+Serial number ....: 87022326
+Name of cardholder: [not set]
+Language prefs ...: [not set]
+Sex ..............: unspecified
+URL of public key : [not set]
+Login data .......: [not set]
+Signature PIN ....: forced
+Key attributes ...: rsa2048 rsa2048 rsa2048
+Max. PIN lengths .: 127 127 127
+PIN retry counter : 3 3 3
+Signature counter : 0
+Signature key ....: [none]
+Encryption key....: [none]
+Authentication key: [none]
+General key info..: [none]
+</code></pre>
+
+<h3>If it goes wrong?</h3>
+
+<p>You need to use the ST Link v2 adapter to reflash the firmware. <a href="http://blog.nodonogard.net/2015/11/compiling-and-flashing-gnuk-binaries-to.html">See this tutorial</a> for a guide.</p>
+
+<h3>Now what?</h3>
+
+<p>You can put 4096 bit keys on the card, or use any of the new algorithms. See my <a href="https://raymii.org/s/articles/Nitrokey_Start_Getting_started_guide.html">Nitrokey Start Getting Started</a> guide for how to put keys on the card.</p>
+
+<p>You can also reflash the device to NeuG firmware, then it will become a True Random Number Generator. But that is for another tutorial.</p>
+</div><hr>Tags: <a href="../tags/fst-01.html" class="link">fst-01, </a><a href="../tags/gnuk.html" class="link">gnuk, </a><a href="../tags/gnupg.html" class="link">gnupg, </a><a href="../tags/gpg.html" class="link">gpg, </a><a href="../tags/neug.html" class="link">neug, </a><a href="../tags/nitrokey.html" class="link">nitrokey, </a><a href="../tags/nitrokey-start.html" class="link">nitrokey-start, </a><a href="../tags/start.html" class="link">start, </a><a href="../tags/stm32f103tb.html" class="link">stm32f103tb, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
