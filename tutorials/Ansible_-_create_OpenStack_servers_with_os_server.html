@@ -1,0 +1,284 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Ansible - Create OpenStack servers with Ansible 2.0 and the os_server module and a dynamic inventory - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Ansible - Create OpenStack servers with Ansible 2.0 and the os_server module and a dynamic inventory</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="Ansible_-_create_OpenStack_servers_with_os_server.html" class="link">Ansible - Create OpenStack servers with Ansible 2.0 and the os_server module and a dynamic inventory</a></li></ul><p><small>10-09-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>I regularly deploy clusters and single servers on OpenStack with Ansible. However, Ansible 2.0 comes with new OpenStack modules my playbooks still used the old ones. I reserved some time to convert these playbooks to the new modules and ansible 2. This article shows a very simple example, it creates three servers in OpenStack and adds them to different hostgroups based on variables. For example, to create one loadbalancer and two appservers and run specific playbooks on those hosts based on their role.</p>
+
+<p>Since Ansible 2 the OpenStack modules are renewed. The old <code>nova_*</code> modules are replaced by the <code>os_server</code> modules. Ansible 2 also changed some deperecated stuff regarding <code>yaml</code> parsing and variable concatination. Therefore some of my old playbooks were not working anymore and I had to figure out how to get it working with the new versions.</p>
+
+<p>I&#39;ve written about <a href="https://raymii.org/s/tags/ansible.html">Ansible before</a>, click that link to get all the articles about Ansible.</p>
+
+<p><img src="https://raymii.org/s/inc/img/ansible_meme.jpg" alt=ansible></p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a> </p>
+
+<p>I <a href="http://blog.oddbit.com/2015/10/26/ansible-20-new-openstack-modules/">found</a> documentation on the new modules but that just created a single instance. I need to spawn multiple instances and add those to specific hostgroups based on variables, so this guide wasn&#39;t complete enough for me. </p>
+
+<p>This is my folder structure:</p>
+
+<pre><code>$ tree -I &quot;*.git&quot;
+.
+|-- ansible.cfg
+|-- group_vars
+|   `-- all.yml
+|-- roles
+|   |-- haproxy
+|   |   |-- handlers
+|   |   |   `-- main.yml
+|   |   |-- tasks
+|   |   |   `-- main.yml
+|   |   |-- templates
+|   |   |   `-- haproxy.cfg.j2
+|   |   `-- vars
+|   |       `-- main.yml
+|   `-- create_instances
+|       |-- tasks
+|       |   `-- main.yml
+|       `-- vars
+|           `-- main.yml
+`-- site.yml
+</code></pre>
+
+<p><code>site.yml</code> is the main playbook and <code>create-instances</code> and <code>appservers</code> are the specific roles. <a href="https://raymii.org/s/snippets/Ansible_-_create_playbooks_and_role_file_and_folder_structure.html">Create</a> the folder structure if you&#39;re starting from zero.</p>
+
+<p>On the local host you need the OpenStack tools and some python modules installed. The <a href="https://docs.ansible.com/ansible/os_server_module.html">os_server</a> page lists all the requirements. You also need an <code>openstackrc</code> file with credentials in your environment:</p>
+
+<pre><code>$ cat openstackrc
+export OS_AUTH_URL=&quot;https://identity.stack.cloudvps.com/v2.0&quot;
+export OS_USERNAME=&quot;username&quot;
+export OS_PASSWORD=&quot;password&quot;
+export OS_TENANT_ID=&quot;UUID&quot;
+export OS_TENANT_NAME=&quot;UUID&quot;
+</code></pre>
+
+<p>Source it before running the playbooks:</p>
+
+<pre><code>source openstackrc
+</code></pre>
+
+<h3>Main playbook</h3>
+
+<p>The <code>site.yml</code> playbook first runs on <code>locahost</code> and creates the OpenStack instances. It also adds them to the specific hostgroups. Those hostgroups are only available when you run this playbook.</p>
+
+<p>Then it starts a new <code>play</code> (if that is how you call multiple runs) to the first newly created hostgroup (loadbalancers) and you can add a new <code>play</code> to run on the appservers as well.</p>
+
+<pre><code>---
+- name: create instances
+  hosts: localhost
+  roles:
+    - { role: create_instances }
+
+
+- name: deploy haproxy
+  hosts: loadbalancers
+  user: root
+  roles:
+    - { role:  haproxy }
+    - { role:  keepalived }
+</code></pre>
+
+<h3>Instance creation playbook</h3>
+
+<p>The first playbook, <code>roles/create-instances/tasks/main.yml</code> runs on localhost and creates the OpenStack instances:</p>
+
+<pre><code>    ---
+    - name: launch instances
+      os_server:
+        name: &quot;{{ prefix }}-{{ item.name }}&quot;
+        state: present
+        key_name: &quot;{{ item.key }}&quot;
+        availability_zone: &quot;{{ item.availability_zone }}&quot;
+        nics: &quot;{{ item.nics }}&quot;
+        image: &quot;{{ item.image }}&quot;
+        flavor: &quot;{{ item.flavor }}&quot;
+      with_items: &quot;{{ servers }}&quot;
+      register: &quot;os_hosts&quot;
+
+
+    - name: add hosts to inventory
+      add_host:
+        name: &quot;{{ item[&#39;openstack&#39;][&#39;human_id&#39;] }}&quot;
+        groups: &quot;{{ item[&#39;item&#39;][&#39;meta&#39;][&#39;group&#39;] }}&quot;
+        ansible_host: &quot;{{ item.openstack.accessIPv4 }}&quot;
+      with_items: &quot;{{ os_hosts.results }}&quot;
+</code></pre>
+
+<p>Based on the name we defined and the group we gave it also is adds the hosts to a new hostgroup. That hostgroup is only active within this playbook run.</p>
+
+<p>The parameters we used to create the instances are also available in the <code>result</code> of that action. It&#39;s a 
+<code>dict</code>, so you can access all three the servers we created. That is were we get the <code>group</code> value from.</p>
+
+<p>If you&#39;re using a <code>jumphost</code> and other machines with private IP&#39;s you need to use a different <code>ansible_ssh_host</code>, but you can achieve that by adding extra data to the variables. The <code>debug</code> module is your friend here.</p>
+
+<p>If the instances are already created, it will not create them again but it will add then to the hostgroup again.</p>
+
+<p>The variables required for this playbook are the following (<code>roles/create-instances/vars/main.yml</code>):</p>
+
+<pre><code>---
+prefix: demo
+servers:
+  - name: lb1
+    image: CloudVPS Ubuntu 16.04
+    flavor: Standard 2
+    key: SSH-Key
+    nics: &quot;net-id=00000000-0000-0000-0000-000000000000&quot;
+    availability_zone: NL1
+    meta: 
+      group: loadbalancers
+  - name: app1
+    image: CloudVPS Ubuntu 16.04
+    flavor: Standard 2
+    key: SSH-Key
+    nics: &quot;net-id=00000000-0000-0000-0000-000000000000&quot;
+    availability_zone: NL1
+    meta: 
+      group: appservers
+  - name: app2
+    image: CloudVPS Ubuntu 16.04
+    flavor: Standard 2
+    key: SSH-Key
+    nics: &quot;net-id=00000000-0000-0000-0000-000000000000&quot;
+    availability_zone: NL2
+    meta: 
+      group: appservers
+</code></pre>
+
+<p>The <code>prefix</code> is used in the servername and can be used to create different pseudo-groups in the same tenant/project. I do recommend to create different projects/tenants per environment (accept/staging etc) instead of prefixes, since you can then manage the rights more fine grained.</p>
+
+<h3>Role specific playbooks</h3>
+
+<p>The role specific playbooks are just regular playbook roles you would run. For the guide you can use an example play which just does a ping (<code>roles/ping/tasks/main.yml</code>):</p>
+
+<pre><code>---
+- name: ping instances
+  ping:
+</code></pre>
+
+<p>The full play then results in:</p>
+
+<pre><code>    $ ansible-playbook site.yml 
+
+     [WARNING]: provided hosts list is empty, only localhost is available
+
+    PLAY [create instances] ********************************************************
+
+    TASK [setup] *******************************************************************
+    ok: [localhost]
+
+    TASK [create_instances : launch instances] *************************************
+    changed: [localhost] =&gt; (item={u&#39;name&#39;: u&#39;lb1&#39;, u&#39;availability_zone&#39;: u&#39;NL1&#39;, u&#39;nics&#39;: u&#39;net-id=00000000-0000-0000-0000-000000000000&#39;, u&#39;image&#39;: u&#39;CloudVPS Ubuntu 16.04&#39;, u&#39;meta&#39;: {u&#39;group&#39;: u&#39;loadbalancers&#39;}, u&#39;key&#39;: u&#39;SSH-Key&#39;, u&#39;flavor&#39;: u&#39;Standard 2&#39;})
+    changed: [localhost] =&gt; (item={u&#39;name&#39;: u&#39;app1&#39;, u&#39;availability_zone&#39;: u&#39;NL1&#39;, u&#39;nics&#39;: u&#39;net-id=00000000-0000-0000-0000-000000000000&#39;, u&#39;image&#39;: u&#39;CloudVPS Ubuntu 16.04&#39;, u&#39;meta&#39;: {u&#39;group&#39;: u&#39;appservers&#39;}, u&#39;key&#39;: u&#39;SSH-Key&#39;, u&#39;flavor&#39;: u&#39;Standard 2&#39;})
+    changed: [localhost] =&gt; (item={u&#39;name&#39;: u&#39;app2&#39;, u&#39;availability_zone&#39;: u&#39;NL1&#39;, u&#39;nics&#39;: u&#39;net-id=00000000-0000-0000-0000-000000000000&#39;, u&#39;image&#39;: u&#39;CloudVPS Ubuntu 16.04&#39;, u&#39;meta&#39;: {u&#39;group&#39;: u&#39;appservers&#39;}, u&#39;key&#39;: u&#39;SSH-Key&#39;, u&#39;flavor&#39;: u&#39;Standard 2&#39;})
+
+    TASK [create_instances : add hosts to inventory] *******************************
+    changed: [localhost] =&gt; (item={u&#39;changed&#39;: True, &#39;_ansible_no_log&#39;: False, &#39;_ansible_item_result&#39;: True, u&#39;server&#39;: 
+    [...] # a lot of json
+    u&#39;volumes&#39;: [], u&#39;metadata&#39;: {}, u&#39;human_id&#39;: u&#39;demo-app2&#39;}, u&#39;id&#39;: u&#39;eff00345-977f-4c72-4684-4aa22d1dfc9f&#39;})
+
+    PLAY [ping instances] **********************************************************
+
+    TASK [setup] *******************************************************************
+    ok: [demo-app1]
+    ok: [demo-app2]
+
+    TASK [common : ping instances] *************************************************
+    ok: [demo-app1]
+    ok: [demo-app2]
+
+    PLAY RECAP *********************************************************************
+    demo-app1            : ok=2    changed=0    unreachable=0    failed=0   
+    demo-app2            : ok=2    changed=0    unreachable=0    failed=0   
+    localhost            : ok=3    changed=2    unreachable=0    failed=0   
+</code></pre>
+</div><hr>Tags: <a href="../tags/ansible.html" class="link">ansible, </a><a href="../tags/cloudvps.html" class="link">cloudvps, </a><a href="../tags/nova.html" class="link">nova, </a><a href="../tags/openstack.html" class="link">openstack, </a><a href="../tags/python.html" class="link">python, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
