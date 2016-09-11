@@ -57,7 +57,7 @@
            <div class="col-md-8 col-sm-8"> 
                 <div class="inner">
 
-           <h2 class='headheader'>Nagios 4 + Nagiosgraph (latest) installation on Ubuntu</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="Nagios_Core_4_Installation_on_Ubuntu_12.04.html" class="link">Nagios 4 + Nagiosgraph (latest) installation on Ubuntu</a></li></ul><p><small>14-09-2015</small> | <small>Remy van Elst</small></p><div class='ad'>
+           <h2 class='headheader'>Nagios 4 + Nagiosgraph (latest) installation on Ubuntu</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="Nagios_Core_4_Installation_on_Ubuntu_12.04.html" class="link">Nagios 4 + Nagiosgraph (latest) installation on Ubuntu</a></li></ul><p><small>11-09-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
                             <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                             <!-- voorartikel -->
                             <ins class="adsbygoogle"
@@ -69,7 +69,7 @@
                             </script>
                         </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p><img src="https://raymii.org/s/img/nagios4.0.8.png" alt="nagios 4" /></p>
 
-<p>This is a guide on installing the latest Nagios Core (4.1.1) on Ubuntu 12.04 and 14.04. Nagios is an open source computer system monitoring, network monitoring and infrastructure monitoring software application. Nagios offers monitoring and alerting services for servers, switches, applications, and services. It alerts the users when things go wrong and alerts them a second time when the problem has been resolved. The version in the Ubuntu 12.04 repositories is quite old, it is still the in the 3 branch. This guide helps to fix that by using the latest Nagios version. We also install Nagiosgraph, a plugin for Nagios which gives you graps of the metrics.</p>
+<p>This is a guide on installing the latest Nagios Core (4.2.1) on Ubuntu 12.04 and 14.04. Nagios is an open source computer system monitoring, network monitoring and infrastructure monitoring software application. Nagios offers monitoring and alerting services for servers, switches, applications, and services. It alerts the users when things go wrong and alerts them a second time when the problem has been resolved. The version in the Ubuntu 12.04 repositories is quite old, it is still the in the 3 branch. This guide helps to fix that by using the latest Nagios version. We also install Nagiosgraph, a plugin for Nagios which gives you graps of the metrics.</p>
 
 <p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring this site by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p>
 
@@ -167,13 +167,13 @@ adduser www-data nagcmd
 
 <p>Use wget to download the latest Nagios Core from sourceforge:</p>
 
-<pre><code>wget http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-4.1.1.tar.gz
+<pre><code>wget http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-4.2.1.tar.gz
 </code></pre>
 
 <p>Extract it:</p>
 
-<pre><code>tar xf nagios-4.1.1.tar.gz
-cd nagios-4.1.1
+<pre><code>tar xf nagios-4.2.1.tar.gz
+cd nagios-4.2.1
 </code></pre>
 
 <p>Create a few folders:</p>
@@ -225,7 +225,7 @@ type &#39;make all&#39; to compile the main program and CGIs.
 checkinstall
 </code></pre>
 
-<p>In the depends section of the package, make sure to add <code>libc6, perl</code>. Name the package <code>nagios4</code> and give it the correct version, namely <code>4.1.1</code>. Repeat for all following packages created.</p>
+<p>In the depends section of the package, make sure to add <code>libc6, perl</code>. Name the package <code>nagios4</code> and give it the correct version, namely <code>4.2.1</code>. Repeat for all following packages created.</p>
 
 <pre><code># This installs the init script in /etc/init.d
 checkinstall --pkgname=nagios-init make install-init
@@ -272,9 +272,9 @@ cd /usr/local/src/nagios-plugins
 
 <p>Download the files and untar them:</p>
 
-<pre><code>wget https://www.nagios-plugins.org/download/nagios-plugins-2.1.1.tar.gz
-tar -xf nagios-plugins-2.1.1.tar.gz
-cd nagios-plugins-2.1.1
+<pre><code>wget https://www.nagios-plugins.org/download/nagios-plugins-2.1.2.tar.gz
+tar -xf nagios-plugins-2.1.2.tar.gz
+cd nagios-plugins-2.1.2
 </code></pre>
 
 <p>Start the compile process:</p>
@@ -288,7 +288,7 @@ cd nagios-plugins-2.1.1
 checkinstall
 </code></pre>
 
-<p>Here again, make sure to set <code>libc6, perl</code> as dependencies, name it <code>nagios-plugins</code> and give it the correct version (<code>2.1.1)</code>.</p>
+<p>Here again, make sure to set <code>libc6, perl</code> as dependencies, name it <code>nagios-plugins</code> and give it the correct version (<code>2.1.2)</code>.</p>
 
 <p>This should also go fine. Continue on to NRPE.</p>
 
@@ -329,7 +329,7 @@ checkinstall
 
 <h3>Setup the upstart script</h3>
 
-<p>The current init script which comes with Nagios Core 4.1.1 does not work with Ubuntu 12.1.14. See this stackoverflow topic: <a href="http://stackoverflow.com/questions/19606049/nagios-4-cant-open-etc-rc-d-init-d-functions">http://stackoverflow.com/questions/19606049/nagios-4-cant-open-etc-rc-d-init-d-functions</a>. </p>
+<p>The current init script which comes with Nagios Core 4.2.1 does not work with Ubuntu 12.1.24. See this stackoverflow topic: <a href="http://stackoverflow.com/questions/19606049/nagios-4-cant-open-etc-rc-d-init-d-functions">http://stackoverflow.com/questions/19606049/nagios-4-cant-open-etc-rc-d-init-d-functions</a>. </p>
 
 <p>The fixes in that topic and on the Nagios forum did not work for me, so I wrote a very simple upstart script. </p>
 
@@ -386,7 +386,7 @@ chown www-data:www-data /var/www/nagios4
 
 <p>Create some symlinks:</p>
 
-<pre><code>ln -s /usr/local/src/nagios4/nagios-4.1.1/contrib/exfoliation/images/favicon.ico /var/www/favicon.ico
+<pre><code>ln -s /usr/local/src/nagios4/nagios-4.2.1/contrib/exfoliation/images/favicon.ico /var/www/favicon.ico
 </code></pre>
 
 <p>Set up a vhost for Nagios. The below file can be used on Ubuntu 12.04. Place it in <code>/etc/apache2/sites-available/nagios.conf</code>:</p>
@@ -656,7 +656,7 @@ service apache2 restart
 
 <p>Copy the included configuration from Nagios:</p>
 
-<pre><code>cp /usr/local/src/nagios4/nagios-4.1.1/sample-config/mrtg.cfg /usr/local/nagios/etc/
+<pre><code>cp /usr/local/src/nagios4/nagios-4.2.1/sample-config/mrtg.cfg /usr/local/nagios/etc/
 </code></pre>
 
 <p>Create a folder for the graphs and files:</p>
