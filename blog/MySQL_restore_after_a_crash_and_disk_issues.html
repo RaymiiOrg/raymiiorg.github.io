@@ -1,0 +1,192 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>MySQL restore after a crash and disk issues - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>MySQL restore after a crash and disk issues</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../blog/index.html" class="link">Blog</a></li><li><a href="MySQL_restore_after_a_crash_and_disk_issues.html" class="link">MySQL restore after a crash and disk issues</a></li></ul><p><small>11-10-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>Recently I had to restore a MySQL server. The hardware had issues with the storage and required some FSCK&#39;s, disk replacements and a lot of RAID and LVM love to get working again. Which was the easy part. MySQL was a bit harder to fix. This post describes the proces I used to get MySQL working again with a recent backup. In this case it was a replicated setup so the client had no actual downtime. </p>
+
+<p>The proces requires a backup, preferably a recent one. What I did was remove everything and start fresh, restoring the backups.</p>
+
+<p>MySQL was not starting and the <code>hostname.err</code> log file had stack trace errors like <a href="https://dba.stackexchange.com/questions/46657/mysql-died-with-stack-trace">in this post</a>. The server uses InnoDB, so no MyISAM recovery. Although my experience with that is not very good as well. But still, error messages like:</p>
+
+<pre><code>Attempting backtrace. You can use the following information to find out
+where mysqld died. If you see no messages after this, something went
+terribly wrong...
+</code></pre>
+
+<p>Are extra funny.</p>
+
+<p>First move the current MySQL folder away somewhere safe:</p>
+
+<pre><code>mv /var/lib/mysql{,.bak-$(date +%s)}
+</code></pre>
+
+<p>Recreate the folder and make sure the correct permissions are set up:</p>
+
+<pre><code>mkdir -p /var/lib/mysql
+chown mysql:mysql /var/lib/mysql
+</code></pre>
+
+<p>Now restore your backup so that you have the dumps available somewhere. In my case that&#39;s in <code>/var/restore.10219/</code> and the files are compressed with <code>gzip</code>. They all have an <code>.sql.gz</code> extension and their filename is the name of the database. The below steps do require that format.</p>
+
+<p>Start up MySQL and make sure we can login without a password:</p>
+
+<pre><code>mysqld_safe --skip-grant-tables &amp;
+</code></pre>
+
+<p>Restore the MySQL <a href="https://dev.mysql.com/doc/refman/5.7/en/system-database.html">system database</a> first. This database contains data MySQL requires to function. For example, the grants (users and permisions), stored procedures, logging, time zone information, replication information and other miscellaneous system tables. </p>
+
+<pre><code>gunzip /var/restore.10219/mysql.sql.gz
+cd /var/restore.10219/
+# Note that I always chuckle when typing this command. 
+mysql mysql &lt; mysql.sql
+</code></pre>
+
+<p>Since the grants are now reset, you need to (re)set a root password. Or, any other administrative user (<code>da_admin</code> for DirectAdmin):</p>
+
+<pre><code>mysql -e &#39;use mysql; update user set password=PASSWORD(&quot;password&quot;) where User=&quot;root&quot;;&#39;
+</code></pre>
+
+<p>Stop the MySQL server:</p>
+
+<pre><code>killall -9 mysqld
+</code></pre>
+
+<p>Start it up via the system init script:</p>
+
+<pre><code>service mysqld restart # (or systemctl if that floats your boat)
+</code></pre>
+
+<p>Check if the service starts up normally now. It should, if not then your backup probably is corrupt as well. You might need to recreate all users by hand.</p>
+
+<p>Move the <code>mysql</code> database backup out of the restore folder:</p>
+
+<pre><code>mv /var/restore.10219/mysql.sql /root/mysql.sql.bak.$(date +%s)
+</code></pre>
+
+<p>Unpack all the databases in the restore folder:</p>
+
+<pre><code>gunzip /var/restore.10219/*.gz
+</code></pre>
+
+<p>The below script takes all <code>.sql</code> files from the restore folder and does the following:</p>
+
+<ul>
+<li>Creates a database with the name of the file (without the <code>.sql</code> extension)</li>
+<li>Restores the dump to that database</li>
+</ul>
+
+<p>It doesn&#39;t take into account stuff like existing datbases, they are just overwritten. You can copy and paste it in the shell, but saving it to a <code>.sh</code> file and running that is better:</p>
+
+<pre><code>for backupfile in /var/restore.10219/*.sql; do 
+  FULLFILE=&quot;$(basename $backupfile)&quot;;
+  DBNAME=&quot;${FULLFILE%.*}&quot;; 
+  echo &quot;Started restoring ${DBNAME} from ${backupfile}&quot;; 
+  mysql -e &quot;create database ${DBNAME}&quot;; 
+  mysql &quot;${DBNAME}&quot; &lt; &quot;${backupfile}&quot;; 
+  sleep 5; 
+  echo &quot;Finished restoring ${DBNAME} from ${backupfile}&quot;;
+done
+</code></pre>
+
+<p>Depending on the size of the database it could take a while to restore all the backups. </p>
+
+<p>Afterwards, you might also want to check the replication if you had any setup. The master/slave settings should be restored via the <code>mysql</code> database, but the log position might be off or there might be duplicates or other errors.</p>
+
+<p>Just to be sure, check, repair and optimize all databases. If you had any errors with the above script, you will get those here as well.</p>
+
+<pre><code>mysqlcheck -uroot -ppassword --auto-repair  --optimize --all-databases
+</code></pre>
+
+<p>In my case there were no databases that were corrupt in the backup and couldn&#39;t be restored in this case. I did have cases were I had one or more databases fail because of corrupt backups. So make sure you do not only set up and monitor your backup process, also set a recurring event every month or so to do a test restore, just to be sure. </p>
+</div><hr>Tags: <a href="../tags/backup.html" class="link">backup, </a><a href="../tags/database.html" class="link">database, </a><a href="../tags/duplicity.html" class="link">duplicity, </a><a href="../tags/mariadb.html" class="link">mariadb, </a><a href="../tags/mysql.html" class="link">mysql, </a><a href="../tags/ubuntu.html" class="link">ubuntu, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    

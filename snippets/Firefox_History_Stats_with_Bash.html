@@ -60,7 +60,7 @@
            <div class="col-md-8 col-sm-8"> 
                 <div class="inner">
 
-           <h2 class='headheader'>Firefox History stats with Bash</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../snippets/index.html" class="link">Snippets</a></li><li><a href="Firefox_History_Stats_with_Bash.html" class="link">Firefox History stats with Bash</a></li></ul><p><small>28-09-2014</small> | <small>Remy van Elst</small></p><div class='ad'>
+           <h2 class='headheader'>Firefox History stats with Bash</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../snippets/index.html" class="link">Snippets</a></li><li><a href="Firefox_History_Stats_with_Bash.html" class="link">Firefox History stats with Bash</a></li></ul><p><small>25-09-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
                             <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                             <!-- voorartikel -->
                             <ins class="adsbygoogle"
@@ -72,18 +72,19 @@
                             </script>
                         </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>This is a small script to gather some statistics from your Firefox history. First we use sqlite3 to parse the Firefox history database and get the last three months, then we remove all the IP addresses and port numbers and finally we sort and count it.</p>
 
-<pre><code>if [[ ! -d ${HOME}/.www ]]; then
-mkdir ${HOME}/.www/
+<pre><code>#!/bin/bash
+if [[ ! -d ${HOME}/.www ]]; then
+  mkdir ${HOME}/.www/
 fi
 
-cp &quot;$(find &quot;${HOME}.mozilla/firefox/&quot; -name &quot;places.sqlite&quot; | head -n 1)&quot; &quot;${HOME}/.www/places.sqlite&quot;
+cp &quot;$(find &quot;${HOME}/.mozilla/firefox/&quot; -name &quot;places.sqlite&quot; | head -n 1)&quot; &quot;${HOME}/.www/places.sqlite&quot;
 sqlite3 &quot;${HOME}/.www/places.sqlite&quot; &quot;SELECT url FROM moz_places, moz_historyvisits \
                        WHERE moz_places.id = moz_historyvisits.place_id \
                              and visit_date &gt; strftime(&#39;%s&#39;,&#39;now&#39;,&#39;-3 month&#39;)*1000000 ORDER by \
                        visit_date;&quot;  &gt; &quot;${HOME}/.www/urls-unsorted&quot;
 sort -u &quot;${HOME}/.www/urls-unsorted&quot; &gt; &quot;${HOME}/.www/urls&quot;
 
-awk -F/ &#39;{print $3}&#39; .www/urls | grep -v -E -e &#39;[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}&#39; -e &#39;:.*&#39; -e &#39;^$&#39; | sed -e &#39;s/www\.//g&#39; |sort | uniq -c | sort -n
+awk -F/ &#39;{print $3}&#39; &quot;${HOME}/.www/urls&quot; | grep -v -E -e &#39;[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}&#39; -e &#39;:.*&#39; -e &#39;^$&#39; | sed -e &#39;s/www\.//g&#39; |sort | uniq -c | sort -n 
 </code></pre>
 
 <p>Example output:</p>
@@ -98,6 +99,11 @@ awk -F/ &#39;{print $3}&#39; .www/urls | grep -v -E -e &#39;[0-9]{1,3}\.[0-9]{1,
    3009 duckduckgo.com
    6459 wiki.int
   12934 management.int
+</code></pre>
+
+<p>If you just want HTTPS domains, or just HTTP you can use awk to make that happen:</p>
+
+<pre><code>awk -F/ &#39;$1 == &quot;https:&quot; {print $3}&#39; &quot;${HOME}/.www/urls&quot; | grep -v -E -e &#39;[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}&#39; | sort | uniq -c | sort
 </code></pre>
 </div><hr>Tags: <a href="../tags/bash.html" class="link">bash, </a><a href="../tags/firefox.html" class="link">firefox, </a><a href="../tags/history.html" class="link">history, </a><a href="../tags/sqlite.html" class="link">sqlite, </a><a href="../tags/ubuntu.html" class="link">ubuntu, </a><div class="footer">
                 <hr>
