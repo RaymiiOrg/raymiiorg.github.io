@@ -1,0 +1,551 @@
+<!-- nominify -->
+
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Build a FreeBSD 11.0-release Openstack Image with bsd-cloudinit - Raymii.org</title>
+        <link href="/s/inc/css/custom-first.css" rel="stylesheet" />
+        <link href="/s/inc/css/light.css" rel="stylesheet"  />
+        <link href="/s/inc/css/custom.css" rel="stylesheet" title="custom" />
+        <script src="/s//inc/js/toc.js" type="text/javascript"></script>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link href="inc/img/icons/iphone.png" rel="apple-touch-icon" />
+        <link href="inc/img/icons/ipad.png" rel="apple-touch-icon" sizes="76x76" />
+        <link href="inc/img/icons/iphone-retina.png" rel="apple-touch-icon" sizes="120x120" />
+        <link href="inc/img/icons/ipad-retina.png" rel="apple-touch-icon" sizes="152x152" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        <a id="top-of-page"></a>
+        <div class="container-fluid ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-3 col-sm-3 max-200">
+                        <div class="well well-none"> 
+                            <h3 class="headheader"><a href="https://raymii.org/s/">Raymii.org <img src="/s/inc/img/resistor-50.png" alt="IEC Resistor logo"></a></h3>
+                            <h6 class="headheader">Quis custodiet ipsos custodes?</h6>
+                            <h6><a href="https://raymii.org/s/feed.xml">RSS Feed</a></h6>
+                        </div>
+          
+
+    
+    <form role="search" action="https://encrypted.google.com/search">
+        <div class="form-group">
+          <input type="hidden" name="as_sitesearch" value="raymii.org">
+          <input type="hidden" name="as_qdr" value="all">
+          <input type="text" name="as_q" class="form-control" placeholder="Search">
+        </div>
+      </form>
+      <div class="menu"><ul class="nav nav-pills nav-stacked"><li><a href="/s/index.html" class="special-menu">Home</a></li><li class='bottom-spacing'><a href="/s/everything.html" class="special-menu">All Pages</a></li><li class='hideifsmall'><a href="/s/tags/bash.html" class="link">Bash</a></li><li class='hideifsmall'><a href="/s/tags/monitoring.html" class="link">Monitoring</a></li><li class='hideifsmall'><a href="/s/tags/ssl.html" class="link">SSL</a></li><li class='hideifsmall'><a href="/s/tags/debian.html" class="link">Debian</a></li><li class='hideifsmall'><a href="/s/tags/python.html" class="link">Python</a></li><li class='hideifsmall'><a href="/s/tags/vpn.html" class="link">VPN</a></li><li class='hideifsmall'><a href="/s/tags/ubuntu.html" class="link">Ubuntu</a></li><li class='hideifsmall'><a href="/s/tags/nginx.html" class="link">nginx</a></li><li class='hideifsmall'><a href="/s/tags/openstack.html" class="link">Openstack</a></li><li class='hideifsmall'><a href="/s/tags/ansible.html" class="link">Ansible</a></li></ul>            
+               <!-- advertisement start -->
+                <a href="http://clients.inceptionhosting.com/aff.php?aff=083">Inception Hosting Affiliate Link</a><br />
+                <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean Affiliate Link, $10 free credit.</a><br />
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Raymii-2 -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:200px;height:200px"
+                     data-ad-client="ca-pub-7993642564731324"
+                     data-ad-slot="9322003332"></ins>
+                <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+                <!-- advertisement end -->
+                </div>
+           </div>  
+           <div class="col-md-8 col-sm-8"> 
+                <div class="inner">
+
+           <h2 class='headheader'>Build a FreeBSD 11.0-release Openstack Image with bsd-cloudinit</h2><ul class="breadcrumb"><li><a href="../index.html" class="link">Home</a></li><li><a href="../tutorials/index.html" class="link">Tutorials</a></li><li><a href="FreeBSD_11.0-release_Openstack_Image.html" class="link">Build a FreeBSD 11.0-release Openstack Image with bsd-cloudinit</a></li></ul><p><small>14-11-2016</small> | <small>Remy van Elst</small></p><div class='ad'>
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- voorartikel -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="ca-pub-7993642564731324"
+                                 data-ad-slot="6172324376"></ins>
+                            <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div><br><div id="toc"><h3>Table of Contents</h3></div><hr><div id="contents"><p>We are going to prepare a FreeBSD image for Openstack deployment. We do this by creating a FreeBSD 11.0-RELEASE instance, installing it and converting it using <a href="http://pellaeon.github.io/bsd-cloudinit/">bsd-cloudinit</a>. We&#39;ll use the <a href="https://cloudvps.com">CloudVPS</a> public Openstack cloud for this. Create an account there and install the Openstack command line tools, like <code>nova</code>, <code>cinder</code> and <code>glance</code>. </p>
+
+<p>A FreeBSD image with Cloud Init will automatically resize the disk to the size of the flavor and it will add your SSH key right at boot. You can use <a href="https://www.digitalocean.com/community/tutorials/an-introduction-to-cloud-config-scripting">Cloud Config</a> to execute <a href="https://raymii.org/s/tutorials/Automating_Openstack_with_Cloud_init_run_a_script_on_VMs_first_boot.html">a script at first boot</a>, for example, to bootstrap your system into Puppet or Ansible. If you <a href="https://raymii.org/s/tutorials/Ansible_-_create_OpenStack_servers_with_os_server.html">use Ansible</a> to manage OpenStack instances you can integrate it without manually logging in or doing anything manually.</p>
+
+<p>You can see all my <a href="https://raymii.org/s/tags/openstack.html">Openstack related articles here</a>. For example, how to use <a href="https://raymii.org/s/tutorials/Encrypted_Duplicity_Backups_to_Openstack_Swift_Objectstore.html">Duplicity to create Encrypted backups to the Openstack Swift Object Store</a></p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p>
+
+<p>This tutorial is available for: </p>
+
+<ul>
+<li><a href="https://raymii.org/s/tutorials/FreeBSD_10.0-release_Openstack_Image.html">FreeBSD 10.0-RELEASE.</a></li>
+<li><a href="https://raymii.org/s/tutorials/FreeBSD_10.1-release_Openstack_Image.html">FreeBSD 10.1-RELEASE.</a></li>
+<li><a href="https://raymii.org/s/tutorials/FreeBSD_10.3-release_Openstack_Image.html">FreeBSD 10.3-RELEASE.</a></li>
+<li><a href="https://raymii.org/s/tutorials/FreeBSD_11.0-release_Openstack_Image.html">FreeBSD 11.0-RELEASE.</a></li>
+</ul>
+
+<h3>Command Line tools</h3>
+
+<p>Make sure you have the Openstack command line tools installed. Follow the official openstack guide <a href="http://docs.openstack.org/user-guide/content/install_clients.html">here</a>. If you have <code>pip</code> installed you can use that to install the tools:</p>
+
+<pre><code>pip install python-novaclient
+pip install python-cinderclient
+pip install python-glanceclient
+pip install python-keystoneclient
+pip install python-neutronclient
+pip install python-swiftclient
+</code></pre>
+
+<p>Save yourself some time and create a file named <code>computerc</code> with the below contents:</p>
+
+<pre><code>export OS_AUTH_URL=&quot;https://identity.stack.cloudvps.com/v2.0&quot;
+export OS_TENANT_NAME=&quot;&lt;tenant name&gt;&quot;
+export OS_USERNAME=&quot;&lt;username&gt;&quot;
+export OS_PASSWORD=&quot;&lt;password&gt;&quot;
+export OS_TENANT_ID=&quot;&lt;tenant id&gt;&quot;
+</code></pre>
+
+<p>When you are going to do stuff with the Openstack command line clients, load this file:</p>
+
+<pre><code>source computerc
+</code></pre>
+
+<p>That way, your authentication data are loaded and you don&#39;t have to give parameters like <code>-os-username</code> and such.</p>
+
+<h3>Openstack Overview</h3>
+
+<p>Openstack is a datacenter virtualization plaform consisting out of many different tools and services. For this tutorial it is important to know the following ones.</p>
+
+<h4>Compute (Nova)</h4>
+
+<p>This is the virtualization service. It works with a hypervisor to create and manage virtual machines. You can create a VM based on a specific &quot;Flavour&quot;, which is just a definition of specs like disk, cpu and ram.</p>
+
+<h4>Block Storage (Cinder)</h4>
+
+<p>This is the service which makes block devices (volumes) available to services. A flavour can not be changed, just resized. If you want extra storage you need to create a volume, attach it to the VM and mount it there for use.</p>
+
+<h4>Images (Glance)</h4>
+
+<p>This is the service which holds all the images. Images can be used to boot a VM from. Images can be prepared with tools like <code>cloud-init</code> to make them behave better in a cloud environment, for example, setting an SSH key or password at boot.</p>
+
+<h4>ISO Installation</h4>
+
+<p>Booting from an ISO with a disk attached is quite tricky in Openstack. This FreeBSD tutorial can be used for any ISO which needs to be installed. The process is as following:</p>
+
+<ul>
+<li>Boot an instance from an ISO image with an extra volume attached.</li>
+<li>Install the software on that volume.</li>
+<li>Stop the install VM.</li>
+<li>Start a new VM with the volume as root disk. (To test, prepare and configure the installation).</li>
+<li>Stop and destory that VM.</li>
+<li>Convert the volume to an image.</li>
+</ul>
+
+<p>You then have an image with your own installation available to boot new vm&#39;s from.</p>
+
+<p>Lets get started.</p>
+
+<h3>Upload the ISO to glance</h3>
+
+<p>Start by uploading the FreeBSD 11.0-RELEASE ISO to Openstack using the Glance client:</p>
+
+<pre><code>glance image-create --name &quot;FreeBSD-11.0-RELEASE-amd64-dvd1.iso&quot; --disk-format iso --container-format bare --copy-from &quot;ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/amd64/ISO-IMAGES/11.0/FreeBSD-11.0-RELEASE-amd64-bootonly.iso&quot;
+</code></pre>
+
+<p>Note that we download the 300 MB boot only image instead of the full DVD. You can also use that, but it will take longer to download/upload.</p>
+
+<p>If your Openstack provider does not support the <code>--copy-from</code> parameter you will have to download the ISO yourself:</p>
+
+<pre><code>wget ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/amd64/ISO-IMAGES/11.0/FreeBSD-11.0-RELEASE-amd64-bootonly.iso
+</code></pre>
+
+<p>And upload it as an image. That can take a while:</p>
+
+<pre><code>glance image-create --file Downloads/FreeBSD-11.0-RELEASE-amd64-dvd1.iso --name &quot;FreeBSD-11.0-RELEASE-amd64-bootonlyiso&quot; --disk-format iso --container-format bare --progress
+</code></pre>
+
+<p>The result of the glance command should be something like below:</p>
+
+<pre><code>+------------------+-----------------------------------------+
+| Property         | Value                                   |
++------------------+-----------------------------------------+
+| checksum         | f0f49e5d50195ef3a70a5aa7b73a8d71        |
+| container_format | bare                                    |
+| created_at       | 2016-11-14T09:06:39                     |
+| deleted          | False                                   |
+| deleted_at       | None                                    |
+| disk_format      | iso                                     |
+| id               | a7f36877-8dc5-4ae9-bcf4-a7484552a887    |
+| is_public        | False                                   |
+| min_disk         | 0                                       |
+| min_ram          | 0                                       |
+| name             | FreeBSD-11.0-RELEASE-amd64-bootonly.iso |
+| owner            | e8[...]e4                               |
+| protected        | False                                   |
+| size             | 298821632                               |
+| status           | active                                  |
+| updated_at       | 2016-11-14T09:07:09                     |
+| virtual_size     | None                                    |
++------------------+-----------------------------------------+
+</code></pre>
+
+<p>Note down the ISO ID, in our case <code>5b74bee7-c05e-4102-9dd2-349dec4adee2</code>.</p>
+
+<h3>Create the volume</h3>
+
+<p>Create the root volume for our FreeBSD preparation install:</p>
+
+<pre><code>cinder create --display-name &quot;FreeBSD-11.0-root&quot; --availability-zone=NL1 16
+</code></pre>
+
+<p>This creates an 16 GB volume, on which we will install FreeBSD. The result of the command is like below:</p>
+
+<pre><code>+---------------------+--------------------------------------+
+|       Property      |                Value                 |
++---------------------+--------------------------------------+
+|     attachments     |                  []                  |
+|  availability_zone  |                 NL1                  |
+|       bootable      |                false                 |
+|      created_at     |      2016-11-14T09:10:21.570845      |
+| display_description |                 None                 |
+|     display_name    |          FreeBSD-11.0-root           |
+|      encrypted      |                False                 |
+|          id         | fc4d6110-6d21-4fa9-80c1-e6916d1c2daf |
+|       metadata      |                  {}                  |
+|         size        |                  16                  |
+|     snapshot_id     |                 None                 |
+|     source_volid    |                 None                 |
+|        status       |               creating               |
+|     volume_type     |                 None                 |
++---------------------+--------------------------------------+
+</code></pre>
+
+<p>Again, note down the ID, in our case <code>f00fdea0-37ea-4a0e-9a1d-403d39ce8320</code>.</p>
+
+<h3>Boot a VM with an ISO and extra volume</h3>
+
+<p>Boot a new instance from the ISO, attaching the volume we just created as well:</p>
+
+<pre><code>nova boot --image &lt;freebsd iso image id&gt; --poll --flavor &quot;Standard 1&quot; --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000 --block-device-mapping &quot;vdb=&lt;volume freebsd-10-root id&gt;:::0&quot; &quot;FreeBSD-11.0-RELEASE-install&quot;
+</code></pre>
+
+<ul>
+<li><code>--image</code> is the FreeBSD ISO image ID</li>
+<li><code>--flavor</code> is the Openstack VM Flavour, this can be different at another Openstack provider</li>
+<li><code>--availability-zone</code> is also Openstack provider specific. It is the datacenter/logic region where the VM starts. The volume needs to be in the same availability zone.</li>
+<li><code>--nic net-id</code> is the Openstack network. In this case it is the CloudVPS public network.</li>
+<li><code>--block-device-mapping</code> maps the volume we created as a second disk for the VM. The <code>:::0</code> makes sure it does not get deleted when the VM is terminated.</li>
+</ul>
+
+<p>Your output will be like below:</p>
+
+<pre><code>+--------------------------------------+--------------------------------------------------------------------------------+
+| Property                             | Value                                                                          |
++--------------------------------------+--------------------------------------------------------------------------------+
+| OS-DCF:diskConfig                    | MANUAL                                                                         |
+| OS-EXT-AZ:availability_zone          | NL2                                                                            |
+| OS-EXT-STS:power_state               | 0                                                                              |
+| OS-EXT-STS:task_state                | scheduling                                                                     |
+| OS-EXT-STS:vm_state                  | building                                                                       |
+| OS-SRV-USG:launched_at               | -                                                                              |
+| OS-SRV-USG:terminated_at             | -                                                                              |
+| accessIPv4                           |                                                                                |
+| config_drive                         |                                                                                |
+| created                              | 2016-11-14T09:11:09Z                                                           |
+| flavor                               | Standard 1 (111)                                                               |
+| hostId                               |                                                                                |
+| id                                   | 7f399f7b-c96e-46c8-b70d-047783f7037d                                           |
+| image                                | FreeBSD-11.0-RELEASE-amd64-bootonly.iso (a7f36877-8dc5-4ae9-bcf4-a7484552a887) |
+| key_name                             | -                                                                              |
+| metadata                             | {}                                                                             |
+| name                                 | FreeBSD-11-install                                                             |
+| os-extended-volumes:volumes_attached | [{&quot;id&quot;: &quot;fc4d6110-6d21-4fa9-80c1-e6916d1c2daf&quot;}]                               |
+| progress                             | 0                                                                              |
+| security_groups                      | default                                                                        |
+| status                               | BUILD                                                                          |
+| tenant_id                            | e8[...]e4                                                                      |
+| updated                              | 2016-11-14T09:11:10Z                                                           |
++--------------------------------------+--------------------------------------------------------------------------------+
+</code></pre>
+
+<p>Note down the ID like usual, in our case: <code>7f399f7b-c96e-46c8-b70d-047783f7037d</code>.</p>
+
+<h3>Install FreeBSD 11.0</h3>
+
+<p>Do a standard install of FreeBSD 10. Use the Openstack console to do that. </p>
+
+<p>These are my simple install settings:</p>
+
+<ul>
+<li>default keymap</li>
+<li>hostname: freebsd.public.cloudvps.com</li>
+<li>Just lib32 and ports, no doc, games or src (If you have the bootonly DVD you need to configure networking (dhcp) to download the other packages. Settings are a below under <code>Network:</code>.)</li>
+<li>Manual Partition Layout:
+
+<ul>
+<li>vtbd0 GPT</li>
+<li>vtbd0p1 64KB freebsd-boot (boot)</li>
+<li>vtbd0p2 16GB freebsd-ufs mountpoint / (root)</li>
+<li>The root partition must be the last partition on the drive so that it can expand at run time to the disk size that your instance type provides. Also note that bsd-cloudinit currently has a hard-coded bug/assumption that this is the second partition. This is also the reason we do not use ZFS-on-root, sadly.</li>
+</ul></li>
+<li>Root password P@ssw0rd</li>
+<li>Network:
+
+<ul>
+<li>adapter: vtnet0</li>
+<li>ipv4: dhcp</li>
+<li>ipv6: slaac</li>
+<li>search: public.cloudvps.com</li>
+</ul></li>
+<li>UTC: no, timezone 8 EUROPE 34 NETHERLANDS</li>
+<li>Services at boot: 
+
+<ul>
+<li>sshd</li>
+<li>ntpd</li>
+<li>moused</li>
+<li>dumpd</li>
+<li>local_unbound</li>
+</ul></li>
+<li>System Hardening:
+
+<ul>
+<li>This is up to you, but in my case everything is turned on:</li>
+<li>Hide processes running as [other users | other groups]</li>
+<li>Disable [reading kernel message buffer | proces debugging features] for unprivileged users</li>
+<li>Randomize the PID of newly created processes</li>
+<li>Insert stack guard page ahead of the growable segments</li>
+<li>Clean the /tmp filesystem on system startup</li>
+<li>Disable opening Syslogd network socket (disables remote logging)</li>
+<li>Disable Sendmail service</li>
+<li>Note that all of the above can still be changed later on.</li>
+</ul></li>
+<li>Extra users: no</li>
+<li>Exit, open a shell.</li>
+</ul>
+
+<p>Below is a picture of the running installation:</p>
+
+<p><img src="https://raymii.org/s/inc/img/freebsd-11-install-1.png" alt="freebsdinstall"></p>
+
+<h3>Stop the install VM</h3>
+
+<p>Shut the instance from FreeBSD using <code>shutdown -p now</code> and after that via nova:</p>
+
+<pre><code>nova stop &lt;install vm id&gt;
+</code></pre>
+
+<p>Detach the volume:</p>
+
+<pre><code>nova volume-detach &lt;install vm id&gt; &lt;install root volume id&gt;
+</code></pre>
+
+<p>When the volume is detached you can delete the installation VM. We don&#39;t need it anymore:</p>
+
+<pre><code>nova delete &lt;install vm id&gt;
+</code></pre>
+
+<p>The volume will not be destroyed when the VM is deleted.</p>
+
+<h3>Boot a new VM with the volume as root disk</h3>
+
+<p>Boot a new instance with the volume freebsd was installed on as the root disk:</p>
+
+<pre><code>nova boot --block-device source=volume,id=&lt;root volume id&gt;,dest=volume,shutdown=preserve,bootindex=0 --poll --flavor &quot;Standard 1&quot; --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000 --key-name &lt;ssh key&gt; FreeBSD-11.0-RELEASE-configure
+</code></pre>
+
+<p>Here we use <code>--block-device</code> to specify that the only disk attached to the instance should be the volume <code>source=volume,id=&lt;volume id&gt;</code>. This can also be an image as source. The destination is also a volume, this can also be local. </p>
+
+<p>If you have more block devices specified here you should make sure there is only 1 with the <code>bootindex 0</code>, that is the disk the VM will try to boot from.</p>
+
+<h3>Prepare FreeBSD for Cloud Init</h3>
+
+<p>If you get a mountroot error from the bootloader, enter the following: </p>
+
+<pre><code>    ufs:/dev/vtbd0p3.
+</code></pre>
+
+<p>Change <code>/etc/fstab</code> after the fact, change <code>ada0</code> to <code>vtbd0</code> for VirtIO support. If you don&#39;t get an error then change nothing.</p>
+
+<p>Bootstrap the packaging system (<code>pkg</code>) so we can install some stuff required for <code>bsd-cloudinit</code>:</p>
+
+<pre><code>pkg
+</code></pre>
+
+<p>Enter y.</p>
+
+<p>Install vim and py27-setuptools (for bsd-cloudinit):</p>
+
+<pre><code>pkg install vim-lite py27-setuptools ca_root_nss
+</code></pre>
+
+<p>The ca<em>root</em>nss is required by fetch to do certificate validation.</p>
+
+<h3>Login Users</h3>
+
+<p>By default cloudinit will create a user named <code>freebsd</code> which has sudo privileges without password. However, if you want to enable root login directly, you need to add your SSH key, enable root login and add some extra configuration later on for cloud-init.</p>
+
+<p>If you want root login, add your SSH key:</p>
+
+<pre><code>mkdir /root/.ssh
+chmod 700 /root/.ssh
+echo &quot;ssh-rsa AAAA[...] user@example.com&quot; &gt; /root/.ssh/authorized_keys
+chmod 600 /root/.ssh/authorized_keys
+</code></pre>
+
+<p>Enable root login via ssh:</p>
+
+<pre><code>vim /etc/ssh/sshd_config
+PermitRootLogin yes
+</code></pre>
+
+<h3>Expand root filesystem</h3>
+
+<p>Since <a href="https://www.freebsd.org/releases/10.2R/relnotes.html#userland-rc">FreeBSD 10.2-RELEASE</a> there is an <code>rc</code> script which, when the file <code>/firstboot</code> exists, expands the root filesystem to the full disk. While <code>bsd-cloudinit</code> does this as well, if you don&#39;t need the whole <code>cloudinit</code> stack, (when you use a static ssh key for example), you can <code>touch</code> that file to make sure the disk is expanded at the first boot:</p>
+
+<pre><code>touch /firstboot
+</code></pre>
+
+<h3>bsd-cloudinit install</h3>
+
+<p>Install python modules for bsd-cloudinit:</p>
+
+<pre><code>rehash
+easy_install eventlet
+easy_install iso8601
+</code></pre>
+
+<p>Add the following to <code>/boot/loader.conf</code> to make sure the console works:</p>
+
+<pre><code>console=&quot;comconsole,vidconsole&quot;
+autoboot_delay=&quot;15&quot;
+</code></pre>
+
+<p>This sets console output to go to the serial console, which is displayed by nova consolelog, and the video console for sites with VNC or Spice configured.</p>
+
+<p>Now do any other customizations you want to have in your image.</p>
+
+<p>Do the bsd-cloudinit install:</p>
+
+<pre><code>fetch https://raw.github.com/pellaeon/bsd-cloudinit-installer/master/installer.sh
+chmod +x installer.sh
+</code></pre>
+
+<p>The default username will be <code>freebsd</code>, bsd-cloudinit will create it if it does not exists. The freebsd user will also be able to <code>sudo</code> without a password by default, <code>bsd-cloudinit</code> will handle that by default.</p>
+
+<p>Before you start the installer, make sure you do any other configuration you want. After the installer has started and you reboot, cloudinit will prepare the vm for use.</p>
+
+<p>Start the installer:</p>
+
+<pre><code>./installer.sh
+</code></pre>
+
+<p>Answer yes to the questions and remove the installer file afterwards:</p>
+
+<pre><code>rm installer.sh
+</code></pre>
+
+<p>Delete all history:</p>
+
+<pre><code>set history = 0
+history -c
+</code></pre>
+
+<p>Zero out all the free space:</p>
+
+<pre><code>dd if=/dev/zero of=/bla
+rm /bla
+</code></pre>
+
+<p>We do that so that the image compresses better later.</p>
+
+<p>Turn the machine off:</p>
+
+<pre><code>shutdown -p now
+</code></pre>
+
+<p>Terminate the machine, otherwise you cannot detach the volume (<code>ERROR: Can&#39;t detach root device volume (HTTP 403)</code>):</p>
+
+<pre><code>nova delete &lt;id of freebsd-configure vm&gt;
+</code></pre>
+
+<p>Convert the volume to an image:</p>
+
+<pre><code>cinder upload-to-image &lt;freebsd-10-root volume id&gt; FreeBSD-11.0-RELEASE-CloudInit
+</code></pre>
+
+<p>This might take a while.</p>
+
+<p>Set the min-disk and min-ram requirements, plus some more properties for the image:</p>
+
+<pre><code>glance image-update --min-disk 8 --min-ram 1024 --property architecture=x86_64 --property image_supports_keypair=true --property image_supports_password=true --property supported=false &lt;id from the converted volume image&gt;
+</code></pre>
+
+<p>If needed, make it public:</p>
+
+<pre><code>glance --name &quot;UNSUPPORTED: FreeBSD-11.0-RELEASE&quot; --is-public True &lt;id from the converted volume image&gt;
+</code></pre>
+
+<p>That&#39;s it. You are done and have a good workable freebsd image.</p>
+
+<p>Boot a new instance from your newly created image:</p>
+
+<pre><code>nova boot --image &lt;id from the converted volume image&gt; --flavor &quot;Standard 4&quot; --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000 --key-name &lt;your ssh key&gt; FreeBSD-11.0-RELEASE-cloudinit
+</code></pre>
+
+<p>When the instance has spawned you can login as the freebsd user, freebsd@ipaddress. </p>
+
+<h3>Compress the image</h3>
+
+<p>If your Openstack provider does not compress the images converted from volumes you might need to do that yourself. You want to do that because storing 475 MB costs you less qouta/money than 16 GB.</p>
+
+<p>First, use glance to download the image:</p>
+
+<pre><code>glance image-download --file bsd.raw &lt;freebsd image uuid&gt;
+</code></pre>
+
+<p>Convert and compress the image to qcow2 with <code>qemu-img</code>:</p>
+
+<pre><code>qemu-img convert -c -f raw -O qcow2 bsd.raw bsd.qcow2
+</code></pre>
+
+<p>You will get the best compression if you&#39;ve zero&#39;d out the image as listed above.</p>
+
+<p>Upload this new smaller image to Openstack:</p>
+
+<pre><code>glance image-create --name FreeBSD-11.0 --disk-format qcow2 --container-format bare --min-disk 16 --min-ram 1024  --property architecture=x86_64 --property image_supports_keypair=true --property image_supports_password=true --property os_type=linux --property supported=false --file ./bsd.qcow2 
+</code></pre>
+
+<p>In my case the converted volume was 16 GB and the compressed image was 475MB. </p>
+
+<p><a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you like this article, consider sponsoring me by trying out a Digital Ocean VPS. With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10 credit). (referral link)</a></p>
+</div><hr>Tags: <a href="../tags/cloud.html" class="link">cloud, </a><a href="../tags/cloudinit.html" class="link">cloudinit, </a><a href="../tags/compute.html" class="link">compute, </a><a href="../tags/freebsd.html" class="link">freebsd, </a><a href="../tags/image.html" class="link">image, </a><a href="../tags/openstack.html" class="link">openstack, </a><a href="../tags/python.html" class="link">python, </a><div class="footer">
+                <hr>
+                <p>Generated by <a href="/s/software/ingsoc.html">ingsoc</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                <a href="/s/static/About.html">About</a><br />
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+    </div>
+     
+    <!-- Piwik --> 
+    <script type="text/javascript">
+    var pkBaseURL = (("https:" == document.location.protocol) ? "https://hosted-oswa.org/piwik/" : "http://hosted-oswa.org/piwik/");
+    document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script><script type="text/javascript">
+    try {
+    var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+    } catch( err ) {}
+    </script><noscript><p><img src="http://hosted-oswa.org/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+    </body>
+    </html>
+    
