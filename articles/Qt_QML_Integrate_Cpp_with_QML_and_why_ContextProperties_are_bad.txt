@@ -1,6 +1,6 @@
 This is a text-only version of the following page on https://raymii.org:
 ---
-Title       : 	Qt/QML setContextProperty is a bad way to expose C++ classes to QML, use these better alternatives!
+Title       : 	Qt/QML expose C++ classes to QML and why setContextProperty is a not the best idea
 Author      : 	Remy van Elst
 Date        : 	03-10-2021
 URL         : 	https://raymii.org/s/articles/Qt_QML_Integrate_Cpp_with_QML_and_why_ContextProperties_are_bad.html
@@ -15,12 +15,12 @@ Format      : 	Markdown/HTML
 
 In this article I'm going to discuss the different ways to expose a C++ class to QML.  QML is a markup language (part of the QT framework) like HTML/CSS, with inline JavaScript that can interact with the C++ code of your (QT) application. There are multiple ways to expose a C++ class to QML, each with their own benefits and quirks. This guide will cover three integration methods, `qmlRegisterSingletonType<>`, `rootContext->setContextProperty()` and `qmlRegisterType<>`. We'll end off with a simple benchmark showing the difference in startup times between the first two. 
 
-The executive summary is that `setContextProperty` is [deprecated][11], has
-issues and you should use `qmlRegisterSingletonType<>`. In my benchmarks the
-`qmlRegisterSingletonType` one is faster than `setContextProperty`. If you
-need more than one instance of your class, use `qmlRegisterType<>` and
-instantiate your objects in QML directly. `qmlRegisterType` is also faster
-than a context property in my benchmarks.
+The executive summary is that `setContextProperty` is [deprecated][11], has a
+performance impact (and you should use `qmlRegisterSingletonType<>`. In my
+benchmarks the `qmlRegisterSingletonType` one is faster than
+`setContextProperty`. If you need more than one instance of your class, use
+`qmlRegisterType<>` and instantiate your objects in QML directly.
+`qmlRegisterType` is also faster than a context property in my benchmarks.
 
 <p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
 
