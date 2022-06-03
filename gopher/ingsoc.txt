@@ -1,0 +1,202 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	ingsoc
+Author      : 	Remy van Elst
+Date        : 	02-12-2014
+URL         : 	https://raymii.org/s/software/ingsoc.html
+Format      : 	Markdown/HTML
+---
+
+
+
+ingsoc is a static site generator written in Python with the purpose of
+generating raymii.org. It differs from other static site generators because it
+does not create a blog-like site, but it is focused on pages and structure. It
+also does not use a template engine. It generates categories, pages, tags, an
+XML sitemap and a RSS feed. It takes markdown files with a yaml config header as
+input, and outputs html.
+
+I sometimes write updates on new changes in ingsoc, those articles can be found
+[on this page][1].
+
+### Usage
+
+ingsoc requires three directories and content to work. The directory structure
+can be as below:
+
+    
+    
+    $ tree
+    .
+    |-- ci.sh
+    |-- config.yml
+    |-- minify.py
+    |-- newspeak.py
+    |-- inc
+    |   |-- css
+    |   |   |-- example.css
+    |   |-- img
+    |   |   |-- example.png
+    |   |-- js
+    |   |   |-- example.js
+    |-- src
+    |   |-- software
+    |   |   |-- ingsoc.md
+    |   |   |-- Awesome_Example_Application.md
+    |   `-- tutorials
+    |       |-- Awesome_Tutorial_1.md
+    |       |-- Tutorial_2.md
+    |-- out
+    |   |-- everything.html
+    |   |-- feed.xml
+    |   |-- inc
+    |   |   |-- css
+    |   |   |   |-- example.css
+    |   |   |-- img
+    |   |   |   |-- example.png
+    |   |   |-- js
+    |   |   |   |-- example.js
+    |   |-- index.html
+    |   |-- sitemap.xml
+    |   |-- software
+    |   |   |-- ingsoc.html
+    |   |   |-- Awesome_Example_Application.html
+    |   |-- tags
+    |   |   |-- tag1.html
+    |   |   |-- tag2.html
+    |   |   |-- tag3.html
+    |   `-- tutorials
+    |       |-- Awesome_Tutorial_1.html
+    |       |-- Tutorial_2.html
+    `-- tests
+        |-- broken-link-check.py
+        |-- dead-link-checker.py
+        |-- spell-check.py
+        |-- w3-validate.sh
+        `-- words-to-ignore.txt
+    
+
+I have a `src` directory with my content, which is written in markdown. The
+`inc` directory gets copied over to the output folder, it has the css, js,
+images and other static content. The `out` folder is the folder where ingsoc
+puts its generated html.
+
+### Content
+
+A content item is a markdown file, with a yaml header. The header looks like
+this:
+
+    
+    
+    title: "Example Title"
+    author: "John Doe"
+    category: "software"
+    date: "29-06-2015"
+    lastupdate: "05-10-2019"
+    summary: "This is a great article about some stuff related to Lorum Ipsum. The summary of this article is even more awesome."
+    tags: 
+      - example
+      - lorum
+      - ipsum
+      - tag
+    ---
+    
+
+Then below the three dashes (`---`) the actual markdown content is placed. The
+`category` item is what also end up in the menu. The date and summary are used
+in the RSS. The summary is the only field which is not required.
+
+There is a post generation step in which the css and generated html are
+minified. The `minify: False` optional option (default is True) allows a page to
+be excluded from the minification.
+
+### Configuration
+
+There is also a `config.yml` file. It looks like this:
+
+    
+    
+    title: "Awesome Website"
+    subtitle: "Awesome Slogan!"
+    rootdir: "./src"
+    outdir: "out"
+    incfolder: "./inc"
+    breadcrumbs: "yes"
+    tags: "yes"
+    rsstitle: "Awesome Website RSS Feed"
+    rssdescr: "The Awesome Website RSS feed, all about awesome stuff"
+    rssurl: "https://raymii.org/s/"
+    
+    homepagetext: >
+        <h3>Welcome!</h3>
+        This is the <strong>most awesome site</strong> on the entire internet.
+    
+
+The `homepagetext` item is the raw html code which is put on the index.html
+code. the `tags` and `breadcrumbs` are used to define if tags and breadcrumbs
+should be generated and placed or not.
+
+### Requirements
+
+  * python 2.7+ (fully Python 3 compatible)
+  * [Sundown/Misaka][2]
+  * dateutils
+  * [pyyaml][3]
+
+The minification also requires the `cssmin` and `htmlmin.minify` modules. It is
+fully threaded, minifying at least 4 pages at once.
+
+To install them in a standard ubuntu/debian:
+
+    
+    
+    sudo apt-get install python-pip
+    
+
+and then:
+
+    
+    
+    sudo pip install misaka pyyaml dateutils
+    
+
+   [1]: https://raymii.org/s/tags/ingsoc.html
+   [2]: https://github.com/FSX/misaka
+   [3]: http://pyyaml.org/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

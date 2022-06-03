@@ -1,0 +1,240 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Store multiple types in a single std::map in C++ with std::any, just like a python dict
+Author      : 	Remy van Elst
+Date        : 	23-09-2020
+URL         : 	https://raymii.org/s/articles/Store_multiple_types_in_a_single_stdmap_in_cpp_just_like_a_python_dict.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+In C++, everything has a type. When declaring a function you specify the return
+type and for each parameter you specify what type it is, just as for regular
+variables. Templates aside (those still have a type), you almost always know
+what type of data you're working with. There is the `auto` keyword, which can
+save you a lot of typing and duplicate code, but fundamentally you're still
+working with types. Since C++ 17 you can use `std::any` to store anything,
+without knowing the type. This is awesome for some tasks, and horrific for most
+use cases. In this article I'll show an example of a `std::map` with `std::any`, 
+that behaves like a python `dict`, it's able to store multiple different types
+in the same container.
+
+There are times when you'd whish C++ wasn't so strict, staticly typed. Maybe 
+you even dream of python, or worse, javascript. But then you go and [watch wat][1]
+and are cured of the javascript dream. Most of those times, you're taking a shortcut
+and probably need to think better about the use case.
+
+Well, since `C++ 17` there is the `std::any` type. Basically it's a type safe 
+way of working with `void pointers`, forcing you cast it to the correct type, 
+otherwise you get a runtime exception. With `std::any`, you can seperate the
+storing of the (unknown) data from the handling of said data. Whenever you're 
+handling the data you still need to know the type, but when storing, anything
+is allowed.
+
+Ever thought you would see this being valid and compiling:
+
+    std::vector<std::any> wow {"hello", 3.14, 9ll, my_object, std::string("world")};
+
+A use case is when you are just storing data, or just passing things around,
+and the responsibility of doing "stuff" with that data is elsewhere. Or you might
+be implementing a library, handling user data from the network (json), unknown
+file contents.  
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+First I'll go over some caveats of `std::any`, then a python example, ending 
+with the actual C++ code to have a dynamic map.
+
+
+### Caveats and a word of caution
+
+A few caveats you should keep in mind. First, this only works for copy-constructable
+things. If you've explicitly deleted the copy constructor you cannot put it in a
+`std::any`.
+
+Second, you still always have know the type when working with things inside your 
+map. You cannot, at runtime, `any_cast`. Every type must be known at compile time.
+Only the storage side now can be (sort of) type agnostic.
+
+Do note that if you do have the slightest idea what kind of data/types you're
+going to  handle, `std::variant` is often a better choice. Everything you can
+check at compile time, you should check, less bugs in runtime later. `std::variant`
+has automatic storage, `std::any` may use the free store, which could mean performance 
+impact. `std::variant` can also store non-copyable things, 
+
+In the `olden days` you would probably use a `void*` with a `static_cast` or 
+a `(cstyle cast)` to achieve the same use case. Advantages of `std::any` are
+that lifetime is managed (like smart pointers) and you're forced to cast it to
+a correct type.
+
+
+The [microsoft devblog][2] article has more background information on `std::any`,
+[this post][3] is a great overview of `std::any` vs `std::variant` and [here][4]
+is another informative article.
+
+### Python?
+
+In Python, you can for example, just mix and match types in a dict. For example,
+a dict with strings and ints:
+
+    exampleDict =  {
+      "brand": "Ford",
+      "model": "Mustang",
+      "year": 1964
+    }
+
+Accessing that data can either be done with `exampleDict["brand"]` or 
+`exampleDict.get("brand")`. Easy peasy. No type checking, as you'd expect in 
+python. No type safety either.
+
+
+### ExampleDict in C++
+
+If I'd want the exact `exampleDict` from the python example, I think I'd create
+a `struct` which hold the mentioned types:
+
+    struct exampleDict {
+        std::string brand;
+        std::string model;
+        int year = 0;
+    };
+
+This is quite rigid, extending it required changing all code using it, if you
+write C++ often, you know the drill. Probably I'd not even use `std::string`s but
+a `Model` class or an `enum`. We C++ guys love our classes and multiple inheretance. 
+
+### The dynamic map with std::any (C++)
+
+Here's the code. It's in an `example` class but the gist should be clear enough.
+
+
+    class ExampleThing {
+        std::map<std::string, std::any> _tVars;
+    public:
+        template <typename T>
+        T getValue(const std::string &key, T defaultValue) const
+        {
+            auto it = _tVars.find(key);
+            if (it == _tVars.end())
+                return defaultValue;
+
+            return std::any_cast<T>(it->second);
+        };
+        template <typename T>
+        void setValue(const std::string &key, T value)
+        {
+            _tVars[key] = value;
+        };
+    };
+
+
+With the above code, I can recreate the python dict from earlier, without specifying 
+the types inside of the exampleclass. I do still need to specify then on the
+usage side, but not on the storage side.
+
+    ExampleThing ex1;
+    ex1.setValue("model", "mustang");
+    ex1.setValue("brand", "ford");
+    ex1.setValue("year", 1984);
+
+This `ex1` object can be passed around, and whenever I'm ready to read the data,
+I can do so:
+
+    ex1.getValue("year", -1);
+
+Here is another usage example:
+
+
+    struct fortyTwo {
+        std::string the;
+        std::string is;
+        int ft2 {0};
+    } life;
+
+    ExampleThing exampleThing1;
+    exampleThing1.setValue("hello", std::string("world"));
+    exampleThing1.setValue("pi", 3.14);
+    exampleThing1.setValue("dolphin", life);
+
+    std::cout << exampleThing1.getValue("hello", std::string()) << std::endl;
+    std::cout << exampleThing1.getValue("pi", 0.0) << std::endl;
+    std::cout << exampleThing1.getValue("dolphin", fortyTwo()).the << std::endl;
+    std::cout << exampleThing1.getValue("nonexistent", 8ll) << std::endl;
+
+
+Output:
+
+    world
+    3.14
+    answer
+    8
+
+#### default value or std::optional? 
+
+The `defaultValue` part is a relic of the codebase I use this in. It was easier
+to refactor specific getters/setters to this generic template with a default 
+value, since it used the `sentinel` value (an extra variable that lets us know
+if what we want wasn't available, like `-1`) often. 
+
+I did play with `std::optional`, but it seems that [it does not play well][5]
+with `any_cast`, or I would have to write more code and refactor the sentinel
+usage everywhere.
+
+
+### Final thoughts
+
+I'm going to repeat it, as said above, if you even have the slightest idea of 
+what you're data is going to be, use a `std::variant`. If you need to set / get
+just a bunch of numbers (`int/long/double`) and some text (`const char*, std::string`),
+apply this code but use a `std::variant`. This might seem easier and more flexible, 
+but it comes at a cost (dynamic memory allocation, since it's syntactic sugar 
+around void pointers, and the variant has compile time checks). 
+
+Still, even though it feels weirds, I think this kinda cool. 
+
+
+[1]: https://www.destroyallsoftware.com/talks/wat
+[2]: https://devblogs.microsoft.com/cppblog/stdany-how-when-and-why/
+[3]: https://stackoverflow.com/questions/56303939/c-stdvariant-vs-stdany
+[4]: https://www.bfilipek.com/2018/06/any.html
+[5]: https://stackoverflow.com/questions/39899155/any-cast-with-stdanys-and-stdoptional
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

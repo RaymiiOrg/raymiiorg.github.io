@@ -1,0 +1,308 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Openstack Soft Delete - recover deleted instances
+Author      : 	Remy van Elst
+Date        : 	18-03-2017
+URL         : 	https://raymii.org/s/articles/Openstack_Soft_Delete_-_recover_deleted_instances.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![][1]
+
+This article contains both an end user and OpenStack administrator guide to set
+up and use `soft_delete` with OpenStack Nova. If an instance is deleted with
+nova delete, it's gone right away. If `soft_delete` is enabled, it will be
+queued for deletion for a set amount of time, allowing end-users and
+administrators to restore the instance with the `nova restore` command. This can
+save your ass (or an end-users bottom) if the wrong instance is removed. Setup
+is simple, just one variable in `nova.conf`. There are some caveats we'll also
+discuss here.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Pro's and Con's
+
+There are some considorations you need to make when enabling soft-deletion. I'll
+discuss them below.
+
+The most important one is that instances are not deleted right away. If you're a
+heavy API user, herding cattle (spawning and deleting many instances all the
+time), capacity management might be a problem.
+
+![][3]
+
+Let's say you set the `reclaim_instance_interval` to 3 days (because, what if a
+user removes an instance during the weekend, this is a ass-saver after all), but
+you spawn and remove about a hundred servers every day. (Let's assume you have
+cloud-ready applications, good for you). Normally, the capacity (RAM, disk, cpu,
+volumes, floating IP's, security groups) used by these VM's is removed right
+away. With soft-delete enabled, all of this will be reserved until after 3 days
+in this case. This means you need to have capacity to store 300 instances extra.
+This can be mitigated by using `nova force-delete`. This delete function skips
+the `SOFT_DELETE` state entirely. Or you can set the `reclaim_instance_interval`
+to a smaller amount of time. This is a consideration you should plan for based
+on the available infrastructure and usage patterns in your cloud.
+
+The second caveat is that when you delete an instance, attached resources
+(Volumes, Floating IP's, Security Groups) stay reserved. If you need a volume
+that was attached to an instance that is soft-deleted, you first need to
+`recover` that instance, then detach the volume (or other resource) and then
+delete the instance again. Or detach the resource before you delete the
+instance. Normally, when deleting an instance, the resources are released
+automatically. If you use the API for resource management you [need to][4] take
+this into consideration as well.
+
+The third is that a `nova list` doesn't show instances in the `SOFT_DELETED`
+state. Recovering can only be done with the UUID, so you must have noted that
+somewhere, or do a database query if you have that level of access. If a
+floating IP or volume is still attached to the VM, you are able to get the UUID
+from there, otherwise you're out of luck.
+
+The positive part of soft-delete is that you can recover instances. I work for a
+large cloud provider and the amount of times we get the question from end users
+will suprise you. Higher up however decided that this feature should not be
+enabled, so we always have to tell users something along the lines of 'Time to
+restore your backups'. Mostly this is because of the extreme amount of resources
+being created and deleted, also because you just should have good backups
+(regularly tested).
+
+In a private cloud setting this is a much better argument. Users there will
+probably remove the wrong instance and panic, call you, and you will be the hero
+of the day. In a public cloud this can also be a feature, marketing wise.
+
+Now, after all the points, let's continue on to the setup.
+
+### Administrator setup
+
+In your `/etc/nova/nova.conf` file, there is a (commented by default) variable
+`reclaim_instance_interval`. This is the amount of time, in seconds, that an
+instance will at least be in the state `SOFT_DELETED`. There is a scheduler task
+that runs every `$reclaim_instance_interval` seconds. It checks if an instance
+has the state `SOFT_DELETED`, and if it is at least `reclaim_instance_interval`
+seconds in this state. If so, it will be removed permanently. If you set
+`reclaim_instance_interval` to 4 hours, and an instance is deleted just when
+this task runs, it might overlap and will be removed after 8 hours, since one of
+the two conditions is not met. In practice this won't happen very often.
+
+You need to deploy this change to `nova.conf` on all your `nova-compute` servers
+and everywhere the `nova-api` runs (`scheduler`, `conducter`, etc). Restart the
+services afterwards.
+
+### Testing
+
+After you've enabled soft-delete, create an instance (`nova boot`), attach a
+volume and make sure it boots:
+
+    
+    
+    $ nova show 905b8228-6a0b-48ec-a7e6-e2e7b7460004
+    +--------------------------------------+----------------------------------------------------------------------------------------------------+
+    | Property                             | Value                                                                                              |
+    +--------------------------------------+----------------------------------------------------------------------------------------------------+
+    | OS-DCF:diskConfig                    | MANUAL                                                                                             |
+    | OS-EXT-AZ:availability_zone          | NL1                                                                                                |
+    | OS-EXT-SRV-ATTR:host                 | compute-3-7                                                                                        |
+    | OS-EXT-SRV-ATTR:hypervisor_hostname  | compute-3-7                                                                                        |
+    | OS-EXT-SRV-ATTR:instance_name        | instance-00044243                                                                                  |
+    | OS-EXT-STS:power_state               | 1                                                                                                  |
+    | OS-EXT-STS:task_state                | -                                                                                                  |
+    | OS-EXT-STS:vm_state                  | active                                                                                             |
+    | OS-SRV-USG:launched_at               | 2017-03-18T10:21:25.000000                                                                         |
+    | OS-SRV-USG:terminated_at             | -                                                                                                  |
+    | accessIPv4                           |                                                                                                    |
+    | accessIPv6                           |                                                                                                    |
+    | config_drive                         |                                                                                                    |
+    | created                              | 2017-03-18T10:20:46Z                                                                               |
+    | flavor                               | Tiny (199)                                                                                         |
+    | hostId                               | 3d7ed510fb3dfa987e7eb7ae6f70106917a5feb57fe56ef740a1d9ed                                           |
+    | id                                   | 905b8228-6a0b-48ec-a7e6-e2e7b7460004                                                               |
+    | image                                | CloudVPS Ubuntu 16.04 (cda1773d-064c-4750-9c41-081467fc6575)                                       |
+    | metadata                             | {}                                                                                                 |
+    | name                                 | test-delete                                                                                        |
+    | net-public network                   | 185.3.210.299                                                                                     |
+    | os-extended-volumes:volumes_attached | [{"id": "6a664e03-46bf-4f7b-9eb7-14d16d305a6d"}]                                                   |
+    | progress                             | 0                                                                                                  |
+    | security_groups                      | built-in-allow-icmp, built-in-allow-web, built-in-provider-access, built-in-remote-access, default |
+    | status                               | ACTIVE                                                                                             |
+    | updated                              | 2017-03-18T10:21:25Z                                                                               |
+    +--------------------------------------+----------------------------------------------------------------------------------------------------+
+    
+
+Delete the instance:
+
+    
+    
+    $ nova delete 905b8228-6a0b-48ec-a7e6-e2e7b7460004
+    Request to delete server 905b8228-6a0b-48ec-a7e6-e2e7b7460004 has been accepted.
+    
+
+A `nova show` will now show the instance as SOFT_DELETED:
+
+    
+    
+    $ nova show 905b8228-6a0b-48ec-a7e6-e2e7b7460004
+    +--------------------------------------+----------------------------------------------------------------------------------------------------+
+    | Property                             | Value                                                                                              |
+    +--------------------------------------+----------------------------------------------------------------------------------------------------+
+    | OS-DCF:diskConfig                    | MANUAL                                                                                             |
+    | OS-EXT-AZ:availability_zone          | NL1                                                                                                |
+    | OS-EXT-SRV-ATTR:host                 | compute-3-7                                                                                        |
+    | OS-EXT-SRV-ATTR:hypervisor_hostname  | compute-3-7                                                                                        |
+    | OS-EXT-SRV-ATTR:instance_name        | instance-00044243                                                                                  |
+    | OS-EXT-STS:power_state               | 4                                                                                                  |
+    | OS-EXT-STS:task_state                | -                                                                                                  |
+    | OS-EXT-STS:vm_state                  | soft-delete                                                                                        |
+    | OS-SRV-USG:launched_at               | 2017-03-18T10:21:25.000000                                                                         |
+    | OS-SRV-USG:terminated_at             | -                                                                                                  |
+    | accessIPv4                           |                                                                                                    |
+    | accessIPv6                           |                                                                                                    |
+    | config_drive                         |                                                                                                    |
+    | created                              | 2017-03-18T10:20:46Z                                                                               |
+    | flavor                               | Tiny (199)                                                                                         |
+    | hostId                               | 3d7ed510fb3dfa987e7eb7ae6f70106917a5feb57fe56ef740a1d9ed                                           |
+    | id                                   | 905b8228-6a0b-48ec-a7e6-e2e7b7460004                                                               |
+    | image                                | CloudVPS Ubuntu 16.04 (cda1773d-064c-4750-9c41-081467fc6575)                                       |
+    | key_name                             | Remy                                                                                               |
+    | metadata                             | {}                                                                                                 |
+    | name                                 | test-delete                                                                                        |
+    | net-public network                   | 185.3.210.227                                                                                      |
+    | os-extended-volumes:volumes_attached | [{"id": "6a664e03-46bf-4f7b-9eb7-14d16d305a6d"}]                                                   |
+    | security_groups                      | built-in-allow-icmp, built-in-allow-web, built-in-provider-access, built-in-remote-access, default |
+    | status                               | SOFT_DELETED                                                                                       |
+    | updated                              | 2017-03-18T10:50:25Z                                                                               |
+    +--------------------------------------+----------------------------------------------------------------------------------------------------+
+    
+
+The volume will still show as attached:
+
+    
+    
+    $ cinder show 6a664e03-46bf-4f7b-9eb7-14d16d305a6d
+    
+    +--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Property                       | Value                                                                                                                                                                                               |
+    +--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | attachments                    | [{'id': '6a664e03-46bf-4f7b-9eb7-14d16d305a6d', 'host_name': None, 'device': '/dev/sdb', 'server_id': '905b8228-6a0b-48ec-a7e6-e2e7b7460004', 'volume_id': '6a664e03-46bf-4f7b-9eb7-14d16d305a6d'}] |
+    | availability_zone              | NL1                                                                                                                                                                                                 |
+    | bootable                       | false                                                                                                                                                                                               |
+    | created_at                     | 2017-03-18T10:47:14.000000                                                                                                                                                                          |
+    | description                    | None                                                                                                                                                                                                |
+    | encrypted                      | False                                                                                                                                                                                               |
+    | id                             | 6a664e03-46bf-4f7b-9eb7-14d16d305a6d                                                                                                                                                                |
+    | metadata                       | {'readonly': 'False', 'attached_mode': 'rw'}                                                                                                                                                        |
+    | name                           | test-delete                                                                                                                                                                                         |
+    | os-vol-host-attr:host          | zfs-3-4                                                                                                                                                                                             |
+    | os-vol-mig-status-attr:migstat | None                                                                                                                                                                                                |
+    | os-vol-mig-status-attr:name_id | None                                                                                                                                                                                                |
+    | size                           | 8                                                                                                                                                                                                   |
+    | snapshot_id                    | None                                                                                                                                                                                                |
+    | source_volid                   | None                                                                                                                                                                                                |
+    | status                         | in-use                                                                                                                                                                                              |
+    | volume_type                    | None                                                                                                                                                                                                |
+    +--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    
+
+Horizon and other interfaces will probably show it as well:
+
+![][5]
+
+![][6]
+
+Using the `nova restore` command we can bring back the server:
+
+    
+    
+    $ nova restore 905b8228-6a0b-48ec-a7e6-e2e7b7460004
+    
+
+There is no output. A `nova show` will show the server back in `ACTIVE` state,
+it will boot up as if it had a regular shutdown.
+
+Now do this again and await the scheduler. If you then do a `nova show`, the
+instance should be removed and the volume should be released.
+
+### End user usage
+
+The `nova restore` action is by default not admin only. If you have a UUID you
+can restore an instance, if the public cloud provider has enabled this feature.
+
+To test if it is enabled, just remove an instance and see if it goes into the
+`SOFT_DELETED` state with `nova show`. If so, send them a message / ticket
+asking what the scheduler timeout is, how long you can recover the instance.
+
+### Database query to get all soft_deleted instances
+
+If you manage a private cloud and someone calls you to recover their instance,
+if you have access to the database of nova, you can execute the following query
+to get all instances in soft _deleted state with their UUID. The caller will
+probably have a name, and otherwise a tenant_ id helps as well. Then just do a
+`nova recover` and you're all set:
+
+    
+    
+    SELECT uuid,hostname,project_id FROM nova.instances WHERE vm_state = 'soft-delete';
+    
+
+Example output:
+
+    
+    
+    +--------------------------------------+--------------------+----------------------------------+
+    | uuid                                 | hostname           | project_id                       |
+    +--------------------------------------+--------------------+----------------------------------+
+    | 8b6f7517-8155-463a-a277-e08d5597c1cd | test               | c3347bc952eb4904bb922c379beb1932 |
+    | 73e6f3bf-e3b8-432f-b6ce-4208f476b8f9 | khjkjhkjhjkhkhkhjk | e80a4d46437446b1b51d57ecc566f9e4 |
+    | 169c8696-d831-4331-8a7e-831b1526bbac | jkhjkhkh           | 3335ae642c4a42549b7a4489adf98d7c |
+    | 8c7a7c1f-bfa9-41cc-8172-9fa190f3ff9d | c7-test            | e80a4d46437446b1b51d57ecc566f9e4 |
+    | 099b37fa-04f8-4561-a6f4-e5d9d0bd9223 | lkjlkjlkj          | e80a4d46437446b1b51d57ecc566f9e4 |
+    | 905b8228-6a0b-48ec-a7e6-e2e7b7460004 | test-delete        | 3335ae642c4a42549b7a4489adf98d7c |
+    +--------------------------------------+--------------------+----------------------------------+
+    6 rows in set (0.20 sec)
+    
+
+   [1]: https://raymii.org/s/inc/img/ocata-lg.jpg
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://raymii.org/s/inc/img/cloudscaling_pets_cattle_servers.jpg
+   [4]: https://github.com/hashicorp/terraform/issues/5104
+   [5]: https://raymii.org/s/inc/img/soft-delete.png
+   [6]: https://raymii.org/s/inc/img/soft-delete2.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

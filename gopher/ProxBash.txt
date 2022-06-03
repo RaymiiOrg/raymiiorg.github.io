@@ -1,0 +1,182 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	ProxBash - a bash script to manage Proxmox VE
+Author      : 	Remy van Elst
+Date        : 	28-06-2012
+URL         : 	https://raymii.org/s/software/ProxBash.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Proxmox VE is a complete virtualization management solution for servers. You can
+virtualize even the most demanding application workloads running on Linux and
+Windows Servers. It is based on the leading Kernel-based Virtual Machine (KVM)
+hypervisor and OpenVZ, the number one solution for container based
+virtualization.
+
+[Proxmox Website][1]
+
+ProxMox VE is a very nice piece of software to setup a VM host very fast, which
+also is easy manageable via a webinterface. It supports both OpenVZ and KVM. I
+use it to manage a few VM's to test stuff on and it works really great.
+
+However, I'm a command line lover, and I thought it would be nice to be able to
+"Manage" Proxmox VE from a bash shell. And I've written a script to do just
+that.
+
+proxbash.sh is a bash script to manage your Proxmox VE server.
+
+Check out my other [Proxmox/OpenVZ related articles][2].
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+##### Features
+
+  * Add OpenVZ containers
+  * Remove OpenVZ containers
+  * Start / Stop OpenVZ containers
+  * List all OpenVZ containers and KVM virtual machines
+  * Shell dropper into OpenVZ containers
+  * Command execution in openvz containers
+
+As you can see there is a lot of OpenVZ and not a lot of KVM. Most of the VM's I
+use are OpenVZ, so for the KVM things you need to use the webinterface.
+
+##### Download
+
+[Click here to download the script][4]
+
+Or use this:
+
+    
+    
+    wget https://raymii.org/s/inc/software/proxbash.sh; chmod +x ./proxbash.sh; ./proxbash.sh
+    
+
+##### Usage
+
+Before you start, edit the script variables:
+
+    
+    
+    VAR_PROXMOXHOST="192.168.0.25"    #proxmox server IP
+    VAR_PROXMOXSSH="22"         #proxmox ssh port
+    VAR_PROXMOXUSER="root"          #proxmox ssh user
+    VAR_PROXMOX_NODE="proxmox"      #proxmox cluster node name
+    
+
+and set up passwordless key auth to the proxmox node. If you don't do that, you
+have to enter the proxmox root password every time.
+
+**Also edit the case statement for the templates. Default it has ubuntu 10.04
+and 12.04 and centos 5 and 6.**
+
+Replace $CTID with an openvz ct id. (like 103, 104)
+
+###### Create a CT
+
+    
+    
+    proxbash.sh createct node-hostname node-password node-template node-ram node-disk node-ip
+    proxbash.sh createct prod001 supersecret1 ubuntu12 1024 15 172.20.5.48
+    
+
+proxbash.sh createct node-hostname node-password node-template node-ram node-
+disk node-ip $CTID
+
+###### Start/Stop a CT
+
+    
+    
+    ./proxbash.sh startct 
+    ./proxbash.sh startct $CTID   
+    
+    ./proxbash.sh stopct
+    ./proxbash.sh stopct $CTID
+    
+
+###### Remove a CT
+
+    
+    
+    ./proxbash.sh deletect
+    ./proxbash.sh deletect $CTID
+    
+
+###### Shell dropper
+
+    
+    
+    ./proxbash.sh shelldrop $CTID
+    
+
+###### Execute commands in CT
+
+    
+    
+    ./proxbash.sh execinct $CTID "commands you -want -to; execute; in the ../ct" 
+    
+
+###### List CTs/VMs
+
+    
+    
+    ./proxbash.sh listcts
+    ./proxbash.sh listvms
+    
+
+###### Get CT info
+
+    
+    
+    ./proxbash.sh ctinfo
+    ./proxbash.sh ctinfo $CTID
+    
+
+##### Notes
+
+If you like it or use it, please leave a comment.
+
+   [1]: http://www.proxmox.com/products/proxmox-ve/
+   [2]: https://raymii.org/s/tags/openvz.html
+   [3]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [4]: https://raymii.org/s/inc/software/proxbash.sh
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

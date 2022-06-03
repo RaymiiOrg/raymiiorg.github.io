@@ -1,0 +1,243 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Word occurrence counter and analyzer
+Author      : 	Remy van Elst
+Date        : 	07-03-2013
+URL         : 	https://raymii.org/s/articles/Word_occurrence_counter_and_analyzer.html
+Format      : 	Markdown/HTML
+---
+
+
+
+With these commands you can analyze a text file. It will count all the
+occurrences of all words and put out the stats. It is usefull for song lyrics,
+books, notes and everything. It helps me analyze my writing style, which words
+do I use more often, where are my spelling errors and such. It is also nice to
+win an argument against someone over a dragonforce song. This example will use
+lyrics as example, but it is applicable to all text files.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+##### Get the Lyrics (text)
+
+First get the lyrics, or the text you want to analyze into a text file. I've
+heard nano, vi(m) and emacs are quite good with text. In this song I will use a
+song by Dragonforce. It does not matter which one because they're all full of
+the same words.
+
+My lyrics file is named: `df1.txt`
+
+##### Sanitize them
+
+The tools we are going to use do not like all those comma's, colons, exclamation
+marks and weird non-alphanumeric characters. So sanitize the file like this:
+
+    
+    
+    cat df1.txt | tr -cd '[:alnum:] [:space:]' > df1san.txt
+    
+
+What this does is pump the file through the tr command, that command (with these
+arguments) strips everything which is not a-zA-Z0-9 or a space. Exactly what we
+want.
+
+##### Analyze it Now we do the magic:
+
+    
+    
+    sed 's/\.//g;s/\(.*\)/\L\1/;s/\ /\n/g' dfsan.txt | sort | uniq -c | sort -nr | head -n 20
+    
+    
+    
+    remy@vps8:~$ sed 's/\.//g;s/\(.*\)/\L\1/;s/\ /\n/g' dfsan.txt | sort | uniq -c | sort -nr | head -n 20
+    72 the
+    32 
+    25 and
+    22 of
+    20 in
+    17 we
+    16 on
+    14 our
+    13 a
+    8 were
+    8 lost
+    8 for
+    7 will
+    7 still
+    7 light
+    6 to
+    6 so
+    6 fire
+    6 far
+    5 through
+    
+
+### Other Example
+
+#### on my class notes about blood and the immune system
+
+    
+    
+    remy@vps8:~$ cat afweer.txt | tr -cd '[:alnum:] [:space:]' > afweersan.txt      
+    remy@vps8:~$ sed 's/\.//g;s/\(.*\)/\L\1/;s/\ /\n/g' afweersan.txt | sort | uniq -c | sort -nr | head -n 20                 
+    195 
+    108 de
+    80 een
+    72 van
+    65 het
+    51 in
+    46 is
+    40 en
+    24 zijn
+    24 op
+    24 afweer
+    22 die
+    20 vraag
+    20 deze
+    19 worden
+    18 kan
+    17 bij
+    16 dit
+    15 er
+    14 of
+    
+
+After stripping it of the non-usefull words:
+
+    
+    
+    remy@vps8:~$ cat afwres.txt | head -n 10
+    24 afweer
+    14 cellen
+    11 bacterin
+    9 waar
+    9 reactie
+    9 antigeen
+    8 specifieke
+    7 milieu
+    7 lymfocyten
+    7 lichaam
+    
+
+#### Fabian Scherschels NanoWriMo 2011 Book: Nightwatch
+
+[GIT tree of the book][2] & [NaNoWiMo page][3] Book is `Creative Commons
+Attribution-NonCommercial-ShareAlike 3.0 Unported License`
+
+    
+    
+    1020 the
+    454 he
+    421 and
+    418 of
+    357 to
+    347 had
+    297 a
+    267 was
+    257 his
+    241 that
+    216 in
+    132 it
+    130 marc
+    112 him
+    108 as
+    105 this
+    105 they
+    93 with
+    90 but
+    82 were
+    82 from
+    82 been
+    82 at
+    74 on
+    70 would
+    68 for
+    68 could
+    56 their
+    56 be
+    53 out
+    51 into
+    50 man
+    49 all
+    48 there
+    48 so
+    48 by
+    47 looked
+    46 not
+    44 up
+    44 them
+    44 like
+    
+
+#### Analyzing IP and log files
+
+Today I found another usefull use for this command. Analyzing IP adresses. First
+I grepped my entire lighttpd log file:
+
+cat access.log | egrep -o
+'[[:digit:]]{1,3}.[[:digit:]]{1,3}.[[:digit:]]{1,3}.[[:digit:]]{1,3}' | tr
+[:space:] '\n' | grep -v "^\s*$" | sort | uniq -c | sort -bnr
+
+(egrep -o spits out only the IP adress, not the whole line on which the IP
+adress is on)
+
+That gives out this nice list (this list is made up, not real IP adresses):
+
+    
+    
+    2 83.64.150.248
+    2 94.0.74.75
+    2 94.142.55.252
+    2 95.237.133.3
+    2 98.225.130.26
+    3 108.100.28.45
+    3 213.93.70.87
+    5 81.30.145.69
+    348 66.228.43.247
+    467 173.255.236.50
+    
+
+[Thanks to the wonderfull community at stackexchange][4]
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://gitorious.org/nano2011
+   [3]: http://www.nanowrimo.org/en/participants/fabsh
+   [4]: http://unix.stackexchange.com/questions/39039/get-text-file-word-occurrence-count-of-all-words-print-output-sorted
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

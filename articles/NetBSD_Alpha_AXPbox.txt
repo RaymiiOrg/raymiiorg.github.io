@@ -1,0 +1,1351 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Install NetBSD 9.2 on a DEC Alpha CPU with AXPBox
+Author      : 	Remy van Elst
+Date        : 	28-08-2021
+URL         : 	https://raymii.org/s/articles/NetBSD_Alpha_AXPbox.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![screenshot][12]
+
+> Neofetch running on NetBSD inside AXPbox
+
+This is a guide on installing and running NetBSD 9.2 for the DEC Alpha CPU
+architecture on AXPbox, the open source Alpha Emulator. I recently wrote an
+article on [how to install NetBSD in QEMU][2] for Alpha and since [I'm involved][3]
+with the AXPbox project this article was just a matter of time. This guide
+shows you how to compile AXPbox and install NetBSD 9.2. It also shows you 
+how to install packages without networking available and includes `openssl`
+and `sysbench` benchmarks, which we compare to NetBSD running inside QEMU.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+AXPbox runs NetBSD less well than QEMU does, it's a bit slower, enabling
+networking or a GUI crashes NetBSD and running with more than 512 MB RAM also
+crashes NetBSD during installation. The fun thing however is that the OpenSSL
+benchmark, which failed horribly on QEMU, runs well on AXPbox. The big
+selling point of AXPbox is that it runs [OpenVMS][1] (QEMU doesn't). NetBSD
+and other UNIXes(Tru64) kind of work, but that's more a by-product than an
+actual feature.
+
+Comparing `sysbench` benchmarks between QEMU and AXPbox we can see that QEMU
+is two to three times faster when running NetBSD.
+
+This guide does not cover X11 / GUI, since there is no networking available.
+No networking means that you cannot SSH into the machine and use X11 forwarding.
+If in the future networking does work, you can follow the [other guide][2] that
+has instructions for VNC or [this guide][4] that covers SSH X11 forwarding. I
+did also try the AXPbox [VGA console][5] but as you might have guessed, that
+[crashed NetBSD][13].
+
+Package installation is a bit difficult as well since there is no networking.
+However, we can work around that by downloading the package files and creating
+an ISO file, which can be mounted inside NetBSD. Poor mans file transfer, but 
+that way I was able to get sysbench installed. 
+
+Nevertheless, I love the fact that Alpha emulation is so much better then
+[it was three years ago][6] when I wrote about it. AXPbox is awesome for 
+OpenVMS and the recent QEMU fixes make that great for NetBSD. I love these
+developments!
+
+
+### Compiling and configuring AXPbox
+
+
+Make sure you have git and a development environment installed. For Ubuntu:
+
+    apt install build-essential git
+
+Clone the AXPbox git repository:
+
+    git clone https://github.com/lenticularis39/axpbox.git
+
+You can also use one of the pre-built release versions, as of writing 1.1.0 is 
+the latest. If you do that, skip the build process and continue to the configuration
+section.
+
+Create a build folder and compile AXPbox:
+
+    mkdir build && cd build
+    cmake .. -DCMAKE_BUILD_TYPE="Release" 
+    make -j$(($(nproc) + 1))
+
+
+In your build folder there should now be a binary named `AXPbox`:
+
+    ./axpbox 
+    AXPBox Alpha Emulator (commit cba974cdfa4d2b8a459e7c1eb1943fff8b514a09)
+    Usage: ../build/axpbox run|configure <options>
+
+Create a `netbsd` folder where the config, ISO and disk are. Not really required, but 
+I like to keep my virtualized configs seperated:
+
+    mkdir netbsd
+    cd netbsd
+
+
+Create a folder for the ROM file, which AXPbox needs to boot:
+
+    mkdir rom
+    cd rom
+
+Download the SRM rom file:
+
+    wget https://raymii.org/s/inc/downloads/es40-srmon/cl67srmrom.exe
+    cd ..
+
+Add the config file for AXPbox. Create or edit `es40.cfg`:
+
+    vim es40.cfg
+
+Paste the following contents:    
+
+    sys0 = tsunami
+    {
+      memory.bits = 29;
+      rom.srm = "rom/cl67srmrom.exe";
+      rom.decompressed = "rom/decompressed.rom";
+      rom.flash = "rom/flash.rom";
+      rom.dpr = "rom/dpr.rom";
+
+      cpu0 = ev68cb
+      {
+        speed = 1800M;
+        icache = false;
+        skip_memtest_hack = true;
+      }
+
+      serial0 = serial
+      {
+        port = 21264;
+        action = "";
+      }
+
+      pci0.15 = ali_ide
+      {
+      }
+
+      pci0.1 = sym53c810
+      {
+        disk0.0 = file
+        {
+          file = "disk.img";
+          cdrom = false;
+          read_only = false;
+        }
+
+        disk0.1 = file
+        {
+          file = "netbsd.iso"; 
+          cdrom = true;
+          read_only = true;
+        }
+      }
+
+      pci0.7 = ali
+      {
+        mouse.enabled = false;
+        vga_console = false;
+      }
+    }
+
+Last but not least, create an empty disk file where you will install NetBSD onto:
+
+    truncate -s 20G disk.img
+
+I've used 20 GB as size, but less than that will work fine as well. I think
+you need 1.5GB for a full NetBSD installation.
+
+Now that the emulator is all set up and ready, continue on to the next section
+where we'll start the NetBSD installation.
+
+### Installing NetBSD inside AXPbox
+
+Before we can install NetBSD, we need to download the ISO file. I'm using the
+latest current ISO because that was what the QEMU article used, 9.2 should
+work just as well.
+
+Check [the following directory][8] for the current version of the latest
+`current` ISO, in my case `NetBSD-9.99.88-alpha.iso`. Download the ISO:
+
+    wget -O netbsd.iso https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/images/NetBSD-9.99.88-alpha.iso
+
+Note: If the version number changed, the above command will return a 404 error and you must
+specify the new URL yourself.
+
+More information on how the `current` (development/daily) builds work can be
+found [here][9] on the NetBSD site.
+
+AXPbox supports booting from the ISO directly, as opposed to QEMU, there 
+we had to provide a separate kernel file. 
+
+Once the ISO is downloaded, you can start AXPbox. Make sure you're in
+the same folder as the `es40.cfg` file and the NetBSD ISO. In my case
+AXPbox is in the `../build` folder, if yours is somewhere else,
+adapt the commands accordingly.
+
+    ../build/axpbox run
+
+Output:
+
+    sys0(tsunami): $Id: System.cpp,v 1.79 2008/06/12 07:29:44 iamcamiel Exp $
+    %FLS-F-NOREST: Flash could not be restored from rom/flash.rom
+    sys0(tsunami): $Id: Flash.cpp,v 1.19 2008/03/24 22:11:50 iamcamiel Exp $
+    pci0.1(sym53c810).disk0.0(file): Mounted file disk.img, 10485760 512-byte blocks, 16384/16/40.
+    pci0.1(sym53c810).disk0.1(file): Mounted file netbsd.iso, 168005 2048-byte blocks, 33601/5/1.
+    dma: $Id: DMA.cpp,v 1.9 2008/04/29 09:24:52 iamcamiel Exp $
+    %DPR-F-NOREST: DPR could not be restored from rom/dpr.rom
+    sys0(tsunami): $Id: DPR.cpp,v 1.23 2008/06/12 07:29:44 iamcamiel Exp $
+    cpu0(ev68cb)(0): $Id: AlphaCPU.cpp,v 1.82 2009/03/16 01:33:27 iamcamiel Exp $
+    serial0(serial): Waiting for connection on port 21264.
+
+
+Open another terminal and connect to the emulator, after which it will continue booting:
+	
+    telnet 127.0.0.1 21264
+
+Output:
+
+    Trying 127.0.0.1...
+    Connected to 127.0.0.1.
+    Escape character is '^]'.
+    This is serial port #0 on ES40 Emulator
+
+
+A bunch of output appears which is all part of the emulator startup sequence,
+no NetBSD yet:
+
+    OpenVMS PALcode V1.98-104, Tru64 UNIX PALcode V1.92-105
+
+    starting console on CPU 0
+    initialized idle PCB
+    initializing semaphores
+    initializing heap
+    initial heap 240c0
+    memory low limit = 1b0000 heap = 240c0, 17fc0
+    initializing driver structures
+    initializing idle process PID
+    initializing file system
+    initializing hardware
+    initializing timer data structures
+    lowering IPL
+    CPU 0 speed is 1786 MHz
+    create dead_eater
+    create poll
+    create timer
+    create powerup
+    access NVRAM
+    Memory size 512 MB
+    testing memory
+    ..
+    probe I/O subsystem
+    probing hose 1, PCI
+    probing hose 0, PCI
+    probing PCI-to-ISA bridge, bus 1
+    bus 0, slot 1 -- pka -- NCR 53C810
+    bus 0, slot 15 -- dqa -- Acer Labs M1543C IDE
+    bus 0, slot 15 -- dqb -- Acer Labs M1543C IDE
+    starting drivers
+    entering idle loop
+    *** system serial number not set. use set sys_serial_num command.
+    Partition 0, Memory base: 000000000, size: 020000000
+    initializing GCT/FRU at 1c8000
+    Initializing pka ewa dqa dqb 
+    Memory Testing and Configuration Status
+      Array       Size       Base Address    Intlv Mode
+    ---------  ----------  ----------------  ----------
+        0        512Mb     0000000000000000    4-Way
+
+         512 MB of System Memory
+    Testing the System
+    Testing the Disks (read only)
+    Testing the Network
+    AlphaServer ES40 Console V7.3-1, built on Feb 27 2007 at 12:57:47
+
+
+    P00>>>
+
+
+Once you see the `P00>>>` prompt, the fist part of the boot process is finished. Enter
+the command `show dev` to see which devices are available:
+
+    P00>>>sho de
+
+Output:
+
+    dka0.0.0.1.0               DKA0                           RZ58  2000
+    dka100.1.0.1.0             DKA100                        RRD42  4.5d
+    ewa0.0.0.4.0               EWA0              08-00-DE-AD-BE-EF
+    dva0.0.0.1000.0            DVA0                               
+    pka0.7.0.1.0               PKA0                  SCSI Bus ID 7
+
+If you've configured the disk under the IDE controller, the disk names are different:
+
+    P00>>>sho de
+    dqa0.0.0.15.0              DQA0                       disk.img          
+    dqa1.1.0.15.0              DQA1                    netbsd .iso          
+    dva0.0.0.1000.0            DVA0                               
+    ewa0.0.0.4.0               EWA0              08-00-DE-AD-BE-EF
+    pka0.7.0.1.0               PKA0                  SCSI Bus ID 7
+
+I found SCSI disks to be more stable and a bit faster when installing, which is why
+I'm using those. You can try IDE, it should work fine. Mixing the two could result
+in a bug, there is one open in AXPbox regarding copying from an IDE CDROM to a SCSI
+disk.
+
+I was testing with networking when I copied this output, which is why you see
+a network adapter in the output. That turned out not to work, as you might
+have read in the introduction.
+
+
+Enter the command `boot dka100` to boot from the CDROM drive (with the NetBSD iso):
+
+    P00>>>boot dka100
+
+Output:
+
+    (boot dka100.1.0.1.0 -flags 0)
+    block 0 of dka100.1.0.1.0 is a valid boot block
+    reading 13 blocks from dka100.1.0.1.0
+    bootstrap code read in
+    base = 200000, image_start = 0, image_bytes = 1a00(6656)
+    initializing HWRPB at 2000
+    initializing page table at 1ff56000
+    initializing machine state
+    setting affinity to the primary CPU
+    jumping to bootstrap code
+
+    NetBSD/alpha 9.99.88 ISO 9660 Primary Bootstrap
+    Jumping to entry point...
+
+    NetBSD/alpha 9.99.88 Secondary Bootstrap, Revision 1.13 (Sun Aug 15 22:22:52 UTC 2021)
+
+    VMS PAL rev: 0x4006800010162
+    OSF PAL rev: 0x400690002015c
+    Switch to OSF PAL code succeeded.
+
+    Boot flags: 0
+    11177040+185104=0xad6560
+
+
+Yay! NetBSD is booting! The boot process continues until it stops and asks you what 
+terminal you have:
+
+    Entering netbsd at 0xfffffc0000a01410...
+    [   1.0000000] Unrecognized boot flag '0'.
+    [   1.0000000] Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+    [   1.0000000]     2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+    [   1.0000000]     2018, 2019, 2020, 2021 The NetBSD Foundation, Inc.  All rights reserved.
+    [   1.0000000] Copyright (c) 1982, 1986, 1989, 1991, 1993
+    [   1.0000000]     The Regents of the University of California.  All rights reserved.
+
+    [   1.0000000] NetBSD 9.99.88 (INSTALL) #0: Sun Aug 15 22:22:52 UTC 2021
+    [   1.0000000]  mkrepro@mkrepro.NetBSD.org:/usr/src/sys/arch/alpha/compile/INSTALL
+    [   1.0000000] AlphaServer ES40, 1785MHz, s/n 
+    [   1.0000000] 8192 byte page size, 1 processor.
+    [   1.0000000] total memory = 512 MB
+    [   1.0000000] (2736 KB reserved for PROM, 509 MB used by NetBSD)
+    [   1.0000000] avail memory = 491 MB
+    [   1.0000000] mainbus0 (root)
+    [   1.0000000] cpu0 at mainbus0: ID 0 (primary), 21264C-6 (EV68CB)
+    [   1.0000000] cpu0: Architecture extensions: 0x1305<PMI,PAT,MVI,CIX,BWX>
+    [   1.0000000] tsc0 at mainbus0: 21272 Core Logic Chipset, Cchip rev 0
+    [   1.0000000] tsc0: 8 Dchips, 2 memory buses of 16 bytes
+    [   1.0000000] tsc0: arrays present: 512MB, 0MB, 0MB, 0MB, Dchip 0 rev 1
+    [   1.0000000] tsp0 at tsc0
+    [   1.0000000] pci0 at tsp0 bus 0
+    [   1.0000000] siop0 at pci0 dev 1 function 0: Symbios Logic 53c810 (fast scsi)
+    [   1.0000000] siop0: interrupting at dec 6600 irq 8
+    [   1.0000000] scsibus0 at siop0: 8 targets, 8 luns per target
+    [   1.0000000] tlp0 at pci0 dev 4 function 0: DECchip 21143 Ethernet, pass 3.0
+    [   1.0000000] tlp0: interrupting at dec 6600 irq 20
+    [   1.0000000] tlp0: Ethernet address 08:00:de:ad:be:ef
+    [   1.0000000] tlp0: 100baseTX, 10baseT, auto
+    [   1.0000000] sio0 at pci0 dev 7 function 0: vendor 10b9 product 1533 (rev. 0xc3)
+    [   1.0000000] aceride0 at pci0 dev 15 function 0: Acer Labs M5229 UDMA IDE Controller (rev. 0xc1)
+    [   1.0000000] aceride0: primary channel interrupting at isa irq 14
+    [   1.0000000] atabus0 at aceride0 channel 0
+    [   1.0000000] aceride0: secondary channel interrupting at isa irq 15
+    [   1.0000000] atabus1 at aceride0 channel 1
+    [   1.0000000] isa0 at sio0
+    [   1.0000000] lpt0 at isa0 port 0x3bc-0x3bf irq 7
+    [   1.0000000] com0 at isa0 port 0x3f8-0x3ff irq 4: ns8250 or ns16450, no fifo
+    [   1.0000000] com0: console
+    [   1.0000000] pckbc0 at isa0 port 0x60-0x64
+    [   1.0000000] pckbd0 at pckbc0 (kbd slot)
+    [   1.0000000] pckbc0: using irq 1 for kbd slot
+    [   1.0000000] wskbd0 at pckbd0 (mux ignored)
+    [   1.0000000] pms0 at pckbc0 (aux slot)
+    [   1.0000000] pckbc0: using irq 12 for aux slot
+    [   1.0000000] wsmouse0 at pms0 (mux ignored)
+    [   1.0000000] mcclock0 at isa0 port 0x70-0x71: mc146818 compatible time-of-day clock
+    [   1.0000000] tsp1 at tsc0
+    [   1.0000000] pci1 at tsp1 bus 0
+    [   1.0000000] tsciic at tsc0
+    [   1.0000000]  not configured
+    [   1.0000000] entropy: WARNING: extracting entropy too early
+    [   1.0083909] scsibus0: waiting 2 seconds for devices to settle...
+    [   3.1186893] sd0 at scsibus0 target 0 lun 0: <DEC, RZ58     (C) DEC, 2000> disk fixed
+    [   3.1227910] sd0: 20480 MB, 65536 cyl, 16 head, 40 sec, 512 bytes/sect x 41943040 sectors
+    [   3.1258816] sd0: async, 8-bit transfers
+    [   3.1289436] cd0 at scsibus0 target 1 lun 0: <DEC, RRD42   (C) DEC, 4.5d> cdrom removable
+    [   3.1310198] cd0: async, 8-bit transfers
+    [   3.1576555] root on md0a dumps on md0b
+    [   3.1607318] root file system type: ffs
+    [   3.1621352] kern.module.path=/stand/alpha/9.99.88/modules
+    Terminal type? [vt100] 
+
+
+
+Press RETURN to accept the default terminal type. The next thing you should
+see is the menu driven installer:
+
+
+
+     NetBSD/alpha 9.99.88
+
+     This menu-driven tool is designed to help you install NetBSD to a hard disk,
+     or upgrade an existing NetBSD system, with a minimum of work.
+     In the following menus type the reference letter (a, b, c, ...) to select an
+     item, or type CTRL+N/CTRL+P to select the next/previous item.
+     The arrow keys and Page-up/Page-down may also work.
+     Activate the current selection from the menu by typing the enter key.
+     
+
+
+                    +---------------------------------------------+
+                    |>a: Installation messages in English         |
+                    | b: Messages d'installation en franais      |
+                    | c: Installation auf Deutsch                 |
+                    | d: Komunikaty instalacyjne w jezyku polskim |
+                    | e: Mensajes de instalacion en castellano    |
+                    +---------------------------------------------+
+
+
+
+I'm not going to cover the entire installation process, that would give
+an enormous amount of output. It's a minimal install with default 
+partitioning. No network configured, no X11. 
+
+I'll highlight the steps with some output, but the installer is 
+so straight forward that you should be able to figure it out.
+
+Select `>a: Install NetBSD to hard disk` to continue.
+
+Choose the only available disk (`sd0`):
+
+
+                                                                               
+    On which disk do you want to install NetBSD?
+
+                          +--------------------------+
+                          | Available disks          |
+                          |                          |
+                          |>a: sd0 (20.0G)           |
+                          | b: Extended partitioning |                          
+                          | x: Exit                  |
+                          +--------------------------+
+                                                                                
+
+Select the default partitioning:
+
+     You can use a simple editor to set the sizes of the NetBSD partitions, or
+     apply the default partition sizes and contents.
+
+     You will then be given the opportunity to change any of the partition
+     details.                 
+                              
+     The NetBSD (or free) part of your disk (sd0) is 20G.
+                              
+     A full installation requires at least 1156M without X and at least 1456M if
+     the X sets are included. 
+
+                         +-----------------------------------+
+                         | What would you like to do?        |
+                         |                                   |
+                         | a: Set sizes of NetBSD partitions |
+                         |>b: Use default partition sizes    |
+                         | x: Cancel                         |
+                         +-----------------------------------+
+
+
+
+Review the options and select `OK`:
+
+
+     We now have your disklabel partitions for sd0 below.  This is your last  
+     chance to change them.
+
+     Flags: (I)nstall, (N)ewfs.  Total size: 20G, free: 0B
+     
+         Start (sec)    End (sec)   Size (sec)  FS type Flag Filesystem
+        ------------ ------------ ------------ -------- ---- ----------------
+     a:            0     41680895     41680896   4.2BSD IN   /
+     b:     41680896     41943039       262144     swap
+     c:            0     41943039     41943040 Whole disk
+        ------------ ------------ ------------ -------- ---- ----------------
+     e: Change input units (sectors/cylinders/MB/GB)
+     f: Edit name of the disk
+     g: Clone external partition(s)
+     h: Cancel           
+    >x: Partition sizes ok
+                     
+                     
+
+The installer will now format and partition the disk, output looks like this:
+
+
+    
+        Status: Running
+        Command: /sbin/newfs -V2 -O 1  /dev/rsd0a
+
+    --------------------------------------------------------------------------------
+    /dev/rsd0a: 428.0MB (876544 sectors) block size 8192, fragment size 1024}
+            using 10 cylinder groups of 42.80MB, 5479 blks, 10624 inodes.
+    .......................................
+
+Select the `Minimal Installation` option. In my case the other ones failed
+with error messages regarding `no space left on device`. The `Install From` 
+location is `CD-ROM / DVD`.
+
+The installer will show the progress of the installation:
+
+        Status: Running
+        Command: progress -zf /mnt2//alpha/binary/sets/kern-GENERIC.tgz tar --chroot -xpf -
+                                                                                       
+        --------------------------------------------------------------------------------
+         15% |*****                              |  2240 KiB  743.71 KiB/s    00:15 ETA
+
+
+Once prompted `Hit ENTER to continue`, do so. The basic installation is complete and you
+can now configure a few options. 
+
+I choose to leave all the options on their default. We're not configuring networking, 
+so no `ssh`. If you want you can set a root password. 
+
+     Configure the additional items as needed.
+
+                                                                                   
+    >a: Configure network                                  configure 
+     b: Timezone                                           UTC
+     c: Root shell                                         /bin/sh
+     d: Change root password                               ***EMPTY***
+     e: Enable installation of binary packages             install
+     f: Fetch and unpack pkgsrc                            install
+     g: Enable sshd                                        NO
+     h: Enable ntpd                                        NO
+     i: Run ntpdate at boot                                NO
+     j: Enable mdnsd                                       NO
+     k: Enable xdm                                         NO
+     l: Enable cgd                                         YES
+     m: Enable lvm                                         NO
+     n: Enable raidframe                                   YES
+     o: Add a user
+     x: Finished configuring
+
+
+Choose `x: Finished configuring`, press ENTER a few more times and exit the
+installer. Shutdown the system with the command `shutdown -h now` and in
+your other terminal, where AXPbox runs, exit that by pressing CTRL+C.
+
+The installation is now finished. 
+
+### NetBSD startup
+
+
+Fire up AXPbox again and open a telnet session in another terminal, just as
+you did when installing NetBSD. There are two things different as to when installing,
+the first is setting a boot flag to boot in to multiuser mode and the second is a 
+different boot device. 
+
+![bootflags][7]
+
+The SRM firmware has the concept of boot flags, which are different for each 
+type of operating system. For Tru64 (unix) and thus for NetBSD, by default
+the system will boot to single user mode, unless we give it a specific flag. 
+I've included an image with the different supported flags, taken from the SRM
+reference manual for an actual AlphaServer. You can check out my [OpenVMS guide][1]
+to read more about what the flags mean for OpenVMS.
+
+On the `P00>>>` prompt, enter the following command:
+
+    P00>>>set boot_osflags a
+
+
+You only need to do this once. Next time you fire up AXPbox, the flag will
+be remembered. 
+
+Boot from the freshly installed NetBSD disk:
+
+    P00>>>boot dka0
+
+Output:
+
+    (boot dka0.0.0.1.0 -flags a)
+    block 0 of dka0.0.0.1.0 is a valid boot block
+    reading 13 blocks from dka0.0.0.1.0
+    bootstrap code read in
+    base = 200000, image_start = 0, image_bytes = 1a00(6656)
+    initializing HWRPB at 2000
+    initializing page table at 1ff56000
+    initializing machine state
+    setting affinity to the primary CPU
+    jumping to bootstrap code
+
+    NetBSD/alpha 9.99.88 FFS Primary Bootstrap
+    Jumping to entry point...
+
+    NetBSD/alpha 9.99.88 Secondary Bootstrap, Revision 1.13 (Sun Aug 15 22:22:52 UTC 2021)
+
+    VMS PAL rev: 0x4006800010162
+    OSF PAL rev: 0x400690002015c
+    Switch to OSF PAL code succeeded.
+
+    Boot flags: a
+    13164432+233872 [645360+419227]=0xdcb718
+
+
+Yay! NetBSD again. I'm always excited when you reach such a point, like an OS booting. 
+When you think about all the layers of emulation inbetween, it's amazing! 
+
+The output continues:
+
+    Entering netbsd at 0xfffffc0000a014b0...
+    [   1.0000000] consinit: not using prom console
+    [   1.0000000] Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+    [   1.0000000]     2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+    [   1.0000000]     2018, 2019, 2020, 2021 The NetBSD Foundation, Inc.  All rights reserved.
+    [   1.0000000] Copyright (c) 1982, 1986, 1989, 1991, 1993
+    [   1.0000000]     The Regents of the University of California.  All rights reserved.
+
+    [   1.0000000] NetBSD 9.99.88 (GENERIC) #0: Sun Aug 15 22:22:52 UTC 2021
+    [   1.0000000]  mkrepro@mkrepro.NetBSD.org:/usr/src/sys/arch/alpha/compile/GENERIC
+    [   1.0000000] AlphaServer ES40, 1785MHz, s/n 
+    [   1.0000000] 8192 byte page size, 1 processor.
+    [   1.0000000] total memory = 512 MB
+    [   1.0000000] (2736 KB reserved for PROM, 509 MB used by NetBSD)
+    [   1.0000000] avail memory = 488 MB
+    [   1.0000000] mainbus0 (root)
+    [   1.0000000] cpu0 at mainbus0: ID 0 (primary), 21264C-6 (EV68CB)
+    [   1.0000000] cpu0: Architecture extensions: 0x1305<PMI,PAT,MVI,CIX,BWX>
+    [   1.0000000] tsc0 at mainbus0: 21272 Core Logic Chipset, Cchip rev 0
+    [   1.0000000] tsc0: 8 Dchips, 2 memory buses of 16 bytes
+    [   1.0000000] tsc0: arrays present: 512MB, 0MB, 0MB, 0MB, Dchip 0 rev 1
+    [   1.0000000] tsp0 at tsc0
+    [   1.0000000] pci0 at tsp0 bus 0
+    [   1.0000000] siop0 at pci0 dev 1 function 0: Symbios Logic 53c810 (fast scsi)
+    [   1.0000000] siop0: interrupting at dec 6600 irq 8
+    [   1.0000000] scsibus0 at siop0: 8 targets, 8 luns per target
+    [   1.0000000] sio0 at pci0 dev 7 function 0: Acer Labs M1533 PCI-ISA Bridge (rev. 0xc3)
+    [   1.0000000] aceride0 at pci0 dev 15 function 0: Acer Labs M5229 UDMA IDE Controller (rev. 0xc1)
+    [   1.0000000] aceride0: primary channel interrupting at isa irq 14
+    [   1.0000000] atabus0 at aceride0 channel 0
+    [   1.0000000] aceride0: secondary channel interrupting at isa irq 15
+    [   1.0000000] atabus1 at aceride0 channel 1
+    [   1.0000000] isa0 at sio0
+    [   1.0000000] lpt0 at isa0 port 0x3bc-0x3bf irq 7
+    [   1.0000000] com0 at isa0 port 0x3f8-0x3ff irq 4: ns8250 or ns16450, no fifo
+    [   1.0000000] com0: console
+    [   1.0000000] pckbc0 at isa0 port 0x60-0x64
+    [   1.0000000] pckbd0 at pckbc0 (kbd slot)
+    [   1.0000000] pckbc0: using irq 1 for kbd slot
+    [   1.0000000] wskbd0 at pckbd0 mux 1
+    [   1.0000000] pms0 at pckbc0 (aux slot)
+    [   1.0000000] pckbc0: using irq 12 for aux slot
+    [   1.0000000] wsmouse0 at pms0 mux 0
+    [   1.0000000] attimer0 at isa0 port 0x40-0x43
+    [   1.0000000] pcppi0 at isa0 port 0x61
+    [   1.0000000] spkr0 at pcppi0: PC Speaker
+    [   1.0000000] wsbell at spkr0 not configured
+    [   1.0000000] midi0 at pcppi0: PC speaker
+    [   1.0000000] isabeep0 at pcppi0
+    [   1.0000000] mcclock0 at isa0 port 0x70-0x71: mc146818 compatible time-of-day clock
+    [   1.0000000] attimer0: attached to pcppi0
+    [   1.0000000] tsp1 at tsc0
+    [   1.0000000] pci1 at tsp1 bus 0
+    [   1.0000000] tsciic0 at tsc0
+    [   1.0000000] iic0 at tsciic0: I2C bus
+    [   1.0000000] entropy: WARNING: extracting entropy too early
+    [   1.0117272] scsibus0: waiting 2 seconds for devices to settle...
+    [   3.0219763] sd0 at scsibus0 target 0 lun 0: <DEC, RZ58     (C) DEC, 2000> disk fixed
+    [   3.0258952] sd0: 20480 MB, 65536 cyl, 16 head, 40 sec, 512 bytes/sect x 41943040 sectors
+    [   3.0278523] sd0: async, 8-bit transfers
+    [   3.0307854] cd0 at scsibus0 target 1 lun 0: <DEC, RRD42   (C) DEC, 4.5d> cdrom removable
+    [   3.0327430] cd0: async, 8-bit transfers
+    [   3.0709108] root on sd0a dumps on sd0b
+    [   3.0767888] root file system type: ffs
+    [   3.0787464] kern.module.path=/stand/alpha/9.99.88/modules
+    Thu Aug 26 16:13:07 UTC 2021
+
+Because I had exited the emulater a few times without shutting down the operating
+system, it had to do a disk check. Takes about 5 minutes:
+
+    Starting root file system check:
+    /dev/rsd0a: UNREF FILE I=391813  OWNER=0 MODE=100600
+    /dev/rsd0a: SIZE=0 MTIME=Aug 26 16:10 2021   (CLEARED)
+    /dev/rsd0a: FREE BLK COUNT(S) WRONG IN SUPERBLK (SALVAGED)
+    /dev/rsd0a: SUMMARY INFORMATION BAD (SALVAGED)
+    /dev/rsd0a: BLK(S) MISSING IN BIT MAPS (SALVAGED)
+    /dev/rsd0a: 7355 files, 97258 used, 9945101 free (437 frags, 1243083 blocks, 0.0% fragmentation)
+    /dev/rsd0a: MARKING FILE SYSTEM CLEAN
+
+
+Boot output continues:
+
+    Setting sysctl variables:
+    ddb.onpanic: 1 -> 0
+    [ 195.0098685] cd0: no disk label
+    swapctl: setting dump device to /dev/sd0b
+    swapctl: adding /dev/sd0b as swap device at priority 0
+    Starting file system checks:
+    rndctl: no entropy in seed
+    Setting tty flags.
+    Starting network.
+    Hostname: netbsd.spnw.nl
+    IPv6 mode: host
+    Configuring network interfaces:.
+    Adding interface aliases:.
+    route: writing to routing socket: Network is unreachable
+    add net default: gateway 192.168.11.1: Network is unreachable
+    Waiting for duplicate address detection to finish...
+    Building databases: dev, utmp, utmpx, services.
+    Starting syslogd.
+    Mounting all file systems...
+    Clearing temporary files.
+    Checking quotas: done.
+    Setting securelevel: kern.securelevel: 0 -> 1
+    [ 222.5400920] cd0: no disk label
+    swapctl: setting dump device to /dev/sd0b
+    Starting virecover.
+    Checking for core dump...
+    savecore: no core dump
+    Starting local daemons:.
+    Updating motd.
+
+At first I had SSH enabled, on first boot it generated host keys, which took almost an hour:
+
+    ssh-keygen: 1024 SHA256:o7jEPyk463sM62tU9m3QMIIQqPBWa95yIlqVayPbaW0 root@netbsd.spnw.nl (DSA)
+    ssh-keygen: 521 SHA256:4SNpVX3HRzkLQ7MymTryocCoJZ518iPbb3gLiZexmwg root@netbsd.spnw.nl (ECDSA)
+    ssh-keygen: 256 SHA256:YR3WQJK38h3Nc4hrGgBtvPTPn8eawBtDoiETfrwzmoc root@netbsd.spnw.nl (ED25519)
+    ssh-keygen: 3072 SHA256:lQdGTEzlJHpo7EDHrRbx2Q1C1zh1B6JDbe3wDWoAjtA root@netbsd.spnw.nl (RSA)
+    Starting sshd.
+    postfix: rebuilding /etc/mail/aliases (missing /etc/mail/aliases.db)
+    Starting postfix.
+    Starting inetd.
+    Starting cron.
+    Thu Aug 26 16:25:54 UTC 2021
+
+    NetBSD/alpha (netbsd.spnw.nl) (constty)
+
+    login: 
+
+
+Enter the username `root` and if you set a password during install, also enter that. You 
+should now be logged in:
+
+
+    Aug 26 16:26:38 netbsd login: ROOT LOGIN (root) on tty constty
+    Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+        2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+        2018, 2019, 2020, 2021 The NetBSD Foundation, Inc.  All rights reserved.
+    Copyright (c) 1982, 1986, 1989, 1991, 1993
+        The Regents of the University of California.  All rights reserved.
+
+    NetBSD 9.99.88 (GENERIC) #0: Sun Aug 15 22:22:52 UTC 2021
+
+    Welcome to NetBSD!
+
+    This is a development snapshot of NetBSD for testing -- user beware!
+
+    Bug reports: https://www.NetBSD.org/support/send-pr.html
+    Donations to the NetBSD Foundation: https://www.NetBSD.org/donations/
+    We recommend that you create a non-root account and use su(1) for root access.
+    netbsd# 
+
+
+Now the system is all yours to play with. This article covers package installation via
+an ISO file and some crashes I had, but if you know your way around NetBSD you can stop
+here.
+
+Some system information:
+
+    netbsd# uname -a
+    NetBSD netbsd.spnw.nl 9.99.88 NetBSD 9.99.88 (GENERIC) #0: Sun Aug 15 22:22:52 UTC 2021  mkrepro@mkrepro.NetBSD.org:/usr/src/sys/arch/alpha/compile/GENERIC alpha
+
+It's not possible to see what kind of CPU NetBSD thinks there is:
+
+
+    netbsd# cat /proc/cpuinfo 
+    netbsd# cpuctl identify 0
+    CPU identification not implemented for this architecture.
+
+`dmesg` output does have some info:
+
+    netbsd# dmesg | grep MHz
+    [     1.000000] AlphaServer ES40, 1785MHz, s/n 
+
+
+In the QEMU guide, that output was:
+
+    6600 family, unknown model variation 0x1400, 250MHz, s/n QEMU
+
+
+To speed up the system, you can disable a few services in `/etc/rc.conf`:
+
+    sshd=NO
+    inetd=NO
+    postfix=NO
+    cron=NO
+    syslogd=NO
+
+
+Networking does not work, so `postfix`, `inetd` and `sshd` are not needed.
+`inetd` starts services once you connect to a port, but we can't do that 
+when we have no network. Postfix is for email, which is quite useless without 
+network.
+
+`cron` and `syslogd` could be useful, but disk IO is not fast, so disabling them
+speeds up the system a noticeable amount.
+
+
+#### Autoboot NetBSD via SRM
+
+As I showed in the OpenVMS guide, with the below SRM commands you can make
+AXPbox boot into NetBSD by default, that way you don't have to type
+the `boot dka0` command each time you fire up AXPbox.
+
+    P00>>>set auto_action boot 
+    P00>>>set bootdef_dev dka0
+
+You cannot undo those commands, or at least I haven't found out how. 
+
+### Installing packages
+
+Since we have no network, we cannot use `pkgin` or `fetch` or 
+`ftp` to download packages. A trick I used in the OpenVMS 
+install guide to install the OpenVMS license was to create 
+an ISO file on the host OS (where you run AXPbox) and mount
+that ISO file inside the virtualized OS (OpenVMS in that case),
+transferring the file that way.
+
+That trick also works with NetBSD. I'm going to show you how
+to install the `sysbench` package, because that is a simple
+package without dependencies. Start by creating a folder 
+for the packages:
+
+    mkdir pkg
+    cd pkg
+
+Download the package:
+
+    wget https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/alpha/9.2/All/sysbench-0.4.12nb8.tgz
+
+Go up one folder:
+
+    cd ..
+
+Turn that folder into an ISO file:    
+
+    genisoimage -V pkg -o pkg.iso pkg/
+
+Output:
+
+    Total translation table size: 0
+    Total rockridge attributes bytes: 0
+    Total directory bytes: 0
+    Path table size(bytes): 10
+    Max brk space used 0
+    202 extents written (0 MB)    
+
+Make sure AXPbox is not running. Edit `es40.cfg` and replace the `netbsd.iso`
+filename with our new ISO: `pkg.iso`:
+
+    disk0.1 = file
+    {
+      file = "pkg.iso"; 
+      cdrom = true;
+      read_only = true;
+    }
+
+Fire up AXPbox and boot into NetBSD. Once logged in, mount the ISO file:
+
+
+    netbsd# mount /dev/cd0a /mnt
+
+Output:
+
+    [ 1092.6207707] cd0: no disk label
+    [ 1092.6246875] cd0: no disk label
+    [ 1092.7029975] cd0: no disk label
+
+In `/mnt` you should now see the package we put on the ISO:
+
+    netbsd# ls -la /mnt
+
+Output:
+
+    total 59
+    dr-xr-xr-x   1 root  wheel   2048 Aug 27 06:49 .
+    drwxr-xr-x  20 root  wheel    512 Aug 26 16:05 ..
+    -r-xr-xr-x   1 root  wheel  56803 Jul 16 11:27 sysbench.tgz
+
+
+Install the package:
+
+    netbsd# pkg_add /mnt/sysbench.tgz 
+
+Output:
+
+    pkg_add: Warning: package `sysbench-0.4.12nb8' was built for a platform:
+    pkg_add: NetBSD/alpha 9.0 (pkg) vs. NetBSD/alpha 9.99.88 (this host)
+
+
+You can repeat this process for as many packages as you want. It becomes a
+bit more difficult when you have dependencies, as you need to manually install
+those in the correct order. This is the output I got when installing `screenfetch`:
+
+    pkg_add: Warning: package `screenfetch-3.9.1' was built for a platform:
+    pkg_add: NetBSD/alpha 9.0 (pkg) vs. NetBSD/alpha 9.99.88 (this host)
+    pkg_add: no pkg found for 'curl-[0-9]*', sorry.
+    pkg_add: Can't install dependency curl-[0-9]*
+    pkg_add: Expected dependency curl-[0-9]* still missing
+    pkg_add: 1 package addition failed
+
+The `curl` package depends on `libidn` and so forth, it took a while to get
+`screenfetch` installed.
+
+You do not have to reboot AXPbox every time you update the ISO. Unmount it 
+in NetBSD (`umount /mnt`), add a package to the `pkg` folder and re-issue
+the `genisoimage` command. Mount the disk in NetBSD and you should see the 
+new package. I'm not sure if this is intended, but as far as I tested it,
+it seems to work. If you do get weird errors, reboot netbsd or terminate and 
+restart AXPbox to make sure the ISO file is re-read.
+
+### OpenSSL Benchmark            
+
+In [the QEMU][2] article I also posted some benchmarks, both OpenSSL 
+and `sysbench`. `OpenSSL speed` failed horribly on QEMU, overflowing
+numbers, no output or `infinity`. On AXPbox however, the benchmark
+runs fine. 
+
+[This article][10] has some benchmarks on Debian 5.0 on QEMU Alpha, including
+`OpenSSL speed`. [EmuVM][11] has a few benchmarks as well, both real Alpha
+machines as their commercial emulator. Most of the other benchmarks do not
+run on NetBSD (Only OpenVMS or Tru64), so reproducing that is hard. OpenSSL
+however, is included on NetBSD by default. Newer version, but hopefully
+comparable results.
+
+`OpenSSL speed` is a performance benchmark for each of the available
+algorithms. Because this is an old CPU architecture, and because [the other
+article][10] does so (as well as [EmuVM][11]), I'm trying just the `md5` and
+`rsa` benchmarks. 
+
+Here are the results for RSA:
+
+    netbsd# openssl speed rsa
+    Doing 512 bits private rsa's for 10s: 576 512 bits private RSA's in 10.10s
+    Doing 512 bits public rsa's for 10s: 5950 512 bits public RSA's in 10.07s
+    Doing 1024 bits private rsa's for 10s: 118 1024 bits private RSA's in 10.09s
+    Doing 1024 bits public rsa's for 10s: 2363 1024 bits public RSA's in 10.07s
+    Doing 2048 bits private rsa's for 10s: 18 2048 bits private RSA's in 10.08s
+    Doing 2048 bits public rsa's for 10s: 654 2048 bits public RSA's in 10.06s
+    Doing 3072 bits private rsa's for 10s: 6 3072 bits private RSA's in 10.48s
+    Doing 3072 bits public rsa's for 10s: 283 3072 bits public RSA's in 10.08s
+    Doing 4096 bits private rsa's for 10s: 3 4096 bits private RSA's in 12.09s
+    Doing 4096 bits public rsa's for 10s: 156 4096 bits public RSA's in 10.09s
+    Doing 7680 bits private rsa's for 10s: 1 7680 bits private RSA's in 28.09s
+    Doing 7680 bits public rsa's for 10s: 44 7680 bits public RSA's in 10.09s
+    OpenSSL 1.1.1k  25 Mar 2021
+    NetBSD 9.99.88
+    options:bn(64,64) rc4(int) des(int) aes(partial) idea(int) blowfish(ptr) 
+    gcc version 10.3.0 (NetBSD nb1 20210411) 
+                      sign    verify    sign/s verify/s
+    rsa  512 bits 0.017528s 0.001692s     57.0    590.8
+    rsa 1024 bits 0.085515s 0.004262s     11.6    234.6
+    rsa 2048 bits 0.560221s 0.015389s      1.7     64.9
+    rsa 3072 bits 1.746093s 0.035615s      0.5     28.0
+    rsa 4096 bits 4.030598s 0.064678s      0.2     15.4
+    rsa 7680 bits 28.090820s 0.229292s      0.0      4.3
+
+These are the results for MD5:
+
+    netbsd# openssl speed md5
+    Doing md5 for 3s on 16 size blocks: 67630 md5's in 3.02s
+    Doing md5 for 3s on 64 size blocks: 44047 md5's in 3.02s
+    Doing md5 for 3s on 256 size blocks: 21973 md5's in 3.02s
+    Doing md5 for 3s on 1024 size blocks: 7252 md5's in 3.02s
+    Doing md5 for 3s on 8192 size blocks: 1027 md5's in 3.02s
+    Doing md5 for 3s on 16384 size blocks: 488 md5's in 3.02s
+    OpenSSL 1.1.1k  25 Mar 2021
+    NetBSD 9.99.88
+    options:bn(64,64) rc4(int) des(int) aes(partial) idea(int) blowfish(ptr) 
+    gcc version 10.3.0 (NetBSD nb1 20210411) 
+    The 'numbers' are in 1000s of bytes per second processed.
+    type             16 bytes     64 bytes    256 bytes   1024 bytes   8192 bytes  16384 bytes
+    md5                358.12k      933.28k     1861.69k     2456.95k     2783.55k     2644.47k
+
+
+The NetBSD version is exactly the same as with QEMU, so it seems unlikely
+that the issue with QEMU is in OpenSSL or NetBSD. Which is weird because
+[the other article][11] runs the same commands that do work in Debian 5.0.
+
+                   
+### sysbench
+
+In the earlier section we installed the `sysbench` package. Sysbench is quite
+a populair cross platform benchmarking tool and it even gave reasonable
+results, as opposed to OpenSSL. It's an older version, currently we're at
+sysbench 1.0.20 and NetBSD has 0.4.12. 
+
+Here are the results, the tests are the same as in the [QEMU article][2].
+
+CPU:
+
+    netbsd# sysbench --test=cpu run --max-time=30
+    sysbench 0.4.12:  multi-threaded system evaluation benchmark
+
+    Running the test with following options:
+    Number of threads: 1
+
+    Doing CPU performance benchmark
+
+    Threads started!
+    Time limit exceeded, exiting...
+    Done.
+
+    Maximum prime number checked in CPU test: 10000
+
+
+    Test execution summary:
+        total time:                          30.6455s
+        total number of events:              19
+        total time taken by event execution: 30.6395
+        per-request statistics:
+             min:                               1556.20ms
+             avg:                               1612.60ms
+             max:                               1679.96ms
+             approx.  95 percentile:            1679.39ms
+
+    Threads fairness:
+        events (avg/stddev):           19.0000/0.00
+        execution time (avg/stddev):   30.6395/0.00
+
+
+Memory:
+
+
+    netbsd# sysbench --test=memory run --max-time=60
+    sysbench 0.4.12:  multi-threaded system evaluation benchmark
+
+    Running the test with following options:
+    Number of threads: 1
+
+    Doing memory operations speed test
+    Memory block size: 1K
+
+    Memory transfer size: 102400M
+
+    Memory operations type: write
+    Memory scope type: global
+    Threads started!
+    Time limit exceeded, exiting...
+    Done.
+
+    Operations performed: 457799 ( 7629.74 ops/sec)
+
+    447.07 MB transferred (7.45 MB/sec)
+
+
+    Test execution summary:
+        total time:                          60.0019s
+        total number of events:              457799
+        total time taken by event execution: 41.2108
+        per-request statistics:
+             min:                                  0.08ms
+             avg:                                  0.09ms
+             max:                                 14.55ms
+             approx.  95 percentile:               0.05ms
+
+    Threads fairness:
+        events (avg/stddev):           457799.0000/0.00
+        execution time (avg/stddev):   41.2108/0.00
+
+
+File IO:
+
+    netbsd# sysbench --test=fileio --file-test-mode=seqwr --file-num=8 run --max-time=60
+    sysbench 0.4.12:  multi-threaded system evaluation benchmark
+
+    Running the test with following options:
+    Number of threads: 1
+
+    Extra file open flags: 0
+    8 files, 256Mb each
+    2Gb total file size
+    Block size 16Kb
+    Periodic FSYNC enabled, calling fsync() each 100 requests.
+    Calling fsync() at the end of test, Enabled.
+    Using synchronous I/O mode
+    Doing sequential write (creation) test
+    Threads started!
+    Time limit exceeded, exiting...
+    Done.
+
+    Operations performed:  0 Read, 37353 Write, 0 Other = 37353 Total
+    Read 0b  Written 583.64Mb  Total transferred 583.64Mb  (9.7263Mb/sec)
+      622.48 Requests/sec executed
+
+    Test execution summary:
+        total time:                          60.0063s
+        total number of events:              37353
+        total time taken by event execution: 58.1965
+        per-request statistics:
+             min:                                  0.81ms
+             avg:                                  1.56ms
+             max:                               2405.82ms
+             approx.  95 percentile:               2.41ms
+
+    Threads fairness:
+        events (avg/stddev):           37353.0000/0.00
+        execution time (avg/stddev):   58.1965/0.00
+
+
+### Comparing AXPbox and QEMU benchmarks
+
+Comparing the results to QEMU is interesting. Summarized below are the AXPbox results:
+
+    CPU: total number of events: 19
+    Memory: 447.07 MB transferred (7.45 MB/sec)
+    Disk: Operations performed:  0 Read, 37353 Write, 0 Other = 37353 Total
+    Read 0b  Written 583.64Mb  Total transferred 583.64Mb  (9.7263Mb/sec)
+      622.48 Requests/sec executed
+
+These are the QEMU results, running on the same host machine and the same NetBSD version:
+
+    CPU: total number of events: 532
+    Memory: 1228.18 MB transferred (20.47 MB/sec)
+    Disk: Operations performed:  0 Read, 131072 Write, 8 Other = 131080 Total
+    Read 0b  Written 2Gb  Total transferred 2Gb  (34.332Mb/sec)
+     2197.25 Requests/sec executed
+
+The emulation provided by QEMU seems to be faster by a large amount, on all three
+tests. This is a basic benchmark and we have to keep in mind that both emulators
+emulate different hardware and that the core code of AXPbox is over 10 years old.
+
+
+### Kernel error too much memory
+
+If you boot the installer more than 512 MB of RAM (`memory.bits > 29;`), the
+installation will crash during formatting the disk. The disk size does not
+matter, I tried it with 500MB, 1 GB, 2 GB, 5 GB, 10 GB and 20 GB disk files.
+Default partitioning sizes. Here's the output of the installer:
+
+
+         Status: Command ended on signal
+         Command: /sbin/newfs -V2 -O 1  /dev/rsd0a
+         Hit enter to continue
+        --------------------------------------------------------------------------------
+        /dev/rsd0a: 4992.0MB (10223616 sectors) block size 16384, fragment size 2048
+                using 28 cylinder groups of 178.30MB, 11411 blks, 22528 inodes.
+        ...............................................................................
+        cg 0: bad magic number
+
+
+Issuing that command manually inside a shell on the installer gives more information:
+
+    # /sbin/newfs -V2 -O 1 /dev/sd0
+    /dev/rsd0: 20480.0MB (41943040 sectors) block size 16384, fragment size 2048
+            using 112 cylinder groups of 182.86MB, 11703 blks, 23168 inodes.
+    ...............................................................................
+    cg 0: bad magic number
+
+    [ 3981.4779427] CPU 0: fatal kernel trap:
+
+    [ 3981.4789302] CPU 0    trap entry = 0x2 (memory management fault)
+    [ 3981.4789302] CPU 0    a0         = 0x58
+    [ 3981.4804219] CPU 0    a1         = 0x1
+    [ 3981.4811477] CPU 0    a2         = 0x0
+    [ 3981.4811477] CPU 0    pc         = 0xfffffc0000a40720
+    [ 3981.4825466] CPU 0    ra         = 0xfffffc0000a40714
+    [ 3981.4833153] CPU 0    pv         = 0xfffffc0000a548b8
+    [ 3981.4840840] CPU 0    curlwp     = 0xfffffc007fc51240
+    [ 3981.4848502] CPU 0        pid = 188, comm = newfs
+
+    [ 3981.4848502] panic: trap
+    [ 3981.4861366] cpu0: Begin traceback...
+    [ 3981.4868367] alpha trace requires known PC =eject=
+    [ 3981.4868367] cpu0: End traceback...
+    Stopped in pid 188.188 (newfs) at       fffffc0000a53b00:       ret     zero,(ra
+    )
+    db>
+
+
+
+### Kernel error with networking
+
+AXPbox supports networking, which works reasonably well with OpenVMS. This is the part
+you put in your config to enable it:
+
+      pci0.4 = dec21143 
+      {
+        adapter = "eth0"; 
+        mac = "08-00-DE-AD-BE-EF"; 
+      }
+
+The NetBSD installer sees the adapter and allows you to configure it:
+
+
+     Which network device would you like to use?
+
+                                                                                   
+                              +-------------------------+            
+                              | Available interfaces    |
+                              |                         |
+                              |>a: tlp0                 |
+                              | x: Cancel               |
+                              +-------------------------+
+     
+     
+ 
+ 
+I choose autoselect the first time:
+
+     To be able to use the network, we need answers to the following:
+
+     Network media type [autoselect]:                                              
+                          
+                           +-------------------------------+
+                           | Perform autoconfiguration?    |
+                           |                               |
+                           |>a: Yes                        |
+                           | b: No                         |
+                           +-------------------------------+
+     
+     
+ 
+It kept hanging on DHCP requests with error messages from `dmesg` inbetween:
+
+
+    Status: Running
+    Command: /sbin/dhcpcd -d -n tlp0
+
+    --------------------------------------------------------------------------------
+    spawned master process on PID 4198
+    tlp0: executing: /libexec/dhcpcd-run-hooks PREINIT
+
+
+    tlp0: waiting for carrier
+                           
+                           
+                           
+                           
+                           
+    tlp0: carrier unknown, assuming up
+    tlp0: executing: /libexec/dhcpcd-run-hooks CARRIER
+    DUID 00:01:00:01:28:b7:bd:ba:08:00:de:ad:be:ef
+    tlp0: IAID de:ad:be:ef
+    tlp0: delaying IPv4 for 0.8 seconds
+    [ 824.6727] tlp0: receive process failed to idle: state RUNNING - WAIT
+    tlp0: reading lease: /var/db/dhcpcd/tlp0.lease
+    tlp0: soliciting a DHCP lease
+    [ 826.4716] tlp0: receive process failed to idle: state RUNNING - WAIT
+    tlp0: sending DISCOVER (xid 0xc91b4a68), next in 4.6 seconds
+
+
+If you do configure networking manually in the installer and boot up the installed
+NetBSD system, it panics and reboots:
+
+
+    /dev/rsd0a: file system is clean; not checking
+    Setting sysctl variables:
+    ddb.onpanic: 1 -> 0
+    [   7.9697692] cd0: no disk label
+    swapctl: setting dump device to /dev/sd0b
+    swapctl: adding /dev/sd0b as swap device at priority 0
+    Starting file system checks:
+    rndctl: no entropy in seed
+    Setting tty flags.
+    Starting network.
+    Hostname: netbsd.spnw.nl
+    IPv6 mode: host
+    Configuring network interfaces: tlp0[  13.7300354] tlp0: receive process failed to idle: state RUNNING - WAIT
+    [  13.7666263] tlp0: receive process failed to idle: state RUNNING - WAIT
+    [  13.7854181] tlp0: receive process failed to idle: state RUNNING - WAIT
+    [  13.7962981] stray dec 6600 irq 20
+    [  13.7980337] stray dec 6600 irq 20
+    [  13.7987652] stray dec 6600 irq 20
+    [  13.7994967] stray dec 6600 irq 20
+    [  13.8002541] stray dec 6600 irq 20; stopped logging
+    [  13.8002541] panic: kernel diagnostic assertion "mutex_owned(&cpu_lock)" failed: file "/usr/src/sys/arch/alpha/pci/pci_6600.c", line 362 
+    [  13.8032401] cpu0: Begin traceback...
+    [  13.8032401] alpha trace requires known PC =eject=
+    [  13.8045611] cpu0: End traceback...
+
+    [  13.8045611] dump to dev 8,1 not possible
+    [  13.8045611] rebooting...
+
+### Kernel error with AXPBox VGA Graphics 
+
+![crash][13]
+
+Configuring AXPbox to use the graphics console [as per the documentation][5] 
+sadly also crashed NetBSD as the above screenshot shows. Both `cirrus` as
+`s3` crash the system with the same kind of error message.
+
+If in the future these errors get fixed, I'll update the guide accordingly. 
+
+
+[1]: /s/tutorials/Installing_OpenVMS_8.4_Alpha_in_AXPbox_with_networking.html
+[2]: /s/articles/NetBSD_on_QEMU_Alpha.html
+[3]: https://web.archive.org/web/20210827075725/https://github.com/lenticularis39/axpbox/graphs/contributors
+[4]: /s/articles/Remote_desktop_on_NetBSD_with_Xnest_no_VNC.html
+[5]: https://github.com/lenticularis39/axpbox/wiki/VGA
+[6]: /s/blog/The_sad_state_of_Alpha_emulators_for_OpenVMS.html
+[7]: /s/inc/img/netbsd-axpbox-2.png
+[8]: https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/images/
+[9]: https://www.netbsd.org/releases/current.html
+[10]: https://boxes-of-tat.blogspot.com/2021/06/linux-for-alpha-on-qemu-system.html
+[11]: http://web.archive.org/web/20210827055720/https://emuvm.com/support/benchmarks/
+[12]: /s/inc/img/netbsd-axpbox-3.png
+[13]: /s/inc/img/netbsd-axpbox-1.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

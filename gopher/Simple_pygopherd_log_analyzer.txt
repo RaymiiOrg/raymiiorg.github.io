@@ -1,0 +1,171 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Simple pygopherd log analyzer
+Author      : 	Remy van Elst
+Date        : 	20-03-2019
+URL         : 	https://raymii.org/s/software/Simple_pygopherd_log_analyzer.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Simple log analyzer for pygopherd. Fun if you have a gopherhole and want
+statistics. If you ever used [Logwatch][1] you'll feel at home.
+
+[Github repository here][2] or just [the script here][3].
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Requirements
+
+  * pygopherd (tested with 2.0.18)
+  * syslog of some kind
+  * bash 4+
+
+### Installation
+
+  * Clone the git repository or save the shell script somewhere
+  * Make the script executable (`chmod +x ./pygopherstats.sh`)
+  * Run it providing one or more logfiles to analyze:
+    
+        ./pygopherstats.sh /var/log/syslog
+    
+
+./pygopherstats.sh /var/log/syslog /var/log/syslog.1 ./pygopherstats.sh
+/var/log/syslog.*
+
+If you don't have a central syslog server, use poor man's ssh to get all the log
+files from all the servers:
+
+    
+    
+    for host in $(dig +short a example.org); do 
+        ssh -l root $host "zgrep pygopherd /var/log/syslog.*"; 
+    done 2>/dev/null > gopherlog
+    
+
+### Example report
+
+    
+    
+    # pyGopherd log analyzer
+    From file: /var/log/syslog
+    Hostname: example.org
+    Start: Mar 18 06:29:50
+    End: Mar 18 12:18:23
+    ----------------------------------
+    
+    # Totals
+    - Hits: 800
+    - IP's: 60
+    
+    # Top Tens
+    ## Most Popular
+        165   /
+         32   /Site_updates_raymii.org_now_on_gopher.txt
+         14   /links
+         14   /About.txt
+         10   /Viewing_PDF_docx_and_odt_files_in_Mutt.txt
+         10   /SpaceCat_Launchpad_v2_an_awesome_little_macropad.txt
+          6   /Get_json_value_with_sed.txt
+          5   /Split_keyboards_a_five_year_review_including_the_ErgoDox_EZ_Matias_Ergo_Pro_and_Kinesis_Freestyle_2.txt
+          4   /Sparkling_Network.txt
+          3   /Three_New_Nitrokeys_Pro_2_Storage_2_and_Fido_u2f.txt
+    
+    ## Files per IP
+         10 66.166.122.163  /Site_updates_raymii.org_now_on_gopher.txt
+          3 66.166.122.163  /About.txt
+          3 182.259.43.98  /Viewing_PDF_docx_and_odt_files_in_Mutt.txt
+          2 79.131.39.102  /SpaceCat_Launchpad_v2_an_awesome_little_macropad.txt
+          2 66.166.122.163  /SpaceCat_Launchpad_v2_an_awesome_little_macropad.txt
+          2 182.259.43.98  /Split_keyboards_a_five_year_review_including_the_ErgoDox_EZ_Matias_Ergo_Pro_and_Kinesis_Freestyl
+    e_2.txt
+          2 182.259.43.98  /Site_updates_raymii.org_now_on_gopher.txt
+          2 47.72.77.216  /About.txt
+          2 185.94.189.189  /Site_updates_raymii.org_now_on_gopher.txt
+          2 18.197.227.29  /Site_updates_raymii.org_now_on_gopher.txt
+    
+    ## Gophermaps per IP
+         52 182.259.43.98  /
+         32 66.166.122.163  /
+          8 60.191.38.77  /
+          7 182.259.43.98  /links
+          5 143.179.52.12  /links
+          4 143.179.52.12  /
+          3 88.75.179.155  /
+          3 84.75.205.142  /
+          3 82.68.156.30  /
+          3 79.131.39.102  /
+    
+    ## Folders per IP
+          1 182.259.43.98  /links
+    
+    ## Errors:
+         54   EXCEPTION FileNotFound: '/caps.txt'
+         25   EXCEPTION TypeError'>: stat()
+         24   EXCEPTION error'>: [Errno
+         17   EXCEPTION IndexError'>: string
+         12   EXCEPTION FileNotFound: '/bout.txt'
+          2   EXCEPTION FileNotFound: '/mahua/v/20190212/8dfcb2192a5052e5a152b9d8115201af_24f3fa0cbc00474fab1610181191b09c_0.
+    m3u8'
+          2   EXCEPTION FileNotFound: '/Hello
+          1   EXCEPTION FileNotFound: '/links'
+          1   EXCEPTION FileNotFound: '/ite_updates_raymii.org_now_on_gopher.txt'
+          1   EXCEPTION FileNotFound: '/favicon.ico'
+    
+    # Protocols
+        480 [GopherProtocol/FileHandler]:
+        162 [GopherProtocol/BuckGophermapHandler]:
+        128 [GopherProtocol/None]
+         16 [HTTPProtocol/BuckGophermapHandler]:
+         13 [HTTPProtocol/None]
+          1 [GopherProtocol/UMNDirHandler]:
+    
+    
+    ----------------------------------
+    Simple pygopherlog analyzer by raymii.org
+    License: GNU GPLv3
+    
+
+   [1]: https://wiki.archlinux.org/index.php/Logwatch
+   [2]: https://github.com/RaymiiOrg/pygopherdstats
+   [3]: https://raymii.org/s/inc/software/pygopherstats.sh
+   [4]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

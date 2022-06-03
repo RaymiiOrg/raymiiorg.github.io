@@ -1,0 +1,165 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Chrome 68 is depcrecating HPKP (HTTP Public Key Pinning)
+Author      : 	Remy van Elst
+Date        : 	12-06-2018
+URL         : 	https://raymii.org/s/blog/Chrome_68_is_deprecating_HPKP.html
+Format      : 	Markdown/HTML
+---
+
+
+
+### HPKP removed from Chrome 68
+
+![][1]
+
+In 2014 I [published an article on HPKP][2], http public key pinning. It allows
+a site operator to send a public key in an http header, forcing the browser to
+only connect when that header is found. It was ment to redice the risk of a
+compromised certificate authority (since any CA can create a certificate for any
+website). Quite secure, but it was often wrongly configured, forgotten until
+certificates expired and there were some security issues like a false pin. Late
+2017 Google announced that HPKP would be removed in Chrome 68 and that version
+is released now, so HPKP is no longer supported.
+
+A certificate authority, like Comodo, because they are trusted by every browser, can issue a certificate for any site (so google.com, raymii.org). But, the Netherlands Government ([Staat der Nederlanden][3]) or the [Hong Kong Post office][4] (China government) are trusted as well, thus are also able to issue a certificate for google.com. Now, there are all kinds of rules prohibiting that, but as [I've shown][5] by getting a certificate for a website I don't own, just as [this guy for Microsoft Live.fi][6], that it is prohibited by rules doesn't mean it is not technically possible. HPKP was meant to prevent that, by hardcoding a certificate for your site into a browser.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+The [Google development announcement can be found here][8], where they describe
+and discuss the intent to remove the feature from chrome.
+
+[ZDNET][9] has an article going into more detail on what goes wrong when you
+forgot about Key Pinning when a certificate expires:
+
+> This scenario happened to [Smashing Magazine][10] when it was updating an
+expiring SSL certificate. It enabled HPKP and set the policy for 365 days. After
+rolling out new valid certificates, all browsers with the old HPKP policy
+couldn't visit the site. Also, the new HPKP policy did nothing to update the old
+one.
+
+### Replacement for HPKP, Expect-CT header?
+
+Google wants the [Expect-CT][11] header to replace HPKP. This header allows web
+host operators to instruct user agents (browsers) to expect valid Signed
+Certificate Timestamps (SCTs) to be served on connections to these hosts. When
+configured in enforcement mode, user agents (UAs) will remember that hosts
+expect SCTs and will refuse connections that do not conform to the UAs
+Certificate Transparency policy.
+
+There is no automatic detection of invalid certificates or rouge certificates.
+As far as I understand you must configure and monitor the CT logs yourself to
+find rouge certificates. I use [this site][12] and get emails when a certificate
+for a certain domain is found.
+
+[This page][13] has a little bit more on the replacement:
+
+> By combining Expect-CT with active monitoring for relevant domains, which a
+growing number of CAs and third-parties now provide, site operators can
+proactively detect misissuance in a way that HPKP does not achieve, while also
+reducing the risk of misconfiguration and avoiding the risk of hostile pinning,
+(Chris) Palmer said.
+
+Google's Certificate Transparency project is an open framework for monitoring
+and auditing SSL certificates. The goal behind the project is detection of mis-
+issued/malicious certificates and identification of rogue Certificate
+Authorities.
+
+Read more about the [Expect-CT header in the RFC][14]. To read more about
+Certificate Transparency, [check the site here][15].
+
+As I'm unsure on how the actual header works, for example what defines when an
+error is given, I'm not recommending it yet, until I've done more research.
+
+### Removing HPKP on raymii.org
+
+I removed HPKP about half a year ago from the servers [hosting raymii.org][16].
+First by setting the `max-age` portion of the header to `0`, that tells existing
+browsers that have HPKP cached to invalidate the known time. Otherwise, when
+changing the certificate, the browser would still have old information thus
+giving errors.
+
+After 4 months, I actually changed the webserver configuration to remove the
+HPKP headers:
+
+    
+    
+    $ curl -I https://raymii.org
+    HTTP/2 200 
+    server: nginx/1.10.3 (Ubuntu)
+    date: Tue, 12 Jun 2018 09:39:01 GMT
+    content-type: text/html
+    content-length: 376
+    last-modified: Tue, 05 May 2015 17:21:00 GMT
+    etag: "5548fbfc-178"
+    expires: Thu, 12 Jul 2018 09:39:01 GMT
+    cache-control: max-age=2592000
+    strict-transport-security: max-age=63072000; includeSubdomains; preload
+    referrer-policy: origin
+    x-xss-protection: 1; mode=block
+    coffee: Black
+    tea: Earl-Gray; Hot
+    x-frame-options: DENY
+    x-content-type-options: nosniff
+    x-ua-compatible: IE=Edge,chrome=1
+    cache-control: public
+    accept-ranges: bytes
+    
+
+As you can see, no `Public-Key-Pins` header. If you have HPKP and want to remove
+it, make sure to first set the time to `0` and let that run for a few months.
+
+   [1]: https://raymii.org/s/inc/img/chrome_68.png
+   [2]: https://raymii.org/s/articles/HTTP_Public_Key_Pinning_Extension_HPKP.html
+   [3]: https://en.wikipedia.org/wiki/PKIoverheid
+   [4]: https://bugzilla.mozilla.org/show_bug.cgi?id=408949
+   [5]: https://raymii.org/s/blog/How_I_got_a_valid_SSL_certificate_for_my_ISPs_main_website.html
+   [6]: http://web.archive.org/web/20180612111006/https://arstechnica.com/information-technology/2015/03/man-who-obtained-windows-live-cert-said-his-warnings-went-unanswered/
+   [7]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [8]: https://groups.google.com/a/chromium.org/forum/#!msg/blink-dev/he9tr7p3rZ8/eNMwKPmUBAAJ
+   [9]: http://web.archive.org/web/20180612110541/https://www.zdnet.com/article/google-chrome-is-backing-away-from-public-key-pinning-and-heres-why/
+   [10]: https://www.smashingmagazine.com/be-afraid-of-public-key-pinning/
+   [11]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expect-CT
+   [12]: https://ctadvisor.lolware.net/
+   [13]: http://web.archive.org/web/20180612100401/https://threatpost.com/google-to-ditch-public-key-pinning-in-chrome/128679/
+   [14]: http://web.archive.org/web/20180612095804/http://httpwg.org/http-extensions/expect-ct.html
+   [15]: http://www.certificate-transparency.org/how-ct-works
+   [16]: https://raymii.org/s/software/Sparkling_Network.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,168 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Raspberry Pi Compute Module 4 eMMC flashing issue (nRPI_BOOT)
+Author      : 	Remy van Elst
+Date        : 	26-02-2022
+URL         : 	https://raymii.org/s/blog/Raspberry_Pi_Compute_Module_4_eMMC_flashing_issues.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+I recently got my hands on a Raspberry Pi 4 Compute Module, 4 GB with 32 GB eMMC flash and a Compute Module 4 IO board. Due to the global chip shortage it's hard to find one in stock but I got lucky by checking [rpilocator.com] (https://rpilocator.com/) regularly (thanks to [Jeff Geerling] (https://www.jeffgeerling.com/blog/2022/its-dire-raspberry-pi-availability-tracker-launched) for that site. He's got amazing Raspberry Pi related content next to a bunch of high-quality Ansible playbooks, go give him a visit).
+The eMMC edition I have can only be flashed if you put a jumper on a pin on the I/O board (to put the cm4 in a special mode, `nRPI_BOOT`) and use a special tool, [usbboot](https://github.com/raspberrypi/usbboot). [Jeff has a great guide](https://web.archive.org/web/20220226203155/https://www.jeffgeerling.com/blog/2020/how-flash-raspberry-pi-os-compute-module-4-emmc-usbboot) on flashing the cm4 eMMC edition. My `cm4` however, was not showing up whenever I put it in this special flashing mode. This article goes over the troubleshooting I did and the eventual solution (hint: hardware problem).
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+
+The Raspberry Pi Compute Module 4 (from now on abbreviated as `cm4`) has 2
+versions, a lite edition without eMMC storage and one with onboard eMMC
+storage. The lite edition supports booting from an SD card, the eMMC edition
+does not. The eMMC cm4 does not have the SD pins wired up, so the microSD
+slot on the cm4 I/O board is going nowhere. 
+
+
+<img src="/s/inc/img/j2-emmc-jumper.jpeg" alt="I/O board pin" width=400 height=300 />
+
+> eMMC boot pin jumper, picture via [Jeff Geerling][2]
+
+### The issue
+
+I prepared the board with a jumper, micro USB cable and installed
+the `rpiboot` tool, all as [per the official documentation][5].
+
+But when I powered on the board, no USB device showed up. The 
+tool kept hanging on `Waiting for BCM2835/6/7/2711...`. 
+
+The strange thing however was that the cm4 module booted up fine, 
+I saw Raspbian on my HDMI display, network was available and I 
+could `ssh` into the cm4 just fine. Only when I tried to flash
+the storage it failed. The red 'D1' LED turned on, no green ACT led,
+but no USB device shows up.
+
+Sometimes I did get `dmesg` logs on Linux, but they were full of errors:
+
+    usb 1-5: new full-speed USB device number 17 using xhci_hcd
+    usb 1-5: Device not responding to setup address.
+    usb 1-5: Device not accepting address 8, error -71
+    usb 1-5: device descriptor read/64, error -71
+    usb usb1-port5: unable to enumerate USB device
+    usb usb1-port5: attempt power cycle
+
+I didn't always get log errors like this, sometimes nothing happened.
+
+* I tried a different power supply (12v, 2A) but that didn't help. Board
+booted just fine, but no USB flashing.
+* I tried a few different Micro USB cables.
+* I tried a Windows PC. Installed drivers, but no storage / usb appeared.
+* Tried a USB 2.0 port as opposed to a USB 3 port.
+* Tried a different Linux version (Debian vs. Arch)
+
+I found [this topic][5] on the Raspberry Pi forums where they received a 
+broken module, a new one (swapped by Farnell) worked just fine. I was running
+out of options to try, so I was on the brink of requesting a waranty swap of 
+my module. 
+
+The weirdest part was that the cm4 worked just fine in normal mode, Raspbian
+showed no errors, everything worked, except for the eMMC flashing. 
+
+### The solution
+
+**The cm4 was not mounted correctly in the I/O board, it was screwed in too tight.**
+
+I used m2.5 standoffs to screw the compute module into the I/O board. These
+were so tight, that the compute module was not flat, but a bit convex. Not a
+lot, but still visibly convex (not flat). 
+
+I'm used to screwing in modules, as at work we also have a SOM module that
+does require tight screws. That is a SO-DIMM socket however, the compute
+module 4 has  two high-speed, high-density 100-pin mezzanine connectors. 
+
+I saw a video of Jeff where he just clicked in the cm4, no
+screwing whatsoever, so I took a closer look at my module, and decided to try
+it without screws.
+
+After removing the screws and re-seating the board (just a click, no screws),
+the issues went away and I can now flash the board as intended with `rpiboot`:
+
+    $ sudo ./rpiboot  
+    RPIBOOT: build-date Feb 22 2022 version 20220208~181027 042cd145
+    Waiting for BCM2835/6/7/2711...
+    Loading embedded: bootcode4.bin
+    Sending bootcode.bin
+    Successful read 4 bytes 
+    Waiting for BCM2835/6/7/2711...
+    Loading embedded: bootcode4.bin
+    Second stage boot server
+    Loading embedded: start4.elf
+    File read: start4.elf
+    Second stage boot server done
+
+This is `dmesg` output when everything is working correctly:
+
+    usb 3-1.2: new high-speed USB device number 34 using xhci_hcd
+    usb 3-1.2: New USB device found, idVendor=0a5c, idProduct=0001, bcdDevice= 0.01
+    usb 3-1.2: New USB device strings: Mfr=2, Product=1, SerialNumber=3
+    usb 3-1.2: Product: Compute Module
+    usb 3-1.2: Manufacturer: Raspberry Pi
+    usb 3-1.2: SerialNumber: xxxxxxxx
+    usb-storage 3-1.2:1.0: USB Mass Storage device detected
+    scsi host4: usb-storage 3-1.2:1.0
+    scsi 4:0:0:0: Direct-Access     RPi-MSD- 0001                  PQ: 0 ANSI: 2
+
+
+So make sure your cm4 module is not screwed in tightly. It should be flat in the I/O 
+board, not convex. 
+
+Here's a photo of my cm4 after the [bootloader update was successful][7]:
+
+![green screen][6]
+
+
+
+[1]: /s/inc/img/j2-emmc-jumper.jpeg
+[2]: https://web.archive.org/web/20220226203155/https://www.jeffgeerling.com/blog/2020/how-flash-raspberry-pi-os-compute-module-4-emmc-usbboot
+[3]: https://github.com/raspberrypi/usbboot
+[4]: https://web.archive.org/web/20220223025655/https://www.raspberrypi.com/documentation/computers/compute-module.html#setting-up-the-cmio-board
+[5]: https://web.archive.org/web/20220226205117/https://forums.raspberrypi.com/viewtopic.php?t=82905
+[6]: /s/inc/img/cm4-green-bootloader.jpg
+[7]: https://web.archive.org/web/20220226205626/https://www.jeffgeerling.com/blog/2022/how-update-raspberry-pi-compute-module-4-bootloader-eeprom
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

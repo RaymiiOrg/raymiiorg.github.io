@@ -1,0 +1,495 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	My first OpenVMS
+Author      : 	Remy van Elst
+Date        : 	31-03-2018
+URL         : 	https://raymii.org/s/blog/My_first_OpenVMS.html
+Format      : 	Markdown/HTML
+---
+
+
+
+[![openvms][1]][2]
+
+(You can read all my OpenVMS articles by [clicking the picture above][2])
+
+Last week I registered myself with the DECUServe OpenVMS system. I also
+registered with HP as an OpenVMS hobbyist and got OpenVMS 7.3 for VAX. This
+small blog item describes my first steps with the hosted DECUS OpenVMS system.
+I'm excited since I now know how to create folders, navigate the filesystem and
+edit files. Oh and I had a nice chat with another OpenVMS user via the PHONE
+program.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+As I like to mess around with legacy systems like the [PDP-8][4] and the PDP-11,
+VAX/VMS and thus OpenVMS seems to be a great step forward. Started out as a
+hardware project to be a a 32-bit virtual address extension for the PDP-11, the
+VAX saw it's birth at DEC around 1977. Accompanied with several operating
+systems, like DEC systems before, the VAX could run a lot of software including
+PDP-11 software. Also released around 1977 was VMS, one of the operating systems
+for the VAX-11/780. Renamed to VAX/VMS with the release of version 2 in 1980.
+Ported to the Alpha architecture and renamed OpenVMS with version 6 in 1992. In
+2001 with version 8.2 it was ported to the Intel Itanium architecture and now
+also being ported to the x86 architecture, hopefully ready in [2019, a port by
+VMS Software Inc. (VSI)][5]. A venerable operating system with lots of history
+behind it and a great future ahead.
+
+Lively among [hobbyists][6] (Dutch article), with recent [articles on clustering][7] and [installing OpenVMS][8], I wanted to enjoy this as well, so I decided to register as a hobbyist with [HP Enterprise's OpenVMS Hobbyist program][9]. It is required to be part of a 'chapter' of OpenVMS Hobbyists, and `DECUServe` seems to be the only club left that allows registration and is open to all.
+
+At first I did not fill in a number and chapter, but was contacted by HPe to
+register with DECUS before I could become a member. So I did, via
+<http://decus.org>.
+
+### DECUServe Online
+
+Using the following SSH command you can connect to DECUS and register:
+
+    
+    
+    ssh -oHostKeyAlgorithms=+ssh-dss REGISTRATION@eisner.decus.org
+    
+
+Follow the online interactive instructions and you're good to go.
+
+As I registered I can login with my username and password:
+
+    
+    
+                                    N O T I C E
+    
+    This is Encompasserve.  Access is for subscribed individuals only.
+    
+     o  By logging into the system you agree to abide by the Encompasserve
+        Canons of Conduct.
+    
+     o  Source code or any other information posted on this system is not
+        warranted in any way.  YOU USE IT AT YOUR OWN RISK.
+    
+     o  If you submit source code to or post information on this system, you
+        must allow its unrestricted use.  You must have the right to grant
+        such permission.
+    
+     o  Refer to the Encompasserve Canons of Conduct, posted in the
+        DECUServe_Information conference topic 4.3, for further guidance.
+    
+     o  Report problems in DECUServe_Forum.
+    
+    
+    For information about Encompasserve please login under -> Username INFORMATION
+    To subscribe to Encompasserve       please login under -> Username REGISTRATION
+    To report any form of a problem     please login under -> Username PROBLEMS
+    To renew an Expired account         please login under -> Username REGISTRATION
+    
+    EXAMPLE@eisner.decus.org's password:
+    
+        Last interactive login on Thursday, 29-MAR-2018 03:22:35.36
+            1 login failure since last successful login
+    
+                 You have 1 new Mail message.
+    
+    
+    
+    %DCL-S-SPAWNED, process EXAMPLE_45713 spawned
+      User [EXAMPLE] has 63 blocks used, 9937 available,
+      of 10000 authorized and permitted overdraft of 0 blocks on DISK_USER
+     $
+    Subprocess EXAMPLE_45713 has completed
+    
+
+### Navigating the filesystem
+
+Now for the most exiting part of my OpenVMS journey yet, navigating the
+filesystem. It is not as you would expect on a Linux/UNIX system, as `ls`
+dropped me into some sort of file editor:
+
+    
+    
+     $ ls
+    
+    [End of File]
+    
+    
+    
+    
+     Buffer: $MAIN                                                                                                                                                            | Write | Insert | Forward
+    
+    (Pressed CTRL+Z)
+    LSE> exit
+    
+    $
+    
+
+Okay, that's not working. Lets try the (Windows) alternative:
+
+    
+    
+     $ DIR
+    
+    Directory EISNER$DRA3:[DECUSERVE_USER.EXAMPLE]
+    
+    $MAIN.TPU$JOURNAL;1 ICREATEDAFOLDERYAY.DIR;1                LOGIN.COM;1
+    MAIL.MAI;1          NOTES$NOTEBOOK.NOTE;1                   REMY.DAT;2
+    REMY.DAT;1          WWW.DIR;1
+    
+    Total of 8
+    
+
+To be honest, I found out that command after reading through 9 [chapters of
+OpenVMS documentation][10] from HP.
+
+As you can see I managed to create some files and a folder. As you might also
+notice, the names and structure is way different that a Linux filesystem.
+
+This is my understanding so far. OpenVMS directories are not seperated by a `/`
+(as on UNIX) but a dot (`.`). A full file path can be addressed by it's file
+specification that has the following format:
+
+    
+    
+    node::device:[root.][directory]file-name.file-type;version  
+    
+
+So in the case above, there is an `INDEX.HTML` file in the `WWW` folder, which
+can be addressed via:
+
+    
+    
+    $ dir [.WWW]
+    
+    Directory EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.WWW]
+    
+    INDEX.HTML;1
+    
+    Total of 1 file.
+    
+
+As far as I know a folder should be surrounded by `[brackets]` and the dot in
+front of WWW specifies the current folder. I could also write the full file
+specification:
+
+    
+    
+     $ dir EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.WWW]
+    
+    Directory EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.WWW]
+    
+    INDEX.HTML;1
+    
+    Total of 1 file.
+    
+
+Creating a folder is not done with `mkdir`:
+
+    
+    
+     $ mkdir raymii
+    %DCL-W-IVVERB, unrecognized command verb - check validity and spelling
+     \MKDIR\
+    
+
+But with the logically named `create` command, and the correct folder
+specifications, with brackets and a leading dot:
+
+    
+    
+     $ create /dir [.RAYMII]
+     $ dir [.RAYMII]
+    %DIRECT-W-NOFILES, no files found
+    
+
+Changing folders, again, not done with `cd`. Printing the current folder is not
+`pwd` as well, but `show default`:
+
+    
+    
+     $ show default
+      DISK_USER:[DECUSERVE_USER.EXAMPLE]
+    
+
+Changing the folder is `set default`:
+
+    
+    
+     $ set default [.WWW]
+     $ dir
+    
+    Directory EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.WWW]
+    
+    INDEX.HTML;1
+    
+    Total of 1 file.
+    
+
+Changing back to the previous folder:
+
+    
+    
+     $ set default DISK_USER:[DECUSERVE_USER.EXAMPLE]
+     $ dir
+    Directory EISNER$DRA3:[DECUSERVE_USER.EXAMPLE]
+    
+    $MAIN.TPU$JOURNAL;1 ICREATEDAFOLDERYAY.DIR;1                LOGIN.COM;1
+    MAIL.MAI;1          NOTES$NOTEBOOK.NOTE;1                   REMY.DAT;2
+    REMY.DAT;1          WWW.DIR;1
+    
+    Total of 8 files.
+     $
+    
+
+### Editing text files
+
+I very briefly dabbled with `EVE` to create some files:
+
+    
+    
+    EVE REMY.DAT
+    
+    hello
+    print
+    
+    this is a test
+    
+    [End of file]
+    
+    
+    
+    
+    
+     Buffer: REMY.DAT                                                                                                                                                         | Write | Insert | Forward
+    
+    5 lines read from file EISNER$DRA3:[DECUSERVE_USER.EXAMPLE]REMY.DAT;2
+    
+
+It seems to be an interactive editor, pressing CTRL+Z saves the file:
+
+    
+    
+    7 lines written to file EISNER$DRA3:[DECUSERVE_USER.EXAMPLE]REMY.DAT;3
+    
+
+Other editors are available, like `TECO`, which was on several PDP-8 operating
+systems as well. To be continued in a new article.
+
+### File versioning
+
+As you saw in the above examples, OpenVMS by default supports file versioning.
+On every file on it's filesystem. How awesome is that? 32,767 versions are
+supported by default and there is nothing you have to do or remember. Just
+create and edit files!
+
+Managing versions is quite easy as well. Since the version number is appended to
+the filename (`REMY.DAT;1`) after a semicolon, you just use file system commands
+(which I haven't figured out yet) to remove or edit specific versions.
+
+Editing version 2 of the file `REMY.DAT`:
+
+    
+    
+    EVE REMY.DAT;2
+    
+
+Or using the `TYPE` command (`cat` on linux) to show the difference:
+
+Version 2:
+
+    
+    
+     $ type REMY.DAT;2
+    hello
+    print
+    
+    this is a test
+    
+
+Version 1:
+
+    
+    
+     $ type REMY.DAT;1
+    hello
+    
+    this is a test
+    
+
+I don't understand we don't have this as an option on modern linux systems to
+enable. Windows has something like it, `VSS`, but that has to be set up and
+provides only timed backups. This however is default and awesome.
+
+### PHONE
+
+Using the `SHOW USERS` command I was able to see a list of currently logged in
+users:
+
+    
+    
+     $ show users
+          OpenVMS User Processes at 31-MAR-2018 14:46:06.54
+        Total number of users = 9,  number of processes = 11
+    
+     Username         Interactive  Subprocess   Batch
+     EXAMPLE                  1
+     HARROD                1
+     HENKLE                2         1
+     JACKSON               1
+     MALMBERG              1
+     PARRIS                1
+     REICHERT_D            1
+     SCHENKENBERG          1
+     SPALDING              1
+    
+
+There was a user online and I used the `PHONE` program to initiate a chat with
+`CORNELIUS` (hi George). It was a nice chat, until work required attention. Exit
+with CTRL+Z.
+
+Thank you George for the nice talk we had!
+
+![][11]
+
+The above image shows my discussion with George and my enthousiasm on just
+having figured out how to create a folder on this OpenVMS system.
+
+### Other commands
+
+I found out, with the documentation, some other commands.
+
+The `show` command shows general information:
+
+    
+    
+     $ show system
+    OpenVMS V8.4-2L2  on node EISNER   31-MAR-2018 14:32:46.22   Uptime  9 03:43:15
+      Pid    Process Name    State  Pri      I/O       CPU       Page flts  Pages
+    00000201 SWAPPER         HIB     16        0   0 00:00:04.75         0      4
+    00000204 LANACP          HIB     14       69   0 00:00:00.03       112    138
+    00000206 FASTPATH_SERVER HIB     10        9   0 00:00:00.03        78     95
+    00000207 IPCACP          HIB     10       10   0 00:00:00.00        37     51
+    00000208 ERRFMT          HIB      8    13946   0 00:00:03.87       113    134
+    
+    
+    
+     $ show network
+    
+    Product:  MULTINET      Node:  Eisner.Encompasserve.org Address(es):  10.10.127.2
+    Product:  DECNET        Node:  EISNER               Address(es):  11.91
+    
+    
+    
+     $ show cpu
+    
+    System: EISNER, AlphaServer DS20 500 MHz
+    
+    CPU ownership sets:
+       Active               0,1
+       Configure            0,1
+    
+    CPU state sets:
+       Potential            0,1
+       Autostart            0,1
+       Powered Down         None
+       Not Present          None
+       Hard Excluded        None
+       Failover             None
+    
+    
+     $ show memory
+                  System Memory Resources on 31-MAR-2018 14:39:40.52
+    
+    Physical Memory Usage (pages):     Total        Free      In Use    Modified
+      Main Memory (1.50GB)            196608       21718      163141       11749
+    
+    Extended File Cache  (Time of last reset: 22-MAR-2018 10:48:42.07)
+     Allocated (MBytes)            749.39    Maximum size (MBytes)           768.00
+     Free (MBytes)                   0.04    Minimum size (MBytes)             3.12
+     In use (MBytes)               749.35    Percentage Read I/Os                92%
+    
+
+The `HELP` command is very good as well:
+
+    
+    
+     $ help show
+    
+    SHOW
+    
+         Displays information about the current status of a process, the
+         system, or devices in the system.
+    
+         Format
+    
+           SHOW  option
+    
+      Additional information available:
+    
+      Description           ACCOUNTING ACL        AUDIT      BROADCAST  CLUSTER    CPU        DEFAULT    DEVICES    DISPLAY    ENTRY
+      ERROR      FASTPATH   IMAGE      INTRUSION  KEY        LICENSE    LOGICAL    MEMORY     NETWORK    PRINTER    PROCESS
+      PROTECTION QUEUE      QUOTA      RMS_DEFAULT           ROOT       SECURITY   SERVER     SHADOW     STATUS     SYMBOL     SYSTEM
+      TERMINAL   TIME       TRANSLATION           USERS      WORKING_SET           ZONE
+    
+
+### Conclusion
+
+I'm very happy this system exists and that there are still other people around
+to keep it running and let new folks like me enjoy and learn about it. The last
+time I was so enthousiastic about navigating a file system was with the PDP-8
+and OS/8, and now with OpenVMS. I do expect to learn more about OpenVMS and
+eventually installing my own system with `simh` and the Hobbyist binaries I got
+from HPe, including a ISO image for OpenVMS 7.3 for the VAX architecture.
+
+I do have one unread email, but no idea how to read that. So that will be the
+next challenge ahead, figure out how to read and reply to emails. Fun times
+ahead!
+
+Oh and I also don't know yet how to exit an SSH session other than closing the
+window.
+
+   [1]: https://raymii.org/s/inc/img/ovmsdec.png
+   [2]: https://raymii.org/s/tags/openvms.html
+   [3]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [4]: https://raymii.org/s/tags/pdp-8.html
+   [5]: https://www.theregister.co.uk/2016/10/13/openvms_moves_slowly_towards_x86/
+   [6]: https://web.archive.org/web/20180331175310/http://www.hetlab.tk/museum/vaxvms-v4-4-prompt
+   [7]: https://vanalboom.org/node/19
+   [8]: https://vanalboom.org/node/18
+   [9]: https://web.archive.org/web/20180331175641/https://www.hpe.com/h41268/live/index_e.aspx?qid=24548
+   [10]: https://web.archive.org/web/20180331181136/http://h41379.www4.hpe.com/doc/731final/6489/6489pro_009.html
+   [11]: https://raymii.org/s/inc/img/PHONE.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

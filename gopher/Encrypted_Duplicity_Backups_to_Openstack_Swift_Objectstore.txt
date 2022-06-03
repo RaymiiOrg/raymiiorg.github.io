@@ -1,0 +1,666 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Encrypted Duplicity Backups to Openstack Swift Objectstore
+Author      : 	Remy van Elst
+Date        : 	19-05-2014
+URL         : 	https://raymii.org/s/tutorials/Encrypted_Duplicity_Backups_to_Openstack_Swift_Objectstore.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![openStack Logo][1]
+
+This is a guide on backing up your data to an Openstack Swift (Objectstore)
+instance using Duplicity. It provides encrypted backups using gpg so that you
+can safely use any public cloud storage to store them. This tutorial is for
+Ubuntu and CentOS and includes initial setup plus a script to automate it all.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+We will be using the Dutch provider [CloudVPS][3], which is not bound to the
+Patriot Act, so your data is more safe than it is with a provider that is
+vulnerable to the Patriot Act. Although your data is already encrypted with GPG,
+you can never be to sure. [CloudVPS][3] provides 10GB free ObjectStore, if you
+have VPS with them, the data is stored on at least 3 machines in 3 locations and
+they have a boatload of certifications.
+
+If you order a VPS or Objectstore at [CloudVPS][3], please mention my name or
+this article. I'll get a little referal bonus, which will be used to keep this
+awesome website running.
+
+Openstack is one of those cloudy cloud projects. Warning, keep your buzzword
+bingo cards ready for the [Wikipedia][4] definition:
+
+    
+    
+    OpenStack is a free and open-source software cloud computing platform. It is primarily deployed as an infrastructure as a service (IaaS) solution. The technology consists of a series of interrelated projects that control pools of processing, storage, and networking resources throughout a data center, able to be managed or provisioned through a web-based dashboard, command-line tools, or a RESTful API. It is released under the terms of the Apache License.
+    
+
+Basically it is a very nice project which provides an easy and scalable way to:
+
+  1. Virtualize (Compute / Nova) (KVM, VMWare, Xen)
+  2. Provide scalable object access (Swift / Objectstore) (like s3)
+  3. Manage it all using a nice dashboard (Horizon)
+  4. Have a great API which lets people develop applications for it.
+  5. Be open source. There is no vendor lock in, you can switch between any provider providing OpenStack.
+
+My summary is, lets say, sparse. For the sake of this tutorial, we will be using
+the Swift service (Object Store) to store backups we make with Duplicity.
+
+Duplicity is another wonderfull open source project which lets you easily make
+(encrypted) (remote) full or incremental backups. I've been using it for many
+years now, it is awesome and very easy to manage.
+
+As we all know, your data is not backed up until it is at least backed up in
+three places:
+
+  1. Locally (homeserver)
+  2. Off site (the cloud)
+  3. Offline (DVD / Tape in a box at your bank)
+
+Why would we want to use the Openstack Swift service to send our backups to
+instead of your own ssh server? Duplicity supports that as well, right?
+
+To be honest, you can use both to your preference. Objectstore provides a nice
+scalable way to acces data. Because it only needs to provide access to data, it
+(can be)/(mostly is) faster than one VPS or off site Rasberry Pi. It (depending
+on the provider) can also be stored on more than one place, without to much user
+hassle.
+
+An example can be a company providing managed services with their own (Openstack
+based) "private cloud". They also provide backups, of course, and most of the
+time they use Duplicity to make them. It is easier to scale up ObjectStore then
+it is to scale up an SSH server. Both can be done of course, take a SAN or NFS
+backend and it also scales.
+
+Therefore, the choice is up to you. Both can complement each other, sometimes
+one is better and sometimes the other. Speaking like a lawyer, it depends.
+
+### CloudVPS
+
+[CloudVPS][3] is the only Dutch company providing Openstack and Objectstore as
+far as I know. It is not bound by the patriot act, because it has no American
+locations and it has no American data centers. As far as I know, they only use
+Dutch Data Centers.
+
+[CloudVPS][3] has the following points listed on [their website][5]:
+
+  * Durable: Your data is stored 3 times on 3 different machines in at least two different datacenters. This means you do not have to worry about data loss. You are getting the security of a datacenter redundant file cluster at a fraction of the cost.
+  * Privacy concious: We are not subject to the Patriot Act like Amazon and others. This means our cloud storage can be used to store privacy sensitive data.
+  * Certification: The [CloudVPS][3] Object Store is covered by our strict certification. This platform is covered by the ISO 27002, NEN 7510 and the CloudControls that we developed together with KPMG.
+
+The latter can be very important for companies. I like the first and the second
+most, because it takes away hassle for me to set up multiple backup locations.
+
+If you order a VPS or Objectstore at [CloudVPS][3], please mention my name or
+this article. I'll get a little referal bonus, which will be used to keep this
+awesome website running.
+
+**Note that this article is not sponsored nor endorsed by[CloudVPS][3], nor am I
+speaking for or as [CloudVPS][3]. They just happen to be the best Dutch
+Openstack provider.**
+
+### Requirements
+
+You will need the following for this tutorial:
+
+  * Data to back up
+  * [Duplicity][6]
+  * Openstack Swift/Objectstore access
+
+You will need Duplicity version v0.6.22 or higher. [v0.6.22][7] added support
+for Openstack Swift as a backend.
+
+This tutorial was written for and tested on Ubuntu 12.04, 14.04 and CentOS 6. It
+also works on any other distro where the above requirements are met.
+
+Note that there are more Openstack providers, for example [Rackspace][8]. Do
+note, that they fall under the Patriot Act and thus the NSA probably can access
+your data.
+
+I will be using an example data set containing photo's in this tutorial. Since
+the cost can sometimes be unclear with these Cloud providers, it is best to
+start with a small data set.
+
+### Install packages
+
+We will be using pip to install the required python modules. We also install gpg
+plus of course Duplicity itself. The following commands wil install them.
+
+For debian/ubuntu:
+
+    
+    
+    apt-get install python-pip gnupg2 duplicity
+    
+
+For CentOS:
+
+    
+    
+    yum install python-pip gnupg2 duplicity
+    
+
+If the version of Duplicity in the repositories is to old, you can download
+offcial RPM packages from the [Duplicity Website][9]. There is also an [official
+PPA][10] for Ubuntu users. The duplicity versions in the Ubuntu 12.04 and CentOS
+6 repositories are to old, so those OS versions require manual install.
+
+Use `pip` to install the packages Duplicity uses for the Openstack
+authentication (keystone) and the actual storage (swift):
+
+    
+    
+    pip install python-swiftclient python-keystoneclient
+    
+
+### Generate Keys
+
+Because we trust nobody except ourselves with our backups, we will be encrypting
+the backups using GPG.
+
+We will be creating two different keys, one for signing and one for encrypting.
+
+First generate the encryption key:
+
+    
+    
+    gpg --gen-key
+    
+
+Example output. I choose a 4096 RSA/RSA key whithout expiry date:
+
+    
+    
+    gpg (GnuPG) 2.0.14; Copyright (C) 2009 Free Software Foundation, Inc.
+    This is free software: you are free to change and redistribute it.
+    There is NO WARRANTY, to the extent permitted by law.
+    
+    gpg: directory `/root/.gnupg' created
+    gpg: new configuration file `/root/.gnupg/gpg.conf' created
+    gpg: WARNING: options in `/root/.gnupg/gpg.conf' are not yet active during this run
+    gpg: keyring `/root/.gnupg/secring.gpg' created
+    gpg: keyring `/root/.gnupg/pubring.gpg' created
+    Please select what kind of key you want:
+       (1) RSA and RSA (default)
+       (2) DSA and Elgamal
+       (3) DSA (sign only)
+       (4) RSA (sign only)
+    Your selection? 1
+    RSA keys may be between 1024 and 4096 bits long.
+    What keysize do you want? (2048) 4096
+    Requested keysize is 4096 bits
+    Please specify how long the key should be valid.
+             0 = key does not expire
+          <n>  = key expires in n days
+          <n>w = key expires in n weeks
+          <n>m = key expires in n months
+          <n>y = key expires in n years
+    Key is valid for? (0) 0
+    Key does not expire at all
+    Is this correct? (y/N) y
+    
+    GnuPG needs to construct a user ID to identify your key.
+    
+    Real name: Objectstore Backup Encryption
+    Email address: user@example.com
+    Comment: 
+    You selected this USER-ID:
+        "Objectstore Backup Encryption <user@example.com>"
+    
+    Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+    You need a Passphrase to protect your secret key.
+    
+    can't connect to `/root/.gnupg/S.gpg-agent': No such file or directory
+    gpg-agent[25464]: directory `/root/.gnupg/private-keys-v1.d' created
+    
+    We need to generate a lot of random bytes. It is a good idea to perform
+    some other action (type on the keyboard, move the mouse, utilize the
+    disks) during the prime generation; this gives the random number
+    generator a better chance to gain enough entropy.
+    gpg: /root/.gnupg/trustdb.gpg: trustdb created
+    gpg: key 672FBC9E marked as ultimately trusted
+    public and secret key created and signed.
+    
+    gpg: checking the trustdb
+    gpg: 3 marginal(s) needed, 1 complete(s) needed, PGP trust model
+    gpg: depth: 0  valid:   1  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 1u
+    pub   4096R/672FBC9E 2014-05-19
+          Key fingerprint = C3F3 8B08 7699 D9C9 9AE1  BFBF 1B01 60C5 672F BC9E
+    uid                  Objectstore Backup Encryption <user@example.com>
+    sub   4096R/7695ED36 2014-05-19
+    
+
+Remember your passphrase! Do the same thing again, now to create the Signing
+key:
+
+    
+    
+    gpg --gen-key
+    
+
+Again, I choose a non-expiring 4096 bits RSA/RSA key, with a different name:
+
+    
+    
+    gpg (GnuPG) 2.0.14; Copyright (C) 2009 Free Software Foundation, Inc.
+    This is free software: you are free to change and redistribute it.
+    There is NO WARRANTY, to the extent permitted by law.
+    
+    Please select what kind of key you want:
+       (1) RSA and RSA (default)
+       (2) DSA and Elgamal
+       (3) DSA (sign only)
+       (4) RSA (sign only)
+    Your selection? 1
+    RSA keys may be between 1024 and 4096 bits long.
+    What keysize do you want? (2048) 4096
+    Requested keysize is 4096 bits
+    Please specify how long the key should be valid.
+             0 = key does not expire
+          <n>  = key expires in n days
+          <n>w = key expires in n weeks
+          <n>m = key expires in n months
+          <n>y = key expires in n years
+    Key is valid for? (0) 0
+    Key does not expire at all
+    Is this correct? (y/N) y
+    
+    GnuPG needs to construct a user ID to identify your key.
+    
+    Real name: Objectstore Backup Signing
+    Email address: user@example.com
+    Comment: 
+    You selected this USER-ID:
+        "Objectstore Backup Signing <user@example.com>"
+    
+    Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+    You need a Passphrase to protect your secret key.
+    
+    can't connect to `/root/.gnupg/S.gpg-agent': No such file or directory
+    We need to generate a lot of random bytes. It is a good idea to perform
+    some other action (type on the keyboard, move the mouse, utilize the
+    disks) during the prime generation; this gives the random number
+    generator a better chance to gain enough entropy.
+    gpg: key C65A7536 marked as ultimately trusted
+    public and secret key created and signed.
+    
+    gpg: checking the trustdb
+    gpg: 3 marginal(s) needed, 1 complete(s) needed, PGP trust model
+    gpg: depth: 0  valid:   2  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 2u
+    pub   4096R/C65A7536 2014-05-19
+          Key fingerprint = 1FC8 49E2 9A81 2B0E 1BAC  952A 1BCF 6F51 C65A 7536
+    uid                  Objectstore Backup Signing <user@example.com>
+    sub   4096R/B569F653 2014-05-19
+    
+
+We now have two keys, `B569F653` for backup signing, and `7695ED36` for backup
+encryption. You can check it with the command `gpg --list-keys`:
+
+    
+    
+    [root@vps2 ~]# gpg --list-keys
+    /root/.gnupg/pubring.gpg
+    ------------------------
+    pub   4096R/672FBC9E 2014-05-19
+    uid                  Objectstore Backup Encryption <user@example.com>
+    sub   4096R/7695ED36 2014-05-19
+    
+    pub   4096R/C65A7536 2014-05-19
+    uid                  Objectstore Backup Signing <user@example.com>
+    sub   4096R/B569F653 2014-05-19
+    
+
+Make a backup of these keys! Store it on a safe place. The key (hopefully) has a
+password, but still should be kept as secret as possible.
+
+Use the `--export-secret-keys` option to backup both keys (as ascii, hence the
+`-a`) to two files:
+
+    
+    
+    [root@vps2 ~]# gpg --export-secret-keys -a B569F653 > signing.asc
+    [root@vps2 ~]# gpg --export-secret-keys -a 7695ED36 > encryption.asc
+    
+
+If you ever need to import those, use the `gpg --import` command:
+
+    
+    
+    root@vps5:~# gpg --import enc.asc 
+    gpg: directory `/root/.gnupg' created
+    gpg: new configuration file `/root/.gnupg/gpg.conf' created
+    gpg: WARNING: options in `/root/.gnupg/gpg.conf' are not yet active during this run
+    gpg: keyring `/root/.gnupg/secring.gpg' created
+    gpg: keyring `/root/.gnupg/pubring.gpg' created
+    gpg: key 672FBC9E: secret key imported
+    gpg: /root/.gnupg/trustdb.gpg: trustdb created
+    gpg: key 672FBC9E: public key "Objectstore Backup Encryption <user@example.com>" imported
+    gpg: Total number processed: 1
+    gpg:               imported: 1  (RSA: 1)
+    gpg:       secret keys read: 1
+    gpg:   secret keys imported: 1
+    
+
+The key setup part is now complete. Let's continue on to making the actual
+backups.
+
+### Duplicity
+
+To use Duplicity with Swift we need to set 4 environment variables:
+
+  * SWIFT_USERNAME: your username, in the form tenant:user
+  * SWIFT_PASSWORD: your password
+  * SWIFT_AUTHURL: URL to the Keystone service. For CloudVPS, it would be [https://identity.stack.cloudvps.com/v2.0/][11]
+  * SWIFT_AUTHVERSION: for keystone authentication, set it to 2.
+
+More information on CloudVPS Object Store can be found on their [quickstart][11]
+page. Change this to fit your Cloud Providers settings.
+
+You have to create a container/project at your Openstack Provider. I've created
+a project named Duplicity, that is what will be used in this example.
+
+Set the variables in your shell:
+
+    
+    
+    export SWIFT_USERNAME="user@example.com"
+    export SWIFT_PASSWORD="passw0rd"
+    export SWIFT_AUTHURL="https://identity.stack.cloudvps.com/v2.0/"
+    export SWIFT_AUTHVERSION="2"
+    
+
+Start a simple test. I have a folder with three photo's used as example.
+
+    
+    
+    duplicity ~/test-backup swift://duplicity
+    
+
+The whole credentials part was a bit confusing to me. Why do I have a tenant,
+project, bucket, user, password, url and what more? I got errors like
+`Connection failed: ClientException No tenant specified` and `Connection failed:
+ClientException Unauthorised. Check username, password and tenant name/id`.
+
+The format of SWIFT_USERNAME should be "tenant:username". I did not know my
+tenant name, so I used the [Openstack API][12] to find out. First get an Auth
+Token, using cURL:
+
+    
+    
+    curl -i 'https://identity.stack.cloudvps.com/v2.0/tokens' -X POST -H "Content-Type: application/json" -H "Accept: application/json"  -d '{"auth": {"tenantName": "", "passwordCredentials": {"username": "user@example.com", "password": "passw0rd"}}}'
+    
+
+Response:
+
+    
+    
+    HTTP/1.1 200 OK
+    Vary: X-Auth-Token
+    Content-Type: application/json
+    Content-Length: 543
+    Connection: close
+    
+    {
+        "access": {
+            "token": {
+                "issued_at": "2014-05-19T03:24:50.971373",
+                "expires": "2014-05-20T03:24:50Z",
+                "id": "8g2CeQ3kM0tkRAEiu6KmGaI6M8NLFDJ8WQ"
+            },
+            "serviceCatalog": [],
+            "user": {
+                "username": "user@example.com",
+                "roles_links": [],
+                "id": "J0XPUWipImRpkFXAVxJYELAXnXx26jPPj9w",
+                "roles": [],
+                "name": "user@example.com"
+            },
+            "metadata": {
+                "is_admin": 0,
+                "roles": []
+            }
+        }
+    }
+    
+
+The token is the first `id`. In this case: `8g2CeQ3kM0tkRAEiu6KmGaI6M8NLFDJ8WQ`.
+Use the token to get a list of tenants for that token:
+
+    
+    
+    curl -i -X GET 'https://identity.stack.cloudvps.com/v2.0/tenants' -H "User-Agent: python-keystoneclient" -H "X-Auth-Token: 8g2CeQ3kM0tkRAEiu6KmGaI6M8NLFDJ8WQ"
+    
+
+Response:
+
+    
+    
+    HTTP/1.1 200 OK
+    Vary: X-Auth-Token
+    Content-Type: application/json
+    Content-Length: 523
+    Connection: close
+    
+    {
+        "tenants_links": [],
+        "tenants": [
+            {
+                "handle": "HANDLE",
+                "description": "HANDLE Projectname",
+                "enabled": true,
+                "id": "zORIDFV4ybpbV9bRg1gwNi7NNnTiCw",
+                "name": "HANDLE Projectname"
+            },
+            {
+                "handle": "HANDLE",
+                "description": "Main Customer Tenant",
+                "enabled": true,
+                "id": "vnsdmwzPSl8dHm2RQQe",
+                "name": "HANDLE"
+            }
+        ]
+    }
+    
+
+The part you want to have is the `"name": "HANDLE Projectname"` part. That is
+your tenant.
+
+In my case, the SWIFT_USERNAME should be:
+
+    
+    
+    SWIFT_USERNAME="HANDLE Projectname:user@example.com"
+    
+
+If you are wondering why you don't specify an URL like so:
+
+    
+    
+    duplicity ~/backup-test swift://https://zORIDFV4ybpbV9bRg1gwNi7NNnTiCw.objectstore.eu/duplicity
+    
+
+Well that is because Duplicity is smart enough to get that data from the API. If
+you do try it, you will get an error like this:
+
+    
+    
+    Connection failed: ClientException Container PUT failed: https://zORIDFV4ybpbV9bRg1gwNi7NNnTiCw.objectstore.eu/zORIDFV4ybpbV9bRg1gwNi7NNnTiCw.objectstore.eu/duplicity 404 Not Found  [first 60 chars of response] <html>
+     <head>
+      <title>404 Not Found</title>
+     </head>
+     <bod
+    
+
+If the authentication details are correct, Duplicity should ask for the password
+of your gpg keys and then do its magic:
+
+    
+    
+    Local and Remote metadata are synchronized, no sync needed.
+    Last full backup date: none
+    GnuPG passphrase: 
+    Retype passphrase to confirm: 
+    No signatures found, switching to full backup.
+    --------------[ Backup Statistics ]--------------
+    StartTime 1400471008.22 (Mon May 19 05:43:28 2014)
+    EndTime 1400471008.30 (Mon May 19 05:43:28 2014)
+    ElapsedTime 0.08 (0.08 seconds)
+    SourceFiles 10
+    SourceFileSize 829395 (810 KB)
+    NewFiles 10
+    NewFileSize 829395 (810 KB)
+    DeletedFiles 0
+    ChangedFiles 0
+    ChangedFileSize 0 (0 bytes)
+    ChangedDeltaSize 0 (0 bytes)
+    DeltaEntries 10
+    RawDeltaSize 825299 (806 KB)
+    TotalDestinationSizeChange 726604 (710 KB)
+    Errors 0
+    -------------------------------------------------
+    
+
+Now using `list-current-files` we can see what is in the backup:
+
+    
+    
+    duplicity list-current-files swift://duplicity
+    Local and Remote metadata are synchronized, no sync needed.
+    Last full backup date: Mon May 19 05:43:17 2014
+    Mon May 19 05:19:36 2014 .
+    Mon May 19 05:19:36 2014 Metro-5110 Hdk-02.JPG
+    Mon May 19 05:19:36 2014 Metro-5110 brand bij Rhoon 02-06-1993 om 17.00 uur.jpg
+    Mon May 19 05:19:36 2014 Metro-5110-5124 brand bij Rho 2-06-1993.jpg
+    
+
+If we want to restore out backup, we can do it like this:
+
+    
+    
+    mkdir /tmp/backup
+    duplicity restore swift://duplicity /tmp/backup
+    
+
+Output:
+
+    
+    
+    Local and Remote metadata are synchronized, no sync needed.
+    Last full backup date: Mon May 19 05:43:17 2014
+    GnuPG passphrase: 
+    
+
+And we check `/tmp/backup` to see it worked:
+
+    
+    
+    $ ls /tmp/backup/
+    total 820K
+    drwxr-xr-x  2 remy remy  220 May 19 05:19 .
+    drwxrwxrwt 20 root root  440 May 19 05:49 ..
+    -rwxr-xr-x  1 remy remy  45K May 19 05:19 Metro-5110 Hdk-02.JPG
+    -rwxr-xr-x  1 remy remy 215K May 19 05:19 Metro-5110 brand bij Rhoon 02-06-1993 om 17.00 uur.jpg
+    -rwxr-xr-x  1 remy remy  92K May 19 05:19 Metro-5110-5124 brand bij Rho 2-06-1993.jpg
+    
+
+And you know what the cloud provider/a three letter american agency has? Just a
+bunch of encrypted blobs:
+
+![CloudVPS][13]
+
+### Script
+
+The below script automates the entire thing and lets you run a backup from a
+cronjob. It requires that you put in your GPG passphrase to make unattended
+backups possible, so make sure you keep the script just as safe as the keys
+themselves.
+
+The below script takes a full backup every 7 days, the rest is incremental.
+
+Also, edit the variables to fit your needs.
+
+    
+    
+    #!/bin/bash
+    enc_key=7695ED36
+    sign_key=B569F653
+    src="/home/remy/backup-test"
+    dest="swift://duplicity"
+    
+    # OpenStack
+    export SWIFT_USERNAME="HANDLE Projectname:user@example.com"
+    export SWIFT_PASSWORD="passw0rd"
+    export SWIFT_AUTHURL="https://identity.stack.cloudvps.com/v2.0/"
+    export SWIFT_AUTHVERSION="2"
+    
+    # GnuPG
+    export PASSPHRASE="passw0rd"
+    export SIGN_PASSPHRASE="passw0rd"
+    
+    
+    
+    duplicity --verbosity notice \
+            --encrypt-key "$enc_key" \
+            --sign-key "$sign_key" \
+            --full-if-older-than 7D \
+            --num-retries 3 \
+            --asynchronous-upload \
+            --volsize 10 \
+             "${src}" "${dest}"
+    
+
+That's all for today. Have fun using Openstack for your backups!
+
+   [1]: https://raymii.org/s/inc/img/openstack.jpg
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: http://www.cloudvps.com
+   [4]: https://en.wikipedia.org/wiki/OpenStack
+   [5]: http://www.cloudvps.com/openstack/object-store/
+   [6]: http://duplicity.nongnu.org
+   [7]: http://duplicity.nongnu.org/CHANGELOG
+   [8]: http://www.rackspace.com/cloud/files/
+   [9]: http://duplicity.nongnu.org/
+   [10]: https://launchpad.net/%7Eduplicity-team/+archive/ppa
+   [11]: http://www.cloudvps.com/community/knowledge-base/cloudvps-object-store-quickstart/
+   [12]: http://docs.openstack.org/api/quick-start/content/
+   [13]: https://raymii.org/s/inc/img/haha-nsa2.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

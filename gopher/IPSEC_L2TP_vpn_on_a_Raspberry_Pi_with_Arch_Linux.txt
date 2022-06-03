@@ -1,0 +1,569 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	IPSEC L2TP VPN on Arch Linux on a Raspberry Pi with OpenSwan, xl2tpd and ppp
+Author      : 	Remy van Elst
+Date        : 	01-12-2014
+URL         : 	https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_a_Raspberry_Pi_with_Arch_Linux.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![ArchonPi][1]
+
+The Raspberry Pi is a great little small computer, both for tinkering but also
+as a low power 24/7 running homeserver system. I've got multiple Pi's, one
+running as my home VPN gateway. It is running an IPSEC/L2TP VPN server. This is
+a guide on setting up an IPSEC/L2TP vpn server with Arch Linux on the Raspberry
+Pi using Openswan as the IPsec server, xl2tpd as the l2tp provider and ppp or
+local users / PAM for authentication. It has a detailed explanation with every
+step. We choose the IPSEC/L2TP protocol stack because of recent vulnerabilities
+found in pptpd VPNs.
+
+This tutorial is available for the following platforms:
+
+  * [Raspberry Pi with Arch Linux ARM][2]
+
+  * [CentOS 7, Scientific Linux 7 or Red Hat Enterprise Linux 7 (IKEv2,no L2TP)][3]
+
+  * [CentOS 6, Scientific Linux 6 or Red Hat Enterprise Linux 6][4]
+
+  * [Ubuntu 16.04, (IKEv2,no L2TP)][5]
+
+  * [Ubuntu 15.10, (IKEv2,no L2TP)][6]
+
+  * [Ubuntu 15.04, (IKEv2,no L2TP)][7]
+
+  * [Ubuntu 14.04 LTS][8]
+
+  * [Ubuntu 13.10][9]
+
+  * [Ubuntu 13.04][10]
+
+  * [Ubuntu 12.10][11]
+
+  * [Ubuntu 12.04 LTS][12]
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+This tutorial was tested on a Raspberry Pi running Arch Linux ARM, installed via
+NOOBS. It ran the current up to date Arch Linux ARM, here are the versions used:
+
+  * `uname -a`: Linux pi2.raymii.nl 3.10.25-1-ARCH #1 PREEMPT Mon Dec 23 16:07:25 MST 2013 armv6l GNU/Linux
+  * `ipsec --version`: Linux Openswan U2.6.39/K3.10.25-1-ARCH (netkey)
+  * `xl2tpd -v`: xl2tpd version: xl2tpd-1.3.1
+  * `pppd --version`: pppd version 2.4.5
+
+IPSec encrypts your IP packets to provide encryption and authentication, so no
+one can decrypt or forge data between your clients and your server. L2TP
+provides a tunnel to send data. It does not provide encryption and
+authentication though, that is why we combine the two.
+
+To work trough this tutorial you should have:
+
+  * 1 Raspberry Pi running Arch Linux ARM
+  * 1 (or more) clients running an OS that support IPsec/L2tp vpns (Ubuntu, Mac OS, Windows, Android).
+  * Ports 1701 TCP, 4500 UDP and 500 UDP opened in the firewall.
+
+I do all the steps as the root user. You should do to, but only via `sudo -i` or
+`su -`. Do not allow root to login via SSH!
+
+#### Install ppp openswan and xl2tpd
+
+First we will install the required packages:
+
+    
+    
+    pacman -Sy openswan xl2tpd ppp lsof python2
+    
+
+If you are running normal Arch (x86), you need to install OpenSWAN from the AUR.
+For the ARM/Pi version there is a package available. Python2 is required for
+OpenSWAN, but not listed as a dependency, therefore it is installed.
+
+#### Firewall and sysctl
+
+We are going to set the firewall and make sure the kernel forwards IP packets:
+
+Execute this command to enable the iptables firewall to allow vpn traffic:
+
+    
+    
+    iptables --table nat --append POSTROUTING --jump MASQUERADE
+    
+
+Execute the below commands to enable kernel IP packet forwarding and disable ICP
+redirects.
+
+    
+    
+    echo "net.ipv4.ip_forward = 1" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.conf.all.accept_redirects = 0" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.conf.all.send_redirects = 0" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.conf.default.rp_filter = 0" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.conf.default.accept_source_route = 0" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.conf.default.send_redirects = 0" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" |  tee -a /etc/sysctl.conf
+    
+
+Set these settings for other network interfaces:
+
+    
+    
+    for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 > $vpn/accept_redirects; echo 0 > $vpn/send_redirects; done
+    
+
+Apply them:
+
+    
+    
+    sysctl -p
+    
+
+##### Persistent settings via systemd
+
+Arch Linux uses systemd. Init script functionality like rc.local is not
+available. To have these settings applied at boot we can however create a custom
+systemd service which starts at boot.
+
+Add the following code to `/usr/local/bin/vpn-boot.sh`:
+
+    
+    
+    #!/usr/bin/env bash
+    for vpn in /proc/sys/net/ipv4/conf/*; do 
+        echo 0 > $vpn/accept_redirects; 
+        echo 0 > $vpn/send_redirects; 
+    done
+    iptables --table nat --append POSTROUTING --jump MASQUERADE
+    
+    sysctl -p
+    
+
+Make it executable:
+
+    
+    
+    chmod 755 /usr/local/bin/vpn-boot.sh
+    
+
+Using the following systemd service we can start the script which sets the above
+things at boot:
+
+Add the following code to `/etc/systemd/system/vpnboot.service`:
+
+    
+    
+    [Unit]
+    Description=VPN Settings at boot
+    After=netctl@eth0.service
+    Before=openswan.service xl2tpd.service
+    
+    [Service]
+    ExecStart=/usr/local/bin/vpn-boot.sh
+    
+    [Install]
+    WantedBy=multi-user.target 
+    
+
+Then enable it:
+
+    
+    
+    systemctl enable vpnboot.service
+    
+
+#### Configure Openswan (IPSEC)
+
+Use your favorite editor to edit the following file:
+
+    
+    
+    vim /etc/ipsec.conf  
+    
+
+Replace the contents with the following:
+
+(Most lines have a comment below it explaining what it does.)
+
+    
+    
+    version 2 
+    config setup
+        dumpdir=/var/run/pluto/
+        #in what directory should things started by setup (notably the Pluto daemon) be allowed to dump core?
+    
+        nat_traversal=yes
+        #whether to accept/offer to support NAT (NAPT, also known as "IP Masqurade") workaround for IPsec
+    
+        virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v6:fd00::/8,%v6:fe80::/10
+        #contains the networks that are allowed as subnet= for the remote client. In other words, the address ranges that may live behind a NAT router through which a client connects.
+    
+        protostack=netkey
+        #decide which protocol stack is going to be used.
+    
+        plutoopts="--interface=eth0"
+        # replace with your ethernet interface.
+    
+        force_keepalive=yes
+        keep_alive=60
+        # Send a keep-alive packet every 60 seconds.
+    
+    conn L2TP-PSK-noNAT
+        authby=secret
+        #shared secret. Use rsasig for certificates.
+    
+        pfs=yes
+        #Enable pfs
+    
+        auto=add
+        #the ipsec tunnel should be started and routes created when the ipsec daemon itself starts.
+    
+        keyingtries=3
+        #Only negotiate a conn. 3 times.
+    
+        ikelifetime=8h
+        keylife=1h
+    
+        type=transport
+        #because we use l2tp as tunnel protocol
+    
+        left=%SERVERIP%
+        #fill in server IP above
+    
+        leftprotoport=17/1701
+        right=%any
+        rightprotoport=17/%any
+    
+        dpddelay=10
+        # Dead Peer Dectection (RFC 3706) keepalives delay
+        dpdtimeout=20
+        #  length of time (in seconds) we will idle without hearing either an R_U_THERE poll from our peer, or an R_U_THERE_ACK reply.
+        dpdaction=clear
+        # When a DPD enabled peer is declared dead, what action should be taken. clear means the eroute and SA with both be cleared.
+    
+
+Replace %SERVERIP% with the external IP of your Raspberry Pi. You can find it
+out by:
+
+    
+    
+    curl http://ip.mtak.nl
+    
+
+##### The shared secret
+
+The shared secret is defined in the `/etc/ipsec.secrets` file. Make sure it is
+long and random:
+
+    
+    
+    %SERVERIP%  %any:   PSK "Your secret random key"
+    
+
+Again, replace %SERVERIP% with the external IP of your Raspberry Pi. If you want
+to generate a random key you can use the following openssl command:
+
+    
+    
+    openssl rand -hex 30
+    
+
+Example output:
+
+    
+    
+    c12cf75b47c210b9d7094ce10e3b3544c6927ff49ca2d949252b5a94ccf5
+    
+
+##### Verify IPSEC Settings
+
+Now to make sure IPSEC works, execute the following command:
+
+    
+    
+    ipsec verify
+    
+
+My output looks like this:
+
+    
+    
+     Checking if IPsec got installed and started correctly:
+    
+    Version check and ipsec on-path                     [OK]
+    Openswan U2.6.39/K3.10.25-1-ARCH (netkey)
+    See `ipsec --copyright' for copyright information.
+    Checking for IPsec support in kernel                [OK]
+     NETKEY: Testing XFRM related proc values
+             ICMP default/send_redirects                [OK]
+             ICMP default/accept_redirects              [OK]
+             XFRM larval drop                           [OK]
+    Hardware random device check                        [N/A]
+    Two or more interfaces found, checking IP forwarding    [OK]
+    Checking rp_filter                                  [ENABLED]
+     /proc/sys/net/ipv4/conf/default/rp_filter          [ENABLED]
+     /proc/sys/net/ipv4/conf/eth0/rp_filter             [ENABLED]
+     /proc/sys/net/ipv4/conf/ifb0/rp_filter             [ENABLED]
+     /proc/sys/net/ipv4/conf/ifb1/rp_filter             [ENABLED]
+    Checking that pluto is running                      [OK]
+     Pluto listening for IKE on udp 500               fail in else:State      Recv-Q Send-Q        Local Address:Port          Peer Address:Port
+    
+        [FAILED]
+     Pluto listening for IKE on tcp 500                 [NOT IMPLEMENTED]
+     Pluto listening for IKE/NAT-T on udp 4500          [DISABLED]
+     Pluto listening for IKE/NAT-T on tcp 4500          [NOT IMPLEMENTED]
+     Pluto listening for IKE on tcp 10000 (cisco)       [NOT IMPLEMENTED]
+    Checking NAT and MASQUERADEing                      [TEST INCOMPLETE]
+    Checking 'ip' command                               [OK]
+    Checking 'iptables' command                         [OK]
+    
+    ipsec verify: encountered errors
+    
+
+However, a `netstat -tulpan` shows that `pluto` is listening on the ports that
+give errors:
+
+    
+    
+    Active Internet connections (servers and established)
+    Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+    [...]
+    udp        0      0 10.0.0.10:4500          0.0.0.0:*                           4624/pluto
+    udp        0      0 0.0.0.0:1701            0.0.0.0:*                           4443/xl2tpd
+    udp        0      0 10.0.0.10:500           0.0.0.0:*                           4624/pluto
+    [...]
+    
+
+Enable Openswan:
+
+    
+    
+    systemctl enable openswan
+    
+
+#### Configure xl2tpd
+
+Use your favorite editor to edit the following file:
+
+    
+    
+    /etc/xl2tpd/xl2tpd.conf  
+    
+
+Replace the contents with the following:
+
+    
+    
+    [global]
+    ipsec saref = yes
+    saref refinfo = 30
+    
+    [lns default]
+    ip range = 172.16.1.30-172.16.1.100
+    local ip = 172.16.1.1
+    refuse pap = yes
+    require authentication = yes
+    ppp debug = yes
+    pppoptfile = /etc/ppp/options.xl2tpd
+    length bit = yes
+    
+
+  * ip range = range of IPs to give to the connecting clients
+  * local ip = IP of VPN server
+  * refuse pap = refure pap authentication
+  * ppp debug = yes when testing, no when in production
+
+Also create the following folder for xl2tpd's control file:
+
+    
+    
+    mkdir /var/run/xl2tpd/
+    
+
+#### Local user (PAM//etc/passwd) authentication
+
+To use local user accounts via pam (or /etc/passwd), and thus not having plain
+text user passwords in a text file you have to do a few extra steps. Huge thanks
+to `Sascha Scandella` for the hard work and troubleshooting.
+
+In your `/etc/xl2tpd/xl2tpd.conf` add the following line:
+
+    
+    
+    unix authentication = yes
+    
+
+and remove the following line:
+
+    
+    
+    refuse pap = yes
+    
+
+In the file `/etc/ppp/options.xl2tpd` make sure you do not add the following
+line (below it states to add it, but not if you want to use UNIX
+authentication):
+
+    
+    
+    require-mschap-v2
+    
+
+Also in that file (`/etc/ppp/options.xl2tpd`) add the following extra line:
+
+    
+    
+    login
+    
+
+Change `/etc/pam.d/ppp` to this:
+
+    
+    
+    auth    required        pam_nologin.so
+    auth    required        pam_unix.so
+    account required        pam_unix.so
+    session required        pam_unix.so
+    
+
+Add the following to `/etc/ppp/pap-secrets`:
+
+    
+    
+    *       l2tpd           ""              *
+    
+
+(And, skip the `chap-secrets` file below (adding users).)
+
+#### Configuring PPP
+
+Use your favorite editor to edit the following file:
+
+    
+    
+    /etc/ppp/options.xl2tpd  
+    
+
+Replace the contents with the following:
+
+    
+    
+    require-mschap-v2
+    ms-dns 8.8.8.8
+    ms-dns 8.8.4.4
+    auth
+    mtu 1200
+    mru 1000
+    crtscts
+    hide-password
+    modem
+    name l2tpd
+    proxyarp
+    lcp-echo-interval 30
+    lcp-echo-failure 4
+    
+
+  * ms-dns = The dns to give to the client. I use googles public DNS.
+  * proxyarp = Add an entry to this systems ARP [Address Resolution Protocol] table with the IP address of the peer and the Ethernet address of this system. This will have the effect of making the peer appear to other systems to be on the local ethernet.
+  * name l2tpd = is used in the ppp authentication file.
+
+#### Adding users
+
+Every user should be defined in the `/etc/ppp/chap-secrets` file. Below is an
+example file.
+
+    
+    
+    # Secrets for authentication using CHAP
+    # client       server  secret                  IP addresses
+    alice          l2tpd   0F92E5FC2414101EA            *
+    bob            l2tpd   DF98F09F74C06A2F             *
+    
+
+  * client = username for the user
+  * server = the name we define in the ppp.options file for xl2tpd
+  * secret = password for the user
+  * IP Address = leave to * for any address or define addresses from were a user can login.
+
+#### Testing it
+
+To make sure everything has the newest config files restart openswan and xl2tpd:
+
+    
+    
+    systemctl restart openswan
+    systemctl restart xl2tpd
+    
+
+On the client connect to the server IP address (or add a DNS name) with a valid
+user, password and the shared secret. Test if you have internet access and which
+IP you have (via for example <http://whatsmyip.org>. If it is the VPN servers IP
+then it works.
+
+If you experience problems make sure to check the client log files. Also, on
+Arch Linux, the system log can be viewed by using `journalctl -f` (that emulates
+`tail -f /var/log/syslog`). Arch Linux uses systemd logging. For more info about
+systemd services, [see this page][14]
+
+If you have your Raspberry Pi behind a NAT router, you might need to change your
+%SERVERIP% to the internal IP of your Raspberry Pi (like 192.168.1.101) instead
+of your external IP address.
+
+If you google the error messages you most of the time get a good answer.
+
+Thanks to [Keith's article][15] for help with boot persistency.
+
+   [1]: https://raymii.org/s/inc/img/arch_on_pi.jpg
+   [2]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_a_Raspberry_Pi_with_Arch_Linux.html
+   [3]: https://raymii.org/s/tutorials/IPSEC_vpn_with_CentOS_7.html
+   [4]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_CentOS_-_Red_Hat_Enterprise_Linux_or_Scientific_-_Linux_6.html
+   [5]: https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_16.04.html
+   [6]: https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_15.10.html
+   [7]: https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_15.04.html
+   [8]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_14.04.html
+   [9]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.10.html
+   [10]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.04.html
+   [11]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.10.html
+   [12]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html
+   [13]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [14]: http://www.freedesktop.org/software/systemd/man/systemd.service.html
+   [15]: https://smileykeith.com/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

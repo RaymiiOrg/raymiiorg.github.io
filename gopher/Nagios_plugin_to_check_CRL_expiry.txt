@@ -1,0 +1,150 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Nagios plugin to check CRL expiry in minutes
+Author      : 	Remy van Elst
+Date        : 	02-05-2013
+URL         : 	https://raymii.org/s/software/Nagios_plugin_to_check_CRL_expiry.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This is a nagios plugin which you can use to check if a CRL (Certificate
+Revocation List, public list with revoked certificates) is still valid. This is
+based on the check_crl.py plugin from [Michele Baldessari][1]. It is modified it
+so that it checks the time in minutes (for more precision) instead of days, it
+has a GMT time comparison bug fixed and I've added error handling so that if the
+plugin cannot get a crl file (because the webserver is down) it gives a Critical
+error in nagios.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+#### Download
+
+[Download the plugin from my github][3]  
+[Download the plugin from raymii.org][4]
+
+#### Install and Usage
+
+This guide covers the steps needed for Ubuntu 10.04/12.04 and Debian 6. It
+should also work on other distro's, but make sure to modify the commands where
+needed.
+
+Make sure you have openssl, python3 and a module needed by the script installed
+on the nagios host:
+
+    
+    
+    apt-get install python3 openssl python-m2crypto
+    
+
+Now place the script on the host. I've placed in _/etc/nagios/plugins/check_
+crl.py_.
+
+    
+    
+    wget -O /etc/nagios/plugins/check_crl.py http://raymii.org/s/inc/downloads/check_crl.py
+    
+
+Make sure the script is executable:
+
+    
+    
+    chmod +x /etc/nagios/plugins/check_crl.py
+    
+
+Now test the script. I'm using the URL of the Comodo CA CRL file which is the CA
+that signed my certificate for raymii.org.
+
+    
+    
+    /etc/nagios/plugins/check_crl.py -u http://crl.comodoca.com/PositiveSSLCA2.crl -w 480 -c 360
+    OK CRL Expires in 5109 minutes (on Thu May  9 07:30:32 2013 GMT)
+    
+    /etc/nagios/plugins/check_crl.py -u http://crl.comodoca.com/PositiveSSLCA2.crl -w 5200 -c 360
+    WARNING CRL Expires in 5108 minutes (on Thu May  9 07:30:32 2013 GMT)
+    
+    /etc/nagios/plugins/check_crl.py -u http://crl.comodoca.com/PositiveSSLCA2.crl -w 5000 -c 5300
+    CRITICAL CRL Expires in 5108 minutes (on Thu May  9 07:30:32 2013 GMT)
+    
+
+Lets add the nagios command:
+
+    
+    
+    define command{
+        command_name    crl_check
+        command_line    /etc/nagios-plugins/check_crl.py -u $ARG1$ -w $ARG2$ -c $ARG3$
+    }
+    
+
+And lets add the command to a service check:
+
+    
+    
+    define service {
+            use                             generic-service
+            host_name                       localhost
+            service_description             Comodo PositiveSSL CA2 CRL
+            contact                         nagiosadmin                 
+            check_command                   crl_check!http://crl.comodoca.com/PositiveSSLCA2.crl!24!12
+    }
+    
+
+The above service check runs on the nagios defined host "localhost", uses the
+(default) service template "generic-service" and had the contact "nagiosadmin".
+As you can see, the URL maps to $ARG1$, the warning hours to $ARG2$ and the
+critical hours to $ARG3$. This means that if the field _"Next Update:"_ is less
+then 8 hours in the future you get a warning and if it is less then 6 hours you
+get a critical.
+
+#### Changelog
+
+03-04-2013: - Changed time to minutes for more precision - Fixed timezone bug by
+comparing GMT with GMT
+
+06-11-2012: - Changed checking interval from dates to hours - Added error
+catching if a crl file cannot be retrieved.
+
+   [1]: http://acksyn.org/?p=690
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://github.com/RaymiiOrg/nagios
+   [4]: https://raymii.org/s/inc/downloads/check_crl.py
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

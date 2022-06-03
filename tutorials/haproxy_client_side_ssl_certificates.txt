@@ -1,0 +1,194 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	haproxy: client side ssl certificates
+Author      : 	Remy van Elst
+Date        : 	18-12-2013
+URL         : 	https://raymii.org/s/tutorials/haproxy_client_side_ssl_certificates.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This tutorial shows you how to configure haproxy and client side ssl
+certificates.
+
+You need at least haproxy 1.5 dev 16 for this to work. If you want to pass the
+full sha 1 hash of a certificate to a backend you need at least 1.5 dev 19.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Place the certificate chain file somewhere haproxy can access it and append the
+following to your `bind` config line in the frontends where you want to use
+client side certificates: `ca-file <path to certificate chain> verify required`.
+If you want to also accept visitors without an ssl certificate change `verify
+required` to `verify optional`. You might want this if you handle the
+certificates in your application.
+
+Below is an example which sends users to a different backend based on if there
+is a client side certificate. It also sends users to a special error page if
+there are validation errors with their client side certificate.
+
+    
+    
+    frontend intranet
+        mode http
+        bind 10.20.30.40:443 ssl crt /etc/haproxy/pem/server.pem ca-file /etc/haproxy/pem/client-chain.pem verify optional crt-ignore-err all crl-file /etc/haproxy/crl/haproxy.pem
+        use_backend ssl-error unless { ssl_c_verify 0 }
+        use_backend wiki if { ssl_fc_has_crt }
+        default_backend helpdesk
+    
+    backend wiki
+        mode http
+        server wiki1 10.20.10.10:80 check
+        server wiki2 10.20.10.20:80 check
+    
+    backend ssl-error
+        mode http
+        server helpdesk1 10.20.20.10:80 check
+        server helpdesk2 10.20.20.20:80 check
+    
+    backend expired
+        mode http
+        option http-server-close
+        redirect location /certificate-expired.html if { ssl_c_verify 10 } ! { path /certificate-expired.html }
+        redirect location /certificate-revoked.html if { ssl_c_verify 23 } ! { path /certificate-revoked.html }
+        redirect location /other-certificate-error.html unless { ssl_c_verify 0 } ! { path //other-certificate-error.html }
+        server helpdesk3 10.20.20.30:80 check
+    
+
+Note that this example config also uses a CRL file to check for revocations. You
+need to place that CRL file.
+
+  * If the client did not provide a certificate, haproxy uses the `helpdesk` backend.
+  * If the client provides a certificate, haproxy uses the `wiki` backend
+  * If there is an error with the client certificate, haproxy uses the `ssl-error` backend. 
+    * If the certificate is revoked, haproxy redirects the user to the `certificate-revoked.html` page on that backend server.
+    * If the certificate is expired, haproxy redirects the user to the `certificate-expired.html` page on that backend server.
+    * If there is any other error, haproxy redirects the user to the `other-certificate-error.html` page on that backend server.
+
+I've had issues with a DER encoded CRL file for haproxy. To convert it to pem
+you can use the following command:
+
+    
+    
+    openssl crl -in example.crl -inform DER -outform PEM -out /etc/haproxy/crl/haproxy.crl
+    
+
+Combine this with a cronjob that downloads the CRL you are good to go:
+
+    
+    
+    */5 * * * * wget -O /tmp/haproxy.crl http://example-ca.org/crl/example_crl.crl && openssl crl -in /tmp/example.crl -inform DER -outform PEM -out /etc/haproxy/crl/haproxy.crl
+    
+
+### Sending certificate details to backend application
+
+You can also send specific details about a client certificate to your backend
+application. You can then handle the verification of the certificate in your
+backend application.
+
+This example config sends all available certificate details to your backend
+application as HTTP Headers:
+
+    
+    
+    frontend intranet
+        bind 10.20.30.40:443 ssl crt /etc/haproxy/pem/server.pem ca-file /etc/haproxy/pem/client-chain.pem verify required
+        http-request set-header X-SSL                       %[ssl_fc]
+        http-request set-header X-SSL-Client-Verify         %[ssl_c_verify]
+        http-request set-header X-SSL-Client-SHA1           %{+Q}[ssl_c_sha1]
+        http-request set-header X-SSL-Client-DN             %{+Q}[ssl_c_s_dn]
+        http-request set-header X-SSL-Client-CN             %{+Q}[ssl_c_s_dn(cn)]
+        http-request set-header X-SSL-Issuer                %{+Q}[ssl_c_i_dn]
+        http-request set-header X-SSL-Client-Not-Before     %{+Q}[ssl_c_notbefore]
+        http-request set-header X-SSL-Client-Not-After      %{+Q}[ssl_c_notafter]
+        default_backend example_backend
+    
+
+The `{+Q}` means that the data is quoted as a string. Otherwise it would be
+binary or boolean.
+
+In your backend the headers look like this:
+
+    
+    
+    X-SSL: 1
+    # 1 if client used a secure connection, 0 if not.
+    
+    X-SSL-Client-Verify: 0
+    # The status code of the SSL client connection
+    
+    X-SSL-Client-SHA1: "a01b894d12579d88efce97d27107f380b05f5968"
+    # The SHA 1 hash of the client certificate.
+    
+    X-SSL-Client-DN: "/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/CN=exampleUserCertificate/emailAddress=example@example.org"
+    # The full Distinguished Name of the client certificate.
+    
+    X-SSL-Client-CN: "exampleUserCertificate"
+    # The full Common Name of the client certificate.
+    
+    X-SSL-Issuer: "/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/CN=Sparkling Intermediate Client SSL CA 2"
+    # The full Distinguished Name of the issuing certificate.
+    
+    X-SSL-Client-Not-Before: "120101100030Z"
+    # Date from on which certificate is valid in format: YYMMDDhhmmss
+    
+    X-SSL-Client-Not-After: "160101100030Z"
+    # Date from on which certificate is not valid anymore in format: YYMMDDhhmmss
+    
+
+### Testing it
+
+You can use OpenSSL to test client side certificate authentication:
+
+    
+    
+    openssl s_client -connect 10.20.30.40:443 -cert ./client.pem -key ./client.key
+    
+
+### Links
+
+  * [OpenSSL CRL][2]
+  * [haproxy 1.5 ssl certificate data][3]
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: http://www.openssl.org/docs/apps/crl.html
+   [3]: http://cbonte.github.io/haproxy-dconv/configuration-1.5.html#7.3.3
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

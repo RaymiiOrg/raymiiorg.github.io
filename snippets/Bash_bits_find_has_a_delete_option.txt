@@ -1,0 +1,106 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Bash bits: find has a -delete flag
+Author      : 	Remy van Elst
+Date        : 	14-07-2019
+URL         : 	https://raymii.org/s/snippets/Bash_bits_find_has_a_delete_option.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Bash Bits are small examples, tips and tutorials for the bash shell. 
+This bash bit shows you that find has a `-delete` option. I recently found this 
+out, before I would always use `-exec rm {} \;`. This is shorter and easier to 
+remember.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+[All Bash Bits can be found using this link][98]
+[98]: https://raymii.org/s/tags/bash-bits.html
+
+### find -delete flag
+
+A long long time ago one of my co-workers showed me an option to `find` which 
+removes all the files the find command found. Let's say I would want to remove 
+all `.txt` files in a folder, I first would build the `find` command:
+
+    find . -type f -iname "*.txt"
+
+If it found files, a list of them will be printed to the console. After checking
+the list, I would append the command to remove all found results:
+
+    find . -type f -iname "*.txt" -exec rm {} \;
+
+That would, for every file, run the command `rm filename;`. This is a lot of typing 
+and depending on the shell you might need to escape characters (like here).
+
+Just now I was looking to remove all empty directories and found on the find
+[manpage][1] that it nowdays has a `-delete` flag. Which makes the above command 
+easier:
+
+    find . -type f -iname "*.txt" -delete
+
+Or in my case, to remove empty directories:
+
+    find . -type d -empty -delete
+
+(if you omit the `-type d` find will also remove empty files).
+
+The `-delete` flag will perform better since it doesn't have to spawn an external
+`rm` process for every file. However, the [POSIX 1003.1 man page][2] for find 
+specifies `-exec` but not `-delete`, thus the former being a requirement for POSIX
+compatibility. Some embedded linux systems or UNIX systems therefore might also not
+have the `delete` flag.
+
+The [manpage][1] has more information including a warning:
+
+> Delete  files;  true if removal succeeded.  If the removal failed, an error message
+is issued.  If  -delete  fails,  find's  exit  status  will  be  nonzero  (when  it
+eventually exits).  Use of -delete automatically turns on the '-depth' option.
+Warnings: Don't forget that the find command line is evaluated as an expression, so
+putting -delete first will make find try to delete everything  below  the  starting
+points  you  specified.   When testing a find command line that you later intend to
+use with -delete, you should explicitly specify -depth  in  order  to  avoid  later
+surprises.   
+
+[1]: http://manpages.ubuntu.com/manpages/bionic/en/man1/find.1.html
+[2]: https://www.unix.com/man-page/posix/1p/find/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

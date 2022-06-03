@@ -1,0 +1,156 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Wallbase.cc commandline bash wget downloader
+Author      : 	Remy van Elst
+Date        : 	22-07-2012
+URL         : 	https://raymii.org/s/software/Wallbase.cc_Command_line_script.html
+Format      : 	Markdown/HTML
+---
+
+
+
+I mostly get my wallpapers from the website [Wallbase.cc][1]. But the site
+requires a lot of javascript and ajax, and it is hard to get a lot of wallpapers
+at once. I've written a script for this problem, it lets you grep wallbase from
+the cli!
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+##### Features
+
+  * Bash, wget, awk only, nothing else required (well, active internet connection)
+  * Get the newest wallpapers from wallbase.cc
+  * Search for a term and get all the wallpapers from the first page at wallbase.cc
+  * Get random wallpapers
+  * Duplicate check, removes duplicate wallpapers (filesize && md5sum)
+
+##### Usage
+
+Very simple, first copy and paste the script into a file (wall.sh) and chmod
+that so that you can execute it. chmod +x ./wall.sh ./wall.sh r for random
+./wall.sh n for newest ./wall.sh s TERM for search TERM.
+
+So to download forest wallpapers: ./wall.sh s forest
+
+If you want to get a lot of random wallpapers then execute this: while true; do
+./wall.sh r; sleep 1; done and kill that afet 10 minutes...
+
+##### The Script
+
+    
+    
+    #!/bin/bash
+    #Copyright (c) 2012 Remy van Elst
+    #Permission is hereby granted, free of charge, to any person obtaining a copy
+    #of this software and associated documentation files (the "Software"), to deal
+    #in the Software without restriction, including without limitation the rights
+    #to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    #copies of the Software, and to permit persons to whom the Software is
+    #furnished to do so, subject to the following conditions:
+    #
+    #The above copyright notice and this permission notice shall be included in
+    #all copies or substantial portions of the Software.
+    #
+    #THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    #IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    #FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    #AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    #THE SOFTWARE.
+    #first the vars
+    BASEURL="http://wallbase.cc/search/"
+    MODE="$1"
+    SEARCH="$2"
+    NEWWALLURL="http://wallbase.cc/search/0/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers"
+    WALLR="http://wallbase.cc/random/"
+    CONFIGS="/0/213/eqeq/0x0/0/1/1/0/60/relevance/desc/wallpapers"
+    
+    #now see what we need to do
+    case "$1" in
+       s)
+       if [ -e $2 ]; then
+          echo "I need search terms"
+          exit 1
+       fi
+       GETURL="$BASEURL$SEARCH$CONFIGS"
+       ;;
+       n)
+       GETURL="$NEWWALLURL"
+       ;;
+       r)
+       GETURL="$WALLR"
+       ;;
+       *)
+       echo -e "Usage:n$0 r for randomn$0 n for newestn$0 s TERM for search TERM."
+       exit 1
+       ;;
+    esac
+    
+    GETURL=$WALLR
+    #get the wallpaper overview page, grep the wallpaper page urls and dump them into a file for wget
+    wget -q --referer="http://www.google.com" --user-agent="Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0" $GETURL -O- | egrep -o "http://[^[:space:]]*" | grep "/wallpaper/" | sed 's/"//g' > ./wallist
+    
+    #put the url file in a variable, but first backup IFS and later restore it.
+    OLDIFS=$IFS
+    IFS='
+    '
+    urlsa=( $( < ./wallist ) )
+    IFS=$OLDIFS
+    
+    #now loop trough the urls and wget the page, then grep the wallpaper URL, and then wget the wallpaper
+    for i in "${urlsa[@]}"
+    do
+      echo $i
+      wget -vv --referer="http://www.google.com" --user-agent="Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0" $i -O- | wget -vv -nd -nc `egrep -o "http://[^[:space:]]*.jpg"`
+    done
+    
+    #now a duplicate check...
+    find -not -empty -type f -printf "%sn" | sort -rn | uniq -d | xargs -I{} -n1 find -type f -size {}c -print0 | xargs -0 md5sum | sort | uniq -w32 | cut -d" " -f3 | xargs -P 10 -r -n 1 rm
+    
+
+##### Notes
+
+If you have any tips, questions or comments, please use the form below.  
+**Don't go and hammer the wallbase.cc servers, use this script responsibly**
+
+   [1]: http://wallbase.cc
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

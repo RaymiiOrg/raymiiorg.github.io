@@ -1,0 +1,182 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Firefox 89 Proton UI Tab Styling
+Author      : 	Remy van Elst
+Date        : 	27-06-2021
+URL         : 	https://raymii.org/s/blog/Firefox-89-proton-ui-tab-styling.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Firefox 89 recently came out with a "new" user interface (named proton). I'm not a 
+fan of change because UX/UI people need to make it seem like their job is relevant.
+Also, the picture they show under the headline ["17 billion clicks..."][1] only 
+scares the crap out of me, tracking every move a user makes in their browser seems 
+to me to be a bad idea, but hey, lets see how long Mozilla can continue their war
+[against their own users][2]. Since the `about:config` flag to disable proton 
+will probably be gone in [a few releases][3] I thought, why not try to get used to
+this new interface. It's so enormous and wide, lacking contrast. As you 
+might have guessed, I cannot get used to the tab bar, so in this post I'll show you
+how to use the `userChrome.css` file to make the new tab bar look a bit more like
+the old tab bar. 
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+The changes we're going to make include:
+
+- A brighter background colour for the active tab
+- A bold font for the active tab
+- A larger font size in the tab bar
+- The tabs are connected to the browser again, instead of floating in an empty void
+- The tab you are hovering over is colour brighter
+- The tab bar height is reduced (compact mode)
+
+Below you'll also find before and after screenshots.
+
+### Before and after screenshots
+
+Here is the default look showing the tab bar of firefox 89:
+
+![proton tab bar][4]
+
+This is the tab bar after we've made and activated the `userChrome.css` file:
+
+![proton with styling][5]
+
+And this is the tab bar with `browser.proton.disabled` set to true, to temporary
+disable the new proton interface:
+
+![proton disabled][6]
+
+As you can see I have customized my browser window toolbar layout to be more compact
+than the default settings. The menubar is enabled (in the title bar) and the bookmark
+bar is next to the menu bar (thus the wasted space below the tab bar is moved to
+otherwise empty space next to the menubar). These new tabs are a huge waste of precious
+screen real-estate. 
+
+
+### Set up a userChrome.css file
+
+I assume you use Linux, for Windows / OS X the instructions are comparable, but the
+path to the profile folder is different.
+
+Navigate to `about:config`, search for the setting `toolkit.legacyUserProfileCustomizations.stylesheets`
+and enable it (`true`). If you want to set the UI density to `Compact`, you can change
+`browser.uidensity` to `1`. My stylesheet also does that for just the tab bar.
+
+Next, under the `Help` menu, open up `More troubleshooting information`. There
+you'll find the path to your profile folder and a button to open it right away.
+
+![ff profile folder][7]
+
+Either click the button or navigate to the folder in your terminal. In the main profile
+folder, create a new folder named `chrome` (all lowercase):
+
+    mkdir chrome
+
+Navigate into that folder and create a file named `userChrome.css`, open it up in your
+favorite text editor:
+
+    vi userChrome.css
+
+
+Here is my `userChrome.css` file. Paste in in, change the colours to your liking and restart
+the browser to see the changes.
+
+    tab {
+        font-size: 16px !important;
+        font-family: sans-serif !important;
+    }
+
+    .tab-background {
+        background: #eeeeee;
+        border-radius: 0 !important;
+        margin-bottom: 0px !important;
+        box-shadow: 0 0 2px 2px rgba(0,0,0,0.1) !important;
+        border: 1px solid rgba(0,0,0,.5) !important;
+        border-bottom-width: 0px !important;
+    }
+
+    #tabbrowser-tabs {
+        --tab-min-height: 24px !important;
+    }
+    #scrollbutton-up,
+    #scrollbutton-down {
+        border-top-width: 0 !important;
+        border-bottom-width: 0 !important;
+    }
+
+    .tabbrowser-tab[selected] .tab-background {
+        background: #75cc00 !important;
+    }
+
+    .tabbrowser-tab[selected] .tab-label {
+        color: black !important;
+        font-weight: bold !important;
+    }
+
+    #TabsToolbar {
+        border-bottom: 2px solid #000000 !important;
+    }
+
+    .tabbrowser-tab:hover .tab-background:not([selected]) {
+        background: #75cc00 !important;
+    }
+
+
+Most of the CSS came from [this article][8], customized to my liking (no rounded corners or fancy
+purple/yellow colours). Also the tab bar height was added.
+
+How do you find out that you need to use those specific class names? If you
+want to tweak the UI further, you can inspect the Firefox UI via the Browser Toolbox
+(You can [enable it in the Developer Tools][9] settings and then press
+Ctrl+Alt+Shift+I). (Thank you to `gillescastel` on Lobste.rs).
+
+[1]: https://web.archive.org/web/20210616060802/https://blog.mozilla.org/en/mozilla/news/modern-clean-new-firefox-clears-the-way-to-all-you-need-online/
+[2]: http://web.archive.org/web/20210627183546/http://n-gate.com/hackernews/2020/09/
+[3]: http://web.archive.org/web/20210627183744/https://bugzilla.mozilla.org/show_bug.cgi?id=1709425
+[4]: /s/inc/img/ff-89-tabbar-proton.png
+[5]: /s/inc/img/ff-89-tabbar-styling.png
+[6]: /s/inc/img/ff-89-tabbar-proton-disabled.png
+[7]: /s/inc/img/ff-profile-folder.png
+[8]: http://web.archive.org/web/20210627190427/https://amitp.blogspot.com/2021/06/firefox-89-tab-appearance.html
+[9]: https://developer.mozilla.org/en-US/docs/Tools/Browser_Toolbox
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

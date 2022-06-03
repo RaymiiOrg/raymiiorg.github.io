@@ -1,0 +1,105 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Bash Bits: Find all files containing specific text (and remove them)
+Author      : 	Remy van Elst
+Date        : 	07-05-2019
+URL         : 	https://raymii.org/s/snippets/Bash_Bits_Find_all_files_containing_specific_text.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Bash Bits are small examples and tips for Bash Scripts. This bash bit shows you
+how to find all files containing specific text, and how to remove them.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+[All Bash Bits can be found using this link][2]
+
+### Finding all files with specific text in them
+
+For [text news][3] I convert news articles to plain text with readability.
+Recently one of the sites I convert changed their HTML, causing the parsing to
+fail. I fixed that in the parser, but had over 200 failed parsed articles. I
+wanted to remove them all. They all contain the following string:
+
+    
+    
+    Wij willen graag weten in welke omgeving u woont
+    
+
+Navigate to the folder where you want to search (recursivly):
+
+    
+    
+    cd /var/gopher
+    
+
+Search for all `.txt` files which have the string in them. `grep -l` will only
+write the filename of the file that contains the string.
+
+    
+    
+    find -iname "*.txt" | xargs grep -l "Wij willen graag weten in welke omgeving"
+    
+
+This will give you a list of files:
+
+    
+    
+    ./Dutch/www.rtvdrenthe.nl/20190428T0924_Inbraak_bij_super_Barger_Oosterveld.txt
+    ./Dutch/www.rtvdrenthe.nl/20190428T1036_Hoofdprijs_Staatsloterij_valt_in_Borger_Odoorn.txt
+    ./Dutch/www.rtvdrenthe.nl/20190501T1304_50Plus_en_Sterk_Lokaal_samen_verder_in_de_Staten.txt
+    ./Dutch/www.rtvdrenthe.nl/20190504T1657_Live__Dodenherdenking_Westerbork__afgesloten_.txt
+    ./Dutch/www.rtvdrenthe.nl/20190503T0557_Drankrijder_A28_is_rijbewijs_kwijt.txt
+    
+
+Check them by hand, and if you're sure you want to remove them, use the
+following command:
+
+    
+    
+    find -iname "*.txt" | xargs grep -l "Wij willen graag weten in welke omgeving" | awk '{print "rm "$1}' | bash
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://raymii.org/s/tags/bash-bits.html
+   [3]: https://txtn.ws
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

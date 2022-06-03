@@ -1,0 +1,314 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Corosync Notes
+Author      : 	Remy van Elst
+Date        : 	02-11-2013
+URL         : 	https://raymii.org/s/snippets/Corosync_Notes.html
+Format      : 	Markdown/HTML
+---
+
+
+
+What are all the components?
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+  * Pacemaker: Resource manager
+  * Corosync: Messaging layer
+  * Heartbeat: Also a messaging layer
+  * Resource Agents: Scripts that know how to control various services
+
+Pacemaker is the thing that starts and stops services (like your database or
+mail server) and contains logic for ensuring both that they are running, and
+that they are only running in one location (to avoid data corruption).
+
+But it cant do that without the ability to talk to instances of itself on the
+other node(s), which is where Heartbeat and/or Corosync come in.
+
+Think of Heartbeat and Corosync as dbus but between nodes. Somewhere that any
+node can throw messages on and know that they'll be received by all its peers.
+This bus also ensures that everyone agrees who is (and is not) connected to the
+bus and tells Pacemaker when that list changes.
+
+If you want to make sure that the commands below execute on all cluster nodes,
+append the `-w` parameter to the crm command, it stands for `wait`. Like so:
+`crm -w resource stop virtual-ip`.
+
+#### Get corosync cluster status
+
+    
+    
+    crm_mon --one-shot -V
+    
+
+or
+
+    
+    
+    crm status
+    
+
+#### Put node on standby
+
+Execute on node you want to put in standby.
+
+    
+    
+    crm node standby
+    
+
+Put node online again (after standby)
+
+Execute on node you want to put online again.
+
+    
+    
+    crm node online
+    
+
+If you want to put a node online or in standby from another cluster node, append
+the node name to the commands above, like so:
+
+    
+    
+    crm node standby NODENAME
+    
+
+#### Disable stonith (shoot the other node in the head)
+
+    
+    
+    crm configure property stonith-enabled=false
+    
+
+#### Add a simple shared IP resource
+
+    
+    
+    crm configure primitive failover-ip ocf:heartbeat:IPaddr2 params ip=10.0.2.10 cidr_netmask=32 op monitor interval=10s
+    
+
+This tells Pacemaker three things about the resource you want to add. The first
+field, ocf, is the standard to which the resource script conforms to and where
+to find it. The second field is specific to OCF resources and tells the cluster
+which namespace to find the resource script in, in this case heartbeat. The last
+field indicates the name of the resource script.
+
+##### View all available resource classes
+
+    
+    
+    crm ra classes
+    
+
+Output:
+
+    
+    
+    heartbeat
+    lsb
+    ocf / heartbeat pacemaker
+    stonith
+    
+
+##### View all the OCF resource agents provided by Pacemaker and Heartbeat
+
+    
+    
+    crm ra list ocf pacemaker
+    
+
+Output:
+
+    
+    
+    ClusterMon    Dummy         HealthCPU     HealthSMART   Stateful      SysInfo
+    SystemHealth  controld      o2cb          ping          pingd
+    
+
+For Heartbeat:
+
+    
+    
+    crm ra list ocf heartbeat
+    
+
+Output:
+
+    
+    
+    AoEtarget            AudibleAlarm         CTDB                 ClusterMon
+    Delay                Dummy                EvmsSCC              Evmsd
+    Filesystem           ICP                  IPaddr               IPaddr2
+    IPsrcaddr            IPv6addr             LVM                  LinuxSCSI
+    MailTo               ManageRAID           ManageVE             Pure-FTPd
+    Raid1                Route                SAPDatabase          SAPInstance
+    SendArp              ServeRAID            SphinxSearchDaemon   Squid
+    Stateful             SysInfo              VIPArip              VirtualDomain
+    WAS                  WAS6                 WinPopup             Xen
+    Xinetd               anything             apache               conntrackd
+    db2                  drbd                 eDir88               ethmonitor
+    exportfs             fio                  iSCSILogicalUnit     iSCSITarget
+    ids                  iscsi                jboss                ldirectord
+    lxc                  mysql                mysql-proxy          nfsserver
+    nginx                oracle               oralsnr              pgsql
+    pingd                portblock            postfix              proftpd
+    rsyncd               scsi2reservation     sfex                 symlink
+    syslog-ng            tomcat               vmware
+    
+
+#### Add simple apache resource
+
+    
+    
+    crm configure primitive apache-ha ocf:heartbeat:apache params configfile=/etc/apache2/apachd2.conf op monitor interval=1min
+    
+
+#### Make sure Apache and the Virtual IP are on the same node
+
+    
+    
+    crm configure colocation apache-with-ip inf: apache-ha failover-ip
+    
+
+#### Make sure that when either one crashes they both are recovered on another
+
+node:
+
+    
+    
+    crm configure order apache-after-ip mandatory: failover-ip apache-ha
+    
+
+#### Stop a resource
+
+    
+    
+    crm resource stop $`RESOURCENAME
+    
+
+#### Delete a resource
+
+    
+    
+    crm configure delete $RESOURCENAME
+    
+
+#### Remove a node from the cluster
+
+    
+    
+    crm node delete $NODENAME
+    
+
+#### Stop all cluster resources
+
+    
+    
+    crm configure property stop-all-resources=true
+    
+
+#### Clean up warnings and errors for a resource
+
+    
+    
+    crm resource cleanup $RESOURCENAME
+    
+
+#### Erase entire config
+
+    
+    
+    crm configure erase
+    
+
+#### Disable quorum (when using only two nodes)
+
+    
+    
+    crm configure property no-quorum-policy=ignore
+    
+
+#### Let the shared IP go back to the primary node when it is up after failover
+
+    
+    
+    crom configure rsc_defaults resource-stickiness=100
+    
+
+#### sysctl
+
+In order to be able to bind on a IP which is not yet defined on the system, we
+need to enable non local binding at the kernel level.
+
+Temporary:
+
+    
+    
+    echo 1 > /proc/sys/net/ipv4/ip_nonlocal_bind
+    
+
+Permanent:
+
+Add this to `/etc/sysctl.conf`:
+
+    
+    
+    net.ipv4.ip_nonlocal_bind = 1
+    
+
+Enable with:
+
+    
+    
+    sysctl -p
+    
+
+### Sources
+
+  * [http://clusterlabs.org/doc/en-US/Pacemaker/1.1-crmsh/html-single/Clusters _from_ Scratch/index.html][2]
+  * <http://blog.clusterlabs.org/blog/2010/pacemaker-heartbeat-corosync-wtf/>
+  * <http://blog.clusterlabs.org/blog/2009/highly-available-data-corruption/>
+  * <http://ourobengr.com/ha/>
+  * <http://floriancrouzat.net/2013/01/monitor-a-pacemaker-cluster-with-ocfpacemakerclustermon-andor-external-agent/>
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: http://clusterlabs.org/doc/en-US/Pacemaker/1.1-crmsh/html-single/Clusters_from_Scratch/index.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

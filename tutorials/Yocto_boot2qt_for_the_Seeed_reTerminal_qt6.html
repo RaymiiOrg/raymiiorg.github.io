@@ -1,0 +1,1320 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Yocto boot2qt for the Seeed reTerminal (Qt 6) - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>
+                </small>
+            </header>
+          
+    <h2 class='headheader' id='main'>Yocto boot2qt for the Seeed reTerminal (Qt 6)</h2>
+<p><small>Published: 18-03-2022 | Last update: 04-04-2022 | Author: Remy van Elst | <a href="Yocto_boot2qt_for_the_Seeed_reTerminal_qt6.txt">Text only version of this article</a>
+</small></p>
+<div class='ad'>
+                                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7993642564731324"
+                             crossorigin="anonymous"></script>
+                        <!-- voorartikel -->
+                        <ins class="adsbygoogle"
+                             style="display:block"
+                             data-ad-client="ca-pub-7993642564731324"
+                             data-ad-slot="6172324376"
+                             data-ad-format="auto"></ins>
+                        <script>
+                             (adsbygoogle = window.adsbygoogle || []).push({});
+                        </script>
+                        </div><br><div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">What is the reTerminal</a>
+</li>
+<li>
+<a href="#toc_1">What is Yocto</a>
+</li>
+<li>
+<a href="#toc_2">Development host Yocto setup</a>
+<ul>
+<li>
+<a href="#toc_3">Google Repo</a>
+</li>
+<li>
+<a href="#toc_4">Initial boot2qt setup</a>
+</li>
+<li>
+<a href="#toc_5">Adding the Seeed reTerminal layer</a>
+</li>
+<li>
+<a href="#toc_6">Making our own layer for b2qt image overrides</a>
+</li>
+<li>
+<a href="#toc_7">Tweaking our <code>local.conf</code> for the reTerminal</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_8">Bitbaking the image</a>
+<ul>
+<li>
+<a href="#toc_9">Flashing the image</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_10">First boot and a quick recap</a>
+</li>
+<li>
+<a href="#toc_11">Qt SDK and Qt Creator integration</a>
+</li>
+<li>
+<a href="#toc_12">Making your own app the default</a>
+</li>
+<li>
+<a href="#toc_13">Rotating your app in b2qt</a>
+<ul>
+<li>
+<a href="#toc_14">Qt Widgets rotation</a>
+</li>
+<li>
+<a href="#toc_15">Qt QML rotation</a>
+<ul>
+<li>
+<a href="#toc_16">Weston and Wayland</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p>In this guide we&#39;ll build a linux distribution for Seeed reTerminal, using the Yocto project and the <code>boot2qt</code> stack provided by Qt. This <code>boot2qt</code> image can be written to the internal eMMC and when booted up, the Seeed reTerminal runs a software stack that integrates nicely with Qt Creator (the Qt IDE), for example, one click deployment to the device. You can run your own Qt application on the reTerminal, full screen, it will boot right into it.
+This guide covers Qt 6.2. The guide also covers changing the default startup app to your own app, Qt Creator integration and rotating your Qt app, both Widgets and QML, the latter via Wayland and Weston.</p>
+
+<p>The main difference between the guide that <a href="http://web.archive.org/web/20220315202600/https://wiki.seeedstudio.com/reTerminal-Yocto/">Seeed provides</a> and this guide
+is that this guide uses Qt&#39;s own boot2qt Yocto stack and runs Qt 6. The Seeed
+guide covers their own image and Qt 5. This guide also shows you how to make 
+your own Qt app the default and helps you with rotation.</p>
+
+<p>Running your own Yocto distribution over the default Debian image provided by Seeed
+has the advantage that it&#39;s reproducible and you are fully in control. Using the 
+<code>boot2qt</code> Yocto stack makes the Yocto setup process way easier and faster. By using
+your own image, no other application run on the device, so all resources are available
+for your app. (No desktop environment or other software, unless you built it in the 
+image.) This also assures you that in the future, lets say as an example, 5 years later,
+you can still build your image and software, since your Yocto build server has all 
+the sources locally.</p>
+
+<p>Full disclosure: I was contacted by Seeed, they sent me this reTerminal in
+exchange for a few articles, this one being the first. No monetary payment is
+involved and Seeed has not reviewed this article before publishing. For official
+support, please visit the <a href="https://wiki.seeedstudio.com/reTerminal/">Seeed wiki</a>.</p>
+
+<p>Seeed actually sent me 2 reTerminal units. The first one had a stuck boot-mode 
+switch. It wouldn&#39;t move, and later broke off. The boot mode switch is required 
+to flash an image, which is quite essential for this Yocto guide. I contacted
+them and a replacement unit was sent quickly. So, be careful with your 
+boot mode switch. I now use a pair of tweezers to switch it, just to be extra cautious.</p>
+
+<p>Article changelog:</p>
+
+<ul>
+<li>04-04-2022: Fixed paths in shell commands</li>
+<li>04-04-2022: Fixed syntax in some recipe files including missing slashes</li>
+<li>04-04-2022: Added note regarding the <code>seeed-linux-dtoverlays</code> on commit <code>7c846e23de9346d318fbdc8ac92dcc72b90fb6ce</code></li>
+<li>Thanks to Ryan Bryngelson for the above issues and fixes!</li>
+</ul>
+
+<h3 id="toc_0">What is the reTerminal</h3>
+
+<p><img src="/s/inc/img/reterminal_1.png" alt="reTerminal"></p>
+
+<blockquote>
+<p>The reTerminal </p>
+</blockquote>
+
+<p>The reTerminal is marketed as a future-ready Human-Machine Interface
+(HMI). The reTerminal is powered by a Raspberry Pi Compute Module 4 (cm4) which
+is a Quad-Core ARM Cortex-A72 CPU running at 1.5GHz and a 5-inch IPS
+capacitive multi-touch screen with a resolution of 1280x720. 4GB of RAM and
+32 GB of eMMC storage are built in (non-expandable). It has wireless
+connectivity with dual-band 2.4GHz/5GHz Wi-Fi and Bluetooth 5.0 BLE.</p>
+
+<p>The reTerminal has a high-speed expansion interface and exposes many I/O ports
+and connectors. The device has security features such as a cryptographic
+co-processor with secure hardware-based key storage. It also has built-in
+modules such as an accelerometer, light sensor and a Real-Time Clock.
+reTerminal has a Gigabit Ethernet Port for faster network connections and
+also has dual USB 2.0 Type-A ports. The 40-pin Raspberry Pi compatible GPIO
+header allows most or all of your hat&#39;s and existing projects to work with
+the reTerminal.</p>
+
+<p><strong>You can <a href="https://www.seeedstudio.com/ReTerminal-with-CM4-p-4904.html">buy the reTerminal here, current price is USD 195</a>.</strong> That includes 
+a Compute Module 4.</p>
+
+<p><img src="/s/inc/img/reterminal_2.png" alt="reterminal hardware"></p>
+
+<blockquote>
+<p>External hardware overview of the reTerminal. Notice the many mounting holes and nuts</p>
+</blockquote>
+
+<p><img src="/s/inc/img/reterminal_3.jpg" alt="reterminal carrier board"></p>
+
+<blockquote>
+<p>Carrier board including the Compute Module 4</p>
+</blockquote>
+
+<p>You could bluntly say that the reTerminal is a carrier board for the Compute Module 4
+with a multi-touch screen and a convenient case. In my opinion, it&#39;s much more than that.</p>
+
+<p>It does lack a built-in battery at the time of writing this article. You power it via a USB-C
+cable or by supplying 5V and ground to the correct GPIO pins.</p>
+
+<p>Behind a little cover pad is a high-speed interface, on the picture above it&#39;s labeled 
+<code>Industrial High Speed Interface</code>. In the <a href="https://wiki.seeedstudio.com/reTerminal-hardware-interfaces-usage/#high-speed-interface-for-expansion-modules">FAQ</a> they write the following:</p>
+
+<blockquote>
+<p>The High-Speed Interface for Expansion Modules consists of 1 PCIe 1-lane
+  Host Gen 2 (supporting speeds up to 5Gbps), 1 USB 2.0, 1 PoE and 26 GPIOs.
+  The 26 GPIO pins can be further used as 2 I2C, 2 SPI and 1 UART. We plan to
+  build expansion modules in the future for reTerminal and we have reserved
+  this interface to connect these modules to the reTerminal. We will release
+  a wide range of modules such as a Mic Array &amp; Speaker Module, Camera
+  Module, Industrial I/O, LoraWAN Module, 5G/4G Module, PoE Module and an
+  Ethernet Switch. There are 2xM4 mechanical screw holes on the side of the
+  reTerminal to help keep the expansion modules in place.</p>
+</blockquote>
+
+<p>So, hardware wise, the reTerminal is solid and future proof. If you buy one,
+it comes pre-loaded with a Compute Module and Raspbian including drivers plus
+a demo application, so you can get started right away. No messy supply chain
+issues here, only a bit of waiting on shipping a package from China.</p>
+
+<h3 id="toc_1">What is Yocto</h3>
+
+<p>There is a lot of ground to cover, if you are not familiar with the Yocto
+project, here is a quick, <em>simplified</em>, overview of all the terms. </p>
+
+<p><strong>Seeed have their own <a href="http://web.archive.org/web/20220315202600/https://wiki.seeedstudio.com/reTerminal-Yocto/">FAQ on Yocto for the reTerminal here</a></strong>. That FAQ
+covers the basics and has tips and tricks for using Yocto. I
+recommend you read that guide as well, since it explains different parts.
+My guide is tailored to (boot 2) Qt on the reTerminal.</p>
+
+<p>Yocto is an open-source project which provides a build framework and metadata
+to help to create a custom image for your target board. Yocto uses so-called
+(meta) layers and recipes. Recipes are <code>.bb</code> (for bitbake) files that contain
+build instructions and layers are a collection of specific recipes, classes
+and configuration files. You could have a layer named <code>meta-raspberry</code>
+(all layers, by convention, start with <code>meta-</code>) that has recipes applicable
+only for the Raspberry Pi.</p>
+
+<p>Yocto helps you to build a linux distro, their reference distro is named
+<code>poky</code>. The primary build tool is a python command line tool named <code>bitbake</code>.
+It parses all the recipes and then, one by one, gathers the source code
+and compiles all the software, then packages that up into an image for your
+board.</p>
+
+<p>Yocto is aimed at embedded linux devices, at work we use it to create our own
+Linux distribution (not <code>boot2qt</code>) to run on the coffee machines. Many
+different boards are supported, most vendors provide a so called board
+support package (bsp). Often this contains a kernel and drivers for your
+board. There is a board support package for the Raspberry Pi, which we will
+use. </p>
+
+<p><code>boot2qt</code> is an set of layers for Yocto which builds a simple linux system
+that starts up without a desktop, right into a Qt application. It also builds
+a cross-compile SDK for your desktop, which you can use in Qt Creator to
+cross-compile your application for the target device. Often the device you
+develop for does not have the same CPU architecture as your desktop
+workstation. To top this all up, it also integrates into Qt Creator, allowing
+you to one-click deploy and run your application, via the network, on your
+device. </p>
+
+<p><code>boot2qt</code> also provides a set of scripts to make the <code>yocto</code> setup very easy, so 
+the process you see in this guide is not the same as a default <code>yocto</code> setup. It&#39;s
+specifically for <code>boot2qt</code> and for the reTerminal.</p>
+
+<p>So to summarize, <code>boot2qt</code> provides a layer on top of yocto that adds 
+integration between your embedded linux device and the Qt suite of tools,
+saving a boatload of time doing manual busywork.</p>
+
+<h3 id="toc_2">Development host Yocto setup</h3>
+
+<p>The machine that is going to build your <code>boot2qt</code> image (the host that runs
+<code>bitbake</code>) needs a few packages before we can get started building. You need
+at least 50 GB&#39;s of free space, but my host has 300 GB. Cross-compiling all
+the packages takes a huge amount of time, so the more cores and RAM you have,
+the better. My test build machine has 4 cores and 8 GB of RAM, the entire
+image build took more than 2 days. At work we have a few beefy servers, there
+the build takes about 2 hours. Yocto does support incremental builds, so if
+you change one recipe, only that part has to be rebuilt, not all the other
+parts. </p>
+
+<p>My build machine runs Debian 11, but Ubuntu 20.04 is also known to
+work. Install the required packages first:</p>
+
+<pre><code>apt-get install gawk wget git diffstat unzip texinfo gcc build-essential
+chrpath socat cpio python3 python3-pip python3-pexpect xz-utils
+debianutils iputils-ping python3-git python3-jinja2 libegl1-mesa
+libsdl1.2-dev pylint3 xterm python3-subunit mesa-common-dev python
+git-lfs g++-multilib gcc-multilib libxkbcommon-dev
+libxkbcommon-x11-dev libwayland-cursor++0 libwayland-cursor0
+</code></pre>
+
+<p>These are a bit more packages than the Qt site recommends, I had build issues
+when building the <code>qbsp</code> layer, which is where most of the extra packages
+come from.</p>
+
+<h4 id="toc_3">Google Repo</h4>
+
+<p>Next you need <code>repo</code>, a git management tool <a href="https://web.archive.org/web/20220219191821/https://gerrit.googlesource.com/git-repo/">by Google</a>. It hides most of
+the complexity of submodules and different repo&#39;s by putting all of that
+extra information in a manifest file. You can install it using apt:</p>
+
+<pre><code>apt install repo
+</code></pre>
+
+<p>If it&#39;s not in the repository, check the <a href="https://web.archive.org/web/20220219191821/https://gerrit.googlesource.com/git-repo/">instructions</a>, installation
+process is just a simple copy of one executable. </p>
+
+<h4 id="toc_4">Initial boot2qt setup</h4>
+
+<p>Create a folder where all of yocto will reside:</p>
+
+<pre><code>mkdir b2qt
+cd b2qt
+</code></pre>
+
+<p>Use the <code>repo</code> tool to clone all the git repositories of the Yocto project
+and <code>boot2qt</code> at once. First initialize for the correct Qt version:</p>
+
+<pre><code># for Qt 6.2:
+repo init -u git://code.qt.io/yocto/boot2qt-manifest -m v6.2.3.xml
+</code></pre>
+
+<p>Then sync the repositories:</p>
+
+<pre><code>repo sync
+</code></pre>
+
+<p>You must tell which board you want to build for, then source a
+script:</p>
+
+<pre><code>export MACHINE=raspberrypi4-64 &amp;&amp; source ./setup-environment.sh 
+</code></pre>
+
+<p><strong>This step must be repeated on every login</strong>.</p>
+
+<p>Notice that we specify <code>raspberrypi-64</code>. This is because the reTerminal uses a
+Raspberry Pi Compute Module 4. The <code>meta-raspberry</code> layer uses that name for
+both the regular Pi 4 and the Compute module. The Yocto layer from Seeed has 
+a specific board for the reTerminal since 3 days (at the time of writing), 
+but boot2qt has no support for that, so in this guide we&#39;ll port the specific
+requirements over to our build image.</p>
+
+<p>Output:</p>
+
+<pre><code>### Shell environment set up for builds. ###
+
+You can now run &#39;bitbake &lt;target&gt;&#39;
+
+Common targets are:
+b2qt-embedded-qt6-image
+meta-toolchain-b2qt-embedded-qt6-sdk
+
+QBSP target is:
+meta-b2qt-embedded-qbsp
+
+For creating toolchain or QBSP for Windows, set environment variable before running bitbake:
+SDKMACHINE=x86_64-mingw32
+
+For more information about Boot to Qt, see https://doc.qt.io/QtForDeviceCreation/
+</code></pre>
+
+<p>You should now be in a folder named <code>build-raspberrypi4-64</code>. Using the <code>repo</code> tool and 
+sourcing this script has made a nifty folder structure for yocto:</p>
+
+<ul>
+<li><code>build-raspberrypi4-64</code>: build directory for the board, you are in this folder
+after sourcing the <code>setup-environment.sh</code> file.</li>
+<li><code>sources</code>: has all the <code>bitbake</code> layers and recipes</li>
+<li><code>download</code>: folder where all the source code is downloaded (git repo&#39;s,
+tar.gz archives)</li>
+</ul>
+
+<p>In the <code>build-*</code> directory there is a <code>conf</code> folder, that has two important
+files. <code>bblayers.conf</code> and <code>local.conf</code>. The first defines the layers that 
+your build uses and the second has specific configuration options for 
+this specific build. We&#39;ll start by adding the reTerminal layer, the
+config file is covered later. </p>
+
+<h4 id="toc_5">Adding the Seeed reTerminal layer</h4>
+
+<p>We need the reTerminal layer for the device tree and a few drivers. </p>
+
+<pre><code>cd ../sources
+git clone -b main https://github.com/Seeed-Studio/meta-seeed-reterminal.git
+</code></pre>
+
+<p>I&#39;ve tested this guide with commit <code>7c846e23de9346d318fbdc8ac92dcc72b90fb6ce</code>
+and with commit <code>57d1b68d73e625fe6a4cb14372a0cb7c42bae9c5</code>. If the
+<code>seeed-linux-dtoverlays</code> package gives a linker error like below:</p>
+
+<pre><code>| aarch64-poky-linux-ld: internal error in set_address, at ../../gold/output.h:322
+</code></pre>
+
+<p>Then, remove the <code>ld-is-gold</code> option that the <code>boot2qt</code> <code>distro.conf</code> file enabled,
+as we do in our local config later on:</p>
+
+<pre><code>DISTRO_FEATURES_remove = &quot;ld-is-gold&quot;
+</code></pre>
+
+<p>I&#39;ve made an upstream <a href="https://github.com/Seeed-Studio/seeed-linux-dtoverlays/issues/37">bug report</a> for it. If you use commit <code>7c846e23de9346d318fbdc8ac92dcc72b90fb6ce</code>, the error will not appear. </p>
+
+<p>You must add the Yocto version that <code>boot2qt</code> uses to the layer configuration. Edit
+the following file:</p>
+
+<pre><code>vi meta-seeed-reterminal/conf/layer.conf
+</code></pre>
+
+<p>Add <code>hardknott</code> to the <code>LAYERSERIES_COMPAT</code> line:</p>
+
+<pre><code>LAYERSERIES_COMPAT_meta-reterminal = &quot;honister hardknott&quot;
+</code></pre>
+
+<p>Save and close. Change to our build folder:</p>
+
+<pre><code>cd ../build-raspberrypi4-64
+</code></pre>
+
+<p>Add the layer to our config:    </p>
+
+<pre><code>bitbake-layers add-layer ../sources/meta-seeed-reterminal
+</code></pre>
+
+<h4 id="toc_6">Making our own layer for b2qt image overrides</h4>
+
+<p>To override a few parts of the default <code>b2qt-embedded-qt6-image</code>, we must
+make our own layer. This layer will include more customization later on, 
+but for the initial build, we&#39;ll only override parts of the image. Why do
+we not just overwrite the contents of the original file? By using a <code>.bbappend</code>
+file, we can keep our changes separated, so we know later on what our specific
+changes are. It also makes it easier to apply upstream changes. </p>
+
+<p>Start by making a few folders for your layer, in the <code>b2qt</code> folder:</p>
+
+<pre><code>mkdir -p sources/meta-raymii/conf/
+mkdir -p sources/meta-raymii/recipes-qt/images/
+</code></pre>
+
+<p>Edit the following file:</p>
+
+<pre><code>sources/meta-raymii/conf/layer.conf
+</code></pre>
+
+<p>Place the below contents:</p>
+
+<pre><code>BBPATH .= &quot;:${LAYERDIR}&quot;
+
+BBFILES += &quot;${LAYERDIR}/recipes*/*/*.bb \
+            ${LAYERDIR}/recipes*/*/*.bbappend \
+            &quot;
+BBFILE_COLLECTIONS += &quot;raymii&quot;
+BBFILE_PATTERN_raymii := &quot;^${LAYERDIR}/&quot;
+BBFILE_PRIORITY_raymii = &quot;1&quot;
+
+LAYERSERIES_COMPAT_raymii = &quot;thud zeus dunfell gatesgarth hardknott&quot;
+</code></pre>
+
+<p>Add our layer to the Yocto build for the reTerminal:</p>
+
+<pre><code>cd build-raspberrypi4-64
+bitbake-layers add-layer ../sources/meta-raymii
+</code></pre>
+
+<p>Now on to the changes to the default <code>boot2qt</code> image. The following
+file is a <code>.bbappend</code> file, which, if it has the same name, path and version,
+will, as you might expect, append stuff to the original. In this case, we
+will extend the default <code>b2qt-embedded-qt6-image</code> image to include our
+<code>myapp</code> recipe in the installation. Edit this file:</p>
+
+<pre><code>vi sources/meta-raymii/recipes-qt/images/b2qt-embedded-qt6-image.bbappend
+</code></pre>
+
+<p>Add the following:</p>
+
+<pre><code>SUMMARY = &quot;reTerminal changes for Qt image&quot;
+
+SPLASH = &quot;psplash-raspberrypi&quot;
+
+IMAGE_FEATURES_append = &quot; \
+        splash \
+        &quot;
+
+IMAGE_INSTALL_append = &quot; \
+        kernel-modules \
+        evtest \
+        iperf3 \
+        i2c-tools \
+        util-linux \
+        &quot;
+</code></pre>
+
+<p>The changes, as you can see, are related to the reTerminal image. Later on
+we&#39;ll add our application here, but for now this is just the essentials to 
+make a bootable image.</p>
+
+<h4 id="toc_7">Tweaking our <code>local.conf</code> for the reTerminal</h4>
+
+<p>We need to add a few variables to the local config file (<code>conf/local.conf</code>). All of these
+have to do with the reTerminal hardware, except for one, the removal of <code>webengine</code>. If your 
+Qt app uses webengine, leave it in, otherwise, remove it. Not including it saves you a bunch
+of time compiling and the image is smaller. </p>
+
+<p>The reTerminal related features are pulled from the official layer, but
+tweaked for <code>boot2qt</code>. You can see the <a href="https://github.com/Seeed-Studio/meta-seeed-cm4/commit/885d6a332a25832dd954beb8cb5337c24bf9d77f">backport here</a>, quite a recent
+addition to the reTerminal Yocto layer, 3 days ago when writing this
+article. </p>
+
+<p>The difference between <code>local.conf</code> and the <code>b2qt-embedded-qt6-image.bbappend</code> is that 
+<code>local.conf</code> is for this device only. In my case I also have a <code>raspberrypi4</code> machine
+build folder for <a href="/s/tutorials/Yocto_boot2qt_for_the_Raspberry_Pi_4_both_Qt_6_and_Qt_5.html">the compute module 4</a>. You could also create your own <code>distro.conf</code> 
+or define a new device with machine specific overrides, but for this article, <code>local.conf</code>
+is simple enough.</p>
+
+<p>Edit the following file:</p>
+
+<pre><code># in the folder: build-raspberrypi4-64   
+vi conf/local.conf
+</code></pre>
+
+<p>Add the following:</p>
+
+<pre><code>RPI_KERNEL_DEVICETREE_OVERLAYS_append = &quot; overlays/reTerminal.dtbo overlays/i2c3.dtbo overlays/vc4-kms-v3d-pi4.dtbo&quot;
+ENABLE_UART = &quot;1&quot;
+ENABLE_I2C = &quot;1&quot;
+
+KERNEL_MODULE_AUTOLOAD_rpi += &quot;i2c-dev&quot;
+
+MACHINE_EXTRA_RRECOMMENDS += &quot;\
+    seeed-linux-dtoverlays \
+&quot;
+
+VC4DTBO ?= &quot;vc4-kms-v3d&quot;
+
+PACKAGECONFIG_append_pn-qtbase = &quot; eglfs &quot;
+
+DISTRO_FEATURES_remove = &quot;webengine ld-is-gold&quot;
+
+PREFERRED_VERSION_linux-raspberrypi ?= &quot;5.10.%&quot; 
+</code></pre>
+
+<p>You&#39;re all set up for the initial build of <code>boot2qt</code>. I recommend you start a
+<code>screen</code> or <code>tmux</code> session as the build will take a long time. My initial build
+on the hardware described earlier took more than 2 days.</p>
+
+<p>If you use commit <code>7c846e23de9346d318fbdc8ac92dcc72b90fb6ce</code>, you do not need
+to add the <code>MACHINE_EXTRA_RRECOMMENDS += &quot;seeed-linux-dtoverlays&quot;</code>. The
+device tree overlays <a href="https://github.com/Seeed-Studio/meta-seeed-cm4/blob/7c846e23de9346d318fbdc8ac92dcc72b90fb6ce/recipes-kernel/linux/files/0003-add-reTerminal-dtoverlay-for-yocto.patch">are a patch</a> in that commit, later on they
+became a git submodule.</p>
+
+<h3 id="toc_8">Bitbaking the image</h3>
+
+<p>With <code>boot2qt</code> and the reTerminal hardware layer setup, we can do our initial build. </p>
+
+<p>Make sure you have <code>source</code>-ed the script and are in the correct folder:</p>
+
+<pre><code>cd ~/b2qt
+export MACHINE=raspberrypi4-64 &amp;&amp; source ./setup-environment.sh 
+</code></pre>
+
+<p>Start the image build:</p>
+
+<pre><code>bitbake b2qt-embedded-qt6-image
+</code></pre>
+
+<p>The output will vary. First it lists all your layers and config, at 
+the bottom it shows the current task. Example output:</p>
+
+<pre><code>WARNING: Host distribution &quot;debian-11&quot; has not been validated with this version of the build system; you may possibly experience unexpected failures. It is recommended that you use a tested distribution.
+Loading cache: 100% |################################################################################################| Time: 0:00:00
+Loaded 4374 entries from dependency cache.
+Parsing recipes: 100% |##############################################################################################| Time: 0:00:00
+Parsing of 2813 .bb files complete (2809 cached, 4 parsed). 4377 targets, 611 skipped, 0 masked, 0 errors.
+NOTE: Resolving any missing task queue dependencies
+
+Build Configuration:
+BB_VERSION           = &quot;1.50.0&quot;
+BUILD_SYS            = &quot;x86_64-linux&quot;
+NATIVELSBSTRING      = &quot;universal&quot;
+TARGET_SYS           = &quot;aarch64-poky-linux&quot;
+MACHINE              = &quot;raspberrypi4-64&quot;
+DISTRO               = &quot;b2qt&quot;
+DISTRO_VERSION       = &quot;3.3.4&quot;
+TUNE_FEATURES        = &quot;aarch64 armv8a crc crypto cortexa72&quot;
+TARGET_FPU           = &quot;&quot;
+SDKMACHINE           = &quot;x86_64&quot;
+meta
+meta-poky            = &quot;HEAD:c40ac16d79026169639f47be76a3f7b9d8b5178e&quot;
+meta-raspberrypi     = &quot;HEAD:b4ec97e4eb8e36efd1f7e2f8ae020a9e55cfc239&quot;
+meta-oe
+meta-python
+meta-networking
+meta-initramfs
+meta-multimedia      = &quot;HEAD:f72a73b42fa740130b388ba8555cdbefdee8d37d&quot;
+meta-python2         = &quot;HEAD:810d6d842f103eb59f18b06426106462b15de7e2&quot;
+meta-boot2qt
+meta-boot2qt-distro  = &quot;HEAD:e59a2e20697e0afc2a0b068835cd90e102dec589&quot;
+meta-mingw           = &quot;HEAD:422b96cb2b6116442be1f40dfb5bd77447d1219e&quot;
+meta-qt6             = &quot;HEAD:eb3719266fc03b96d5056980b135b371f31811f4&quot;
+meta-seeed-reterminal = &quot;main:57d1b68d73e625fe6a4cb14372a0cb7c42bae9c5&quot;
+meta-raymii          = &quot;master:84123f093be34a9a4d73de545132cffc3e210c19&quot;
+
+Initialising tasks: 100% |###########################################################################################| Time: 0:00:10
+Sstate summary: Wanted 1706 Local 49 Network 0 Missed 1657 Current 1441 (2% match, 47% complete)
+Removing 375 stale sstate objects for arch raspberrypi4_64: 100% |#################################################| Time: 0:00:02
+Removing 6 stale sstate objects for arch allarch: 100% |###########################################################| Time: 0:00:00
+Removing 956 stale sstate objects for arch cortexa72: 100% |#######################################################| Time: 0:00:02
+NOTE: Executing Tasks
+Currently  8 running tasks (2488 of 9043)  27% |######################                                                           |
+0: libunistring-0.9.10-r0 do_configure - 27s (pid 1946515)
+1: libpciaccess-0.16-r0 do_configure - 22s (pid 1949317)
+2: icu-68.2-r0 do_compile - 15s (pid 1959678)
+3: libpam-1.5.1-r0 do_compile - 15s (pid 1959794)
+4: tslib-1.22-r0 do_configure - 13s (pid 1961800)
+5: nettle-3.7.3-r0 do_configure - 10s (pid 1963210)
+6: libpcre2-10.36-r0 do_configure - 8s (pid 1963889)
+7: libogg-1.3.4-r0 do_configure - 5s (pid 1964770)
+</code></pre>
+
+<p>Now is a great time to go do something else and return in a few days. If you
+have a beefy machine, the build will be faster, but it will still take a while.</p>
+
+<p>Once the build is done, the image is located in the folder:</p>
+
+<pre><code>build-raspberrypi4-64/tmp/deploy/images/raspberrypi4-64/
+</code></pre>
+
+<p>The image is a <code>bmap</code> file. <code>bmap</code> is a special format which should be faster to flash
+and verifies data during flash, initially created by Intel for their Tizen
+project. If you run Ubuntu, you must install the <code>bmap-tools</code> package. </p>
+
+<h4 id="toc_9">Flashing the image</h4>
+
+<p>Because the reTerminal has a Compute Module 4 with eMMC, the SD card slot
+won&#39;t work. You must flash the image to the eMMC, using a tool provided by
+the Raspberry Pi. This tool is named <code>rpiboot</code>, which you must build
+yourself. Start by installing a dependency:</p>
+
+<pre><code>sudo apt install git libusb-1.0-0-dev
+</code></pre>
+
+<p>Next, clone the repo</p>
+
+<pre><code>git clone --depth=1 https://github.com/raspberrypi/usbboot
+cd usbboot
+</code></pre>
+
+<p>Start the build process:</p>
+
+<pre><code>make
+</code></pre>
+
+<p>The above steps are one time only. You now have the <code>rpiboot</code> tool in this
+folder. Every time you flash an image, you must repeat the below process.</p>
+
+<p><a href="https://wiki.seeedstudio.com/reTerminal/#flash-raspberry-pi-os-64-bit-ubuntu-os-or-other-os-to-emmc">Flip the boot mode switch</a>. Be very careful, my first unit had a 
+stuck boot mode switch. I use a pair of tweezers to carefully flip the
+tiny switch. </p>
+
+<p><img src="/s/inc/img/reterminal_6.png" alt="boot mode switch"></p>
+
+<p>While you&#39;re playing around with the reTerminal and constantly flashing
+images, I recommend to leave the device open, not screw back the cooling
+or the plastic cover. This way the boot switch is easily accessible. 
+My device did get a bit hot, but not extremely.</p>
+
+<p>Plug in the USB C cable and run the <code>rpiboot</code> utility as root:</p>
+
+<pre><code>$ sudo ./rpiboot 
+RPIBOOT: build-date Feb 22 2022 version 20220208~181027 042cd145
+Waiting for BCM2835/6/7/2711...
+Loading embedded: bootcode4.bin
+Sending bootcode.bin
+Successful read 4 bytes 
+Waiting for BCM2835/6/7/2711...
+Loading embedded: bootcode4.bin
+Second stage boot server
+Loading embedded: start4.elf
+File read: start4.elf
+Second stage boot server done
+</code></pre>
+
+<p>Unmount the folders, otherwise the image flashing will fail:</p>
+
+<pre><code>sudo umount /dev/sda1; sudo umount /dev/sda2
+</code></pre>
+
+<p>Flash the image, using <code>bmaptool</code>:</p>
+
+<pre><code>cd TO_THE_YOCTO_IMAGE_FOLDER
+# cd b2qt/build-raspberrypi4-64/tmp/deploy/images/raspberrypi4-64/
+
+
+sudo bmaptool copy b2qt-embedded-qt6-image-raspberrypi4-64-20220316191856.rootfs.wic.bz2 --bmap b2qt-embedded-qt6-image-raspberrypi4-64-20220316191856.rootfs.wic.bmap /dev/sda
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>bmaptool: info: block map format version 2.0
+bmaptool: info: 698368 blocks of size 4096 (2.7 GiB), mapped 367758 blocks (1.4 GiB or 52.7%)
+bmaptool: info: copying image &#39;rootfs.wic.bz2&#39; to block device &#39;/dev/sda&#39; using bmap file &#39;rootfs.wic.bmap&#39;
+bmaptool: info: 100% copied
+bmaptool: info: synchronizing &#39;/dev/sda&#39;
+bmaptool: info: copying time: 5m 6.5s, copying speed 4.7 MiB/sec
+</code></pre>
+
+<p>Flashing takes a while, for me with the default image it takes about 5 minutes.
+The image filename varies, the date and time is in there. Switch the boot mode
+switch back (be careful), remove the USB C power cable and plug it back in.</p>
+
+<h3 id="toc_10">First boot and a quick recap</h3>
+
+<p><img src="/s/inc/img/reterminal_7.jpg" alt="first boot"></p>
+
+<blockquote>
+<p>First bootup of your own <code>boot2qt</code> image!</p>
+</blockquote>
+
+<p>Sit back, relax and enjoy your own home-grown image booting. Well done!</p>
+
+<p>Play around with the example app, you can click &quot;Learn More&quot; and scroll around
+a bit. </p>
+
+<p>You might notice the application is rotated. Actually the screen&#39;s default
+orientation is portrait, but the terminal is landscape. The <a href="https://wiki.seeedstudio.com/reTerminal-FAQ/#q11-the-screen-orientation-is-incorrect-after-installing-raspberry-pi-os-bullseye">FAQ</a> addresses
+this for <a href="/s/inc/img/reterminal_8.png">Ubuntu</a> and Debian, we will fix this later on when we deploy our
+own Qt app. The fix depends on what kind of Qt app you want to run and if you
+have access to the source code of said app.</p>
+
+<p>You can also plugin a network cable and <code>ssh</code> in to the machine, the IP address
+will be displayed on screen. </p>
+
+<p>To recap what you already have achieved:</p>
+
+<ul>
+<li>Installed Yocto</li>
+<li>Installed the <code>boot2qt</code> stack</li>
+<li>Customized Yocto by creating your own layer</li>
+<li>Added the reTerminal hardware layer</li>
+<li>Built your own image</li>
+<li>Flashed it onto the reTerminal.</li>
+</ul>
+
+<p>If you make changes to Yocto, subsequent builds will be faster since it only
+has to re-do stuff that changed. The steps you always have to do on the Yocto
+side are:</p>
+
+<ul>
+<li><code>cd b2qt/</code></li>
+<li><code>export MACHINE=raspberrypi4-64 &amp;&amp; source ./setup-environment.sh</code></li>
+<li>(do your changes)</li>
+<li><code>bitbake b2qt-embedded-qt6-image</code></li>
+</ul>
+
+<p>On the reTerminal side for flashing:</p>
+
+<ul>
+<li>Flip the <code>boot mode switch</code> and plugin a USB C cable</li>
+<li><code>./rpiboot</code> to be able to flash the image</li>
+<li><code>bmaptool copy b2qt-embedded-qt6-image-raspberrypi4-64-2022*.rootfs.wic.bz2 --bmap b2qt-embedded-qt6-image-raspberrypi4-64-2022*.rootfs.wic.bmap /dev/sda</code></li>
+<li>Flip back the boot mode switch</li>
+<li>Remove the power cable and plug it back in</li>
+</ul>
+
+<p>Now that you have your device set up, it&#39;s time to make use of all the handy features
+<code>boot2qt</code> offers us, most important, the integration with the Qt IDE, Qt Creator. It
+allows for rapid development and testing, right from inside the IDE you can deploy to
+the device and test your changes. That workflow is really nice and quick, including
+debugging, breakpoints, etc. </p>
+
+<h3 id="toc_11">Qt SDK and Qt Creator integration</h3>
+
+<p>In <a href="/s/tutorials/Yocto_boot2qt_for_the_Raspberry_Pi_4_both_Qt_6_and_Qt_5.html">my other article</a> on Yocto on the regular Pi Compute Module 4, I&#39;ve written
+out all the steps required to build the Qt SDK and integrate it with Qt Creator. Because
+the process is quite long, I&#39;ve decided not to duplicate it here but rather refer
+you to my other guide, which is full of screenshots and explains the whole process.</p>
+
+<p>Please check out <a href="/s/tutorials/Yocto_boot2qt_for_the_Raspberry_Pi_4_both_Qt_6_and_Qt_5.html">that article</a> for the full guide. The only thing that changes is
+the first command to <code>source</code> the setup file, we&#39;re exporting the <code>MACHINE</code> variable
+for the 64 bit version, like so:</p>
+
+<pre><code>export MACHINE=raspberrypi4-64 &amp;&amp; source ./setup-environment.sh 
+</code></pre>
+
+<p>Next, you build the SDK, which takes a while:</p>
+
+<pre><code>bitbake meta-toolchain-b2qt-embedded-qt6-sdk
+</code></pre>
+
+<p>When you&#39;ve completed all the <a href="/s/tutorials/Yocto_boot2qt_for_the_Raspberry_Pi_4_both_Qt_6_and_Qt_5.html">steps in my other guide</a>, you should
+have a new Qt kit configured in Qt Creator and a new device to deploy to. </p>
+
+<h3 id="toc_12">Making your own app the default</h3>
+
+<p>Now that you&#39;ve got the image working and you have your Qt integration set up,
+you should be able to run and deploy your app to the reTerminal via Qt Creator.</p>
+
+<p>If, and only if that&#39;s the case, continue on with the guide. We&#39;re going to 
+replace the default <code>b2qt</code> <code>startupscreen</code> app with our own compiled program.</p>
+
+<p>In my case it&#39;s a <a href="/s/tutorials/Qml_Drag_and_Drop_example_including_reordering_the_Cpp_Model.html">drag and drop demo app</a>. It&#39;s modified a little bit to
+also show the current IP address, which is useful when debugging on the device.</p>
+
+<p>This demo app is cool because it allows me to check the touch screen as well. Later
+on in the guide, in case of a Qt Widgets app, the rotation of the screen and the 
+touch-screen rotation must match, otherwise the app will be rotated, but not the 
+touch. Very weird stuff happens then.</p>
+
+<p>Start by making a new recipe for your app. We&#39;ll name it <code>myapp</code> for this example:</p>
+
+<pre><code>    mkdir -p sources/meta-raymii/recipes-myapp/myapp/files/
+</code></pre>
+
+<p>In the folder <code>files/</code> we&#39;ve just created, place the compiled binary for your app,
+name it <code>myapp</code> for this guides example. Make sure the architecture matches the 
+Pi 64 bit build:</p>
+
+<pre><code>$ file myapp
+myapp: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (GNU/Linux), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.14.0, BuildID[sha1]=f2d876e1fe62e2eec1d5c0ead27a99c74a1f77ca, with debug_info, not stripped
+</code></pre>
+
+<p>Next, create the actual recipe file with filename <code>myapp_1.0.bb</code> (not in the
+<code>files</code> folder, but one folder above). The underscore and version number are
+important, if you raise that number, a new package will be built by Yocto.
+Paste in the following contents:</p>
+
+<pre><code>DESCRIPTION = &quot;My Custom Qt App&quot;
+AUTHOR = &quot;author@example.org&quot;
+LICENSE = &quot;CLOSED&quot;
+PR = &quot;r0&quot;
+
+SRC_URI =+ &quot;file://myapp \
+           &quot;
+
+DEPENDS += &quot;qtbase qtdeclarative qtdeclarative-native&quot;
+
+do_install() {
+    install -d ${D}/${bindir}
+    install -m 0755 ${WORKDIR}/myapp ${D}/${bindir}/myapp
+
+    lnr ${D}/${bindir}/myapp ${D}/${bindir}/b2qt
+
+}
+
+FILES_${PN} = &quot;${bindir}/myapp \
+               ${bindir}/b2qt \
+              &quot;
+</code></pre>
+
+<p>The line starting with <code>lnr</code> replaces the build in <code>b2qt</code> startupscreen app
+(which is a symlink) to your own application. <code>boot2qt</code> ships with a simple
+launcher that, on boot, launches whatever is the current symlink at
+<code>/usr/bin/b2qt</code> and it has a few more utilities (like start/stop or replacing
+the symlink)</p>
+
+<p>Add the new <code>myapp</code> recipe to our custom image <code>.bbappend</code> file:</p>
+
+<pre><code>vi sources/meta-raymii/recipes-qt/images/b2qt-embedded-qt6-image.bbappend
+</code></pre>
+
+<p>Edit the <code>IMAGE_INSTALL_append</code> section and add <code>myapp</code> right above the
+<code>kernel-modules</code> line:</p>
+
+<pre><code>        myapp \
+</code></pre>
+
+<p>The entire section looks like this now:</p>
+
+<pre><code>IMAGE_INSTALL_append = &quot; \
+        myapp \
+        kernel-modules \
+        evtest \
+        iperf3 \
+        i2c-tools \
+        util-linux \
+        &quot;
+</code></pre>
+
+<p>After the changes, build a new image:</p>
+
+<pre><code>bitbake b2qt-embedded-qt6-image
+</code></pre>
+
+<p>Flash that using <code>bmaptool</code> as described above.</p>
+
+<p>Because we&#39;re appending to the default <code>b2qt</code> image, and because we&#39;re
+symlinking our own binary where the <code>b2qt</code> launcher expects it, the next
+time you boot up after building and flashing an image, your own app should start.</p>
+
+<p>Here&#39;s a picture of my custom app after startup, still incorrectly rotated:</p>
+
+<p><img src="/s/inc/img/reterminal_9.jpg" alt="reterminal myapp"></p>
+
+<p>If you want to upload a new version of your app, replace the <code>myapp</code> binary
+in the <code>files</code> folder and increment the <code>PR = &quot;r0&quot;</code> line to <code>r1</code>. Then bitbake
+a new image and flash it. Rinse and repeat for every release. </p>
+
+<p>If you just want to test out a new version, you can also <code>bitbake myapp</code>, then
+you&#39;ll just build the app without a new image. There will be a new <code>IPK</code> package
+in the <code>tmp/deploy/ipk</code> folder: </p>
+
+<pre><code>$ file tmp/deploy/ipk/cortexa72/myapp_1.0-r2_cortexa72.ipk
+tmp/deploy/ipk/cortexa72/myapp_1.0-r2_cortexa72.ipk: Debian binary package (format 2.0), with control.tar.gz, data compression xz
+</code></pre>
+
+<p><code>scp</code> this file over to the device and install it using the package manager <code>opkg</code>:</p>
+
+<pre><code>opkg install myapp_1.0-r2_cortexa72.ipk
+</code></pre>
+
+<p>Then either reboot or restart the <code>startupscreen</code> service to load the new app.</p>
+
+<p>However, if you just want to test new builds of your app, use the built in Qt creator
+integration you set up earlier. Works way faster and right from Qt Creator, including
+remote debugging.</p>
+
+<h3 id="toc_13">Rotating your app in b2qt</h3>
+
+<p>The next sections will cover the rotation aspect. It differs for Qt Widgets and Qt QML apps,
+and, in my opinion, is a big mess. The <a href="https://wiki.seeedstudio.com/reTerminal-FAQ/#q11-the-screen-orientation-is-incorrect-after-installing-raspberry-pi-os-bullseye">FAQ</a> covers rotation and I&#39;ve found a Japanese
+Seeed blog <a href="https://lab.seeed.co.jp/entry/2022/01/20/120000">covering rotation</a>, but that is all for the <code>X11</code> display server. </p>
+
+<p><code>boot2qt</code> uses <code>eglfs</code> to directly run your app. EGLFS is a platform plugin
+for running Qt applications on top of EGL and OpenGL ES 2.0, without an
+actual windowing system like <code>X11</code> or <code>Wayland</code>. </p>
+
+<p>Using <code>eglfs</code>, you can set an environment variable to rotate your application,
+but that will only work if you have a Qt Widgets app. For a QML app, you must
+either add a <code>transform: Rotation {}</code> to your program or run a display server
+like <code>weston</code> on <code>wayland</code> and let that handle rotation. We&#39;ll cover all the options
+in the next sections, starting with Qt Widgets.</p>
+
+<h4 id="toc_14">Qt Widgets rotation</h4>
+
+<p>The simplest option is for a Qt Widget application, you can define 2 environment
+variables, one for rotation and one for touchscreen rotation, that&#39;s all:</p>
+
+<pre><code>QT_QPA_EGLFS_ROTATION=-90
+QT_QPA_GENERIC_PLUGINS=evdevtouch:/dev/input/event0:rotate=270
+</code></pre>
+
+<p>Why does one use <code>-90</code> and one use <code>270</code>? Because when I tried to use <code>270</code>
+instead of <code>-90</code>, on startup the app gave an error: <code>Invalid rotation 270
+specified in QT_QPA_EGLFS_ROTATION</code>. I did try
+<code>QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS</code>, but that failed to work for touchscreen rotation.</p>
+
+<p>Now, how do we apply this to Yocto? There is a default qt environment file in <code>/etc/default/qt</code>,
+which we need to override in our Yocto build. Start by making a folder where our override <code>.bbappend</code>
+will reside:</p>
+
+<pre><code>mkdir -p sources/meta-raymii/recipes-qt/boot2qt-addons/default-qt-envs/
+</code></pre>
+
+<p>Copy over the default environment file from the <code>boot2qt</code> layer to that folder:</p>
+
+<pre><code>cp sources/meta-boot2qt/meta-boot2qt/recipes-qt/boot2qt-addons/default-qt-envs/defaults sources/meta-raymii/recipes-qt/boot2qt-addons/default-qt-envs/
+</code></pre>
+
+<p>Edit the <code>defaults</code> file:</p>
+
+<pre><code>vim sources/meta-raymii/recipes-qt/boot2qt-addons/default-qt-envs/defaults
+</code></pre>
+
+<p>Append the two lines below the existing ones:</p>
+
+<pre><code>QT_QPA_EGLFS_ROTATION=-90
+QT_QPA_GENERIC_PLUGINS=evdevtouch:/dev/input/event0:rotate=270    
+</code></pre>
+
+<p>In my case, the user programmable keys don&#39;t show up, so the touchscreen 
+is <code>/dev/input/event0</code>. It might be <code>event1</code>, but you can check using the
+<code>evtest</code> command:</p>
+
+<pre><code>root@b2qt-raspberrypi4-64:~# evtest
+No device specified, trying to scan all of /dev/input/event*
+Available devices:
+/dev/input/event0:      seeed-tp
+/dev/input/event1:      vc4
+/dev/input/event2:      vc4
+Select the device event number [0-2]: 
+</code></pre>
+
+<p><code>seeed-tp</code> is the touchscreen (tp stands for touch-panel).</p>
+
+<p>Create a <code>.bbappend</code> file, which will override the default recipe:</p>
+
+<pre><code>vim sources/meta-raymii/recipes-qt/boot2qt-addons/default-qt-envs.bbappend
+</code></pre>
+
+<p>Add the following:</p>
+
+<pre><code>FILESEXTRAPATHS_prepend := &quot;${THISDIR}/${PN}:&quot;
+</code></pre>
+
+<p>This line adds the folder in our own layer to the package, so it will look for 
+the files in that folder as well as the original folder. Your new folder is checked
+first. <a href="https://docs.yoctoproject.org/3.3/singleindex.html#term-FILESEXTRAPATHS">The Yocto manual explains this variable</a> and why using <code>:=</code> is important. </p>
+
+<p>You can check that your <code>.bbappend</code> is used using the following command:</p>
+
+<pre><code>bitbake-layers show-appends default-qt-envs
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>=== Matched appended recipes ===
+default-qt-envs.bb:
+  /home/remy/b2qt/sources/meta-raymii/recipes-qt/boot2qt-addons/default-qt-envs.bbappend
+  /home/remy/b2qt/sources/meta-boot2qt/meta-boot2qt-distro/dynamic-layers/raspberrypi/recipes-qt/boot2qt-addons/default-qt-envs.bbappend
+</code></pre>
+
+<p><code>bitbake</code> the image and flash it, now your Qt Widgets app should be rotated correctly. Here
+is a picture of the incorrectly rotated example Qt widgets controls demo app:</p>
+
+<p><img src="/s/inc/img/reterminal_10.jpg" alt="widgets"></p>
+
+<p>And here is the app with the environment variables set, rotated as you&#39;d expect:</p>
+
+<p><img src="/s/inc/img/reterminal_11.jpg" alt="widgets rotated"></p>
+
+<h4 id="toc_15">Qt QML rotation</h4>
+
+<p>For a QML application, rotation is a bit harder. You either need to make changes
+to the source code, or use <code>wayland</code> and <code>weston</code>, a display manager and server 
+which handle the rotation. The latter solution is only if you cannot change 
+the source code of your application.</p>
+
+<p>If you can change your <code>QML</code> source code, add <a href="https://web.archive.org/web/20220318200959/https://doc.qt.io/qt-6/qml-qtquick-rotation.html">a <code>Rotation</code> transformation</a>:</p>
+
+<pre><code>transform: Rotation {
+    angle: 270 
+    origin.x: parent.width / 2
+    origin.y: parent.width / 2
+}
+</code></pre>
+
+<p>In this case I assume the rotation is on your root element. Not the <code>Window</code>, but the 
+<code>Loader</code> or <code>StackLayout</code>, or <code>Rectangle</code> in the window, whatever is your root element.</p>
+
+<p>No changes to the environment are required, just upload a new version of your
+application as described above. </p>
+
+<h5 id="toc_16">Weston and Wayland</h5>
+
+<p>If you cannot change your source code, you must install a display manager. We&#39;re using 
+Wayland and Weston, not <code>X11</code>. The Qt documentation has an <a href="https://web.archive.org/web/20220318194533/https://doc.qt.io/qt-6/wayland-and-qt.html">article explaining why not X11</a>. 
+Here is a quote summarizing the important bits:</p>
+
+<blockquote>
+<p>X11 is quite large and complex, and it lacks customizability. In fact, it is
+  difficult to run a client fluidly with X11, and reach 60 fps without
+  tearing. Wayland, in contrast, is easier to implement, has better
+  performance, and contains all the necessary parts to run efficiently on
+  modern graphics hardware. For embedded, multi-process systems on Linux,
+  Wayland is the standard.</p>
+</blockquote>
+
+<p>Qt also has a Wayland Compositor, but we&#39;re not going to use that. We&#39;re going 
+to run our <code>myapp</code> program as a client application in <code>Weston</code>. Weston is the 
+reference compositor, sort of like the window manager in X11. Why Weston? It ships 
+with the <code>boot2qt</code> Yocto stack and can run one program fullscreen without decorations
+and panels (using the <code>kiosk</code> plugin).</p>
+
+<p>We&#39;re currently at Weston version 9. In <a href="https://gitlab.freedesktop.org/wayland/weston/-/merge_requests/652">version 10 there will be support for
+autostarting programs</a>, but for now we must do that ourselves using a
+<code>systemd</code> service. </p>
+
+<p>As we&#39;ve done a few times in this guide, we&#39;ll make a <code>.bbappend</code> file
+to override the default recipes with our changes. Start by creating a 
+folder structure:</p>
+
+<pre><code>mkdir -p sources/meta-raymii/recipes-graphics/wayland/weston-init/
+</code></pre>
+
+<p>In that folder, create a file named <code>weston.ini</code> and put the following in:</p>
+
+<pre><code># configuration file for Weston
+
+[core]
+shell=kiosk-shell.so
+require-input=false
+
+[output]
+name=DSI-1
+mode=720x1280@60
+transform=rotate-270
+
+[screen-share]
+command=/usr/bin/weston --backend=rdp-backend.so --shell=fullscreen-shell.so --no-clients-resize
+
+[shell]
+panel-position=none
+</code></pre>
+
+<p>The default shipped config starts a desktop, but we&#39;re changing that. The
+<code>kiosk-shell.so</code> plugin runs one app fullscreen without any window
+decorations. The <code>output</code> section, including the <code>transform=rotate-270</code> is
+the magic section you need to rotate your QML application.</p>
+
+<p>Create a <code>.bbappend</code> recipe:</p>
+
+<pre><code>FILESEXTRAPATHS_prepend := &quot;${THISDIR}/${PN}:&quot;
+
+SRC_URI += &quot; file://weston.ini &quot;
+
+do_install_append() {
+    # Remove upstream weston.ini to avoid conflict with weston-ini-conf package
+    rm -f ${D}${sysconfdir}/xdg/weston/weston.ini
+
+    install -D -p -m0644 ${WORKDIR}/weston.ini ${D}${sysconfdir}/xdg/weston/weston.ini
+}
+
+SYSTEMD_AUTO_ENABLE_${PN} = &quot;enable&quot;
+</code></pre>
+
+<p>This looks like what we did earlier to override the default Qt environment. 
+<code>FILESEXTRAPATHS_prepend := &quot;${THISDIR}/${PN}:&quot;</code> adds the current folder in our 
+own layer, where we just placed the config file. I had some vague issues where 
+the default <code>weston.ini</code> file was not replaced, which is why there is such an
+explicit <code>do_install_append</code> section. Normally that is not required, but in
+my case, the file would not be replaced unless I did it this way.</p>
+
+<p><code>SYSTEMD_AUTO_ENABLE_${PN} = &quot;enable&quot;</code> enables the <code>weston</code> systemd service.</p>
+
+<p>Now, to make sure <code>weston</code> starts and not <code>b2qt</code> or the <code>startupscreen</code>, we must
+make a few more <code>.bbappend</code> recipes to disable those systemd services. There can 
+only be one display service running, if <code>b2qt</code> runs, then <code>weston</code> will fail to 
+start. </p>
+
+<p>Same as earlier, create the following file:</p>
+
+<pre><code>sources/meta-raymii/recipes-qt/boot2qt-addons/boot2qt-startupscreen_%.bbappend 
+</code></pre>
+
+<p>Put in the below line:</p>
+
+<pre><code>SYSTEMD_AUTO_ENABLE_${PN} = &quot;disable&quot;
+</code></pre>
+
+<p>This disables the <code>startupscreen</code> service.</p>
+
+<p>Repeat the above for the <code>b2qt</code> service, which, confusingly, is in 
+the <code>default-qt-envs</code> recipe file:</p>
+
+<pre><code>sources/meta-raymii/recipes-qt/boot2qt-addons/default-qt-envs.bbappend
+</code></pre>
+
+<p>The same line goes in to disable the systemd service:</p>
+
+<pre><code>SYSTEMD_AUTO_ENABLE_${PN} = &quot;disable&quot;
+</code></pre>
+
+<p>The next part involves our custom image <code>.bbappend</code> file, where we need to add 
+<code>weston</code> to the distro features, to make sure <code>systemd</code> boots up to the <code>graphical</code>
+target and not the <code>multiuser</code> target:</p>
+
+<pre><code>sources/meta-raymii/recipes-qt/images/b2qt-embedded-qt6-image.bbappend
+</code></pre>
+
+<p>Append <code>weston \</code> to the <code>IMAGE_FEATURES_append</code> section:</p>
+
+<pre><code>IMAGE_FEATURES_append = &quot; \
+        splash \
+        weston \
+        &quot;
+</code></pre>
+
+<p>Include the <code>weston-init</code> package in the <code>IMAGE_INSTALL_append</code> section:</p>
+
+<pre><code>IMAGE_INSTALL_append = &quot; \
+        myapp \
+        kernel-modules \
+        evtest \
+        iperf3 \
+        i2c-tools \
+        util-linux \
+        weston-init \
+        &quot;
+</code></pre>
+
+<p>The last part involves updating our <code>myapp</code> recipe to include a <code>systemd</code> service,
+which will start up our application after <code>weston</code> is started. Create a new file:</p>
+
+<pre><code>vim sources/meta-raymii/recipes-myapp/myapp/files/myapp.service 
+</code></pre>
+
+<p>Place the following contents:    </p>
+
+<pre><code>[Unit]
+Description=MyApp on Weston
+After=weston.service
+
+[Service]
+User=weston
+Restart=always
+Type=simple
+Environment=QT_QPA_PLATFORM=wayland
+ExecStartPre=/bin/sh -c &#39;echo XDG_RUNTIME_DIR=&quot;$(loginctl show-user --property=RuntimePath --value \&quot;$USER\&quot;)&quot; &gt; /tmp/qtenv&#39;
+EnvironmentFile=-/tmp/qtenv
+ExecStopPost=/bin/rm /tmp/qtenv
+ExecStart=/usr/bin/myapp
+WorkingDirectory=/home/weston
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>If you run a Qt app on Wayland, it required the <code>XDG_RUNTIME_DIR</code> environment variable. We 
+could hardcode this to <code>/run/user/1000</code>, which would work for this specific setup, but we
+can also use the <code>loginctl</code> command to query the actual path, which works for all future 
+devices and setups.</p>
+
+<p><code>systemd</code> has no option to evaluate a shell command as an <code>Environment</code> option, so we use 
+a hack to do that. First, it executes the <code>ExecStartPre</code> command, which start a subshell  to
+execute the command and writes the output to a file in <code>/tmp</code>. Then we specify the line
+<code>EnvironmentFile</code>, but, <strong>important</strong>, start it with a dash (<code>-</code>). This ensures the correct
+order, first the command, then the file. Not documented well, I found a stackoverflow post 
+explaining it, but I cannot find that anymore to quote as source. Once the app stops, 
+the environment file is removed.</p>
+
+<p>Change our <code>myapp_1.0.bb</code> recipe to include this systemd recipe:</p>
+
+<pre><code>DESCRIPTION = &quot;My Custom Qt App&quot;
+AUTHOR = &quot;author@example.org&quot;
+LICENSE = &quot;CLOSED&quot;
+PR = &quot;r1&quot;
+
+SRC_URI =+ &quot;file://myapp \
+            file://myapp.service \
+           &quot;
+
+inherit systemd
+
+DEPENDS += &quot;qtbase qtdeclarative qtdeclarative-native&quot;
+
+do_install() {
+    install -d ${D}/${bindir}
+    install -m 0755 ${WORKDIR}/myapp ${D}/${bindir}/myapp
+
+    lnr ${D}/${bindir}/myapp ${D}/${bindir}/b2qt
+
+    install -m 0755 -d ${D}${systemd_unitdir}/system
+    install -m 0644 ${WORKDIR}/myapp.service ${D}${systemd_unitdir}/system/
+}
+
+FILES_${PN} = &quot;${bindir}/myapp \
+               ${bindir}/b2qt \
+              &quot;
+SYSTEMD_SERVICE:${PN} = &quot;myapp.service&quot;
+</code></pre>
+
+<p>By specifying <code>SYSTEMD_SERVICE</code>, it will be enabled by default on boot.</p>
+
+<p>Build a new image and after all that effort, a correctly rotated QML application
+should be the result:</p>
+
+<p><img src="/s/inc/img/reterminal_12.jpg" alt="qml rotated"></p>
+
+<p>In my personal opinion this rotation for QML is an area the Qt Company could improve,
+rather, make just as easy as Qt Widgets. </p>
+
+<p>You can run any Qt app this way manually, compile and copy it via Qt Creator, or if you 
+can&#39;t compile it, just copy it. Set the correct environment variables and run it. For 
+example, the Qt built in Bear Whack example (fun game, under <code>quick/touchinteraction</code>):</p>
+
+<pre><code>XDG_RUNTIME_DIR=/run/user/1000 QT_QPA_PLATFORM=wayland /usr/share/examples/quick/touchinteraction/touchinteraction 
+</code></pre>
+
+<p>Here&#39;s a picture of <a href="https://web.archive.org/web/20220318213600/https://doc.qt.io/qt-6/qtquick-touchinteraction-example.html">Bear Whack</a>:</p>
+
+<p><img src="/s/inc/img/reterminal_14.jpg" alt="bear whack"></p>
+
+<p>And here&#39;s a picture of the <a href="https://web.archive.org/web/20220318213644/https://doc.qt.io/qt-6/qtquick-tutorials-samegame-samegame4-example.html">SameGame demo</a> running. Particles and effects are
+very smooth on the reTerminal:</p>
+
+<p><img src="/s/inc/img/reterminal_13.jpg" alt="samegame"></p>
+Tags: <a href="../tags/arm.html">arm</a>
+, <a href="../tags/boot2qt.html">boot2qt</a>
+, <a href="../tags/c++.html">c++</a>
+, <a href="../tags/cpp.html">cpp</a>
+, <a href="../tags/embedded.html">embedded</a>
+, <a href="../tags/hardware.html">hardware</a>
+, <a href="../tags/openembedded.html">openembedded</a>
+, <a href="../tags/qml.html">qml</a>
+, <a href="../tags/qt.html">qt</a>
+, <a href="../tags/qt6.html">qt6</a>
+, <a href="../tags/raspberry-pi.html">raspberry-pi</a>
+, <a href="../tags/reterminal.html">reterminal</a>
+, <a href="../tags/seeed.html">seeed</a>
+, <a href="../tags/tutorials.html">tutorials</a>
+, <a href="../tags/yocto.html">yocto</a>
+</div>
+<br/>
+<footer>
+<br/>
+                <form role="search" action="https://encrypted.google.com/search"
+                style="min-width:250px;max-width:300px;">
+                    <div class="form-group">
+                      <input type="hidden" name="as_sitesearch" value="raymii.org">
+                      <input type="hidden" name="as_qdr" value="all">
+                      <input type="text" name="as_q" class="form-control" placeholder="Search">
+                    </div>
+                  </form>
+                <br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-3704876-6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-3704876-6');
+    </script>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+     
+    </main>
+    </body>
+    </html>
+    

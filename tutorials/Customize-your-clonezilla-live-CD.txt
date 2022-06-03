@@ -1,0 +1,146 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Customize your Clonezilla Live CD
+Author      : 	Remy van Elst
+Date        : 	01-01-2010
+URL         : 	https://raymii.org/s/tutorials/Customize-your-clonezilla-live-CD.html
+Format      : 	Markdown/HTML
+---
+
+
+
+At work we need to image laptops. We do that with clonezilla.  
+But some people think the clonezilla menu is to hard. So A colleague and I made
+a script to do it in 2 steps (mount and enter image name).  
+But that had to be integrated in to the clonezilla live CD.  
+That is a pain to do if you're on a windows vista PC.  
+But it worked, and I wanted to share it with the rest of the world.  
+Our script to backup can be found at the bottom of the page.  
+But how do I get that script on to the live USB?
+
+This is how I do it:
+
+    
+    
+    mkdir rw.fs  
+    mkdir clonscript  
+    (above is only required once).  
+    mount -t unionfs -o dirs=rw.fs=rw:/mnt=ro unionfs clonscript  
+    cd clonscript  
+    mkdir clondir1  
+    copy the scripts, or nano them.  
+    (To launch a clonezilla script as root, make a launcher script, and put this in it:  
+    *#!/bin/sh  
+    sudo su -c /path/to/script/you/just/made.sh*  
+    cd ../../  
+    umount clonscript  
+    mksquashfs ./rw.fs ./filesystem.squashfs
+    
+
+Now the 2 filesystems are being put together.  
+The next time, mount it again, make a new directory (say clondir2) and cp all
+the scripts from clondir1 into clondir2, and edit them from there. Also change
+your root launch script to the new dir.
+
+Now edit the isolinux/isolinux.cfg file. To start a script as root,  
+make a link to it as described earlier. Here is my setup:
+
+    
+    
+    * label RESTORE  
+    # MENU DEFAULT  
+    # MENU HIDE  
+    MENU LABEL RESTORE  
+    # MENU PASSWD  
+    kernel /live/vmlinuz1  
+    append initrd=/live/initrd1.img boot=live union=aufs  
+    hostname=jaunty edd=on nolocales ocs_live_run="/path/to/your/root/launcher/script.sh"  
+    ocs_live_extra_param="" ocs_live_keymap="NONE" ocs_live_batch="no"  
+    ocs_lang="" noprompt mode_option=800x600 toram=filesystem.squashfs  
+    ip=frommedia  
+    TEXT HELP  
+    TEST RESTORE  
+    ENDTEXT  
+    *  
+    
+
+Note this part: ocs _live_ run="/path/to/your/root/launcher/script.sh". Change
+that every time you make a change to the script. (For every change to the script
+you make you must make a new directory and change your root launcher script.
+This is because your merging a read only file system. And read only cannot be
+overwritten.) Now make an ISO of it again. (At work I need to use the tool  
+folder2iso [which can be downloaded here.][1]
+
+after you made the ISO, unetbootin it to USB or burn it to CD.
+
+You can remove the USB stick or CD when clonezilla is imaging, because this boot
+script loads it into the ram.
+
+If this can be done with less work, please post it in a comment, I hate this
+way... (first start fcking vista, then virtualbox a mint, then share a folder,
+then mount and edit, then folder2iso and at last unetbootin...)... And thanks to
+the people of clonezilla for making such a wonderfull alternative to ghost and
+acronis ^.^
+
+##### Example Backup Script
+
+    
+    
+    #!/bin/sh  
+    dhclient  
+    echo "###############################"  
+    echo "# Script made by Remy & David #"  
+    echo "###############################"  
+    echo  
+    echo  
+    echo Voer nu het wachtwoord van de laptop in   
+    echo  
+    mount -t cifs -o username="daniel" //192.168.1.2/image /home/partimag  
+    echo  
+    echo  
+    echo "Er komt nu een lijst met images"  
+    echo "IMAGES: "  
+    ls -n /home/partimag  
+    echo  
+    echo -n "Voer de naam van het image in(schoon#): "; read NAME;  
+    /opt/drbl/sbin/ocs-sr -q -c -z1 -p true saveparts "$NAME" "sda2"
+    
+
+   [1]: http://www.trustfm.net/divx/SoftwareFolder2Iso.php?b2=1
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

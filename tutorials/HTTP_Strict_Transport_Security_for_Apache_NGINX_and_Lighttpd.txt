@@ -1,0 +1,227 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	HTTP Strict Transport Security for Apache, NGINX and Lighttpd
+Author      : 	Remy van Elst
+Date        : 	17-06-2016
+URL         : 	https://raymii.org/s/tutorials/HTTP_Strict_Transport_Security_for_Apache_NGINX_and_Lighttpd.html
+Format      : 	Markdown/HTML
+---
+
+
+
+HTTP Strict Transport Security (often abbreviated as HSTS) is a security feature
+that lets a web site tell browsers that it should only be communicated with
+using HTTPS, instead of using HTTP. This tutorial will show you how to set up
+HSTS in Apache2, NGINX and Lighttpd. It is tested with all mentioned webservers,
+NGINX 1.1.19, Lighttpd 1.4.28 and Apache 2.2.22 on Ubuntu 12.04, Debian 6 & 7
+and CentOS 6.It should work on other distro's however, these are just reference
+values.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### What is HTTP Strict Transport Security?
+
+Quoting the [Mozilla Developer Network][2]:
+    
+    
+    If a web site accepts a connection through HTTP and redirects to HTTPS, the user in this case may initially talk to the non-encrypted version of the site before being redirected, if, for example, the user types http://www.foo.com/ or even just foo.com.
+    
+    This opens up the potential for a man-in-the-middle attack, where the redirect could be exploited to direct a user to a malicious site instead of the secure version of the original page.
+    
+    The HTTP Strict Transport Security feature lets a web site inform the browser that it should never load the site using HTTP, and should automatically convert all attempts to access the site using HTTP to HTTPS requests instead.
+    
+
+An example scenario:
+
+    
+    
+    You log into a free WiFi access point at an airport and start surfing the web, visiting your online banking service to check your balance and pay a couple of bills. Unfortunately, the access point you're using is actually a hacker's laptop, and they're intercepting your original HTTP request and redirecting you to a clone of your bank's site instead of the real thing. Now your private data is exposed to the hacker.
+    
+    Strict Transport Security resolves this problem; as long as you've accessed your bank's web site once using HTTPS, and the bank's web site uses Strict Transport Security, your browser will know to automatically use only HTTPS, which prevents hackers from performing this sort of man-in-the-middle attack.
+    
+
+_Do note that HSTS does not work if you've never visited the website before._ A
+website needs to tell you it is HTTPS only.
+
+### Important regarding preload
+
+In the below configuration the `preload` directive was used. As requested by
+Lucas Garron from Google I removed it since most people seem to do screw it up.
+
+Please note that that `THE PRELOAD DIRECTIVE WILL HAVE SEMI-PERMANENT
+CONSEQUENCE`. If you are testing, screw up or don't want to use HSTS anymore you
+might be on the preload list.
+
+It is important that you understand what you are doing and that you understand
+that the preload directive means that it will end up in browsers. If your HTTPS
+configuration is wrong, broken or you don't want to use HTTPS anymore, you will
+experience problems. [See this page][3] as well.
+
+If you still want to use `preload`, just append it to the header after the semi-
+colon.
+
+### Set up HSTS in Apache2
+
+Edit your apache configuration file (`/etc/apache2/sites-enabled/website.conf`
+and `/etc/apache2/httpd.conf` for example) and add the following to your
+VirtualHost:
+
+    
+    
+    # Optionally load the headers module:
+    LoadModule headers_module modules/mod_headers.so
+    
+    <VirtualHost 67.89.123.45:443>
+        Header always set Strict-Transport-Security "max-age=63072000; includeSubdomains;"
+    </VirtualHost>
+    
+
+Now your website will set the header every time someone visits, with an
+expiration date of two years (in seconds). It sets it at every visit. So
+tomorrow, it will say two years again.  
+You do have to set it on the HTTPS vhost only. It cannot be in the http vhost.
+
+To redirect your visitors to the HTTPS version of your website, use the
+following configuration:
+
+    
+    
+    <VirtualHost *:80>
+      [...]
+      ServerName example.com
+      Redirect permanent / https://example.com/
+    </VirtualHost>
+    
+
+If you only redirect, you dont even need a document root.
+
+You can also use mod _rewrite, however the above method is simpler and safer.
+However, mod_ rewrite below redirects the user to the page they were visiting
+over https, the above config just redirects to /:
+
+    
+    
+    <VirtualHost *:80>
+      [...]
+      <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteCond %{HTTPS} off
+        RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+      </IfModule>
+    </VirtualHost>
+    
+
+And don't forget to restart Apache.
+
+### Lighttpd
+
+The lighttpd variant is just as simple. Add it to your Lighttpd configuration
+file (`/etc/lighttpd/lighttpd.conf` for example):
+
+    
+    
+    server.modules += ( "mod_setenv" )
+    $HTTP["scheme"] == "https" {
+        setenv.add-response-header  = ( "Strict-Transport-Security" => "max-age=63072000; includeSubdomains; ")
+    }
+    
+
+And restart Lighttpd. Here the time is also two years.
+
+### NGINX
+
+NGINX is even shorter with its config. Add this in the `server` block for your
+HTTPS configuration:
+
+    
+    
+    add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; ";
+    
+
+Don't forget to restart NGINX.
+
+### X-Frame-Options header
+
+The last tip I'll give you is the X-Frame-Options header, which you can add to your HTTPS website to make sure it is not embedded in a frame or iframe. This avoids clickjacking, and might be helpfull for HTTPS websites. Quoting the [Mozilla Developer Network again][4]:
+    
+    
+    The X-Frame-Options HTTP response header can be used to indicate whether or not a browser should be allowed to render a page in a `<frame>` or `<iframe>`. Sites can use this to avoid clickjacking attacks, by ensuring that their content is not embedded into other sites.
+    
+
+You can change DENY to SAMEORIGIN or ALLOW-FROM uri, see the Mozilla link above
+for more information on that. (Or the [RFC][5].)
+
+#### X-Frame-Options for Apache2
+
+As above, add this to the apache config file:
+
+    
+    
+    Header always set X-Frame-Options DENY
+    
+
+### Lighttpd
+
+This goes in the lighttpd config. Make sure you don't double the above set
+config, if you have that, just add the rule it to it.
+
+    
+    
+    server.modules += ( "mod_setenv" )
+    $HTTP["scheme"] == "https" {
+        setenv.add-response-header  = ( "X-Frame-Options" => "DENY")
+    }
+    
+
+#### NGINX
+
+Yet again, in a `server` block:
+
+    
+    
+    add_header X-Frame-Options "DENY";
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://developer.mozilla.org/en-US/docs/Security/HTTP_Strict_Transport_Security
+   [3]: https://hstspreload.appspot.com/
+   [4]: https://developer.mozilla.org/en-US/docs/HTTP/X-Frame-Options
+   [5]: http://tools.ietf.org/html/rfc7034
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

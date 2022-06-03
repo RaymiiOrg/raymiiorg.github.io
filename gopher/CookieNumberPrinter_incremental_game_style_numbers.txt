@@ -1,0 +1,164 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	CookieNumberPrinter, incremental / idle game style numbers in C++
+Author      : 	Remy van Elst
+Date        : 	12-09-2020
+URL         : 	https://raymii.org/s/software/CookieNumberPrinter_incremental_game_style_numbers.html
+Format      : 	Markdown/HTML
+---
+
+
+
+To level up my software development skills, I'm programming a command line game
+in my spare  time.  It is a clone of the famous cookieclicker game [by
+ortiel][1]. A clone of a game is simple enough to get up and running  fairly
+quickly, but also extensible enough when needed. How do you store huge score
+numbers  when they don't fit in a `long long`? How do you write a game loop, how
+to use threads to handle  user input? Saving a game (how to design a proper save
+format)? Also a great way to learn about  project organization, software
+architecture and to try out design patterns.
+
+
+As the game is a clone of CookieCliker, which itself is an [incremental
+game][2], I had to figure out how to work with large numbers. Since this is not
+a university math project, I allowed myself the luxury of using [Boosts
+Multiprecision][3].  The library handles the large numbers, including
+caluclation and operations with such a number. I did want to print the numbers
+in Idle Style, where large numbers are displayed with a suffix, like `1 million`
+instead of `1000000` and so on. 
+
+This `C++` class can be used to print Boost's `cpp_dec_float` numbers in
+incremental style. It's just one header. You can [get the code here][6].
+
+
+[If you like this class, consider sponsoring me by trying out a Digital Ocean
+VPS. With this link you'll get $100 credit for 60 days). (referral link)][99]
+
+
+
+Please do keep in mind that this is a hobby project, the code might not be up to
+your professional standards. As of now the class in my game has diverged a bit 
+to also support a few other boost numbers and can directly be used as an output
+stream (`std::cout << cookienumber` instead of `std::cout << cookienumber.print()`).
+
+### Idle Style numbers?
+
+If you're wondering what Idle / Incremental game style is, let me show you. A
+lot of mobile games show numbers in idle style, here is a picture of one:
+
+![idle miner][5]
+
+Here is a screenshot of my game, where you can see I have `5p` cookies as well
+as prices for certain items with suffixes:
+
+![c_ookieclicker][4]
+
+Even though one is a flashy Android game and one is a humble command line
+application, you see the idle style printing. 
+
+In the future I might show more of the game, or even make the git repository 
+public. For now it's just me and a few friends.
+
+### Download and building and an example
+
+I assume you have a working C++ compiler setup and have compiled before.
+
+Install boost:
+
+    apt install libboost-all-dev
+
+Clone the git repository
+
+    git clone https://github.com/RaymiiOrg/cookienumberprinter
+    
+Go in the folder and cmake / make
+
+    cd cookienumberprinter
+    mkdir build
+    cd build
+    cmake .. 
+    make
+
+Run the example:
+
+    ./cookienumberprinter
+    
+Output should be:
+
+    CookieNumberPrinter by https://raymii.org, examples.
+    Should print:
+    0
+    1
+    1.1
+    100.3
+    1234
+    123 thousand
+    1 million
+    8 million
+    12 billion
+    3 quintillion
+    897a
+    11yyy
+    Here we go!
+    
+    0
+    1
+    1.1
+    100.3
+    1234
+    123 thousand
+    1 million
+    8 million
+    12 billion
+    3 quintillion
+    897a
+    11yyy
+    
+    Process finished with exit code 0
+
+
+
+
+[1]: https://orteil.dashnet.org/cookieclicker/
+[2]: https://en.wikipedia.org/wiki/Incremental_game
+[3]: https://www.boost.org/doc/libs/1_74_0/libs/multiprecision/doc/html/boost_multiprecision/intro.html
+[4]: /s/inc/img/105_main.png
+[5]: /s/inc/img/idleminer.png
+[6]: https://github.com/RaymiiOrg/cookienumberprinter
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

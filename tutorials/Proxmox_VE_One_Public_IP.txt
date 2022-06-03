@@ -1,0 +1,175 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Proxmox VE - One Public IP
+Author      : 	Remy van Elst
+Date        : 	10-07-2014
+URL         : 	https://raymii.org/s/tutorials/Proxmox_VE_One_Public_IP.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This guide will show you how to set up Proxmox with only one public IP. We will
+configure an extra interface bridge and make sure VM traffic is NATed. I have a
+few dedicated servers, some run Proxmox. Most of them however have only a few
+IP's. Therefore the VM's in proxmox cannot all have a public IP. For most of
+them that is not a problem. If needed I run a proxy or set up iptables to
+forward ports to the VM's.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+This guide is tested on a proxmox machine running proxmox version 3.2.
+
+What we will have at the end is a VM with an SSH port reachable on the public
+IP:
+
+    
+    
+    Container/VM ------------ Proxmox Server -------------- Public Internet
+    10.21.21.5:22 --- 10.21.21.5:22 NAT to 1.2.3.4:2222 --- 1.2.3.4:2222
+    
+
+Proxmox by default creates one interface, `vmbr0`. That config looks like this:
+
+    
+    
+    # /etc/network/interfaces
+    auto vmbr0
+    iface vmbr0 inet static
+        address 1.2.3.4
+        netmask 255.255.255.0
+        network 1.2.3.0
+        broadcast 1.2.3.255
+        gateway 1.2.3.1
+        bridge_ports eth0
+        bridge_stp off
+        bridge_fd 0
+    
+
+Replace `1.2.3.X` with your public ip, network, gateway and such. Do note that
+there might be more interfaces, like `vmbr1` for ipv6.
+
+We create a new bridge which will enable NAT when the interface gets UP. Add the
+following to the file:
+
+    
+    
+    # /etc/network/interfaces:
+    auto vmbr2
+    iface vmbr2 inet static
+        address 10.21.21.254
+        netmask 255.255.255.0
+        bridge_ports none
+        bridge_stp off
+        bridge_fd 0
+        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up iptables -t nat -A POSTROUTING -s '10.21.21.0/24' -o vmbr0 -j MASQUERADE
+        post-down iptables -t nat -D POSTROUTING -s '10.21.21.0/24' -o vmbr0 -j MASQUERADE
+        post-up iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 2222 -j DNAT --to 10.21.21.5:22
+        post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 2222 -j DNAT --to 10.21.21.5:22
+    
+
+The first part:
+
+    
+    
+    address 10.21.21.254
+    netmask 255.255.255.0
+    bridge_ports none
+    bridge_stp off
+    bridge_fd 0
+    
+
+defines the IP address and subnet mask of the new interface. It also tells the
+network stack that the bridge has no actual ports (like eth0) and that the
+Spanning Tree Protocol should be disabled.
+
+    
+    
+    post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+    
+
+Enables IP forwarding when this interface gets up. This allows the machine to
+forward packets.
+
+    
+    
+    post-up iptables -t nat -A POSTROUTING -s '10.21.21.0/24' -o vmbr0 -j MASQUERADE
+    post-down iptables -t nat -D POSTROUTING -s '10.21.21.0/24' -o vmbr0 -j MASQUERADE
+    
+
+These two lines enable the actual NAT-ing of packets from the source network
+'10.21.21.0/24' and `vmbr0` as the output interface. If your WAN interface has a
+different name, change that here. The first line enables the natting when the
+interface gets up, the second line deletes the firewall rule when the interface
+goes down.
+
+    
+    
+    post-up iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 2222 -j DNAT --to 10.21.21.5:22
+    post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 2222 -j DNAT --to 10.21.21.5:22
+    
+
+These two rules enable and disable the actual port forwarding of tcp port `2222`
+on the WAN IP to tcp port 22 on internal IP address 10.21.21.5. Here as well the
+WAN interface (this time, the input interface) is `vmbr0`.
+
+If you for example want to expose tcp port 80 of a VM with IP 10.21.21.6 on the
+public IP's port 80, you should also add these lines:
+
+    
+    
+    post-up iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 80 -j DNAT --to 10.21.21.6:80
+    post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 80 -j DNAT --to 10.21.21.6:80
+    
+
+When you create a KVM VM, make sure it is attached to the bridge `vmbr2`. It
+should also have a static IP configured in the range you define. OpenVZ `venet`
+interfaces with an IP in this range automagiaclly work.
+
+Don't forget to restart the network afterwards:
+
+    
+    
+    /etc/init.d/networking restart
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

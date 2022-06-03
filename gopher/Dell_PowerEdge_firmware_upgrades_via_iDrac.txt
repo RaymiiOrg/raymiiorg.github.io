@@ -1,0 +1,130 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Dell PowerEdge firmware upgrades via iDrac
+Author      : 	Remy van Elst
+Date        : 	26-01-2018
+URL         : 	https://raymii.org/s/articles/Dell_PowerEdge_firmware_upgrades_via_iDrac.html
+Format      : 	Markdown/HTML
+---
+
+
+
+The recent spectre and meltdown vulnerabilities require BIOS and firmware
+updates. Dell provides binaries for Windows and Linux, but just for Red Hat and
+SUSE. Some firmware updates can be run on Ubuntu or Debian, but some fail with
+the error that RPM could not be found. Which is correct since it's not Red Hat.
+In this small article I'll show you how to upgrade the firmware via the iDrac,
+which I recently discovered.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Upgrade via the shell
+
+Usually I do upgrades automated with Ansible, via the shell. Manually this can
+be done as well, in this example a firmware for the power supply unit of a Dell
+R620:
+
+    
+    
+    # Download the firmware
+    wget https://downloads.dell.com/FOLDER01988261M/1/Power_Firmware_JX7PR_LN_09.2B.80_A00.BIN
+    
+    # Run it
+    bash Power_Firmware_JX7PR_LN_09.2B.80_A00.BIN
+    
+
+On Ubuntu the output in this case is:
+
+    
+    
+    Cannot find utilities on the system to execute package.
+    Make sure the following utilities are in the path:
+    rpm stat stty cut fmt tty tar gzip tail rm mkdir mktemp chmod ls basename dirname wc sleep
+    
+
+You could use the iDrac console (if you have an enterprise license) or a KVM
+switch to boot up a CentOS live DVD, but in this case there was no KVM or
+license available.
+
+### Upgrade via the iDrac
+
+I was unaware of this feature, but using the iDrac web interface you can upgrade
+the firmware as well. I found [this][2] article on the Dell site which explains
+it.
+
+Quoting the important parts:
+
+    
+    
+    Use the Windows 32-bit or 64-bit version of the Dell Update Package (DUP), which the iDRAC is able to extract and apply by itself.
+    
+
+For iDrac 9:
+
+    
+    
+    Go to Maintenance > System Update. The Firmware Update page is displayed.
+    
+
+For iDrac 7/8:
+
+    
+    
+        Go to Overview > iDRAC Settings > Update and Rollback. The Firmware Update page is displayed.
+    
+
+![][3]
+
+Using the job queue, reboot the machine to apply the update.
+
+This interface has a few advantages over the shell binaries:
+
+  * Multiple updates can be uploaded and queued, applied directly after the reboot
+  * No OS is required on the machine (redhat etc)
+  * Progress can be monitored even when the machine is rebooting
+
+It is also possible to SSH into the iDrac and use `racadm` to upgrade the
+firmware. This process involves a remote NFS or SMB share where the upgrade file
+is hosted, which we may cover in another article.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://web.archive.org/web/20180126122320/https://www.dell.com/support/article/us/en/04/sln292363/poweredge-server-updating-firmware-through-the-idrac?lang=en
+   [3]: https://raymii.org/s/inc/img/idrac-1.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

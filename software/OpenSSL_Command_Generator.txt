@@ -1,0 +1,152 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	OpenSSL Command Generator
+Author      : 	Remy van Elst
+Date        : 	08-11-2014
+URL         : 	https://raymii.org/s/software/OpenSSL_Command_Generator.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+<script type="text/javascript">
+function genetate_command() {
+
+  var cn = document.getElementById("cn").value;
+  var country =  document.getElementById("country").value;
+  var state =  document.getElementById("state").value;
+  var city =  document.getElementById("city").value;
+  var org =  document.getElementById("organisation").value;
+  var unit =  document.getElementById("unit").value;
+
+  if(cn.replace(/\s/g,"") == ""){
+    alert('Please enter a domain name.');
+    return
+  } else if(country.replace(/\s/g,"") == ""){
+    alert('Please enter a country code (ISO).');
+    return
+  } else if(state.replace(/\s/g,"") == ""){
+    alert('Please enter a state.');
+    return
+  } else if(city.replace(/\s/g,"") == ""){
+    alert('Please enter a city.');
+    return
+  } else if(org.replace(/\s/g,"") == ""){
+    alert('Please enter an organization.');
+    return
+  } else if(unit.replace(/\s/g,"") == ""){
+    alert('Please enter an organizational unit.');
+    return
+  }
+
+  if (document.getElementById('selfsig').checked) {
+    var newtext = "openssl req -nodes -x509 -sha256 -newkey rsa:4096 -keyout \"" + cn + ".key\" -out \"" + cn + ".crt\" -days 365 -subj \"/C=" + country + "/ST=" + state + "/L=" + city + "/O=" + org + "/OU=" + unit + "/CN=" + cn + "\"";
+  } else {
+    var newtext = "openssl req -nodes -sha256 -newkey rsa:4096 -keyout \"" + cn + ".key\" -out \"" + cn + ".csr\" -subj \"/C=" + country + "/ST=" + state + "/L=" + city + "/O=" + org + "/OU=" + unit + "/CN=" + cn + "\"";
+  }
+  document.CSR.outputtext.value = newtext;
+
+}
+
+</script>
+
+Enter the data below and click Generate Command. Execute the command in a Terminal. Save the files.  
+
+Don't use the following characters: &lt; &gt; ~ ! @ # $ % ^ * / \ ( ) ?  
+
+
+[If you like this article, consider sponsoring me by trying out a Digital Ocean 
+VPS. With this link you'll get $100 credit for 60 days). (referral link)][99] 
+
+
+
+
+<form name="CSR" class="cssform">
+
+    <div class="form-group">
+      <label for="cn">Common Name (your.domain.org):</label>
+      <input type="text" class="form-control" id="cn" value="" />
+    </div>
+
+    <div class="form-group">
+      <label for="country">Country Cole (NL, BE, DE): </label>
+      <input type="text" class="form-control" id="country" value="" />
+    </div>
+
+    <div class="form-group">
+      <label for="state">State (Zuid-Holland):</label>
+      <input type="text" class="form-control" id="state" value="" />
+    </div>
+
+    <div class="form-group">
+      <label for="city">City (Rotterdam):</label>
+      <input type="text" class="form-control" id="city" value="" />
+    </div>
+
+    <div class="form-group">
+      <label for="organisation">Organisation:</label>
+      <input type="text" class="form-control" id="organisation" value="" />
+    </div>
+
+    <div class="form-group">
+      <label for="unit">Organisational Unit:</label>
+      <input type="text" class="form-control" id="unit" value="" />
+    </div>
+
+    <div class="form-group">
+      <div class="checkbox">
+        <label><input type="checkbox" id="selfsig" name="selfsig"> Generate Self Signed Certificate</label>
+
+      </div>
+
+      <div class="form-group">
+        <input type="hidden" name="placement" value="replace">
+
+        <label><input type="button" value="Generate Commando!" onClick="genetate_command();"></label>
+      </div>
+
+      <div class="form-group">
+        <label for="outputtext">Command:</label>
+        <textarea name="outputtext" class="form-control" cols="70" rows="10"></textarea>
+      </div>
+
+</form>
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

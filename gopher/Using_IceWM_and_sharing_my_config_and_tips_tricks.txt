@@ -1,0 +1,351 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Using IceWM and a Raspberry Pi as my main PC, sharing my theme, config and some tips and tricks.
+Author      : 	Remy van Elst
+Date        : 	10-07-2021
+URL         : 	https://raymii.org/s/blog/Using_IceWM_and_sharing_my_config_and_tips_tricks.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![My IceWM Desktop][1]
+
+KDE is my desktop environment of choice. KDE5 is rock-solid, configurable in any way possible and works great. It treats you like a responsible adult instead of a child like GNOME does these days, and after XFCE switched to GTK3, the RAM usage is on-par, more often than not a bare KDE install (Debian or Arch) uses around 300MB ram. This is with Baloo (search indexer) and Akonadi (PIM database backend) disabled. Great default behaviour, low resource usage and enourmous configurability, so why is this post then titled 'IceWM'? At home I'm using a small ARM device (Raspberry Pi 4 with an SSD) as my main computer, and there resources are limited. KDE runs fine, but you notice that it is a bit slower than on my work computer. IceWM on the other hand, uses less than 30 MB of RAM and even less CPU. The program that gives you a desktop background, icewmbg, uses double the RAM of IceWM itself! IceWM, next to Awesome, is one of my favorite window managers, very configurable and provides all I need. This PC doesn't have multiple screens, which would be a bit more of a hassle than with KDE. After switching, the machine feels a lot faster. It's the small details in which I notice it, like text input, a few seconds of lag here and there. This post shows my IceWM config including some options explained, my IceWM theme and a few tips and tricks to configure the rest of the desktop.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+If you're wondering why I use a Raspberry Pi, it has to do with my commute and
+the weight of my backpack. For the past few years I'd only have work computers
+at home, sometimes workstations and sometimes laptops (heavy due to the specs).
+Nothing that actually was mine. We are going back to the office instead of full
+remote work, what drew me over the line was the weight of my current work
+laptop. When cycling to work its really noticeable if you have 3 kilograms less
+weight in your bag. Without laptop and power brick, I'm only carrying lunch, a
+tire repair kit and my wallet. Why not leave the laptop at work? Well, it's
+uncertain if the next day I'll be at work due to covid. Maybe a coworker has to
+quarantine and so do we or maybe the rules change. Also, just  tinkering and
+playing around with the Pi 4, is fun.
+
+### Resource Usage
+
+As for RAM usage goes, here's what `ps_mem.py` tells me on this machine:
+
+     Private  +   Shared  =  RAM used       Program
+
+    352.0 KiB + 500.0 KiB = 852.0 KiB       icewm-session
+    384.0 KiB + 546.0 KiB = 930.0 KiB       xscreensaver
+      3.3 MiB +   6.4 MiB =   9.7 MiB       xdm (2)
+      8.2 MiB +  10.5 MiB =  18.7 MiB       NetworkManager
+     11.2 MiB +  16.6 MiB =  27.8 MiB       icewm
+     15.9 MiB +  42.1 MiB =  58.0 MiB       klipper
+     28.5 MiB +  33.1 MiB =  61.6 MiB       firewalld
+     25.8 MiB +  46.1 MiB =  71.9 MiB       nm-applet
+     20.7 MiB +  52.7 MiB =  73.3 MiB       konsole
+     34.8 MiB +  69.3 MiB = 104.0 MiB       dolphin
+     58.3 MiB +  60.3 MiB = 118.7 MiB       icewmbg
+     68.9 MiB + 150.3 MiB = 219.3 MiB       sublime_text
+     57.1 MiB + 186.8 MiB = 243.9 MiB       Xorg
+    300.9 MiB + 330.4 MiB = 631.3 MiB       thunderbird
+    341.6 MiB + 558.7 MiB = 900.3 MiB       firefox (3)
+
+I've stripped out some less useful parts, but this is normal usage for this
+machine. A bit of browsing, a bit of writing and some email. C++ development
+(in CLion) is quite doable, although I prefer plain old vim on this machine due
+to CLion being quite laggy. CMake, make or gcc all run fine, al be it a bit
+slower initially. `ccache` helps a lot for further compilation. But for most of
+that kind of programming work I can use my work computer. 
+
+This machine had KDE5 running first, fully configured and themes. Most of those
+settings came over to IceWM, like the larger cursor in QT applications. I'm
+unsure how a newly setup IceWM would handle those changes. Send me an email if
+you know. But keep that in mind when you try the below things and they don't
+work, it might be because KDE already did it for me.
+
+This Raspberry Pi is in a [special case][7] for cooling and the SSD. It was
+[Jeff Geerling's][7] review of the case that made me buy it. Great choice, nice
+case. Read his review to find out more.
+
+One thing to takeaway from this article is that IceWM feels fast and snappy. KDE
+feels the same on my work computer, which has an i9 and 128GB of RAM, but this
+is a Raspberry Pi 4, a small 1.5GHz ARM board, on which KDE still is fast, runs
+fine, but has a noticeable lag. The Pi now runs Arch Linux Arm, but first ran 
+default Raspbian. For the speed-feeling, that made no difference in KDE.
+
+Using noscript to disable javascript in Firefox has also helped tremendously. I
+can still turn it on when I want to, but it saves so much `Web Content`
+processes eating up resources.
+
+### Configuration
+
+Before you start doing any of this, make sure you have the configuration files in
+your home folder:
+
+    mkdir ~/.icewm/
+    cp -R /usr/share/icewm/* ~/.icewm/
+
+I've changed little to the provided default configuration. I don't use
+workspaces, so they are gone from the taskbar as is the mail icon. The
+fontsize is increased a bit and `MenuMouseTracking` is on (otherwise I'd have
+to click each startmenu item instead of hovering over it). The grep command
+strips out everything starting with a # (comment) and any empty lines,
+showing just the changes I made:
+
+    $ grep -E -v -e "^#" -e "^$" .icewm/preferences 
+    
+    MenuMouseTracking=1 
+    
+    SmartPlacement=1 
+    SnapMove=1 
+    
+    TaskBarShowMailboxStatus=0 
+    TaskBarShowWindowListMenu=0 
+    TaskBarShowWorkspaces=0 
+    
+    ActiveButtonFontNameXft="sans-serif:size=14:bold"
+    ActiveTaskBarFontNameXft="sans-serif:size=14:bold"
+    ActiveWorkspaceFontNameXft="sans-serif:size=14"
+    ApmFontNameXft="monospace:size=14"
+    ClockFontNameXft="monospace:size=14"
+    TitleFontNameXft="sans-serif:size=14"
+    ToolButtonFontNameXft="sans-serif:size=14"
+    ToolTipFontNameXft="sans-serif:size=14"
+
+    DesktopBackgroundImage="~/wallpaper.jpeg"
+    DesktopBackgroundScaled=1 
+
+    KeySysAddressBar="Alt+Space"
+
+    KeySysCollapseTaskBar=""
+    KeyWinMenu=""
+
+    NetworkStatusDevice="[eth]*"
+
+
+The empty `KeySysCollapseTaskBar` and `KeyWinMenu` are to unset those keyboard
+shortcuts. I'm used to ALT+SPACE for krunner (to execute a command), a simpler
+version is built into IceWM. I've configured that to ALT+SPACE (which was
+`KeyWinMenu` first, that's why that is unset). It turns the taskbar into a
+textbox to enter a command in. Below are two screenshots, one of 
+the taskbar and one of the `KeyWinMenu` feature:
+
+![taskbar][9]
+
+![krunner][10]
+
+Not as configurable as krunner or dmenu, but it's built in.
+
+`KeySysCollapseTaskBar` collides with my preferred Clipboard manager shortcut
+(CTRL+ALT+H), which is why it's unset. 
+
+The desktop background option should be clear
+enough. SnapMove and SmartPlacement let's windows snap to one another when
+moving or opening a new one. 
+
+#### Window Snapping / Expose / Tiling
+
+I like the Window Snapping feature of KDE (and Windows), so I've configured the
+following shortcuts in my `.icewm/keys` file:
+
+    key "Alt+Left" icesh -f left top sizeto 50% 100%
+    key "Alt+Right" icesh -f right top sizeto 50% 100%
+
+This allows me to press Alt plus an arrow key to get a window resized exactly
+to half the screen, either left or right. 
+
+If it doesn't work, make sure the window is not maximized (press ALT+F10).
+
+My tiling window manager of choice is Awesome, but to my surprise IceWM has two
+built-in keyboard shortcuts to tile windows:
+
+    #  Tiles all windows from top to bottom maximized horizontally.
+    # KeySysTileHorizontal="Alt+Shift+F3"
+
+    #  Tiles all windows from left to right maximized vertically.
+    # KeySysTileVertical="Alt+Shift+F2"
+
+You learn a lot when you read through the config files. 
+
+### Menu Maker
+
+The default menu doesn't list any useful applications, but `mmaker`, otherwise
+known as Menu Maker comes to the rescue. This is the command I use to update
+the menu. 
+
+    mmaker -f --no-legacy --no-debian icewm -t Konsole 
+
+It does not include the Debian style menu neither are console applications (like 
+`alsamixer`) included. I like Konsole as my default terminal, otherwise it would
+be `xterm`.
+
+### Theme
+
+The picture below shows the theme I use. It's the [SilverXP][2] theme but with
+the larger cursors from the [K-ath-Leen][3] theme. Nothing fancy, copied
+SilverXP to a new folder, copied the cursors into there and set that as my
+theme:
+
+    cp -r .icewm/themes/SilverXP .icewm/themes/RemyXP
+    cp -r .icewm/themes/K-ath-Leen/cursors .icewm/themes/RemyXP/
+
+![theme][1]
+
+There are no icons on the desktop. That is not a feature I use, I either
+use ALT+SPACE (krunner, dmenu, whatever) or toolbar icons.
+
+### Tray
+
+The right side of the toolbar houses the tray with a few (built in to IceWM)
+monitoring graphs, icons and a clock. Nothing fancy, but just what I like.
+
+![tray][8]
+
+By default there is a mail envelope icon, which I disabled. 
+
+### Toolbar
+
+Next to the start button I have a few buttons to launch applications:
+
+![toolbar][5]
+
+This is configured in the `.icewm/toolbar` file. The `icon` part is found in
+the `/usr/share/icons` folder structure, but without the extension.
+
+The format per line is: 
+
+- `prog` (literal string prog)
+- `Name of program`
+- `icon filename` without extension. Set to a dash `-` if you want to show the `Name`.
+- `binary to execute`
+
+This is my list:
+
+    prog "Konsole" utilities-terminal konsole
+    prog "Dolphin" system-file-manager dolphin
+    prog "Sublime Text" kwrite subl 
+    prog  "Mozilla Firefox"  firefox  /usr/bin/firefox
+    prog  "Mozilla Thunderbird"  thunderbird  /usr/bin/thunderbird
+
+
+The full path to the Dolphin icon is `/usr/share/icons/breeze/apps/32/system-file-manager.svg`.
+
+### Cursor size
+
+I like my user interface elements large. Not only font size, also the mouse cursor. I had that configured via the KDE system settings panel,
+here is the `gsettings` command to do it on the GTK side of things:
+
+    gsettings set org.gnome.desktop.interface cursor-size 48
+
+On the KDE side of things, this command writes out a config file:
+
+    kwriteconfig5 --file ~/.config/kcminputrc --group Mouse --key cursorTheme breeze_cursors
+
+In that file you can edit the cursor size:
+
+    [Mouse]
+    cursorSize=48
+    cursorTheme=breeze_cursors
+
+Logout and back in to make it active. On the [Arch Wiki][4] the page on [Cursor Themes][4] lists more ways of changing the cursor size.
+
+### Larger font size in QT applications
+
+I like to have a larger font size and when using KDE, that is an option in the settings menu. After I switched over to IceWM, 
+all QT5 applications reverted back to their smaller default fontsize. The GTK applications still have the larger fontsize. 
+I found a fix on StackOverflow to increase the font size in all QT5 applications. Edit the following file:
+
+    vim /etc/profile.d/qt-fontsize.sh
+
+Place the below contents:
+
+    # For the graphical elements
+    export QT_SCALE_FACTOR=1.5 
+
+    # To make the fonts readable
+    export QT_FONT_DPI=96
+
+You must logout and login to make this active.
+
+Here is a before and after screenshot to show the difference. On the left is the default, on the right it's using the above config.
+
+![large font][6]
+
+
+### Autostart applications
+
+You need to create a script to autostart applications on login, like the network
+manager applet or clipboard manager. First create the script and make it executable:
+
+    touch ~/.icewm/startup
+    chmod +x ~/.icewm/startup
+
+Edit it with your favorite editor. Below is the contents of mine. `sleep 1` is in
+there for tray applications because they are windowed otherwise, that looks weird.
+
+    #!/bin/sh
+
+    # allow notifications
+    /usr/lib/notification-daemon-1.0/notification-daemon &
+
+    # start network manager
+    sleep 1 && nm-applet &
+
+    # enable screensaver
+    xscreensaver -nosplash &
+
+    # clipboard manager
+    sleep 1 && /bin/parcellite &
+
+    #screenshots
+    sleep 1 && /bin/shutter &
+
+
+
+[1]: /s/inc/img/icewm-desktop.png
+[2]: https://github.com/bbidulock/icewm-extra-themes/tree/master/data/SilverXP
+[3]: https://github.com/bbidulock/icewm-extra-themes/tree/master/data/K-ath-Leen
+[4]: https://wiki.archlinux.org/title/Cursor_themes
+[5]: /s/inc/img/icewm-toolbar.png
+[6]: /s/inc/img/icewm-qtfont.png
+[7]: https://www.jeffgeerling.com/blog/2021/argon-one-m2-raspberry-pi-ssd-case-review
+[8]: /s/inc/img/icewm-tray.png
+[9]: /s/inc/img/icewm-taskbar.png
+[10]: /s/inc/img/icewm-krunner.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

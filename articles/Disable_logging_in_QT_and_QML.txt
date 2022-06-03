@@ -1,0 +1,129 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Disable (debug) logging in QT and QML
+Author      : 	Remy van Elst
+Date        : 	27-02-2021
+URL         : 	https://raymii.org/s/articles/Disable_logging_in_QT_and_QML.html
+Format      : 	Markdown/HTML
+---
+
+
+
+In QT you can use a few functions from the `qDebug.h` header like `qDebug()` and `qWarning()` to log information to the console. In QML you can use the likes of `console.log()`, `console.error()`. It's also very easy to implement your own logger (eg. `SyslogMessageHandler`) if you want something different, like logging to syslog and the console.
+In this post I'll show you how to disable both forms of logging in a release build, qml and qt have different ways to manage their output.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Information online mostly suggested to define `QT_NO_DEBUG_OUTPUT`, but that failed to disable
+QML logging. Not sure if that's because my sample project had it's own `MessageHandler`, but in 
+the end I figured out how to disable everything. 
+
+The QT documentation pages on [debugging][1] and [qml logging][3] are helpful, but as most often
+with their documentation, it's so comprehensive that it is not easy to find how to do just one 
+specific thing, in this case, just disabling logging in a release build.
+
+### Disable QT logging
+
+In your `.pro` file add the following lines:
+
+	# Suppress logging output for release build.
+	CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT
+	CONFIG(release, debug|release): DEFINES += QT_NO_INFO_OUTPUT
+	CONFIG(release, debug|release): DEFINES += QT_NO_WARNING_OUTPUT
+
+Each flag disables the appropriate `qLog()` method, for example, `QT_NO_DEBUG_OUTPUT` disables `qDebug()`.
+
+After editing your `.pro` file, remember to clean and rebuild your project.
+
+Why not just `CONFIG(release):`? If you have multiple options, this only triggers if the last option is `release`. 
+
+`CONFIG(release, debug|release)` evaluates to `true` if `CONFIG` contains `release` but not `debug`, or if it contains both `debug` and `release` but `debug` doesn't appear after the last occurrence of `release`. For example:
+
+	CONFIG += release debug release
+
+Because the last `debug` comes after the last `debug`, `CONFIG(release, debug|release)` is `true`. 
+
+### Disable QML logging
+
+In `main.cpp` include the `QLoggingCategory` header:
+
+	#include <QLoggingCategory>
+
+Before your other logging handlers (like `qInstallMessageHandler()`), add this piece of code:
+
+	#ifdef QT_NO_DEBUG
+	    QLoggingCategory::setFilterRules("*.debug=false\n"
+	                                     "*.info=false\n"
+	                                     "*.warning=false\n"
+	                                     "*.critical=true");
+	    fprintf(stderr, "Disabling QML logging in release build.\n");
+	#else
+	    fprintf(stderr, "QML logging enabled.\n");
+	#endif
+
+`QT_NO_DEBUG` is exported automatically by QT when compiling a release build. Filter rules 
+allow for more control over what is logged when and where, but this code just disables 
+everything except critical. It must be newline separated (`\n` in the method parameters), 
+comma's do not work. 
+
+The `fprintf` line is optional but does help to know what's going on and when there
+is logging and when logging is disabled.
+
+I tried using an `#if defined(QT_NO_DEBUG_OUTPUT)` check for more granular control,
+that failed to work however. Every compile (debug or release) disabled the logging, not 
+sure why and didn't dig in too much either.
+
+The other way is with an environment variable. [Here][2] they suggest the following flag:
+
+	QT_LOGGING_RULES=qml=false
+
+This failed to work for me, both exported on the command line or in `main.cpp` as below:
+
+	#ifdef QT_NO_DEBUG
+	   qputenv("QT_LOGGING_RULES", "qml=false");
+	#endif
+
+Your mileage may vary. If it does work for you, please let me know.
+
+
+[1]: https://web.archive.org/web/20210226104508/https://doc.qt.io/qt-5/debug.html
+[2]: https://web.archive.org/web/20210226103620if_/https://forum.qt.io/topic/100098/how-i-can-disable-qdebug-and-console-log-logs-in-final-release/5
+[3]: https://web.archive.org/web/20210226103259/https://doc.qt.io/qt-5.12/qloggingcategory.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

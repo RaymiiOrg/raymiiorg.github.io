@@ -1,0 +1,160 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Debian packages clean up commands
+Author      : 	Remy van Elst
+Date        : 	01-01-2010
+URL         : 	https://raymii.org/s/tutorials/Debian-apt-get-dpkg-packages-cleanup-commands.html
+Format      : 	Markdown/HTML
+---
+
+
+
+As all my servers run on Debian and I like to keep things clean, here are some
+handy commands.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+##### Find large packages
+
+    
+    
+    dpkg --get-selections | cut -f1 | while read pkg; do dpkg -L $pkg | xargs -I'{}' bash -c 'if [ ! -d "{}" ]; then echo "{}"; fi' | tr '\n' '\000' | du -c --files0-from - | tail -1 | sed "s/total/$pkg/"; done | sort -rn > ~/packages.log.txt
+    
+
+If you run this as root, when its finished you will have a file in /root called
+packages.log.txt which has all the packages from your system in it with the size
+of the package and the files it uses:
+
+    
+    
+    15312 perl-modules
+    14192 php5-cgi
+    12588 perl
+    12400 coreutils
+    12396 iso-codes
+    11232 aptitude
+    10684 binutils
+    9916 python2.5 
+    
+
+You can also use something like
+
+    
+    
+    dpkg-query -Wf '${Installed-Size}\t${Package}\n' | sort -n 
+    
+
+but this also takes the size of databases and extra files.
+
+##### Remove config files
+
+If you uninstall stuff with apt-get remove sometimes debian does not removes
+config files and they also take up space. Now you can just use apt-get purge but
+I tend to forget that every time. This command lists all the packages which are
+removed but still have config files on your system:
+
+    
+    
+    dpkg --list | grep '^rc '
+    
+    rc binutils     2.20.1-15           The GNU assembler, linker and binary utilities
+    rc dbus         1.2.24-3            simple interprocess messaging system
+    rc dpkg-dev     1.15.8.5            Debian package development tools
+    rc erlang-base  1:14.a-dfsg-2       Erlang/OTP virtual machine and base applications
+    rc fakeroot     1.14.4-1            Gives a fake root environment
+    
+
+Now, just to make sure check the output and then remove the config files with
+this command:
+
+    
+    
+    dpkg --list | grep '^rcb' | awk '{ print $2 }' | xargs dpkg -P
+    
+
+##### Cleanup afterwards
+
+To save up some space via apt get you can use these commands:
+
+    
+    
+    apt-get autoremove
+    apt-get clean 
+    
+
+autoremove removes unused dependencies, packages which were installed by other
+packeges but which are no longer needed by your system. clean just removes all
+the packages in the apt cache. You can also use autoclean but clean frees up
+more space. This command shows all the packages which are installed on your
+system because some package recommends it, but they are not actually
+dependencies of packages:
+
+    
+    
+    aptitude search '?and( ?automatic(?reverse-recommends(?installed)), ?not(?automatic(?reverse-depends(?installed))) )' 
+    
+
+can give something like this:
+
+    
+    
+    i A apt-xapian-index    -   maintenance and search tools for a Xapian index of Debian packages 
+    i A exim4               -   metapackage to ease Exim MTA (v4) installation 
+    i A file                -   Determines file type using "magic" numbers 
+    i A heirloom-mailx      -   feature-rich BSD mail(1)  
+    
+
+Check the output and if needed remove them all:
+
+    
+    
+    aptitude search '?and( ?automatic(?reverse-recommends(?installed)), ?not(?automatic(?reverse-depends(?installed))) )' | awk '{ print $3 }' | xargs dpkg -P
+    
+
+Here are some commands to sort files by size:
+
+    
+    
+    du -h | grep ^[0-9.]*M | sort -rn
+    du -h | grep ^[0-9.]*G | sort -rn
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

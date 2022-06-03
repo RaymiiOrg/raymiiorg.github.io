@@ -1,0 +1,3211 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Installing OpenVMS 8.4 Alpha inside AXPbox on Debian 10 / Ubuntu 20.04 with networking - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>
+                </small>
+            </header>
+          
+    <h2 class='headheader' id='main'>Installing OpenVMS 8.4 Alpha inside AXPbox on Debian 10 / Ubuntu 20.04 with networking</h2>
+<p><small>Published: 04-11-2020 | Last update: 08-11-2020 | Author: Remy van Elst | <a href="Installing_OpenVMS_8.4_Alpha_in_AXPbox_with_networking.txt">Text only version of this article</a>
+</small></p>
+<div class='ad'>
+                                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7993642564731324"
+                             crossorigin="anonymous"></script>
+                        <!-- voorartikel -->
+                        <ins class="adsbygoogle"
+                             style="display:block"
+                             data-ad-client="ca-pub-7993642564731324"
+                             data-ad-slot="6172324376"
+                             data-ad-format="auto"></ins>
+                        <script>
+                             (adsbygoogle = window.adsbygoogle || []).push({});
+                        </script>
+                        </div><br><div class='olderthanayear'><p><strong>&#10071; This post is over one year old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Preface on networking and using a virtual machine</a>
+</li>
+<li>
+<a href="#toc_1">Getting OpenVMS 8.4-2 from VSI (Hobbyist program)</a>
+<ul>
+<li>
+<a href="#toc_2">HP Enterprise OpenVMS 8.4 and a bit of time travel</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_3">Compiling AXPbox</a>
+<ul>
+<li>
+<a href="#toc_4">Prepare the license ISO</a>
+</li>
+<li>
+<a href="#toc_5">Download the SRM ROM</a>
+</li>
+<li>
+<a href="#toc_6">Configuring AXPbox - es40.cfg</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_7">OpenVMS Installation</a>
+</li>
+<li>
+<a href="#toc_8">OpenVMS Configuration, autoboot</a>
+<ul>
+<li>
+<a href="#toc_9">First boot</a>
+</li>
+<li>
+<a href="#toc_10">Activate the license</a>
+</li>
+<li>
+<a href="#toc_11">Add a user</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_12">Networking</a>
+<ul>
+<li>
+<a href="#toc_13">Virtualbox Port Forward</a>
+</li>
+<li>
+<a href="#toc_14">OpenVMS TCP/IP setup</a>
+</li>
+<li>
+<a href="#toc_15">Automatic TCP/IP Startup</a>
+</li>
+<li>
+<a href="#toc_16">Telnet, FTP &amp; SSH</a>
+</li>
+<li>
+<a href="#toc_17">Installing unzip on OpenVMS</a>
+</li>
+<li>
+<a href="#toc_18">Installing wget or curl on OpenVMS</a>
+</li>
+</ul>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p><img src="/s/inc/img/Vms-arrow-logo.jpg" alt="openvms logo"></p>
+
+<p>In my <a href="/s/blog/Exciting_OpenVMS_Alpha_emulation_news_es40_has_been_forked_to_axpbox.html">previous article</a> I announced the fork of the <code>es40</code> emulator to <code>AXPbox</code>
+by <a href="https://github.com/lenticularis39/axpbox">Tom&aacute;&scaron;</a> including bug fixes and rework allowing it to install OpenVMS 8.4 without
+problems. Since then I&#39;ve contributed a few patches and doc updates, now NetBSD boots 
+as well (the patches for netbsd were from other es40 forks). I&#39;ve also looked into
+getting networking setup, since that is a bit of a tedious process due to pcap and
+linux, pcap being used for network emulation. SIMH (among others, <a href="/s/blog/OpenVMS_7.3_install_log_with_simh_vax_on_Ubuntu_16.04.html">a great VAX emulator</a>)
+suffers from the same problems with networking. This guide will show you how to install
+AXPbox and get OpenVMS 8.4 ready and running with networking inside AXPbox. It&#39;s a rather
+long guide with a lot of information and output.</p>
+
+<p>In this guide I&#39;ll cover: </p>
+
+<ul>
+<li>Getting OpenVMS 8.4 from VSI</li>
+<li>Compilation and setup of AXPbox </li>
+<li>Configuring AXPbox, </li>
+<li>Installing OpenVMS inside AXPbox</li>
+<li>OpenVMS Configuration
+
+<ul>
+<li>Adding a user to OpenVMS</li>
+<li>Setting up networking in OpenVMS</li>
+<li>Port forwarding to the virtual machine</li>
+<li>Setup SSH, FTP and telnet</li>
+<li>Downloading and installing curl</li>
+</ul></li>
+</ul>
+
+<p>I do recommend you to read the <a href="https://github.com/lenticularis39/axpbox/wiki/OpenVMS-installation-guide">AXPbox wiki Installation Guide</a>, in the future that might
+be more up to date on installing OpenVMS. </p>
+
+<blockquote>
+<p><a href="/s/tags/openvms.html">You can read all my OpenVMS articles here</a></p>
+</blockquote>
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<p>This guide is a big and comprehensive one, we cover a lot of ground. Use the
+table of contents above to skip to a part you&#39;re interested in. The order of
+topics is  specifically so you can follow along. And if you&#39;re able, do
+<a href="https://github.com/lenticularis39/axpbox">contribute back to AXPbox</a>, it&#39;s our only hope for an open source Alpha
+emulator.</p>
+
+<h3 id="toc_0">Preface on networking and using a virtual machine</h3>
+
+<p>I&#39;ll start off with a bit about networking. It took me a long time and <a href="https://github.com/lenticularis39/axpbox/issues/16">help
+from Tomas</a> to  figure out what was happening and why. A short summary is
+that AXPbox uses <code>libpcap</code> to emulate networking. On Linux, packets made by
+axpbox, are not received by the host system. That means, that if you run
+AXPbox on your desktop, your desktop will not be able to communicate with
+AXPbox, but other systems on the network will be. This issue can be resolved
+by using 2 network interfaces on your host system (one for axpbox and one for
+regular networking)  or by a virtualbox setup which we&#39;ll explain further.</p>
+
+<p>This <a href="https://github.com/simh/simh/issues/950">issue</a> is documented by SIMH, they have the same setup for networking
+(although, simh also support tun/tap and vde, which do not suffer from this
+problem).</p>
+
+<p>In the <a href="https://github.com/simh/simh/blob/master/0readme_ethernet.txt">simh docs</a>:</p>
+
+<blockquote>
+<p>On Windows using the WinPcap interface, the simulated computer can &quot;talk&quot; to
+the host computer on the same interface. On other platforms with libpcap
+(linux, mac OS), the simulated computer can not &quot;talk&quot; to the host computer via the
+selected interface, since simulator transmitted packets are not received
+by the hosts network stack. The workaround for this is to use a second NIC
+in the host and connect them both into the same network; then the host and
+the simulator can communicate over the physical LAN. </p>
+</blockquote>
+
+<p>And in the <a href="http://simh.trailing-edge.com/pdf/simh_faq.pdf">SIMH FAQ PDF</a>:</p>
+
+<blockquote>
+<p>2.11 - My Linux, OSX or other Unix host can&#39;t communicate with the PDP-11 or
+VAX  over Ethernet; why?</p>
+
+<p>The network stacks on these systems don&#39;t naturally receive packets which are 
+transmitted with the pcap_sendpacket API...</p>
+</blockquote>
+
+<p>I also had issues with bridged network adapters. I&#39;m used to creating a bridge
+for when using KVM virtual machines, and giving each VM it&#39;s own <code>tapX</code>
+interface, they can access the network directly that way. </p>
+
+<p>Because of the above, if you want to use networking (which you probably will,
+it&#39;s awesome to play with clustering) and have only 1 NIC in your PC,  I
+recommend you use a virtual machine with two separate network adapters. In
+this guide I&#39;m using Ubuntu 20.04 on my desktop, which runs Virtualbox (I
+choose that over KVM for ease of use in this guide). </p>
+
+<p>Virtualbox has a Debian 10 virtual machine with 2 virtual network adapters,
+the first is in the virtualbox <code>NAT</code> network, that one will be used by OpenVMS,
+the second is bridged into my own LAN, that one is used to SSH into the Debian
+VM from Ubuntu. </p>
+
+<p>This Debian 10 virtual machine runs AXPbox, so it&#39;s a bit of virtual machine 
+inception going on. Have your spinning top ready.</p>
+
+<p>OpenVMS inside AXPbox can connect to the internet, and via virtualbox you 
+can create port forwards back into OpenVMS. That will be explained later
+on in the network section, including screenshots.   </p>
+
+<p>I had issues with 2 bridges interfaces, OpenVMS couldn&#39;t connect
+to my router and my host PC couldn&#39;t connect to OpenVMS, but Tomas has had 
+that setup working with KVM, so that might work, but for the sake of a reproducible
+tutorial, I&#39;ll be focusing on this Virtualbox <code>NAT</code> setup.</p>
+
+<p>When I plugged in a USB NIC adapter and configured AXPbox to use that,
+connectivity worked as expected. If you have multiple separate network
+cards in your PC, you don&#39;t need the VM setup.</p>
+
+<p>**Summarizing, install Virtualbox, install a Debian 10 VM with 2 NIC&#39;s, one
+<strong>NAT and one Bridged, or use multiple NIC&#39;s in your PC.</strong>.</p>
+
+<p>If you&#39;re comfortable with KVM you can do that as well, the network setup should be 
+easy enough with the theory and explanation above.</p>
+
+<h3 id="toc_1">Getting OpenVMS 8.4-2 from VSI (Hobbyist program)</h3>
+
+<p>Currently there is only one legal option to get OpenVMS installation media,
+the <a href="https://vmssoftware.com/services/community-license/">VSI Community License program</a>. Fill out the form there and you&#39;ll
+get an e-mail with login credentials to the VSI SFTP server.</p>
+
+<p>Login in to the SFTP server and download the file named <code>ALPHA0842L1.ZIPEXE</code>. 
+This is a self-extracting archive for OpenVMS Alpha, but it can be extracted
+normally using <code>unzip</code> or an archive manager on any operating system. After
+unzipping you should have the file <code>ALPHA0842L1.ISO</code>.</p>
+
+<pre><code>$ unzip ALPHA0842L1.ZIPEXE 
+Archive:  ALPHA0842L1.ZIPEXE
+warning [ALPHA0842L1.ZIPEXE]:  120320 extra bytes at beginning or within zipfile
+  (attempting to process anyway)
+  inflating: ALPHA0842L1.ISO         
+
+$ md5sum ALPHA0842L1.ISO 
+e19f1123bdb565d9f9bb736be5314c46  ALPHA0842L1.ISO
+
+$ md5sum ALPHA0842L1.ZIPEXE 
+2228fc25d9640a16a57bada6d8c609ec  ALPHA0842L1.ZIPEXE
+</code></pre>
+
+<p>You will also receive an email containing your license, PAK files. Save that 
+as well. </p>
+
+<h4 id="toc_2">HP Enterprise OpenVMS 8.4 and a bit of time travel</h4>
+
+<p>Alternatively you can use <code>ALPHA084.ISO</code> from the now concluded HPE OpenVMS 
+Hobbyist Program. You do need a different license PAK though, from HPE, and
+you need to set the date inside the Debian virtual machine to back when your
+<a href="/s/inc/downloads/openvms-HP-hobbyist-pak.txt">HPE hobbyist license</a> was still valid. For hobbyist use, it will work
+fine inside AXPbox.</p>
+
+<p><a href="https://fsck.technology/software/DEC-Compaq/OpenVMS%20Install%20Media/OpenVMS%208.4%20Alpha/">Here is a site hosting that HP ISO</a> and <a href="https://mirrors.pdp-11.ru/_alpha/_VMS/">here is another one</a>, but I&#39;m 
+not sure how long those will stay alive. Google the filename or resort to
+less legal internet protocols to get a copy of this ISO.</p>
+
+<pre><code>$ md5sum ALPHA084.ISO 
+55248b10ca08a350731daa12cc253b8c  ALPHA084.ISO
+</code></pre>
+
+<p>Reset the time inside the Debian VM:</p>
+
+<pre><code>systemctl stop systemd-timesyncd; 
+systemctl disable systemd-timesyncd;
+date --set 2018-10-18; 
+hwclock --set --date 2018-10-18
+</code></pre>
+
+<p>Reset the time inside OpenVMS:</p>
+
+<pre><code>SET TIME=18-OCT-2018:13:00:00
+</code></pre>
+
+<p>Now that you&#39;ve got the ISO and license, continue on building and installing
+the emulator.</p>
+
+<h3 id="toc_3">Compiling AXPbox</h3>
+
+<p>I&#39;ll assume you do these steps inside the Debian 10 virtual machine you&#39;ve setup. They
+work the same for Ubuntu 20.04.</p>
+
+<p>First install required dependencies to compile AXPbox:</p>
+
+<pre><code>apt install libpcap-dev build-essential unzip libx11-dev libsdl-dev cmake
+libpoco-dev libxt-dev git
+</code></pre>
+
+<p>Clone the repository:</p>
+
+<pre><code># I&#39;m building commit d7e7c93
+git clone https://github.com/lenticularis39/axpbox
+</code></pre>
+
+<p>Create a build folder and navigate into it:</p>
+
+<pre><code>cd axpbox
+mkdir build
+cd build
+</code></pre>
+
+<p>Run <code>cmake</code> to generate the files for <code>make</code>:</p>
+
+<pre><code>cmake .. -DCMAKE_BUILD_TYPE=&quot;Release&quot;
+</code></pre>
+
+<p>Run <code>make</code> to start the actual compile</p>
+
+<pre><code>make -j$(($(nproc) + 1))
+</code></pre>
+
+<p>Output, make sure that <code>pcap found</code> appears if you want networking</p>
+
+<pre><code>-- pcap found. Networking support enabled
+-- sdl found. SDL graphics support enabled
+-- x11 found. x11 graphics support enabled
+-- C++ compiler flags  :  -O3 -march=native -DNDEBUG
+-- C compiler flags    :  -O3
+-- Linker flags        :   
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /root/git/axpbox/build
+Scanning dependencies of target axpbox
+[  1%] Building CXX object CMakeFiles/axpbox.dir/src/AliM1543C.cpp.o
+[  3%] Building CXX object CMakeFiles/axpbox.dir/src/AliM1543C_ide.cpp.o
+[  4%] Building CXX object CMakeFiles/axpbox.dir/src/AliM1543C_usb.cpp.o
+[...]
+[ 95%] Building CXX object CMakeFiles/axpbox.dir/src/gui/scancodes.cpp.o
+[ 96%] Building CXX object CMakeFiles/axpbox.dir/src/gui/sdl.cpp.o
+[ 98%] Building CXX object CMakeFiles/axpbox.dir/src/lockstep.cpp.o
+[100%] Linking CXX executable axpbox
+[100%] Built target axpbox
+</code></pre>
+
+<p>You now have the emulator built and ready for configuration:</p>
+
+<pre><code>./axpbox 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>AXPBox Alpha Emulator (version 0.1)
+Usage: ./axpbox run|configure &lt;options&gt;
+</code></pre>
+
+<h4 id="toc_4">Prepare the license ISO</h4>
+
+<p>If you have your PAK from VSI (product activation key) with the hobbyist
+license,  it&#39;s handy to build an ISO and later on after the installation,
+mount that and  run the <code>ALPHA_COMMUNITY_LICENSE_PAK_XX_XXXX.COM</code> script on
+OpenVMS, than it is to copy and paste. Not all terminal emulators handle it
+well (too fast) and  with the HP license, it&#39;s way to long to copy and paste.
+The VSI license  seems shorter. </p>
+
+<p>First copy the OpenVMS license script (<code>.COM</code>) to the Debian VM. Then create
+the ISO:</p>
+
+<pre><code># create a folder for the script
+mkdir license
+# copy the license script into that folder
+cp ALPHA_COMMUNITY_LICENSE_PAK_SEP_2020.COM license
+# generate an ISO of that folder
+genisoimage -V license -o pak.iso license
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Total translation table size: 0
+Total rockridge attributes bytes: 0
+Total directory bytes: 0
+Path table size(bytes): 10
+Max brk space used 0
+175 extents written (0 MB)
+</code></pre>
+
+<p>Later on when we&#39;re finished installing OpenVMS we&#39;ll activate this license
+from the ISO. <a href="/s/blog/OpenVMS_Mount_ISO_and_execute_scripts.html">Read more on OpenVMS scripts, ISO and record format here</a></p>
+
+<h4 id="toc_5">Download the SRM ROM</h4>
+
+<p>Summarized, the SRM rom is sort of a BIOS, but for Alpha and OpenVMS requires
+this to boot. It was available from HP, but not anymore, so I mirrored it.
+Create a rom folder and download the file there:</p>
+
+<pre><code>mkdir rom &amp;&amp; cd rom
+wget https://raymii.org/s/inc/downloads/es40-srmon/cl67srmrom.exe
+cd ..
+</code></pre>
+
+<p>Quoting <a href="http://web.archive.org/web/20201101122848/http://www.grootersnet.nl/download/FREEWAREV60/VMSFAQ/VMSFAQ_017.HTML">Grootersnet</a> with more information on SRM and PALcode:</p>
+
+<blockquote>
+<p>14.3.2 What does SRM mean? What is PALcode? </p>
+
+<p>The abbreviation SRM is derived from the Alpha System Reference Manual, the
+specification of the Alpha architecture and the associated firmware.</p>
+
+<p>PALcode is a name assigned to a particular set of functions provided by the
+SRM firmware. PALcode is used to provide low-level functions required by
+higher-level operating system or application software, functions which may not
+be directly available in Alpha hardware. PALcode is implemented using
+available Alpha instructions and using the Alpha processor, though PALcode
+operates in a mode which simplifies programming. PALcode is also permitted
+access to processor-specific and otherwise internal features of a particular
+Alpha microprocessor implementation; microprocessor-specific features which
+are not easily accessible to operating system or application code. </p>
+</blockquote>
+
+<p>We&#39;re almost ready to install OpenVMS. After compiling and preparing, all that
+is left is configuring AXPbox. </p>
+
+<h4 id="toc_6">Configuring AXPbox - es40.cfg</h4>
+
+<p>AXPbox has an interactive configuration prompt which you can invoke with
+<code>./axpbox configure</code>. It will ask you a set of questions, and you can read
+more about it <a href="https://github.com/lenticularis39/axpbox/wiki/OpenVMS-installation-guide">on the project wiki</a>. For the purpose of this guide, please
+use the below configuration.</p>
+
+<p>Place the below contents in a file named  <code>es40.cfg</code> in the same folder as the binary. </p>
+
+<pre><code>sys0 = tsunami
+{
+  memory.bits = 28;
+  rom.srm = &quot;rom/cl67srmrom.exe&quot;;
+  rom.decompressed = &quot;rom/decompressed.rom&quot;;
+  rom.flash = &quot;rom/flash.rom&quot;;
+  rom.dpr = &quot;rom/dpr.rom&quot;;
+
+  cpu0 = ev68cb
+  {
+    speed = 800M;
+    icache = true;
+    skip_memtest_hack = true;
+  }
+
+  serial0 = serial
+  {
+    port = 21264;
+    action = &quot;&quot;;
+  }
+
+ pci0.15 = ali_ide
+ {
+   disk0.0 = file
+   {
+     file =          &quot;disk0.img&quot;;
+     serial_number = &quot;VMS&quot;;
+     rev_number    = &quot;8.4&quot;;
+     model_number  = &quot;OpenVMS8.3&quot;;
+     read_only     = false;
+     cdrom         = false;
+     autocreate_size = 6000M;
+   }
+   disk1.0 = file
+   {
+     file          = &quot;ALPHA0842L1.ISO&quot;;
+     read_only     = true;
+     cdrom         = true;
+   }
+ }
+
+
+pci1.1 = dec21143 
+{ 
+        adapter = &quot;enp0s3&quot;;
+        mac = &quot;08-00-DE-AD-BE-EF&quot;;
+}
+
+
+  pci0.7 = ali
+  {
+    mouse.enabled = false;
+    vga_console = false;
+  }
+
+  pci0.19 = ali_usb
+  {
+  }
+}
+</code></pre>
+
+<p>Change the <code>adapter = &quot;enp0s3&quot;</code> line to match your virtualbox NAT adapter.
+That is, not the NIC with the IP of the Debian VM you&#39;re connecting to, but
+the one with the internal Virtualbox network. In my case <code>enp0s8</code> is the
+bridged adapter and <code>enp0s3</code> is the NAT adapter.</p>
+
+<p>Make sure the <code>ALPHA0842L1.ISO</code> installation ISO is in the same folder as the
+binary and this config file. If you forget to place that file, you&#39;ll get a
+crash:</p>
+
+<pre><code>pci0.15(ali_ide).disk1.0(file): Could not open file ALPHA0842L1.ISO!
+Emulator Failure: Runtime exception: pci0.15(ali_ide).disk1.0(file): File
+does not exist and no autocreate_size set:
+/root/git/axpbox/src/DiskFile.cpp, line 124 Segmentation fault
+</code></pre>
+
+<p>I have my setup with 1800MHz <code>cpu.speed</code> and 30 <code>memory.bits</code> (1 GB instead of
+256MB). For this guide I&#39;ll  recommend the defaults (800MHz and 256MB). </p>
+
+<p>If you want to skip the memory test at startup (saves a few minutes of
+booting), add the following  underneath the <code>icache</code> line in the <code>cpu</code> block:</p>
+
+<pre><code>skip_memtest_hack = true;
+</code></pre>
+
+<del>Do note that this will make the installation of OpenVMS fail, so add the line
+after you're done installing.</del>
+
+<p>Update 08-11-2020: Tom&aacute;&scaron; did <a href="https://github.com/lenticularis39/axpbox/commit/837750f2cb43a9cd32365b428a3dc470c45d0e86">a bugfix</a>, <code>skip_memtest_hack</code> now works during 
+installation.</p>
+
+<p>The disk will be automatically created at first start of the emulator:</p>
+
+<pre><code>pci0.15(ali_ide).disk0.0(file): Could not open file disk0.img!
+pci0.15(ali_ide).disk0.0(file): writing 6000 1kB blocks: 100%
+pci0.15(ali_ide).disk0.0(file): 6000 MB file disk0.img created.
+pci0.15(ali_ide).disk0.0(file): Mounted file disk0.img, 12288000 512-byte
+blocks, 15360/16/50.
+</code></pre>
+
+<p>You can also manually create it, but that shouldn&#39;t be needed:</p>
+
+<pre><code>truncate -s 6G disk0.img
+</code></pre>
+
+<p>If everything is setup correctly, the emulator should prompt you to connect to
+a telnet port:</p>
+
+<pre><code>serial0(serial): Waiting for connection on port 21264.
+</code></pre>
+
+<p>Continue on to the OpenVMS installation part.</p>
+
+<h3 id="toc_7">OpenVMS Installation</h3>
+
+<p>Connect to the telnet port as specified by the emulator prompt (replace
+<code>10.0.0.8</code> by the IP of your Debian VM).</p>
+
+<pre><code>$ telnet 10.0.0.8 21264
+Trying 10.0.0.8...
+Connected to 10.0.0.8.
+Escape character is &#39;^]&#39;.
+This is serial port #0 on ES40 Emulator
+
+OpenVMS PALcode V1.98-104, Tru64 UNIX PALcode V1.92-105
+
+starting console on CPU 0
+[...]
+     256 MB of System Memory
+Testing the System
+Testing the Network
+AlphaServer ES40 Console V7.3-1, built on Feb 27 2007 at 12:57:47
+P00&gt;&gt;&gt;
+</code></pre>
+
+<p>If you see the <code>P00&gt;&gt;&gt;</code> prompt, continue on. If you get a crash, disconnect or
+segfault, check the emulator tab,  it has an error what is wrong.</p>
+
+<p>Find out which device has the installation ISO:</p>
+
+<pre><code>P00&gt;&gt;&gt;show dev
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>dqa0.0.0.15.0              DQA0                    OpenVMS8 .3          
+dqb0.0.1.15.0              DQB0               ALPHA084 2L1.ISO          
+dva0.0.0.1000.0            DVA0                               
+ewa0.0.0.1.1               EWA0              08-00-DE-AD-BE-EF
+</code></pre>
+
+<p>In our case, <code>DQB0</code> has the install disk and <code>DQA0</code> is our root disk. Boot the
+install ISO:</p>
+
+<pre><code>P00&gt;&gt;&gt;boot DQB0
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>(boot dqb0.0.1.15.0 -flags 0)
+block 0 of dqb0.0.1.15.0 is a valid boot block
+reading 1230 blocks from dqb0.0.1.15.0
+bootstrap code read in
+base = 200000, image_start = 0, image_bytes = 99c00(629760)
+initializing HWRPB at 2000
+initializing page table at ff56000
+initializing machine state
+setting affinity to the primary CPU
+jumping to bootstrap code
+
+
+    OpenVMS (TM) Alpha Operating System, Version V8.4-2L1
+                    Copyright 2016 VMS Software, Inc.
+</code></pre>
+
+<p>There will be some more output:</p>
+
+<pre><code>    Installing required known files...
+
+    Configuring devices...
+
+%EWA0, Auto-negotiation mode set by console
+%EWA0, Link state: UP
+%EWA0, Auto-negotiation (internal) starting
+%EWA0, Full Duplex 100baseTX connection selected
+</code></pre>
+
+<p>When that&#39;s done, takes a while, the installer menu pops up:</p>
+
+<pre><code>    ****************************************************************
+
+    You can install or upgrade the OpenVMS ALPHA operating system
+    or you can install or upgrade layered products that are included
+    on the OpenVMS ALPHA distribution media (CD/DVD).
+
+    You can also execute DCL commands and procedures to perform
+    &quot;standalone&quot; tasks, such as backing up the system disk.
+
+    Please choose one of the following:
+
+        1)  Upgrade, install or reconfigure OpenVMS ALPHA Version V8.4-2L1
+        2)  Display layered products that this procedure can install
+        3)  Install or upgrade layered products
+        4)  Show installed products
+        5)  Reconfigure installed products
+        6)  Remove installed products
+        7)  Find, Install or Undo patches; Show or Delete Recovery Data
+        8)  Execute DCL commands and procedures
+        9)  Shut down this system
+
+Enter CHOICE or ? for help: (1/2/3/4/5/6/7/8/9/?) 
+</code></pre>
+
+<p>Enter 1.</p>
+
+<p>Some information about patches on the disk pops up:</p>
+
+<pre><code>    The following PATCH kits are present on the OpenVMS ALPHA
+    distribution media.
+
+
+----------------------------------- ----------- ----------
+PRODUCT                             KIT TYPE    KIT FORMAT
+----------------------------------- ----------- ----------
+VSI AXPVMS TCPIP_NFS_PAT V5.7-ECO5A Patch       Compressed 
+VSI AXPVMS TCPIP_SSH_PAT V5.7-ECO5D Patch       Compressed 
+----------------------------------- ----------- ----------
+
+2 products found
+
+    Please consult the OpenVMS ALPHA Installation and Upgrade Manual,
+    the Release Notes, and the Cover Letter to determine if any or
+    all of these patches may be required for your system.
+
+Press Return to continue...
+</code></pre>
+
+<p>Press return as said. You will be asked if you want to format the disk:</p>
+
+<pre><code> ***********************************************************
+
+    This procedure will ask a series of questions.
+
+          () - encloses acceptable answers
+          [] - encloses default answers
+
+    Type your response and press the &lt;Return&gt; key.  Type:
+
+          ? - to repeat an explanation
+          ^ - to change prior input (not always possible)
+          Ctrl/Y - to exit the installation procedure
+
+    There are two choices for installation/upgrade:
+
+    Initialize - Removes all software and data files that were
+        previously on the target disk and installs OpenVMS ALPHA.
+
+    Preserve -- Installs or Upgrades OpenVMS ALPHA on the target disk
+        and retains all other contents of the target disk.
+
+   * Note: You cannot use preserve to install OpenVMS ALPHA on a disk on
+        which any other operating system is installed.  This includes
+        implementations of OpenVMS for other architectures.
+
+Do you want to INITIALIZE or to PRESERVE? [PRESERVE] 
+</code></pre>
+
+<p>Since this is a new installation, enter <code>INITIALIZE</code>.</p>
+
+<p>Choose the disk you want to install on:</p>
+
+<pre><code>    You must enter the device name for the target disk on which
+    OpenVMS ALPHA will be installed.
+
+Enter device name for target disk: (? for choices) ?   
+
+Device                  Device           Error   Volume          Free  Trans Mnt
+ Name                   Status           Count    Label         Blocks Count Cnt
+DQB0:                   Mounted wrtlck       0 ALPHA0842L1         936    81   1
+DQB1:                   Offline              1
+DVA0:                   Offline              0
+DQA0:                   Online               0
+DQA1:                   Offline              1
+DAD0:                   Online               0
+
+
+Enter device name for target disk: (? for choices) DQA0
+</code></pre>
+
+<p>In our case that&#39;s <code>DQA0</code>. </p>
+
+<p>If you&#39;re going to cluster, every disk must have a unique name. I tend to go
+with the system hostname as system disk name. In this tutorial, it&#39;s fine to
+just press Return for the default:</p>
+
+<pre><code>Enter volume label for target system disk: [ALPHASYS] 
+</code></pre>
+
+<p>You will now be prompted which filesystem you want to use:</p>
+
+<pre><code>The target system disk can be initialized with On-Disk Structure
+Level 2 (ODS-2) or Level 5 (ODS-5).  (? for more information)
+
+Do you want to initialize with ODS-2 or ODS-5? (2/5/?) 5
+</code></pre>
+
+<p>Enter <code>5</code>. (Unless you want to mount this disk image on a VAX.)</p>
+
+<p>ODS, meaning on disk structure, is part of the Files-11 filesystem. Compare it
+with ext2/3/4. </p>
+
+<ul>
+<li><code>Files-11</code> is the general term for five separate file systems, known as on-disk 
+&quot;structure (ODS) levels 1 through 5.</li>
+<li>ODS-1 is the flat file system used by the RSX-11 OS, supported by older VMS 
+systems for RSX compatibility, but never used to support VMS itself; it has 
+been largely superseded by ODS-2 and ODS-5.</li>
+<li>ODS-2 is the standard VMS file system, and remains the most common file system 
+for system disks (the disk on which the operating system is installed).</li>
+<li>Although seldom referred to by their ODS level designations, ODS-3 and ODS-4 
+are the Files-11 support for the CD-ROM ISO 9660 and High Sierra Format file 
+systems, respectively.</li>
+<li>ODS-5 is an extended version of ODS-2 available on Alpha and IA-64 platforms 
+which adds support for case-preserving filenames with non-ASCII characters and 
+improvements to the hierarchical directory support.</li>
+</ul>
+
+<p><a href="https://en.wikipedia.org/wiki/Files-11#Overview">Read more on ODS here</a></p>
+
+<p>Hardlinks are fine, so enter <code>Yes</code>:</p>
+
+<pre><code>Do you want to enable hard links? (Yes/No/?) yes
+</code></pre>
+
+<p>Next is a confirmation question, enter <code>Yes</code>: </p>
+
+<pre><code>    You have chosen to install OpenVMS ALPHA on a new disk.
+
+    The target system disk, DQA0:, will be initialized
+    with structure level 5 (ODS-5).
+    Hard links WILL be enabled.
+    The disk will be labeled ALPHASYS.
+    Any data currently on the target system disk will be lost.
+
+Is this OK? (Yes/No) yes
+</code></pre>
+
+<p>Some more output:</p>
+
+<pre><code>Initializing and mounting target....
+
+Creating page and swap files....
+</code></pre>
+
+<p>Enter a password for the <code>SYSTEM</code> user. Make it a good one since this is the same as the 
+<code>root</code> account on linux, or <code>Administrator</code> on Windows.</p>
+
+<pre><code>You must enter a password for the SYSTEM account.
+
+The password must be a minimum of 8 characters in length, and
+may not exceed 31 characters.  It will be checked and verified.
+The system will not accept passwords that can be guessed easily.
+
+The password will not be displayed as you enter it.
+
+Password for SYSTEM account: 
+
+Re-enter SYSTEM password for verification: 
+</code></pre>
+
+<p>If you&#39;re interested, OpenVMS can give users <a href="/s/blog/Multiple_passwords_for_one_user_UIC_uniqueness_and_the_system_password_on_OpenVMS.html">Secondary Passwords</a>.</p>
+
+<p>For now, enter <code>No</code> on the clustering questions:</p>
+
+<pre><code>Will this system be a member of an OpenVMS Cluster? (Yes/No) No
+
+Will this system be an instance in an OpenVMS Galaxy? (Yes/No) No
+</code></pre>
+
+<p>Next are two DECnet networking questions. First some more information on this,
+background theory. Because we&#39;re setting up a cluster in a future article, we
+must account for that now. </p>
+
+<p>For the <code>SCSNODE</code> name - the hostname, if you will - you&#39;ll have to remember
+to use only 6 characters or less. The <code>SCSSYSTEMID</code> is a bit more complex.
+It&#39;s calculated through the formula <code>X * 1024 + Y</code>, where <code>X</code> is the <code>DECnet
+area number</code>, and <code>Y</code> the <code>DECnet node number</code> in that area.</p>
+
+<p>Since we&#39;re starting from scratch, we can use <code>X=1</code>; for the node numbers, it
+makes sense to think this through properly. Useful tip: use the last octet of
+the IP address you want to assign to this machine! Since I want to give IPs
+10.0.2.131 and 10.0.2.132 to the nodes, I&#39;ll give this one <code>Y=131</code> and the
+next one  <code>Y=132</code>. This leaves us with a <code>SCSSYSTEMID</code> of <code>1155</code> for this
+install, and DECnet code <code>1.131</code>. The other VM, later on for clustering, will
+get <code>1156</code> as <code>SCSSYSTEMID</code> and DECnet code <code>1.132</code>.</p>
+
+<p>This node will be named <code>u1</code> and the second node later on <code>u2</code>. Why? Because
+it&#39;s short.</p>
+
+<pre><code>For your system to operate properly, you must set two parameters:
+SCSNODE and SCSSYSTEMID.
+
+SCSNODE can be from 1 to 6 letters or numbers.  It must contain at
+least one letter.
+
+If you plan to use DECnet, SCSNODE must be the DECnet Phase IV
+node name, or the DECnet-Plus (Phase V) node synonym.
+
+If you have multiple OpenVMS systems, the SCSNODE on each system
+must be unique.
+</code></pre>
+
+<p>Enter the hostname:</p>
+
+<pre><code>Enter SCSNODE: u1
+
+If you plan to use DECnet, SCSSYSTEMID must be set based on the
+DECnet Phase IV address.
+</code></pre>
+
+<p>Choose <code>Yes</code>:</p>
+
+<pre><code>    Do you plan to use DECnet? (Yes/No) [Yes] 
+
+    DECnet Phase IV addresses are in the format
+
+        DECnet_area_number.DECnet_node_number
+
+    DECnet_area_number is a number between 1 and 63.
+    DECnet_node_number is a number between 1 and 1023.
+
+    If you plan to use DECnet WITHOUT Phase IV compatible addresses,
+    enter 0.0.
+</code></pre>
+
+<p>Enter the DECnet code, in our case <code>1.132</code>:</p>
+
+<pre><code>Enter DECnet (Phase IV) Address: [1.1] 1.132
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>  SCSSYSTEMID will be set to 1156.
+
+  This was calculated as follows:
+
+      (DECnet_area_number * 1024) + DECnet_node_number
+</code></pre>
+
+<p>Next is the date and time setup. I&#39;m in the Netherlands, so my timezone is in
+Europe:</p>
+
+<pre><code>  Configuring the Local Time Zone
+
+TIME ZONE SPECIFICATION -- MAIN Time Zone Menu            &quot;*&quot; indicates a menu
+
+  0* GMT
+  1* AFRICA          17) EST             33) IRAN            49) PORTUGAL       
+  2* AMERICA         18) EST5EDT         34) ISRAEL          50) PRC            
+  3* ANTARCTICA      19* ETC             35) JAMAICA         51) PST8PDT        
+  4* ARCTIC          20* EUROPE          36) JAPAN           52) ROC            
+  5* ASIA            21) FACTORY         37) KWAJALEIN       53) ROK            
+  6* ATLANTIC        22) GB-EIRE         38) LIBYA           54) SINGAPORE      
+  7* AUSTRALIA       23) GB              39) MET             55) TURKEY         
+  8* BRAZIL          24) GMT-0           40* MEXICO          56) UCT            
+  9* CANADA          25) GMT             41* MIDEAST         57) UNIVERSAL      
+ 10) CET             26) GMT0            42) MST             58* US             
+ 11* CHILE           27) GMTPLUS0        43) MST7MDT         59) UTC            
+ 12) CST6CDT         28) GREENWICH       44) NAVAJO          60) W-SU           
+ 13) CUBA            29) HONGKONG        45) NZ-CHAT         61) WET            
+ 14) EET             30) HST             46) NZ              62) ZULU           
+ 15) EGYPT           31) ICELAND         47* PACIFIC        
+ 16) EIRE            32* INDIAN          48) POLAND         
+
+Press &quot;Return&quot; to redisplay, enter &quot;=&quot; to search or &quot;?&quot; for help, or
+</code></pre>
+
+<p>Enter 20: </p>
+
+<pre><code>Select the number above that best represents the desired time zone:  20
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>EUROPE Time Zone Menu                                     &quot;*&quot; indicates a menu
+
+  0* RETURN TO MAIN TIME ZONE MENU
+  1) AMSTERDAM       17) HELSINKI        33) NICOSIA         49) TALLINN        
+  2) ANDORRA         18) ISLE_OF_MAN     34) OSLO            50) TIRANE         
+  3) ATHENS          19) ISTANBUL        35) PARIS           51) TIRASPOL       
+  4) BELFAST         20) JERSEY          36) PODGORICA       52) UZHGOROD       
+  5) BELGRADE        21) KALININGRAD     37) POLAND          53) VADUZ          
+  6) BERLIN          22) KIEV            38) PORTUGAL        54) VATICAN        
+  7) BRATISLAVA      23) LISBON          39) PRAGUE          55) VIENNA         
+  8) BRUSSELS        24) LJUBLJANA       40) RIGA            56) VILNIUS        
+  9) BUCHAREST       25) LONDON          41) ROME            57) VOLGOGRAD      
+ 10) BUDAPEST        26) LUXEMBOURG      42) SAMARA          58) WARSAW         
+ 11) BUSINGEN        27) MADRID          43) SAN_MARINO      59) ZAGREB         
+ 12) CHISINAU        28) MALTA           44) SARAJEVO        60) ZAPOROZHYE     
+ 13) COPENHAGEN      29) MARIEHAMN       45) SIMFEROPOL      61) ZURICH         
+ 14) DUBLIN          30) MINSK           46) SKOPJE         
+ 15) GIBRALTAR       31) MONACO          47) SOFIA          
+ 16) GUERNSEY        32) MOSCOW          48) STOCKHOLM      
+
+Press &quot;Return&quot; to redisplay, enter &quot;=&quot; to search or &quot;?&quot; for help, or
+</code></pre>
+
+<p>Choose <code>Amsterdam</code> by entering <code>1</code></p>
+
+<pre><code>Select the number above that best represents the desired time zone: 1
+</code></pre>
+
+<p>Confirm by entering <code>YES</code>:</p>
+
+<pre><code>You selected EUROPE / AMSTERDAM as your time zone.
+Is this correct? (Yes/No) [YES]:    
+</code></pre>
+
+<p>A few questions about daylight saving time, if you selected a timezone that has that:</p>
+
+<pre><code>    Configuring the Time Differential Factor (TDF)
+
+
+    Default Time Differential Factor for standard time is 1:00.
+    Default Time Differential Factor for daylight saving time is 2:00.
+
+    The Time Differential Factor (TDF) is the difference between your
+    system time and Coordinated Universal Time (UTC).  UTC is similar
+    in most respects to Greenwich Mean Time (GMT).
+
+    The TDF is expressed as hours and minutes, and should be entered
+    in the hh:mm format.  TDFs for the Americas will be negative
+    (-3:00, -4:00, etc.); TDFs for Europe, Africa, Asia and Australia
+    will be positive (1:00, 2:00, etc.).
+
+This time zone supports daylight saving time.
+</code></pre>
+
+<p>Enter <code>No</code>:</p>
+
+<pre><code>Is this time zone currently on daylight saving time? (Yes/No): no
+</code></pre>
+
+<p>Accept the default of <code>1.00</code>:</p>
+
+<pre><code>Enter the Time Differential Factor [1:00]: 
+
+    NEW SYSTEM TIME DIFFERENTIAL FACTOR = 1:00
+
+Is this correct? [Y]: y
+</code></pre>
+
+<p>Skip the PAK license, we&#39;ll do that after we finished installing:</p>
+
+<pre><code>    If you have Product Authorization Keys (PAKs) to register,
+    you can register them now.
+
+Do you want to register any Product Authorization Keys? (Yes/No) [Yes] No
+</code></pre>
+
+<p>With the <a href="/s/blog/Installing_the_es40_AlphaServer_emulator_0.18_on_Ubuntu_16.04_and_trying_to_install_openVMS_8.4_on_es40.html">old es40 emulator on Ubuntu 16.04 this is how far we came</a>. 
+Amazing that AXPbox handles this so well without crashing.</p>
+
+<p>Accept the defaults on all the next questions, yes we want all the good stuff:</p>
+
+<pre><code>    The following products are part of the the OpenVMS installation;
+    they will be installed along with the OpenVMS operating system:
+
+        o Availability Manager (base) for OpenVMS Alpha
+        o CDSA for OpenVMS Alpha
+        o KERBEROS for OpenVMS Alpha
+        o SSL for OpenVMS Alpha (based on OpenSSL V0.9.8)
+        o SSL1 V1.0 for OpenVMS Alpha (based on OpenSSL V1.0.2)
+        o Performance Data Collector (base) for OpenVMS Alpha
+        o HP Binary Checker for OpenVMS Alpha
+
+    You can also install the following optional products along with the
+    OpenVMS operating system:
+
+        o DECwindows Motif for OpenVMS Alpha
+        o DECnet-Plus for OpenVMS Alpha
+        o DECnet Phase IV for OpenVMS Alpha
+        o TCP/IP Services for OpenVMS
+
+    If you want to change your selections, you can do so later in the
+    installation by answering &quot;NO&quot; to the following question:
+
+        &quot;Do you want the defaults for all options?&quot;
+</code></pre>
+
+<p>Yes DECwindows:</p>
+
+<pre><code>    Do you want to install DECwindows Motif for OpenVMS Alpha V1.7-F?
+(Yes/No) [Yes] 
+</code></pre>
+
+<p>Yes DECnet:</p>
+
+<pre><code>    Beginning with OpenVMS V7.1, the DECnet-Plus kit is provided with
+    the OpenVMS operating system kit.  DECnet Phase IV applications are
+    supported by DECnet-Plus.
+
+    DECnet Phase IV is also provided as an option.
+
+    If you install DECnet-Plus and TCP/IP you can run DECnet
+    applications over a TCP/IP network.  Please see the OpenVMS
+    Management Guide for information on running DECnet over TCP/IP.
+
+    Do you want to install DECnet-Plus for OpenVMS Alpha V8.4-D?
+(Yes/No) [Yes] 
+</code></pre>
+
+<p>Yes TCP/IP:</p>
+
+<pre><code>    Do you want to install TCP/IP Services for OpenVMS V5.7-13ECO5F?
+(Yes/No) [Yes] 
+</code></pre>
+
+<p>We don&#39;t need a detailed description:</p>
+
+<pre><code>    The installation operation can provide brief or detailed descriptions.
+    In either case, you can request the detailed descriptions by typing ?.
+
+Do you always want detailed descriptions? (Yes/No) [No] 
+</code></pre>
+
+<p>Some information on not being able to validate signed kits:</p>
+
+<pre><code>The system was booted from a device containing the OpenVMS Alpha distribution.
+Validation of signed kits is not supported in this restricted environment.
+</code></pre>
+
+<p>Accept the default options again with a <code>YES</code>:</p>
+
+<pre><code>The following product has been selected:
+    VSI AXPVMS OPENVMS V8.4-2L1            Platform (product suite)
+
+Configuration phase starting ...
+
+You will be asked to choose options, if any, for each selected product and for
+any products that may be installed to satisfy software dependency requirements.
+
+Configuring VSI AXPVMS OPENVMS V8.4-2L1: OPENVMS and related products Platform
+
+    Copyright 2015-2016 VMS Software, Inc.
+
+    VMS Software, Inc.
+
+Do you want the defaults for all options? [YES] 
+</code></pre>
+
+<p>A big blob of text, give it a big <code>YES</code>:</p>
+
+<pre><code>Availability Manager (base) for OpenVMS Alpha
+
+CDSA for OpenVMS Alpha
+
+KERBEROS for OpenVMS Alpha
+
+SSL for OpenVMS Alpha (based on OpenSSL V0.9.8)
+
+  VSI AXPVMS SSL V1.4-502A: SSL V1.4 for OpenVMS Alpha (Based on OpenSSL 0.9.8ze)
+
+    VSI SSL is not Backward Compatible!
+
+
+        The VSI SSL Version 1.4 for OpenVMS is based on the 0.9.8ze baselevel of
+        OpenSSL. Some of the OpenSSL API, data structure and command are changed
+        from the previous HP SSL version 1.3 (Based on OpenSSL 0.9.7e).
+
+        If you were running a version of HP SSL prior to Version 1.4 and your
+        application is dependent upon the SSL, you must recompile and relink your
+        code after you upgrade to Version 1.4.
+
+        You must recompile and re-link your code with the latest SSL header files
+        and shareable images if you see the following error:
+
+        $ run ssl_test
+        %DCL-W-ACTIMAGE, error activating image SSL$LIBSSL_SHR32
+        -CLI-E-IMGNAME, image file
+        DWLLNG$DKA500:[SYS0.SYSCOMMON.][SYSLIB]SSL$LIBSSL_SHR32.EXE
+        -SYSTEM-F-SHRIDMISMAT, ident mismatch with shareable image
+        $
+
+        Following list of HP products/components that are dependent on HP SSL.
+        Look at the product website for these products that is compatible with
+        HP SSL Version 1.4
+
+                LDAP
+                ENCRYPT
+                Stunnel
+                HP System Management Homepage (HP SMH) for OpenVMS
+                HP WBEM Services for OpenVMS Integrity servers
+                HP OpenView Operations Agent for OpenVMS
+                OpenView Performance Agent (OVPA) for OpenVMS
+                Secure Web Server
+                ABS
+                HP Enterprise Directory
+
+        If any of the product dependent upon the above list of products, also
+        will not work.
+
+        For example:
+        -          iCAp/nPar depends upon HP WBEMServices also will not work
+        -          &quot;$ backup/encrypt command  which is in turn dependant on
+                        Encrypt will not work
+
+        Links to the above products are available in the HP SSL home page.
+        http://h71000.www7.hp.com/openvms/products/ssl/ssl.html
+
+
+        Do you want to continue? [YES] 
+</code></pre>
+
+<p>No need to review the options here:</p>
+
+<pre><code>    SSL1 V1.0 for OpenVMS Alpha (based on OpenSSL V1.0.2)
+
+    Performance Data Collector (base) for OpenVMS Alpha
+
+    HP Binary Checker for OpenVMS Alpha
+
+Do you want to review the options? [NO] 
+</code></pre>
+
+<p>And finally, after what seems ages, we&#39;re ready for liftoff:</p>
+
+<pre><code>Execution phase starting ...
+</code></pre>
+
+<p>One more summary, and it&#39;s chugging along installing:</p>
+
+<pre><code>The following products will be installed to destinations:
+    VSI AXPVMS AVAIL_MAN_BASE V8.4-2L1     DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS CDSA V2.4-320A              DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS DECNET_OSI V8.4-D           DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS DWMOTIF V1.7-F              DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS DWMOTIF_SUPPORT V8.4-2L1    DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS HPBINARYCHECKER V1.1-A      DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS KERBEROS V3.1-152A          DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS OPENVMS V8.4-2L1            DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS SSL V1.4-502A               DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS SSL1 V1.0-2JA               DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS TCPIP V5.7-13ECO5F          DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS TDC_RT V2.3-1220            DISK$ALPHASYS:[VMS$COMMON.]
+    VSI AXPVMS VMS V8.4-2L1                DISK$ALPHASYS:[VMS$COMMON.]
+
+Portion done: 0%
+</code></pre>
+
+<p>This part took over 2 hours on my machine, so grab a cup of your favorite
+beverage.</p>
+
+<p>If you are installing the VSI version of OpenVMS, you may get this error
+during install:</p>
+
+<pre><code>Portion done: 0%...10%
+
+%PCSI-E-OPENOUT, error opening DISK$ALPHASYS:[VMS$COMMON.][SYSHLP]HELPLIB.HLB; as output
+-RMS-E-FNF, file not found
+%PCSI-E-OPFAILED, operation failed
+Terminating is strongly recommended.  Do you want to terminate? [YES] no
+
+%PCSI-E-OPENIN, error opening DISK$ALPHASYS:[VMS$COMMON.][SYSLIB]DCLTABLES.EXE; as input
+-RMS-E-FNF, file not found
+%PCSI-E-OPFAILED, operation failed
+Terminating is strongly recommended.  Do you want to terminate? [YES] no
+Portion done: 20%...30%...40%...50%
+%PCSI-I-PRCOUTPUT, output from subprocess follows ...
+%SYSTEM-F-ACCVIO, access violation, reason mask=00, virtual address=00000000001AE104, PC=000000007FDC5324, PS=0000001B
+
+%PCSI-E-MODREPLERR, error replacing module DUMP in library DISK$ALPHASYS:[VMS$COMMON.][SYSLIB]DCLTABLES.EXE
+-SYSTEM-F-ACCVIO, access violation, reason mask=!XB, virtual address=!XH, PC=!XH, PS=!XL
+%PCSI-E-OPFAILED, operation failed
+Terminating is strongly recommended.  Do you want to terminate? [YES] no
+</code></pre>
+
+<p>This is not unique to AXPbox, it happens in AlphaVM, too - just ignore it,
+make sure to give it a <code>NO</code>.</p>
+
+<pre><code>Portion done: 60%...70%...80%...90%
+%PCSI-I-PRCOUTPUT, output from subprocess follows ...
+% - Execute SYS$MANAGER:TCPIP$CONFIG.COM to proceed with configuration of
+%   HP TCP/IP Services for OpenVMS.
+% 
+Portion done: 100%
+</code></pre>
+
+<p>Another summary, <code>Return</code> is your friend:</p>
+
+<pre><code>The following products have been installed:
+    VSI AXPVMS AVAIL_MAN_BASE V8.4-2L1     Layered Product
+    VSI AXPVMS CDSA V2.4-320A              Layered Product
+    VSI AXPVMS DECNET_OSI V8.4-D           Layered Product
+    VSI AXPVMS DWMOTIF V1.7-F              Layered Product
+    VSI AXPVMS DWMOTIF_SUPPORT V8.4-2L1    Layered Product
+    VSI AXPVMS HPBINARYCHECKER V1.1-A      Layered Product
+    VSI AXPVMS KERBEROS V3.1-152A          Layered Product
+    VSI AXPVMS OPENVMS V8.4-2L1            Platform (product suite)
+    VSI AXPVMS SSL V1.4-502A               Layered Product
+    VSI AXPVMS SSL1 V1.0-2JA               Layered Product
+    VSI AXPVMS TCPIP V5.7-13ECO5F          Layered Product
+    VSI AXPVMS TDC_RT V2.3-1220            Layered Product
+    VSI AXPVMS VMS V8.4-2L1                Operating System
+
+VSI AXPVMS OPENVMS V8.4-2L1: OPENVMS and related products Platform
+
+    VSI AXPVMS KERBEROS V3.1-152A
+
+      Configure and set up Kerberos
+
+      If Kerberos will be run on this system, but has not been
+      used previously, you need to perform the following steps.
+
+       o Run the Kerberos configuration procedure:
+
+          @SYS$STARTUP:KRB$CONFIGURE.COM
+
+       o Add the following line to SYS$MANAGER:SYSTARTUP_VMS.COM:
+
+          $ @SYS$STARTUP:KRB$STARTUP
+
+       o Add the following line to SYS$MANAGER:SYLOGIN.COM:
+
+          $ @SYS$MANAGER:KRB$SYMBOLS
+
+
+      Press RETURN to continue: 
+</code></pre>
+
+<p>Again more information:</p>
+
+<pre><code>    VSI AXPVMS SSL V1.4-502A: SSL V1.4 for OpenVMS Alpha (Based on OpenSSL 0.9.8ze)
+
+      There are post installation tasks that you must complete
+
+      after upgrading from previous SSL versions
+
+      including verifying startup command procedures and logical names.
+
+      Refer to SYS$HELP:SSL014.RELEASE_NOTES for more information.
+
+    VSI AXPVMS SSL1 V1.0-2JA: SSL1 for OpenVMS AXP V1.0-2J (Based on OpenSSL 1.0.2J)
+
+      There are post-installation tasks that you must complete.
+
+      After upgrading from previous SSL1 versions 
+
+      Refer to SYS$HELP:SSL100-2J.RELEASE_NOTES for more information.
+
+    VSI AXPVMS TDC_RT V2.3-1220: The Performance Data Collector (base) for OpenVMS
+
+      Users of this product require the following privileges:
+          (CMKRNL,LOG_IO,WORLD,PHY_IO,SYSPRV,SYSLCK)
+
+      Users of this product require the following process resource limits:
+          WSQUO minimum 6000
+
+      A read-me file is available in SYS$COMMON:[TDC]TDC_README.TXT
+
+      Release notes are available in SYS$COMMON:[TDC]TDC_RELEASE_NOTES.TXT
+
+    VSI AXPVMS HPBINARYCHECKER V1.1-A: HP Binary Checker
+
+      Release notes for HP Binary Checker available
+
+    VSI AXPVMS DECNET_OSI V8.4-D: DECnet-Plus V8.4-D for OpenVMS AXP
+
+      Release notes are available in SYS$HELP:DECNET-Plus-V8_4.RELEASE_NOTES
+
+      It is necessary to reboot your system for the software to take effect.
+
+      You may install OSI Applications after rebooting and configuring.
+
+    VSI AXPVMS TCPIP V5.7-13ECO5F: VSI TCP/IP Services for OpenVMS.
+
+      VSI AXPVMS SSL1 V1.0-2JA: SSL1 for OpenVMS AXP V1.0-2J (Based on OpenSSL 1.0.2J)
+
+        There are post-installation tasks that you must complete.
+
+        After upgrading from previous SSL1 versions 
+
+        Refer to SYS$HELP:SSL100-2J.RELEASE_NOTES for more information.
+
+      Check the release notes for current status of the product.
+%PCSIUI-I-COMPWERR, operation completed after explicit continuation from errors
+
+        **************************************************************
+        *                                                            *
+        *                        W A R N I N G                       *
+        *                                                            *
+        *  One or more errors were encountered during installation/  *
+        *  upgrade.  The target system may not operate correctly.    *
+        *                                                            *
+        *  You should correct the condition that caused the error(s) *
+        *  and repeat the installation/upgrade.                      *
+        *                                                            *
+        **************************************************************
+</code></pre>
+
+<p>Finally, output that states that our install is complete:</p>
+
+<pre><code>    The installation is now complete.
+
+    When the newly installed system is first booted, a special
+    startup procedure will be run.  This procedure will:
+
+        o  Configure the system for standalone or OpenVMS Cluster operation.
+        o  Run AUTOGEN to set system parameters.
+        o  Reboot the system with the newly set parameters.
+
+
+    You may shut down now or continue with other operations.
+
+
+  Process AXPVMS_INSTALL logged out at 18-OCT-2018 08:44:06.52
+
+Press Return to continue...
+</code></pre>
+
+<p>Enter <code>9</code> to shutdown the system:</p>
+
+<pre><code>    ****************************************************************
+
+    You can install or upgrade the OpenVMS ALPHA operating system
+    or you can install or upgrade layered products that are included
+    on the OpenVMS ALPHA distribution media (CD/DVD).
+
+    You can also execute DCL commands and procedures to perform
+    &quot;standalone&quot; tasks, such as backing up the system disk.
+
+    Please choose one of the following:
+
+        1)  Upgrade, install or reconfigure OpenVMS ALPHA Version V8.4-2L1
+        2)  Display layered products that this procedure can install
+        3)  Install or upgrade layered products
+        4)  Show installed products
+        5)  Reconfigure installed products
+        6)  Remove installed products
+        7)  Find, Install or Undo patches; Show or Delete Recovery Data
+        8)  Execute DCL commands and procedures
+        9)  Shut down this system
+
+Enter CHOICE or ? for help: (1/2/3/4/5/6/7/8/9/?) 9
+
+    Shutting down the system
+</code></pre>
+
+<p>You can close AXPbox by pressing <code>CTRL+C</code> if you&#39;re not automatically
+redirected to the SRM prompt (<code>P0 &gt;&gt;&gt;</code>) </p>
+
+<blockquote>
+<p>I do recommend you to make a copy of the disk image, as the installation
+takes a long time.</p>
+</blockquote>
+
+<p>If you want to play around with multiple installations, as we want to do, copy
+the <code>disk0.img</code> file somewhere safe, that saves you a few hours of
+installation later on.</p>
+
+<p>If you want to speed up the boot process, you can (re)enable
+<code>skip_memtest_hack = true;</code> in the <code>es40.cfg</code> file now.</p>
+
+<h3 id="toc_8">OpenVMS Configuration, autoboot</h3>
+
+<p>Now that we&#39;ve installed OpenVMS, it&#39;s time for the first boot. Edit the
+<code>es40.cfg</code> file and replace the <code>ALPHA0842L1.ISO</code> installation disk with your
+license ISO you created earlier. Fire up the emulator, we&#39;re going to setup
+<code>auto_boot</code>, so we skip the SRM prompt. Saves us a bit of time.</p>
+
+<p>At the SRM prompt, enter the following two commands:</p>
+
+<pre><code>P00&gt;&gt;&gt;set auto_action boot 
+P00&gt;&gt;&gt;set bootdef_dev dqa0
+</code></pre>
+
+<p>Then boot up:</p>
+
+<pre><code>P00&gt;&gt;&gt;boot dqa0     
+</code></pre>
+
+<p>Since this is the first boot, we are not setting <code>boot_osflags</code>, we want the
+conversational startup to happen this time. If you&#39;re wondering, the first
+half of <code>osflags</code> is the directory to boot from (0 = [SYS0], 1 = [SYS1]) and
+the second part can enable specific functions on boot:</p>
+
+<ul>
+<li><code>0,1</code>:  Enable SYSBOOT to change system parameters; enable conversational booting for debugging purposes.</li>
+<li><code>0,2</code>: Load XDELTA</li>
+<li><code>0,4</code>: Stops at the initial system breakpoint. (EXEC_INIT)</li>
+<li><code>0.8</code>: Performs a diagnostic bootstrap</li>
+<li><code>0,10</code>: Stops at the bootstrap breakpoints</li>
+<li><code>0,20</code>: Omits header from secondary boot image</li>
+<li><code>0,80</code>: Prompts for the name of the secondary bootfile</li>
+<li><code>0,100</code>: Halts the system before secondary bootstrap</li>
+<li><code>0,2000</code>: Marks corrected read data error pages as bad.</li>
+<li><code>0,10000</code>: Print debug messages on boot.</li>
+<li><code>0,20000</code>: Print selected user  messages at boot.</li>
+<li><code>0,30000</code>: Print even more debug messages on boot.</li>
+</ul>
+
+<p>The next time you fire up the emulator, it will automatically boot the
+harddisk:</p>
+
+<pre><code>AlphaServer ES40 Console V7.3-1, built on Feb 27 2007 at 12:57:47
+
+CPU 0 booting
+
+(boot dqa0.0.0.15.0 -flags 0)
+block 0 of dqa0.0.0.15.0 is a valid boot block
+</code></pre>
+
+<p>Now that we&#39;ve set up autoboot and OpenVMS is starting up, continue on to the
+next paragraph.</p>
+
+<h4 id="toc_9">First boot</h4>
+
+<p>First boot takes a while, things are setup, uncompressed and you have to wait
+some more time. If you thought the installation took a long time, this process
+will take about half that time in my experience.</p>
+
+<p>Here&#39;s the boatload of output:</p>
+
+<pre><code> OpenVMS (TM) Alpha Operating System, Version V8.4-2L1
+                    Copyright 2016 VMS Software, Inc.
+
+%DECnet-I-LOADED, network base image loaded, version = 05.17.02
+
+%DECnet-W-NOOPEN, could not open SYS$SYSROOT:[SYSEXE]NET$CONFIG.DAT
+
+
+    Installing required known files...
+
+    Configuring devices...
+
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:20:09.58  %%%%%%%%%%%
+Operator _U1$OPA0: has been enabled, username SYSTEM
+
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:20:09.59  %%%%%%%%%%%
+Operator status for operator _U1$OPA0:
+CENTRAL, PRINTER, TAPES, DISKS, DEVICES, CARDS, NETWORK, CLUSTER, SECURITY,
+LICENSE, OPER1, OPER2, OPER3, OPER4, OPER5, OPER6, OPER7, OPER8, OPER9, OPER10,
+OPER11, OPER12
+
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:20:09.62  %%%%%%%%%%%
+Logfile has been initialized by operator _U1$OPA0:
+Logfile is U1::SYS$SYSROOT:[SYSMGR]OPERATOR.LOG;1
+
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:20:09.62  %%%%%%%%%%%
+Operator status for operator U1::SYS$SYSROOT:[SYSMGR]OPERATOR.LOG;1
+CENTRAL, PRINTER, TAPES, DISKS, DEVICES, CARDS, NETWORK, CLUSTER, SECURITY,
+LICENSE, OPER1, OPER2, OPER3, OPER4, OPER5, OPER6, OPER7, OPER8, OPER9, OPER10,
+OPER11, OPER12
+
+%SYSTEM-I-BOOTUPGRADE, security auditing disabled
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:20:10.09  %%%%%%%%%%%
+Message from user SYSTEM on U1
+%JBC-E-OPENERR, error opening SYS$COMMON:[SYSEXE]QMAN$MASTER.DAT;
+
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:20:10.09  %%%%%%%%%%%
+Message from user SYSTEM on U1
+-RMS-E-FNF, file not found
+
+%LICENSE-F-EMTLDB, license database contains no license records
+%RUN-S-PROC_ID, identification of created process is 0000002A
+%SYSTEM-I-BOOTUPGRADE, security server not started
+%SYSTEM-I-BOOTUPGRADE, ACME server not started
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:20:12.51  %%%%%%%%%%%
+Message from user SYSTEM on U1
+TDF-I-SETTDF TDF set new timezone differential
+
+NET$STARTUP, Network not started due to UPGRADE boot
+%SYSTEM-W-NOSUCHDEV, no such device available
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:20:15.20  %%%%%%%%%%%
+Message from user SYSTEM on U1
+%LICENSE-E-NOAUTH, VSI OPENVMS-ALPHA use is not authorized on this node
+-LICENSE-F-NOLICENSE, no license is active for this software product
+-LICENSE-I-SYSMGR, please see your system manager
+
+
+%LICENSE-E-NOAUTH, VSI OPENVMS-ALPHA use is not authorized on this node
+-LICENSE-F-NOLICENSE, no license is active for this software product
+-LICENSE-I-SYSMGR, please see your system manager
+Startup processing continuing...
+
+%SYSTEM-I-BOOTUPGRADE, Coordinated Startup not performed
+%EWA0, Auto-negotiation mode set by console
+%EWA0, Link state: UP
+%EWA0, Auto-negotiation (internal) starting
+%EWA0, Full Duplex 100baseTX connection selected
+
+
+CDSA-I-InitCDSA, Initializing CDSA...
+MDS installed successfully.
+Module installed successfully.
+Module installed successfully.
+Module installed successfully.
+Module installed successfully.
+Module installed successfully.
+Module installed successfully.
+Module installed successfully.
+Module installed successfully.
+Module installed successfully.
+Module installed successfully.
+Module installed successfully.
+CDSA-I-InitCDSA, CDSA Initialization complete
+
+CDSA-I-InitSecDel, Initializing Secure Delivery...
+Install completed successfully.
+Install completed successfully.
+Module installed successfully.
+Module installed successfully.
+CDSA-I-InitSecDel, Secure Delivery Initialization complete
+
+    AUTOGEN will now be run to compute the new system parameters.  The system
+    will then shut down and reboot, and the installation or upgrade will be
+    complete.
+
+    After rebooting you can continue with such system management tasks as:
+
+            Configuring networking software (TCP/IP Services, DECnet, other)
+            Using SYS$MANAGER:CLUSTER_CONFIG.COM to create an OpenVMS Cluster
+            Creating FIELD, SYSTEST and SYSTEST_CLIG accounts if needed
+
+%AUTOGEN-I-BEGIN, GETDATA phase is beginning.
+%AUTOGEN-I-NEWFILE,  Previous contents of SYS$SYSTEM:CLU$PARAMS.DAT have
+  been copied to SYS$SYSTEM:CLU$PARAMS.OLD.  You may wish to purge
+  SYS$SYSTEM:CLU$PARAMS.OLD.
+%AUTOGEN-I-NEWFILE,  Previous contents of SYS$SYSTEM:CLU$PARAMS.DAT have
+  been copied to SYS$SYSTEM:CLU$PARAMS.OLD.  You may wish to purge
+  SYS$SYSTEM:CLU$PARAMS.OLD.
+%AUTOGEN-I-NEWFILE,  Previous contents of SYS$SYSTEM:CLU$PARAMS.DAT have
+  been copied to SYS$SYSTEM:CLU$PARAMS.OLD.  You may wish to purge
+  SYS$SYSTEM:CLU$PARAMS.OLD.
+%AUTOGEN-I-NEWFILE, A new version of SYS$SYSTEM:PARAMS.DAT has been created.
+        You may wish to purge this file.
+%AUTOGEN-I-END, GETDATA phase has successfully completed.
+%AUTOGEN-I-BEGIN, GENPARAMS phase is beginning.
+%AUTOGEN-I-NEWFILE, A new version of SYS$MANAGER:VMSIMAGES.DAT has been created.
+        You may wish to purge this file.
+%SYSTEM-W-NOSUCHDEV, no such device available
+%AUTOGEN-I-NEWFILE, A new version of SYS$SYSTEM:SETPARAMS.DAT has been created.
+        You may wish to purge this file.
+%AUTOGEN-I-END, GENPARAMS phase has successfully completed.
+%AUTOGEN-I-BEGIN, GENFILES phase is beginning.
+Computed size: 42;  current size: 8202
+%SYSGEN-I-CREATED, SYS$SYSROOT:[SYSEXE]SYS$ERRLOG.DMP;2 created
+Computed size: 2105300;  current size: 4604
+%SYSGEN-I-EXTENDED, SYS$SYSROOT:[SYSEXE]PAGEFILE.SYS;1 extended
+
+        Extending SYS$SYSROOT:[SYSEXE]PAGEFILE.SYS to 2105300 blocks will take
+        approximately 180 seconds.  Please wait ...
+</code></pre>
+
+<p>180 seconds, I wish. It took ten minutes on my system, but your mileage may
+vary.  Next few lines of output, including an automatic reboot:</p>
+
+<pre><code>%SYSGEN-I-EXTENDED, SYS$SYSROOT:[SYSEXE]PAGEFILE.SYS;1 extended
+                                        ... done.
+Computed size: 315554;  current size: 0
+%SYSGEN-I-CREATED, DQA0:[SYS0.SYSEXE]SYSDUMP.DMP;1 created
+%SYSGEN-I-EXTENDED, DQA0:[SYS0.SYSEXE]SYSDUMP.DMP;1 extended
+Computed size: 66200;  current size: 1000
+%SYSGEN-I-EXTENDED, SYS$SYSROOT:[SYSEXE]SWAPFILE.SYS;1 extended
+
+%AUTOGEN-I-REPORT, AUTOGEN has produced some informational messages which
+        have been stored in the file SYS$SYSTEM:AGEN$PARAMS.REPORT.  You may
+        wish to review the information in that file.
+
+%AUTOGEN-I-END, GENFILES phase has successfully completed.
+%AUTOGEN-I-BEGIN, SETPARAMS phase is beginning.
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:26:35.77  %%%%%%%%%%%
+Message from user SYSTEM on U1
+%SYSGEN-I-WRITECUR, CURRENT system parameters modified by process ID 00000023 in
+to file SYS$SYSROOT:[SYSEXE]ALPHAVMSSYS.PAR;2
+
+%AUTOGEN-I-SYSGEN, parameters modified
+%AUTOGEN-I-END, SETPARAMS phase has successfully completed.
+%AUTOGEN-I-BEGIN, REBOOT phase is beginning.
+
+The system is shutting down to allow the system to boot with the
+generated site-specific parameters and installed images.
+
+The system will automatically reboot after the shutdown and the
+upgrade will be complete.
+
+
+
+        SHUTDOWN -- Perform an Orderly System Shutdown
+                    on node U1
+</code></pre>
+
+<p>As you might have noticed, this console terminal is very verbose. When the
+first boot is finished, make sure to configure networking and work via SSH as
+a regular user, that terminal will be way less chatty.</p>
+
+<pre><code>%SHUTDOWN-I-BOOTCHECK, performing reboot consistency check...
+%SHUTDOWN-I-CHECKOK, basic reboot consistency check completed
+
+%SHUTDOWN-I-OPERATOR, this terminal is now an operator&#39;s console
+%SHUTDOWN-I-DISLOGINS, interactive logins will now be disabled
+%SET-I-INTSET, login interactive limit = 0, current interactive value = 0
+%SHUTDOWN-I-STOPQUEUES, the queues on this node will now be stopped
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:26:38.49  %%%%%%%%%%%
+Message from user SYSTEM on U1
+%JBC-E-OPENERR, error opening SYS$COMMON:[SYSEXE]QMAN$MASTER.DAT;
+
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:26:38.50  %%%%%%%%%%%
+Message from user SYSTEM on U1
+-RMS-E-FNF, file not found
+
+
+SHUTDOWN message on U1 from user SYSTEM at U1 Batch   06:26:38
+U1 will shut down in 0 minutes; back up soon.  Please log off node U1.
+Reboot system with AUTOGENerated parameters
+
+
+%SHUTDOWN-I-STOPUSER, all user processes will now be stopped
+%SHUTDOWN-I-REMOVE, all installed images will now be removed
+%SHUTDOWN-I-DISMOUNT, all volumes will now be dismounted
+%%%%%%%%%%%  OPCOM   2-NOV-2020 06:26:39.86  %%%%%%%%%%%
+Message from user SYSTEM on U1
+STARTUP, U1 shutdown was requested by the operator.
+
+halted CPU 0
+
+halt code = 5
+HALT instruction executed
+PC = ffffffff80093a84
+</code></pre>
+
+<p>Since we&#39;ve setup autoboot, the emulator automatically boots again:</p>
+
+<pre><code>CPU 0 booting
+
+resetting all I/O buses
+(boot dqa0.0.0.15.0 -flags 0)
+block 0 of dqa0.0.0.15.0 is a valid boot block
+reading 1230 blocks from dqa0.0.0.15.0
+bootstrap code read in
+base = 200000, image_start = 0, image_bytes = 99c00(629760)
+initializing HWRPB at 2000
+initializing page table at 3ff54000
+initializing machine state
+setting affinity to the primary CPU
+jumping to bootstrap code
+
+
+    OpenVMS (TM) Alpha Operating System, Version V8.4-2L1
+                    Copyright 2016 VMS Software, Inc.
+
+%DECnet-I-LOADED, network base image loaded, version = 05.17.02
+
+%DECnet-W-NOOPEN, could not open SYS$SYSROOT:[SYSEXE]NET$CONFIG.DAT
+
+%STDRV-I-STARTUP, OpenVMS startup begun at  2-NOV-2020 06:27:11.79
+</code></pre>
+
+<p>I&#39;m going to skip over the output now, since that would be a big wall of text
+again.  Once your prompt hangs at the following, you can press <code>Return</code> to
+login:</p>
+
+<pre><code>%RUN-S-PROC_ID, identification of created process is 00000418
+  SYSTEM       job terminated at  2-NOV-2020 06:28:47.35
+
+  Accounting information:
+  Buffered I/O count:               4004      Peak working set size:       7792
+  Direct I/O count:                 1753      Peak virtual size:         186624
+  Page faults:                      4820      Mounted volumes:                0
+  Charged CPU time:        0 00:00:26.35      Elapsed time:       0 00:01:35.85
+</code></pre>
+
+<p>It will ask you to choose a new password, do so:</p>
+
+<pre><code> Welcome to OpenVMS (TM) Alpha Operating System, Version V8.4-2L1
+
+Username: SYSTEM
+Password: 
+%LICENSE-I-NOLICENSE, no license is active for this software product
+%LOGIN-S-LOGOPRCON, login allowed from OPA0:
+   Welcome to OpenVMS (TM) Alpha Operating System, Version V8.4-2L1
+
+Your password has expired; you must set a new password to log in
+
+
+New password: 
+Verification: 
+</code></pre>
+
+<p>Your output will be full of AUDITSERVER messages, you get my point on the chattiness:</p>
+
+<pre><code>%%%%%%%%%%%  OPCOM   2-NOV-2020 06:32:12.55  %%%%%%%%%%%
+Message from user AUDIT$SERVER on U1
+Security alarm (SECURITY) and security audit (SECURITY) on U1, system id: 1156
+Auditable event:          System UAF record modification
+Event time:                2-NOV-2020 06:32:12.54
+PID:                      0000041A        
+Process name:             SYSTEM          
+Username:                 SYSTEM          
+Process owner:            [SYSTEM]
+Terminal name:            OPA0:
+Image name:               U1$DQA0:[SYS0.SYSCOMMON.][SYSEXE]LOGINOUT.EXE
+Object class name:        FILE
+Object name:              SYS$COMMON:[SYSEXE]SYSUAF.DAT;1
+User record:              SYSTEM                          
+Password Date:            New:       2-NOV-2020 06:32
+                          Original: 18-OCT-2018 06:10
+Posix UID:                -2              
+Posix GID:                -2 (%XFFFFFFFE) 
+
+$ 
+</code></pre>
+
+<p>The dollar sign means you&#39;re now at a shell prompt. Finally! You can view some
+system information with the <code>show status</code> or <code>show cpu</code> command:</p>
+
+<pre><code>$ show status
+  Status on   2-NOV-2020 06:34:04.03     Elapsed CPU :   0 00:00:10.09
+  Buff. I/O :      277    Cur. ws. :    4096    Open files :         0
+  Dir. I/O :       105    Phys. Mem. :  1312    Page Faults :      529
+$ show cpu
+
+System: U1, AlphaServer ES40
+
+CPU ownership sets:
+   Active               0
+   Configure            0
+
+CPU state sets:
+   Potential            0
+   Autostart            0-3
+   Powered Down         None
+   Not Present          1-3
+   Hard Excluded        None
+   Failover             None
+$ 
+</code></pre>
+
+<p>The help system is very comprehensive on OpenVMS, try the command <code>help show</code>,
+and play around. To exit  a command if you&#39;re stuck, don&#39;t use <code>CTRL+C</code>, but
+<code>CTRL+Z</code>. </p>
+
+<p>Once you finished playing around and admiring your hard work, continue on to
+activating the license.</p>
+
+<h4 id="toc_10">Activate the license</h4>
+
+<p>If you haven&#39;t prepared the license ISO, check the top of this page for that
+topic. I assume you have  it configured in the <code>es40.cfg</code> file. This short
+paragraph is <a href="/s/blog/OpenVMS_Mount_ISO_and_execute_scripts.html">a summary of this page, read that for  more information on whats
+happening</a>.</p>
+
+<p>Figure out which disk is the license ISO:</p>
+
+<pre><code>$ show dev
+
+Device                  Device           Error   Volume          Free  Trans Mnt
+ Name                   Status           Count    Label         Blocks Count Cnt
+U1$DQA0:                Mounted              0 ALPHASYS        7998480   313   1
+U1$DQA1:                Offline              1
+U1$DVA0:                Offline              0
+U1$DQB0:                Online               0
+U1$DQB1:                Offline              1
+</code></pre>
+
+<p>The only other <code>online</code> disk is <code>DQB0</code>. Check that for more information:</p>
+
+<pre><code>$ show dev dqb0 /full
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Disk U1$DQB0:, device type pak.iso, is online, file-oriented device, shareable,
+    available to cluster, error logging is enabled.
+
+    Error count                    0    Operations completed                  1
+    Owner process                 &quot;&quot;    Owner UIC                      [SYSTEM]
+    Owner process ID        00000000    Dev Prot            S:RWPL,O:RWPL,G:R,W
+    Reference count                0    Default buffer size                 512
+    Total blocks            16515072    Sectors per track                    63
+    Total cylinders            16384    Tracks per cylinder                  16
+</code></pre>
+
+<p>This is our <code>pak.iso</code> file we created earlier. Mount the license disk:</p>
+
+<pre><code>$ MOUNT /OVERRIDE=IDENT DQB0  
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>%MOUNT-I-WRITELOCK, volume is write locked
+%MOUNT-I-CDROM_ISO, license: (1 of 1) , mounted on  _U1$DQB0:
+</code></pre>
+
+<p>Navigate to the mounted volume folder:</p>
+
+<pre><code>SET DEF _U1$DQB0:[000000]
+</code></pre>
+
+<ul>
+<li><code>_U1</code> is our hostname, on clusters all disks are available on all nodes, you address them via their hostname.</li>
+<li><code>DQB0</code> is the device name</li>
+<li><code>[000000]</code> has to do with the Master File Directory. Check <a href="/s/blog/OpenVMS_Mount_ISO_and_execute_scripts.html">this page</a> for more info.</li>
+</ul>
+
+<p>This folder has our license file:</p>
+
+<pre><code>$ dir
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Directory U1$DQB0:[000000]
+
+ALPHA_CO.COM;1      
+
+Total of 1 file.
+</code></pre>
+
+<p>If you have a HP hobbyist license, replace the filename in the following commands.</p>
+
+<p>Copy the license script from the disk to the system. This is required because
+we need to change the document format, line endings are messed up. <a href="/s/blog/OpenVMS_Mount_ISO_and_execute_scripts.html">Check here
+for more info on that as well</a>.</p>
+
+<pre><code>COPY ALPHA_CO.COM;1 SYS$LOGIN
+</code></pre>
+
+<p>Navigate back to the folder we just copied the license to:</p>
+
+<pre><code>SET DEF SYS$LOGIN
+</code></pre>
+
+<p>Update the file to &quot;fix&quot; the line ending:</p>
+
+<pre><code>SET FILE/ATTRIBUTE=(RFM=STM) ALPHA_CO.COM;1
+</code></pre>
+
+<p>Finally, execute the license script:</p>
+
+<pre><code> @ALPHA_CO.COM;1
+</code></pre>
+
+<p>On my first try, nothing happened, no output. Checking the license status
+confirmed that no licenses were added:</p>
+
+<pre><code>$ SHOW LICENSE
+
+Active licenses on node U1:
+%SHOW-I-NOLICENSE, no licenses exist
+</code></pre>
+
+<p>The script does contain license command:</p>
+
+<pre><code>$ TYPE ALPHA_CO.COM;1
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>$! Software Product Authorization Key Replica
+$! Issued by LICENSESVR  
+$! Issued on 21-SEP-2020 08:13
+$!-----------------------------------
+$ LICENSE REGISTER ALPHA-LP - 
+/ISSUER=VSI - 
+/AUTHORIZATION=...
+/PRODUCER=VSI - 
+/UNITS=0 - 
+/TERMINATION_DATE=20-SEP-2021  - 
+/AVAILABILITY=H - 
+/OPTIONS=(ALPHA) - 
+/CHECKSUM=...
+$! Software Product Authorization Key Replica
+$! Issued by LICENSESVR  
+$! Issued on 21-SEP-2020 08:13
+$!-----------------------------------
+$ LICENSE REGISTER ALPHA-SYSTEM - 
+/ISSUER=VSI - 
+/AUTHORIZATION=...
+/PRODUCER=VSI - 
+/UNITS=0 - 
+/TERMINATION_DATE=20-SEP-2021  - 
+/AVAILABILITY=A - 
+/OPTIONS=(ALPHA) - 
+/CHECKSUM=...
+$! Software Product Authorization Key Replica
+$! Issued by LICENSESVR  
+$! Issued on 21-SEP-2020 08:14
+$!-----------------------------------
+$ 
+</code></pre>
+
+<p>Manually trying to register the license told me that it was already registered:</p>
+
+<pre><code>$ LICENSE REGISTER
+_PRODUCT: ALPHA-LP
+%LICENSE-F-DUPREC, license is already registered
+</code></pre>
+
+<p>So whats going on there? On the HP build of OpenVMS, registering the license spams 
+the console with loads of output, If we try to run the script again, it says that 
+the license is already registered:</p>
+
+<pre><code>$ @ALPHA_CO.COM;1
+%LICENSE-F-DUPREC, license is already registered
+</code></pre>
+
+<p>The <code>HELP LICENSE</code> page tells me that there is also a <code>LICENSE LIST</code> command.
+If we issue that, we see that there are two active licenses:</p>
+
+<pre><code>$ LICENSE LIST /FULL
+
+ License Management Facility  V2.0
+
+ License Database File:       SYS$COMMON:[SYSEXE]LMF$LICENSE.LDB;1
+ Created on:              18-OCT-2018
+ Created by user:         SYSTEM
+ Created by LMF Version:      V2.0
+
+ -----------------------------------
+ Issuer:              VSI
+ Authorization:           ...
+ Product Name:            ALPHA-LP
+ Producer:            VSI
+ Units:               0 
+ Version:             0.0
+ Release Date:            (none)
+ PAK Termination Date:        20-SEP-2021
+ Availability:            H (Alpha &amp; IA64 Layered Products)
+ Activity:            0 
+ Options:             ALPHA
+ Hardware ID:
+
+ Revision Level:          1 
+ Status:              Active
+
+ -----------------------------------
+ Issuer:                      VSI
+ Authorization:               ...
+ Product Name:                ALPHA-SYSTEM
+ Producer:                    VSI
+ Units:                       0
+ Version:                     0.0
+ Release Date:                (none)
+ PAK Termination Date:        20-SEP-2021
+ Availability:                A (VAX/VMS Capacity or OpenVMS Unlimited or Base)
+ Activity:                    0
+ Options:                     ALPHA
+ Hardware ID:
+
+ Revision Level:              1
+ Status:                      Active
+ Command:                     REGISTER
+ Modified by user:            SYSTEM
+ Modified on:                  2-NOV-2020 06:47:37.10
+ [End Of List]
+</code></pre>
+
+<p>Why all this extra text and troubleshooting? On HP OpenVMS you got a load of
+output telling all the licenses are activated, on VSI OpenVMS, nothing, and
+the <code>SHOW LICENSE</code> command tells me that there is nothing active. But, it
+seems this is different between HP and VSI, and it seems our hobbyist license
+is activated. </p>
+
+<p>I&#39;m not sure if everything is correct now, but lets continue on. On the HP
+OpenVMS build, this does work so let&#39;s assume this works as well. Continue on
+with creating a user.</p>
+
+<p><em>Update after a few days of writing this guide</em>, after a reboot
+(<code>@SYS$SYSTEM:SHUTDOWN.COM</code>), the licenses became visible:</p>
+
+<pre><code>Active licenses on node U1:
+
+------- Product ID --------    ---- Rating ----- -- Version --
+Product            Producer    Units Avail Activ Version Release    Termination
+ALPHA-LP           VSI             0  H     0      0.0  (none)      20-SEP-2021 
+ALPHA-SYSTEM       VSI             0  A     0      0.0  (none)      20-SEP-2021 
+</code></pre>
+
+<h4 id="toc_11">Add a user</h4>
+
+<p>It&#39;s a bad idea to always work with the administrative user, just as on linux or windows. Therefore, 
+we will create a user that you can use for your daily activities. </p>
+
+<p>First create a folder for home folders of users:</p>
+
+<pre><code>CREATE/DIR SYS$SYSDEVICE:[USERS]
+</code></pre>
+
+<p>Check if there is not already a symlink:</p>
+
+<pre><code>show log sys$users
+</code></pre>
+
+<p>Output should be:</p>
+
+<pre><code>%SHOW-S-NOTRAN, no translation for logical name SYS$USERS
+</code></pre>
+
+<p>If so, continue on to create a logical name (sort of symlink):</p>
+
+<pre><code>ASSIGN SYS$SYSDEVICE:[USERS] SYS$USERS
+</code></pre>
+
+<p>It&#39;s not required to create such a folder, but as I&#39;m used to Linux having <code>/home/</code>, it feels
+more comfortable and tidy to have a specific user folder here as well.</p>
+
+<p>Create home folder for our new user:</p>
+
+<pre><code>CREATE /DIRECTORY SYS$SYSDEVICE:[USERS.REMY]
+</code></pre>
+
+<p>Remember, on OpenVMS, folders are separated by a dot (<code>.</code>), not a <code>/</code> or <code>\</code>, so 
+<code>USERS.REMY</code> is the comparable to <code>C:\Users\Remy</code> or <code>/home/remy</code>.</p>
+
+<p>Add a new administrative user with a temp password (TEMP). Same privileges as the <code>SYSTEM</code> account.</p>
+
+<pre><code># change to the folder where the user management program is located
+$ SET DEFAULT SYS$SYSTEM
+$ RUN AUTHORIZE
+UAF&gt; ADD REMY/PASSWORD=TEMP/OWNER=&quot;Remy van Elst&quot;/DEV=SYS$SYSDEVICE/DIR=[USERS.REMY]/UIC=[200,201]/FLAG=NODISUSER/PRIV=ALL
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>%UAF-I-PWDLESSMIN, new password is shorter than minimum password length
+%UAF-I-ADDMSG, user record successfully added
+%UAF-I-RDBADDMSGU, identifier REMY value [000200,000201] added to rights database
+</code></pre>
+
+<p>On the main audit console:</p>
+
+<pre><code>%%%%%%%%%%%  OPCOM   2-NOV-2020 07:17:26.10  %%%%%%%%%%%
+Message from user AUDIT$SERVER on U1
+Security alarm (SECURITY) and security audit (SECURITY) on U1, system id: 1156
+Auditable event:          System UAF record addition
+Event time:                2-NOV-2020 07:17:26.09
+PID:                      0000041A        
+Process name:             SYSTEM          
+Username:                 SYSTEM          
+Process owner:            [SYSTEM]
+Terminal name:            OPA0:
+Image name:               U1$DQA0:[SYS0.SYSCOMMON.][SYSEXE]AUTHORIZE.EXE
+Object class name:        FILE
+Object name:              SYS$COMMON:[SYSEXE]SYSUAF.DAT;1
+User record:              REMY                            
+Default Device:           New:      SYS$SYSDEVICE:
+                          Original: &lt;none&gt;
+Default Directory:        New:      [USERS.REMY]
+                          Original: [USER]
+Flags:                    New:      (none)
+                          Original: DISUSER
+Owner:                    New:      Remy van Elst
+                          Original: &lt;none&gt;
+Privileges:               New:      CMKRNL,CMEXEC,SYSNAM,GRPNAM,ALLSPOOL,IMPERSO
+NATE,DIAGNOSE,LOG_IO,GROUP,NOACNT,PRMCEB,PRMMBX,PSWAPM,SETPRI,SETPRV,TMPMBX,WORL
+D,MOUNT,OPER,EXQUOTA,NETMBX,VOLPRO,PHY_IO,BUGCHK,PRMGBL,SYSGBL,PFNMAP,SHMEM,SYSP
+RV,BYPASS,SYSLCK,SHARE,UPGRADE,DOWNGRADE,GRPPRV,READALL,IMPORT,AUDIT,SECURITY
+                          Original: TMPMBX,NETMBX
+UIC:                      New:      [200,201]
+                          Original: [200,200]
+Password Date:            New:      (pre-expired)    
+                          Original: (pre-expired)    
+Posix UID:                -2              
+Pos
+*TRUNCATED* -- If audits are enabled for this class, the full message
+               can be examined with ANALYZE/AUD
+
+%%%%%%%%%%%  OPCOM   2-NOV-2020 07:17:26.17  %%%%%%%%%%%
+Message from user AUDIT$SERVER on U1
+Security alarm (SECURITY) and security audit (SECURITY) on U1, system id: 1156
+Auditable event:          Identifier added
+Event time:                2-NOV-2020 07:17:26.16
+PID:                      0000041A        
+Process name:             SYSTEM          
+Username:                 SYSTEM          
+Process owner:            [SYSTEM]
+Terminal name:            OPA0:
+Image name:               U1$DQA0:[SYS0.SYSCOMMON.][SYSEXE]AUTHORIZE.EXE
+Identifier name:          REMY                            
+Identifier value:         %X00800081      
+Attributes:               none
+Posix UID:                -2              
+Posix GID:                -2 (%XFFFFFFFE) 
+</code></pre>
+
+<p>Press <code>CTRL+Z</code>to exit <code>UAF</code>, you should be back in a regular shell prompt (<code>$</code>).</p>
+
+<p>Assign the home folder to the new user:</p>
+
+<pre><code>SET DIRECTORY/OWNER=REMY SYS$SYSDEVICE:[USERS.REMY]
+</code></pre>
+
+<p>Logout as the system user:</p>
+
+<pre><code>LOG
+</code></pre>
+
+<p>Reconnect and login as your new user, the password is <code>TEMP</code>. You&#39;ll be prompted to set a new password.</p>
+
+<pre><code> Welcome to OpenVMS (TM) Alpha Operating System, Version V8.4    
+
+Username: remy
+Password: TEMP
+   Welcome to OpenVMS (TM) Alpha Operating System, Version V8.4
+
+Your password has expired; you must set a new password to log in
+
+New password: 
+Verification: 
+</code></pre>
+
+<p>Check your home folder:</p>
+
+<pre><code>$ show def
+  SYS$SYSDEVICE:[USERS.REMY]
+</code></pre>
+
+<p>You can now try to run a privileged command, which should fail:</p>
+
+<pre><code>set def sys$system
+run authorize
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>%UAF-E-NAOFIL, unable to open system authorization file (SYSUAF.DAT)
+-RMS-E-PRV, insufficient privilege or file protection violation
+</code></pre>
+
+<p>You can give yourself permissions (sort of <code>sudo</code>) with the following command:</p>
+
+<pre><code>$ SET PROCESS/PRIVILEGE=SYSPRV
+</code></pre>
+
+<p>After which <code>run authorize</code> will work:</p>
+
+<pre><code>$ run authorize
+UAF&gt; 
+</code></pre>
+
+<p>With this separate account, you can still do privileged work, but you will have to elevate your rights,
+making you aware of whats happening and what you&#39;re doing.</p>
+
+<h3 id="toc_12">Networking</h3>
+
+<p>Now the fun part you&#39;ve all been waiting for, networking. As you could have read in the introduction,
+this was quite <a href="https://github.com/lenticularis39/axpbox/issues/16">an adventure for me to figure out</a> and due to the way network is emulated in AXPbox,
+there are some limitations. If you build and run AXPbox on Windows, you shouldn&#39;t have these problems,
+<code>libpcap</code> there supports host communication. But since this is a linux guide, we have to do a few 
+workarounds.</p>
+
+<p>If you have the luck of having two separate NIC&#39;s and bridging works, then lucky you. It saves you a
+bunch of configuration. Plug in both cables (or wireless), configure one NIC (secondary) in <code>es40.cfg</code> 
+and you&#39;re good to go. </p>
+
+<p>In the introduction we already discussed the setup, a virtual machine with
+2 NIC&#39;s, one Virtualbox NAT and one bridged. Why one NAT and not two bridged adapters? Well, if the bridged
+adapter inside the VM would work, then we wouldn&#39;t need the VM because our host would be able to be 
+bridged as well. Due to the host OS not being able to receive libpcap network packages, we eliminate 
+the host OS nic by using a virtualbox NAT NIC. </p>
+
+<p>You need to give the emulator special permissions for networking:</p>
+
+<pre><code>sudo setcap cap_net_raw,cap_net_bind_service=+eip ./axpbox
+</code></pre>
+
+<p>If you still get a permission error afterwards, start the emulator as root (<code>sudo ./axpbox run</code>).</p>
+
+<p>Inside <code>es40.cfg</code> you need to configure your interface:</p>
+
+<pre><code>pci0.4 = dec21143 
+{
+  adapter = &quot;enp0s3&quot; 
+  mac = &quot;08-00-DE-AD-BE-EF&quot;; 
+}
+</code></pre>
+
+<p>The <code>MAC</code> parameter is optional, but if you are running multiple AXPbox instances to play with clustering,
+I recommend you change it to something other than the default. Change <code>en0ps3</code> to your network adapter,
+you can find it with the <code>ifconfig</code> or <code>ip addr</code> command.</p>
+
+<p>The next topic is for the Virtualbox setup. You can skip that if you don&#39;t use this setup with virtualbox.</p>
+
+<h4 id="toc_13">Virtualbox Port Forward</h4>
+
+<p>If you&#39;ve got the same setup as I have, Virtualbox Debian 10 VM with 2 NIC&#39;s, you need to setup a port forward
+to be able to reach OpenVMS. OpenVMS can connect to the outside world via NAT, but you cannot get in. Just like
+your home router allows all your devices to access the internet, but blocks the internet from accessing your 
+devices unless you open a port.</p>
+
+<p>Open up the preferences pane in Virtualbox for the Debian VM, go to the networking page and select the 
+NAT adapter tab. Click Advanced, then Port Forwarding and enter the following, as the image below shows:</p>
+
+<p><img src="/s/inc/img/vbox-portfw-openvms.png" alt="virtualbox port forward"></p>
+
+<ul>
+<li>Enter port 2323 as Host port, and 23 as guest port for telnet.</li>
+<li>Enter port 2222 as Host port, and 22 as guest port for SSH.</li>
+</ul>
+
+<p>For both lines, enter the NAT OpenVMS IP, in my case, <code>10.0.2.20</code>. </p>
+
+<p>You can now connect to localhost (or the Debian VM IP) with those ports to reach OpenVMS:</p>
+
+<pre><code>telnet 10.0.0.8 2323 # 10.0.0.8 is my Debian VM IP
+</code></pre>
+
+<p>Do note that you have to setup the services, which we&#39;ll do in the next section. Here&#39;s a picture of my
+HP OpenVMS telnet login:</p>
+
+<p><img src="/s/inc/img/openvms84-1.png" alt="telnet login"></p>
+
+<p>If you decide to setup WASD (web server) you need to open up port 80/443 as well. Inside the NAT network
+all communication is allowed, so clustering doesn&#39;t require any additional ports open.</p>
+
+<h4 id="toc_14">OpenVMS TCP/IP setup</h4>
+
+<p>Login as the SYSTEM user (or elevate your permissions, <code>SET PROCESS/PRIVILEGE=SYSPRV</code>) and issue the following 
+command to open the interactive menu driven configuration for TCP/IP:</p>
+
+<pre><code>@SYS$STARTUP:TCPIP$CONFIG.COM
+</code></pre>
+
+<p>In the virtualbox setup, the IP and subnet for OpenVMS will be <code>10.0.2.25/24</code>, the gateway will be 
+<code>10.0.2.2</code> and DNS is <code>8.8.8.8</code>. In the below commands, replace those for your network.</p>
+
+<p>On VSI OpenVMS the output is a bit different than on HP OpenVMS the first time, you should be able to 
+follow along with both. First is a warning that not everything is setup yet:</p>
+
+<pre><code>        TCP/IP Network Configuration Procedure
+
+    This procedure helps you define the parameters required
+    to run HP TCP/IP Services for OpenVMS on this system. 
+
+
+    Checking TCP/IP Services for OpenVMS configuration database files.
+
+    Creating SYS$COMMON:[SYSEXE]TCPIP$SERVICE.DAT
+    Creating SYS$COMMON:[SYSEXE]TCPIP$HOST.DAT
+    Creating SYS$COMMON:[SYSEXE]TCPIP$NETWORK.DAT
+    Creating SYS$COMMON:[SYSEXE]TCPIP$ROUTE.DAT
+    Creating SYS$COMMON:[SYSEXE]TCPIP$PROXY.DAT
+    Creating SYS$COMMON:[SYSEXE]TCPIP$CONFIGURATION.DAT
+
+
+    Node: U1
+
+    HP TCP/IP Services for OpenVMS requires either DHCP to be
+    configured or alternately, you must manually configure an
+    address, and a hostname. HP TCP/IP Services for OpenVMS
+    will not start until these are configured.
+
+    DHCP      - NOT configured.
+    Hostname  - NOT configured.
+
+    Please configure these from the Core Environment Menu on node U1.
+</code></pre>
+
+<p>Press <code>Return</code> to continue.</p>
+
+<p>The next menu lists the possible choices. We&#39;ll start with <code>1</code>, the <code>Core Environment</code>:</p>
+
+<pre><code>    HP TCP/IP Services for OpenVMS Configuration Menu
+
+    Configuration options:
+
+         1  -  Core environment
+         2  -  Client components   
+         3  -  Server components   
+         4  -  Optional components
+
+         5  -  Shutdown HP TCP/IP Services for OpenVMS
+         6  -  Startup HP TCP/IP Services for OpenVMS
+         7  -  Run tests
+
+         A  -  Configure options 1 - 4
+        [E] -  Exit configuration procedure
+
+Enter configuration option: 
+</code></pre>
+
+<p>If you see license errors, like below:</p>
+
+<pre><code>     2  -  Client components  No Client License
+     3  -  Server components  No Client License
+     [...]
+     1  -  Domain               No Client License
+     3  -  Routing              No Client License
+     4  -  BIND Resolver        No Client License
+</code></pre>
+
+<p>Those mean your hobbyist license wasn&#39;t installed correctly. Reboot and retry.</p>
+
+<p>Start with option 2, <code>Interfaces</code>:</p>
+
+<pre><code>    HP TCP/IP Services for OpenVMS Core Environment Configuration Menu
+
+    Configuration options:
+
+         1  -  Domain                
+         2  -  Interfaces
+         3  -  Routing               
+         4  -  BIND Resolver         
+         5  -  Time Zone
+
+         A  -  Configure options 1 - 5
+        [E] -  Exit menu
+
+Enter configuration option: 2
+</code></pre>
+
+<p>Next pick the only interface, <code>WE0</code>:</p>
+
+<pre><code>      HP TCP/IP Services for OpenVMS Interface WE0 Configuration Menu (Node: U1)
+
+ Configuration options:
+
+         1  - Add a primary address on WE0
+         2  - Add an alias address on WE0
+         3  - Enable DHCP client to manage address on WE0
+
+        [E] - Exit menu
+
+Enter configuration option: 1
+</code></pre>
+
+<p>Pick <code>1</code> to configure an IP address:</p>
+
+<pre><code>* Is this address used by Clusters over IP (IPCI) [NO]: 
+
+    IPv4 Address may be entered with CIDR bits suffix.
+    E.g. For a 16-bit netmask enter 10.0.1.1/16
+
+Enter IPv4 Address []: 10.0.2.25/24
+Enter hostname []: u1.home
+
+Requested configuration:
+
+      Node     : U1
+      Interface: WE0
+      IPCI     : No
+      Address  : 10.0.2.25/24
+      Netmask  : 255.255.255.0 (CIDR bits: 24)
+      Hostname : u1.home
+
+* Is this correct [YES]: 
+</code></pre>
+
+<p>Exit the next menu with <code>E</code>:</p>
+
+<pre><code>      HP TCP/IP Services for OpenVMS Interface &amp; Address Configuration Menu
+
+ Hostname Details: Configured=u1.home, Active=u1
+
+ Configuration options:
+
+   0  -  Set The Target Node (Current Node: U1)
+
+   1  -  WE0 Menu (EWA0: TwistedPair 100mbps)
+   2  -  10.0.2.25/24        u1.home               Configured                 
+
+
+  [E] -  Exit menu
+
+Enter configuration option: E
+</code></pre>
+
+<p>Select option <code>3 - Routing</code> and answer <code>NO</code> to the first question:</p>
+
+<pre><code>DYNAMIC ROUTING Configuration
+
+ [...]
+
+* Do you want to configure dynamic ROUTED or GATED routing [NO]: 
+</code></pre>
+
+<p>Enter the hostname of your gateway, or it&#39;s IP address:</p>
+
+<pre><code>A default route has not been configured.
+* Do you want to configure a default route [YES]: 
+
+Enter your Default Gateway host name or address: 10.0.0.1
+</code></pre>
+
+<p>You&#39;ll be back in the previous menu. Select <code>4</code> for the DNS resolver configuration:</p>
+
+<pre><code>BIND RESOLVER Configuration
+
+    A BIND resolver has not been configured.
+
+    HP TCP/IP Services for OpenVMS supports the Berkeley Internet Name
+    Domain (BIND) resolver.  BIND is a network service that enables clients
+    to name resources or objects and share information with other objects
+    on the network.
+
+    Before configuring your system as a BIND resolver, you should
+    first be sure that there is at least one system on the network
+    configured as either a BIND primary or secondary server for
+    this domain.
+
+    You can specify a BIND server by its address or name;
+    however, if specified by name, an entry for it must
+    exist in the TCPIP$HOST database.
+
+    You will be asked one question for each server.
+    Press Return at the prompt to terminate the list.
+</code></pre>
+
+<p>Enter the address of your DNS server, in our case it&#39;s Google DNS:</p>
+
+<pre><code>Enter your BIND server name: 8.8.8.8
+
+    8.8.8.8 is not in the local host database.
+    If you want to enter the server in the local host
+    database, enter the server name. Otherwise, enter &lt;CR&gt;.
+</code></pre>
+
+<p>Give it a name:</p>
+
+<pre><code>Enter remote BIND server name []: googledns
+</code></pre>
+
+<p>Enter nothing here, just <code>return</code>:</p>
+
+<pre><code>Enter next BIND server name: 
+
+  Creating file TCPIP$ETC:IPNODES.DAT
+  Creating file TCPIP$ETC:SERVICES.DAT
+
+  Creating file TCPIP$ETC:RESOLV_CONF.TEMPLATE
+
+    You must provide the domain name in order to run
+    the BIND resolver. This information should be available
+    from your Internet network administrator.
+
+    You will now be asked to configure the domain name.
+</code></pre>
+
+<p>Enter a domain name of choice here, I choose <code>local.home</code>. </p>
+
+<p>You&#39;ll be back in the main menu, exit that with <code>E</code> to go to the topmost menu.</p>
+
+<p>Select <code>6</code> to start the TCP/IP stack:</p>
+
+<pre><code>Enter configuration option: 6
+Begin Startup...
+
+%TCPIP-I-INFO, TCP/IP Services startup beginning at  3-NOV-2020 14:26:22.10
+%TCPIP-I-INFO, creating UCX compatibility file SYS$COMMON:[SYSEXE]UCX$SERVICE.DAT
+[...]
+%%%%%%%%%%%  OPCOM   3-NOV-2020 14:26:32.85  %%%%%%%%%%%
+Message from user INTERnet on U1
+%TCPIP-I-FSIPADDRUP, WE0 10.0.2.25 primary active on node U1, interface WE0
+[...]
+%TCPIP-S-STARTDONE, TCP/IP Services startup completed at  3-NOV-2020 14:26:41.06
+</code></pre>
+
+<p>IP Configuration is finished, lets test if we can connect to the outside world:</p>
+
+<pre><code>$ tcpip ping 8.8.8.8
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>PING 8.8.8.8 (8.8.8.8): 56 data bytes
+64 bytes from 8.8.8.8: icmp_seq=0 ttl=63 time=169 ms
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=63 time=90 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=63 time=46 ms
+64 bytes from 8.8.8.8: icmp_seq=3 ttl=63 time=79 ms
+
+
+----8.8.8.8 PING Statistics----
+4 packets transmitted, 4 packets received, 0% packet loss
+round-trip (ms)  min/avg/max = 46/96/169 ms
+</code></pre>
+
+<p>Yay! You can view the current information with <code>tcpip show</code>, a few examples:</p>
+
+<pre><code>$ tcpip show int    
+                                                           Packets
+Interface   IP_Addr         Network mask          Receive          Send     MTU
+
+ LO0        127.0.0.1       255.0.0.0                   0             0    4096
+ WE0        10.0.2.25       255.255.255.0               5             6    1500
+
+
+$ tcpip show route
+
+                             DYNAMIC
+
+Type           Destination                           Gateway
+
+AN    0.0.0.0                               10.0.2.2
+AN    10.0.2.0/24                           10.0.2.25
+AH    10.0.2.25                             10.0.2.25
+AH    127.0.0.1                             127.0.0.1
+</code></pre>
+
+<p>Later on in this guide we will configure telnet and SSH.</p>
+
+<h4 id="toc_15">Automatic TCP/IP Startup</h4>
+
+<p>Once you reboot, you might notice TCP/IP is not started. You must do this manually each time with the following command:</p>
+
+<pre><code>@SYS$STARTUP:TCPIP$STARTUP.COM
+</code></pre>
+
+<p>Or you can edit the startup procedure to make it auto start on boot. Edit the following file: <code>SYS$COMMON:[SYSMGR]SYSTARTUP_VMS.COM</code> and 
+remove the exclamation point (<code>!</code>) from the beginning of the following line:</p>
+
+<pre><code>$!$ @SYS$STARTUP:TCPIP$STARTUP.COM
+</code></pre>
+
+<p>You can edit this file with the following command:</p>
+
+<pre><code>EDIT /EDT SYS$COMMON:[SYSMGR]SYSTARTUP_VMS.COM
+</code></pre>
+
+<p>You&#39;ll enter a line editor. To switch to visual mode, type <code>change</code> followed by <code>Return</code>. You can use the arrow keys to scroll down.</p>
+
+<p>Exit visual mode with <code>CTRL+Z</code>, then type <code>exit</code> to save the file:</p>
+
+<pre><code>*exit
+SYS$COMMON:[SYSMGR]SYSTARTUP_VMS.COM;2 413 lines
+</code></pre>
+
+<p>With all network configuration done, lets continue on with enabling some network services, so we can make use of our network.</p>
+
+<h4 id="toc_16">Telnet, FTP &amp; SSH</h4>
+
+<p>To enable telnet or SSH, which will allow you to connect remotely to your OpenVMS installation. Open up the TCP/IP configuration menu:</p>
+
+<pre><code>@SYS$STARTUP:TCPIP$CONFIG.COM
+</code></pre>
+
+<p>Contrary to what you might expect, enabling TELNET is done from the Client
+Menu, not services menu, so enter <code>2</code> as choice. The following menu is displayed:</p>
+
+<pre><code>HP TCP/IP Services for OpenVMS Client Components Configuration Menu
+
+    Configuration options:
+
+         1  -  DHCP Client      Disabled Stopped
+         2  -  FTP Client       Disabled Stopped
+         3  -  NFS Client       Disabled Stopped
+         4  -  REXEC and RSH    Disabled Stopped
+         5  -  RLOGIN           Disabled Stopped
+         6  -  SMTP             Disabled Stopped
+         7  -  SSH Client       Disabled Stopped
+         8  -  TELNET           Disabled Stopped
+         9  -  TELNETSYM        Disabled Stopped
+
+         A  -  Configure options 1 - 9
+        [E] -  Exit menu
+
+Enter configuration option: 8
+</code></pre>
+
+<p>Choose <code>Enable and Start</code>, option 2:</p>
+
+<pre><code>TELNET Configuration
+
+Service is not defined in the SYSUAF.
+Service is not defined in the TCPIP$SERVICE database.
+Service is not enabled.
+Service is stopped.
+
+    TELNET configuration options:
+
+         1 - Enable service on this node
+
+         2 - Enable &amp; Start service on this node
+
+        [E] - Exit TELNET configuration
+
+Enter configuration option: 2
+</code></pre>
+
+<p>Lots of logging output later, the system tells you telnet is enabled:</p>
+
+<pre><code>%TCPIP-I-INFO, service enabled
+%TCPIP-S-STARTDONE, TCPIP$TELNET startup completed
+Press &lt;ENTER&gt; key to continue ...
+</code></pre>
+
+<p>In the services menu, telnet should now be enabled:</p>
+
+<pre><code>         8  -  TELNET           Enabled  Started
+</code></pre>
+
+<p>Repeat the same process for service <code>7 - SSH Client</code> and if you want, <code>2 - FTP Client</code>. For SSH, you&#39;ll see the 
+location of all configuration files as well:</p>
+
+<pre><code>    Creating TCPIP$SSH_DEVICE:[TCPIP$SSH.SSH2]SSH2_CONFIG.
+%TCPIP-I-INFO, image SYS$SYSTEM:TCPIP$SSH_SCP2.EXE installed
+%TCPIP-I-INFO, image SYS$SYSTEM:TCPIP$SSH_SFTP2.EXE installed
+%TCPIP-I-INFO, image SYS$SYSTEM:TCPIP$SSH_SSH-ADD2.EXE installed
+%TCPIP-I-INFO, image SYS$SYSTEM:TCPIP$SSH_SSH-AGENT2.EXE installed
+%TCPIP-I-INFO, image SYS$SYSTEM:TCPIP$SSH_SSH-KEYGEN2.EXE installed
+%TCPIP-I-INFO, image SYS$SYSTEM:TCPIP$SSH_SSH-SIGNER2.EXE installed
+%TCPIP-I-INFO, image SYS$SYSTEM:TCPIP$SSH_SSH2.EXE installed
+%TCPIP-I-INFO, logical names created
+%TCPIP-S-STARTDONE, TCPIP$SSH_CLIENT startup completed
+Press &lt;ENTER&gt; key to continue ..
+</code></pre>
+
+<p>After which you will be told that the <code>SSH Server is not active on this system</code>, with a question to activate it:</p>
+
+<pre><code>The SSH SERVER is not enabled.
+* Do you want to configure SSH SERVER [NO]:
+</code></pre>
+
+<p>Enter <code>YES</code> and you&#39;ll be taken to the SSH Server menu. Choose option <code>2</code> to enable and start the SSH server. </p>
+
+<p>OpenVMS will now generate SSH keys, which takes a few minutes. 10 on my system to be exact:</p>
+
+<pre><code>    Creating SSH Service Entry
+    Creating TCPIP$SSH_DEVICE:[TCPIP$SSH.SSH2]SSHD2_CONFIG.
+* Create a new default server host key? [YES]: 
+* Please enter host key type DSA or RSA [RSA]: 
+    Creating private RSA key file: TCPIP$SSH_DEVICE:[TCPIP$SSH.SSH2]HOSTKEY
+    Creating public RSA key file: TCPIP$SSH_DEVICE:[TCPIP$SSH.SSH2]HOSTKEY.PUB
+</code></pre>
+
+<p>After a few minutes, key generation is complete and more output is shown:</p>
+
+<pre><code>%TCPIP-I-INFO, image SYS$SYSTEM:TCPIP$SSH_SSHD2.EXE installed
+%TCPIP-I-INFO, image SYS$SYSTEM:TCPIP$SSH_SFTP-SERVER2.EXE installed
+%TCPIP-I-INFO, logical names created
+%%%%%%%%%%%  OPCOM   3-NOV-2020 14:47:51.19  %%%%%%%%%%%
+Message from user INTERnet on U1
+INTERnet ACP Activate SSH Server 
+
+%TCPIP-I-INFO, service enabled
+%TCPIP-S-STARTDONE, TCPIP$SSH startup completed
+Press &lt;ENTER&gt; key to continue ...
+</code></pre>
+
+<p>You can edit the SSH configuration, e.g. to change the port, in the following file:</p>
+
+<pre><code>TCPIP$SSH_DEVICE:[TCPIP$SSH.SSH2]SSH2_CONFIG.
+</code></pre>
+
+<p>If you want to configure SSH public key authentication, which I recommend you do (instead of passwords),
+<a href="/s/blog/SSH_public_key_authentication_on_OpenVMS.html">read my guide to do that here</a>.</p>
+
+<p>If you by accident choose just to enable the SSH server, you can start it manually with the following command:</p>
+
+<pre><code>@SYS$STARTUP:TCPIP$SSH_STARTUP.COM
+</code></pre>
+
+<p>FTP client and server do not prompt for any options, so you can just enable those via the respective menu&#39;s.</p>
+
+<p>The SSH server version is not the latest, so you&#39;ll have to specify some older configuration options to connect to OpenVMS:</p>
+
+<pre><code>ssh -o HostKeyAlgorithms=ssh-rsa,ssh-dss \
+-o KexAlgorithms=diffie-hellman-group1-sha1 \
+-o Ciphers=aes128-cbc,3des-cbc \
+-o MACs=hmac-md5,hmac-sha1 \
+-l SYSTEM \
+-p 2222 \
+127.0.0.1
+</code></pre>
+
+<p>Replace <code>-p 2222</code> by the Virtualbox Port forward you defined, or leave it out
+all together if you have two NIC&#39;s in your host PC, then you can just connect
+to the IP configured in OpenVMS.</p>
+
+<p>You can also put a few lines in your <code>~/.ssh/config</code> file:</p>
+
+<pre><code>Host openvms
+  Hostname 127.0.0.1
+  Port 2222
+  HostKeyAlgorithms ssh-rsa,ssh-dss
+  KexAlgorithms diffie-hellman-group1-sha1
+  Ciphers aes128-cbc,3des-cbc
+  MACs hmac-md5,hmac-sha1
+  User SYSTEM
+</code></pre>
+
+<p>You will then be able to just type <code>ssh openvms</code> to connect.</p>
+
+<h4 id="toc_17">Installing unzip on OpenVMS</h4>
+
+<p>Now that we have networking, you might want to be able to download files over http, 
+which by default is a bit hard, since OpenVMS does not come with any command line
+download utilities, except for FTP and NFS. No HTTP. But we are lucky, since both
+curl and wget are available, prepackaged, for OpenVMS. They do require you to 
+install <code>zip</code> first. </p>
+
+<p>There are a few ways to install zip, the fastest way is to <a href="/s/inc/downloads/unzip.alpha_exeinc/downloads/unzip.alpha_exe">download unzip.alpha_exe</a> and 
+use an FTP client to upload it to OpenVMS. Here&#39;s a picture of Filezilla connected to my 
+OpenVMS installation:</p>
+
+<p><img src="/s/inc/img/ftp-openvms.png" alt="filezilla"></p>
+
+<p>Alternatively, you can download it via FTP on 
+OpenVMS. Process software has an up to date version on their FTP server. Start the FTP client</p>
+
+<pre><code>ftp
+</code></pre>
+
+<p>A new prompt opens, connect to <code>ftp.process.com</code> and login as user <code>anonymous</code>:</p>
+
+<pre><code>FTP&gt; connect ftp.process.com
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>220 triton.process.com MultiNet FTP Server Process V5.6(17) at Tue 3-Nov-2020 10
+:59PM-EST
+Connected to ftp.process.com. 
+Name (ftp.process.com:system): anonymous
+331 anonymous user ok. Send real ident as password.
+Password: 
+230-Welcome to Process&#39;s TCPware Anonymous FTP directory
+230-Thanks for stopping by.
+230-
+230-Note: If you&#39;re looking for MultiNet related files, please try
+230-ftp.multinet.process.com.
+230-
+230-Here&#39;s a roadmap for what&#39;s available:
+230-
+230-Subdirectory    Contents
+230-------------    --------
+230-DECUS           The session notes for talks given by Process
+230-                  Software Corporation personnel at recent
+230-                  DECUS National Events.
+230-SUPPORT         Update kits for TCPware for OpenVMS - check
+230-                  out the 00SUMMARY.TXT file in this subdirectory
+230-                  for more details.
+230-TCPWARE         Contains various TCPware related subdirectories.
+230-
+230-VMS-FREEWARE    Hunter Goatley&#39;s VMS Freeware archive, plus mirrors
+230-                  of the WASD web server and other freeware packages
+230-
+230-Other files and directories exist.
+230-
+230-Guest User TEST logged into /delta_anonymous at Tue 3-Nov-2020 10:59PM-EST, 
+job 2c000547.
+230 Directory and access restrictions apply
+</code></pre>
+
+<p>Make sure to set FTP to binary mode, otherwise you&#39;ll get corrupt files:</p>
+
+<pre><code>FTP&gt; binary 
+200 TYPE is now 8-bit binary
+</code></pre>
+
+<p>You can browse around, but first get the unzip binary:</p>
+
+<pre><code>    FTP&gt; get vms-freeware/unzip.alpha_exe
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>200 Type I ok.
+227 Entering passive mode; use PORT (192,42,95,32,79,81)
+150 IMAGE retrieve of /delta_anonymous/vms-freeware/unzip.alpha_exe (204800 byte
+s) started.
+226 Transfer completed.  203776 (8) bytes transferred.
+local: SYS$SYSROOT:[SYSMGR]unzip.alpha_exe;1  remote: vms-freeware/unzip.alpha_exe
+203776 bytes received in 00:00:00.00 seconds (1897.81 Gbytes/s)
+</code></pre>
+
+<p>If you get the following error:</p>
+
+<pre><code>500 I won&#39;t open a connection to 10.0.2.25 (only to .....)
+</code></pre>
+
+<p>You must first enable passive mode:</p>
+
+<pre><code>FTP&gt; passive on
+Passive is ON.
+</code></pre>
+
+<p>Exit FTP (<code>CTRL+Z</code>) and test if the binary is correctly transfered:</p>
+
+<pre><code>run unzip.alpha_exe
+UnZip 6.00 of 20 April 2009, by Info-ZIP.  For more details see: unzip -v.
+</code></pre>
+
+<p>There however is one more thing to do, because by using <code>run</code> you can&#39;t pass any more
+parameters to a program:</p>
+
+<pre><code>$ run unzip.alpha_exe -v
+%DCL-W-MAXPARM, too many parameters - reenter command with fewer parameters
+</code></pre>
+
+<p>The <code>RUN</code> program only accepts one parameter, the program to run. You must declare a special symbol (a <code>foreign command</code>),
+otherwise DCL&#39;s command line parsing will be in the way. Use the following command to declare such a symbol:</p>
+
+<pre><code>unzip :== $SYS$SYSROOT:[SYSMGR]unzip.alpha_exe
+</code></pre>
+
+<p>There is a leading dollar sign (<code>$</code>), the format of the above line is <code>unzip :== $device:[path]unzip.exe</code>. 
+Test to see if you can now call unzip:</p>
+
+<pre><code>$ unzip -v
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>UnZip 6.00 of 20 April 2009, by Info-ZIP.  Maintained by C. Spieler.  Send
+bug reports using http://www.info-zip.org/zip-bug.html; see README for details.
+
+Latest sources and executables are at ftp://ftp.info-zip.org/pub/infozip/ ;
+see ftp://ftp.info-zip.org/pub/infozip/UnZip.html for other sites.
+
+Compiled with DEC C for OpenVMS (V6.2 Alpha) on Apr 29 2009.
+</code></pre>
+
+<p>This symbol is gone however if you reboot the system, so it&#39;s best if you add it to your login file:</p>
+
+<pre><code>EDIT /EDT SYS$LOGIN:LOGIN.COM
+</code></pre>
+
+<p>Type <code>change</code> to get into visual mode, then read the file and place the command where it states
+interactive things should go:</p>
+
+<pre><code>$! Put commands that you want executed only on an interactive login
+$! between this comment and the &quot;ENDINTER:&quot; label.
+$!
+$! For example, you may wish to add a shortcut to an editor:
+$!  E*DIT == &quot;EDIT/EDT/COMMAND=SYS$LOGIN:EDTINI.EDT&quot;
+$!
+$ unzip :== $SYS$SYSROOT:[SYSMGR]unzip.alpha_exe
+$
+$!
+</code></pre>
+
+<p>Exit visual mode with <code>CTRL+z</code> and save by typing <code>exit</code></p>
+
+<h4 id="toc_18">Installing wget or curl on OpenVMS</h4>
+
+<p>You can find many packages, including <code>curl</code> and <code>wget</code> on the OpenVMS Freeware CD,
+which is <a href="https://www.digiater.nl/openvms/freeware/v80/">hosted by Digiater</a>. Not the most recent versions, but they will
+get you started. Fire up FTP again and connect:</p>
+
+<pre><code>FTP&gt; connect ftp.digiater.nl
+220---------- Welcome to Pure-FTPd [privsep] [TLS] ----------
+220-You are user number 2 of 12 allowed.
+220-Local time is now 17:01. Server port: 21.
+220-Only anonymous FTP is allowed here
+220 You will be disconnected after 15 minutes of inactivity.
+Connected to www.digiater.nl. 
+Name (www.digiater.nl:system): 
+230 Anonymous user logged in
+FTP&gt; 
+</code></pre>
+
+<p>Turn on passive mode (<code>passive on</code>) and binary (<code>binary</code>):</p>
+
+<pre><code>FTP&gt; binary 
+200 TYPE is now 8-bit binary
+
+FTP&gt; passive on
+Passive is ON.
+</code></pre>
+
+<p>Get the curl archive:</p>
+
+<pre><code>FTP&gt; get openvms/freeware/v80/curl/alpha/curl-7_15_2-vms-axp.zip
+227 Entering Passive Mode (185,92,71,114,199,82)
+150-Accepted data connection
+150 1740.5 kbytes to download
+226-File successfully transferred
+226 6.987 seconds (measured here), 249.86 Kbytes per second
+local: SYS$SYSROOT:[SYSMGR]curl-7_15_2-vms-axp.zip;1  remote: openvms/freeware/v
+80/curl/alpha/curl-7_15_2-vms-axp.zip
+1782272 bytes received in 00:00:00.00 seconds (16598.70 Gbytes/s)
+</code></pre>
+
+<p>Exit FTP and unzip the file:</p>
+
+<pre><code>$ unzip curl-7_15_2-vms-axp.zip
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Archive:  SYS$SYSROOT:[SYSMGR]CURL-7_15_2-VMS-AXP.ZIP;1
+  inflating: CURL.EXE_HPSSL          
+  inflating: CURL.EXE_NOSSL          
+  inflating: CURL.EXE_OPENSSL        
+  inflating: CURLLIB.OLB_HPSSL       
+  inflating: CURLLIB.OLB_NOSSL       
+  inflating: CURLLIB.OLB_OPENSSL     
+  inflating: README.VMS   
+</code></pre>
+
+<p>If you get the following error:</p>
+
+<pre><code>     Error:  zipfile is in variable-length record format.  Please
+     run &quot;bilf l SYS$SYSROOT:[SYSMGR]curl-7_15_2-vms-axp.zip;1&quot; to convert the zipfile to stream-LF
+     record format.  (BILF is available at various VMS archives.)
+</code></pre>
+
+<p>You probably forgot to turn on binary mode in FTP, or your file is corrupt. Try again with <code>binary</code> mode on in 
+FTP.</p>
+
+<p>As with <code>unzip</code>, we must create a symbol to allow command line flags to be passed to curl:</p>
+
+<pre><code>curl_openssl :== $SYS$SYSROOT:[SYSMGR]curl.exe_openssl
+curl_nossl :== $SYS$SYSROOT:[SYSMGR]curl.exe_nossl
+</code></pre>
+
+<p>Test it:</p>
+
+<pre><code>$ curl_openssl --version
+curl 7.15.2 (ALPHA-HP-VMS) libcurl/7.15.2 OpenSSL/0.9.7e
+Protocols: tftp ftp telnet dict http file https ftps 
+Features: NTLM SSL 
+</code></pre>
+
+<p>You should now be able to get stuff over HTTP/HTTPS:</p>
+
+<pre><code>$ curl_nossl http://raymii.org/s/index.html
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+    &lt;head&gt;
+    &lt;title&gt;Homepage - Raymii.org&lt;/title&gt;
+</code></pre>
+
+<p>Follow the same procedure for any other interesting software you see in the <a href="https://www.digiater.nl/openvms/freeware/v80/">freeware archive</a>.</p>
+
+<p>I found <code>crs</code> to be quite nice, it&#39;s a visual midnight commander style file manager. </p>
+
+<p>Create a new folder to download it into:</p>
+
+<pre><code>$ create /directory [.crs]
+</code></pre>
+
+<p>Go into the folder:</p>
+
+<pre><code>$ set def [.crs]
+</code></pre>
+
+<p>Download the zipfile via FTP:</p>
+
+<pre><code>$ ftp ftp.digiater.nl
+220---------- Welcome to Pure-FTPd [privsep] [TLS] ----------
+220-You are user number 2 of 12 allowed.
+220-Local time is now 06:59. Server port: 21.
+220-Only anonymous FTP is allowed here
+220 You will be disconnected after 15 minutes of inactivity.
+Connected to www.digiater.nl. 
+Name (www.digiater.nl:system): 
+230 Anonymous user logged in
+</code></pre>
+
+<p>Don&#39;t forget binary and passive:</p>
+
+<pre><code>FTP&gt; binary
+200 TYPE is now 8-bit binary
+FTP&gt; passive on
+Passive is ON.
+</code></pre>
+
+<p>Get the archive:</p>
+
+<pre><code>FTP&gt; get openvms/freeware/v80/crs/crs.zip
+200 PORT command successful
+150-Connecting to port 49191
+150 240.0 kbytes to download
+226-File successfully transferred
+226 0.858 seconds (measured here), 280.83 Kbytes per second
+local: SYS$SYSROOT:[SYSMGR.CRS]crs.zip;1  remote: openvms/freeware/v80/crs/crs.zip
+245780 bytes received in 00:00:00.00 seconds (2289.00 Gbytes/s)
+FTP&gt; 
+</code></pre>
+
+<p>Disconnect and unzip:</p>
+
+<pre><code>$ unzip crs.zip
+Archive:  SYS$SYSROOT:[SYSMGR.CRS]crs.zip;1
+
+
+CRS V1.1  --  A Norton Commander-style directory browser for VMS
+Written by Alexey Gadzhiev &lt;alexey@ace.elektra.ru&gt;
+
+Runs on both OpenVMS VAX and OpenVMS Alpha.  To produce a .EXE, just
+execute @LINK.COM.
+
+(VMS file attributes saved---use UnZip v5.x+ on VMS to restore)
+  inflating: AAAREADME.TXT     
+</code></pre>
+
+<p>Do as it says to create the exe:</p>
+
+<pre><code>$ @LINK.COM
+</code></pre>
+
+<p>Run it:</p>
+
+<pre><code>$ run CRS
+Initializing, please wait ...
+............................
+</code></pre>
+
+<p>Here&#39;s what crs looks on my system:</p>
+
+<p><img src="/s/inc/img/openvms-crs.png" alt="crs"></p>
+
+<p>The <a href="http://web.archive.org/web/20201104051007/https://wiki.vmssoftware.com/Freeware_CD">VSI OpenVMS Wiki</a> has a page on the freeware CD with a description of what most things are.</p>
+
+<!--
+CPacketQueue(rx_queue):add() packet lost! Size = 4314.. dst: 08-00-de-ad-be-ef .. src: 52-54-00-12-35-02 
+CPacketQueue(rx_queue):add() packet lost! Size = 2894.. dst: 08-00-de-ad-be-ef .. src: 52-54-00-12-35-02 
+CPacketQueue(rx_queue):add() packet lost! Size = 2894.. dst: 08-00-de-ad-be-ef .. src: 52-54-00-12-35-02 
+CPacketQueue(rx_queue):add() packet lost! Size = 2894.. dst: 08-00-de-ad-be-ef .. src: 52-54-00-12-35-02 
+CPacketQueue(rx_queue):add() packet lost! Size = 2894.. dst: 08-00-de-ad-be-ef .. src: 52-54-00-12-35-02 
+CPacketQueue(rx_queue):add() packet lost! Size = 2894.. dst: 08-00-de-ad-be-ef .. src: 52-54-00-12-35-02 
+
+
+
+
+$ backup /list hack.bck /save_set
+Listing of save set(s)
+
+Save set:          HACK.BCK
+Written by:        SMILEY      
+UIC:               [000001,000005]
+Date:              30-JUN-2002 12:44:54.42
+Command:           BACKUP/FAST/LOG [.HACK]*.* DKA100:[TEMP]HACK.BCK/SAV
+Operating system:  OpenVMS Alpha version V7.2
+BACKUP version:    AXP72R001
+CPU ID register:   80000000
+Written on:        _DEFCON$DKA100:
+Block size:        32256
+Group size:        10
+Buffer count:      67
+
+[GAMES.HACK]HACK.EXE;1                                     468  12-MAR-1986 14:59
+[GAMES.HACK]HACK_TV.EXE;1                                 2137   9-JUL-2001 22:59
+[GAMES.HACK]HACK_TV.LIS;1                                    8   9-JUL-2001 22:58
+[GAMES.HACK]HELP.;1                                         11  22-MAY-1985 08:46
+[GAMES.HACK]HH.;1                                            4   8-MAY-1985 15:30
+[GAMES.HACK]HK.COM;6                                         1  13-JUL-2001 20:50
+[GAMES.HACK]HK.COM;5                                         1  13-JUL-2001 20:50
+[GAMES.HACK]HK.COM;4                                         1  13-JUL-2001 20:33
+[GAMES.HACK]HK.COM;3                                         1  13-JUL-2001 20:31
+[GAMES.HACK]HK.COM;2                                         1  13-JUL-2001 20:30
+[GAMES.HACK]HK.COM;1                                         1  13-JUL-2001 20:25
+[GAMES.HACK]README.;1                                        9   8-MAY-1985 15:30
+[GAMES.HACK]RECORD.;1                                        3  13-JUL-2001 20:42
+[GAMES.HACK]RUMORS.;1                                       32   8-MAY-1985 15:31
+
+Total of 14 files, 2678 blocks
+End of save set
+
+
+
+$ backup /log hack.bck/save_set [.hack]*
+%BACKUP-S-CREDIR, created directory SYS$COMMON:[000000.DU.HACK.HACK]
+%BACKUP-E-OPENOUT, error opening SYS$SYSROOT:[000000.DU.HACK.HACK]HACK.EXE;1 as output
+-RMS-E-DNF, directory not found
+-SYSTEM-W-NOSUCHFILE, no such file
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]HACK_TV.EXE;1
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]HACK_TV.LIS;1
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]HELP.;1
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]HH.;1
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]HK.COM;6
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]HK.COM;5
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]HK.COM;4
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]HK.COM;3
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]HK.COM;2
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]HK.COM;1
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]README.;1
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]RECORD.;1
+%BACKUP-S-CREATED, created SYS$COMMON:[000000.DU.HACK.HACK]RUMORS.;1
+
+
+$ set def [.hack] 
+$ dir
+
+Directory SYS$COMMON:[000000.DU.HACK.HACK]
+
+HACK_TV.EXE;1       HACK_TV.LIS;1       HELP.;1             HH.;1              
+HK.COM;6            HK.COM;5            HK.COM;4            HK.COM;3           
+HK.COM;2            HK.COM;1            README.;1           RECORD.;1          
+RUMORS.;1           
+
+Total of 13 files.
+$ 
+
+
+$! Software Product Authorization Key Replica
+$! Issued by LICENSESVR  
+$! Issued on 21-SEP-2020 08:13
+$!-----------------------------------
+$ LICENSE REGISTER ALPHA-LP - 
+/ISSUER=VSI - 
+/AUTHORIZATION=EVAL-7479VMSSOFTW-E202009214078 - 
+/PRODUCER=VSI - 
+/UNITS=0 - 
+/TERMINATION_DATE=20-SEP-2021  - 
+/AVAILABILITY=H - 
+/OPTIONS=(ALPHA) - 
+/CHECKSUM=2-IIOL-IDMH-JHMJ-NEBG
+$! Software Product Authorization Key Replica
+$! Issued by LICENSESVR  
+$! Issued on 21-SEP-2020 08:13
+$!-----------------------------------
+$ LICENSE REGISTER ALPHA-SYSTEM - 
+/ISSUER=VSI - 
+/AUTHORIZATION=EVAL-7479VMSSOFTW-E202009214078 - 
+/PRODUCER=VSI - 
+/UNITS=0 - 
+/TERMINATION_DATE=20-SEP-2021  - 
+/AVAILABILITY=A - 
+/OPTIONS=(ALPHA) - 
+/CHECKSUM=2-BJOK-PDHM-DOHJ-GHKH
+$! Software Product Authorization Key Replica
+$! Issued by LICENSESVR  
+$! Issued on 21-SEP-2020 08:14
+$!-----------------------------------
+
+
+
+-->
+Tags: <a href="../tags/alpha.html">alpha</a>
+, <a href="../tags/axpbox.html">axpbox</a>
+, <a href="../tags/dec.html">dec</a>
+, <a href="../tags/decus.html">decus</a>
+, <a href="../tags/es40.html">es40</a>
+, <a href="../tags/itanium.html">itanium</a>
+, <a href="../tags/openvms.html">openvms</a>
+, <a href="../tags/pdp.html">pdp</a>
+, <a href="../tags/simh.html">simh</a>
+, <a href="../tags/tutorials.html">tutorials</a>
+, <a href="../tags/vax.html">vax</a>
+, <a href="../tags/vms.html">vms</a>
+</div>
+<br/>
+<footer>
+<br/>
+                <form role="search" action="https://encrypted.google.com/search"
+                style="min-width:250px;max-width:300px;">
+                    <div class="form-group">
+                      <input type="hidden" name="as_sitesearch" value="raymii.org">
+                      <input type="hidden" name="as_qdr" value="all">
+                      <input type="text" name="as_q" class="form-control" placeholder="Search">
+                    </div>
+                  </form>
+                <br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-3704876-6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-3704876-6');
+    </script>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+     
+    </main>
+    </body>
+    </html>
+    

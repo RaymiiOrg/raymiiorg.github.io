@@ -1,0 +1,266 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Filtering IMAP mail with imapfilter
+Author      : 	Remy van Elst
+Date        : 	17-01-2015
+URL         : 	https://raymii.org/s/blog/Filtering_IMAP_mail_with_imapfilter.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![mail][1]
+
+I have several email accounts at different providers. Most of them don't offer
+filtering capabilites like Sieve, or only their own non exportable rule system
+(Google Apps). My mail client of choice, Thunderbird, has filtering capabilities
+but my phone has not and I don't want to leave my machine running Thunderbird
+all the time since it gets quite slow with huge mailboxes. Imapfilter is a mail
+filtering utility written in Lua which connects to one or more IMAP accounts and
+filters on the server using IMAP queries. It is a lightweight command line
+utility, the configuration can be versioned and is simple text and it is very
+fast.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Imapfilter is configured via a config file. This article will discuss this
+config file with filtering and other examples. Start with a blank one:
+
+    
+    
+    mkdir -p ~/.imapfilter
+    vim ~/.imapfilter/config.lua
+    
+
+### Options
+
+imapfilter has a few global options which are configured via the
+`options.$OPTION = $VALUE` format. These are the ones I have, the manpage has
+more. Comments in the config file are prefix by two dashes (`--`).
+
+    
+    
+    -- One of the work mailservers is slow.
+    -- The time in seconds for the program to wait for a mail server's response (default 60)
+    options.timeout = 120
+    
+    -- According to the IMAP specification, when trying to write a message to a non-existent mailbox, the server must send a hint to the client, whether it should create the mailbox and try again or not. However some IMAP servers don't follow the specification and don't send the correct response code to the client. By enabling this option the client tries to create the mailbox, despite of the server's response. 
+    options.create = true
+    
+    -- By enabling this option new mailboxes that were automatically created, get also subscribed; they are set active in order for IMAP clients to recognize them
+    options.subscribe = true
+    
+    -- Normally, messages are marked for deletion and are actually deleted when the mailbox is closed. When this option is enabled, messages are expunged immediately after being marked deleted.
+    options.expunge = true
+    
+
+### Accounts
+
+I've defined two example accounts, one for work and one for personal stuff:
+
+    
+    
+    account1 = IMAP {
+      server = "imap.gmail.com",
+      username = "joe@gmail.com",
+      password = "P@ssw0rd",
+      ssl = "tls1"
+    }
+    
+    account2 = IMAP {
+      server = "imap.mywork.org",
+      username = "joe",
+      password = "W0rdP@ss",
+      ssl = "ssl3"
+    }
+    
+
+You can define as much accounts as needed. You can even [get your accounts from offlineimap][3]:
+    
+    
+    function offlineimap (key)
+      local status
+      local value
+      status, value = pipe_from('grep -A2 mail.gandi.net ~/.offlineimaprc | grep ' .. key .. '|cut -d= -f2')
+      value = string.gsub(value, ' ', '')
+      value = string.gsub(value, '\n', '')
+      return value
+    end
+    
+    
+    T = IMAP {
+      server   = offlineimap('remotehost'),
+      username = offlineimap('remoteuser'),
+      password = offlineimap('remotepass'),
+      ssl = 'ssl3',
+    }
+    
+
+### Mailboxes / Folders
+
+imapfilter has the concept of `mailboxes`. While technically correct, we general
+users just call them (top level) folders. `INBOX` is a mailbox, other folders
+are as well. After an IMAP account has been initialized, mailboxes residing in
+that account can be accessed simply as elements of the account table:
+
+    
+    
+    myaccount.mymailbox
+    
+
+If mailbox names don't only include letters, digits and underscores, or begin
+with a digit, an alternative form must be used:
+
+    
+    
+    myaccount['mymailbox']
+    
+
+A mailbox inside a folder (subfolder) can be only accessed by using the
+alternative form:
+
+    
+    
+    myaccount['myfolder/mymailbox']
+    
+
+In this article I use this alternative form for ease of use and consistensy.
+
+### Filtering
+
+The filters defined are processed in order from top to bottom. I mostly filter
+my inbox by moving messages to another folder. If a message matched a filter it
+is moved, if it would then lower on match another filter that would not apply to
+that mail because it is already moved.
+
+See the [manpage][4] for all configuration options.
+
+If you simply want to filter a message based on the sender, receipient or
+subject you can use the following. It moves all messages with the Duplicity
+mailing list address to the mailinglists folder:
+
+    
+    
+      messages = account1["INBOX"]:contain_to("duplicity-talk@nongnu.org")
+      messages:move_messages(account1["Mailinglists/Duplicity-Talk"])
+    
+
+If you want to filter based on a few more parameters, you can use the following
+operators, `*` for AND, `+` for OR and `-` for NOT. To filter nagios messages
+with a certain subject line:
+
+    
+    
+      messages = account1["INBOX"]:contain_from("nagios@monitoring.org")
+        * account1["INBOX"]:contain_subject("important_hostname")
+      messages:move_messages(account1["Important/Nagios"])
+    
+
+To move messages from Nagios from less important hosts, but not with the
+"CRITICAL" subject and mark them as read:
+
+    
+    
+      messages = account1["INBOX"]:contain_from("nagios@monitoring.org")
+        - account1["INBOX"]:contain_subject("CRITICAL:")
+      messages:mark_seen()  
+      messages:move_messages(account1["Monitoring/Nagios"])    
+    
+
+As you can see the `mark_seen()` operator marks messages as read.
+
+With these operators you can construct advanced filters.
+
+### Copying mail
+
+To copy mail from one account to another account's folder and mark those copied
+messages as read, for archival purposes for example, use the following filter:
+
+    
+    
+        messages = account2['INBOX']:is_unseen()
+        messages:copy_messages(account1["Backup_of_Account2"])
+    
+        messages = account1['Backup_of_Account2']:is_unseen()
+        messages:mark_seen()
+    
+
+Place this at the top of the `account2` filtering rules.
+
+### pipe_to
+
+Taken from the [extended configuration example][5] here is an example piece of
+code which sends mail to an external program and based on the output deletes the
+messages the program marked as spam.
+
+    
+    
+    -- The auxiliary function pipe_to() is supplied for conveniency.  For
+    -- example if there was a utility named "bayesian-spam-filter", which
+    -- returned 1 when it considered the message "spam" and 0 otherwise:
+    
+    all = account1["INBOX"]:is_unseen()
+    
+    results = Set {}
+    for _, mesg in ipairs(all) do
+        mbox, uid = table.unpack(mesg)
+        text = mbox[uid]:fetch_message()
+        if (pipe_to('bayesian-spam-filter', text) == 1) then
+            table.insert(results, mesg)
+        end
+    end
+    
+    results:delete_messages()
+    
+
+### Conclusion
+
+The above examples will get you started with message filtering right away. The
+[manpage][4] and the [example config][6] and the [extended example config][7]
+will get you even further.
+
+   [1]: https://raymii.org/s/inc/img/mail-send-receive.png
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: http://thomaslevine.com/!/imapfilter/
+   [4]: http://linux.die.net/man/5/imapfilter_config
+   [5]: https://raw.githubusercontent.com/lefcha/imapfilter/master/samples/extend.lua
+   [6]: https://github.com/lefcha/imapfilter/blob/master/samples/config.lua
+   [7]: https://github.com/lefcha/imapfilter/blob/master/samples/extend.lua
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

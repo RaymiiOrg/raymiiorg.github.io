@@ -1,0 +1,79 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Join Mac OS X to an Active Directory / OpenDLAP directory from the commandline
+Author      : 	Remy van Elst
+Date        : 	02-05-2013
+URL         : 	https://raymii.org/s/snippets/OS-X-Add-or_Remove_Mac_to_Active_Directory_or_OpenLDAP_Domain.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This little snippet joins an Mac OS X computer to a Windows Active Directory or
+OpenLDAP Directory domain from the Command Line or via Apple Remote Desktop. It
+is tested on OS X 10.6, 10.7 and 10.8 combined with a Windows Server
+2003/2008/2012 mixed Active Directory domain and a Fedora 389 DS domain and an
+OpenLDAP domain.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+    
+    
+    dsconfigad -add DOMAIN.EXT -computer "`hostname -s`" -mobile enable -mobileconfirm disable -username "DOMAIN_ADMIN_USERNAME" -password "DOMAIN_ADMIN_PASSWORD" -ou "CN=Computers,DC=DOMAIN,DC=EXT"
+    
+
+The following command also add's users in the "Domain Admins" and "IT_ADM" to
+the local Mac OS Admin users. Those users have local administrator rights on the
+OS X Machine
+
+    
+    
+    dsconfigad -groups "DOMAIN\Domain Admins,DOMAIN\IT_ADM"
+    
+
+This last command removes the OS X machine from a domain:
+
+    
+    
+    dsconfigad -remove DOMAIN.EXT -computer "`hostname -s`" -username "DOMAIN_ADMIN_USERNAME" -password "DOMAIN_ADMIN_PASSWORD"
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

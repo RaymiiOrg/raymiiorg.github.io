@@ -1,0 +1,133 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	I've packaged up Gnash as a snap, for modern linux
+Author      : 	Remy van Elst
+Date        : 	07-12-2020
+Last update : 	15-05-2021
+URL         : 	https://raymii.org/s/blog/Ive_packaged_up_Gnash_as_a_Snap_for_modern_linux.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/gnash-raymii)
+
+
+
+Last week I did something unexpected, I [packaged up Gnash as a snap][2]. 
+Gnash is a GNU flash media  player, not updated since 2011, and  thus removed
+from the Ubuntu 20.04 repositories. The snap packaging is based on work by
+[phil roche][4], he wrote about re-packaging older debian packages with an
+Ubuntu 18.04/16.04 base layer as a snap. My gnash package is confined (no
+`--classic` needed), the source code for the snap [is on my github][3] and on
+any snap-enabled distro you can now `snap install gnash-raymii` to enjoy Gnash
+again.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+As the code is up [on github][3] and [Phil][4] has his code up as well, you 
+should be able to easily re-package deb's as snaps as well. Pygopherd comes
+to mind, but any package from the Ubuntu repositories you might need fits 
+the bill, search/replace gnash, test the confinement options and you're done.
+
+Here is a screenshot of Gnash running as a snap:
+
+![gnash snap][6]
+
+
+**Update: 15-05-2021**
+
+I've updated the gnash snap package on user request to include a few
+extra commands, namely `dump-gnash`, `cygnal`, `rtmpget`, `gprocessor`
+`flvdumper` and `soldumper`. The main package is now also named 
+`gnash-raymii`, so you'll no longer need to use the command `gnash-raymii.gnash`,
+you can just use `gnash-raymii`. Although the former is kept around for
+scripting. 
+
+As the snap store tells me, this snap has almost 1500 active installs, way
+more than I ever expected. Happy to see that people actually still use gnash.
+
+### Why re-package gnash as a snap?
+
+As you might know, [I sincerely dislike snap][1] and I actively avoid using
+it. However, a few co-workers do run Ubuntu and were fiddling around with my 
+[docker gnash][5] guide, didn't get it to work and asked me for help. As I
+recently read [Phil's][4] article and this was a good way to put that into
+practice. As Gnash is no longer under active development for almost a decade, 
+it is not  in the Debian/Ubuntu repositories anymore, thus hard to install.
+But, Ubuntu 18.04 was the last release to have it in its repositories, 
+so just as with the Docker guide, I used that as a base. Compiling gnash
+by hand is hard due to outdated dependencies (looking at you gstreamer).
+
+I might dislike snaps, as with most of my work I'm pragmatic enough to use
+whatever task suits the current situation best, and for this problem snaps
+were a good fit. Saves my current and future co-workers a bunch of time.
+
+### Why run gnash?
+
+Some of my work depends on gnash, although it's actively being replaced with
+QT. Gnash in our case runs on the framebuffer of an embedded device, no
+network connectivity, no external input, so almost no risk.
+
+For  development and testing we sometimes need to run gnash on my workstation
+with an SSH  port forward to a development board. We can then locally interact
+with the UI. Also, the development board does not require a screen, which
+saves time and  space in the development setup. 
+
+We don't want the coffee machines to end up as e-waste in a few years, expected
+lifetime with regular maintenance is at least a decade, I suspect we'll use
+Gnash for just as long. All of our new machines use QT, but the older ones still
+get support and waranty. 
+
+
+Here is gnash running the coffee machine user interface:
+
+![gnash coffee][7]
+
+
+[2]: https://snapcraft.io/gnash-raymii
+[3]: https://github.com/RaymiiOrg/gnash-snap/
+[4]: http://web.archive.org/web/20201207100511/https://philroche.net/2020/10/08/using-snaps-to-package-old-software/
+[5]: /s/tutorials/Running_gnash_on_Ubuntu_20.04.html
+[6]: /s/inc/img/gnash-snap.png
+[7]: /s/inc/img/gnash1.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

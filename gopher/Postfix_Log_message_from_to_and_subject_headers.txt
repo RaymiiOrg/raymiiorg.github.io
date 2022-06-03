@@ -1,0 +1,94 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Postfix: log message from, to and subject
+Author      : 	Remy van Elst
+Date        : 	28-03-2009
+URL         : 	https://raymii.org/s/tutorials/Postfix_Log_message_from_to_and_subject_headers.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This is a little trick for Postfix, it lets you log the `subject`, `from` and
+`to` of all the emails postfix sends (or which pass through it if you run it as
+a relay). It comes in handy when you need to debug an email issue and need to
+confirm your mailserver has sent the message.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+First create the file `/etc/postfix/header_checks` and insert this into it:
+
+    
+    
+    /^subject:/      WARN
+    /^to:/           WARN
+    /^from:/         WARN
+    /^Subject:/      WARN
+    /^To:/           WARN
+    /^From:/         WARN
+    
+
+Now, in your postfix `/etc/postfix/main.cf` add the following to the end of the
+file:
+
+    
+    
+    header_checks = regexp:/etc/postfix/header_checks
+    
+
+And restart postfix:
+
+    
+    
+    service postfix restart
+    
+
+You will hopefully now get log items like below, and if not you have a problem
+with your mailserver:
+
+    
+    
+    Dec  4 08:23:05 localhost postfix/cleanup[2278]: 90CA714: warning: header
+    Subject: This is a testmail which gets logged from localhost[127.0.0.1];
+    from=<root@localhost> to=<root@localhost> proto=ESMTP helo=<localhost>
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

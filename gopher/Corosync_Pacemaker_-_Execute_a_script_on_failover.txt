@@ -1,0 +1,189 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Corosync Pacemaker - Execute script on failover
+Author      : 	Remy van Elst
+Date        : 	20-11-2013
+URL         : 	https://raymii.org/s/tutorials/Corosync_Pacemaker_-_Execute_a_script_on_failover.html
+Format      : 	Markdown/HTML
+---
+
+
+
+With Corosync/Pacemaker there is no easy way to simply run a script on failover.
+There are good reasons for this, but sometimes you want to do something simple.
+This tutorial describes how to change the Dummy OCF resource to execute a script
+on failover.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+In this example it is a script which triggers a few SNMP traps, sends an alert
+to Nagios and sends some data to Graphite. SNMP alone could be done with the
+`ocf:heartbeat:ClusterMon` resource, but the other stuff not.
+
+This is a very very simple way of doing it, I find it more a quick hack. For
+example, the script path is hard coded. For me that is not a problem because
+both the script as the Dummy resource are managed via Ansible, so I can change
+them any time.
+
+Start by copying the Dummy resource over to a new resource. On Ubuntu the
+resource files are located here:
+
+    
+    
+    /usr/lib/ocf/resource.d/heartbeat/
+    
+
+In there, copy the `Dummy` file to a new resource, for example `FailOverScript`.
+If you don't have the Dummy resource, you can also find it [here][2].
+
+Edit the name and description:
+
+Name:
+
+    
+    
+    meta_data() {
+        cat <<END
+    <?xml version="1.0"?>
+    <!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
+    <resource-agent name="FailOverScript" version="0.9">
+    <version>1.0</version>
+    
+
+Description:
+
+    
+    
+    <longdesc lang="en">
+    Script ran on Failover
+    </longdesc>
+    <shortdesc lang="en">Script ran on Failover</shortdesc>
+    
+
+Make sure the script you want to execute is placed on the host, and is
+executable (`chmod +x /usr/local/bin/script`).
+
+A bit lower in the file, edit the `dummy_start` function. Add the script path
+below the `if [ $? = $OCF_SUCCESS ]; then` and above the `return $OCF_SUCCESS`
+lines. Like so:
+
+    
+    
+    dummy_start() {
+        dummy_monitor
+        /usr/local/bin/failover.sh
+        if [ $? =  $OCF_SUCCESS ]; then
+        return $OCF_SUCCESS
+        fi
+        touch ${OCF_RESKEY_state}
+    }
+    
+
+After that has been done, replace all instances of Dummy and dummy with your
+name of choice:
+
+    
+    
+    sed -i 's/Dummy/FailOverScript' /usr/lib/ocf/resource.d/heartbeat/FailOverScript
+    sed -i 's/dummy/failoverscript' /usr/lib/ocf/resource.d/heartbeat/FailOverScript
+    
+
+Test the script using the `ocf-tester` program to see if you have any mistakes:
+
+    
+    
+    ocf-tester -n resourcename /usr/lib/ocf/resource.d/heartbeat/FailOverScript
+    
+
+Output:
+
+    
+    
+    Beginning tests for /usr/lib/ocf/resource.d/heartbeat/FailOverScript...
+    /usr/sbin/ocf-tester: 214: /usr/sbin/ocf-tester: xmllint: not found
+    * rc=127: Your agent produces meta-data which does not conform to ra-api-1.dtd
+    * Your agent does not support the notify action (optional)
+    * Your agent does not support the demote action (optional)
+    * Your agent does not support the promote action (optional)
+    * Your agent does not support master/slave (optional)
+    Tests failed: /usr/lib/ocf/resource.d/heartbeat/FailOverScript failed 1 tests
+    
+
+Oops. Seems we need `xmllint`. On Ubuntu, install it:
+
+    
+    
+    apt-get install libxml2-utils
+    
+
+Test again, you'll see it will pass:
+
+    
+    
+    Beginning tests for /usr/lib/ocf/resource.d/heartbeat/FailOverScript...
+    * Your agent does not support the notify action (optional)
+    * Your agent does not support the demote action (optional)
+    * Your agent does not support the promote action (optional)
+    * Your agent does not support master/slave (optional)
+    /usr/lib/ocf/resource.d/heartbeat/FailOverScript passed all tests
+    
+
+As an extra test, to see if the script you've created is correctly executed, you
+can do a test start of the resource:
+
+    
+    
+     export OCF_ROOT=/usr/lib/ocf
+     bash -x /usr/lib/ocf/resource.d/heartbeat/FailOverScript start
+    
+
+To use this resource, add it like so:
+
+    
+    
+    crm configure primitive script ocf:heartbeat:FailOverScript op monitor interval="30"
+    
+
+If you want to test it, you can for example let the script send you an email.
+Put a node in standby and see if you get an email.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://github.com/ClusterLabs/resource-agents/blob/master/heartbeat/Dummy
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

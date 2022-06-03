@@ -1,0 +1,532 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Mount ISO and execute scripts on OpenVMS - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>
+                </small>
+            </header>
+          
+    <h2 class='headheader' id='main'>Mount ISO and execute scripts on OpenVMS</h2>
+<p><small>Published: 08-05-2018 | Author: Remy van Elst | <a href="OpenVMS_Mount_ISO_and_execute_scripts.txt">Text only version of this article</a>
+</small></p>
+<div class='ad'>
+                                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7993642564731324"
+                             crossorigin="anonymous"></script>
+                        <!-- voorartikel -->
+                        <ins class="adsbygoogle"
+                             style="display:block"
+                             data-ad-client="ca-pub-7993642564731324"
+                             data-ad-slot="6172324376"
+                             data-ad-format="auto"></ins>
+                        <script>
+                             (adsbygoogle = window.adsbygoogle || []).push({});
+                        </script>
+                        </div><br><div class='olderthanayear'><p><strong>&#10071; This post is over three years old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">-SYSTEM-W-DATAOVERUN, data overrun</a>
+</li>
+<li>
+<a href="#toc_1">Create the ISO</a>
+</li>
+<li>
+<a href="#toc_2">OpenVMS mounts</a>
+</li>
+<li>
+<a href="#toc_3">[000000], the Master File Directory</a>
+</li>
+<li>
+<a href="#toc_4">Execute a DCL script</a>
+</li>
+<li>
+<a href="#toc_5">Line endings</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p><a href="https://raymii.org/s/tags/openvms.html"><img src="https://raymii.org/s/inc/img/ovmsdec.png" alt="openvms"></a></p>
+
+<p>(You can read all my OpenVMS articles by <a href="https://raymii.org/s/tags/openvms.html">clicking the picture above</a>)</p>
+
+<p>I&#39;m playing around with OpenVMS on Alpha using <a href="https://raymii.org/s/blog/The_sad_state_of_Alpha_emulators_for_OpenVMS.html">an emulator</a>, but was not
+able to copy paste in my Hobbyist License. I suspect Putty pasting too quickly,
+so I had to get the license script on the OpenVMS, without using the network. In
+this article you&#39;ll learn some OpenVMS filesystem history, how OpenVMS handles
+line endings and in the end I get my license installed by creating an ISO with
+the script on it.</p>
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<h3 id="toc_0">-SYSTEM-W-DATAOVERUN, data overrun</h3>
+
+<p>When pasting in my ISO using simh and a VAX system, I had no issues. When trying
+it on the Alpha and putty, it errors out:</p>
+
+<pre><code>%DCL-W-IVVERB, unrecognized command verb - check validity and spelling
+ \$\
+$ $ /ISSUER=DEC -
+%DCL-W-NOCOMD, no command on line - reenter with alphabetic first character
+$ /AUTHORIZATION=H
+%RMS-F-RER, file read error
+-SYSTEM-W-DATAOVERUN, data overrun
+</code></pre>
+
+<p>On a few forums it was suggested to create an ISO with the license script on it,
+mount that and execute the script from there. Since the installed system has no
+network yet (I&#39;m having a lot of issues with Windows and bridging in Virtualbox)
+I cannot just copy over the file via FTP.</p>
+
+<h3 id="toc_1">Create the ISO</h3>
+
+<p>On Ubuntu and Debian you can <code>apt-get install genisoimage</code>. Place the License
+PAK script in a new folder, in my case the folder is named <code>license</code>. The PAK
+script is named <code>a.com</code>. Generate the ISO:</p>
+
+<pre><code>genisoimage -V license -o a.iso license
+</code></pre>
+
+<p><code>-V license</code> is so that the ISO label is <code>license</code>.</p>
+
+<p>Using your favorite emulator, couple this ISO to your OpenVMS installation and
+boot up. I&#39;m using a trial version of <a href="https://raymii.org/s/blog/The_sad_state_of_Alpha_emulators_for_OpenVMS.html">AlphaVM Basic</a>, but FreeAXP is
+available as well as is <a href="https://raymii.org/s/blog/Installing_the_es40_AlphaServer_emulator_0.18_on_Ubuntu_16.04_and_trying_to_install_openVMS_8.4_on_es40.html">es40</a>.</p>
+
+<p>In the case of AlphaVM the disk drive is <code>DKA400</code>.</p>
+
+<h3 id="toc_2">OpenVMS mounts</h3>
+
+<p>When OpenVMS is booted up, in my case it complains about the licenses:</p>
+
+<pre><code> Welcome to OpenVMS (TM) Alpha Operating System, Version V8.4
+
+Username: system
+Password:
+%LICENSE-I-NOLICENSE, no license is active for this software product
+%LOGIN-S-LOGOPRCON, login allowed from OPA0:
+   Welcome to OpenVMS (TM) Alpha Operating System, Version V8.4
+
+$
+</code></pre>
+
+<p>Find out what your cdrom device is:</p>
+
+<pre><code>$ SHOW DEVICE
+
+Device                  Device           Error    Volume         Free  Trans Mnt
+ Name                   Status           Count     Label        Blocks Count Cnt
+REMY1$DKA0:             Mounted              0  REMY1          5419104   307   1
+REMY1$DKA400:           Online               0
+</code></pre>
+
+<p>In my case <code>DKA400</code>. You can find more information by specifying it to the <code>SHOW
+DEV</code> command:</p>
+
+<pre><code>$ show device dka400 /full
+
+Disk REMY1$DKA400:, device type EmuVM CDROM ISO image, is online, file-oriented
+    device, shareable, available to cluster, error logging is enabled.
+
+    Error count                    0    Operations completed                268
+    Owner process                 &quot;&quot;    Owner UIC                      [SYSTEM]
+    Owner process ID        00000000    Dev Prot            S:RWPL,O:RWPL,G:R,W
+    Reference count                0    Default buffer size                 512
+    Total blocks                 256    Sectors per track                   128
+    Total cylinders                1    Tracks per cylinder                   2
+</code></pre>
+
+<p>Let&#39;s try my linux-mindedness and see if mounting is the same. First create a
+folder to mount the device on:</p>
+
+<pre><code>$ CREATE /DIR [.MNT]
+</code></pre>
+
+<p>Try to mount the device:</p>
+
+<pre><code>$ MOUNT DKA400 [.MNT]
+</code></pre>
+
+<p>And nope, no luck this time:</p>
+
+<pre><code>%MOUNT-I-OPRQST, incorrect volume label
+%MOUNT-I-OPRQST, Please mount volume [.MNT] in device _REMY1$DKA400:
+</code></pre>
+
+<p>Different variations on this command with the ISO label did not help.</p>
+
+<p>Looking around the OpenVMS <code>HELP</code> for mount I found the <code>OVERRIDE</code> option.</p>
+
+<pre><code>$ HELP MOUNT /OVERRIDE
+</code></pre>
+
+<p>Snipping the relevant part:</p>
+
+<pre><code> IDENTIFICATION Overrides processing of the volume identifier
+                in the volume label. Use this keyword to mount
+                a volume for which you do not know the label,
+                or for an ISO 9660 volume whose label is not
+                unique in the first 12 characters. Only the volume
+                identifier field is overridden. Volume protection,
+                if any, is preserved. The volume must be mounted
+                /NOSHARE (either explicitly or by default).
+
+                The /OVERRIDE=IDENTIFICATION qualifier is
+                incompatible with the /GROUP and /SYSTEM
+                qualifiers.
+</code></pre>
+
+<p>Let&#39;s try that since I&#39;m not able to figure out this volume label:</p>
+
+<pre><code>$ MOUNT /OVERRIDE=IDENT DKA400
+%MOUNT-I-WRITELOCK, volume is write locked
+%MOUNT-I-CDROM_ISO, license: (1 of 1) , mounted on  _REMY1$DKA400:
+</code></pre>
+
+<p>Lets see if the <code>SHOW DEV</code> output shows it as mounted now?</p>
+
+<pre><code>$ SHOW DEV DKA400 /FULL
+
+Disk REMY1$DKA400:, device type EmuVM CDROM ISO image, is online, allocated,
+    deallocate on dismount, mounted, software write-locked, file-oriented
+    device, shareable, available to cluster, error logging is enabled.
+
+    Error count                    0    Operations completed                267
+    Owner process           &quot;SYSTEM&quot;    Owner UIC                      [SYSTEM]
+    Owner process ID        00000216    Dev Prot            S:RWPL,O:RWPL,G:R,W
+    Reference count                2    Default buffer size                 512
+    Total blocks                 256    Sectors per track                   128
+    Total cylinders                1    Tracks per cylinder                   2
+
+    Volume label           &quot;license&quot;    Relative volume number                1
+    Cluster size                   0    Transaction count                     1
+    Free blocks                    0    Maximum files allowed                 0
+    Extend quantity                0    Mount count                           1
+    Mount status             Process    ACP process name           &quot;DKA400CACP&quot;
+
+  Volume Status:  ISO 9660.
+  Members of this volume set are REMY1$DKA400: (rvn 1).
+</code></pre>
+
+<p>So now for the easy part right? Go into the device folder and execute the
+script. Can&#39;t go wrong here.</p>
+
+<p>But oh yes we can go wrong. Lets see what happens if we <code>cd</code> (<code>SET DEFAULT</code> on
+OpenVMS) into the device:</p>
+
+<pre><code>$ SET DEFAULT _REMY1$DKA400:
+$ DIR
+%DIRECT-E-OPENIN, error opening REMY1$DKA400:[SYSMGR]*.*;* as input
+-RMS-E-DNF, directory not found
+-SYSTEM-W-BADIRECTORY, bad directory file format
+</code></pre>
+
+<p>Again an OpenVMS error message. Not sure why, but I guess I did something wrong.</p>
+
+<h3 id="toc_3">[000000], the Master File Directory</h3>
+
+<p>Diving into some history <a href="https://books.google.nl/books?id=y0qhFDfU0iUC&amp;lpg=PA97&amp;ots=Ay0-FB1rD7&amp;dq=%5B000000%5D%20openvms&amp;hl=nl&amp;pg=PA97#v=onepage&amp;q=%5B000000%5D%20openvms&amp;f=false"></a> we find more on why our previous command did not
+work. We did not execute it in the root directory of the device. On OpenVMS a
+filesystem&#39;s root directory is <code>[000000]</code>.</p>
+
+<p>The HP documentation is not very helpfull on this part. I had to go on my local
+ebook seller and buy this book since Google Books doesn&#39;t allow copy pasting.
+But, reading through it, it seems to be a good book for me. Shame it cost me EUR
+30. A few hours of reading later I realised I was busy with an ISO mount.</p>
+
+<p>Quoting verbatim:</p>
+
+<blockquote>
+<p>Files11 is the file system used by OpenVMS. As one might imagine, the file
+system is that part of an operating system that controls the storage and
+manipulation of files.</p>
+
+<p>ODS2 stands for OnDisk Structure, Version 2. It describes the actual layout of
+files on the disk, including all control information needed to interpret the
+contents of the disk. Later versions of OpenVMS Alpha (and presumably, the
+upcoming Itanium version) also support a newer Files11 structure level, ODS5.
+ODS2 and ODS5 volumes may exist on the same system, so long as the system is
+running a compatible version of OpenVMS.</p>
+
+<p>On ODS2 disks, the toplevel directory is called [000000]. This toplevel
+directory is also known as the &quot;MFD,&quot; or &quot;Master File Directory.&quot;</p>
+
+<p>New users may find it curious that directory listings of the [000000]
+directory include the file 000000.DIR. This is because the MFD includes an entry
+for itself, making it appear that the MFD &quot;contains itself.&quot;</p>
+
+<p>Why Call It 000000?</p>
+
+<p>The unlikelysounding name 000000 has a historical basis. On much older Digital
+systems, the directory name for each user took the form [gggmmm], where ggg was
+the UIC group number for that user, and mmm was the member number. So,
+<a href="also%20denoted%20%5B000,000%5D">000000</a> represented the MFD. (Try it: as of OpenVMS V7.3, the command
+DIRECTORY [0,0] still works as a substitute for DIRECTORY [000000] if you have
+the appropriate privileges.)</p>
+</blockquote>
+
+<p>(Duffy, M. (2003). Getting started with openVMS system management: a guide for
+(new users. Boston: Digital Press, p. 76-78)</p>
+
+<p>When we execute the command in the correct folder it does show my script:</p>
+
+<pre><code>$ SET DEF _REMY1$DKA400:[000000]
+$ DIR _REMY1$DKA400:[000000]
+
+Directory _REMY1$DKA400:[000000]
+
+A_COM.;1
+
+Total of 1 file.
+</code></pre>
+
+<h3 id="toc_4">Execute a DCL script</h3>
+
+<p>From <a href="https://web.archive.org/web/20180507185324/http://h41379.www4.hpe.com/doc/84final/9996/9996pro_18.html">the documentation</a>:</p>
+
+<blockquote>
+<p>@ (Execute Procedure) Executes a command procedure or requests the command
+interpreter to read subsequent command input from a specific file or device.</p>
+</blockquote>
+
+<p>So no <code>./</code> as in linux.</p>
+
+<p>Do specify the version number, otherwise it will fail:</p>
+
+<pre><code>$ @A_COM
+%DCL-E-OPENIN, error opening REMY1$DKA400:[000000]A_COM.COM; as input
+-RMS-E-FNF, file not found
+</code></pre>
+
+<p>My license script did fail nontheless:</p>
+
+<pre><code>$ @A_COM.;1
+%DCL-W-IVVERB, unrecognized command verb - check validity and spelling
+ \RODUCT\
+%DCL-W-IVVERB, unrecognized command verb - check validity and spelling
+$\
+%DCL-W-UNDSYM, undefined symbol - check validity and spelling
+ \APR\
+</code></pre>
+
+<p>I re-downloaded my license PAK and created a new ISO. That did not help. I
+suspected it had something to do with line endings as I was using Windows to
+create the text file. Opening the file with <code>EDIT</code> comfirmed my suspicion:</p>
+
+<p><img src="https://raymii.org/s/inc/img/openvms-license.png" alt=""></p>
+
+<h3 id="toc_5">Line endings</h3>
+
+<p>A search around the web lead me to the <a href="https://web.archive.org/web/20180507190424/http://h41379.www4.hpe.com/wizard/wiz_3707.html">OpenVMS Wizard</a>. Read the page for
+the full answer and explanation. I&#39;ve snipped the relevant parts here:</p>
+
+<pre><code>This depends on the current format of the file.  The OpenVMS Wizard
+assumes that the reason for the CR characters is that this is a STREAM
+file copied from Microsoft MS-DOS or Microsoft Windows system, as this
+is a common reason for seeing apparently extraneous CR characters embedded
+within a file.
+
+RMS recognises three types of stream files:
+
+  1) STREAM_LF - in which records are delimited by an LF character
+  2) STREAM_CR - in which records are delimited by a CR character
+  3) STREAM    - in which records are delimited by an LF character,
+             a CR+LF character pair, or an FF or VT character
+
+Often, text files from MS-DOS or Windows systems will have records ending
+with a CR+LF pair. When such a file is copied onto a VMS system as a
+STREAM_LF file, the CR character becomes part of the data stream and
+therefore will appear at the end of each record.
+
+You can check if your file falls into this category with the following
+two commands:
+
+    $ DIRECTORY/FULL filespec
+
+Check that the Record Format is Stream_LF:
+
+    Record format:      Stream_LF, maximum 0 bytes, longest 0 bytes
+
+and that the records contain a CR+LF pair. Ensure you dump sufficient
+blocks to see the ends of a number of records
+
+    $ DUMP/BLOCK=COUNT:1 filespec
+
+31310962 65462031 300A0D38 312E3009 .0.18..01 Feb.11 000020
+                  ^^^^
+
+0A0D is a CR+LF pair (remember that the hex dump reads right to left!).
+
+If your file satisfies BOTH these conditions, you have two choices for
+removing the CR from your data. The first doesn&#39;t actually remove the
+character, it just tells RMS that the CR is part of the record
+delimiter:
+
+    $ SET FILE/ATTRIBUTE=(RFM=STM) filespec
+
+Note that this does not involve any conversion or copying of data. The
+DIRECTORY/FULL command will now display the record format as:
+
+    Record format:      Stream, maximum 0 bytes, longest 0 bytes
+
+and applications reading the file will no longer &quot;see&quot; the embedded CR
+character.
+
+If you really must physically remove the CR character, you can now do
+so with a simple CONVERT command:
+
+    $ SET FILE/ATTRIBUTE=(RFM=STM) filespec
+    $ CONVERT/FDL=SYS$INPUT filespec newfilespec
+        RECORD
+          FORMAT STREAM_LF
+    $
+
+The first command tells RMS that the record relimiter is CR+LF as before.
+The second performs a conversion of the file to STREAM_LF format, so when
+the new file is created, records will be delimited by a single LF character.
+</code></pre>
+
+<p>Since the CDROM is mounted read only we cannot change the file spec:</p>
+
+<pre><code>$ SET FILE/ATTRIBUTE=(RFM=STM) A_COM.;1
+%SET-E-READERR, error reading REMY1$DKA400:[000000]A_COM.;1
+-SYSTEM-F-WRITLCK, write lock error
+</code></pre>
+
+<p>Copy the file over to your home folder:</p>
+
+<pre><code>$ COPY A_COM.;1 SYS$LOGIN
+</code></pre>
+
+<p>Change to that folder:</p>
+
+<pre><code>$ SET DEF SYS$LOGIN
+</code></pre>
+
+<p>Retry the command, which should work now:</p>
+
+<pre><code>$ SET FILE/ATTRIBUTE=(RFM=STM) A_COM.;1
+</code></pre>
+
+<p>In my case, it now looks correct in the editor:</p>
+
+<p><img src="https://raymii.org/s/inc/img/openvms-license2.png" alt=""></p>
+
+<p>But would it actually execute?</p>
+
+<pre><code>$ @A_COM.;1
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>%SHOW-I-NOLICENSE, no licenses exist
+%LICENSE-I-DISABLED, ACMS has been disabled
+%LICENSE-W-NOENT, no license was loaded for this product - DEC ACMS
+%LICENSE-I-ENABLED, ACMS  has been enabled
+%LICENSE-I-LOADED, DEC ACMS was successfully loaded with 0 units
+%SHOW-I-NOLICMATCH, no licenses match search criteria
+[...]
+%LICENSE-W-NOENT, no license was loaded for this product - DEC X500-DIRECTORY-SERVER
+%LICENSE-I-ENABLED, X500-DIRECTORY-SERVER has been enabled
+%LICENSE-I-LOADED, DEC X500-DIRECTORY-SERVER was successfully loaded with 0 units
+Completion of PAK Load Command File....
+</code></pre>
+
+<p>Yay! It works and my licenses have been setup.</p>
+
+<p>I can now check my activated licenses:</p>
+
+<pre><code>$
+$ SHOW LICENSE
+
+Active licenses on node REMY1:
+
+------- Product ID --------    ---- Rating ----- -- Version --
+Product            Producer    Units Avail Activ Version Release    Termination
+ACMS               DEC             0  0     100    0.0  (none)       1-APR-2019
+ACMS-REM           DEC             0  0     100    0.0  (none)       1-APR-2019
+ACMS-RT            DEC             0  0     100    0.0  (none)       1-APR-2019
+[...]
+VMSCLUSTER         DEC             0  0     100    0.0  (none)       1-APR-2019
+VOLSHAD            DEC             0  0     100    0.0  (none)       1-APR-2019
+X25                DEC             0  0     100    0.0  (none)       1-APR-2019
+X25-CLIENT         DEC             0  0     100    0.0  (none)       1-APR-2019
+X500-ADMIN-FACILIT DEC             0  0     100    0.0  (none)       1-APR-2019
+X500-DIRECTORY-SER DEC             0  0     100    0.0  (none)       1-APR-2019
+</code></pre>
+
+<p>When it&#39;s not DNS it&#39;s line endings. In this small adventure I learned the
+OpenVMS mount command with a few options. Furthermore, it&#39;s not only between
+Windows and Linux that line-endings cause issues, even in OpenVMS.</p>
+Tags: <a href="../tags/alpha.html">alpha</a>
+, <a href="../tags/blog.html">blog</a>
+, <a href="../tags/dec.html">dec</a>
+, <a href="../tags/decus.html">decus</a>
+, <a href="../tags/es40.html">es40</a>
+, <a href="../tags/itanium.html">itanium</a>
+, <a href="../tags/openvms.html">openvms</a>
+, <a href="../tags/pdp.html">pdp</a>
+, <a href="../tags/simh.html">simh</a>
+, <a href="../tags/vax.html">vax</a>
+, <a href="../tags/vms.html">vms</a>
+</div>
+<br/>
+<footer>
+<br/>
+                <form role="search" action="https://encrypted.google.com/search"
+                style="min-width:250px;max-width:300px;">
+                    <div class="form-group">
+                      <input type="hidden" name="as_sitesearch" value="raymii.org">
+                      <input type="hidden" name="as_qdr" value="all">
+                      <input type="text" name="as_q" class="form-control" placeholder="Search">
+                    </div>
+                  </form>
+                <br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-3704876-6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-3704876-6');
+    </script>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+     
+    </main>
+    </body>
+    </html>
+    

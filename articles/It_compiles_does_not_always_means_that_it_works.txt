@@ -1,0 +1,390 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	It compiles does not always mean that it works, a tale of virtual overridden fun in C++
+Author      : 	Remy van Elst
+Date        : 	12-05-2021
+Last update : 	14-05-2021
+URL         : 	https://raymii.org/s/articles/It_compiles_does_not_always_means_that_it_works.html
+Format      : 	Markdown/HTML
+---
+
+
+
+In a [recent article on clang-tidy](/s/snippets/Run_one_specific_clang-tidy_check_on_your_codebase.html) I referenced the fact that we're doing a huge refactoring regarding `char` pointers, lifetime, ownership and `std::strings`. Todays post is another one related to that change, where even though everything compiled correctly, it didn't `work`. For a compiled language, that is not something you expect. Next to unit tests, a compiler error is your number one sign that you've made a mistake somewhere.
+In this case however, the code all compiled fine. The issue here was an older part of the code not using `override` combined with automated refactoring in CLion missing some parts of the code during a change. So, the issue in this case is entirely our own fault, it was spotted in the manual testing, but I'd rather had it not happen at all.
+In this post I'll describe the problem including some example code that illustrates what happened. My key point is that even though the code compiles, you should always test it, preferably automated with unit and integrations tests, otherwise manually with a runbook.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Here's a screenshot of CLion's `Refactoring -> Change Signature` dialog:
+
+![screenshot][6]
+
+### Refactoring char pointers to const std::string references
+
+In our refactoring efforts we're rewriting a large part of the code that
+handles text,  strings if you will. Most texts come from a configuration file
+(binary xml), for example, the name of a consumption (Coffee Black). In the
+past this config was stored on a smartcard or burned into an EEPROM, which is
+why the texts and translations are embedded in the config. Nowadays we'd do
+that differently, but refactoring everything at once is a bad idea (Uncle Bob
+calls this the [Big Redesign In The Sky][5]), so we do it one small part at a
+time.
+
+Due to the age and size of the codebase, most of the places used a `char*`.
+Ownership of that pointer was reasonably well known, and some parts even did
+some RAII, but most often, lifetime, const-ness and ownership were hard to
+figure out. 
+
+Next to replacing all `char*` with `std::strings` and making sure the
+lifetimes are  managed correctly, the construction paths are clearer and
+performance wise, due to  using `const std::string&`, there's not much of a
+difference (according to our  benchmarks). 
+
+Most of this refactoring was done using CLion's `Refactor -> Change Signature`
+coupled with [clang-tidy][1] checks to see wherever a `nullptr` was returned. 
+Since we're talking thousands of files, this was quite a big effort. Not  just
+changing the variable types, but also each and every instance of  `strncpy`,
+`snprintf`, `strlen` and all the other C-style string handling  functions.
+Most can be pleased by giving a `.c_str()`, which returns the string as a
+`const char*`. All the `if` blocks that check if the  `char*` is a `nullptr`
+(to see if the string is empty in most cases) replaced by `.empty()` and more
+of that fun stuff.
+
+This specific issue came up inside a derived method where the automated
+refactoring missed one such derived function. In the next paragraph I'll go
+into the exact issue that occurred. We caught the bug when we did our manual
+testing, but it all compiled just fine, so I wasn't expecting  such an issue.
+
+If you're wondering why we are so late with this change, and why we're not using
+a `std::string_view`, I'll try to address that. `std::string_view` does not 
+guarantee a null-terminated string, `std::string` does. We have to use a
+few C libraries, so constructing a temporary string each time instead of 
+using a `const reference` would require more changes and thus more testing,
+whereas we tried to keep this refactoring change as small and scoped to
+as possible, not changing behavior if not absolutely required. That will
+come in a next round of refactoring. Go read that part on the
+[Big Redesign In The Sky][5], then come back here.
+
+Why are we doing this right now and not way earlier? We only just got an
+updated compiler for the specific hardware we use that supports modern
+C++ 17, before that we had a half-baked C++ 11 with big parts either missing
+or not finished. Now we have a newer compiler, thus we can take advantage 
+of newer features.
+
+
+### virtual and override
+
+Lets start with a bit of an introduction to how C++ handles derived methods
+and overrides. Virtual functions are member functions whose behavior can be
+overridden in derived classes. 
+
+In C++ 11 the keywords `override` and `final` were introduced to allow
+overridden functions to be marked appropriately. Their presence allows
+compilers to verify that an overridden function correctly overrides a base
+class implementation.
+
+Before C++ 11 there was no `override` keyword. `virtual` on non base class
+implementations was used to help indicate to the user that a function was
+virtual. C++ compilers did not use the presence of this to signify an
+overridden function. 
+
+That translates to the fact that as long as the signature matches, the
+function will override the one from its base class. If the signature differs,
+by accident or on purpose, no compiler error is given. 
+
+Later on in the code example, I'll make it more clear how it works with
+different derived classes in the old style and the new style.
+
+Quoting [cppreference on virtual][3]: 
+
+> A function with the same name but different parameter list does not override
+the base function of the same name, but hides it: when unqualified name lookup
+examines the scope of the derived class, the lookup finds the declaration and
+does not examine the base class. 
+
+A bit further on that page as well:
+
+> If some member function vf is declared as virtual in a class Base, and some
+class Derived, which is derived, directly or indirectly, from Base, has a
+declaration for member function with the same name, parameter type list (but
+not the return type), cv-qualifiers and ref-qualifiers, then this function in
+the class Derived is also virtual (whether or not the keyword virtual is used
+in its declaration) and overrides Base::vf (whether or not the word override
+is used in its declaration). 
+
+So to summarize, after C++ 11 you could actually make sure the overridden
+functions matched, before that it was just a sort of gentleman's agreement  to
+not make a mistake. The `virtual` keyword is only required at the topmost
+base-class, all methods further down the inheritance chain are automatically
+virtual as well. (After C++ 11 you can specify the `final` keyword instead  of
+`override` to make sure the method can not be overridden from that point on.)
+
+### The actual automated refactoring issue
+
+In my case, there was a `Base` class, a `Derived` class (inherits from `Base`)
+ and a bunch of `SubDerived` classes (inheriting from `Derived`). The
+automated refactoring changed both `Base::method()` and `Derived::method()`,
+but failed to find all occurrences of `SubDerived::method()`. Both
+`Base::method()` and `Derived::method()` had a `char*` argument which was
+changed to a  `const std::string&` argument, but all `SubDerived::method()`
+instances still had a `char*`. That `method()` was used in a different place,
+that place expects a `Base` object, thus it was presented as a
+`Base::method()`. Because the `override` path now was incorrect, even though
+it is a `Derived`, the `method()` on `Base` was called.
+
+The automated refactoring missed the `SubDerived` but all code still compiled,
+so I myself missed that as well. I'm not sure why it was missed, probably due
+to the sheer size of the amount of refactorings. I think there were at  least
+2500 occurrences of that specific method, maybe even double that amount.
+
+The workflow for this refactoring was a bit repetitive:
+
+1. Change a function signature / return value from `char*` to `const std::string&`
+2. Fix the most obvious errors indicated by the IDE
+3. Compile
+4. Fix compilation errors
+5. GOTO 1
+
+This workflow, fixing all compiler errors until none were left, contributed
+to the missing of this specific issue.
+
+Due to this being older style code, `override` was not used to tell the
+compiler that `::method()` was overridden, this was pre-C++ 11 style code. It
+was like this:
+
+	virtual void Base::method(char*);
+	virtual void Derived::method(char*); // public Base
+	void SubDerived::method(char*); // public Derived
+
+After the refactoring, it was:
+
+	virtual void Base::method(const std::string&); 
+	virtual void Derived::method(const::std::string&); // public Base
+	void SubDerived::method(char*); // public Derived
+
+Which is perfectly fine as far as the compiler is concerned. Instead of it
+having an overridden virtual `method(char*)` in `SubDerived`, it now just has
+a normal method in `SubDerived`. If we instead had specified `override`, like
+below, the compiler would have given us an error:
+
+	virtual void Base::method(char*); 
+	void Derived::method(char*) override; // public Base
+	void SubDerived::method(char*) override; // public Derived
+
+You'll also notice that `Derived` now no longer has the `virtual` keyword in
+front, but also `override` at the end. As stated in the previous paragraph,
+the `virtual`  keyword in non-base classes was just a hint and not required. 
+
+
+#### Code examples
+
+In my case the Base class method was implemented but had a log message when
+triggered, telling us, very helpfully, that every derived method  should
+implement that method themselves. Because of that log message, when we  found
+the issue, it didn't even require a debugging session. Whereas normally the
+`SubDerived` class would do a bunch of things, now it was just the `Base`
+method logging an error and I figured out what happened quickly by looking at
+the two classes and their methods.
+
+In the below example code you'll see that log as well, but for this example just
+with an `assert`. Oversimplifying a bit,  `assert` only triggers if you build
+a `Debug` build and not a release build, but it's just to give you  an idea of
+what happened.
+
+Here is the example code before the automated refactoring:
+
+	#include <iostream>
+	#include <cassert>
+
+	class Base {
+	public:
+	    virtual void setName(char* aName) {  
+	    	assert(("Derived Methods must implement setName themselves", false)); 
+	    }
+	};
+
+	class SomeImplementation : public Base {
+	public:
+	    virtual void setName(char* aName) { 
+	    	std::cout << "SomeImplementation\n"; 
+	    }
+	};
+
+	class ADerivedImplementation : public SomeImplementation {
+	public:
+	    void setName(char* aName) { 
+	    	std::cout << "ADerivedImplementation\n"; 
+	    }
+	};
+
+	int main() {
+	    Base base;
+	    SomeImplementation someImpl;
+	    ADerivedImplementation aDerivedImpl;
+
+	    char buf[100] = "irrelevant";
+	    std::cout << "ADerivedImplementation: ";
+	    aDerivedImpl.setName(buf);
+	    std::cout << "SomeImplementation: ";
+	    someImpl.setName(buf);
+	    std::cout << "Base: ";
+	    base.setName(buf);
+	    return 0;
+	}
+
+Output of a `Release` build:
+
+	ADerivedImplementation: ADerivedImplementation
+	SomeImplementation: SomeImplementation
+	Base: 
+
+Output of a `Debug` build:
+
+	untitled5: /home/remy/CLionProjects/untitled5/main.cpp:7: virtual void Base::setName(char*): Assertion `("Derived Methods must implement setName themselves", false)' failed.
+	ADerivedImplementation: ADerivedImplementation
+	SomeImplementation: SomeImplementation
+
+Now after the automated refactoring, all instances except one of the `char*` were
+replaced with `const std::string&`, like below:
+
+	#include <string>
+	#include <iostream>
+	#include <cassert>
+
+	class Base {
+	public:
+	    virtual void setName(const std::string &name) {  
+	    	assert(("Derived Methods must implement setName themselves", false)); 
+	    }
+	};
+
+	class SomeImplementation : public Base {
+	public:
+	    virtual void setName(const std::string &name) { 
+	    	std::cout << "SomeImplementation\n"; 
+	    }
+	};
+
+	class ADerivedImplementation : public SomeImplementation {
+	public:
+	    void setName(char* name) { 
+	    	std::cout << "ADerivedImplementation\n"; 
+	    }
+	};
+
+	int main() {
+	    Base base;
+	    SomeImplementation someImpl;
+	    ADerivedImplementation aDerivedImpl;
+
+	    std::string name = "irrelevant";
+	    std::cout << "ADerivedImplementation: ";
+	    aDerivedImpl.setName(name);
+	    std::cout << "SomeImplementation: ";
+	    someImpl.setName(name);
+	    std::cout << "Base: ";
+	    base.setName(name);
+	    return 0;
+	}
+
+
+The above example will not compile, but in our case it still compiled. I'm not sure
+why it went wrong, but I guess due to the sheer size of the code that was changed
+in the refactoring operation.
+
+If you change
+
+	aDerivedImpl.setName(name);
+
+to
+
+	aDerivedImpl.setName(const_cast<char*>(name.c_str()));
+
+the code will compile again, but once you're making that kind of changes to
+your codebase you know you're on the wrong track. 
+
+After manually changing the signature (`char*` to `const std::string&`) of the
+method in all `SubDerived` classes it worked just as it worked before.
+
+If we had used `override`, CLion would have drawn a big red line and the 
+compiler would give us an error:
+
+![screenshot 2][7]
+
+But, sadly, not all derived classes are modern enough to have the `override`
+attribute set in our codebase. We're improving quite a bit with modern tools
+like `clang-tidy` and CLion, however such changes take time and  we're doing
+it slowly but thoroughly.
+
+
+### How to find and/or prevent this issue
+
+
+`clang-tidy` has [a check for override usage][2] and if you use `clang` you
+can enable the flag `-Woverloaded-virtual` to get a compiler warning if you
+accidentally [make a mistake][4] and not use override:
+
+	warning: 'Derived::example' hides overloaded virtual function [-Woverloaded-virtual]
+
+If you do however use `override` and make a mistake in the function signature
+/ parameters, the compiler (both `clang` and `gcc`) can give you an actual
+error:
+
+	// virtual void Base::example(char*);
+	error: 'void Derived::example(int*)' marked 'override', but does not override
+
+
+When you start adding override to a class, you must change it for every method
+in that class, otherwise you'll end up with warnings like `'function'
+overrides a member function but is not marked 'override'`.
+
+[Marco Foco][8] from NVIDIA has an [interesting post][8] on this subject as well.
+
+
+[1]: /s/snippets/Run_one_specific_clang-tidy_check_on_your_codebase.html
+[2]: https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-override.html
+[3]: https://en.cppreference.com/w/cpp/language/virtual
+[4]: https://stackoverflow.com/questions/18515183/c-overloaded-virtual-function-warning-by-clang
+[5]: http://web.archive.org/web/20210511180209/http://www.luckymethod.com/2013/03/the-big-redesign-in-the-sky/
+[6]: /s/inc/img/refactoring.png
+[7]: /s/inc/img/refactoring2.png
+[8]: http://web.archive.org/web/20210512105745/https://marcofoco.com/final-override-again/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

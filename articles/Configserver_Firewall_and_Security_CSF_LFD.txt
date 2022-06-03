@@ -1,0 +1,348 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Configserver Firewall and Security (CSF and LFD)
+Author      : 	Remy van Elst
+Date        : 	12-10-2014
+URL         : 	https://raymii.org/s/articles/Configserver_Firewall_and_Security_CSF_LFD.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This page covers my notes about csf and lfd. csf is an easy SPI iptables
+firewall suite. lfd is the login failure daemon, which scans log files for
+failed authentication and blocks the IP's doing that. This page covers
+installation, populair command line options and popular config file options.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### CSF Installation
+
+On CentOS systems, first install some required Perl packages:
+
+    
+    
+     yum -y install perl-libwww-perl.noarch perl-Time-HiRes
+    
+
+Download CSF:
+
+    
+    
+    wget http://www.configserver.com/free/csf.tgz
+    
+
+Extract it:
+
+    
+    
+    tar -xf csf.tgz
+    
+
+Start the installation:
+
+    
+    
+    cd csf 
+    ./install.sh
+    
+
+If you have a server with Directadmin:
+
+    
+    
+    cd csf
+    ./install.directadmin.sh
+    
+
+Set some sane defaults:
+
+    
+    
+    perl -pi -w -e "s/TESTING = \"1\"/TESTING = \"0\"/" /etc/csf/csf.conf
+    perl -pi -w -e "s/SMTP_BLOCK = \"0\"/SMTP_BLOCK = \"1\"/" /etc/csf/csf.conf
+    perl -pi -w -e "s/LF_DSHIELD = \"0\"/LF_DSHIELD = \"86400\"/" /etc/csf/csf.conf
+    perl -pi -w -e "s/LF_SPAMHAUS = \"0\"/LF_SPAMHAUS = \"86400\"/" /etc/csf/csf.conf
+    perl -pi -w -e "s/LF_DIRWATCH = \"300\"/LF_DIRWATCH = \"120\"/" /etc/csf/csf.conf
+    perl -pi -w -e "s/LF_DIRWATCH_DISABLE = \"0\"/LF_DIRWATCH_DISABLE = \"1\"/" /etc/csf/csf.conf
+    perl -pi -w -e "s/PT_SKIP_HTTP = \"0\"/PT_SKIP_HTTP = \"1\"/" /etc/csf/csf.conf
+    perl -pi -w -e "s/PT_USERPROC = \"10\"/PT_USERPROC = \"15\"/" /etc/csf/csf.conf
+    perl -pi -w -e "s/CC_DENY = \"\"/CC_DENY = \"CN,KR,HK,IN,ID,MY,NG,PK,RU,SA,TW,SY,AE\"/" /etc/csf/csf.conf
+    perl -pi -w -e "s/IGNORE_ALLOW = \"0\"/IGNORE_ALLOW = \"1\"/" /etc/csf/csf.conf
+    
+
+Restart CSF:
+
+    
+    
+    csf -r
+    
+
+Done. Do note that the IP you installed from has been added to the allow list.
+
+### csf principle
+
+The idea with csf, as with most iptables firewall configurations, is to block
+everything and then allow through only those connections that you want. This is
+done in iptables by DROPPING all connections in and out of the server on all
+protocols. Then allow traffic in and out from existing connections. Then open
+ports up in and outgoing for both TCP and UDP individually.
+
+### csf command line tips
+
+#### Block an IP from the server
+
+    
+    
+    csf -d 192.168.1.2 
+    csf -d 192.168.0/24
+    
+
+#### Remove an IP from the blocklist
+
+    
+    
+    csf -dr 192.168.1.2 
+    
+
+#### Allow an IP
+
+    
+    
+    csf -a 172.16.20.1
+    
+
+Do note that when you allow an IP, it will still be blocked by lfd if it starts
+brute forcing. See below, "Don't block IP addresses from the allow list with
+lfd" to see how to disable it.
+
+#### Search for an IP:
+
+    
+    
+    csf -g 192.168.1.2
+    
+
+#### View Ports listening for external connections and the executables running
+
+behind them
+
+    
+    
+    csf -p
+    
+
+#### Disable csf and lfd
+
+    
+    
+    csf -x
+    
+
+#### Enable csf and lfd
+
+    
+    
+    csf -e
+    
+
+#### Restart csf
+
+    
+    
+    csf -r
+    
+
+#### Mail yourself a general security check of the server
+
+    
+    
+    csf -m user@example.com
+    
+
+#### Advanced filters
+
+These can be placed in either csf.allow or csf.deny.
+
+Allow connections over port 443 to a range of IP addresses:
+
+    
+    
+    tcp|out|d=443|d=12.34.56.78/27 # csf.allow
+    
+
+Allow SSH from one IP:
+
+    
+    
+    tcp|in|d=22|s=23.45.67.88 # csf.allow
+    
+
+Block traffic to port 80 from a specific range:
+
+    
+    
+    tcp|out|d=80|d=12.34.56.78/24 #csf.deny
+    
+
+The syntax for the advanced rules:
+
+    
+    
+    tcp/udp|in/out|s/d=port|s/d=ip|u=uid
+    
+    tcp/udp  : EITHER tcp OR udp OR icmp protocol
+    in/out   : EITHER incoming OR outgoing connections
+    s/d=port : EITHER source OR destination port number (or ICMP type)
+               (use a _ for a port range, e.g. 2000_3000)
+    s/d=ip   : EITHER source OR destination IP address
+    u/g=UID  : EITHER UID or GID of source packet, implies outgoing connections,
+               s/d=IP value is ignored
+    
+
+### csf.conf highlights
+
+The `/etc/csf/csf/csf.conf` file is huge and I recommend you read through it.
+Below I'll highlight some parts of the config I use more often.
+
+#### Don't block IP addresses from the allow list with lfd
+
+By default `lfd` will also block IP addresses listed in the `csf.allow` file.
+Change the following to make `lfd` ignore IP addresses on that list.
+
+    
+    
+    IGNORE_ALLOW = "1"
+    
+
+Do note that if one of those IP's starts brute forcing the server, they will not
+be blocked.
+
+#### Open/Allow ports
+
+To allow incoming connections to a specific port, edit the following part of the
+config:
+
+    
+    
+    # Allow incoming TCP ports
+    TCP_IN = "20,21,22,25,53,80,110,143,443,465,587,993,995,2222"
+    
+    # Allow incoming UDP ports
+    UDP_IN = "20,21,53"
+    
+
+To allow outgoing ports:
+
+    
+    
+    # Allow outgoing TCP ports
+    TCP_OUT = "20,21,22,25,53,80,110,113,443,2222"
+    
+    # Allow outgoing UDP ports
+    # To allow outgoing traceroute add 33434:33523 to this list 
+    UDP_OUT = "20,21,53,113,123"
+    
+
+#### Allow incoming / outgoing ping / ICMP
+
+To allow ICMP/ping, in/out, change the following:
+
+    
+    
+    # Allow incoming PING
+    ICMP_IN = "1"
+    
+    # Allow outgoing PING
+    ICMP_OUT = "1"
+    
+
+To block it, change it to "0"
+
+#### Block certain country's
+
+To block all traffic coming from certain country's:
+
+    
+    
+    CC_DENY = "CN,KR,HK,IN,ID,MY,NG,PK,RU,SA,TW,SY,AE"
+    
+
+Use the 2 letter ISO code there.
+
+#### Disable tracking of long running processes
+
+    
+    
+    PT_LIMIT = "0"
+    
+
+If that is set to 1 you will receive a lot of mails when process resource usage
+spikes or they run longer than a minute.
+
+#### Enable a Web Management UI
+
+To enable the CSF web management UI, without having a controlpanel (like
+cpanel/directadmin):
+
+    
+    
+    UI = "0"
+    UI_PORT = "6666"
+    UI_USER = "username"
+    UI_PASS = "password"
+    
+
+#### Send an email when a user logs in via ssh
+
+    
+    
+    LF_SSH_EMAIL_ALERT = "1"
+    
+
+The emails are sent to `root` by default. Change the below line to change that:
+
+    
+    
+    LF_ALERT_TO = "user@example.org"
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

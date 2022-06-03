@@ -1,0 +1,162 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Check and Fix SSL servers for SSLv3 connections or the Poodle CVE-2014-3566 bug
+Author      : 	Remy van Elst
+Date        : 	14-10-2014
+URL         : 	https://raymii.org/s/articles/Check_servers_for_the_Poodle_bug.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![poodle][1]
+
+The POODLE bug is a new bug discovered by Google in the SSLv3 protocol. The fix
+is easy, disable support for SSLv3. See <https://cipherli.st> for a good list of
+SSL ciphers. You can use this check from the shell to check your servers.
+
+This command can easily be automated with other shell scripts. It also allows
+you to check your services without exposing them to an external checking
+website.
+
+See the google security blog for more info on the bug: .
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+You can use a website like <http://poodlebleed.com/> for a web based check.
+
+### Fix POODLE
+
+To fix the bug, disable SSLv3 and use a secure cipherlist. I've written a few
+good tutorials about strong SSL security for different webservers. These
+tutorials automatically fix POODLE because they disable SSLv3:
+
+  * [See my tutorial for Apache][3]
+  * [See my tutorial for nginx][4]
+  * [See my tutorial for lighttpd][5]
+
+Want an easy, very secure copy-pastable config for your webserver? Check out my
+other project, <https://cipherli.st> for a good, secure config.
+
+If this article helped you and you want to support me AND get $10 Digital Ocean
+credit (2 months free), use this link to order:
+<https://www.digitalocean.com/?refcode=7435ae6b8212>
+
+### TLS-FALLBACK-SCSV
+
+Google have proposed an extension to SSL/TLS named [TLS _FALLBACK_ SCSV][6] that
+seeks to prevent forced SSL downgrades. This is automatically enabled if you
+upgrade OpenSSL to the following versions:
+
+  * OpenSSL 1.0.1 has TLS _FALLBACK_ SCSV in 1.0.1j and higher.
+  * OpenSSL 1.0.0 has TLS _FALLBACK_ SCSV in 1.0.0o and higher.
+  * OpenSSL 0.9.8 has TLS _FALLBACK_ SCSV in 0.9.8zc and higher.
+
+### Manual check
+
+Use the following command to check an IP or hostname:
+
+    
+    
+    echo | timeout 3 openssl s_client -connect HOSTNAMEORIPADDRESS:443 >/dev/null 2>&1; if [[ $? != 0 ]]; then echo "UNKNOWN: HOSTNAMEORIPADDRESS timeout or connection error"; else echo | openssl s_client -connect HOSTNAMEORIPADDRESS:443 -ssl3 2>&1 | grep -qo "sslv3 alert handshake failure\|SSL3_GET_RECORD:wrong version number" && echo "OK: HOSTNAMEORIPADDRESS Not vulnerable" || echo "FAIL:  HOSTNAMEORIPADDRESS vulnerable; sslv3 connection accepted"; fi
+    
+
+Replace HOSTNAMEORIPADDRESS by the actual hostname or IP address. If you use
+SNI, add the `-servername actualhost.org` option to the 2 OpenSSL commands, like
+so:
+
+    
+    
+    openssl s_client -servername snihostname.org -connect 172.16.30.5:443 -ssl    
+    
+
+### Examples
+
+#### Non-vulnerable website:
+
+    
+    
+     echo | timeout 3 openssl s_client -connect raymii.org:443 >/dev/null 2>&1; if [[ $? != 0 ]]; then echo "UNKNOWN: raymii.org timeout or connection error"; else echo | openssl s_client -connect raymii.org:443 -ssl3 2>&1 | grep -qo "sslv3 alert handshake failure\|SSL3_GET_RECORD:wrong version number" && echo "OK: raymii.org Not vulnerable" || echo "FAIL:  raymii.org vulnerable; sslv3 connection accepted"; fi
+    
+
+Result:
+
+    
+    
+    OK: raymii.org Not vulnerable
+    
+
+#### Vulnerable site:
+
+    
+    
+    echo | timeout 3 openssl s_client -connect sslv3-testhost.com:443 >/dev/null 2>&1; if [[ $? != 0 ]]; then echo "UNKNOWN: sslv3-testhost.com timeout or connection error"; else echo | openssl s_client -connect sslv3-testhost.com:443 -ssl3 2>&1 | grep -qo "sslv3 alert handshake failure\|SSL3_GET_RECORD:wrong version number" && echo "OK: sslv3-testhost.com Not vulnerable" || echo "FAIL:  sslv3-testhost.com vulnerable; sslv3 connection accepted"; fi
+    
+
+Result:
+
+    
+    
+    FAIL: sslv3-testhost.com vulnerable; sslv3 connection accepted
+    
+
+#### Site without SSL:
+
+    
+    
+    echo | timeout 3 openssl s_client -connect pepermunt.net:443 >/dev/null 2>&1; if [[ $? != 0 ]]; then echo "UNKNOWN: pepermunt.net timeout or connection error"; else echo | openssl s_client -connect pepermunt.net:443 -ssl3 2>&1 | grep -qo "sslv3 alert handshake failure\|SSL3_GET_RECORD:wrong version number" && echo "OK: pepermunt.net Not vulnerable" || echo "FAIL:  pepermunt.net vulnerable; sslv3 connection accepted"; fi
+    
+
+Result:
+
+    
+    
+    UNKNOWN: pepermunt.net timeout or connection error
+    
+
+You can check other ports by changing `443` to any other valid port.
+
+   [1]: https://raymii.org/s/inc/img/poodlebleed.png
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://raymii.org/s/tutorials/Strong_SSL_Security_On_Apache2.html
+   [4]: https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+   [5]: https://raymii.org/s/tutorials/Strong_SSL_Security_On_lighttpd.html
+   [6]: https://tools.ietf.org/html/draft-ietf-tls-downgrade-scsv-00
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

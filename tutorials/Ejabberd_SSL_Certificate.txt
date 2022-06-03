@@ -1,0 +1,149 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Ejabberd SSL Certificate
+Author      : 	Remy van Elst
+Date        : 	13-06-2013
+URL         : 	https://raymii.org/s/tutorials/Ejabberd_SSL_Certificate.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This tutorial shows you how to set up an SSL Certificate for use with Ejabberd.
+It covers both the creation of the Certificate Signing Request, the preparing of
+the certificate for use with Ejabberd and the installation of the certificate.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+[If you need to set up an ejabberd server then you can read my tutorial here how
+to do that][2].
+
+This tutorial assumes a working ejabberd installation. It is tested on Debian
+and Ubuntu, but should work on any ejabberd installation.
+
+### Steps and Explanation
+
+To get an SSL certificate working on ejabberd we need to do a few things:
+
+  * Create an Certificate Signing Request (CSR) and a Private Key
+  * Submit the CSR to a Certificate Authority, let them sign it and give you a Certificate
+  * Combine the certificate, private key (and chain) into a ejabberd compatible PEM file
+  * Install the certificate in ejabberd
+
+With a certificate we can secure our XMPP connection and conversations. This way
+it is much harder for others to spy on your conversations. Combined with OTR
+this enabled a super secure channel for conversation.
+
+### Creating the Certificate Signing Request
+
+Create a folder to store all the files and cd to that:
+
+mkdir -p ~/Certificates/xmpp cd ~/Certificates/xmpp
+
+Now use OpenSSL to create both a Private Key and a CSR. The first command will
+do it interactively, the second command will do it non-interactive. Make sure to
+set the correct values, your Common Name (CN) should be your XMPP server URL:
+
+Interactive:
+
+openssl req -nodes -newkey rsa:2048 -keyout private.key -out CSR.csr
+
+Non-interactive:
+
+openssl req -nodes -newkey rsa:2048 -keyout private.key -out CSR.csr -subj
+"/C=NL/ST=State/L=City/O=Company Name/OU=Department/CN=chat.example.org"
+
+This will result in two files, `CSR.csr` and `private.key`. You now have to
+submit the CSR to a Certificate Authority. This can be any CA, I myself have
+good experiences with [Xolphin][3], but there are others like Digicert and
+Verisign.
+
+Once you have submitted your CSR and have gotten a Certificate you can continue.
+
+### Creating the ejabberd certificate
+
+Once you have all the files (private key, certificate and certificate chain),
+put them all in a folder and continue. We are going to `cat` all the required
+files into a `ejabberd.pem` file.
+
+This needs to happen in a specific order:
+
+  * private key
+  * certificate
+  * chains
+
+So adapt the following commands to your filenames and create the pem file:
+
+cat private.key >> ejabberd.pem cat certificate.pem >> ejabberd.pem cat
+chain-1.pem >> ejabberd.pem cat chain-2.pem >> ejabberd.pem
+
+If that all works out continue.
+
+### Installing the certificate in ejabberd
+
+Copy the certificate to all your ejabberd servers:
+
+scp ejabberd.pem user@srv1.example.org:
+
+The place the certificate in the `/etc/ejabberd` folder:
+
+cp ejabberd.pem /etc/ejabberd/ejabberd.pem
+
+Now change the ejabberd config to point to the new certificate:
+
+vim /etc/ejabberd/ejabberd.cfg
+
+Check/change the following to point to the new certificate:
+
+[...] {listen, [ {5222, ejabberd _c2s, [ {access, c2s}, {shaper, c2s_ shaper},
+{max _stanza_ size, 65536}, starttls, {certfile, "/etc/ejabberd/ejabberd.pem"}
+]}, [...] {s2s _use_ starttls, true}. {s2s_certfile,
+"/etc/ejabberd/ejabberd.pem"}. [...]
+
+Afterwards restart ejabberd:
+
+/etc/init.d/ejabberd restart
+
+You can now use any XMPP client to connect with SSL/TLS to see if it works.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://raymii.org/s/tutorials/Set_up_a_federated_XMPP_Chat_Network_with_ejabberd.html
+   [3]: https://sslcertificaten.nl
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

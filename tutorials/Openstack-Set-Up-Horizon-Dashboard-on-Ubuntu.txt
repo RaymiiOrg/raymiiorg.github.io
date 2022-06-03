@@ -1,0 +1,260 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Openstack Horizon installation with SSL on Ubuntu
+Author      : 	Remy van Elst
+Date        : 	29-05-2014
+URL         : 	https://raymii.org/s/tutorials/Openstack-Set-Up-Horizon-Dashboard-on-Ubuntu.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![openStack Logo][1]
+
+This is a guide on installing the Openstack Horizon dashboard on Ubuntu 12.04 or
+14.04, including SSL setup. It features nice screenshots and even an Ansible
+playbook to automate it all. We will set up the Icehouse version of Horizon.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Openstack is one of those cloudy cloud projects. Warning, keep your buzzword
+bingo cards ready for the [Wikipedia][3] definition:
+
+    
+    
+    OpenStack is a free and open-source software cloud computing platform. It is primarily deployed as an infrastructure as a service (IaaS) solution. The technology consists of a series of interrelated projects that control pools of processing, storage, and networking resources throughout a data center, able to be managed or provisioned through a web-based dashboard, command-line tools, or a RESTful API. It is released under the terms of the Apache License.
+    
+
+This tutorial does not cover a full openstack cluster setup, just the Dashboard.
+In this tutorial my Dashboard talks to the [CloudVPS][4] Openstack service,
+change this for your own Openstack installation.
+
+You can see all my [Openstack related tutorials here][5]. For example, how to
+use [Duplicity to create Encrypted backups to the Openstack Swift Object
+Store][6].
+
+![openstack][7]
+
+### Requirements
+
+  * Ubuntu 12.04 or 14.04 machine
+  * An Openstack cluster with at least: 
+    * compute (kvm)
+    * keystone (identity)
+    * glance (images)
+    * cinder (block storage)
+    * neutron/classic networking
+
+Just swift (object store) and keystone are also OK, just to manage Object
+storage.
+
+I'll be using the [CloudVPS][4] public Openstack cloud in this example.
+
+If you order a VPS or Objectstore at [CloudVPS][4], please mention my name or
+this article. I'll get a little referal bonus, which will be used to keep this
+awesome website running.
+
+Note that this article is not sponsored nor endorsed by [CloudVPS][4], nor am I
+speaking for or as [CloudVPS][4].
+
+### Install packages
+
+Because Ubuntu 14.04 has Cloudy Support (as in, Openstack Icehouse in the main
+repo) we can just install it. First update the system:
+
+    
+    
+    apt-get update
+    
+
+Then install the packages required:
+
+    
+    
+    apt-get install -y apache2 memcached libapache2-mod-wsgi openstack-dashboard
+    
+
+Remove the ubuntu dashboard theme, this prevents the network map, translations
+and some menu's from working:
+
+    
+    
+    apt-get remove -y --purge openstack-dashboard-ubuntu-theme
+    
+
+Here's a picture of Horizon with the Ubuntu theme:
+
+![openstack][8]
+
+If you run 12.04 you should add the Icehouse Openstack repository first:
+
+    
+    
+    apt-get install python-software-properties
+    add-apt-repository cloud-archive:icehouse
+    apt-get update
+    
+
+If you only want the dashboard you don't need the backported kernel on 12.04.
+Otherwise, install the following extra packages: `linux-image-generic-lts-saucy
+linux-headers-generic-lts-saucy` and reboot.
+
+### Configure Apache
+
+Make sure the Horizon dashboard config is enabled:
+
+    
+    
+    a2enconf openstack-dashboard
+    
+
+On 12.04 this is not needed. The config is already enabled there in
+`/etc/apache2/conf.d/`.
+
+Enable HTTPS:
+
+    
+    
+    a2ensite default-ssl
+    a2enmod ssl
+    
+
+If you want to redirect all traffic from HTTP to HTTPS, which you should, enable
+`mod_rewrite`:
+
+    
+    
+    a2enmod rewrite
+    
+
+Edit `/etc/apache2/sites-enabled/000-default.conf`:
+
+    
+    
+    vim /etc/apache2/sites-enabled/000-default.conf
+    
+
+On 12.04 the file is named without `.conf`:
+
+    
+    
+    vim /etc/apache2/sites-enabled/000-default
+    
+
+And add the following:
+
+    
+    
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+    
+
+Somewhere in the `<Virtualhost>` part.
+
+Make sure to set up a correct certificate if you are going to run HTTPS in
+production. If you need tips to [Set up strong SSL security on Apache, see my
+tutorial][9].
+
+Don't forget to restart Apache:
+
+    
+    
+    service apache2 restart
+    
+
+### Configure Horizon
+
+Edit the dashboard config:
+
+    
+    
+    vim /etc/openstack-dashboard/local_settings.py
+    
+
+Add the following if you are using SSL:
+
+    
+    
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    USE_SSL = True
+    
+
+Configure the Openstack host by setting the following variables:
+
+    
+    
+    OPENSTACK_HOST = "127.0.0.1"
+    OPENSTACK_KEYSTONE_URL = "http://%s:5000/v2.0" % OPENSTACK_HOST
+    OPENSTACK_KEYSTONE_DEFAULT_ROLE = "_member_"
+    
+
+I'm using [CloudVPS][4]'s Openstack service, so for me the variables are like
+this:
+
+    
+    
+    OPENSTACK_KEYSTONE_URL = "https://identity.stack.cloudvps.com/v2.0"
+    
+
+Thats it. Visit the Dasboard at `http://$IPADDRESS/horizon` and login.
+
+Here's another screenshot showing the Swift (Object Storage) part of Horizon:
+
+![openstack][10]
+
+### Ansible Playbook
+
+I've also written an simple Ansible playbook to install a Horizon instance. You
+can find it in this [Github repository.][11]
+
+   [1]: https://raymii.org/s/inc/img/openstack.jpg
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://en.wikipedia.org/wiki/OpenStack
+   [4]: https://cloudvps.com
+   [5]: https://raymii.org/s/tags/openstack.html
+   [6]: https://raymii.org/s/tutorials/Encrypted_Duplicity_Backups_to_Openstack_Swift_Objectstore.html
+   [7]: https://raymii.org/s/inc/img/horizon-openstack-theme.png
+   [8]: https://raymii.org/s/inc/img/horizon-icehouse-ubuntu.png
+   [9]: https://raymii.org/s/tutorials/Strong_SSL_Security_On_Apache2.html
+   [10]: https://raymii.org/s/inc/img/horizon-containers.png
+   [11]: https://github.com/RaymiiOrg/ansible-openstack-horizon-dashboard
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

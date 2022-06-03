@@ -1,0 +1,184 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	DigitalOcean Sucks. Use DigitalOcean!
+Author      : 	Remy van Elst
+Date        : 	19-11-2013
+URL         : 	https://raymii.org/s/articles/Digital_Ocean_Sucks._Use_Digital_Ocean.html
+Format      : 	Markdown/HTML
+---
+
+
+
+[DigitalOcean][1] sucks. And rocks. This is an article reviewing the pro's and
+con's on Digital Ocean after +1 year of usage.
+
+What is DigitalOcean? Buzzword Bingo, DigitalOcean provides scalable cloud
+servers across the globe. Down to earth, they provide virtual private servers.
+And frankly, they do it quite well.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Why they suck!
+
+**Their defitinion of Cloud is different than that of most people**.  
+When you think of a cloud server provider you probably think they have a SAN
+where the disk images are stored. This because when a virtualization node fails,
+all virtual servers are automatically failed over to another server and you have
+little to no interruption. [DigitalOcean does not have a SAN. They use local
+storage in RAID 5, when more than one disk fails you are going to have a bad
+day][3]. There are [more people][4] having trouble with failed nodes.
+
+**There is still no IPv6**.  
+Come one you guys, [even Comcast and Time Warner Cable][5] are now rolling out
+IPv6. It is almost 2014, [and they hoped to have had something working in 2012
+already][6].
+
+**You cannot install your system yourself, or provide your own ISO**.  
+When I buy a KVM VPS I do that because either I need special kernel/firewall
+settings or because I want to do the install myself from my own provided ISO. I
+might want to run FreeBSD, Windows, Mikrotik RouterOS or whatever else the
+provider does not provide. Heck, I've even ran MINIX on a KVM VPS because I was
+reading [the book by Tanenbaum][7]. DigitalOcean does not provide this
+possibility, they only allow their set templates to be used on a VPS.
+
+**There have been security issues with SSH Host Keys**.  
+See above point, DigitalOcean only provide images to roll out. Some time ago
+[someone found out that the SSH Host keys were the same for all Ubuntu VM's on
+DigitalOcean][8] because of the use of images.
+
+### Why they Rock!
+
+**Cheap**.  
+$5 for an SSD based VM with 512MB RAM, 20GB of disk space and 1TB of transfer?
+That is holy cow cheap. The base Linode costs $15 more. Many [other VPS
+providers][9] exist around this price point but most of them are not as good as
+DigitalOcean.
+
+**Fast Network**.  
+I'm from the Netherlands, their Amsterdam location has a 20ms ping to my home
+internet. That is fast. Even the US based nodes have a ping around 125ms from
+The Netherlands. Most providers outside the country are at least 200 or more ms
+away. Heck, even some in the country are.
+
+**Fast Disks**.  
+Here's a disk benchmark on a DigitalOcean VPS:
+
+    
+    
+    remy@vps23:~$ dd if=/dev/zero of=test bs=64k count=16k conv=fdatasync
+    16384+0 records in
+    16384+0 records out
+    1073741824 bytes (1.1 GB) copied, 3.84315 s, 279 MB/s
+    
+
+Other VPS I have are around 80/150MB/s. I use a few DigitalOcean VPS for disk
+intensive applications, speeds are just really fast.
+
+**A lot of Operating Systems and Images**.  
+From Ubuntu, Fedora and Arch to a full PHP or Rails stack, everything is
+available. The amount of images available is more than enough for me. 29 base OS
+images and 7 stack images available on the current date. Even better, when you
+have your own VPS, you can image that and use it to provision new servers based
+on that image.
+
+**Great Management Panel**.  
+[Do you know all those WHMCS+SolusVM VPS Providers?][10]. Where you have three
+panels, one for billing, one for support and one for server management? And
+maybe one for DNS at your domain provider? DigitalOceans panel combines server
+management, support, billing and DNS in one panel. Tickets, invoices, domains
+and servers all in one place under one login. Heck, you can even add SSH keys
+via the panel which then will be available in all current and new VPS from
+DigitalOcean.
+
+**Lots and Lots of support articles and a great community**.  
+[There are a lot of good copy/paste tutorials][11], there is [a forum][12], they
+have a [blog][13] and there is [an IRC channel][14]. The forums and IRC are
+helpfull, the blog is nice to read and most of the tutorials are great for new
+users and also good as reference for experienced users. [If you have an article,
+they even pay you for it][15].
+
+**Coupon codes all the way**.  
+You can get your first two months free using [available coupon codes][16] or by
+following them on Twitter for coupon codes. [And when they accidentally give out
+a $60 coupon code, you get to keep it even when it is their error][17].
+
+**Customer Care**.  
+Three hours after this article was published I got an email from John Edgar from
+DigitalOcean:
+
+    
+    
+    Hey Remy, 
+    
+    I wanted to thank you for your article about us, I appreciated both your honesty and your kind words, so thanks!! Feedback is something that is extremely important to us, and very very welcome. 
+    
+    One thing I needed to quickly point out is the post you linked RE: ssh. You mentioned we had issues with SSH keys, this would be AWFULLL. The issue was with ssh hosts, not keys. (box vs user)
+    
+    Thanks again! :)
+    
+    j. 
+    
+
+Updated the article plus a smile on my face :).
+
+**TL;DR: DigitalOcean is a good VPS provider with minor issues. I like them and
+have been using them for over a year.**
+
+[Disquss this article on Hacker News][18]
+
+   [1]: https://digitalocean.com/
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: http://dfernandez.me/articles/digitalocean_lost_our_data/
+   [4]: http://lowendtalk.com/discussion/10261/digitalocean-is-a-joke
+   [5]: http://www.internetsociety.org/deploy360/blog/2013/11/comcast-and-time-warner-show-dramatic-increases-in-ipv6-deployment/
+   [6]: https://www.digitalocean.com/community/questions/is-ipv6-available
+   [7]: http://en.wikipedia.org/wiki/Operating_Systems:_Design_and_Implementation
+   [8]: http://missingm.co/2013/07/identical-droplets-in-the-digitalocean-regenerate-your-ubuntu-ssh-host-keys-now/
+   [9]: http://lowendbox.com
+   [10]: http://dailyserverdeals.com/
+   [11]: https://digitalocean.com/community/
+   [12]: https://digitalocean.com/community/questions
+   [13]: https://digitalocean.com/blog
+   [14]: http://webchat.freenode.net/?channels=digitalocean&uio=d4
+   [15]: https://digitalocean.com/write-for-digitalocean
+   [16]: http://www.retailmenot.com/s/digitalocean
+   [17]: http://lowendtalk.com/discussion/comment/363429/#Comment_363429
+   [18]: https://news.ycombinator.com/item?id=6764102
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

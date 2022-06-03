@@ -1,0 +1,120 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Correctly grep and display the uptime, load average and amount of users
+Author      : 	Remy van Elst
+Date        : 	06-09-2012
+URL         : 	https://raymii.org/s/snippets/Get_uptime_load_and_users_with_grep_sed_and_awk.html
+Format      : 	Markdown/HTML
+---
+
+
+
+While doing my monitoring script [ray-mon][1] I found out it can be quite hard
+to get the correct values for uptime, load average and users on different
+systems.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+For example, the _uptime_ command displays this on a mac:
+
+    
+    
+     8:27  up 1 day, 17:06, 1 user, load averages: 1,01 0,87 0,79
+    
+
+This on a debian 6 machine:
+
+    
+    
+     06:27:33 up 4 days,  2:36,  2 users,  load average: 0.16, 0.26, 0.27
+    
+
+This on a RHEL 5 machine:
+
+    
+    
+     06:28:26 up 54 min,  127 users,  load average: 6.34, 6.28, 6.27    
+    
+
+Small differences in space placement, "load averages:" instead of "load
+average:" and "min" vs "days". It took me quite a while to find out how to get
+the correct values for the following items using just unix tools:
+
+  * Uptime
+  * Amount of users logged in
+  * Current load average
+
+#### Uptime
+
+    
+    
+    uptime | grep -ohe 'up .*' | sed 's/,//g' | awk '{ print $2" "$3 }'
+    
+
+First take the output of uptime to grep, only show matching characters (-oh) and
+do regex (-e). Filter on "up" "space" "everything after that". Then go to sed to
+remove the comma's "4 days," to "4 days", and then with awk print the second and
+third collumn, and remove the rest of the output.
+
+#### Users logged in
+
+    
+    
+    uptime | grep -ohe '[0-9.*] user[s,]'
+    
+
+Take the output of uptime to grep, only show matching characters (-oh), and do
+regex (-e). Filter on "number between 0 and 9" "any amount of the previous
+character" "space" "user, or users"
+
+#### Load
+
+    
+    
+    uptime | grep -ohe 'load average[s:][: ].*' | awk '{ print $3 }'
+    
+
+First take the output of uptime to grep. only show matching characters (-oh),
+and do regex (-e). Filter on "load average: or load averages:" "everything after
+that". The with awk print the 3d collumn.
+
+   [1]: https://raymii.org/s/software/Bash_PHP_Server_Status_Monitor.html
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

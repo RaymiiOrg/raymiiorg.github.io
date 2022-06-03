@@ -1,0 +1,1431 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Install NetBSD 9.2 on a DEC Alpha CPU with AXPBox - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>
+                </small>
+            </header>
+          
+    <h2 class='headheader' id='main'>Install NetBSD 9.2 on a DEC Alpha CPU with AXPBox</h2>
+<p><small>Published: 28-08-2021 | Author: Remy van Elst | <a href="NetBSD_Alpha_AXPbox.txt">Text only version of this article</a>
+</small></p>
+<div class='ad'>
+                                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7993642564731324"
+                             crossorigin="anonymous"></script>
+                        <!-- voorartikel -->
+                        <ins class="adsbygoogle"
+                             style="display:block"
+                             data-ad-client="ca-pub-7993642564731324"
+                             data-ad-slot="6172324376"
+                             data-ad-format="auto"></ins>
+                        <script>
+                             (adsbygoogle = window.adsbygoogle || []).push({});
+                        </script>
+                        </div><br><div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Compiling and configuring AXPbox</a>
+</li>
+<li>
+<a href="#toc_1">Installing NetBSD inside AXPbox</a>
+</li>
+<li>
+<a href="#toc_2">NetBSD startup</a>
+<ul>
+<li>
+<a href="#toc_3">Autoboot NetBSD via SRM</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_4">Installing packages</a>
+</li>
+<li>
+<a href="#toc_5">OpenSSL Benchmark</a>
+</li>
+<li>
+<a href="#toc_6">sysbench</a>
+</li>
+<li>
+<a href="#toc_7">Comparing AXPbox and QEMU benchmarks</a>
+</li>
+<li>
+<a href="#toc_8">Kernel error too much memory</a>
+</li>
+<li>
+<a href="#toc_9">Kernel error with networking</a>
+</li>
+<li>
+<a href="#toc_10">Kernel error with AXPBox VGA Graphics</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p><img src="/s/inc/img/netbsd-axpbox-3.png" alt="screenshot"></p>
+
+<blockquote>
+<p>Neofetch running on NetBSD inside AXPbox</p>
+</blockquote>
+
+<p>This is a guide on installing and running NetBSD 9.2 for the DEC Alpha CPU
+architecture on AXPbox, the open source Alpha Emulator. I recently wrote an
+article on <a href="/s/articles/NetBSD_on_QEMU_Alpha.html">how to install NetBSD in QEMU</a> for Alpha and since <a href="https://web.archive.org/web/20210827075725/https://github.com/lenticularis39/axpbox/graphs/contributors">I&#39;m involved</a>
+with the AXPbox project this article was just a matter of time. This guide
+shows you how to compile AXPbox and install NetBSD 9.2. It also shows you 
+how to install packages without networking available and includes <code>openssl</code>
+and <code>sysbench</code> benchmarks, which we compare to NetBSD running inside QEMU.</p>
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<p>AXPbox runs NetBSD less well than QEMU does, it&#39;s a bit slower, enabling
+networking or a GUI crashes NetBSD and running with more than 512 MB RAM also
+crashes NetBSD during installation. The fun thing however is that the OpenSSL
+benchmark, which failed horribly on QEMU, runs well on AXPbox. The big
+selling point of AXPbox is that it runs <a href="/s/tutorials/Installing_OpenVMS_8.4_Alpha_in_AXPbox_with_networking.html">OpenVMS</a> (QEMU doesn&#39;t). NetBSD
+and other UNIXes(Tru64) kind of work, but that&#39;s more a by-product than an
+actual feature.</p>
+
+<p>Comparing <code>sysbench</code> benchmarks between QEMU and AXPbox we can see that QEMU
+is two to three times faster when running NetBSD.</p>
+
+<p>This guide does not cover X11 / GUI, since there is no networking available.
+No networking means that you cannot SSH into the machine and use X11 forwarding.
+If in the future networking does work, you can follow the <a href="/s/articles/NetBSD_on_QEMU_Alpha.html">other guide</a> that
+has instructions for VNC or <a href="/s/articles/Remote_desktop_on_NetBSD_with_Xnest_no_VNC.html">this guide</a> that covers SSH X11 forwarding. I
+did also try the AXPbox <a href="https://github.com/lenticularis39/axpbox/wiki/VGA">VGA console</a> but as you might have guessed, that
+<a href="/s/inc/img/netbsd-axpbox-1.png">crashed NetBSD</a>.</p>
+
+<p>Package installation is a bit difficult as well since there is no networking.
+However, we can work around that by downloading the package files and creating
+an ISO file, which can be mounted inside NetBSD. Poor mans file transfer, but 
+that way I was able to get sysbench installed. </p>
+
+<p>Nevertheless, I love the fact that Alpha emulation is so much better then
+<a href="/s/blog/The_sad_state_of_Alpha_emulators_for_OpenVMS.html">it was three years ago</a> when I wrote about it. AXPbox is awesome for 
+OpenVMS and the recent QEMU fixes make that great for NetBSD. I love these
+developments!</p>
+
+<h3 id="toc_0">Compiling and configuring AXPbox</h3>
+
+<p>Make sure you have git and a development environment installed. For Ubuntu:</p>
+
+<pre><code>apt install build-essential git
+</code></pre>
+
+<p>Clone the AXPbox git repository:</p>
+
+<pre><code>git clone https://github.com/lenticularis39/axpbox.git
+</code></pre>
+
+<p>You can also use one of the pre-built release versions, as of writing 1.1.0 is 
+the latest. If you do that, skip the build process and continue to the configuration
+section.</p>
+
+<p>Create a build folder and compile AXPbox:</p>
+
+<pre><code>mkdir build &amp;&amp; cd build
+cmake .. -DCMAKE_BUILD_TYPE=&quot;Release&quot; 
+make -j$(($(nproc) + 1))
+</code></pre>
+
+<p>In your build folder there should now be a binary named <code>AXPbox</code>:</p>
+
+<pre><code>./axpbox 
+AXPBox Alpha Emulator (commit cba974cdfa4d2b8a459e7c1eb1943fff8b514a09)
+Usage: ../build/axpbox run|configure &lt;options&gt;
+</code></pre>
+
+<p>Create a <code>netbsd</code> folder where the config, ISO and disk are. Not really required, but 
+I like to keep my virtualized configs seperated:</p>
+
+<pre><code>mkdir netbsd
+cd netbsd
+</code></pre>
+
+<p>Create a folder for the ROM file, which AXPbox needs to boot:</p>
+
+<pre><code>mkdir rom
+cd rom
+</code></pre>
+
+<p>Download the SRM rom file:</p>
+
+<pre><code>wget https://raymii.org/s/inc/downloads/es40-srmon/cl67srmrom.exe
+cd ..
+</code></pre>
+
+<p>Add the config file for AXPbox. Create or edit <code>es40.cfg</code>:</p>
+
+<pre><code>vim es40.cfg
+</code></pre>
+
+<p>Paste the following contents:    </p>
+
+<pre><code>sys0 = tsunami
+{
+  memory.bits = 29;
+  rom.srm = &quot;rom/cl67srmrom.exe&quot;;
+  rom.decompressed = &quot;rom/decompressed.rom&quot;;
+  rom.flash = &quot;rom/flash.rom&quot;;
+  rom.dpr = &quot;rom/dpr.rom&quot;;
+
+  cpu0 = ev68cb
+  {
+    speed = 1800M;
+    icache = false;
+    skip_memtest_hack = true;
+  }
+
+  serial0 = serial
+  {
+    port = 21264;
+    action = &quot;&quot;;
+  }
+
+  pci0.15 = ali_ide
+  {
+  }
+
+  pci0.1 = sym53c810
+  {
+    disk0.0 = file
+    {
+      file = &quot;disk.img&quot;;
+      cdrom = false;
+      read_only = false;
+    }
+
+    disk0.1 = file
+    {
+      file = &quot;netbsd.iso&quot;; 
+      cdrom = true;
+      read_only = true;
+    }
+  }
+
+  pci0.7 = ali
+  {
+    mouse.enabled = false;
+    vga_console = false;
+  }
+}
+</code></pre>
+
+<p>Last but not least, create an empty disk file where you will install NetBSD onto:</p>
+
+<pre><code>truncate -s 20G disk.img
+</code></pre>
+
+<p>I&#39;ve used 20 GB as size, but less than that will work fine as well. I think
+you need 1.5GB for a full NetBSD installation.</p>
+
+<p>Now that the emulator is all set up and ready, continue on to the next section
+where we&#39;ll start the NetBSD installation.</p>
+
+<h3 id="toc_1">Installing NetBSD inside AXPbox</h3>
+
+<p>Before we can install NetBSD, we need to download the ISO file. I&#39;m using the
+latest current ISO because that was what the QEMU article used, 9.2 should
+work just as well.</p>
+
+<p>Check <a href="https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/images/">the following directory</a> for the current version of the latest
+<code>current</code> ISO, in my case <code>NetBSD-9.99.88-alpha.iso</code>. Download the ISO:</p>
+
+<pre><code>wget -O netbsd.iso https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/images/NetBSD-9.99.88-alpha.iso
+</code></pre>
+
+<p>Note: If the version number changed, the above command will return a 404 error and you must
+specify the new URL yourself.</p>
+
+<p>More information on how the <code>current</code> (development/daily) builds work can be
+found <a href="https://www.netbsd.org/releases/current.html">here</a> on the NetBSD site.</p>
+
+<p>AXPbox supports booting from the ISO directly, as opposed to QEMU, there 
+we had to provide a separate kernel file. </p>
+
+<p>Once the ISO is downloaded, you can start AXPbox. Make sure you&#39;re in
+the same folder as the <code>es40.cfg</code> file and the NetBSD ISO. In my case
+AXPbox is in the <code>../build</code> folder, if yours is somewhere else,
+adapt the commands accordingly.</p>
+
+<pre><code>../build/axpbox run
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>sys0(tsunami): $Id: System.cpp,v 1.79 2008/06/12 07:29:44 iamcamiel Exp $
+%FLS-F-NOREST: Flash could not be restored from rom/flash.rom
+sys0(tsunami): $Id: Flash.cpp,v 1.19 2008/03/24 22:11:50 iamcamiel Exp $
+pci0.1(sym53c810).disk0.0(file): Mounted file disk.img, 10485760 512-byte blocks, 16384/16/40.
+pci0.1(sym53c810).disk0.1(file): Mounted file netbsd.iso, 168005 2048-byte blocks, 33601/5/1.
+dma: $Id: DMA.cpp,v 1.9 2008/04/29 09:24:52 iamcamiel Exp $
+%DPR-F-NOREST: DPR could not be restored from rom/dpr.rom
+sys0(tsunami): $Id: DPR.cpp,v 1.23 2008/06/12 07:29:44 iamcamiel Exp $
+cpu0(ev68cb)(0): $Id: AlphaCPU.cpp,v 1.82 2009/03/16 01:33:27 iamcamiel Exp $
+serial0(serial): Waiting for connection on port 21264.
+</code></pre>
+
+<p>Open another terminal and connect to the emulator, after which it will continue booting:</p>
+
+<pre><code>telnet 127.0.0.1 21264
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is &#39;^]&#39;.
+This is serial port #0 on ES40 Emulator
+</code></pre>
+
+<p>A bunch of output appears which is all part of the emulator startup sequence,
+no NetBSD yet:</p>
+
+<pre><code>OpenVMS PALcode V1.98-104, Tru64 UNIX PALcode V1.92-105
+
+starting console on CPU 0
+initialized idle PCB
+initializing semaphores
+initializing heap
+initial heap 240c0
+memory low limit = 1b0000 heap = 240c0, 17fc0
+initializing driver structures
+initializing idle process PID
+initializing file system
+initializing hardware
+initializing timer data structures
+lowering IPL
+CPU 0 speed is 1786 MHz
+create dead_eater
+create poll
+create timer
+create powerup
+access NVRAM
+Memory size 512 MB
+testing memory
+..
+probe I/O subsystem
+probing hose 1, PCI
+probing hose 0, PCI
+probing PCI-to-ISA bridge, bus 1
+bus 0, slot 1 -- pka -- NCR 53C810
+bus 0, slot 15 -- dqa -- Acer Labs M1543C IDE
+bus 0, slot 15 -- dqb -- Acer Labs M1543C IDE
+starting drivers
+entering idle loop
+*** system serial number not set. use set sys_serial_num command.
+Partition 0, Memory base: 000000000, size: 020000000
+initializing GCT/FRU at 1c8000
+Initializing pka ewa dqa dqb 
+Memory Testing and Configuration Status
+  Array       Size       Base Address    Intlv Mode
+---------  ----------  ----------------  ----------
+    0        512Mb     0000000000000000    4-Way
+
+     512 MB of System Memory
+Testing the System
+Testing the Disks (read only)
+Testing the Network
+AlphaServer ES40 Console V7.3-1, built on Feb 27 2007 at 12:57:47
+
+
+P00&gt;&gt;&gt;
+</code></pre>
+
+<p>Once you see the <code>P00&gt;&gt;&gt;</code> prompt, the fist part of the boot process is finished. Enter
+the command <code>show dev</code> to see which devices are available:</p>
+
+<pre><code>P00&gt;&gt;&gt;sho de
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>dka0.0.0.1.0               DKA0                           RZ58  2000
+dka100.1.0.1.0             DKA100                        RRD42  4.5d
+ewa0.0.0.4.0               EWA0              08-00-DE-AD-BE-EF
+dva0.0.0.1000.0            DVA0                               
+pka0.7.0.1.0               PKA0                  SCSI Bus ID 7
+</code></pre>
+
+<p>If you&#39;ve configured the disk under the IDE controller, the disk names are different:</p>
+
+<pre><code>P00&gt;&gt;&gt;sho de
+dqa0.0.0.15.0              DQA0                       disk.img          
+dqa1.1.0.15.0              DQA1                    netbsd .iso          
+dva0.0.0.1000.0            DVA0                               
+ewa0.0.0.4.0               EWA0              08-00-DE-AD-BE-EF
+pka0.7.0.1.0               PKA0                  SCSI Bus ID 7
+</code></pre>
+
+<p>I found SCSI disks to be more stable and a bit faster when installing, which is why
+I&#39;m using those. You can try IDE, it should work fine. Mixing the two could result
+in a bug, there is one open in AXPbox regarding copying from an IDE CDROM to a SCSI
+disk.</p>
+
+<p>I was testing with networking when I copied this output, which is why you see
+a network adapter in the output. That turned out not to work, as you might
+have read in the introduction.</p>
+
+<p>Enter the command <code>boot dka100</code> to boot from the CDROM drive (with the NetBSD iso):</p>
+
+<pre><code>P00&gt;&gt;&gt;boot dka100
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>(boot dka100.1.0.1.0 -flags 0)
+block 0 of dka100.1.0.1.0 is a valid boot block
+reading 13 blocks from dka100.1.0.1.0
+bootstrap code read in
+base = 200000, image_start = 0, image_bytes = 1a00(6656)
+initializing HWRPB at 2000
+initializing page table at 1ff56000
+initializing machine state
+setting affinity to the primary CPU
+jumping to bootstrap code
+
+NetBSD/alpha 9.99.88 ISO 9660 Primary Bootstrap
+Jumping to entry point...
+
+NetBSD/alpha 9.99.88 Secondary Bootstrap, Revision 1.13 (Sun Aug 15 22:22:52 UTC 2021)
+
+VMS PAL rev: 0x4006800010162
+OSF PAL rev: 0x400690002015c
+Switch to OSF PAL code succeeded.
+
+Boot flags: 0
+11177040+185104=0xad6560
+</code></pre>
+
+<p>Yay! NetBSD is booting! The boot process continues until it stops and asks you what 
+terminal you have:</p>
+
+<pre><code>Entering netbsd at 0xfffffc0000a01410...
+[   1.0000000] Unrecognized boot flag &#39;0&#39;.
+[   1.0000000] Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+[   1.0000000]     2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+[   1.0000000]     2018, 2019, 2020, 2021 The NetBSD Foundation, Inc.  All rights reserved.
+[   1.0000000] Copyright (c) 1982, 1986, 1989, 1991, 1993
+[   1.0000000]     The Regents of the University of California.  All rights reserved.
+
+[   1.0000000] NetBSD 9.99.88 (INSTALL) #0: Sun Aug 15 22:22:52 UTC 2021
+[   1.0000000]  mkrepro@mkrepro.NetBSD.org:/usr/src/sys/arch/alpha/compile/INSTALL
+[   1.0000000] AlphaServer ES40, 1785MHz, s/n 
+[   1.0000000] 8192 byte page size, 1 processor.
+[   1.0000000] total memory = 512 MB
+[   1.0000000] (2736 KB reserved for PROM, 509 MB used by NetBSD)
+[   1.0000000] avail memory = 491 MB
+[   1.0000000] mainbus0 (root)
+[   1.0000000] cpu0 at mainbus0: ID 0 (primary), 21264C-6 (EV68CB)
+[   1.0000000] cpu0: Architecture extensions: 0x1305&lt;PMI,PAT,MVI,CIX,BWX&gt;
+[   1.0000000] tsc0 at mainbus0: 21272 Core Logic Chipset, Cchip rev 0
+[   1.0000000] tsc0: 8 Dchips, 2 memory buses of 16 bytes
+[   1.0000000] tsc0: arrays present: 512MB, 0MB, 0MB, 0MB, Dchip 0 rev 1
+[   1.0000000] tsp0 at tsc0
+[   1.0000000] pci0 at tsp0 bus 0
+[   1.0000000] siop0 at pci0 dev 1 function 0: Symbios Logic 53c810 (fast scsi)
+[   1.0000000] siop0: interrupting at dec 6600 irq 8
+[   1.0000000] scsibus0 at siop0: 8 targets, 8 luns per target
+[   1.0000000] tlp0 at pci0 dev 4 function 0: DECchip 21143 Ethernet, pass 3.0
+[   1.0000000] tlp0: interrupting at dec 6600 irq 20
+[   1.0000000] tlp0: Ethernet address 08:00:de:ad:be:ef
+[   1.0000000] tlp0: 100baseTX, 10baseT, auto
+[   1.0000000] sio0 at pci0 dev 7 function 0: vendor 10b9 product 1533 (rev. 0xc3)
+[   1.0000000] aceride0 at pci0 dev 15 function 0: Acer Labs M5229 UDMA IDE Controller (rev. 0xc1)
+[   1.0000000] aceride0: primary channel interrupting at isa irq 14
+[   1.0000000] atabus0 at aceride0 channel 0
+[   1.0000000] aceride0: secondary channel interrupting at isa irq 15
+[   1.0000000] atabus1 at aceride0 channel 1
+[   1.0000000] isa0 at sio0
+[   1.0000000] lpt0 at isa0 port 0x3bc-0x3bf irq 7
+[   1.0000000] com0 at isa0 port 0x3f8-0x3ff irq 4: ns8250 or ns16450, no fifo
+[   1.0000000] com0: console
+[   1.0000000] pckbc0 at isa0 port 0x60-0x64
+[   1.0000000] pckbd0 at pckbc0 (kbd slot)
+[   1.0000000] pckbc0: using irq 1 for kbd slot
+[   1.0000000] wskbd0 at pckbd0 (mux ignored)
+[   1.0000000] pms0 at pckbc0 (aux slot)
+[   1.0000000] pckbc0: using irq 12 for aux slot
+[   1.0000000] wsmouse0 at pms0 (mux ignored)
+[   1.0000000] mcclock0 at isa0 port 0x70-0x71: mc146818 compatible time-of-day clock
+[   1.0000000] tsp1 at tsc0
+[   1.0000000] pci1 at tsp1 bus 0
+[   1.0000000] tsciic at tsc0
+[   1.0000000]  not configured
+[   1.0000000] entropy: WARNING: extracting entropy too early
+[   1.0083909] scsibus0: waiting 2 seconds for devices to settle...
+[   3.1186893] sd0 at scsibus0 target 0 lun 0: &lt;DEC, RZ58     (C) DEC, 2000&gt; disk fixed
+[   3.1227910] sd0: 20480 MB, 65536 cyl, 16 head, 40 sec, 512 bytes/sect x 41943040 sectors
+[   3.1258816] sd0: async, 8-bit transfers
+[   3.1289436] cd0 at scsibus0 target 1 lun 0: &lt;DEC, RRD42   (C) DEC, 4.5d&gt; cdrom removable
+[   3.1310198] cd0: async, 8-bit transfers
+[   3.1576555] root on md0a dumps on md0b
+[   3.1607318] root file system type: ffs
+[   3.1621352] kern.module.path=/stand/alpha/9.99.88/modules
+Terminal type? [vt100] 
+</code></pre>
+
+<p>Press RETURN to accept the default terminal type. The next thing you should
+see is the menu driven installer:</p>
+
+<pre><code> NetBSD/alpha 9.99.88
+
+ This menu-driven tool is designed to help you install NetBSD to a hard disk,
+ or upgrade an existing NetBSD system, with a minimum of work.
+ In the following menus type the reference letter (a, b, c, ...) to select an
+ item, or type CTRL+N/CTRL+P to select the next/previous item.
+ The arrow keys and Page-up/Page-down may also work.
+ Activate the current selection from the menu by typing the enter key.
+
+
+
+                +---------------------------------------------+
+                |&gt;a: Installation messages in English         |
+                | b: Messages d&#39;installation en franais      |
+                | c: Installation auf Deutsch                 |
+                | d: Komunikaty instalacyjne w jezyku polskim |
+                | e: Mensajes de instalacion en castellano    |
+                +---------------------------------------------+
+</code></pre>
+
+<p>I&#39;m not going to cover the entire installation process, that would give
+an enormous amount of output. It&#39;s a minimal install with default 
+partitioning. No network configured, no X11. </p>
+
+<p>I&#39;ll highlight the steps with some output, but the installer is 
+so straight forward that you should be able to figure it out.</p>
+
+<p>Select <code>&gt;a: Install NetBSD to hard disk</code> to continue.</p>
+
+<p>Choose the only available disk (<code>sd0</code>):</p>
+
+<pre><code>On which disk do you want to install NetBSD?
+
+                      +--------------------------+
+                      | Available disks          |
+                      |                          |
+                      |&gt;a: sd0 (20.0G)           |
+                      | b: Extended partitioning |                          
+                      | x: Exit                  |
+                      +--------------------------+
+</code></pre>
+
+<p>Select the default partitioning:</p>
+
+<pre><code> You can use a simple editor to set the sizes of the NetBSD partitions, or
+ apply the default partition sizes and contents.
+
+ You will then be given the opportunity to change any of the partition
+ details.                 
+
+ The NetBSD (or free) part of your disk (sd0) is 20G.
+
+ A full installation requires at least 1156M without X and at least 1456M if
+ the X sets are included. 
+
+                     +-----------------------------------+
+                     | What would you like to do?        |
+                     |                                   |
+                     | a: Set sizes of NetBSD partitions |
+                     |&gt;b: Use default partition sizes    |
+                     | x: Cancel                         |
+                     +-----------------------------------+
+</code></pre>
+
+<p>Review the options and select <code>OK</code>:</p>
+
+<pre><code> We now have your disklabel partitions for sd0 below.  This is your last  
+ chance to change them.
+
+ Flags: (I)nstall, (N)ewfs.  Total size: 20G, free: 0B
+
+     Start (sec)    End (sec)   Size (sec)  FS type Flag Filesystem
+    ------------ ------------ ------------ -------- ---- ----------------
+ a:            0     41680895     41680896   4.2BSD IN   /
+ b:     41680896     41943039       262144     swap
+ c:            0     41943039     41943040 Whole disk
+    ------------ ------------ ------------ -------- ---- ----------------
+ e: Change input units (sectors/cylinders/MB/GB)
+ f: Edit name of the disk
+ g: Clone external partition(s)
+ h: Cancel           
+&gt;x: Partition sizes ok
+</code></pre>
+
+<p>The installer will now format and partition the disk, output looks like this:</p>
+
+<pre><code>    Status: Running
+    Command: /sbin/newfs -V2 -O 1  /dev/rsd0a
+
+--------------------------------------------------------------------------------
+/dev/rsd0a: 428.0MB (876544 sectors) block size 8192, fragment size 1024}
+        using 10 cylinder groups of 42.80MB, 5479 blks, 10624 inodes.
+.......................................
+</code></pre>
+
+<p>Select the <code>Minimal Installation</code> option. In my case the other ones failed
+with error messages regarding <code>no space left on device</code>. The <code>Install From</code> 
+location is <code>CD-ROM / DVD</code>.</p>
+
+<p>The installer will show the progress of the installation:</p>
+
+<pre><code>    Status: Running
+    Command: progress -zf /mnt2//alpha/binary/sets/kern-GENERIC.tgz tar --chroot -xpf -
+
+    --------------------------------------------------------------------------------
+     15% |*****                              |  2240 KiB  743.71 KiB/s    00:15 ETA
+</code></pre>
+
+<p>Once prompted <code>Hit ENTER to continue</code>, do so. The basic installation is complete and you
+can now configure a few options. </p>
+
+<p>I choose to leave all the options on their default. We&#39;re not configuring networking, 
+so no <code>ssh</code>. If you want you can set a root password. </p>
+
+<pre><code> Configure the additional items as needed.
+
+
+&gt;a: Configure network                                  configure 
+ b: Timezone                                           UTC
+ c: Root shell                                         /bin/sh
+ d: Change root password                               ***EMPTY***
+ e: Enable installation of binary packages             install
+ f: Fetch and unpack pkgsrc                            install
+ g: Enable sshd                                        NO
+ h: Enable ntpd                                        NO
+ i: Run ntpdate at boot                                NO
+ j: Enable mdnsd                                       NO
+ k: Enable xdm                                         NO
+ l: Enable cgd                                         YES
+ m: Enable lvm                                         NO
+ n: Enable raidframe                                   YES
+ o: Add a user
+ x: Finished configuring
+</code></pre>
+
+<p>Choose <code>x: Finished configuring</code>, press ENTER a few more times and exit the
+installer. Shutdown the system with the command <code>shutdown -h now</code> and in
+your other terminal, where AXPbox runs, exit that by pressing CTRL+C.</p>
+
+<p>The installation is now finished. </p>
+
+<h3 id="toc_2">NetBSD startup</h3>
+
+<p>Fire up AXPbox again and open a telnet session in another terminal, just as
+you did when installing NetBSD. There are two things different as to when installing,
+the first is setting a boot flag to boot in to multiuser mode and the second is a 
+different boot device. </p>
+
+<p><img src="/s/inc/img/netbsd-axpbox-2.png" alt="bootflags"></p>
+
+<p>The SRM firmware has the concept of boot flags, which are different for each 
+type of operating system. For Tru64 (unix) and thus for NetBSD, by default
+the system will boot to single user mode, unless we give it a specific flag. 
+I&#39;ve included an image with the different supported flags, taken from the SRM
+reference manual for an actual AlphaServer. You can check out my <a href="/s/tutorials/Installing_OpenVMS_8.4_Alpha_in_AXPbox_with_networking.html">OpenVMS guide</a>
+to read more about what the flags mean for OpenVMS.</p>
+
+<p>On the <code>P00&gt;&gt;&gt;</code> prompt, enter the following command:</p>
+
+<pre><code>P00&gt;&gt;&gt;set boot_osflags a
+</code></pre>
+
+<p>You only need to do this once. Next time you fire up AXPbox, the flag will
+be remembered. </p>
+
+<p>Boot from the freshly installed NetBSD disk:</p>
+
+<pre><code>P00&gt;&gt;&gt;boot dka0
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>(boot dka0.0.0.1.0 -flags a)
+block 0 of dka0.0.0.1.0 is a valid boot block
+reading 13 blocks from dka0.0.0.1.0
+bootstrap code read in
+base = 200000, image_start = 0, image_bytes = 1a00(6656)
+initializing HWRPB at 2000
+initializing page table at 1ff56000
+initializing machine state
+setting affinity to the primary CPU
+jumping to bootstrap code
+
+NetBSD/alpha 9.99.88 FFS Primary Bootstrap
+Jumping to entry point...
+
+NetBSD/alpha 9.99.88 Secondary Bootstrap, Revision 1.13 (Sun Aug 15 22:22:52 UTC 2021)
+
+VMS PAL rev: 0x4006800010162
+OSF PAL rev: 0x400690002015c
+Switch to OSF PAL code succeeded.
+
+Boot flags: a
+13164432+233872 [645360+419227]=0xdcb718
+</code></pre>
+
+<p>Yay! NetBSD again. I&#39;m always excited when you reach such a point, like an OS booting. 
+When you think about all the layers of emulation inbetween, it&#39;s amazing! </p>
+
+<p>The output continues:</p>
+
+<pre><code>Entering netbsd at 0xfffffc0000a014b0...
+[   1.0000000] consinit: not using prom console
+[   1.0000000] Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+[   1.0000000]     2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+[   1.0000000]     2018, 2019, 2020, 2021 The NetBSD Foundation, Inc.  All rights reserved.
+[   1.0000000] Copyright (c) 1982, 1986, 1989, 1991, 1993
+[   1.0000000]     The Regents of the University of California.  All rights reserved.
+
+[   1.0000000] NetBSD 9.99.88 (GENERIC) #0: Sun Aug 15 22:22:52 UTC 2021
+[   1.0000000]  mkrepro@mkrepro.NetBSD.org:/usr/src/sys/arch/alpha/compile/GENERIC
+[   1.0000000] AlphaServer ES40, 1785MHz, s/n 
+[   1.0000000] 8192 byte page size, 1 processor.
+[   1.0000000] total memory = 512 MB
+[   1.0000000] (2736 KB reserved for PROM, 509 MB used by NetBSD)
+[   1.0000000] avail memory = 488 MB
+[   1.0000000] mainbus0 (root)
+[   1.0000000] cpu0 at mainbus0: ID 0 (primary), 21264C-6 (EV68CB)
+[   1.0000000] cpu0: Architecture extensions: 0x1305&lt;PMI,PAT,MVI,CIX,BWX&gt;
+[   1.0000000] tsc0 at mainbus0: 21272 Core Logic Chipset, Cchip rev 0
+[   1.0000000] tsc0: 8 Dchips, 2 memory buses of 16 bytes
+[   1.0000000] tsc0: arrays present: 512MB, 0MB, 0MB, 0MB, Dchip 0 rev 1
+[   1.0000000] tsp0 at tsc0
+[   1.0000000] pci0 at tsp0 bus 0
+[   1.0000000] siop0 at pci0 dev 1 function 0: Symbios Logic 53c810 (fast scsi)
+[   1.0000000] siop0: interrupting at dec 6600 irq 8
+[   1.0000000] scsibus0 at siop0: 8 targets, 8 luns per target
+[   1.0000000] sio0 at pci0 dev 7 function 0: Acer Labs M1533 PCI-ISA Bridge (rev. 0xc3)
+[   1.0000000] aceride0 at pci0 dev 15 function 0: Acer Labs M5229 UDMA IDE Controller (rev. 0xc1)
+[   1.0000000] aceride0: primary channel interrupting at isa irq 14
+[   1.0000000] atabus0 at aceride0 channel 0
+[   1.0000000] aceride0: secondary channel interrupting at isa irq 15
+[   1.0000000] atabus1 at aceride0 channel 1
+[   1.0000000] isa0 at sio0
+[   1.0000000] lpt0 at isa0 port 0x3bc-0x3bf irq 7
+[   1.0000000] com0 at isa0 port 0x3f8-0x3ff irq 4: ns8250 or ns16450, no fifo
+[   1.0000000] com0: console
+[   1.0000000] pckbc0 at isa0 port 0x60-0x64
+[   1.0000000] pckbd0 at pckbc0 (kbd slot)
+[   1.0000000] pckbc0: using irq 1 for kbd slot
+[   1.0000000] wskbd0 at pckbd0 mux 1
+[   1.0000000] pms0 at pckbc0 (aux slot)
+[   1.0000000] pckbc0: using irq 12 for aux slot
+[   1.0000000] wsmouse0 at pms0 mux 0
+[   1.0000000] attimer0 at isa0 port 0x40-0x43
+[   1.0000000] pcppi0 at isa0 port 0x61
+[   1.0000000] spkr0 at pcppi0: PC Speaker
+[   1.0000000] wsbell at spkr0 not configured
+[   1.0000000] midi0 at pcppi0: PC speaker
+[   1.0000000] isabeep0 at pcppi0
+[   1.0000000] mcclock0 at isa0 port 0x70-0x71: mc146818 compatible time-of-day clock
+[   1.0000000] attimer0: attached to pcppi0
+[   1.0000000] tsp1 at tsc0
+[   1.0000000] pci1 at tsp1 bus 0
+[   1.0000000] tsciic0 at tsc0
+[   1.0000000] iic0 at tsciic0: I2C bus
+[   1.0000000] entropy: WARNING: extracting entropy too early
+[   1.0117272] scsibus0: waiting 2 seconds for devices to settle...
+[   3.0219763] sd0 at scsibus0 target 0 lun 0: &lt;DEC, RZ58     (C) DEC, 2000&gt; disk fixed
+[   3.0258952] sd0: 20480 MB, 65536 cyl, 16 head, 40 sec, 512 bytes/sect x 41943040 sectors
+[   3.0278523] sd0: async, 8-bit transfers
+[   3.0307854] cd0 at scsibus0 target 1 lun 0: &lt;DEC, RRD42   (C) DEC, 4.5d&gt; cdrom removable
+[   3.0327430] cd0: async, 8-bit transfers
+[   3.0709108] root on sd0a dumps on sd0b
+[   3.0767888] root file system type: ffs
+[   3.0787464] kern.module.path=/stand/alpha/9.99.88/modules
+Thu Aug 26 16:13:07 UTC 2021
+</code></pre>
+
+<p>Because I had exited the emulater a few times without shutting down the operating
+system, it had to do a disk check. Takes about 5 minutes:</p>
+
+<pre><code>Starting root file system check:
+/dev/rsd0a: UNREF FILE I=391813  OWNER=0 MODE=100600
+/dev/rsd0a: SIZE=0 MTIME=Aug 26 16:10 2021   (CLEARED)
+/dev/rsd0a: FREE BLK COUNT(S) WRONG IN SUPERBLK (SALVAGED)
+/dev/rsd0a: SUMMARY INFORMATION BAD (SALVAGED)
+/dev/rsd0a: BLK(S) MISSING IN BIT MAPS (SALVAGED)
+/dev/rsd0a: 7355 files, 97258 used, 9945101 free (437 frags, 1243083 blocks, 0.0% fragmentation)
+/dev/rsd0a: MARKING FILE SYSTEM CLEAN
+</code></pre>
+
+<p>Boot output continues:</p>
+
+<pre><code>Setting sysctl variables:
+ddb.onpanic: 1 -&gt; 0
+[ 195.0098685] cd0: no disk label
+swapctl: setting dump device to /dev/sd0b
+swapctl: adding /dev/sd0b as swap device at priority 0
+Starting file system checks:
+rndctl: no entropy in seed
+Setting tty flags.
+Starting network.
+Hostname: netbsd.spnw.nl
+IPv6 mode: host
+Configuring network interfaces:.
+Adding interface aliases:.
+route: writing to routing socket: Network is unreachable
+add net default: gateway 192.168.11.1: Network is unreachable
+Waiting for duplicate address detection to finish...
+Building databases: dev, utmp, utmpx, services.
+Starting syslogd.
+Mounting all file systems...
+Clearing temporary files.
+Checking quotas: done.
+Setting securelevel: kern.securelevel: 0 -&gt; 1
+[ 222.5400920] cd0: no disk label
+swapctl: setting dump device to /dev/sd0b
+Starting virecover.
+Checking for core dump...
+savecore: no core dump
+Starting local daemons:.
+Updating motd.
+</code></pre>
+
+<p>At first I had SSH enabled, on first boot it generated host keys, which took almost an hour:</p>
+
+<pre><code>ssh-keygen: 1024 SHA256:o7jEPyk463sM62tU9m3QMIIQqPBWa95yIlqVayPbaW0 root@netbsd.spnw.nl (DSA)
+ssh-keygen: 521 SHA256:4SNpVX3HRzkLQ7MymTryocCoJZ518iPbb3gLiZexmwg root@netbsd.spnw.nl (ECDSA)
+ssh-keygen: 256 SHA256:YR3WQJK38h3Nc4hrGgBtvPTPn8eawBtDoiETfrwzmoc root@netbsd.spnw.nl (ED25519)
+ssh-keygen: 3072 SHA256:lQdGTEzlJHpo7EDHrRbx2Q1C1zh1B6JDbe3wDWoAjtA root@netbsd.spnw.nl (RSA)
+Starting sshd.
+postfix: rebuilding /etc/mail/aliases (missing /etc/mail/aliases.db)
+Starting postfix.
+Starting inetd.
+Starting cron.
+Thu Aug 26 16:25:54 UTC 2021
+
+NetBSD/alpha (netbsd.spnw.nl) (constty)
+
+login: 
+</code></pre>
+
+<p>Enter the username <code>root</code> and if you set a password during install, also enter that. You 
+should now be logged in:</p>
+
+<pre><code>Aug 26 16:26:38 netbsd login: ROOT LOGIN (root) on tty constty
+Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+    2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+    2018, 2019, 2020, 2021 The NetBSD Foundation, Inc.  All rights reserved.
+Copyright (c) 1982, 1986, 1989, 1991, 1993
+    The Regents of the University of California.  All rights reserved.
+
+NetBSD 9.99.88 (GENERIC) #0: Sun Aug 15 22:22:52 UTC 2021
+
+Welcome to NetBSD!
+
+This is a development snapshot of NetBSD for testing -- user beware!
+
+Bug reports: https://www.NetBSD.org/support/send-pr.html
+Donations to the NetBSD Foundation: https://www.NetBSD.org/donations/
+We recommend that you create a non-root account and use su(1) for root access.
+netbsd# 
+</code></pre>
+
+<p>Now the system is all yours to play with. This article covers package installation via
+an ISO file and some crashes I had, but if you know your way around NetBSD you can stop
+here.</p>
+
+<p>Some system information:</p>
+
+<pre><code>netbsd# uname -a
+NetBSD netbsd.spnw.nl 9.99.88 NetBSD 9.99.88 (GENERIC) #0: Sun Aug 15 22:22:52 UTC 2021  mkrepro@mkrepro.NetBSD.org:/usr/src/sys/arch/alpha/compile/GENERIC alpha
+</code></pre>
+
+<p>It&#39;s not possible to see what kind of CPU NetBSD thinks there is:</p>
+
+<pre><code>netbsd# cat /proc/cpuinfo 
+netbsd# cpuctl identify 0
+CPU identification not implemented for this architecture.
+</code></pre>
+
+<p><code>dmesg</code> output does have some info:</p>
+
+<pre><code>netbsd# dmesg | grep MHz
+[     1.000000] AlphaServer ES40, 1785MHz, s/n 
+</code></pre>
+
+<p>In the QEMU guide, that output was:</p>
+
+<pre><code>6600 family, unknown model variation 0x1400, 250MHz, s/n QEMU
+</code></pre>
+
+<p>To speed up the system, you can disable a few services in <code>/etc/rc.conf</code>:</p>
+
+<pre><code>sshd=NO
+inetd=NO
+postfix=NO
+cron=NO
+syslogd=NO
+</code></pre>
+
+<p>Networking does not work, so <code>postfix</code>, <code>inetd</code> and <code>sshd</code> are not needed.
+<code>inetd</code> starts services once you connect to a port, but we can&#39;t do that 
+when we have no network. Postfix is for email, which is quite useless without 
+network.</p>
+
+<p><code>cron</code> and <code>syslogd</code> could be useful, but disk IO is not fast, so disabling them
+speeds up the system a noticeable amount.</p>
+
+<h4 id="toc_3">Autoboot NetBSD via SRM</h4>
+
+<p>As I showed in the OpenVMS guide, with the below SRM commands you can make
+AXPbox boot into NetBSD by default, that way you don&#39;t have to type
+the <code>boot dka0</code> command each time you fire up AXPbox.</p>
+
+<pre><code>P00&gt;&gt;&gt;set auto_action boot 
+P00&gt;&gt;&gt;set bootdef_dev dka0
+</code></pre>
+
+<p>You cannot undo those commands, or at least I haven&#39;t found out how. </p>
+
+<h3 id="toc_4">Installing packages</h3>
+
+<p>Since we have no network, we cannot use <code>pkgin</code> or <code>fetch</code> or 
+<code>ftp</code> to download packages. A trick I used in the OpenVMS 
+install guide to install the OpenVMS license was to create 
+an ISO file on the host OS (where you run AXPbox) and mount
+that ISO file inside the virtualized OS (OpenVMS in that case),
+transferring the file that way.</p>
+
+<p>That trick also works with NetBSD. I&#39;m going to show you how
+to install the <code>sysbench</code> package, because that is a simple
+package without dependencies. Start by creating a folder 
+for the packages:</p>
+
+<pre><code>mkdir pkg
+cd pkg
+</code></pre>
+
+<p>Download the package:</p>
+
+<pre><code>wget https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/alpha/9.2/All/sysbench-0.4.12nb8.tgz
+</code></pre>
+
+<p>Go up one folder:</p>
+
+<pre><code>cd ..
+</code></pre>
+
+<p>Turn that folder into an ISO file:    </p>
+
+<pre><code>genisoimage -V pkg -o pkg.iso pkg/
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Total translation table size: 0
+Total rockridge attributes bytes: 0
+Total directory bytes: 0
+Path table size(bytes): 10
+Max brk space used 0
+202 extents written (0 MB)    
+</code></pre>
+
+<p>Make sure AXPbox is not running. Edit <code>es40.cfg</code> and replace the <code>netbsd.iso</code>
+filename with our new ISO: <code>pkg.iso</code>:</p>
+
+<pre><code>disk0.1 = file
+{
+  file = &quot;pkg.iso&quot;; 
+  cdrom = true;
+  read_only = true;
+}
+</code></pre>
+
+<p>Fire up AXPbox and boot into NetBSD. Once logged in, mount the ISO file:</p>
+
+<pre><code>netbsd# mount /dev/cd0a /mnt
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>[ 1092.6207707] cd0: no disk label
+[ 1092.6246875] cd0: no disk label
+[ 1092.7029975] cd0: no disk label
+</code></pre>
+
+<p>In <code>/mnt</code> you should now see the package we put on the ISO:</p>
+
+<pre><code>netbsd# ls -la /mnt
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>total 59
+dr-xr-xr-x   1 root  wheel   2048 Aug 27 06:49 .
+drwxr-xr-x  20 root  wheel    512 Aug 26 16:05 ..
+-r-xr-xr-x   1 root  wheel  56803 Jul 16 11:27 sysbench.tgz
+</code></pre>
+
+<p>Install the package:</p>
+
+<pre><code>netbsd# pkg_add /mnt/sysbench.tgz 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>pkg_add: Warning: package `sysbench-0.4.12nb8&#39; was built for a platform:
+pkg_add: NetBSD/alpha 9.0 (pkg) vs. NetBSD/alpha 9.99.88 (this host)
+</code></pre>
+
+<p>You can repeat this process for as many packages as you want. It becomes a
+bit more difficult when you have dependencies, as you need to manually install
+those in the correct order. This is the output I got when installing <code>screenfetch</code>:</p>
+
+<pre><code>pkg_add: Warning: package `screenfetch-3.9.1&#39; was built for a platform:
+pkg_add: NetBSD/alpha 9.0 (pkg) vs. NetBSD/alpha 9.99.88 (this host)
+pkg_add: no pkg found for &#39;curl-[0-9]*&#39;, sorry.
+pkg_add: Can&#39;t install dependency curl-[0-9]*
+pkg_add: Expected dependency curl-[0-9]* still missing
+pkg_add: 1 package addition failed
+</code></pre>
+
+<p>The <code>curl</code> package depends on <code>libidn</code> and so forth, it took a while to get
+<code>screenfetch</code> installed.</p>
+
+<p>You do not have to reboot AXPbox every time you update the ISO. Unmount it 
+in NetBSD (<code>umount /mnt</code>), add a package to the <code>pkg</code> folder and re-issue
+the <code>genisoimage</code> command. Mount the disk in NetBSD and you should see the 
+new package. I&#39;m not sure if this is intended, but as far as I tested it,
+it seems to work. If you do get weird errors, reboot netbsd or terminate and 
+restart AXPbox to make sure the ISO file is re-read.</p>
+
+<h3 id="toc_5">OpenSSL Benchmark</h3>
+
+<p>In <a href="/s/articles/NetBSD_on_QEMU_Alpha.html">the QEMU</a> article I also posted some benchmarks, both OpenSSL 
+and <code>sysbench</code>. <code>OpenSSL speed</code> failed horribly on QEMU, overflowing
+numbers, no output or <code>infinity</code>. On AXPbox however, the benchmark
+runs fine. </p>
+
+<p><a href="https://boxes-of-tat.blogspot.com/2021/06/linux-for-alpha-on-qemu-system.html">This article</a> has some benchmarks on Debian 5.0 on QEMU Alpha, including
+<code>OpenSSL speed</code>. <a href="http://web.archive.org/web/20210827055720/https://emuvm.com/support/benchmarks/">EmuVM</a> has a few benchmarks as well, both real Alpha
+machines as their commercial emulator. Most of the other benchmarks do not
+run on NetBSD (Only OpenVMS or Tru64), so reproducing that is hard. OpenSSL
+however, is included on NetBSD by default. Newer version, but hopefully
+comparable results.</p>
+
+<p><code>OpenSSL speed</code> is a performance benchmark for each of the available
+algorithms. Because this is an old CPU architecture, and because <a href="https://boxes-of-tat.blogspot.com/2021/06/linux-for-alpha-on-qemu-system.html">the other
+article</a> does so (as well as <a href="http://web.archive.org/web/20210827055720/https://emuvm.com/support/benchmarks/">EmuVM</a>), I&#39;m trying just the <code>md5</code> and
+<code>rsa</code> benchmarks. </p>
+
+<p>Here are the results for RSA:</p>
+
+<pre><code>netbsd# openssl speed rsa
+Doing 512 bits private rsa&#39;s for 10s: 576 512 bits private RSA&#39;s in 10.10s
+Doing 512 bits public rsa&#39;s for 10s: 5950 512 bits public RSA&#39;s in 10.07s
+Doing 1024 bits private rsa&#39;s for 10s: 118 1024 bits private RSA&#39;s in 10.09s
+Doing 1024 bits public rsa&#39;s for 10s: 2363 1024 bits public RSA&#39;s in 10.07s
+Doing 2048 bits private rsa&#39;s for 10s: 18 2048 bits private RSA&#39;s in 10.08s
+Doing 2048 bits public rsa&#39;s for 10s: 654 2048 bits public RSA&#39;s in 10.06s
+Doing 3072 bits private rsa&#39;s for 10s: 6 3072 bits private RSA&#39;s in 10.48s
+Doing 3072 bits public rsa&#39;s for 10s: 283 3072 bits public RSA&#39;s in 10.08s
+Doing 4096 bits private rsa&#39;s for 10s: 3 4096 bits private RSA&#39;s in 12.09s
+Doing 4096 bits public rsa&#39;s for 10s: 156 4096 bits public RSA&#39;s in 10.09s
+Doing 7680 bits private rsa&#39;s for 10s: 1 7680 bits private RSA&#39;s in 28.09s
+Doing 7680 bits public rsa&#39;s for 10s: 44 7680 bits public RSA&#39;s in 10.09s
+OpenSSL 1.1.1k  25 Mar 2021
+NetBSD 9.99.88
+options:bn(64,64) rc4(int) des(int) aes(partial) idea(int) blowfish(ptr) 
+gcc version 10.3.0 (NetBSD nb1 20210411) 
+                  sign    verify    sign/s verify/s
+rsa  512 bits 0.017528s 0.001692s     57.0    590.8
+rsa 1024 bits 0.085515s 0.004262s     11.6    234.6
+rsa 2048 bits 0.560221s 0.015389s      1.7     64.9
+rsa 3072 bits 1.746093s 0.035615s      0.5     28.0
+rsa 4096 bits 4.030598s 0.064678s      0.2     15.4
+rsa 7680 bits 28.090820s 0.229292s      0.0      4.3
+</code></pre>
+
+<p>These are the results for MD5:</p>
+
+<pre><code>netbsd# openssl speed md5
+Doing md5 for 3s on 16 size blocks: 67630 md5&#39;s in 3.02s
+Doing md5 for 3s on 64 size blocks: 44047 md5&#39;s in 3.02s
+Doing md5 for 3s on 256 size blocks: 21973 md5&#39;s in 3.02s
+Doing md5 for 3s on 1024 size blocks: 7252 md5&#39;s in 3.02s
+Doing md5 for 3s on 8192 size blocks: 1027 md5&#39;s in 3.02s
+Doing md5 for 3s on 16384 size blocks: 488 md5&#39;s in 3.02s
+OpenSSL 1.1.1k  25 Mar 2021
+NetBSD 9.99.88
+options:bn(64,64) rc4(int) des(int) aes(partial) idea(int) blowfish(ptr) 
+gcc version 10.3.0 (NetBSD nb1 20210411) 
+The &#39;numbers&#39; are in 1000s of bytes per second processed.
+type             16 bytes     64 bytes    256 bytes   1024 bytes   8192 bytes  16384 bytes
+md5                358.12k      933.28k     1861.69k     2456.95k     2783.55k     2644.47k
+</code></pre>
+
+<p>The NetBSD version is exactly the same as with QEMU, so it seems unlikely
+that the issue with QEMU is in OpenSSL or NetBSD. Which is weird because
+<a href="http://web.archive.org/web/20210827055720/https://emuvm.com/support/benchmarks/">the other article</a> runs the same commands that do work in Debian 5.0.</p>
+
+<h3 id="toc_6">sysbench</h3>
+
+<p>In the earlier section we installed the <code>sysbench</code> package. Sysbench is quite
+a populair cross platform benchmarking tool and it even gave reasonable
+results, as opposed to OpenSSL. It&#39;s an older version, currently we&#39;re at
+sysbench 1.0.20 and NetBSD has 0.4.12. </p>
+
+<p>Here are the results, the tests are the same as in the <a href="/s/articles/NetBSD_on_QEMU_Alpha.html">QEMU article</a>.</p>
+
+<p>CPU:</p>
+
+<pre><code>netbsd# sysbench --test=cpu run --max-time=30
+sysbench 0.4.12:  multi-threaded system evaluation benchmark
+
+Running the test with following options:
+Number of threads: 1
+
+Doing CPU performance benchmark
+
+Threads started!
+Time limit exceeded, exiting...
+Done.
+
+Maximum prime number checked in CPU test: 10000
+
+
+Test execution summary:
+    total time:                          30.6455s
+    total number of events:              19
+    total time taken by event execution: 30.6395
+    per-request statistics:
+         min:                               1556.20ms
+         avg:                               1612.60ms
+         max:                               1679.96ms
+         approx.  95 percentile:            1679.39ms
+
+Threads fairness:
+    events (avg/stddev):           19.0000/0.00
+    execution time (avg/stddev):   30.6395/0.00
+</code></pre>
+
+<p>Memory:</p>
+
+<pre><code>netbsd# sysbench --test=memory run --max-time=60
+sysbench 0.4.12:  multi-threaded system evaluation benchmark
+
+Running the test with following options:
+Number of threads: 1
+
+Doing memory operations speed test
+Memory block size: 1K
+
+Memory transfer size: 102400M
+
+Memory operations type: write
+Memory scope type: global
+Threads started!
+Time limit exceeded, exiting...
+Done.
+
+Operations performed: 457799 ( 7629.74 ops/sec)
+
+447.07 MB transferred (7.45 MB/sec)
+
+
+Test execution summary:
+    total time:                          60.0019s
+    total number of events:              457799
+    total time taken by event execution: 41.2108
+    per-request statistics:
+         min:                                  0.08ms
+         avg:                                  0.09ms
+         max:                                 14.55ms
+         approx.  95 percentile:               0.05ms
+
+Threads fairness:
+    events (avg/stddev):           457799.0000/0.00
+    execution time (avg/stddev):   41.2108/0.00
+</code></pre>
+
+<p>File IO:</p>
+
+<pre><code>netbsd# sysbench --test=fileio --file-test-mode=seqwr --file-num=8 run --max-time=60
+sysbench 0.4.12:  multi-threaded system evaluation benchmark
+
+Running the test with following options:
+Number of threads: 1
+
+Extra file open flags: 0
+8 files, 256Mb each
+2Gb total file size
+Block size 16Kb
+Periodic FSYNC enabled, calling fsync() each 100 requests.
+Calling fsync() at the end of test, Enabled.
+Using synchronous I/O mode
+Doing sequential write (creation) test
+Threads started!
+Time limit exceeded, exiting...
+Done.
+
+Operations performed:  0 Read, 37353 Write, 0 Other = 37353 Total
+Read 0b  Written 583.64Mb  Total transferred 583.64Mb  (9.7263Mb/sec)
+  622.48 Requests/sec executed
+
+Test execution summary:
+    total time:                          60.0063s
+    total number of events:              37353
+    total time taken by event execution: 58.1965
+    per-request statistics:
+         min:                                  0.81ms
+         avg:                                  1.56ms
+         max:                               2405.82ms
+         approx.  95 percentile:               2.41ms
+
+Threads fairness:
+    events (avg/stddev):           37353.0000/0.00
+    execution time (avg/stddev):   58.1965/0.00
+</code></pre>
+
+<h3 id="toc_7">Comparing AXPbox and QEMU benchmarks</h3>
+
+<p>Comparing the results to QEMU is interesting. Summarized below are the AXPbox results:</p>
+
+<pre><code>CPU: total number of events: 19
+Memory: 447.07 MB transferred (7.45 MB/sec)
+Disk: Operations performed:  0 Read, 37353 Write, 0 Other = 37353 Total
+Read 0b  Written 583.64Mb  Total transferred 583.64Mb  (9.7263Mb/sec)
+  622.48 Requests/sec executed
+</code></pre>
+
+<p>These are the QEMU results, running on the same host machine and the same NetBSD version:</p>
+
+<pre><code>CPU: total number of events: 532
+Memory: 1228.18 MB transferred (20.47 MB/sec)
+Disk: Operations performed:  0 Read, 131072 Write, 8 Other = 131080 Total
+Read 0b  Written 2Gb  Total transferred 2Gb  (34.332Mb/sec)
+ 2197.25 Requests/sec executed
+</code></pre>
+
+<p>The emulation provided by QEMU seems to be faster by a large amount, on all three
+tests. This is a basic benchmark and we have to keep in mind that both emulators
+emulate different hardware and that the core code of AXPbox is over 10 years old.</p>
+
+<h3 id="toc_8">Kernel error too much memory</h3>
+
+<p>If you boot the installer more than 512 MB of RAM (<code>memory.bits &gt; 29;</code>), the
+installation will crash during formatting the disk. The disk size does not
+matter, I tried it with 500MB, 1 GB, 2 GB, 5 GB, 10 GB and 20 GB disk files.
+Default partitioning sizes. Here&#39;s the output of the installer:</p>
+
+<pre><code>     Status: Command ended on signal
+     Command: /sbin/newfs -V2 -O 1  /dev/rsd0a
+     Hit enter to continue
+    --------------------------------------------------------------------------------
+    /dev/rsd0a: 4992.0MB (10223616 sectors) block size 16384, fragment size 2048
+            using 28 cylinder groups of 178.30MB, 11411 blks, 22528 inodes.
+    ...............................................................................
+    cg 0: bad magic number
+</code></pre>
+
+<p>Issuing that command manually inside a shell on the installer gives more information:</p>
+
+<pre><code># /sbin/newfs -V2 -O 1 /dev/sd0
+/dev/rsd0: 20480.0MB (41943040 sectors) block size 16384, fragment size 2048
+        using 112 cylinder groups of 182.86MB, 11703 blks, 23168 inodes.
+...............................................................................
+cg 0: bad magic number
+
+[ 3981.4779427] CPU 0: fatal kernel trap:
+
+[ 3981.4789302] CPU 0    trap entry = 0x2 (memory management fault)
+[ 3981.4789302] CPU 0    a0         = 0x58
+[ 3981.4804219] CPU 0    a1         = 0x1
+[ 3981.4811477] CPU 0    a2         = 0x0
+[ 3981.4811477] CPU 0    pc         = 0xfffffc0000a40720
+[ 3981.4825466] CPU 0    ra         = 0xfffffc0000a40714
+[ 3981.4833153] CPU 0    pv         = 0xfffffc0000a548b8
+[ 3981.4840840] CPU 0    curlwp     = 0xfffffc007fc51240
+[ 3981.4848502] CPU 0        pid = 188, comm = newfs
+
+[ 3981.4848502] panic: trap
+[ 3981.4861366] cpu0: Begin traceback...
+[ 3981.4868367] alpha trace requires known PC =eject=
+[ 3981.4868367] cpu0: End traceback...
+Stopped in pid 188.188 (newfs) at       fffffc0000a53b00:       ret     zero,(ra
+)
+db&gt;
+</code></pre>
+
+<h3 id="toc_9">Kernel error with networking</h3>
+
+<p>AXPbox supports networking, which works reasonably well with OpenVMS. This is the part
+you put in your config to enable it:</p>
+
+<pre><code>  pci0.4 = dec21143 
+  {
+    adapter = &quot;eth0&quot;; 
+    mac = &quot;08-00-DE-AD-BE-EF&quot;; 
+  }
+</code></pre>
+
+<p>The NetBSD installer sees the adapter and allows you to configure it:</p>
+
+<pre><code> Which network device would you like to use?
+
+
+                          +-------------------------+            
+                          | Available interfaces    |
+                          |                         |
+                          |&gt;a: tlp0                 |
+                          | x: Cancel               |
+                          +-------------------------+
+</code></pre>
+
+<p>I choose autoselect the first time:</p>
+
+<pre><code> To be able to use the network, we need answers to the following:
+
+ Network media type [autoselect]:                                              
+
+                       +-------------------------------+
+                       | Perform autoconfiguration?    |
+                       |                               |
+                       |&gt;a: Yes                        |
+                       | b: No                         |
+                       +-------------------------------+
+</code></pre>
+
+<p>It kept hanging on DHCP requests with error messages from <code>dmesg</code> inbetween:</p>
+
+<pre><code>Status: Running
+Command: /sbin/dhcpcd -d -n tlp0
+
+--------------------------------------------------------------------------------
+spawned master process on PID 4198
+tlp0: executing: /libexec/dhcpcd-run-hooks PREINIT
+
+
+tlp0: waiting for carrier
+
+
+
+
+
+tlp0: carrier unknown, assuming up
+tlp0: executing: /libexec/dhcpcd-run-hooks CARRIER
+DUID 00:01:00:01:28:b7:bd:ba:08:00:de:ad:be:ef
+tlp0: IAID de:ad:be:ef
+tlp0: delaying IPv4 for 0.8 seconds
+[ 824.6727] tlp0: receive process failed to idle: state RUNNING - WAIT
+tlp0: reading lease: /var/db/dhcpcd/tlp0.lease
+tlp0: soliciting a DHCP lease
+[ 826.4716] tlp0: receive process failed to idle: state RUNNING - WAIT
+tlp0: sending DISCOVER (xid 0xc91b4a68), next in 4.6 seconds
+</code></pre>
+
+<p>If you do configure networking manually in the installer and boot up the installed
+NetBSD system, it panics and reboots:</p>
+
+<pre><code>/dev/rsd0a: file system is clean; not checking
+Setting sysctl variables:
+ddb.onpanic: 1 -&gt; 0
+[   7.9697692] cd0: no disk label
+swapctl: setting dump device to /dev/sd0b
+swapctl: adding /dev/sd0b as swap device at priority 0
+Starting file system checks:
+rndctl: no entropy in seed
+Setting tty flags.
+Starting network.
+Hostname: netbsd.spnw.nl
+IPv6 mode: host
+Configuring network interfaces: tlp0[  13.7300354] tlp0: receive process failed to idle: state RUNNING - WAIT
+[  13.7666263] tlp0: receive process failed to idle: state RUNNING - WAIT
+[  13.7854181] tlp0: receive process failed to idle: state RUNNING - WAIT
+[  13.7962981] stray dec 6600 irq 20
+[  13.7980337] stray dec 6600 irq 20
+[  13.7987652] stray dec 6600 irq 20
+[  13.7994967] stray dec 6600 irq 20
+[  13.8002541] stray dec 6600 irq 20; stopped logging
+[  13.8002541] panic: kernel diagnostic assertion &quot;mutex_owned(&amp;cpu_lock)&quot; failed: file &quot;/usr/src/sys/arch/alpha/pci/pci_6600.c&quot;, line 362 
+[  13.8032401] cpu0: Begin traceback...
+[  13.8032401] alpha trace requires known PC =eject=
+[  13.8045611] cpu0: End traceback...
+
+[  13.8045611] dump to dev 8,1 not possible
+[  13.8045611] rebooting...
+</code></pre>
+
+<h3 id="toc_10">Kernel error with AXPBox VGA Graphics</h3>
+
+<p><img src="/s/inc/img/netbsd-axpbox-1.png" alt="crash"></p>
+
+<p>Configuring AXPbox to use the graphics console <a href="https://github.com/lenticularis39/axpbox/wiki/VGA">as per the documentation</a> 
+sadly also crashed NetBSD as the above screenshot shows. Both <code>cirrus</code> as
+<code>s3</code> crash the system with the same kind of error message.</p>
+
+<p>If in the future these errors get fixed, I&#39;ll update the guide accordingly. </p>
+Tags: <a href="../tags/alpha.html">alpha</a>
+, <a href="../tags/articles.html">articles</a>
+, <a href="../tags/axpbox.html">axpbox</a>
+, <a href="../tags/dec.html">dec</a>
+, <a href="../tags/es40.html">es40</a>
+, <a href="../tags/netbsd.html">netbsd</a>
+, <a href="../tags/openvms.html">openvms</a>
+, <a href="../tags/qemu.html">qemu</a>
+, <a href="../tags/unix.html">unix</a>
+</div>
+<br/>
+<footer>
+<br/>
+                <form role="search" action="https://encrypted.google.com/search"
+                style="min-width:250px;max-width:300px;">
+                    <div class="form-group">
+                      <input type="hidden" name="as_sitesearch" value="raymii.org">
+                      <input type="hidden" name="as_qdr" value="all">
+                      <input type="text" name="as_q" class="form-control" placeholder="Search">
+                    </div>
+                  </form>
+                <br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-3704876-6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-3704876-6');
+    </script>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+     
+    </main>
+    </body>
+    </html>
+    

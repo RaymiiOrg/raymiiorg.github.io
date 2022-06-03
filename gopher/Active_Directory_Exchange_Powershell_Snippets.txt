@@ -1,0 +1,234 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Active Directory and Exchange Command Line Powershell
+Author      : 	Remy van Elst
+Date        : 	27-02-2016
+URL         : 	https://raymii.org/s/articles/Active_Directory_Exchange_Powershell_Snippets.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This is a collection of Powershell snippets to install Active Directory, create
+a new Active Directory Domain, join an existing Active Directory domain, create
+an Active Directory user and to install Microsoft Exchange 2013. The snippets
+were tested on Windows Server 2012 R2.
+
+I'm quite suprised with how easy it is to do the above tasks with Powershell.
+Much faster than the GUI wizards.
+
+As a Linux admin, I do also like that these tasks can be automated via the
+command line. Also, my Windows knowledge is very limited. There are probably
+better ways to do the below things, if you know how, please shoot me an email
+via the contact page.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Start with a freshly installed Server 2012 R2 machine (or VM). Fire up a
+Powershell session.
+
+### Install Active Directory
+
+The following command installs the Active Directory Domain Services role:
+
+    
+    
+    Install-WindowsFeature -name AD-Domain-Services -IncludeManagementTools
+    
+
+### Create a new Active Directory Domain:
+
+First import the module in the PowerShell session:
+
+    
+    
+    Import-Module ADDSDeployment
+    
+
+Initiate the new Active Directory:
+
+    
+    
+    Install-ADDSForest
+    -CreateDnsDelegation:$false `
+    -DatabasePath "C:\Windows\NTDS" `
+    -DomainMode "Win2012R2" `
+    -DomainName "raymii.nl" `
+    -DomainNetbiosName "RAYMII" `
+    -ForestMode "Win2012R2" `
+    -InstallDns:$true `
+    -LogPath "C:\Windows\NTDS" `
+    -NoRebootOnCompletion:$false `
+    -SysvolPath "C:\Windows\SYSVOL" `
+    -Force:$true
+    
+
+Replace the `DomainName` and `DomainNetbiosName` with your chosen domain name.
+PowerShell will then ask you for the AD Recovery Password, make it a strong one.
+
+### Add a server to a domain
+
+This adds a server to an existing domain, as a backup domain controller. First
+install the AD Domain Services as described above and import it in your
+powershell session.
+
+First test the existing domain to make sure you can join:
+
+    
+    
+    Test-ADDSForestInstallation -DomainName raymii.nl
+    
+
+Add the server to the domain as a backup domain controller:
+
+    
+    
+    Install-ADDSDomainController -InstallDns -Credential `
+      (Get-Credential RAYMII\Administrator) -DomainName raymii.nl
+    
+
+It'll prompt you for the user password.
+
+### Create an Active Directory user account
+
+To create a new Active Directory user account, use the below command. It's
+enabled and has a password:
+
+    
+    
+    New-ADUser -Name "John Doe" -GivenName John -Surname Doe `
+      -SamAccountName jdoe -UserPrincipalName jdoe@craymii.nl `
+      -AccountPassword (Read-Host -AsSecureString "hunter2") `
+      -PassThru | Enable-ADAccount
+    
+
+The user is able to login right away after this. The user is created in the
+default `Users` OU.
+
+### Create an Active Directory group
+
+Use the below command to create a new global group in the default `Users` folder
+of Active Directory called "Managers":
+
+    
+    
+    New-ADGroup -name "Managers" -groupscope Global
+    
+
+If it needs to exist in different path in Active Directory, specify the path by
+its distinguished name:
+
+    
+    
+    New-ADGroup -name "Managers" -groupscope Global -path "OU=OtherOU,DC=Raymii,DC=nl"
+    
+
+### Add user to a group
+
+The below command adds the user `jdoe` to the `Managers` group:
+
+    
+    
+    Add-ADGroupMember -Identity "Managers" -Member "jdoe"
+    
+
+To add a user in a different OU to a group in a different OU, you can specify
+the full DN:
+
+    
+    
+    Add-ADGroupMember -Identity "CN=SupportSlavesGroup,OU=SupportSlaves,DC=raymii,DC=nl" -Members "CN=jdoe,OU=OtherUserOU,DC=raymii,DC=nl" 
+    
+
+### Install Microsoft Exchange 2013
+
+Install the RSAT-DSS role via Powershell:
+
+    
+    
+    Install-WindowsFeature RSAT-ADDS
+    
+
+We prepare the forest for the instalation of Exchange. First the Schema:
+
+    
+    
+    setup /ps /IAcceptExchangeServerLicenseTerms
+    
+
+The Active Directory:
+
+    
+    
+    setup /PrepareAD /OrganizationName:"Raymii" /IAcceptExchangeServerLicenseTerms
+    
+
+The Domain itself:
+
+    
+    
+    setup /pd /IAcceptExchangeServerLicenseTerms
+    
+
+Install other required components and features for Exchange:
+
+    
+    
+    Install-WindowsFeature AS-HTTP-Activation, Desktop-Experience, NET-Framework-45-Features, RPC-over-HTTP-proxy, RSAT-Clustering, RSAT-Clustering-CmdInterface, WAS-Process-Model, Web-Asp-Net45, Web-Basic-Auth, Web-Client-Auth, Web-Digest-Auth, Web-Dir-Browsing, Web-Dyn-Compression, Web-Http-Errors, Web-Http-Logging, Web-Http-Redirect, Web-Http-Tracing, Web-ISAPI-Ext, Web-ISAPI-Filter, Web-Lgcy-Mgmt-Console, Web-Metabase, Web-Mgmt-Console, Web-Mgmt-Service, Web-Net-Ext45, Web-Request-Monitor, Web-Server, Web-Stat-Compression, Web-Static-Content, Web-Windows-Auth, Web-WMI, Windows-Identity-Foundation
+    
+
+You need to download and install the following setups manually from the
+Microsoft website and install them in the order listed below:
+
+  * Unified Communications Managed API 4.0 Runtime
+  * Microsoft Office 2010 Filter Pack 64 bit
+  * Microsoft Office 2010 Filter Pack SP1 64 bit
+
+Start the actual Exchange installation:
+
+    
+    
+    setup /m:Install /Roles:ca,mb,mt /IAcceptExchangeServerLicenseTerms /InstallWindowsComponents /DBFilePath:"E:\EXCHANGE\MDB001.edb" /LogFolderPath:"E:\EXCHANGE" /MdbName:"MDB001"
+    
+
+When it's finished, the ECP web admin is available.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

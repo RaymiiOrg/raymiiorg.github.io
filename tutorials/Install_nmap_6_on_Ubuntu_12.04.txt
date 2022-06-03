@@ -1,0 +1,328 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Install nmap 6.40 on Ubuntu 12.04
+Author      : 	Remy van Elst
+Date        : 	13-12-2013
+URL         : 	https://raymii.org/s/tutorials/Install_nmap_6_on_Ubuntu_12.04.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This tutorial shows you how to install nmap 6.40 on Ubuntu 12.04. Ubuntu 12.04
+has nmap 5.21 in the repositories. nmap 6 features a lot of improvements, here
+is a list of the biggest changes:
+
+  * Nmap Scripting Engine (NSE), 352 scripts
+  * Better Website Scanning
+  * Full IPv6 Support
+  * New Nping Tool
+  * Faster scans
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+We'll use `checkinstall` to create a .deb package instead of `make install`.
+`checkinstall` allows us to easily manage, remove or upgrade the software later
+on, instead of compiling and making just over the old version. Do note that
+`checkinstall` .deb packages are not intended for public distribution, using
+them on your internal network is OK.
+
+Firt install the required development packages:
+
+    
+    
+    apt-get install build-essential checkinstall libpcre3-dev liblua5.2-dev
+    
+
+Then create a folder for the source code:
+
+    
+    
+    mkdir -p /usr/local/src/nmap
+    cd /usr/local/src/nmap
+    
+
+Download nmap:
+
+    
+    
+    wget http://nmap.org/dist/nmap-6.40.tar.bz2
+    
+
+Unpack nmap
+
+    
+    
+    tar xvjf nmap-6.40.tar.bz2
+    cd nmap-6.40
+    
+
+Start the ./configure
+
+    
+    
+    ./configure
+    
+
+Make it:
+
+    
+    
+    make
+    
+
+Now instead of `make install`, execute this command to start building the .deb
+package:
+
+    
+    
+    checkinstall
+    
+
+Here's example output from checkinstall:
+
+    
+    
+        root@example:/usr/local/src/nmap/nmap-6.40# checkinstall
+    
+    
+        checkinstall 1.6.2, Copyright 2009 Felipe Eduardo Sanchez Diaz Duran
+                   This software is released under the GNU GPL.
+    
+    
+        The package documentation directory ./doc-pak does not exist.
+        Should I create a default set of package docs?  [y]:
+    
+        Preparing package documentation...OK
+    
+        Please write a description for the package.
+        End your description with an empty line or EOF.
+        >> The network mapper
+        >>
+    
+        *****************************************
+        **** Debian package creation selected ***
+        *****************************************
+        This package will be built according to these values:
+    
+        0 -  Maintainer: [ root@example ]
+        1 -  Summary: [ The network mapper ]
+        2 -  Name:    [ nmap ]
+        3 -  Version: [ 6.40 ]
+        4 -  Release: [ 1 ]
+        5 -  License: [ GPL ]
+        6 -  Group:   [ checkinstall ]
+        7 -  Architecture: [ amd64 ]
+        8 -  Source location: [ nmap-6.40 ]
+        9 -  Alternate source location: [  ]
+        10 - Requires: [  ]
+        11 - Provides: [ nmap ]
+        12 - Conflicts: [  ]
+        13 - Replaces: [  ]
+    
+        Enter a number to change any of them or press ENTER to continue:
+    
+        Installing with make install...
+    
+        ========================= Installation results ===========================
+        /usr/bin/install -c -d /usr/local/bin /usr/local/share/man/man1 /usr/local/share/nmap
+        /usr/bin/install -c -c -m 755 nmap /usr/local/bin/nmap
+        /usr/bin/strip -x /usr/local/bin/nmap
+        /usr/bin/install -c -c -m 644 docs/nmap.1 /usr/local/share/man/man1/
+        if [ "yes" = "yes" ]; then \
+                  for ll in de es fr hr hu it ja pl pt_BR pt_PT ro ru sk zh; do \
+                    /usr/bin/install -c -d /usr/local/share/man/$ll/man1; \
+                    /usr/bin/install -c -c -m 644 docs/man-xlate/nmap-$ll.1 /usr/local/share/man/$ll/man1/nmap.1; \
+                  done; \
+                fi
+        /usr/bin/install -c -c -m 644 docs/nmap.xsl /usr/local/share/nmap/
+        /usr/bin/install -c -c -m 644 docs/nmap.dtd /usr/local/share/nmap/
+        /usr/bin/install -c -c -m 644 nmap-services /usr/local/share/nmap/
+        /usr/bin/install -c -c -m 644 nmap-payloads /usr/local/share/nmap/
+        /usr/bin/install -c -c -m 644 nmap-rpc /usr/local/share/nmap/
+        /usr/bin/install -c -c -m 644 nmap-os-db /usr/local/share/nmap/
+        /usr/bin/install -c -c -m 644 nmap-service-probes /usr/local/share/nmap/
+        /usr/bin/install -c -c -m 644 nmap-protocols /usr/local/share/nmap/
+        /usr/bin/install -c -c -m 644 nmap-mac-prefixes /usr/local/share/nmap/
+        /usr/bin/install -c -d /usr/local/share/nmap/scripts
+        /usr/bin/install -c -d /usr/local/share/nmap/nselib
+        (cd /usr/local/share/nmap/scripts && rm -f anonFTP.nse ASN.nse asn-to-prefix.nse brutePOP3.nse bruteTelnet.nse chargenTest.nse daytimeTest.nse dns-safe-recursion-port.nse dns-safe-recursion-txid.nse dns-test-open-recursion.nse domino-enum-passwords.nse echoTest.nse ftpbounce.nse HTTPAuth.nse HTTP_open_proxy.nse HTTPpasswd.nse HTTPtrace.nse iax2Detect.nse ircServerInfo.nse ircZombieTest.nse mac-geolocation.nse MSSQLm.nse MySQLinfo.nse netbios-smb-os-discovery.nse nfs-acls.nse nfs-dirlist.nse popcapa.nse PPTPversion.nse promiscuous.nse RealVNC_auth_bypass.nse ripeQuery.nse robots.nse showHTMLTitle.nse showHTTPVersion.nse showOwner.nse showSMTPVersion.nse showSSHVersion.nse skype_v2-version.nse smb-enumdomains.nse smb-enumsessions.nse smb-enumshares.nse smb-enumusers.nse smb-serverstats.nse smb-systeminfo.nse SMTPcommands.nse SMTP_openrelay_test.nse smtp-check-vulns.nse SNMPcommunitybrute.nse SNMPsysdescr.nse SQLInject.nse SSH-hostkey.nse SSHv1-support.nse SSLv2-support.nse strangeSMTPport.nse UPnP-info.nse xamppDefaultPass.nse zoneTrans.nse db2-info.nse db2-brute.nse html-title.nse robots.txt.nse xmpp.nse sql-injection.nse http-robtex-reverse-ip.nse)
+        /usr/bin/install -c -c -m 644 nse_main.lua /usr/local/share/nmap/
+        /usr/bin/install -c -c -m 644 scripts/script.db scripts/*.nse /usr/local/share/nmap/scripts
+        /usr/bin/install -c -c -m 644 nselib/*.lua /usr/local/share/nmap/nselib
+        /usr/bin/install -c -d /usr/local/share/nmap/nselib/data
+        for f in `find nselib/data -name .svn -prune -o -type d -print`; do \
+                        /usr/bin/install -c -d /usr/local/share/nmap/$f; \
+                done
+        for f in `find nselib/data -name .svn -prune -o -type f -print`; do \
+                        /usr/bin/install -c -c -m 644 $f /usr/local/share/nmap/$f; \
+                done
+        /usr/bin/install -c -d /usr/local/bin /usr/local/share/man/man1
+        cd zenmap && /usr/bin/python setup.py --quiet install --prefix "/usr/local" --force
+        /usr/bin/install -c -c -m 644 docs/zenmap.1 /usr/local/share/man/man1/
+        if [ ! -f /usr/local/bin/nmapfe -o -L /usr/local/bin/nmapfe ]; then \
+                        ln -sf zenmap /usr/local/bin/nmapfe; \
+                fi
+        ln -sf zenmap /usr/local/bin/xnmap
+        make[1]: Entering directory `/usr/local/src/nmap/nmap-6.40/ncat'
+        Installing Ncat
+        ../shtool mkdir -f -p -m 755 /usr/local/bin /usr/local/share/man/man1
+        /usr/bin/install -c -c -m 755 ncat /usr/local/bin/ncat
+        /usr/bin/strip -x /usr/local/bin/ncat
+        if [ -n "" ]; then \
+                        ../shtool mkdir -f -p -m 755 /usr/local/share/ncat; \
+                        /usr/bin/install -c -c -m 644  /usr/local/share/ncat/; \
+                fi
+        /usr/bin/install -c -c -m 644 docs/ncat.1 /usr/local/share/man/man1/ncat.1
+        make[1]: Leaving directory `/usr/local/src/nmap/nmap-6.40/ncat'
+        cd ndiff && /usr/bin/python setup.py install --prefix "/usr/local"
+        running install
+        running build
+        running build_scripts
+        running install_scripts
+        copying build/scripts-2.7/ndiff -> /usr/local/bin
+        changing mode of /usr/local/bin/ndiff to 755
+        running install_data
+        copying docs/ndiff.1 -> /usr/local/share/man/man1
+        running install_egg_info
+        make[1]: Entering directory `/usr/local/src/nmap/nmap-6.40/nping'
+        /usr/bin/install -c -d /usr/local/bin /usr/local/share/man/man1
+        /usr/bin/install -c -c -m 755 nping /usr/local/bin/nping
+        /usr/bin/strip -x /usr/local/bin/nping
+        /usr/bin/install -c -c -m 644 docs/nping.1 /usr/local/share/man/man1/
+        NPING SUCCESSFULLY INSTALLED
+        make[1]: Leaving directory `/usr/local/src/nmap/nmap-6.40/nping'
+        NMAP SUCCESSFULLY INSTALLED
+    
+        ======================== Installation successful ==========================
+    
+        Copying documentation directory...
+        ./
+        ./CHANGELOG
+        ./README-WIN32
+        ./docs/
+        ./docs/zenmap.1
+        ./docs/committers.txt
+        ./docs/man-xlate/
+        ./docs/man-xlate/nmap-hr.1
+        ./docs/man-xlate/nmap-es.1
+        ./docs/man-xlate/nmap-ru.1
+        ./docs/man-xlate/nmap-id.1
+        ./docs/man-xlate/nmap-ja.1
+        ./docs/man-xlate/nmap-de.1
+        ./docs/man-xlate/nmap-pl.1
+        ./docs/man-xlate/nmap-hu.1
+        ./docs/man-xlate/nmap-ro.1
+        ./docs/man-xlate/nmap-pt_PT.1
+        ./docs/man-xlate/nmap-fr.1
+        ./docs/man-xlate/nmap-sk.1
+        ./docs/man-xlate/nmap-pt_BR.1
+        ./docs/man-xlate/nmap-it.1
+        ./docs/man-xlate/nmap-zh.1
+        ./docs/nse-scripts.dtd
+        ./docs/nmap.xsl
+        ./docs/3rd-party-licenses.txt
+        ./docs/README
+        ./docs/nmap.dtd
+        ./docs/nmap.usage.txt
+        ./docs/device-types.txt
+        ./docs/leet-nmap-ascii-art.txt
+        ./docs/nmap_gpgkeys.txt
+        ./docs/nmap-fo.xsl
+        ./docs/win32-installer-zenmap-buildguide.txt
+        ./docs/licenses/
+        ./docs/licenses/BSD-simplified
+        ./docs/licenses/LGPL-2
+        ./docs/licenses/LGPL-2.1
+        ./docs/licenses/MPL-1.1
+        ./docs/licenses/OpenSSL.txt
+        ./docs/style/
+        ./docs/style/lua-format
+        ./docs/style/README
+        ./docs/style/lua-format.lua
+        ./docs/nmap.1
+        ./docs/nmap-update.1
+        ./HACKING
+        ./COPYING
+        ./INSTALL
+    
+        Some of the files created by the installation are inside the build
+        directory: /usr/local/src/nmap/nmap-6.40
+    
+        You probably don't want them to be included in the package,
+        especially if they are inside your home directory.
+        Do you want me to list them?  [n]:
+        Should I exclude them from the package? (Saying yes is a good idea)  [y]:
+    
+        Copying files to the temporary directory...OK
+    
+        Stripping ELF binaries and libraries...OK
+    
+        Compressing man pages...OK
+    
+        Building file list...OK
+    
+        Building Debian package...OK
+    
+        Installing Debian package...OK
+    
+        Erasing temporary files...OK
+    
+        Writing backup package...OK
+        OK
+    
+        Deleting temp dir...OK
+    
+    
+        **********************************************************************
+    
+         Done. The new package has been installed and saved to
+    
+         /usr/local/src/nmap/nmap-6.40/nmap_6.40-1_amd64.deb
+    
+         You can remove it from your system anytime using:
+    
+              dpkg -r nmap
+    
+        **********************************************************************
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
