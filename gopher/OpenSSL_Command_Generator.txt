@@ -3,6 +3,7 @@ This is a text-only version of the following page on https://raymii.org:
 Title       : 	OpenSSL Command Generator
 Author      : 	Remy van Elst
 Date        : 	08-11-2014
+Last update : 	15-10-2022
 URL         : 	https://raymii.org/s/software/OpenSSL_Command_Generator.html
 Format      : 	Markdown/HTML
 ---
@@ -45,20 +46,32 @@ function genetate_command() {
   } else {
     var newtext = "openssl req -nodes -sha256 -newkey rsa:4096 -keyout \"" + cn + ".key\" -out \"" + cn + ".csr\" -subj \"/C=" + country + "/ST=" + state + "/L=" + city + "/O=" + org + "/OU=" + unit + "/CN=" + cn + "\"";
   }
+  if(document.getElementById('san').checked) {
+    newtext += " -addext \"subjectAltName = DNS:" + cn + "\"";
+  }
+
   document.CSR.outputtext.value = newtext;
 
 }
 
 </script>
 
-Enter the data below and click Generate Command. Execute the command in a Terminal. Save the files.  
+This page helps you to generate a command you can execute in your shell to
+generate a CSR (certificate signing request) or a self signed certificate. 
+
+Enter the data below and click Generate Command. Execute the command in a
+Terminal. Save the files.  
+
+The last update of this page added the [subject alternative name][3] option
+to the command.
 
 Don't use the following characters: &lt; &gt; ~ ! @ # $ % ^ * / \ ( ) ?  
 
+To use the [Subject Alternative Name][2] option, you need [OpenSSL 1.1.1 or
+higher][3]. See [this article][3] for a command for lower versions.
 
-[If you like this article, consider sponsoring me by trying out a Digital Ocean 
-VPS. With this link you'll get $100 credit for 60 days). (referral link)][99] 
 
+<p class="ad"> <a href="https://leafnode.nl">I'm developing a desktop monitoring app,  Leaf Node Monitoring, open source, but paid. For Windows, Linux & Android, go check it out.</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
 
 
 
@@ -97,13 +110,19 @@ VPS. With this link you'll get $100 credit for 60 days). (referral link)][99]
     <div class="form-group">
       <div class="checkbox">
         <label><input type="checkbox" id="selfsig" name="selfsig"> Generate Self Signed Certificate</label>
-
       </div>
+    </div>
+
+    <div class="form-group">
+      <div class="checkbox">
+        <label><input type="checkbox" checked id="san" name="san"> Add Subject Alternative Name (SAN)</label>
+      </div>
+    </div>
 
       <div class="form-group">
         <input type="hidden" name="placement" value="replace">
 
-        <label><input type="button" value="Generate Commando!" onClick="genetate_command();"></label>
+        <label><input type="button" value="Generate Command!" onClick="genetate_command();"></label>
       </div>
 
       <div class="form-group">
@@ -113,6 +132,9 @@ VPS. With this link you'll get $100 credit for 60 days). (referral link)][99]
 
 </form>
 
+
+[2]: https://en.wikipedia.org/wiki/Subject_Alternative_Name
+[3]: /s/tutorials/OpenSSL_generate_self_signed_cert_with_Subject_Alternative_name_oneliner.html
 
 ---
 
