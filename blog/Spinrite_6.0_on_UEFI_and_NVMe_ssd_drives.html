@@ -66,24 +66,24 @@
 </div><hr><div id="contents">
 <p><img src="/s/inc/img/sr-1.png" alt="spinrite licensed"></p>
 
-<p><a href="https://www.grc.com/sr/spinrite.htm">Spinrite</a> is a hard drive recovery and maintenande utility written by
+<p><a href="https://www.grc.com/sr/spinrite.htm">Spinrite</a> is a hard drive recovery and maintenance utility written by
 Steve Gibson from <a href="https://grc.com">Gibson Research Corporation</a>. It is marketed on the
 <a href="https://twit.tv/shows/security-now">Security Now</a> TWiT podcast which I often listen to. I have bought a copy
 of it and sometimes use it on solid state disks or <a href="/s/blog/Broken_Corrupted_Raspberry_Pi_SD_Card.html">SD cards</a>. Spinrite
 6.0 is written is assembly language and runs on top of MS-DOS or FreeDOS,
 using the BIOS. UEFI is not supported and neither are NVMe drives. This post
 will show you how to run Spinrite 6.0 on such a system anyway, using a modern
-linux live USB drive that can boot on UEFI only system and Virtualbox,
+linux live USB drive that can boot on UEFI only system and VirtualBox,
 exposing the NVMe disk as a SATA drive.</p>
 
 <p class="ad"> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
 
 <p>This post is neither sponsored nor endorsed by GRC, just some random person
-online figuring stuff out. Continue on with caution, you might inadvertantly
+online figuring stuff out. Continue on with caution, you might inadvertently
 loose important data. <strong>Make sure you have a working (and regularly tested)
 backup.</strong></p>
 
-<p>Some people claim it is snakeoil, or that <code>badblocks</code> or <code>ddrescue</code> are better
+<p>Some people claim it is snake oil, or that <code>badblocks</code> or <code>ddrescue</code> are better
 or that a failing drive shouldn&#39;t be stressed more, In my humble opinion
 Spinrite is useful in some cases and I have had it make drives usable again
 that were failing. </p>
@@ -94,7 +94,7 @@ extremely slow. Further troubleshooting revealed that the blue screens were
 related to disk issues. Running Spinrite on level 2(read everything and allow
 the drive controller to mark sectors as bad, hopefully relocating the data)
 made all those problems to away. That laptop&#39;s drive continued to work for
-nearly 5 years until the laptop was replaced, even though I adviced them to
+nearly 5 years until the laptop was replaced, even though I advised them to
 replace the drive right away under warranty. I did of course set them up with
 a backup. </p>
 
@@ -117,7 +117,7 @@ yyzz...</code>). Making an actual MS-DOS live disk does let it boot up, but when
 enumerating the drives, it reboots the machine. The drives are two NVMe SSD disks.</p>
 
 <p>The process I used to run Spinrite was to boot up a Debian linux derivative
-(Antix 22) that supports UEFI only systems and install Virtualbox in that
+(Antix 22) that supports UEFI only systems and install VirtualBox in that
 live environment. VirtualBox can pass through actual drives as other storage
 types (a SATA drive as IDE for example), which Spinrite then can scan.</p>
 
@@ -129,7 +129,7 @@ ISO on.</p>
 <p>I choose <a href="https://antixlinux.com/download/">Antix</a> because that is a small ISO and I only had a 4 GB USB
 drive at that moment. I also run Antix on a few older machines here, it works
 quick and snappy. Any Debian derivative probably works. <a href="https://antixlinux.com/download/">Download</a> the 64
-bit version since Virtualbox does not have a modern 32 bit version in the
+bit version since VirtualBox does not have a modern 32 bit version in the
 repositories. </p>
 
 <p>Use <a href="https://rufus.ie">Rufus</a> to write that linux ISO to your USB drive, make sure to give it
@@ -145,7 +145,7 @@ Linux Live USB drive.</p>
 
 <h3 id="toc_2">Installing and configuring VirtualBox</h3>
 
-<p>Once booted up, fire up a terminal and install Virtualbox using the 
+<p>Once booted up, fire up a terminal and install VirtualBox using the 
 following command:</p>
 
 <pre><code>sudo apt install virtualbox-*
@@ -154,7 +154,7 @@ following command:</p>
 <p>In my case, both a DKMS (kernel driver) and a UI (<code>virtualbox-qt</code>) were
 installed and a reboot was not required. </p>
 
-<p>Fire up Virtualbox via the terminal, using <code>sudo</code> to launch it as root. This
+<p>Fire up VirtualBox via the terminal, using <code>sudo</code> to launch it as root. This
 is needed for the raw disk access:</p>
 
 <pre><code>sudo virtualbox
@@ -201,7 +201,7 @@ nvme0.vmdk --format=VMDK --variant RawDisk --property
 RawDrive=/dev/nvme0n1
 </code></pre>
 
-<p>The version of Virtualbox in the Debian repository is older which is why I
+<p>The version of VirtualBox in the Debian repository is older which is why I
 used the old syntax.</p>
 
 <p>In the Virtual machine settings, to to Storage and use the green PLUS button
@@ -213,7 +213,7 @@ optical disk image):</p>
 
 <p>Use the media manager to select the NVMe disk file you just created. I have 
 two NVMe disks in this machine, but added just one at a time to run Spinrite.
-This is how my Virtualbox storage settings look:</p>
+This is how my VirtualBox storage settings look:</p>
 
 <p><img src="/s/inc/img/sr-5.png" alt="virtualbox storage"></p>
 
@@ -241,16 +241,16 @@ to the machine also having an NVidia graphics card) looks like this:</p>
 <p><img src="/s/inc/img/sr-2.png" alt="entire vm"></p>
 
 <p>After Spinrite finished, I shut down the machine and rebooted into the regular
-linux running on it. That has an encrypted disk, using dm-crypt and lvm, but
-with trim enabled and the recent <a href="https://web.archive.org/web/20221103191933/https://blog.cloudflare.com/speeding-up-linux-disk-encryption/">cloudflare additions to linux disk
+linux running on it. That has an encrypted disk, using <code>dm-crypt</code> and lvm, but
+with <code>trim</code> enabled and the recent <a href="https://web.archive.org/web/20221103191933/https://blog.cloudflare.com/speeding-up-linux-disk-encryption/">cloudflare additions to linux disk
 encryption</a> to speed things up. Full disk encryption is rather slow
 without that and over time, not running trim reduces the speed even more,
 especially when the disk gets full. Running Spinrite also helps with
-(my percieved feeling of) increasing the snappyness of the machine. </p>
+(my perceived feeling of) increasing the snappiness of the machine. </p>
 
 <p>Do note that I&#39;m not sure if this is a supported way of running Spinrite and
 that it might delete all your data. I have not had data loss or issues with
-exposing my raw NVMe disk as an IDE or SATA disk via Virtualbox, but I might
+exposing my raw NVMe disk as an IDE or SATA disk via VirtualBox, but I might
 have just been lucky. </p>
 
 <p>Spinrite 6.1 is on the way, which will be faster because it doesn&#39;t use the
@@ -258,10 +258,10 @@ BIOS for disk access anymore. It will also support disks larger than 2 TB,
 but UEFI or NVMe support are not included. Those are planned for later
 versions.</p>
 
-<p>Before going the Virtualbox route, I tried to use KVM via <code>virt-manager</code> but
+<p>Before going the VirtualBox route, I tried to use KVM via <code>virt-manager</code> but
 that failed to pass through the NVMe drive. First it errored on the cache
 mode, but none of the methods worked (<code>writeback</code>, etc), then after messing
-around I received a few more errors. Virtualbox worked instantly without
+around I received a few more errors. VirtualBox worked instantly without
 issues, but I did try kvm first because I thought that virtualbox required a
 reboot after installing, which wasn&#39;t the case after all.</p>
 Tags: <a href="../tags/badblocks.html">badblocks</a>

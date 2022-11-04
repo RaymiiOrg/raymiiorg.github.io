@@ -12,14 +12,14 @@ Format      : 	Markdown/HTML
 
 ![spinrite licensed][5]
 
-[Spinrite][2] is a hard drive recovery and maintenande utility written by
+[Spinrite][2] is a hard drive recovery and maintenance utility written by
 Steve Gibson from [Gibson Research Corporation][3]. It is marketed on the
 [Security Now][4] TWiT podcast which I often listen to. I have bought a copy
 of it and sometimes use it on solid state disks or [SD cards][1]. Spinrite
 6.0 is written is assembly language and runs on top of MS-DOS or FreeDOS,
 using the BIOS. UEFI is not supported and neither are NVMe drives. This post
 will show you how to run Spinrite 6.0 on such a system anyway, using a modern
-linux live USB drive that can boot on UEFI only system and Virtualbox,
+linux live USB drive that can boot on UEFI only system and VirtualBox,
 exposing the NVMe disk as a SATA drive.
 
 
@@ -27,11 +27,11 @@ exposing the NVMe disk as a SATA drive.
 
 
 This post is neither sponsored nor endorsed by GRC, just some random person
-online figuring stuff out. Continue on with caution, you might inadvertantly
+online figuring stuff out. Continue on with caution, you might inadvertently
 loose important data. **Make sure you have a working (and regularly tested)
 backup.**
 
-Some people claim it is snakeoil, or that `badblocks` or `ddrescue` are better
+Some people claim it is snake oil, or that `badblocks` or `ddrescue` are better
 or that a failing drive shouldn't be stressed more, In my humble opinion
 Spinrite is useful in some cases and I have had it make drives usable again
 that were failing. 
@@ -42,7 +42,7 @@ extremely slow. Further troubleshooting revealed that the blue screens were
 related to disk issues. Running Spinrite on level 2(read everything and allow
 the drive controller to mark sectors as bad, hopefully relocating the data)
 made all those problems to away. That laptop's drive continued to work for
-nearly 5 years until the laptop was replaced, even though I adviced them to
+nearly 5 years until the laptop was replaced, even though I advised them to
 replace the drive right away under warranty. I did of course set them up with
 a backup. 
 
@@ -66,7 +66,7 @@ enumerating the drives, it reboots the machine. The drives are two NVMe SSD disk
 
 
 The process I used to run Spinrite was to boot up a Debian linux derivative
-(Antix 22) that supports UEFI only systems and install Virtualbox in that
+(Antix 22) that supports UEFI only systems and install VirtualBox in that
 live environment. VirtualBox can pass through actual drives as other storage
 types (a SATA drive as IDE for example), which Spinrite then can scan.
 
@@ -78,7 +78,7 @@ ISO on.
 I choose [Antix][6] because that is a small ISO and I only had a 4 GB USB
 drive at that moment. I also run Antix on a few older machines here, it works
 quick and snappy. Any Debian derivative probably works. [Download][6] the 64
-bit version since Virtualbox does not have a modern 32 bit version in the
+bit version since VirtualBox does not have a modern 32 bit version in the
 repositories. 
 
 Use [Rufus][7] to write that linux ISO to your USB drive, make sure to give it
@@ -94,7 +94,7 @@ Linux Live USB drive.
 
 ### Installing and configuring VirtualBox
 
-Once booted up, fire up a terminal and install Virtualbox using the 
+Once booted up, fire up a terminal and install VirtualBox using the 
 following command:
 
     sudo apt install virtualbox-*
@@ -102,7 +102,7 @@ following command:
 In my case, both a DKMS (kernel driver) and a UI (`virtualbox-qt`) were
 installed and a reboot was not required. 
 
-Fire up Virtualbox via the terminal, using `sudo` to launch it as root. This
+Fire up VirtualBox via the terminal, using `sudo` to launch it as root. This
 is needed for the raw disk access:
 
     sudo virtualbox
@@ -145,7 +145,7 @@ use this command syntax:
     nvme0.vmdk --format=VMDK --variant RawDisk --property
     RawDrive=/dev/nvme0n1
 
-The version of Virtualbox in the Debian repository is older which is why I
+The version of VirtualBox in the Debian repository is older which is why I
 used the old syntax.
 
 In the Virtual machine settings, to to Storage and use the green PLUS button
@@ -157,7 +157,7 @@ optical disk image):
 
 Use the media manager to select the NVMe disk file you just created. I have 
 two NVMe disks in this machine, but added just one at a time to run Spinrite.
-This is how my Virtualbox storage settings look:
+This is how my VirtualBox storage settings look:
 
 ![virtualbox storage][12]
 
@@ -186,16 +186,16 @@ to the machine also having an NVidia graphics card) looks like this:
 ![entire vm][8]
 
 After Spinrite finished, I shut down the machine and rebooted into the regular
-linux running on it. That has an encrypted disk, using dm-crypt and lvm, but
-with trim enabled and the recent [cloudflare additions to linux disk
+linux running on it. That has an encrypted disk, using `dm-crypt` and lvm, but
+with `trim` enabled and the recent [cloudflare additions to linux disk
 encryption][14] to speed things up. Full disk encryption is rather slow
 without that and over time, not running trim reduces the speed even more,
 especially when the disk gets full. Running Spinrite also helps with
-(my percieved feeling of) increasing the snappyness of the machine. 
+(my perceived feeling of) increasing the snappiness of the machine. 
 
 Do note that I'm not sure if this is a supported way of running Spinrite and
 that it might delete all your data. I have not had data loss or issues with
-exposing my raw NVMe disk as an IDE or SATA disk via Virtualbox, but I might
+exposing my raw NVMe disk as an IDE or SATA disk via VirtualBox, but I might
 have just been lucky. 
 
 Spinrite 6.1 is on the way, which will be faster because it doesn't use the
@@ -203,10 +203,10 @@ BIOS for disk access anymore. It will also support disks larger than 2 TB,
 but UEFI or NVMe support are not included. Those are planned for later
 versions.
 
-Before going the Virtualbox route, I tried to use KVM via `virt-manager` but
+Before going the VirtualBox route, I tried to use KVM via `virt-manager` but
 that failed to pass through the NVMe drive. First it errored on the cache
 mode, but none of the methods worked (`writeback`, etc), then after messing
-around I received a few more errors. Virtualbox worked instantly without
+around I received a few more errors. VirtualBox worked instantly without
 issues, but I did try kvm first because I thought that virtualbox required a
 reboot after installing, which wasn't the case after all.
 
