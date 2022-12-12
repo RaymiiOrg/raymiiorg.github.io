@@ -1,0 +1,267 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Add moc includes to speed up Qt compilation
+Author      : 	Remy van Elst
+Date        : 	12-12-2022
+URL         : 	https://raymii.org/s/blog/Qt_add_moc_includes_to_speed_up_compilation.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+The Meta-Object Compiler, `moc`, handles Qt's C++ extensions and it is required for signals and slots and properties in Qt. `moc` reads C++ header files and if the `Q_OBJECT` macro is used, it generates an extra `.cpp` file named `moc_filename.cpp` containing extra (meta-object) code. This post has a bit of background information and a shell script to automatically include `moc_*.cpp` files in your code whenever `Q_OBJECT` is used. If you use `qmake`, this will probably speed up your build and if you use `cmake`, this will probably speed up incremental builds (when `CMAKE_AUTOMOC` is `on`).
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Below you'll find a shell script that scans your code for missing `moc_*.cpp`
+includes and if you pass the `addinclude` flag, the script will add them for you.
+
+Summarized heavily, by including your `moc_*.cpp` files you save the compiler
+and linker some work allowing for faster builds and even some optimizations.
+Together with something like `ccache`, [precompiled headers][6] and different
+`qrc` files (one for assets and one for `.qml` code and scripts), you can
+save quite a bit of time of your builds.
+
+### Shell script to include `moc_*.cpp` files
+
+I wrote this script back in 2020, but decided to post it now because
+I recently got an email regarding it and had an interesting conversation
+with the person (which requested to remain anonymous). 
+
+Save the following file as `fixMocInclude.sh` in your project folder:
+
+	#!/bin/bash
+	# Copyright (c) 2022 Remy van Elst
+	# This program is free software: you can redistribute it and/or modify
+	# it under the terms of the GNU General Public License as published by
+	# the Free Software Foundation, version 3.
+	# This program is distributed in the hope that it will be useful, but
+	# WITHOUT ANY WARRANTY; without even the implied warranty of
+	# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+	# General Public License for more details.
+	# You should have received a copy of the GNU General Public License
+	# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+	for filename in $(grep --recursive --files-with-matches --extended-regexp 'Q_OBJECT|Q_GADGET|Q_NAMESPACE'); do 
+		cppfile="${filename%.*}.cpp"; 
+		if [[ -f "${cppfile}" ]]; then 
+			if grep --quiet "#include \"moc_$(basename ${cppfile})\"" "${cppfile}"; then 
+				echo "OK: ${cppfile} HAS moc include"; 
+			else 
+				echo -n "FAIL: ${cppfile} MISSES moc include. "
+				if [[ ${1} == "addinclude" ]]; then			  
+					echo "Addding include...";
+	        echo "" >> ${cppfile}        
+	        echo "#include \"moc_$(basename ${cppfile})\"" >> ${cppfile}
+				else
+					echo "Add this line to the end of the file: ";
+					echo -e "\t#include \"moc_$(basename ${cppfile})\""
+				fi
+	      echo
+			fi; 
+		fi; 
+	done
+
+	if [[ "${1}" != "addinclude" ]]; then
+		echo "Run this script (./${0}) with the flag 'addinclude' to automatically add the moc includes";
+		echo "Warning: make sure you have a backup before running this script with that flag."
+	fi
+
+Example output, running on the [Leaf Node Monitoring][5] code base:
+
+	OK: lib/src/versioncheck/VersionCheck.cpp HAS moc include
+	OK: lib/src/traymenu/TrayMenu.cpp HAS moc include
+	OK: lib/src/model/MainModel.cpp HAS moc include
+	FAIL: lib/src/viewmodel/AboutViewModel.cpp MISSES moc include. Add this line to the end of the file: 
+	        #include "moc_AboutViewModel.cpp"
+
+The next part of the article bundles background information on `moc` and 
+this specific optimization. 
+
+### Background information regarding `moc`
+
+Because the Qt documentation currently does not have clear and concise
+instructions on this and most documentation on speeding up Qt builds is
+spread all over the internet (forum, mailing lists, git repositories, YouTube
+video's, etc), I have quoted (with sources) the most important statements
+regarding including your `moc_*.cpp` files in one place.
+
+Quoting the [Qt documentation][7]: 
+
+> The Meta-Object Compiler, `moc`, is the program that handles Qt's C++ extensions.
+
+> `moc` reads a C++ header file, if it finds one or more class declarations
+  that contain the `Q_OBJECT` macro, it produces a C++ source file containing
+  the meta-object code for those classes. Among other things, meta-object
+  code is required for the signals and slots mechanism, the run-time type
+  information, and the dynamic property system.
+
+> The C++ source file generated by `moc` must be compiled and linked with the
+  implementation of the class (or it can be `#included` into the class's
+  source file). 
+
+> If you use `qmake` to create your `Makefiles`, build rules will be included
+  that call the `moc` when required, so you will not need to use the moc
+  directly. For more background information on `moc`, see [Why Does Qt Use
+  Moc for Signals and Slots][3]?
+
+Interestingly, the line `(or it can be #included into the class's source
+file)` only appears on [this page][3] and not in [the overview][7].
+
+---
+
+
+KDAB, a large Qt consulting firm, have a python [script][1] that 
+does the same including a git hook, but that only was published 5 
+months ago and required python. My script is older and only needs
+bash. They have also published [a video][4] on the subject with 
+benchmarks.
+
+
+From the [KDAB][1] python repository, another quote:
+
+If you are using `CMake`, you will probably have a line like this in your
+`CMakeLists.txt` file:
+
+    set(CMAKE_AUTOMOC ON)
+
+This results in all `moc_*.cpp` files [being included from one file][8], namely
+`mocs_compilation.cpp`. The advantage of this is that it speeds up the initial
+build, but the disadvantage is that incremental builds (when you
+for example touch just a single header file) will be much slower.
+
+Including the `moc` files in the source files, gives us the best of both
+worlds, both fast initial build and fast incremental builds.
+
+---
+
+Via `Sze Howe Koh` on [the Qt forum][2], regarding how the `moc_*.cpp` files are 
+created and included in the build:
+
+`qmake` is responsible for this. It scans your code and your `*.pro` file to
+generate a `Makefile`. Your compiler and linker follow the "recipe" contained
+in the `Makefile`. When you don't `#include "moc_myclass.cpp"`, your
+QObject-based class spans 2 separate `*.o` files: 
+
+	SOURCES       = ../src/main.cpp \
+	                ../src/myclass.cpp moc_myclass.cpp
+	OBJECTS       = main.o \
+	                myclass.o \
+	                moc_myclass.o
+
+When you `#include` your moc file, `qmake` sees this and adjusts the `Makefile`
+accordingly, so your class is fully contained within 1 `*.o` file:
+
+	SOURCES       = ../src/main.cpp \
+	                ../src/myclass.cpp
+	OBJECTS       = main.o \
+	                myclass.o
+
+
+
+- KDE code and internal Qt code prefer the tactic of `#include` the
+  `moc_file.cpp` in the corresponding `.cpp.` 
+- This results in fewer `*.o` files fed into the linker. This has been shown
+  to speed up builds. 
+- This can at times enable the reduction of the header-to-header include
+  graph, per [this email][10], which is a tactic I had mentioned on this
+  other forum thread as being my main weapon overall against long rebuild
+  times (in any C/C++ project, Qt or not). 
+- Per the famous [Thiago Macieira (see here)][9], the `#include-your-moc` will
+  also allow Clang to provide better diagnostics regarding your class.
+
+
+---
+
+Quoting [the Qt mailing list][9], regarding the fact that both KDE
+and Qt do this (including `moc_` files):
+
+
+	On Thursday, 28 May 2020 02:06:01 PDT Shawn Rutledge wrote:
+	> > On 2020 May 27, at 17:50, Thiago Macieira <thiago.macieira@intel.com>
+	> > wrote:> 
+	> > On Wednesday, 27 May 2020 03:42:19 PDT Oswald Buddenhagen wrote:
+	> >>> this is not something we can subject our users to.
+	> >> 
+	> >> orly? kde had been doing that for quite a while.
+	> > 
+	> > And I fixed QtCore to do the same.
+	> > 
+	> > The only reason not to include the moc output in your .cpp is if you don't
+	> > have one (a header-only class whose only non-inline methods are the moc-
+	> > generated ones). Otherwise, #include your mocs.
+	> 
+	> The reason is to speed up compilation, right?  Is there another reason?
+
+	Aside from that benefit and the reason for this thread, it enables some 
+	warnings in Clang that aren't otherwise. If it can see all members of a class, 
+	including non-inline, it can tell if you forgot to use or initialise some of 
+	them.
+
+	Plus the benefit of more inlining, as there's more the compiler can see.
+
+
+In that same thread, another reason is given to include your `moc_` files:
+
+	Shawn Rutledge (28 May 2020 11:06)
+	> The reason is to speed up compilation, right?  Is there another reason?
+
+	Yes, see earlier in this thread: if you #include your .moc in your .cpp,
+	your .h can get away with forward-declaring some classes whose headers
+	it doesn't #include; the .moc may need to see the actual definition,
+	rather than a forward declaration, and the .cpp shall do the needed
+	#include, hence make the definition visible, which the .moc then
+	benefits from by being #included in the .cpp.
+
+		Eddy.
+
+
+[1]: https://github.com/KDAB/KDToolBox/tree/master/qt/includemocs
+[2]: https://web.archive.org/web/20221212124242/https://forum.qt.io/topic/117973/how-does-include-moc_-cpp-work/8
+[3]: https://web.archive.org/web/20221212135618/https://doc.qt.io/qt-6/why-moc.html
+[4]: https://www.youtube.com/watch?v=Cx_m-qVnEjo
+[5]: https://leafnode.nl/
+[6]: https://web.archive.org/web/20221212141026/https://doc.qt.io/qt-5/qmake-precompiledheaders.html
+[7]: https://web.archive.org/web/20220922141034/https://doc.qt.io/qt-6/moc.html
+[8]: https://web.archive.org/web/20221212142342/https://cmake.org/cmake/help/latest/prop_tgt/AUTOMOC.html#prop_tgt:AUTOMOC
+[9]: https://web.archive.org/web/20221021073320/https://lists.qt-project.org/pipermail/development/2020-May/039657.html
+[10]: https://web.archive.org/web/20221021073333/https://lists.qt-project.org/pipermail/development/2020-May/039654.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
