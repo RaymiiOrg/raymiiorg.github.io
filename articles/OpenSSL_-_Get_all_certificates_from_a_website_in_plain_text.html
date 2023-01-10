@@ -211,10 +211,13 @@ certificate at a time. Using the following one liner we:</p>
 <li>We change the Internal Field Seperator back to what it was.</li>
 </ul>
 
-<p>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443
--showcerts -tlsextdebug -tls1 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/
+<p>This is the command:</p>
+
+<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443
+-showcerts -tlsextdebug 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/
 {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo
-$certificate | openssl x509 -noout -text; done; IFS=$OLDIFS</p>
+$certificate | openssl x509 -noout -text; done; IFS=$OLDIFS
+</code></pre>
 
 <p>Do note that you need the GNU version of <code>sed</code>. The OS X or BSD version will not
 work.</p>
@@ -432,7 +435,7 @@ Certificate:
 
 <p>You can also retrieve for example the OCSP URL of all certificates:</p>
 
-<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug -tls1 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -ocsp_uri; done; IFS=$OLDIFS
+<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -ocsp_uri; done; IFS=$OLDIFS
 </code></pre>
 
 <p>Output:</p>
@@ -443,7 +446,7 @@ http://gtglobal-ocsp.geotrust.com
 
 <p>Serial Numbers:</p>
 
-<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug -tls1 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -serial; done; IFS=$OLDIFS
+<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -serial; done; IFS=$OLDIFS
 </code></pre>
 
 <p>Output:</p>
@@ -455,7 +458,7 @@ serial=12BBE6
 
 <p>The subject in the certificates:</p>
 
-<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug -tls1 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -subject; done; IFS=$OLDIFS
+<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -subject; done; IFS=$OLDIFS
 </code></pre>
 
 <p>Output:</p>
@@ -467,7 +470,7 @@ subject= /C=US/O=GeoTrust Inc./CN=GeoTrust Global CA
 
 <p>All the fingerprints:</p>
 
-<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug -tls1 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -subject; echo $certificate | openssl x509 -noout -fingerprint; done; IFS=$OLDIFS
+<pre><code>OLDIFS=$IFS; IFS=&#39;:&#39; certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug 2&gt;&amp;1 &lt;/dev/null | sed -n &#39;/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}&#39;); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -subject; echo $certificate | openssl x509 -noout -fingerprint; done; IFS=$OLDIFS
 </code></pre>
 
 <p>Output:</p>

@@ -151,7 +151,6 @@ However, if we feed that into openssl again to receive the plain text output we
 only get output for the first certificate:
 
     
-    
     openssl s_client -connect google.com:443 -showcerts 2>&1 < /dev/null | sed -n '/-----BEGIN/,/-----END/p' | openssl x509 -noout -text
     
 
@@ -165,16 +164,17 @@ certificate at a time. Using the following one liner we:
   * We feed those one by one to OpenSSL
   * We change the Internal Field Seperator back to what it was.
 
-OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect google.com:443
--showcerts -tlsextdebug -tls1 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/
-{/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo
-$certificate | openssl x509 -noout -text; done; IFS=$OLDIFS
+This is the command:
+
+    OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect google.com:443
+    -showcerts -tlsextdebug 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/
+    {/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo
+    $certificate | openssl x509 -noout -text; done; IFS=$OLDIFS
 
 Do note that you need the GNU version of `sed`. The OS X or BSD version will not
 work.
 
 The output are all certificates in text format:
-
     
     
     Certificate:
@@ -387,46 +387,30 @@ The output are all certificates in text format:
 ### Other certificate information
 
 You can also retrieve for example the OCSP URL of all certificates:
-
     
+    OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -ocsp_uri; done; IFS=$OLDIFS
     
-    OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug -tls1 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -ocsp_uri; done; IFS=$OLDIFS
-    
-
 Output:
-
-    
     
     http://clients1.google.com/ocsp
     http://gtglobal-ocsp.geotrust.com
     
-
 Serial Numbers:
 
+    OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -serial; done; IFS=$OLDIFS
     
-    
-    OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug -tls1 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -serial; done; IFS=$OLDIFS
-    
-
 Output:
 
-    
-    
+  
     serial=667966FCE2C7D02D
     serial=023A69
     serial=12BBE6
     
-
 The subject in the certificates:
-
     
-    
-    OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug -tls1 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -subject; done; IFS=$OLDIFS
-    
+    OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -subject; done; IFS=$OLDIFS
 
 Output:
-
-    
     
     subject= /C=US/ST=California/L=Mountain View/O=Google Inc/CN=*.google.com
     subject= /C=US/O=Google Inc/CN=Google Internet Authority G2
@@ -434,15 +418,13 @@ Output:
     
 
 All the fingerprints:
-
     
     
-    OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug -tls1 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -subject; echo $certificate | openssl x509 -noout -fingerprint; done; IFS=$OLDIFS
+    OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect google.com:443 -showcerts -tlsextdebug 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -subject; echo $certificate | openssl x509 -noout -fingerprint; done; IFS=$OLDIFS
     
 
 Output:
 
-    
     
     subject= /C=US/ST=California/L=Mountain View/O=Google Inc/CN=*.google.com
     SHA1 Fingerprint=99:00:2C:A4:91:BC:53:D7:53:75:B1:8B:F9:24:55:26:4B:69:A4:34
@@ -456,8 +438,9 @@ Output:
 
 [Documentation for openssl x509][2]
 
-   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
-   [2]: http://www.openssl.org/docs/apps/x509.html
+[1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+[2]: http://www.openssl.org/docs/apps/x509.html
+
 
 ---
 
