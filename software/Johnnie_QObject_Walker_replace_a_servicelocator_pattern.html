@@ -192,7 +192,7 @@ functional-programming like code.</p></li>
     auto* t3 = new testObject3(t2);
 
     //act
-    testObject1* findResult = Helpers::findQObjectRecursive&lt;testObject1&gt;(t3);
+    testObject1* findResult = findQObjectRecursive&lt;testObject1&gt;(t3);
 
     //assert
     ASSERT_EQ(findResult-&gt;objectName(), t1-&gt;objectName());
@@ -212,7 +212,7 @@ TEST(HelpersTests, findQobjectWithoutParentsDoesNotReturnResult)
     t3-&gt;setObjectName(&quot;t3&quot;);
 
     //act
-    testObject1* findResult = Helpers::findQObjectRecursive&lt;testObject1&gt;(t3);
+    testObject1* findResult = findQObjectRecursive&lt;testObject1&gt;(t3);
 
     //assert
     ASSERT_EQ(findResult, nullptr);
@@ -236,7 +236,7 @@ TEST(HelpersTests, findQobjectSiblingOneLevelWorks)
     t3-&gt;setObjectName(&quot;t3&quot;);
 
     //act
-    testObject2* findResult = Helpers::findQObjectRecursive&lt;testObject2&gt;(t3);
+    testObject2* findResult = findQObjectRecursive&lt;testObject2&gt;(t3);
 
     //assert
     ASSERT_NE(findResult, nullptr);
@@ -259,7 +259,7 @@ TEST(HelpersTests, findQobjectSiblingTwoLevelsWorks)
     t3_2-&gt;setObjectName(&quot;t3_2&quot;);
 
     //act
-    testObject3* findResult = Helpers::findQObjectRecursive&lt;testObject3&gt;(t2_2);
+    testObject3* findResult = findQObjectRecursive&lt;testObject3&gt;(t2_2);
 
     //assert
     ASSERT_NE(findResult, nullptr);
