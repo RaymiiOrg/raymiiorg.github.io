@@ -1,0 +1,268 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Johnnie 'QObject' Walker, replace a service locator pattern while you're at it
+Author      : 	Remy van Elst
+Date        : 	14-01-2023 04:30
+URL         : 	https://raymii.org/s/software/Johnnie_QObject_Walker_replace_a_servicelocator_pattern.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+I've seen many C++ code bases where there was the concept of a service locator. An global static object that anyone can query to get a class. This is handy with old legacy spiderweb intertwined code that gets everything from everywhere, but not so useful when you're trying to unit test code, it is not visible from the header what dependencies you need. My preference goes to dependency injection, give all the dependencies to the class' constructor and use them that way. Makes it easy to mock and if you have many dependencies, it serves as a starting point to refactor in to a more clearly separated architecture. This article shows a piece of code that uses QObject, the Qt object base class, to replace a servicelocator. All QObjects can have a parent QObject, thus a tree is formed, which you can walk back up and search. This effectively replaces the servicelocator, since you can just request a certain type of QObject.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Johnnie '`QObject` Walker is a satirical reference to the Whisky blend
+named [Johnnie Walker][5]. I can't confirm that I've actually named the 
+class that way, but I might have. 
+
+I've used this code in a Qt5 application to replace [a servicelocator][4]. The
+application is a Qt Widgets application, making heavy use of QObject. But it
+had a legacy hardware communication component in it, which was using a 
+servicelocator class to find runtime dependencies for logging, serial communication
+and other things which you'd normally not put inside that class. When looking 
+at the code from a C4 architecture level, all of those things should be either in
+a presentation layer (logging/notifications) or in an infrastructure layer (serial
+communication) or elsewhere, not part of the core domain code. 
+
+The servicelocator code it replaced was a generic templated piece of code
+which was constructed early on. Over time, all objects were either replaced
+with QObject inherited code or no longer needed. In the end all objects on 
+'the service locator' were QObjects, which already were in the QObject tree.
+
+
+`QObject` is a core part of the Qt C++ framework. Quoting the [Qt documentation][2]:
+
+> QObject is the heart of the Qt Object Model. The central feature in this
+  model is a very powerful mechanism for seamless object communication called
+  signals and slots. You can connect a signal to a slot with connect() and
+  destroy the connection with disconnect(). To avoid never ending
+  notification loops you can temporarily block signals with blockSignals
+  (). The protected functions connectNotify() and disconnectNotify() make it
+  possible to track connections.
+
+> QObjects organize themselves in object trees. When you create a QObject with
+  another object as parent, the object will automatically add itself to the
+  parent's children() list. The parent takes ownership of the object; i.e.,
+  it will automatically delete its children in its destructor. You can look
+  for an object by name and optionally type using findChild() or findChildren
+  ().
+> Every object has an objectName() and its class name can be found via the
+  corresponding metaObject() (see QMetaObject::className()). You can
+  determine whether the object's class inherits another class in the QObject
+  inheritance hierarchy by using the inherits() function.
+
+
+When you're using `QThreads` the parent tree might be a bit different,
+but in this application the `QObject` tree, where applicable (when service
+locator was used) was linear. So, why not remove that (untested as I might say)
+code and replace it by framework-provided and tested code?
+
+Note that this code is not applicable if you don't use Qt or do not have
+a linear parent tree, that is to say, every object has a parent leading
+up to your topmost `QApplication` (or QML variant)
+
+### FindQObject C++ code
+
+This is the code I wrote to search the QObject tree. It first walks back up 
+until there is no parent anymore, because in my case it is likely that the 
+any one of the grand-parents is the class we want. (Don't ask me why, this 
+is a 20 year old legacy C with objects compiled with a C++ compiler codebase).
+
+
+    template <typename T>
+    static T *findQObjectRecursive(const QObject* objectToSearch)
+    {
+        if(objectToSearch == nullptr)
+            return nullptr;
+
+        if(objectToSearch->parent() == nullptr) {
+            // arrived at the topmost QObject.
+            // as last resort, search children recursively
+            T* objectToFind = qobject_cast<T*>(objectToSearch->findChild<T*>());
+            if(objectToFind)
+                return objectToFind;
+            else
+                return nullptr;
+        }
+
+
+        T* objectToFind =  qobject_cast<T*>(objectToSearch->parent());
+        if(objectToFind)
+            return objectToFind;
+        else
+            return findQObjectRecursive<T>(objectToSearch->parent());
+    }
+
+Usage example, finding the one and only class `NotificationsModel`:
+
+    NotificationsModel* notificationsModel = findQObjectRecursive<NotificationsModel>(this);
+        if(notificationsModel)
+            notificationsModel->sendNotification(notification);
+    }
+
+
+This code is tailored to the specific codebase. It first searches the parents,
+and only if that didn't result in anything it uses the framework-provided `findChild`
+method. [That method][3] recursively walks it's own children and if not found, all their children. Not that efficient, but as said, in the codebase I'm currently working on, most objects
+have the utility classes in the parent tree (like notifications or serial communication). 
+If you have multiple instances of a class, it is easy to adapt this code
+to search for multiple instances, returning a list, or maybe even search by
+`QObject::objectName`.
+
+Benchmarking showed no noticeable slowdown, in most cases even a slight speed increase
+of a few milliseconds. 
+
+
+### Unit Tests
+
+There are of course a few unit tests for this code, a few of them generic
+enough to share. I like to use the pattern:
+
+- Arrange: set up the required test dependencies and mocks
+- Act: the one and only call that we're testing
+- Assert: check that the result matches what we're expecting
+- (cleanup): `delete` any pointers or cleanup other things. Optional step
+  which I try to prevent by using `RAII`.
+
+  This helps in keeping the unit tests small, testing one thing only. With
+  test fixtures many different variations are possible, however most
+  of the code I write is unit testable without mocks or fixtures, almost
+  functional-programming like code.
+
+The following unit tests are available:
+
+    TEST(HelpersTests, findQobjectTreeWorks)
+    {
+        //arrange
+        auto* t1 = new testObject1(nullptr);
+        t1->setObjectName("rootTest");
+        auto* t2 = new testObject2(t1);
+        auto* t3 = new testObject3(t2);
+
+        //act
+        testObject1* findResult = Helpers::findQObjectRecursive<testObject1>(t3);
+
+        //assert
+        ASSERT_EQ(findResult->objectName(), t1->objectName());
+
+        //cleanup
+        t1->deleteLater();
+    }
+
+    TEST(HelpersTests, findQobjectWithoutParentsDoesNotReturnResult)
+    {
+        //arrange
+        auto* t1 = new testObject1(nullptr);
+        t1->setObjectName("rootTest");
+        auto* t2 = new testObject2(nullptr);
+        t2->setObjectName("t2");
+        auto* t3 = new testObject3(nullptr);
+        t3->setObjectName("t3");
+
+        //act
+        testObject1* findResult = Helpers::findQObjectRecursive<testObject1>(t3);
+
+        //assert
+        ASSERT_EQ(findResult, nullptr);
+
+        //cleanup
+        t1->deleteLater();
+        t2->deleteLater();
+        t3->deleteLater();
+
+    }
+
+
+    TEST(HelpersTests, findQobjectSiblingOneLevelWorks)
+    {
+        //arrange
+        auto* t1 = new testObject1(nullptr);
+        t1->setObjectName("t1");
+        auto* t2 = new testObject2(t1);
+        t2->setObjectName("t2");
+        auto* t3 = new testObject3(t1);
+        t3->setObjectName("t3");
+
+        //act
+        testObject2* findResult = Helpers::findQObjectRecursive<testObject2>(t3);
+
+        //assert
+        ASSERT_NE(findResult, nullptr);
+        ASSERT_EQ(findResult->objectName(), t2->objectName());
+
+        //cleanup
+        t1->deleteLater();
+    }
+
+    TEST(HelpersTests, findQobjectSiblingTwoLevelsWorks)
+    {
+        //arrange
+        auto* t1 = new testObject1(nullptr);
+        auto* t2 = new testObject1(t1);
+        auto* t3 = new testObject1(t1);
+        auto* t2_1 = new testObject1(t2);
+        auto* t3_1 = new testObject1(t3);
+        auto* t2_2 = new testObject2(t2_1);
+        auto* t3_2 = new testObject3(t3_1);
+        t3_2->setObjectName("t3_2");
+
+        //act
+        testObject3* findResult = Helpers::findQObjectRecursive<testObject3>(t2_2);
+
+        //assert
+        ASSERT_NE(findResult, nullptr);
+        ASSERT_EQ(findResult->objectName(), t3_2->objectName());
+
+        //cleanup
+        t1->deleteLater();
+    }
+
+
+[1]: https://en.wikipedia.org/wiki/Service_locator_pattern  
+[2]: https://web.archive.org/web/20230112182406/https://doc.qt.io/qt-5/objecttrees.html
+[3]: https://web.archive.org/web/20230112184331/https://codebrowser.dev/qt5/qtbase/src/corelib/kernel/qobject.cpp.html#_Z20qt_qFindChild_helperPK7QObjectRK7QStringRK11QMetaObject6QFlagsIN2Qt15FindChildOptionEE
+[4]: https://web.archive.org/web/20221205130234/https://gameprogrammingpatterns.com/service-locator.html
+[5]: https://en.wikipedia.org/wiki/Johnnie_Walker
+
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
