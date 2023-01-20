@@ -1,6 +1,6 @@
 This is a text-only version of the following page on https://raymii.org:
 ---
-Title       : 	Qt/QML expose C++ classes to QML and why setContextProperty is a not the best idea
+Title       : 	Qt/QML: Expose C++ classes to QML and why setContextProperty is not the best idea
 Author      : 	Remy van Elst
 Date        : 	03-10-2021
 URL         : 	https://raymii.org/s/articles/Qt_QML_Integrate_Cpp_with_QML_and_why_ContextProperties_are_bad.html
@@ -13,7 +13,7 @@ Format      : 	Markdown/HTML
 
 > Qt/Qml traffic light example using different C++ integrations methods
 
-In this article I'm going to discuss the different ways to expose a C++ class to QML.  QML is a markup language (part of the QT framework) like HTML/CSS, with inline JavaScript that can interact with the C++ code of your (QT) application. There are multiple ways to expose a C++ class to QML, each with their own benefits and quirks. This guide will cover three integration methods, `qmlRegisterSingletonType<>`, `rootContext->setContextProperty()` and `qmlRegisterType<>`. We'll end off with a simple benchmark showing the difference in startup times between the first two. 
+In this article I'm going to discuss the different ways to expose a C++ class to QML. QML is a markup language (part of the QT framework) like HTML/CSS, with inline JavaScript that can interact with the C++ code of your (QT) application. There are multiple ways to expose a C++ class to QML, each with their own benefits and quirks. This guide will cover three integration methods, `qmlRegisterSingletonType<>`, `rootContext->setContextProperty()` and `qmlRegisterType<>`. We'll end off with a simple benchmark showing the difference in startup times between the first two. 
 
 The executive summary is that `setContextProperty` is [deprecated][11], has a
 performance impact (and you should use `qmlRegisterSingletonType<>`. In my
