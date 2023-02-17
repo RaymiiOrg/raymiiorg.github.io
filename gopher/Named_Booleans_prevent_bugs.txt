@@ -1,0 +1,181 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Named Booleans prevent C++ bugs and save you time
+Author      : 	Remy van Elst
+Date        : 	17-02-2023 20:21
+URL         : 	https://raymii.org/s/blog/Named_Booleans_prevent_bugs.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+ During a recent code review I found a hard to spot bug, a misplaced parenthesis in an `if` statement. I often employ a technique I call `named booleans`, which would have prevented this bug. It's a simple technique, instead of a long `if` statement, give every comparison a seperate boolean variable with a descriptive name and use those variables is the `if` statement. This post shows the bug in question, an example of my `named booleans` technique and another tip regarding naming magic numbers.
+
+<p class="ad"> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+
+
+### The bug in question
+
+The bug in question was caught before it hit the `master` branch, I spotted it
+during a code review of a new colleagues merge request. I can't show the
+actual code, but the line below is equivalent:
+
+	if ((_someLongNamedVar != FooLongNameEnum::Unknown && _someLongNamedMap.count(_someLongNamedVar)) == 0)
+
+The `_someLongNamedMap` is a `std::map<FooLongNameEnums, std::string>` and
+there is parsing involved before this line. Seasoned C++ developers might
+already have spotted the issue.
+
+If not, don't worry. The code compiles just fine, but when run, this method
+doesn't do what was intended. It however does exactly what was asked.  
+
+The second-to-last parentheses are placed wrong. The `== 0` part has to be
+moved one parenthesis back:
+
+	if ((_someLongNamedVar != FooLongNameEnum::Unknown && _someLongNamedMap.count	(_someLongNamedVar) == 0))
+
+The last statement otherwise doesn't compare to 0, but just evaluates:
+
+	_someLongNamedMap.count(_someLongNamedVar)) == 0)
+
+As opposed to:
+
+	_someLongNamedMap.count(_someLongNamedVar) == 0))
+
+In C++, [only zero is false][3]. Effectively the if statement
+was inverted.
+
+This code was intended to check if a given item existed in the `map`. You
+might wonder why a `.count()` method is used? Well that is because the
+`.contains()` method is only available in [C++ 20 and up][1] and `.count
+()` has been [there since forever][2]. This codebase is compiled using C++
+17. Using `.contains()` would also have prevented this issue.
+
+
+### Named Booleans
+
+Named booleans is a name I have given this coding technique where you extract
+every part of an `if` into seperate booleans explaining what they're intended
+for in their variable name, like so:
+	
+    bool someLongNamedVarIsNotUnknown = _parameterCommand != FooLongNameEnum::Unknown;
+    bool someLongNamedMapCountIsZero = _someLongNamedMap.count(_someLongNamedVar) == 0;
+
+Because the statement is now on its own line, the parentheses are no longer
+required and the if statement is both shorter and more readable. 
+
+Using descriptive names allows the if statement to communicates its intent
+much more:
+
+    if (someLongNamedVarIsNotUnknown && someLongNamedMapCountIsZero)
+        return false;
+	else        
+    	return true;
+
+When there are more booleans in my `if`, I often also combine those into
+another named boolean, trying to communicate the intent even more:
+
+    bool validVarButConditionNotMet = (someLongNamedVarIsNotUnknown && someLongNamedMapCountIsZero)
+
+    if(validVarButConditionNotMet)
+    	return false
+    else
+    	return true;
+
+Naming the variables like this not only eliminates comments (which are almost
+always out of date or not refactored along with the code) but also helps you
+to remember why certain things are done the way they are when you return to
+the codebase in the future.
+
+When I need to validate stuff that involves rules with context outside of the
+code, I often employ this techique. Imagine you're  building a shoe
+recommendation engine and the business has a few indicators that make a shoe
+match to a user:
+
+	bool usersHairColorMatchesThisMonthsAdsColour = _user.hair == HairColour::Red;
+	bool userFeetSizeFitsInShoe = _user.feetSize <= _requestedShoe.size;
+	bool shoePriceFitsInUserBudget = _requestedShoe.price <= BudgetHelpers::Calculator(_user);
+
+	bool shoeIsProbablyOkayForUser = usersHairColorMatchesThisMonthsAdsColour && userFeetSizeFitsInShoe && shoePriceFitsInUserBudget;
+
+	if(shoeIsProbablyOkayForUser)
+
+That if statement could also be way less readable with an ugly comment:
+
+	// this months ad campaign color is red 
+	if(_user.hair == HairColor::Red && _user.feetSize <= _requestedShoe.size && _requestedShoe.price <= BudgetHelpers::Calculator(_user))	
+
+
+I explicitly choose to name the hair color comparison
+`usersHairColorMatchesThisMonthsAdsColour` and not `userHasRedHair`. The
+latter one does not indicate **why** the user has to have red hair. By
+explicitly naming a condition outside of the scope of the code, it becomes
+clear why we would check for it. When I come back to this code a few months
+later, I know right away why, in this case, we check the users hair color,
+instead of just knowing that we check if, but not why.
+
+I've seen much code that just had a barren bunch of magic numbers and if's
+scattered all over the place, but in three months from now even you have
+forgotten the `why` behind all those if statements. 
+
+If this technique already has a name, please send me an email, I'd love to
+know, I'm not aware of it (yet).
+
+One other technique I also often employ is naming magic numbers. If you have a
+defined constant, lets say by convention all license plates starting with 42
+are from your company, give that constant a descriptive name:
+
+	int companyCarLicensePlatePrefix = 42;
+
+Rather than to sprinkle `42` all over your if statements, how much nicer is it
+to read `companyCarLicensePrefix`? That saves you a comment (`// 42 is our
+license prefix`), it saves you remembering what 42 was in this case and for
+new people, it's clear what the intent is right away, without having to
+lookup what 42 could mean in this context. And if it ever changes, you
+only need to change one variable instead of all over the place.
+
+
+[1]: https://en.cppreference.com/w/cpp/container/map/contains
+[2]: https://en.cppreference.com/w/cpp/container/map/count
+[3]: /s/snippets/Cpp_Only_zero_is_false.html
+[4]: https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
