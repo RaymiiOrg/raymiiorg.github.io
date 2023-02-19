@@ -16,6 +16,11 @@ Format      : 	Markdown/HTML
 
 
 
+Do note that most of what I write here is a matter of taste.
+Some people prefer comments, some people don't mind parentheses,
+but I find that comments tend to rot. Refactoring often doesn't
+take the comments into account and sometimes, when copied over
+a few times, they are plainly wrong.
 
 ### The bug in question
 
@@ -81,14 +86,36 @@ another named boolean, trying to communicate the intent even more:
     bool validVarButConditionNotMet = (someLongNamedVarIsNotUnknown && someLongNamedMapCountIsZero)
 
     if(validVarButConditionNotMet)
-    	return false
+    	// do the false thing
     else
-    	return true;
+    	// do the true thing
 
 Naming the variables like this not only eliminates comments (which are almost
 always out of date or not refactored along with the code) but also helps you
 to remember why certain things are done the way they are when you return to
 the codebase in the future.
+
+One downside is that this technique prevents [short-circuiting][5], which is
+often handy with pointer-related code. I often use that to make sure a
+pointer is not a `nullptr` before accessing it, because if one part of an
+`if` is false, the rest is not even executed. Example:
+
+	SomeClassPtr* p;
+	if(p && p->someMethod)
+
+If `p` is a `nullptr`, `p->someMethod` is never executed. One caveat is that
+short-circuiting only works on builtin operators, not overloaded operators.
+Another reason people short circuit is to avoid costly functions, doing a
+cheaper validation first and only if needed, a costly method. But you can
+still avoid a costly function turning it into a lambda:
+
+    struct Example { int value = 126; };
+    auto const pointer = std::make_unique<Example>();
+    auto pointerIsOk = [&pointer] { return pointer != nullptr; };
+    auto valueIsGood = [&pointer] { return pointer->value == 126; };
+
+    if(pointerIsOk() && valueIsGood())
+    	std::cout << "All is well";
 
 When I need to validate stuff that involves rules with context outside of the
 code, I often employ this techique. Imagine you're  building a shoe
@@ -124,6 +151,8 @@ forgotten the `why` behind all those if statements.
 If this technique already has a name, please send me an email, I'd love to
 know, I'm not aware of it (yet).
 
+### Name your magic numbers
+
 One other technique I also often employ is naming magic numbers. If you have a
 defined constant, lets say by convention all license plates starting with 42
 are from your company, give that constant a descriptive name:
@@ -142,6 +171,7 @@ only need to change one variable instead of all over the place.
 [2]: https://en.cppreference.com/w/cpp/container/map/count
 [3]: /s/snippets/Cpp_Only_zero_is_false.html
 [4]: https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use
+[5]: https://en.cppreference.com/w/cpp/language/operator_logical
 
 ---
 

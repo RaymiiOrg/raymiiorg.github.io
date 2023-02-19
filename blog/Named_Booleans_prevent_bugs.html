@@ -55,12 +55,21 @@
 <li>
 <a href="#toc_1">Named Booleans</a>
 </li>
+<li>
+<a href="#toc_2">Name your magic numbers</a>
+</li>
 </ul>
 
 </div><hr><div id="contents">
 <p>During a recent code review I found a hard to spot bug, a misplaced parenthesis in an <code>if</code> statement. I often employ a technique I call <code>named booleans</code>, which would have prevented this bug. It&#39;s a simple technique, instead of a long <code>if</code> statement, give every comparison a seperate boolean variable with a descriptive name and use those variables is the <code>if</code> statement. This post shows the bug in question, an example of my <code>named booleans</code> technique and another tip regarding naming magic numbers.</p>
 
 <p class="ad"> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<p>Do note that most of what I write here is a matter of taste.
+Some people prefer comments, some people don&#39;t mind parentheses,
+but I find that comments tend to rot. Refactoring often doesn&#39;t
+take the comments into account and sometimes, when copied over
+a few times, they are plainly wrong.</p>
 
 <h3 id="toc_0">The bug in question</h3>
 
@@ -131,15 +140,39 @@ another named boolean, trying to communicate the intent even more:</p>
 <pre><code>bool validVarButConditionNotMet = (someLongNamedVarIsNotUnknown &amp;&amp; someLongNamedMapCountIsZero)
 
 if(validVarButConditionNotMet)
-    return false
+    // do the false thing
 else
-    return true;
+    // do the true thing
 </code></pre>
 
 <p>Naming the variables like this not only eliminates comments (which are almost
 always out of date or not refactored along with the code) but also helps you
 to remember why certain things are done the way they are when you return to
 the codebase in the future.</p>
+
+<p>One downside is that this technique prevents <a href="https://en.cppreference.com/w/cpp/language/operator_logical">short-circuiting</a>, which is
+often handy with pointer-related code. I often use that to make sure a
+pointer is not a <code>nullptr</code> before accessing it, because if one part of an
+<code>if</code> is false, the rest is not even executed. Example:</p>
+
+<pre><code>SomeClassPtr* p;
+if(p &amp;&amp; p-&gt;someMethod)
+</code></pre>
+
+<p>If <code>p</code> is a <code>nullptr</code>, <code>p-&gt;someMethod</code> is never executed. One caveat is that
+short-circuiting only works on builtin operators, not overloaded operators.
+Another reason people short circuit is to avoid costly functions, doing a
+cheaper validation first and only if needed, a costly method. But you can
+still avoid a costly function turning it into a lambda:</p>
+
+<pre><code>struct Example { int value = 126; };
+auto const pointer = std::make_unique&lt;Example&gt;();
+auto pointerIsOk = [&amp;pointer] { return pointer != nullptr; };
+auto valueIsGood = [&amp;pointer] { return pointer-&gt;value == 126; };
+
+if(pointerIsOk() &amp;&amp; valueIsGood())
+    std::cout &lt;&lt; &quot;All is well&quot;;
+</code></pre>
 
 <p>When I need to validate stuff that involves rules with context outside of the
 code, I often employ this techique. Imagine you&#39;re  building a shoe
@@ -175,6 +208,8 @@ forgotten the <code>why</code> behind all those if statements. </p>
 
 <p>If this technique already has a name, please send me an email, I&#39;d love to
 know, I&#39;m not aware of it (yet).</p>
+
+<h3 id="toc_2">Name your magic numbers</h3>
 
 <p>One other technique I also often employ is naming magic numbers. If you have a
 defined constant, lets say by convention all license plates starting with 42
