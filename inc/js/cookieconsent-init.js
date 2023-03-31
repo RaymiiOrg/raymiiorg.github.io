@@ -26,7 +26,7 @@ window.addEventListener('load', function () {
             en: {
                 consent_modal: {
                     title: 'Cookie popup',
-                    description: 'Hi, this website uses cookies to understand how you interact with it and to serve advertisements. <a aria-label="Cookie policy" class="cc-link" href="/s/static/About.html">Read more</a>',
+                    description: 'Hi, this website uses cookies to understand how you interact with it and to serve advertisements. <a aria-label="Cookie policy" class="cc-link" href="/s/static/Cookie_Privacy_Policy.html">Read more</a>',
                     primary_btn: {
                         text: 'Accept',
                         role: 'accept_all'              // 'accept_selected' or 'accept_all'
@@ -79,8 +79,8 @@ window.addEventListener('load', function () {
                             ]
                         }, 
                         {
-                            title: 'Ad cookies',
-                            description: 'These cookies are used to serve advertisements.',
+                            title: 'Advertisement & Marketing',
+                            description: 'Marketing cookies are used for tracking browsing activity and to customise and display ads that are relevant and engaging.',
                             toggle: {
                                 value: 'ads',
                                 enabled: true,
@@ -141,7 +141,7 @@ window.addEventListener('load', function () {
                             ]
                         }, {
                             title: 'More information',
-                            description: 'For any queries in relation to my policy on cookies and your choices, please <a class="cc-link" href="/s/static/About.html">contact me</a>.',
+                            description: 'For any queries in relation to my policy on cookies and your choices, please <a class="cc-link" href="/s/static/Cookie_Privacy_Policy.html">see the cookie policy for information and contact data</a>.',
                         }
                     ]
                 }
