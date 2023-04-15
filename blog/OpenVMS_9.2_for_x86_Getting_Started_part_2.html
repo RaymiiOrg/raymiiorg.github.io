@@ -191,19 +191,19 @@ VMS Software, Inc. OpenVMS (TM) x86_64 Operating System, E9.2-1
 Last interactive login on Monday, 10-APR-2023 22:08:44.88
 </code></pre>
 
-<p>The Community License file (<code>x86community-20240401.zip</code>) from <a href="https://sp.vmssoftware.com">https://sp.vmssoftware.com</a>
-is a ZIP file containing a long text file. If you try to copy and paste it into
-the shell you will get an error:</p>
+<p>The Community License file (<code>x86community-20240401.zip</code>) from
+<a href="https://sp.vmssoftware.com">https://sp.vmssoftware.com</a> is a ZIP file containing a long text file. If
+you try to copy and paste it into the shell you will get an error:</p>
 
 <pre><code>$ $
 %RMS-F-RER, file read error
 -SYSTEM-W-DATAOVERUN, data overrun
 </code></pre>
 
-<p><a href="/s/blog/OpenVMS_Mount_ISO_and_execute_scripts.html">Four years ago I made an ISO file</a> for the licenses. This time,
-we&#39;ll just manually activate the <code>OPENVMS-X86-BOE</code> license, which 
-is what we need to setup networking. Then we&#39;ll use OpenSSH to copy over
-the license file and execute that script. Much easier and less trouble.</p>
+<p><a href="/s/blog/OpenVMS_Mount_ISO_and_execute_scripts.html">Four years ago I made an ISO file</a> for the licenses. This time, we&#39;ll just
+manually activate the <code>OPENVMS-X86-BOE</code> license, which is what we need to setup
+networking. Then we&#39;ll use OpenSSH to copy over the license file and execute
+that script. Much easier and less trouble.</p>
 
 <p>Check the <code>txt</code> file and look for the line <code>OPENVMS-X86-BOE</code>. Copy the 
 commands, line by line (not the entire command, that will fail):</p>
@@ -221,7 +221,8 @@ commands, line by line (not the entire command, that will fail):</p>
 <pre><code>/AUTHORIZATION=...
 </code></pre>
 
-<p>Repeat this for every line in the license (<code>PRODUCT, UNTIS, TERMINATION_DATE, OPTIONS, CHECKSUM</code>). </p>
+<p>Repeat this for every line in the license (<code>PRODUCT, UNTIS, TERMINATION_DATE,
+OPTIONS, CHECKSUM</code>). </p>
 
 <!-- 
     LICENSE REGISTER OPENVMS-X86-BOE - 
@@ -270,10 +271,11 @@ after network has been setup, we&#39;ll activate the full license file.</p>
 
 <h3 id="toc_4">Network setup</h3>
 
-<p>The VM should be shut down to edit the VirtualBox settings. Execute the <code>SHUTDOWN</code>
-command to do that. Then, in VirtualBox, open the settings and navigate to network 
-and change the adapter from NAT to bridged. Select your main network adapter.
-Under <code>Advanced</code>, select <code>Intel PRO 1000 T Server</code> as the <code>Adapter Type</code>.</p>
+<p>The VM should be shut down to edit the VirtualBox settings. Execute the
+<code>SHUTDOWN</code> command to do that. Then, in VirtualBox, open the settings and
+navigate to network and change the adapter from NAT to bridged. Select your
+main network adapter. Under <code>Advanced</code>, select <code>Intel PRO 1000 T Server</code> as the
+<code>Adapter Type</code>.</p>
 
 <p>Bridging makes the VM become a real part of your network, other machines
 being able to access it. NAT would require port forwarding in VirtualBox which
@@ -281,7 +283,8 @@ is a bit cumbersome.</p>
 
 <p><img src="/s/inc/img/openvms-x86-part2-1.png" alt="network settings"></p>
 
-<p>After changing the network settings in VirtualBox, boot up the OpenVMS installation.</p>
+<p>After changing the network settings in VirtualBox, boot up the OpenVMS
+installation.</p>
 
 <p>Login to the system account and execute the following command:</p>
 
@@ -384,8 +387,9 @@ setup a static IP in my router (via DHCP). Output:</p>
 Configure IE0 as the DHCP PRIMARY? (Y,N,HELP) [Y]:
 </code></pre>
 
-<p>Press <code>ENTER</code> to accept the default of <code>Y</code>. Then press <code>E</code> to exit the <code>Interfaces</code>
-menu. You&#39;re back in the main menu. Press <code>3</code> to enter the <code>Routing</code> menu. <code>Output</code>:</p>
+<p>Press <code>ENTER</code> to accept the default of <code>Y</code>. Then press <code>E</code> to exit the
+<code>Interfaces</code> menu. You&#39;re back in the main menu. Press <code>3</code> to enter the
+<code>Routing</code> menu. <code>Output</code>:</p>
 
 <pre><code>DYNAMIC ROUTING Configuration
 
@@ -465,8 +469,9 @@ to enter the <code>BIND DNS Resolver</code> menu. Output:</p>
 Enter your BIND server name: 
 </code></pre>
 
-<p>I entered my router&#39;s IP address here, <code>192.168.1.1</code>. On the <code>next server</code> prompt,
-I left that empty and pressed <code>ENTER</code>. You&#39;re now back in the <code>Core</code> menu.</p>
+<p>I entered my router&#39;s IP address here, <code>192.168.1.1</code>. On the <code>next server</code>
+prompt, I left that empty and pressed <code>ENTER</code>. You&#39;re now back in the <code>Core</code>
+menu.</p>
 
 <p>Press <code>E</code> to go back to the main TCP/IP menu, then press <code>6</code> to start the 
 TCP/IP services. Bunch of output, but it should end with:</p>
@@ -476,12 +481,13 @@ TCP/IP services. Bunch of output, but it should end with:</p>
 Press &lt;ENTER&gt; key to continue ...
 </code></pre>
 
-<p><code>192.168.1.23</code> is the DHCP address. Press <code>ENTER</code>, then press <code>E</code> to exit this menu.</p>
+<p><code>192.168.1.23</code> is the DHCP address. Press <code>ENTER</code>, then press <code>E</code> to exit this
+menu.</p>
 
-<p>The last step is to enable auto start of the TCP/IP services, otherwise, after
-a reboot, you&#39;ll have no networking. Edit the following file: 
-<code>SYS$COMMON:[SYSMGR]SYSTARTUP_VMS.COM</code> and remove the exclamation point (<code>!</code>) 
-from the beginning of the following line:</p>
+<p>The last step is to enable auto start of the TCP/IP services, otherwise, after a
+reboot, you&#39;ll have no networking. Edit the following file: <code>SYS$COMMON:
+[SYSMGR]SYSTARTUP_VMS.COM</code> and remove the exclamation point (<code>!</code>) from the
+beginning of the following line:</p>
 
 <pre><code>$!$ @SYS$STARTUP:TCPIP$STARTUP.COM
 </code></pre>
@@ -732,11 +738,12 @@ OpenVMS E9.2-1  on node REMY1   15-APR-2023 21:49:57.38   Uptime  0 00:08:39
 00000404 LANACP          HIB     14       62   0 00:00:00.02       217    268
 </code></pre>
 
-<p>Via that working SSH session, edit the startup file and make sure OpenSSH
+<p>In the telnet terminal, edit the startup file and make sure OpenSSH
 is started at boot. The procedure is a lot like enabling TCP/IP.</p>
 
-<p>Edit the following file: <code>SYS$COMMON:[SYSMGR]SYSTARTUP_VMS.COM</code> and add the OpenSSH
-start commands after the TCP/IP startup commands, so below the following line:</p>
+<p>Edit the following file: <code>SYS$COMMON:[SYSMGR]SYSTARTUP_VMS.COM</code> and add the
+OpenSSH start commands after the TCP/IP startup commands, so below the
+following line:</p>
 
 <pre><code>@SYS$STARTUP:TCPIP$STARTUP.COM
 </code></pre>
@@ -764,19 +771,20 @@ SYS$COMMON:[SYSMGR]SYSTARTUP_VMS.COM;4 422 lines
 <p>Try a reboot and if you did everything correctly, SSH login should be possible
 right after a reboot.</p>
 
-<p>If you want to <a href="/s/blog/Multiple_passwords_for_one_user_UIC_uniqueness_and_the_system_password_on_OpenVMS.html">setup a different user</a> for SSH access or <a href="/s/blog/SSH_public_key_authentication_on_OpenVMS.html">login with a public 
-key</a>, please click those links. The instructions from 2018 should still work.</p>
+<p>If you want to <a href="/s/blog/Multiple_passwords_for_one_user_UIC_uniqueness_and_the_system_password_on_OpenVMS.html">setup a different user</a> for SSH access or <a href="/s/blog/SSH_public_key_authentication_on_OpenVMS.html">login with a
+public key</a>, please click those links. The instructions from 2018 should
+still work.</p>
 
 <h3 id="toc_6">Activating the rest of the licenses (PAKs)</h3>
 
-<p>Now that we have networking and OpenSSH set up, it&#39;s much easier to copy 
-the hobbyist license file over to our OpenVMS installation and execute it.</p>
+<p>Now that we have networking and OpenSSH set up, it&#39;s much easier to copy the
+hobbyist license file over to our OpenVMS installation and execute it.</p>
 
 <p>Make sure you&#39;ve got networking and OpenSSH setup, as described above. From
-another terminal or SCP client, copy over the <code>X86COMMUNITY20240401.TXT</code> license
-file:</p>
+another terminal or SCP client, copy over the <code>X86COMMUNITY20240401.TXT</code>
+license file:</p>
 
-<pre><code>$ scp X86Community-20240401.txt system@10.29.95.23:
+<pre><code>scp X86Community-20240401.txt system@10.29.95.23:
 system@10.29.95.23&#39;s password:
 X86Community-20240401.txt
 </code></pre>
@@ -793,18 +801,7 @@ X86Community-20240401.txt
 abled
 %LICENSE-W-NOENT, no license was loaded for this product - VSI ABS-CLIENT-X86
 %LICENSE-I-ENABLED, ABS-CLIENT-X86 EVAL-X86COMMUNITY-E202304019999 has been enab
-led
-%LICENSE-I-LOADED, VSI ABS-CLIENT-X86 was successfully loaded with 6 units
-%SHOW-I-NOLICMATCH, no licenses match search criteria
-%LICENSE-I-DISABLED, ABS-SERVER-X86 EVAL-X86COMMUNITY-E202304019999 has been dis
-abled
-%LICENSE-W-NOENT, no license was loaded for this product - VSI ABS-SERVER-X86
-%LICENSE-I-ENABLED, ABS-SERVER-X86 EVAL-X86COMMUNITY-E202304019999 has been enab
-led
-%LICENSE-I-LOADED, VSI ABS-SERVER-X86 was successfully loaded with 6 units
-%SHOW-I-NOLICMATCH, no licenses match search criteria
-%LICENSE-I-DISABLED, DVNETEXT EVAL-X86COMMUNITY-E202304019999 has been disabled
-%LICENSE-W-NOENT, no license was loaded for this product - VSI DVNETEXT
+[...]
 </code></pre>
 
 <p>That output continues on for a while. A few errors might appear, but afterwards

@@ -117,7 +117,6 @@ For PuTTY: Right-click on the window frame of your PuTTY session and select
 - TURN OFF Local Echo
 - TURN OFF Local line editing
 
-
 ### License installation / PAKs
 
 Boot up your OpenVMS virtual machine and log in using the `SYSTEM` account.
@@ -128,18 +127,18 @@ You should see the following:
     VMS Software, Inc. OpenVMS (TM) x86_64 Operating System, E9.2-1
     Last interactive login on Monday, 10-APR-2023 22:08:44.88
 
-The Community License file (`x86community-20240401.zip`) from [https://sp.vmssoftware.com][7]
-is a ZIP file containing a long text file. If you try to copy and paste it into
-the shell you will get an error:
+The Community License file (`x86community-20240401.zip`) from
+[https://sp.vmssoftware.com][7] is a ZIP file containing a long text file. If
+you try to copy and paste it into the shell you will get an error:
 
     $ $
     %RMS-F-RER, file read error
     -SYSTEM-W-DATAOVERUN, data overrun
 
-[Four years ago I made an ISO file][11] for the licenses. This time,
-we'll just manually activate the `OPENVMS-X86-BOE` license, which 
-is what we need to setup networking. Then we'll use OpenSSH to copy over
-the license file and execute that script. Much easier and less trouble.
+[Four years ago I made an ISO file][11] for the licenses. This time, we'll just
+manually activate the `OPENVMS-X86-BOE` license, which is what we need to setup
+networking. Then we'll use OpenSSH to copy over the license file and execute
+that script. Much easier and less trouble.
 
 Check the `txt` file and look for the line `OPENVMS-X86-BOE`. Copy the 
 commands, line by line (not the entire command, that will fail):
@@ -154,7 +153,8 @@ Press `ENTER`. Then paste:
 
     /AUTHORIZATION=...
     
-Repeat this for every line in the license (`PRODUCT, UNTIS, TERMINATION_DATE, OPTIONS, CHECKSUM`). 
+Repeat this for every line in the license (`PRODUCT, UNTIS, TERMINATION_DATE,
+OPTIONS, CHECKSUM`). 
 
 
 <!-- 
@@ -202,10 +202,11 @@ after network has been setup, we'll activate the full license file.
 
 ### Network setup
 
-The VM should be shut down to edit the VirtualBox settings. Execute the `SHUTDOWN`
-command to do that. Then, in VirtualBox, open the settings and navigate to network 
-and change the adapter from NAT to bridged. Select your main network adapter.
-Under `Advanced`, select `Intel PRO 1000 T Server` as the `Adapter Type`.
+The VM should be shut down to edit the VirtualBox settings. Execute the
+`SHUTDOWN` command to do that. Then, in VirtualBox, open the settings and
+navigate to network and change the adapter from NAT to bridged. Select your
+main network adapter. Under `Advanced`, select `Intel PRO 1000 T Server` as the
+`Adapter Type`.
 
 Bridging makes the VM become a real part of your network, other machines
 being able to access it. NAT would require port forwarding in VirtualBox which
@@ -213,8 +214,8 @@ is a bit cumbersome.
 
 ![network settings][8]
 
-After changing the network settings in VirtualBox, boot up the OpenVMS installation.
-
+After changing the network settings in VirtualBox, boot up the OpenVMS
+installation.
 
 Login to the system account and execute the following command:
 
@@ -318,8 +319,9 @@ setup a static IP in my router (via DHCP). Output:
     Configure IE0 as the DHCP PRIMARY? (Y,N,HELP) [Y]:
 
 
-Press `ENTER` to accept the default of `Y`. Then press `E` to exit the `Interfaces`
-menu. You're back in the main menu. Press `3` to enter the `Routing` menu. `Output`:
+Press `ENTER` to accept the default of `Y`. Then press `E` to exit the
+`Interfaces` menu. You're back in the main menu. Press `3` to enter the
+`Routing` menu. `Output`:
 
 
     DYNAMIC ROUTING Configuration
@@ -395,8 +397,9 @@ to enter the `BIND DNS Resolver` menu. Output:
 
     Enter your BIND server name: 
 
-I entered my router's IP address here, `192.168.1.1`. On the `next server` prompt,
-I left that empty and pressed `ENTER`. You're now back in the `Core` menu.
+I entered my router's IP address here, `192.168.1.1`. On the `next server`
+prompt, I left that empty and pressed `ENTER`. You're now back in the `Core`
+menu.
 
 Press `E` to go back to the main TCP/IP menu, then press `6` to start the 
 TCP/IP services. Bunch of output, but it should end with:
@@ -405,13 +408,14 @@ TCP/IP services. Bunch of output, but it should end with:
 
     Press <ENTER> key to continue ...
 
-`192.168.1.23` is the DHCP address. Press `ENTER`, then press `E` to exit this menu.
+`192.168.1.23` is the DHCP address. Press `ENTER`, then press `E` to exit this
+menu.
 
 
-The last step is to enable auto start of the TCP/IP services, otherwise, after
-a reboot, you'll have no networking. Edit the following file: 
-`SYS$COMMON:[SYSMGR]SYSTARTUP_VMS.COM` and remove the exclamation point (`!`) 
-from the beginning of the following line:
+The last step is to enable auto start of the TCP/IP services, otherwise, after a
+reboot, you'll have no networking. Edit the following file: `SYS$COMMON:
+[SYSMGR]SYSTARTUP_VMS.COM` and remove the exclamation point (`!`) from the
+beginning of the following line:
 
     $!$ @SYS$STARTUP:TCPIP$STARTUP.COM
 
@@ -653,11 +657,12 @@ To test OpenSSH, open another Linux terminal or PuTTY session and try to login:
 
 
 
-Via that working SSH session, edit the startup file and make sure OpenSSH
+In the telnet terminal, edit the startup file and make sure OpenSSH
 is started at boot. The procedure is a lot like enabling TCP/IP.
 
-Edit the following file: `SYS$COMMON:[SYSMGR]SYSTARTUP_VMS.COM` and add the OpenSSH
-start commands after the TCP/IP startup commands, so below the following line:
+Edit the following file: `SYS$COMMON:[SYSMGR]SYSTARTUP_VMS.COM` and add the
+OpenSSH start commands after the TCP/IP startup commands, so below the
+following line:
 
     @SYS$STARTUP:TCPIP$STARTUP.COM
 
@@ -681,49 +686,37 @@ Exit visual mode with `CTRL+Z`, then type `exit` to save the file:
 Try a reboot and if you did everything correctly, SSH login should be possible
 right after a reboot.
 
-If you want to [setup a different user][13] for SSH access or [login with a public 
-key][14], please click those links. The instructions from 2018 should still work.
+If you want to [setup a different user][13] for SSH access or [login with a
+public key][14], please click those links. The instructions from 2018 should
+still work.
 
 
 ### Activating the rest of the licenses (PAKs)
 
-Now that we have networking and OpenSSH set up, it's much easier to copy 
-the hobbyist license file over to our OpenVMS installation and execute it.
+Now that we have networking and OpenSSH set up, it's much easier to copy the
+hobbyist license file over to our OpenVMS installation and execute it.
 
 Make sure you've got networking and OpenSSH setup, as described above. From
-another terminal or SCP client, copy over the `X86COMMUNITY20240401.TXT` license
-file:
+another terminal or SCP client, copy over the `X86COMMUNITY20240401.TXT`
+license file:
 
-    $ scp X86Community-20240401.txt system@10.29.95.23:
+    scp X86Community-20240401.txt system@10.29.95.23:
     system@10.29.95.23's password:
     X86Community-20240401.txt
 
 
 In the OpenVMS prompt, execute the file we just copied over:
-
     
     @X86Community-20240401.txt
 
 Output:
-
 
     %SHOW-I-NOLICMATCH, no licenses match search criteria
     %LICENSE-I-DISABLED, ABS-CLIENT-X86 EVAL-X86COMMUNITY-E202304019999 has been dis
     abled
     %LICENSE-W-NOENT, no license was loaded for this product - VSI ABS-CLIENT-X86
     %LICENSE-I-ENABLED, ABS-CLIENT-X86 EVAL-X86COMMUNITY-E202304019999 has been enab
-    led
-    %LICENSE-I-LOADED, VSI ABS-CLIENT-X86 was successfully loaded with 6 units
-    %SHOW-I-NOLICMATCH, no licenses match search criteria
-    %LICENSE-I-DISABLED, ABS-SERVER-X86 EVAL-X86COMMUNITY-E202304019999 has been dis
-    abled
-    %LICENSE-W-NOENT, no license was loaded for this product - VSI ABS-SERVER-X86
-    %LICENSE-I-ENABLED, ABS-SERVER-X86 EVAL-X86COMMUNITY-E202304019999 has been enab
-    led
-    %LICENSE-I-LOADED, VSI ABS-SERVER-X86 was successfully loaded with 6 units
-    %SHOW-I-NOLICMATCH, no licenses match search criteria
-    %LICENSE-I-DISABLED, DVNETEXT EVAL-X86COMMUNITY-E202304019999 has been disabled
-    %LICENSE-W-NOENT, no license was loaded for this product - VSI DVNETEXT
+    [...]
 
 That output continues on for a while. A few errors might appear, but afterwards
 you should be able to see all the licenses activated:
