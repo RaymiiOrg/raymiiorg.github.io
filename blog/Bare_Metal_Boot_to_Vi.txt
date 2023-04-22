@@ -1,0 +1,279 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Bare Metal Vi, boot into Vi without an OS!
+Author      : 	Remy van Elst
+Date        : 	22-04-2023 22:30
+URL         : 	https://raymii.org/s/blog/Bare_Metal_Boot_to_Vi.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+
+This guide shows you how to run Vi without an operating system, bare metal. This is a follow up on my article from 2014 where I made a custom linux distro that would [Boot to Vim, VIM as PID 1](https://raymii.org/s/blog/Vim_as_PID_1_Boot_to_Vim.html). This time we go further, we boot into Vi without an operating system. This is made possible by Cosmopolitan, a libc that outputs a POSIX-approved polyglot format that runs natively on Linux + Mac + Windows + FreeBSD + OpenBSD + NetBSD + BIOS with the best possible performance and the tiniest footprint imaginable.
+
+Here is a screenshot of bare metal Vi:
+
+![bare metal vi][5]
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+
+The article [Vim as PID 1, Boot to Vim][1] recently hit the front page of
+HackerNews and [one of the commenters stated][3] the following:
+
+> I bet it wouldn't be too extremely hard to port Vim to [cosmopolitan][2] 
+ and run it without an OS (BIOS mode in cosmopolitan). ( etaioinshrdlu )
+
+Turns out, that's mostly possible. Not actual Vim, but a minimal Vi 
+clone compiles just fine and runs without any OS. 
+
+Super cool, blazingly fast startup time, the only thing it lacks is filesystem
+support, so you cannot save or load your files. But hey, who needs that?
+
+I'm compiling a small Vi clone, [viless][4], which is the BusyBox Vi clone but
+patched to run without BusyBox.
+
+### Compiling Vi with Cosmopolitan
+
+These instructions are based on the [instructions on the cosmopolitan source][2].
+I'm running them on a Debian 11 system, but Ubuntu should work too.
+
+Make sure you can compile C code and have `git`:
+
+    apt install build-essential git unzip
+
+
+Clone the `Vi` code:
+
+    git clone https://github.com/RaymiiOrg/viless
+
+Test if you can compile it:
+
+    cd viless
+    make
+
+You should have a runnable `vi` binary in the current folder. Try to run it:
+
+    ./vi
+
+Exit with `:q!`. If that all worked you can continue with the cosmopolitan part.
+
+Download the required files:
+
+     wget https://justine.lol/cosmopolitan/cosmopolitan-amalgamation-2.2.zip
+
+Unzip cosmopolitan:
+
+    unzip cosmopolitan-amalgamation-2.2.zip
+
+Compile `Vi` with the cosmopolitan runtime:
+
+    gcc -g -Os -static -nostdlib -nostdinc -fno-pie -no-pie -mno-red-zone \
+        -fno-omit-frame-pointer -pg -mnop-mcount -mno-tls-direct-seg-refs \
+        -gdwarf-4   \
+        -o vi.com.dbg \
+        vi.c \
+        -fuse-ld=bfd -Wl,-T,ape.lds -Wl,--gc-sections   \
+        -include cosmopolitan.h crt.o ape-no-modify-self.o cosmopolitan.a
+
+Use `objcopy` to make the actual binary you can run:
+
+    objcopy -S -O binary vi.com.dbg vi.com
+
+The file `vi.com` should be executable as well on your linux system, but also
+on all the platforms stated above. 
+
+### Run Vi in QEMU
+
+On the same Ubuntu machine, make sure you've installed `qemu`:
+
+    sudo apt install qemu-system-x86
+
+
+Then execute the following command to boot your freshly created `vi.com` disk(?):
+
+     qemu-system-x86_64 -m 16 -nographic -drive file=vi.com,format=raw,index=0,media=disk
+
+This will launch you into `Vi`. Exit with `CTRL+A, X` (to exit QEMU). If you
+want to have a separate window as I did in the screenshots, remove the `-nographic`
+option and in the window that pops up, select the `View` menu, then choose
+`serial0`.
+
+
+![bare metal vi][5]
+
+
+I currently only have [a Raspberry Pi 4][6] as my main desktop so I cannot
+try booting from a floppy or USB drive on real hardware. If you can, please
+let me know if it works. You will probably not see anything on the screen
+but on the serial port.
+
+The [vi.com][7] file I compiled is available [for download][7].
+
+
+
+### Patches for viless
+
+These are the changes I made to [viless][4] to make it compile with 
+Cosmopolitan:
+
+    
+    From 96aa85f886249ad7fd097a413c28ca4771c0326e Mon Sep 17 00:00:00 2001
+    From: Remy van Elst <RaymiiOrg@users.noreply.github.com>
+    Date: Sat, 22 Apr 2023 20:27:05 +0200
+    Subject: [PATCH] Patches for cosmopolitan
+
+    ---
+     vi.c | 60 ++----------------------------------------------------------
+     1 file changed, 2 insertions(+), 58 deletions(-)
+
+    diff --git a/vi.c b/vi.c
+    index 1d7f9ac..4e959fc 100644
+    --- a/vi.c
+    +++ b/vi.c
+    @@ -22,27 +22,14 @@
+      * A true "undo" facility
+      * An "ex" line oriented mode- maybe using "cmdedit"
+      */
+    + 
+    +#define STANDALONE
+     
+     #ifdef STANDALONE
+     #define BB_VER "version 2.62"
+     #define BB_BT "brent@mbari.org"
+     
+     #define _GNU_SOURCE
+    -#include <stdarg.h>
+    -#include <string.h>
+    -#include <stdio.h>
+    -#include <unistd.h>
+    -#include <stdlib.h>
+    -#include <setjmp.h>
+    -#include <sys/ioctl.h>
+    -#include <sys/types.h>
+    -#include <sys/stat.h>
+    -#include <fcntl.h>
+    -#include <signal.h>
+    -#include <errno.h>
+    -#include <ctype.h>
+    -#include <termios.h>
+    -#include <poll.h>
+     
+     #define vi_main            main
+     #define CONFIG_FEATURE_VI_MAX_LEN 4096
+    @@ -104,8 +91,6 @@ typedef signed char smallint;
+     
+     #endif
+     
+    -#include <limits.h>
+    -
+     /* the CRASHME code is unmaintained, and doesn't currently build */
+     #define ENABLE_FEATURE_VI_CRASHME 0
+     
+    @@ -509,22 +494,6 @@ void *xzalloc(size_t size)
+        return memset(xmalloc(size), 0, size);
+     }
+     
+    -void *xstrdup(const char *s)
+    -{
+    -   void *ptr = strdup(s);
+    -   if (ptr) return ptr;
+    -   perror("strdup");
+    -   exit(66);
+    -}
+    -
+    -void *xstrndup(const char *s, size_t n)
+    -{
+    -   void *ptr = strndup(s, n);
+    -   if (ptr) return ptr;
+    -   perror("strndup");
+    -   exit(67);
+    -}
+    -
+     void *xrealloc(void *old, size_t size)
+     {
+        void *ptr = realloc(old, size);
+    @@ -2475,31 +2444,6 @@ static int rawmode(void)
+        tcsetattr(0, TCSANOW, &term_vi);
+     
+        unsigned tics = 1;
+    -    switch (cfgetispeed(&term_vi)) {
+    -   case B600:
+    -       tics = 2;
+    -       break;
+    -   case B300:
+    -       tics = 4;
+    -       break;
+    -   case B200:
+    -       tics = 6;
+    -       break;
+    -   case B150:
+    -       tics = 7;
+    -       break;
+    -   case B134:
+    -       tics = 8;
+    -       break;
+    -   case B110:
+    -       tics = 10;
+    -       break;
+    -   case B75:
+    -       tics = 15;
+    -       break;
+    -   case B50:
+    -       tics = 21;
+    -   } //determines how long to wait for ESCAPE sequences
+        ticsPerChar = tics;
+        return 0;
+     }
+
+
+
+
+[1]: /s/blog/Vim_as_PID_1_Boot_to_Vim.html
+[2]: https://github.com/jart/cosmopolitan
+[3]: https://news.ycombinator.com/item?id=35664284
+[4]: https://github.com/RaymiiOrg/viless
+[5]: /s/inc/img/bare_metal_vi.png
+[6]: /s/blog/Using_IceWM_and_sharing_my_config_and_tips_tricks.html
+[7]: /s/inc/downloads/vi.com
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
