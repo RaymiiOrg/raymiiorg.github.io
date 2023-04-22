@@ -50,9 +50,9 @@
 </ul>
 
 </div><hr><div id="contents">
-<p>This guide shows you how to run Vi without an operating system, bare metal. This is a follow up on my article from 2014 where I made a custom linux distro that would <a href="https://raymii.org/s/blog/Vim_as_PID_1_Boot_to_Vim.html">Boot to Vim, VIM as PID 1</a>. This time we go further, we boot into Vi without an operating system. This is made possible by Cosmopolitan, a libc that outputs a POSIX-approved polyglot format that runs natively on Linux + Mac + Windows + FreeBSD + OpenBSD + NetBSD + BIOS with the best possible performance and the tiniest footprint imaginable.</p>
+<p>This guide shows you how to run <code>Vi</code> without an operating system, bare metal. This is a follow up on my article from 2014 where I made a custom linux distro that would <a href="https://raymii.org/s/blog/Vim_as_PID_1_Boot_to_Vim.html">Boot to Vim, VIM as PID 1</a>. This time we go further, we boot into <code>Vi</code> without an operating system. This is made possible by <a href="https://justine.lol/cosmopolitan/index.html">Cosmopolitan</a>, a <code>libc</code> that outputs a POSIX-approved polyglot format that runs natively on Linux + Mac + Windows + FreeBSD + OpenBSD + NetBSD + BIOS with the best possible performance and the tiniest footprint imaginable.</p>
 
-<p>Here is a screenshot of bare metal Vi:</p>
+<p>Here is a screenshot of bare metal <code>Vi</code>:</p>
 
 <p><img src="/s/inc/img/bare_metal_vi.png" alt="bare metal vi"></p>
 
@@ -63,17 +63,18 @@ HackerNews and <a href="https://news.ycombinator.com/item?id=35664284">one of th
 
 <blockquote>
 <p>I bet it wouldn&#39;t be too extremely hard to port Vim to <a href="https://github.com/jart/cosmopolitan">cosmopolitan</a> 
- and run it without an OS (BIOS mode in cosmopolitan). ( etaioinshrdlu )</p>
+ and run it without an OS (BIOS mode in cosmopolitan). (by <code>etaioinshrdlu</code> )</p>
 </blockquote>
 
 <p>Turns out, that&#39;s mostly possible. Not actual Vim, but a minimal Vi 
 clone compiles just fine and runs without any OS. </p>
 
-<p>Super cool, blazingly fast startup time, the only thing it lacks is filesystem
+<p>Super cool, fast startup time, the only thing it lacks is filesystem
 support, so you cannot save or load your files. But hey, who needs that?</p>
 
 <p>I&#39;m compiling a small Vi clone, <a href="https://github.com/RaymiiOrg/viless">viless</a>, which is the BusyBox Vi clone but
-patched to run without BusyBox.</p>
+patched to run without BusyBox, and a few patches by me to make it compile
+inside cosmopolitan.</p>
 
 <h3 id="toc_0">Compiling Vi with Cosmopolitan</h3>
 
@@ -96,7 +97,7 @@ I&#39;m running them on a Debian 11 system, but Ubuntu should work too.</p>
 make
 </code></pre>
 
-<p>You should have a runnable <code>vi</code> binary in the current folder. Try to run it:</p>
+<p>You should have an executable <code>vi</code> binary in the current folder. Try to run it:</p>
 
 <pre><code>./vi
 </code></pre>
@@ -129,8 +130,7 @@ make
 <pre><code>objcopy -S -O binary vi.com.dbg vi.com
 </code></pre>
 
-<p>The file <code>vi.com</code> should be executable as well on your linux system, but also
-on all the platforms stated above. </p>
+<p>The file <code>vi.com</code> should be executable on your linux system, but also on all the platforms stated above. </p>
 
 <h3 id="toc_1">Run Vi in QEMU</h3>
 
@@ -157,6 +157,9 @@ let me know if it works. You will probably not see anything on the screen
 but on the serial port.</p>
 
 <p>The <a href="/s/inc/downloads/vi.com">vi.com</a> file I compiled is available <a href="/s/inc/downloads/vi.com">for download</a>.</p>
+
+<p>You could try to compile the actual <code>Vim</code> and see if that works. If you do,
+please let me know about it!</p>
 
 <h3 id="toc_2">Patches for viless</h3>
 
@@ -271,7 +274,8 @@ index 1d7f9ac..4e959fc 100644
     return 0;
  }
 </code></pre>
-Tags: <a href="../tags/blog.html">blog</a>
+Tags: <a href="../tags/bare-metal.html">bare-metal</a>
+, <a href="../tags/blog.html">blog</a>
 , <a href="../tags/compile.html">compile</a>
 , <a href="../tags/cosmopolitan.html">cosmopolitan</a>
 , <a href="../tags/libc.html">libc</a>

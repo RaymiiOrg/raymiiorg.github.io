@@ -10,10 +10,9 @@ Format      : 	Markdown/HTML
 
 
 
+This guide shows you how to run `Vi` without an operating system, bare metal. This is a follow up on my article from 2014 where I made a custom linux distro that would [Boot to Vim, VIM as PID 1](https://raymii.org/s/blog/Vim_as_PID_1_Boot_to_Vim.html). This time we go further, we boot into `Vi` without an operating system. This is made possible by [Cosmopolitan](https://justine.lol/cosmopolitan/index.html), a `libc` that outputs a POSIX-approved polyglot format that runs natively on Linux + Mac + Windows + FreeBSD + OpenBSD + NetBSD + BIOS with the best possible performance and the tiniest footprint imaginable.
 
-This guide shows you how to run Vi without an operating system, bare metal. This is a follow up on my article from 2014 where I made a custom linux distro that would [Boot to Vim, VIM as PID 1](https://raymii.org/s/blog/Vim_as_PID_1_Boot_to_Vim.html). This time we go further, we boot into Vi without an operating system. This is made possible by Cosmopolitan, a libc that outputs a POSIX-approved polyglot format that runs natively on Linux + Mac + Windows + FreeBSD + OpenBSD + NetBSD + BIOS with the best possible performance and the tiniest footprint imaginable.
-
-Here is a screenshot of bare metal Vi:
+Here is a screenshot of bare metal `Vi`:
 
 ![bare metal vi][5]
 
@@ -26,16 +25,17 @@ The article [Vim as PID 1, Boot to Vim][1] recently hit the front page of
 HackerNews and [one of the commenters stated][3] the following:
 
 > I bet it wouldn't be too extremely hard to port Vim to [cosmopolitan][2] 
- and run it without an OS (BIOS mode in cosmopolitan). ( etaioinshrdlu )
+ and run it without an OS (BIOS mode in cosmopolitan). (by `etaioinshrdlu` )
 
 Turns out, that's mostly possible. Not actual Vim, but a minimal Vi 
 clone compiles just fine and runs without any OS. 
 
-Super cool, blazingly fast startup time, the only thing it lacks is filesystem
+Super cool, fast startup time, the only thing it lacks is filesystem
 support, so you cannot save or load your files. But hey, who needs that?
 
 I'm compiling a small Vi clone, [viless][4], which is the BusyBox Vi clone but
-patched to run without BusyBox.
+patched to run without BusyBox, and a few patches by me to make it compile
+inside cosmopolitan.
 
 ### Compiling Vi with Cosmopolitan
 
@@ -56,7 +56,7 @@ Test if you can compile it:
     cd viless
     make
 
-You should have a runnable `vi` binary in the current folder. Try to run it:
+You should have an executable `vi` binary in the current folder. Try to run it:
 
     ./vi
 
@@ -84,8 +84,7 @@ Use `objcopy` to make the actual binary you can run:
 
     objcopy -S -O binary vi.com.dbg vi.com
 
-The file `vi.com` should be executable as well on your linux system, but also
-on all the platforms stated above. 
+The file `vi.com` should be executable on your linux system, but also on all the platforms stated above. 
 
 ### Run Vi in QEMU
 
@@ -114,6 +113,8 @@ but on the serial port.
 
 The [vi.com][7] file I compiled is available [for download][7].
 
+You could try to compile the actual `Vim` and see if that works. If you do,
+please let me know about it!
 
 
 ### Patches for viless
