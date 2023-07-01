@@ -1,0 +1,288 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Automating Openstack with cloud init run a script on VM's first boot
+Author      : 	Remy van Elst
+Date        : 	11-03-2015
+URL         : 	https://raymii.org/s/tutorials/Automating_Openstack_with_Cloud_init_run_a_script_on_VMs_first_boot.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![openstack][1]
+
+This tutorial will show you how to create a VM in Openstack and execute a script
+at the first boot using `cloud-init`'s `user-data` feature. This way you can
+eliminate some more manual labor and keep a small base image, instead of
+requiring all kinds of specific images for specific tasks.
+
+This tutorial will also give you a few example scripts to use with `cloud-init`
+and to create Openstack virtual machines from the command line.
+
+You can see all my [Openstack related articles here][2]. For example, how to
+build [an automated High Available website cluster with Ansible and
+Openstack][3].
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+For this tutorial I've used the [CloudVPS Openstack platform][5]. It will also
+work with any other openstack or cloud provider/software that supports `cloud-
+init` and the specific `user_data` feature. If you build your own images then
+make sure they have `cloud-init` enabled to support this.
+
+Note that this article is not sponsored nor endorsed by CloudVPS, nor am I
+speaking for or as CloudVPS.
+
+### cloud-init
+
+Instead of manually creating a VM, logging in to it and executing a few commands
+to set it up, you can automate all these steps. The creation of the VM and the
+stuff you do when it is up can all be scripted. You can use a programming
+language like Python to do this, but simple Bash scripts also work just as well.
+
+cloud-init is a piece of software created to help with initializing virtual
+machines on multiple different cloud software platforms. It is a collection of
+Python scripts that run on a VM's first boot.
+
+It understands and talks to different data providers like Amazons or the
+Openstack metadata service.
+
+It uses that information to, for example, set a root password, grow the root
+filesystem, setup an SSH key, do a callback to an URL when a VM is finished
+booting or execute commands at boot. All those things and many more are provided
+by so called cloud-init modules. Therefor it can be extended easily.
+
+The metadata provided by the cloud provided can contain things like the VM's
+name, its IP addres(es), a root password or an SSH key. You can also provide
+your own metadata using the so called `user_data`.
+
+`cloud-init` has a nifty feature that allows us to place a script in the
+`user_data` which it will execute at the end of the first boot of the machine.
+It can be a bash script, or any other script as long as it starts with `#!`.
+
+This tutorial was tested with `cloud-init` versions 0.7.4 up to 0.7.7. The
+`/etc/cloud/cloud.cfg` config file needs the following enabled:
+
+    
+    
+    cloud_final_modules:
+      - scripts-user
+    
+
+### Providing user_data to a new VM in Openstack
+
+To provide the `user_data` script to a new VM you need to place your `user_data`
+script in a file, in this example `user_data.file`. See below for an example
+script
+
+Make sure you have the [Openstack Command Line Tools][6] installed. For
+convinience, also create a `computerc` file which holds your credentials and
+`source` it in your shell.
+
+The parameter to supply the user data is `--user-data $filename`. To boot up a
+small Ubuntu machine at CloudVPS with our `user_data` file we can use this
+command:
+
+    
+    
+    nova boot --image "CloudVPS Ubuntu 14.04"  --key-name $ssh_key --flavor "Standard 1" --availability-zone NL1 --user-data user_data.file "Example VPS 1"
+    
+
+If you have the console of the machine open (`nova get-vnc-console $UUID novnc`)
+then you should see your script executed at the end of the cloud-init run at
+boot.
+
+### Example user_data cloud-init script
+
+This is an example bash script you can push via the `user_data`. It gives you a
+generic idea of what can be done. You could install and setup your configuration
+management framework like Puppet or Chef, or just use plain commands. This
+example uses Ansible to deploy the imaginary Example App for your company at
+first boot:
+
+    
+    
+    #!/bin/bash
+    # Example script to run at first boot via Openstack
+    # using the user_data and cloud-init.
+    # This example installs Ansible and deploys your 
+    # org's example App.
+    
+    echo "userdata running on hostname: $(uname -n)"
+    echo "Using pip to install Ansible"
+    pip2 install --upgrade ansible 2>&1
+    
+    echo "Cloning repo with example code"
+    git clone https://gitlab.mycompany.org/ansible/example-app.git /tmp/app
+    
+    pushd /tmp/app
+    ansible-playbook ./our-app.yml
+    popd
+    exit 0
+    
+
+You can also use Python, Ruby or any of your favorite language. As long as the
+`user_data` starts with `#!` cloud-init will see it as a script and not as
+specific cloud-init modules. You do need to make sure that your base image has
+the interpreter installed (Python, Ruby etc.) or bootstrap that via the script.
+
+Here is another script that installs Wordpress on CentOS, including nginx, php-
+fpm and mysql:
+
+    
+    
+    #!/bin/bash
+    # Example script to run at first boot via Openstack using the user_data and cloud-init. This example installs Wordpress, nginx, MySQL and PHP-FPM.
+    # Author: Remy van Elst, https://raymii.org; License: GNU GPLv3
+    
+    printf "\033c" #clear screen
+    VERSION="$(grep -Eo "[0-9]\.[0-9]" /etc/redhat-release | cut -d . -f 1)"
+    
+    echo "Installing EPEL"
+    rpm -Uvh http://cdn.duplicity.so/utils/epel-release-${VERSION}.noarch.rpm 2>&1
+    
+    echo "Installing Ansible and Git"
+    yum -y install ansible git gmp 2>&1
+    
+    echo "Cloning repo with Wordpress Playbook"
+    git clone https://github.com/RaymiiOrg/ansible-examples.git /tmp/app 2>&1
+    
+    echo "Creating Ansible inventory file"
+    echo -e "[wordpress-server]\n127.0.0.1" > /tmp/app/wordpress-nginx/inventory
+    
+    echo "Starting playbook"
+    cd /tmp/app/wordpress-nginx
+    ansible-playbook -i inventory ./site.yml 2>&1
+    
+    exit 0
+    
+
+The repository was forked from Ansible's example repo and changed so that the
+`site.yml` playbook includes the `connection: local` line. That way we don't use
+SSH to run the playbook. It also randomly generates the database password
+instead of using a variable.
+
+### Re-execute or debugging
+
+The script only runs at first boot of the machine via `cloud-init`. If you
+execute the `cloud-init` command again it will not execute the script because it
+already did it. Testing and debugging the script can be quite intensive if you
+need to boot up a machine every time.
+
+We can however fool `cloud-init` by letting it think the machine did a fresh
+first boot. We need to remove the following two files:
+
+    
+    
+    /var/lib/cloud/instances/$UUID/boot-finished
+    /var/lib/cloud/instances/$UUID/sem/config_scripts_user
+    
+
+Replace `$UUID` by your instance's UUID.
+
+Execute the following command to run the cloud-init final module again:
+
+    
+    
+    cloud-init modules --mode final
+    
+
+The `final` module will execute our `user_data` script again. Before every new
+test run you need to remove the two files listed above.
+
+Keep in mind as well that if you for example touch a file and run the script
+again, the file will still be there. Changes are persistent, build your code
+idempotent so that it handles that.
+
+If you've by accident deleted to much cloud-init data you can re-initialize it
+with the following command:
+
+    
+    
+    cloud-init init
+    
+
+### Command Line script to create VM's
+
+Here is an example script you can use to create an amount of VM's using the
+command line. It will wait until the VM is active before creating the next one,
+and it passes through a `user_data` file. You can use this, for example, to
+easily start up 20 servers and set them up as Apache webservers to scale up when
+your site gets a lot of traffic and needs to scale up.
+
+You do need to place a credentials file named `computerc` in your home folder.
+
+    
+    
+    #!/bin/bash
+    KEY="SSH Key Name"
+    BOOTIMG="IMAGE UUID"
+    ZONE="NL1"
+    FLAVOR="Standard 1"
+    
+    source ~/computerc 
+    
+    for RUN in {1..20}; do
+        echo "Creating VM ${RUN}""
+        VMUUID=$(nova boot \
+            --image "${BOOTIMG}" \
+            --flavor "${FLAVOR}" \
+            --availability-zone "${ZONE}" \
+            --nic net-id=00000000-0000-0000-0000-000000000000 \
+            --key-name "${KEY}" \
+            --user-data user_data.file \
+            "VPS-${RUN}-${ZONE}" | awk '/id/ {print $4}' | head -n 1);
+    
+        until [[ "$(nova show ${VMUUID} | awk '/status/ {print $4}')" == "ACTIVE" ]]; do
+            :
+        done
+    
+        echo "VM ${RUN} (${VMUUID}) is active."
+    
+    done
+    
+
+   [1]: https://raymii.org/s/inc/img/openstack-software-diagram.png
+   [2]: https://raymii.org/s/tags/openstack.html
+   [3]: https://raymii.org/s/articles/Building_HA_Clusters_With_Ansible_and_Openstack.html
+   [4]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [5]: https://cloudvps.com
+   [6]: http://docs.openstack.org/user-guide/content/install_clients.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

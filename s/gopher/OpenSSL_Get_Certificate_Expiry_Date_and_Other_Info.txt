@@ -1,0 +1,165 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	OpenSSL one liner to get expiry date from SSL Certificate of any website
+Author      : 	Remy van Elst
+Date        : 	23-01-2013
+URL         : 	https://raymii.org/s/snippets/OpenSSL_Get_Certificate_Expiry_Date_and_Other_Info.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Remember to have the `openssl` package installed. Replace `$IPADRES` with either
+the website or the IP address of the site:
+
+    
+    
+    echo "" | openssl s_client -connect $IPADRES:443 > certexp.crt; openssl x509 -in certexp.crt -noout -enddate
+    
+
+For example, this website:
+
+    
+    
+    echo "" | openssl s_client -connect raymii.org:443 > certexp.crt; openssl x509 -in certexp.crt -noout -enddate
+    
+    depth=2 C = SE, O = AddTrust AB, OU = AddTrust External TTP Network, CN = AddTrust External CA Root
+    verify error:num=19:self signed certificate in certificate chain
+    verify return:0
+    DONE
+    notAfter=Jun 25 23:59:59 2014 GMT
+    
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+By replacing the last parameter `-enddate` with `-text` you get the full
+certificate output. If you use `-subject` you can get the common name.
+
+Example of the `-text` parameter:
+
+    
+    
+    echo "" | openssl s_client -connect raymii.org:443 > certexp.crt; openssl x509 -in certexp.crt -noout -text
+    
+    depth=2 C = SE, O = AddTrust AB, OU = AddTrust External TTP Network, CN = AddTrust External CA Root
+    verify error:num=19:self signed certificate in certificate chain
+    verify return:0
+    DONE
+    Certificate:
+        Data:
+            Version: 3 (0x2)
+            Serial Number:
+                c1:a3:d8:d0:0d:72:fc:e4:83:cd:84:75:9e:9e:c0:bc
+        Signature Algorithm: sha1WithRSAEncryption
+            Issuer: C=GB, ST=Greater Manchester, L=Salford, O=COMODO CA Limited, CN=PositiveSSL CA 2
+            Validity
+                Not Before: Jun 25 00:00:00 2012 GMT
+                Not After : Jun 25 23:59:59 2014 GMT
+            Subject: OU=Domain Control Validated, OU=PositiveSSL, CN=raymii.org
+            Subject Public Key Info:
+                Public Key Algorithm: rsaEncryption
+                    Public-Key: (2048 bit)
+                    Modulus:
+                        00:d7:41:68:85:49:df:a6:43:d7:f4:14:c7:4f:a0:
+                        c9:3e:9e:15:05:9b:a5:19:0c:82:c0:54:92:ae:8b:
+                        d3:e2:c3:fc:a7:e0:19:0b:64:25:87:09:2f:9a:06:
+                        03:a1:e8:44:e1:db:7e:05:b9:41:54:6d:58:ab:a5:
+                        57:48:02:47:1d:6a:fd:dc:72:2b:f8:87:15:4b:27:
+                        86:63:5c:44:7c:93:36:f9:92:4c:d1:8d:13:42:66:
+                        f0:78:2f:76:a5:ce:5b:74:af:40:09:43:e3:6b:1a:
+                        cc:3d:d8:0c:46:4e:d0:5e:8d:fc:f9:63:fb:14:11:
+                        a8:28:cb:d3:4d:b9:71:e8:b3:34:1f:9a:fb:4c:ba:
+                        a3:47:7e:b7:f1:94:15:1c:24:08:65:ab:3b:0f:c8:
+                        8f:38:f4:76:e7:8f:07:83:cf:fc:f1:7e:3f:57:f3:
+                        89:08:b1:6d:12:f7:dd:d1:eb:2d:84:9e:7c:b1:a1:
+                        01:0a:b6:a0:44:d1:60:e1:ca:9f:f2:96:5b:cb:e6:
+                        08:d7:57:fa:c9:d4:3f:56:68:d6:c9:aa:9d:8e:14:
+                        a6:fe:0c:9e:5b:bf:b8:b8:3a:75:a7:56:1c:58:74:
+                        cb:9c:b4:6b:64:c1:20:4b:ee:a1:39:f9:ab:63:a7:
+                        42:97:34:35:2c:60:7d:a3:4b:89:84:ec:05:52:e7:
+                        f4:db
+                    Exponent: 65537 (0x10001)
+            X509v3 extensions:
+                X509v3 Authority Key Identifier: 
+                    keyid:99:E4:40:5F:6B:14:5E:3E:05:D9:DD:D3:63:54:FC:62:B8:F7:00:AC
+    
+                X509v3 Subject Key Identifier: 
+                    3A:4B:29:3E:64:BA:04:06:43:D8:6C:60:CD:69:D3:F7:9E:8E:8B:4F
+                X509v3 Key Usage: critical
+                    Digital Signature, Key Encipherment
+                X509v3 Basic Constraints: critical
+                    CA:FALSE
+                X509v3 Extended Key Usage: 
+                    TLS Web Server Authentication, TLS Web Client Authentication
+                X509v3 Certificate Policies: 
+                    Policy: 1.3.6.1.4.1.6449.1.2.2.7
+                      CPS: http://www.positivessl.com/CPS
+    
+                X509v3 CRL Distribution Points: 
+    
+                    Full Name:
+                      URI:http://crl.comodoca.com/PositiveSSLCA2.crl
+    
+                Authority Information Access: 
+                    CA Issuers - URI:http://crt.comodoca.com/PositiveSSLCA2.crt
+                    OCSP - URI:http://ocsp.comodoca.com
+    
+                X509v3 Subject Alternative Name: 
+                    DNS:raymii.org, DNS:www.raymii.org
+        Signature Algorithm: sha1WithRSAEncryption
+             4c:07:d8:6b:d1:f5:1c:65:0a:dd:47:a4:13:ba:72:ee:ff:e2:
+             f9:42:1c:0b:e1:a2:42:dd:d5:60:52:c5:0f:69:03:16:4d:e9:
+             53:d6:65:a4:29:75:82:c3:62:1a:25:1c:a0:62:d3:1e:8b:f0:
+             cb:ae:11:8f:42:8c:c5:01:6e:80:bf:b3:c9:fc:f3:0f:b3:2e:
+             44:3a:b1:6d:d3:c6:ae:c9:d3:45:31:96:da:89:df:9b:83:2b:
+             40:8e:56:38:2e:bd:0d:b2:b1:c1:51:8a:b1:c6:90:f9:7e:37:
+             10:60:13:3a:fa:0f:5c:9e:6f:aa:4b:29:42:7f:96:87:f4:08:
+             8a:58:96:8c:57:01:6c:c0:0e:61:64:d0:46:7f:44:31:bf:2c:
+             17:28:73:39:ef:d7:9b:6a:32:35:94:56:fa:8d:68:6d:be:02:
+             16:4e:e0:70:1b:09:ff:f3:86:0e:62:81:89:03:0e:e5:18:88:
+             8a:f6:98:eb:05:07:83:2b:cf:33:e8:2e:43:43:7d:7f:20:de:
+             77:42:fd:39:a8:b6:e1:fb:e8:1c:bc:fc:24:ad:eb:c6:01:22:
+             fe:7e:2d:49:76:f8:8f:64:a1:4b:90:7b:d6:82:69:f5:7c:83:
+             3b:c0:d1:e5:ae:d0:0f:7a:ac:8c:9a:22:bb:05:fc:34:8b:d7:
+             a7:31:54:00
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

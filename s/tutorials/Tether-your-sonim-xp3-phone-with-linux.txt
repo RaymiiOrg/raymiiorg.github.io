@@ -1,0 +1,164 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Tether your Sonim XP3 phone with Linux
+Author      : 	Remy van Elst
+Date        : 	08-02-2011
+URL         : 	https://raymii.org/s/tutorials/Tether-your-sonim-xp3-phone-with-linux.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This guide works for the Sonim XP3.20 Quest (Pro).  
+I also have an Android Phone which had an option to share the Internet
+Connection via USB and/or Wifi.  
+This was one of the features I missed on the Sonim. The phone itself is awesome,
+but that is not in the scope of this guide.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+It is also tested with the newer Sonim XP1300 Core. Please note that some
+providers not allow you to tether your phones internet connection, and this may
+cost you a lot of money if you go over your monthly bundle. Also you need to
+have internet setup on your phone already. This guide was written and tested on
+**Arch Linux with Kernel 2.6.36-ARCH** , but I think it will be usable on more
+distributions.  
+First install wvdial:
+
+    
+    
+    pacman -S wvdial
+    
+
+Then plugin you Sonim and see on which tty it is detected:
+
+    
+    
+    dmesg | grep tty 
+    
+
+You need to see something like this:
+
+    
+    
+    cdc_acm 5-1:1.1: ttyACM0: USB ACM device
+    usbcore: registered new interface driver cdc_acm
+    cdc_acm: v0.26:USB Abstract Control Model driver for USB modems and ISDN adapters
+    scsi 8:0:0:0: Direct-Access     Philips  Dev. 0 LUN 0     1.0  PQ: 0 ANSI: 0 
+    
+
+Now we have the tty (/dev/ttyACM0). This is all we need for the wvdial.conf
+file:
+
+    
+    
+    sudo nano /etc/wvdial.conf 
+    
+
+Paste this in there:
+
+    
+    
+    [Dialer Defaults]
+    Modem = /dev/ttyACM0
+    Modem Type = Analog Modem
+    ISDN = 0
+    Baud = 115200
+    Username = tmobile
+    Password = tmobile
+    Init1 = ATZ
+    Init2 = AT&&F E1 V1 X1 &&D2 &&C1 S0=0
+    Dial Attempts = 1
+    
+    [Dialer internet]
+    Phone = *99***1#
+    Stupid Mode = 1
+    Init3 = AT+CGDCONT=1,"IP","internet" 
+    
+
+My provider is T-Mobile NL, and their APN is "internet", with login "tmobile"
+and password: "tmobile".
+
+Change any of these values to your needs, look for them on your providers
+website. Now save with CTRL+O and quit with CTRL+X, and see if it works:
+
+    
+    
+    sudo wvdial internet 
+    
+
+Result:
+
+    
+    
+    [remy@solaris3 ~]$ sudo wvdial internet
+    --> WvDial: Internet dialer version 1.61
+    --> Cannot get information for serial port.
+    --> Initializing modem.
+    --> Sending: ATZ
+    ATZ
+    OK
+    --> Sending: AT&&F E1 V1 X1 &&D2 &&C1 S0=0
+    AT&&F E1 V1 X1 &&D2 &&C1 S0=0
+    OK
+    --> Sending: AT+CGDCONT=1,"IP","internet"
+    AT+CGDCONT=1,"IP","internet"
+    OK
+    --> Modem initialized.
+    --> Sending: ATDT*99***1#
+    --> Waiting for carrier.
+    ATDT*99***1#
+    CONNECT
+    ~[7f]}#@!}!}!} }2}"}&&} }*} } }#}$@#}'}"}(}"U[03]~
+    --> Carrier detected.  Starting PPP immediately.
+    --> Starting pppd at Thu Jan 13 23:20:32 2012
+    --> Pid of pppd: 14319
+    --> Using interface ppp0
+    --> local  IP address 21.98.132.87
+    --> remote IP address 10.32.32.32
+    --> primary   DNS address 8.8.8.8
+    --> secondary DNS address 8.8.4.4 
+    
+
+Bazinga! You can now surf via your Sonim phone via your 3g / 2g / egde or GSM
+connection. (Check via /sbin/ifconfig).
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

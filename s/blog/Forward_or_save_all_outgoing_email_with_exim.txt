@@ -1,0 +1,150 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Forward or save outgoing email with Exim
+Author      : 	Remy van Elst
+Date        : 	16-12-2015
+URL         : 	https://raymii.org/s/blog/Forward_or_save_all_outgoing_email_with_exim.html
+Format      : 	Markdown/HTML
+---
+
+
+
+I have a specific server where requirements state that all outgoing email should
+be saved for archival and auditing purposes. The server uses the Exim mail
+transfer agent, which makes this easy to configure. The outgoing email is also
+forwarded to an off-site mailbox, both for backup and easy consulting. This
+captures all outgoing email, sent by PHP scripts or cronjobs, or user accounts
+that send via exim. This tutorial also shows how to forward or save all outgoing
+email for a specific domain.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Exim configuration
+
+There are two things that need to be configured. The system filter and the
+specific transport. If you only want to forward emails and not save them to the
+filesystem, the transport section is not needed.
+
+Edit your exim configuration and add these lines at the top:
+
+    
+    
+    # /etc/exim.conf top
+    system_filter = /etc/system_filter.exim
+    system_filter_directory_transport = local_copy_outgoing
+    
+
+Add these lines lower in the configuration, in your transports section:
+
+    
+    
+    # /etc/exim.conf transpors section
+    local_copy_outgoing:
+      driver = appendfile
+      delivery_date_add
+      envelope_to_add
+      return_path_add
+      group = mail
+      user = mail
+      mode = 0660
+      maildir_format = true
+      create_directory = true
+    
+
+Change the `mail` user to the specific user account on your system exim runs at.
+It could be named `exim`. You can check that with the `getent passwd` command.
+
+To configure the actual saving and filtering create or edit the
+`/etc/system_filter.exim` file. The below snippets should be placed in that
+file, according to what you're trying to acomplish.
+
+To save all outgoing mail from a specific domain to a maildir folder in
+`/var/mail/`:
+
+    
+    
+    if $sender_address_domain is example.tld
+    then
+    unseen save /var/mail/example.tld/mailarchive/.${tr{$sender_address}{.}{_}}.outgoing/
+    endif
+    
+
+Forward all outgoing from specific domain to specific email address:
+
+    
+    
+    if $sender_address_domain is example.tld
+    then
+    unseen deliver othermailbox@otherdomain.com
+    endif
+    
+
+Forward ALL outgoing mail to email address:
+
+    
+    
+    unseen deliver othermailbox@otherdomain.com
+    
+
+Save ALL outgoing email to maildir folder:
+
+    
+    
+    unseen save /var/mail/${tr{$sender_address_domain}{.}{_}}/mailarchive/${tr{$sender_address}{.}{_}}.outgoing/
+    
+
+The files are saved in a maildir structure:
+
+    
+    
+    ls -la /var/mail/example.tld/mailarchive/example\@example.tld.outgoing/new/
+    total 16
+    -rw-rw---- 1 mail mail 1632 Dec 15 20:31 1450207897.H829447P10443.example.tld
+    drwx------ 5 mail mail 4096 Dec 15 20:31 ..
+    -rw-rw---- 1 mail mail 1747 Dec 15 20:33 1450207983.H51962P10484.example.tld
+    drwx------ 2 mail mail 4096 Dec 15 20:33 .
+    
+
+You can check the [exim documentation][2] for more variables you can use in this
+filter document.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: http://www.exim.org/exim-html-3.30/doc/html/filter_34.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

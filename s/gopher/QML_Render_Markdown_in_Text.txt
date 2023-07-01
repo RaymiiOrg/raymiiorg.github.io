@@ -1,0 +1,175 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Render markdown in a Qt QML Text or TextEdit control
+Author      : 	Remy van Elst
+Date        : 	04-10-2021
+URL         : 	https://raymii.org/s/snippets/QML_Render_Markdown_in_Text.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![qml markdown][2]
+
+> Screenshot of Markdown being rendered by Qt
+
+
+I recently discovered that Qt QML can render Markdown in `Text{}` controls. 
+This snippet shows you how to do that including a screenshot and demo QML app.
+
+Qt 5.14 [added support][1] for markdown in `Text` and `TextEdit` controls:
+
+- Added support for the Markdown format (including CommonMark and GitHub
+  dialects) to Text and TextEdit as an alternative to HTML. This includes the
+  GitHub checklist extension, allowing to toggle checkboxes in a TextEdit.
+
+The `textFormat` property was already able to render basic HTML but since 5.14 you can
+specify `textFormat: TextEdit.Markdowntext` to render markdown:
+
+    TextEdit.MarkdownText: CommonMark plus the GitHub extensions for tables
+    and task lists (since 5.14)
+
+I heavily use markdown so this is a joy for me to use compared to HTML for
+simple formatting. 
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Here is a full QML example of both a `Text` and a `TextEdit`. Note that the `TextEdit` does not parse markdown
+as you write, it just formats the text you have set as markdown.
+
+    import QtQuick 2.15
+    import QtQuick.Window 2.15
+
+    Window {
+        width: 820
+        height: 480
+        visible: true
+        title: qsTr("Qt Markdown Example by Raymii.org")
+
+        QtObject{
+            id: markdown
+            // not having tabs or spaces is important, otherwise
+            // the markdown will not render.
+            property string text: "*Italic*    **Bold**
+
+    # Heading 1
+
+    ## Heading 2
+
+    [Link to raymii.org](https://raymii.org)
+
+
+    > quote
+
+    * List
+    * List
+
+    1. list 2
+    1. list 2
+
+    ```
+    Code()->example
+    ```
+
+    First Header | Second Header
+    ------------ | -------------
+    Content from cell 1 | Content from cell 2
+    Content in the first column | Content in the second column
+
+        "}
+
+        Text {
+            id: textedittext
+            text: "QML TextEdit{}:"
+            anchors.top: parent.top
+            anchors.left: parent.left
+        }
+
+        Rectangle {
+            id: textedit
+            anchors.top: textedittext.bottom
+            anchors.left: parent.left
+            anchors.topMargin: 20
+            anchors.leftMargin: 5
+            width: 400
+            height: 400
+            border.color: "lime"
+
+            TextEdit{
+                anchors.fill: parent
+                textMargin: 5
+                textFormat: TextEdit.MarkdownText
+                text: markdown.text
+                wrapMode: Text.Wrap
+            }
+        }
+
+        Text {
+            id: texttext
+            text: "QML Text{}:"
+            anchors.top: parent.top
+            anchors.left: textedit.right
+        }
+
+        Rectangle {
+            id: text
+            anchors.top: texttext.bottom
+            anchors.left: textedit.right
+            anchors.topMargin: 20
+            anchors.leftMargin: 5
+            width: 400
+            height: 400
+            border.color: "teal"
+
+
+            Text{
+                anchors.fill: parent
+                textFormat: TextEdit.MarkdownText
+                text: markdown.text
+                fontSizeMode: Text.Fit
+                wrapMode: Text.WordWrap
+            }
+        }
+    }
+
+
+[1]: http://web.archive.org/web/20210930201411/https://doc.qt.io/qt-5/whatsnew514.html
+[2]: /s/inc/img/qt-markdown.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

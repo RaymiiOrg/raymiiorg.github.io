@@ -1,0 +1,161 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Exciting OpenVMS Alpha Emulation news, es40 has been forked to Axpbox (and works!)
+Author      : 	Remy van Elst
+Date        : 	28-10-2020
+URL         : 	https://raymii.org/s/blog/Exciting_OpenVMS_Alpha_emulation_news_es40_has_been_forked_to_axpbox.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![openvms logo][15]
+
+Back in 2018 I was playing around with OpenVMS a lot, as it continues on the 
+legacy of the PDP-8 and PDP-11. [OpenVMS 7.3 on the VAX emulated via SIMH][1]
+runs perfectly, [OpenVMS 8.4 for Alpha was kind of a disaster][2], or, the [es40 
+emulator][7] was. Real hardware is available via IslandCo, but shipping to the
+Netherlands is horribly expensive.
+
+The only options back then for emulation of Alpha were FreeAXP
+or AlphaVM, both paid, closed sourced products with watered down free versions.
+Nothing wrong with that, it enables us to play around, and now that OpenVMS
+is in the hands of [VMS Software][3] with an x86 port coming along we may
+hope for a bright future ahead for OpenVMS. VSI currently provides a 
+[hobbyist version][4], but it's a FreeAXP bundle for Windows only. 
+
+Recently I got an email from [Tom&aacute;&scaron;][5] 
+regarding his fork of the es40 emulator, [axpbox][6]. This short post
+is intended to give this emulator more visibility and exposure, since
+I find this to be amazingly cool and exciting. It lists the bugs fixed
+and new features, which allow OpenVMS 8.3 and 8.4 to install perfectly.
+
+You can view the [README here][6] and there is an [OpenVMS Installation Guide here][9].
+Go download and try it quickly, it's now using cmake, way easier to compile, includes a 
+configuration helper and most importantly, the installation of OpenVMS now 
+at least works without major errors. Really cool, amazing work by Tomas. 
+
+> [You can read all my OpenVMS articles here][8]
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+I intend to get back into experimenting with Axpbox and write a few more 
+articles on it, including an compilation and installation guide and 
+maybe even some clustering if I get around to it.
+
+Here's a screenshot of axpbox running OpenVMS 8.4 right after installing:
+
+![axpbox yay][11]
+
+and here is me trying to [Mount an ISO with my (expired) hobbyist license][13]:
+
+![axpbox license][12]
+
+The [Expired OpenVMS License PAK][14] is not an issue, since we can just set 
+the system date to back when it was still valid. For our hobbyist use I think
+that's fine, especially due to the uncertainty regarding the hobbyist program.
+
+To set the system time, use this command: `SET TIME=17-OCT-2018:13:00:00`.
+
+If you are going to install OpenVMS 8.4, do note that it can take quite a long
+time. In my case, over 2 hours, but my test hardware is a few years old and
+the emulator got one core and 256MB RAM.
+
+Tom&aacute;&scaron; gave permission to quote the email verbatim below.
+
+### Verbatim email quoted
+
+Hi Remy!
+
+I saw your article on the sad state of Alpha emulators for OpenVMS
+some time ago and decided to have a look at es40, thinking it can't be
+that bad. After looking at it for a while I decided to fork it and
+improve it, the result of which you can see here:
+
+[https://github.com/lenticularis39/axpbox][6]
+
+As of the problems you describe in your article (and the previous one):
+
+- I used a patched version by the YouTube Stephen's Machine Room as
+the base instead of the original version
+- I changed the build system from autotools to CMake to get rid of
+problems with configuring
+- I fixed several double free bugs, getting rid of the segmentation
+faults (at least those I know of)
+- Most importantly I fixed the semaphore error preventing OpenVMS
+installation with an IDE controller, making OpenVMS installation much
+easier (it was actually possible before, but one had to use the buggy
+SCSI controller and hope it won't fail during the installation)
+
+There are of course still many problems with the program (see [Issues
+in the repo][10]), to name a few:
+
+- slow serial, probably due to the serial thread sleeping for 20 ms
+every cycle
+- occasional access violations/memory errors
+- incomplete IDE emulation (this makes the OpenBSD installation crash
+the emulator, however it shouldn't have any impact on OpenVMS).
+
+So if you want to try running OpenVMS Alpha in an emulator on Linux
+again, you can try my fork. I also plan to continue working on it, so
+its state will probably improve in the future. (I'm only a computer
+science student without much knowledge about Alpha, so my potential
+improvements are limited.)
+
+[Tom&aacute;&scaron;][5] 
+
+
+
+[1]: /s/blog/OpenVMS_7.3_install_log_with_simh_vax_on_Ubuntu_16.04.html
+[2]: /s/blog/The_sad_state_of_Alpha_emulators_for_OpenVMS.html
+[3]: https://vmssoftware.com/
+[4]: https://vmssoftware.com/services/community-license/
+[5]: https://github.com/lenticularis39
+[6]: https://github.com/lenticularis39/axpbox
+[7]: /s/blog/Installing_the_es40_AlphaServer_emulator_0.18_on_Ubuntu_16.04_and_trying_to_install_openVMS_8.4_on_es40.html
+[8]: /s/tags/openvms.html
+[9]: https://github.com/lenticularis39/axpbox/wiki/OpenVMS-installation-guide
+[10]: https://github.com/lenticularis39/axpbox/issues
+[11]: /s/inc/img/axpbox1.png
+[12]: /s/inc/img/axpbox2.png
+[13]: /s/blog/OpenVMS_Mount_ISO_and_execute_scripts.html
+[14]: /s/inc/downloads/openvms-HP-hobbyist-pak.txt
+[15]: /s/inc/img/Vms-arrow-logo.jpg
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

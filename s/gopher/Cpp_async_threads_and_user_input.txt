@@ -1,0 +1,282 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	C++ async, threads and user input
+Author      : 	Remy van Elst
+Date        : 	24-04-2020
+URL         : 	https://raymii.org/s/articles/Cpp_async_threads_and_user_input.html
+Format      : 	Markdown/HTML
+---
+
+
+
+For an unrelated piece of code, I recently spent a few days trying to figure 
+out if there was a portable, modern C++ way to handle user input with a 
+timeout. If there is no input after a few seconds the program can continue
+doing other things. TL;DR, there is none, since `stdin` is blocking I/O. 
+
+`alarm`, `conio.h`, using `ncurses` or manually polling `stdin` are all way
+to complex for the scope of the program. I ended up with using two `std::threads`,
+one for input and one for the "other things". I did play with `std::future` and
+`std::async` since that way is easier to just 'wait until this is done' as 
+opposed to manually managing 'actual big boy' threads. 
+
+This article has example code that uses `std::async` in an attempt to wait until
+the user has given some input and otherwise quit after 5 seconds. It does not
+work since `std::getline` is blocking. The `main()` function ends, but the
+`async` function is still waiting for user input.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+At the end of the article I'll also provide the code I ended up using, with the 
+two threads, one for input and one for 'other work'.
+
+### The async code
+
+Below is a single `test.cpp` file. It is not my actual program, but a simplified
+version to show 
+
+    #include <iostream>
+    #include <string>
+    #include <future>
+    #include <chrono>
+      
+    std::string getString()
+    {
+      std::cout << "# getString() start\n";
+      std::cout << "# getString(): Please enter a string. You have 5 seconds...\n";
+      std::string input;
+      std::getline(std::cin, input);
+      std::cout << "# getString() end\n";
+      return input;
+    }
+     
+    int main()
+    {
+      std::cout << "# main() start\n";
+      std::cout << "# main(): Starting std::async(getString)\n";
+   
+      std::future<std::string> futureString = std::async(std::launch::async, getString);
+
+      std::cout << "# main(): Waiting 5 seconds for input...\n";
+
+      std::chrono::system_clock::time_point five_seconds_passed
+              = std::chrono::system_clock::now() + std::chrono::seconds(5);
+      std::future_status status = futureString.wait_until(five_seconds_passed);
+
+      if (status == std::future_status::ready)
+      {
+          auto  result = futureString.get();
+          std::cout << "# main(): Input result: " << result << "\n";
+      }
+      else
+      {
+          std::cout << "# main(): Timeout reached... \n";
+      }
+
+      std::cout << "# main() end" << std::endl;
+      return 0;
+    }
+
+Make sure you pass `-pthread` while compiling. In CMake:
+
+    find_package(Threads REQUIRED)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread" )
+
+### The result
+
+The below gif shows the program when input is given within five seconds:
+
+![input][1]
+
+Textual output:
+
+    # main() start
+    # main(): Starting std::async(getString)
+    # main(): Waiting 5 seconds for input...
+    # getString() start
+    # getString(): Please enter a string. You have 5 seconds...
+        ===== RETURN PRESSED ON KEYBOARD =====
+    # getString() end
+    # main(): Input result: 
+    # main() end
+
+    Process finished with exit code 0
+
+The below gif shows the program when input is not given on time (within 5 sec):
+
+![no input][2]
+
+Textual output:
+
+    # main() start
+    # main(): Starting std::async(getString)
+    # getString() start
+    # getString(): Please enter a string. You have 5 seconds...
+    # main(): Waiting 5 seconds for input...
+    # main(): Timeout reached... 
+    # main() end
+       ===== RETURN PRESSED ON KEYBOARD =====
+    # getString() end
+
+    Process finished with exit code 0
+
+
+As you can see, the `async` thread will stay running until the user has given
+some input, then the program ends. The timeout we want is sort of available,
+the main function does continue. But, stopping the user input thread does not 
+happen. This, again, is because the `getline()` call is blocking. The thread
+will stop after the call is complete. I did try other tricks such as putting
+the terminal in nonblocking mode or manually polling with `poll()`, but those 
+all were not portable (windows/linux) or involved `memcpy` and more `C` like code
+than I like, as opposed to modern C++.
+
+
+### Conclusion and alternative solution
+
+I didn't get to my goal of having user input with a timeout. For the program,
+it turns out that a solution with two threads, one for input and one for 'other 
+work' was a better choice. There is no timeout on the user input, whenever input
+is received it is handled and signaled to the main thread. Here below is a 
+simplified version with a thread that is 'doing work' and one that handles
+input. If there is specific input, it does a thing and quits.
+
+Here is a GIF that shows the program:
+
+![thread][3]
+
+Textual output:
+
+    Please enter a command: 
+    # (3 seconds pass)
+    I'm doing other work... 
+    # (3 seconds pass)
+    I'm doing other work...
+    # user input is given:
+    magic
+    The answer to life, the universe and everything!
+
+Below is the file, single file again as above:
+
+    #include <iostream>
+    #include <memory>
+    #include <string>
+    #include <thread>
+    #include <mutex>
+    #include <chrono>
+    #include <atomic>
+
+    class Example {
+        std::atomic<bool> running;
+        std::atomic<bool> renderedText;
+        std::mutex inputMutex;
+        std::mutex otherThingsMutex;
+        std::thread otherThread;
+        std::thread inputThread;
+
+        void renderText() {
+            if(!renderedText) {
+                renderedText = true;
+                std::cout << "Please enter a command: " << std::endl;
+            }
+        }
+
+        static void doSomethingWithInput(const std::string& input) {
+            if (input == "magic")
+                std::cout << "The answer to life, the universe and everything!" << std::endl;
+        }
+
+    public:
+        Example() : running(true), renderedText(false),
+                    otherThread(&Example::otherThings, this),
+                    inputThread(&Example::input, this)
+        {
+        }
+
+        ~Example() {
+            inputThread.join();
+            otherThread.join();
+        }
+
+        inline void quit() {
+            running = false;
+        }
+
+        void handleInput() {
+            std::string input;
+            std::getline(std::cin, input);
+            doSomethingWithInput(input);
+            quit();
+        }
+
+        static void doOtherTask() {
+            std::cout << "I'm doing other work..." << std::endl;
+            std::this_thread::sleep_for(std::chrono::seconds(3));
+        }
+
+        void input() {
+            while (running) {
+                std::lock_guard<std::mutex> locker(inputMutex);
+                handleInput();
+            }
+        }
+
+        void otherThings() {
+            while (running) {
+                std::lock_guard<std::mutex> locker(otherThingsMutex);
+                renderText();
+                doOtherTask();
+            }
+        }
+    };
+
+    int main() {
+        std::unique_ptr<Example> test = std::make_unique<Example>();
+        return 0;
+    }
+
+
+
+
+[1]: /s/inc/img/cpp-timeout-withinput.gif
+[2]: /s/inc/img/cpp-timeout-without-input.gif
+[3]: /s/inc/img/cpp-timeout-thread.gif
+
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

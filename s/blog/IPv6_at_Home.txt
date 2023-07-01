@@ -1,0 +1,376 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	IPv6 at Home
+Author      : 	Remy van Elst
+Date        : 	03-05-2014
+URL         : 	https://raymii.org/s/blog/IPv6_at_Home.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![ipv6-ready][1]
+
+For a long time most of my VPS are IPv6 enabled. Raymii.org is reachable over
+IPv6. I've not had IPv6 at home yet, over my residential DSL line. And as you
+know, providers are not that fast with rolling out IPv6 at home. A friend
+pointed me to SixXS, which provide IPv6 tunnels. I had looked at them in the
+past, only then you needed to have a static IP for the tunnel. These days you
+don't need that anymore. Read on to find out how my IPv6 setup works, including
+privacy extensions and a few annoyances with Arch Linux and Ubuntu.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### The Tunnel
+
+The tunnel is provided by [SixXS][3]. It is an [AYIYA][4] tunnel, AYIYA is a
+protocol for managing IP tunneling protocols in use between separated IP
+networks. It is most often used to provide IPv6 transit over an IPv4 network
+link when network address translation masquerades a private network with a
+single IP address that may change frequently because of DHCP provisioning by
+Internet service providers.
+
+Which basically means that you can use it to easily set up an IPv6 tunnel which
+works over a NATted LAN and thus you don't need a static IP anymore. As example,
+even at Starbucks I can set up my IPv6 tunnel without any hassle.
+
+At SixXS you need to register and request a tunnel. You will need to provide
+some information, which will be validated, so make sure it is correct. Then you
+also need to provide a reason for your tunnel. Mine was just a simple one, I
+want to experiment at home with IPv6. They find that a valid reason, so in two
+days I had my tunnel data.
+
+### Tunnel setup
+
+My DSL provider modem does not support IPv6 sadly, so I've spun up a Virtual
+Machine which will do the routing for IPv6. It is an Ubuntu 12.04 server machine
+on KVM. OpenVZ wo'nt work because of the advanced networking involved. It also
+will work on a Raspberry Pi with Raspbian, for those who do not want or have a
+(VM) server running all the time.
+
+You will need all your SixXS data, as in, your account, tunnel and subnet.
+
+First install [AICCU][5]. It stands for: Automatic IPv6 Connectivity Client
+Utility. It is a tool to automatically configure IPv6 connectivity on a variety
+of platforms and it provides AYIYA and heartbeat protocol support.
+
+    
+    
+    apt-get install aiccu
+    
+
+During the installation you will be asked for your SixXS username and password.
+These are the ones you use to login to the SixXS website.
+
+If you only have one tunnel and subnet, it will all be set up automagically. I
+don't have multiple tunnels yet, but I expect it will require more
+configuration.
+
+I had to change one line in the aiccu config file to make it work.
+
+    
+    
+    vim /etc/aiccu.conf
+    
+
+Change the following from false to true and make sure it is not commented out:
+
+    
+    
+    behindnat true
+    
+
+Now we can start the aiccu daemon:
+
+    
+    
+    /etc/init.d/aiccu start
+    
+
+If you type the `ip a` command you should now see a new SixXS interface:
+
+    
+    
+    8: sixxs: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1280 qdisc pfifo_fast state UNKNOWN qlen 500
+        link/none 
+        inet6 2001:[...]998::2/64 scope global 
+           valid_lft forever preferred_lft forever
+    
+
+We can test it some more by accessing [Google over IPv6][6]:
+    
+    
+    curl -g [2a00:1450:4013:c00::64]
+    
+
+The `-g` option is needed otherwise you will get either an `curl: (3) [globbing]
+error: bad range specification after pos 2` or an `curl: (3) IPv6 numerical
+address used in URL without brackets` error. See bug #30 on the [Curl known bugs
+page][7]
+
+Response:
+
+    
+    
+    <HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">
+    <TITLE>302 Moved</TITLE></HEAD><BODY>
+    <H1>302 Moved</H1>
+    The document has moved
+    <A HREF="http://www.google.com/">here</A>.
+    </BODY></HTML>
+    
+
+### The routing
+
+The router needs to be able to forward IPv6 packets, so let's enable that. Edit
+`/etc/sysctl.conf`:
+
+    
+    
+    vim /etc/sysctl.conf
+    
+
+Add or uncomment the following:
+
+    
+    
+    net.ipv6.conf.all.forwarding=1
+    
+
+Apply the rule:
+
+    
+    
+    sysctl -p
+    
+
+To give other machines an IPv6 address we need to install `radvd` and `dhcpv6`.
+Radvd will be used to provide addresses via [SLAAC][8] and dhcpv6 will provide
+compatibility and DNS addresses.
+
+    
+    
+    apt-get install wide-dhcpv6-server radvd
+    
+
+Configure Radvd via `/etc/radvd.conf`:
+
+    
+    
+    vim /etc/radvd.conf
+    
+
+This is the config I use:
+
+    
+    
+    interface eth0 {
+          AdvSendAdvert on ;
+          # Advertise at least every 30 seconds
+          MaxRtrAdvInterval 30;
+          # in order to force non RFC 6106 compliant clients to get a dns address
+          AdvOtherConfigFlag on ;
+          prefix $YOURSUBNET$/64 {
+            AdvOnLink on;
+            AdvAutonomous on;
+          };
+          RDNSS 2001:14b8:0:3401::6 2001:1418:10:2::2 {
+          };
+    };
+    
+
+Replace `$YOURSUBNET$` with one of the subnets you gave from SixXS. The `RDNSS`
+option uses the europian DNS from SixXS. You can find other DNS cache servers
+[here][8].
+
+Now configure DHCPv6:
+
+    
+    
+    vim /etc/wide-dhcpv6/dhcp6s.conf
+    
+
+It has only the following line, to provide DNS:
+
+    
+    
+    option domain-name-servers 2001:14b8:0:3401::6 2001:1418:10:2::2;
+    
+
+Here again you should use the SixXS DNS cache servers in your region.
+
+Restart them both:
+
+    
+    
+    /etc/init.d/radvd restart
+    /etc/init.d/wide-dhcpv6-server restart
+    
+
+### Privacy extensions
+
+The global address is used in IPv6 to communicate with the outside world. This
+is thus the one that is used as source for any communication and thus in a way
+identify you on Internet. The global address is built by using the prefix and
+adding an identifier build with the hardware address.
+
+For example, the hardware address is 00:22:15:64:42:bd and the global IPv6
+address is ending with 22:15ff:fe64:42bd. It is thus easy to go from the IPv6
+global address to the hardware address. To fix this issue and increase the
+privacy of network user, privacy extensions have been developed.
+
+You can read the RFC [here][9], it describes how to build and use temporary
+addresses that will be used as source address for connection to the outside
+world. The [wikipedia][10] page describes it a bit more.
+
+The option is documented in the [ip-sysctl.txt][11] file:
+
+    
+    
+    use_tempaddr - INTEGER
+        Preference for Privacy Extensions (RFC3041).
+          <= 0 : disable Privacy Extensions
+          == 1 : enable Privacy Extensions, but prefer public
+                 addresses over temporary addresses.
+          >  1 : enable Privacy Extensions and prefer temporary
+                 addresses over public addresses.
+        Default:  0 (for most devices)
+                 -1 (for point-to-point devices and loopback devices)
+    
+
+We can enable the privacy extensions on the Ubuntu/Debian router VM by defining
+it in /etc/sysctl.conf.
+
+Edit `/etc/sysctl.conf`:
+
+    
+    
+    vim /etc/sysctl.conf
+    
+
+Add the following line
+
+    
+    
+    net.ipv6.conf.all.use_tempaddr=2
+    
+
+Apply it:
+
+    
+    
+    sysctl -p
+    
+
+We also need to restart the network:
+
+    
+    
+    /etc/init.d/networking restart
+    
+
+Using `ip a` you should now see a new address. It will expire after a while and
+a new one will be added. The default expiry time is one day. It can be changed
+with the following sysctl variable:
+
+    
+    
+    net.ipv6.conf.eth0.temp_prefered_lft=7200
+    
+
+Where 7200 is the value in minutes. Change `eth0` to your network interface.
+
+Don't set it to low, for me at 3600 I got errors like these:
+
+    
+    
+    ipv6_create_tempaddr(): retry temporary address regeneration.
+    ipv6_create_tempaddr(): regeneration time exceeded. disabled temporary
+    address support.
+    
+
+There are however some [bugs][12] [in][13] [the ipv6][14] [stack][15], so it
+might now all work as expected. For example, most of my laptops use Arch Linux
+with NetworkManager. Arch linux does not use `/etc/sysctl.conf` but uses
+`/etc/sysctl.d/00-files`. Therefore there is no `/etc/sysctl.conf` file.
+Networkmanager has hardcoded that it looks in `/etc/sysctl.conf` for the privacy
+extention setting. So that didn't work. You can set in in the config file for
+your network, for example, `/etc/NetworkManager/system-connections/name`:
+
+    
+    
+    [ipv6] method=auto ip6-privacy=2
+    
+
+However, for me that didn't work until I created the `/etc/sysctl.conf` file
+with the privacy setting. I needed some more settings to make it all work on
+Arch:
+
+    
+    
+    #cat /etc/sysctl.d/40-ipv6.conf 
+    net.ipv6.conf.all.use_tempaddr = 2
+    net.ipv6.conf.all.router_solicitation_delay=3
+    net.ipv6.conf.all.force_tllao=1
+    net.ipv6.conf.all.accept_dad=0
+    net.ipv6.conf.default.use_tempaddr = 2
+    
+
+### Testing it
+
+You should get an IPv6 address now. You can use sites like
+<http://ipv6-test.com/> or by connecting to [http://ipv6.google.com][6].
+
+   [1]: https://raymii.org/s/inc/img/ipv6-ready.png
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://www.sixxs.net/
+   [4]: http://en.wikipedia.org/wiki/Anything_In_Anything
+   [5]: https://www.sixxs.net/tools/aiccu/
+   [6]: httpL//ipv6.google.com
+   [7]: http://curl.haxx.se/docs/knownbugs.html
+   [8]: https://www.sixxs.net/tools/dnscache/
+   [9]: https://tools.ietf.org/html/rfc4941
+   [10]: http://en.wikipedia.org/wiki/IPv6
+   [11]: http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=blob;f=Documentation/networking/ip-sysctl.txt;hb=HEAD
+   [12]: http://www.void.gr/kargig/blog/2013/02/23/linux-kernel-handling-of-ipv6-temporary-addresses-cve-2013-0343/
+   [13]: http://ipv6-or-no-ipv6.blogspot.nl/2013/02/ipv6-duplicate-address-in-linux.html
+   [14]: http://madduck.net/docs/ipv6/
+   [15]: https://bugzilla.redhat.com/show_bug.cgi?id=591630
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

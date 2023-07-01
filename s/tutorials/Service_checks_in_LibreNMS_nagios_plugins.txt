@@ -1,0 +1,328 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Service checks in LibreNMS (http, all other Nagios plugins)
+Author      : 	Remy van Elst
+Date        : 	10-09-2018
+URL         : 	https://raymii.org/s/tutorials/Service_checks_in_LibreNMS_nagios_plugins.html
+Format      : 	Markdown/HTML
+---
+
+
+
+LibreNMS is becoming one of my favorite monitoring tools. Setup and getting
+started is easy and it has enough advanced options and tunables. I recently
+discovered that LibreNMS is able to check services as well. Services, in this
+context, means, executing Nagios plugins (like check _http, check_ ping, etc).
+This allows you to check services that SNMP does not cover by default, like
+HTTP(s) health checks, certificate expiry, tcp port checks (e.g. rdp) and
+anything for which you can write a Nagios plugin yourself. The performance data,
+if available, is graphed automatically. Alerting is done with the regular
+LibreNMS alerts. This guide covers the setup of services (it's not enabled by
+default) and a few basic checks, like an http health check, certificate expiry
+and SSH monitoring.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+You need a LibreNMS server for this guide to work. The project provides
+excellent documentation. To get started, get a [Digital Ocean VPS][1] and follow
+the [official guide for Ubuntu][2].
+
+### Nagios check plugins
+
+For those unfamiliar with Nagios, it is a monitoring system which can execute
+checks. These checks are scripts and progams which take input (for example,
+which host to check, tresholds), do a check and then return an exit code and
+some performance data. The plugins can be in any language, Nagios only cares
+about the exit codes. They can be the following:
+
+  * 0: OK
+  * 1: WARNING
+  * 2: CRITICAL
+  * 3: OK
+  * 4 and up: UNKNOWN
+
+For example, to check if a website is working, you would use the `check_http`
+plugin. This plugin checks if the site returns a `200 OK` and if so, gives exit
+status `0`. If not, for example because of a timeout, access denied or `50x
+error`, it will return status `1` or `2`. Nagios then can do all kinds of
+alerting based on those statusses.
+
+Performance data is comma seperated value data added after the status output in
+the command result. This can be anything, for example, the time the HTTP request
+took.
+
+Since you can write these scripts yourself any monitoring system that uses these
+plugins is very extensible. It can check anything you want as long as you can
+write a script for it. This makes the monitoring tool very powerfull, you're not
+limited to what they provide.
+
+To read more about monitoring, [you can read one of my other articles][3].
+
+### Enabling service checks
+
+Service checks are not enabled by default in LibreNMS. [The documentation][4]
+explains how to enable the module. In this guide I asume your path is
+`/opt/librenms/`. Edit your config file:
+
+    
+    
+    vim /opt/librenms/config.php
+    
+
+Add the following line:
+
+    
+    
+    $config['show_services']           = 1;
+    
+
+Save the file.
+
+Edit the LibreNMS cronjob to include service checks:
+
+    
+    
+    vim /etc/cron.d/librenms
+    
+
+Add:
+
+    
+    
+    */5  *    * * *   librenms    /opt/librenms/services-wrapper.py 1
+    
+
+Make sure the Nagios plugins are installed:
+
+    
+    
+    apt-get install nagios-plugins nagios-plugins-extra
+    
+
+Do a test to see if the plugins work:
+
+    
+    
+    /usr/lib/nagios/plugins/check_http -H raymii.org -S -p 443 
+    
+
+Example output:
+
+    
+    
+    HTTP OK: HTTP/1.1 200 OK - 1320 bytes in 0.199 second response time |time=0.198748s;;;0.000000 size=1320B;;;0   
+    
+
+#### Adding a (dummy) host
+
+You must have a host in LibreNMS to be able to add service checks. Normally you
+would use `snmp` to monitor devices, but if you just want to do simple (HTTP)
+checks without SNMP you can add a host without SNMP or TCP checks. Via
+`Devices`, `Add Device` you can enter an URL/IP. Uncheck the SNMP checkbox and
+check the `Force add` button:
+
+![][5]
+
+If this device does not accept ICMP (ping) traffic, you can disable that as
+well. Go to the device, select the Cog menu, Edit, "Misc" tab, then check
+"Disable ICMP Test?":
+
+![][6]
+
+If you do want to use SNMP, here is a quick guide for Ubuntu. First install
+`snmpd`:
+
+    
+    
+    apt-get install snmpd
+    
+
+Edit the configuration. Remove everything and add the following:
+
+    
+    
+    agentAddress udp:161
+    
+    createUser <username> SHA "<password>" AES "<password2>" 
+    
+    view systemonly included .1.3.6.1.2.1.1
+    view systemonly included .1.3.6.1.2.1.25.1
+    
+    rwuser <username>
+    
+    sysLocation <location>
+    sysContact  <your name and email>
+    
+    includeAllDisks 10%
+    
+    defaultMonitors         yes
+    linkUpDownNotifications yes
+    
+
+Change `username` and `password` to a long and secure name and password (8
+characters minimum). Restart snmpd:
+
+    
+    
+    service snmpd restart
+    
+
+**Add a rule in your firewall to only allow access to UDP port 161 from your
+monitoring service and deny all other traffic.**
+
+You can now add this machine in LibreNMS using SNMPv3 and the authentication
+data you provided.
+
+### Configuring services in LibreNMS
+
+In LibreNMS you should now have a new tab button in the top menu, named
+"Services":
+
+![][7]
+
+Make sure you added a host as described above. You can navigate to a host and
+click the "Services" tab, then click "Add service". In the top menu bar you can
+also click "Services", "Add Service". You then have to select the host as well.
+
+The `type` is the nagios plugin you want to use. In our case, `http` (the
+`check_` part is not shown).
+
+Enter a meaningfull description. For example, "HTTP Check
+https://example.org/path/to/data".
+
+The IP address can be the hostname or the IP. It is recommended to make this the
+same as the host the services are coupled to.
+
+The "Parameters" are the Nagios check command parameters, from the shell. In the
+case of an HTTP check for one of the servers hosting raymii.org it would be:
+
+    
+    
+    -E -I 80.211.96.38 -S -p 443 -u "/s/index.html"
+    
+
+  * `IP Address`: raymii.org
+  * `-E`: extended performance data
+  * `-I 80.211.96.38`: the specifc IP address (optional, I have multiple A records)
+  * `-S`: use SSL
+  * `-p 443`: use port 443
+  * `-u "/s/index.html"`: the URL to request. (optional)
+
+![][8]
+
+All parameters can be found on the [monitoring-plugins][9] website. You can test
+on the shell first before you add the check to LibreNMS.
+
+Save the dialog box and wait a few minutes for the check to run.
+
+An SSH check is even simpler, just select `SSH` as the type and add the check.
+Here is an example of a Cisco switch where SSH is checked:
+
+![][10]
+
+A certificate check, to get an alert when a certificate is about to expire, can
+also be done. The `type` is `http` and the parameters are:
+
+    
+    
+    --sni -S -p 443 -C 30
+    
+
+It will check if the certificate expires within 30 days.
+
+#### Alerting
+
+There is a default alert rule in LibreNMS named `Service up/down`:
+
+    
+    
+    services.service_status != 0 AND macros.device_up = 1
+    
+
+If you want to differentiate between WARNING and CRITICAL Nagios alerts, you can
+create two rules:
+
+    
+    
+    # warning
+    services.service_status = 1 AND macros.device_up = 1
+    
+    
+    # critical
+    services.service_status = 2 AND macros.device_up = 1
+    
+
+### Limits
+
+Specific alerting and rechecking when a check fails is not as configurable in
+Icinga or Nagios. The check will run, and alert you on a failure. Icinga/Nagios
+allow you to configure escalation paths and advanced re-checking. For example,
+when a check fails, recheck it 4 times with an interval of X seconds (instead of
+the regular check interval) and only alert if it still fails.
+
+In Icinga you can define (service or host) groups and apply service checks to
+these groups. LibreNMS doesn't allow this, so you cannot define a check and
+apply it to a group. If you need to check 100 servers, it means defining 100
+checks by hand per server.
+
+### Examples
+
+Here is an example of services that are down:
+
+![][11]
+
+Here is an example of a dummy host (no ICMP or SNMP) with a HTTP check and
+alerting enabled:
+
+![][12]
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: http://web.archive.org/web/20180910120958/https://docs.librenms.org/#Installation/Installation-Ubuntu-1804-Nginx/
+   [3]: https://raymii.org/s/articles/Essential_Monitoring_checks.html
+   [4]: http://web.archive.org/web/20180910121438/https://github.com/librenms/librenms/blob/master/doc/Extensions/Services.md
+   [5]: https://raymii.org/s/inc/img/librenms_svc_2.png
+   [6]: https://raymii.org/s/inc/img/librenms_svc_3.png
+   [7]: https://raymii.org/s/inc/img/librenms_svc_1.png
+   [8]: https://raymii.org/s/inc/img/librenms_svc_6.png
+   [9]: https://www.monitoring-plugins.org/doc/man/check_http.html
+   [10]: https://raymii.org/s/inc/img/librenms_svc_7.png
+   [11]: https://raymii.org/s/inc/img/librenms_svc_5.png
+   [12]: https://raymii.org/s/inc/img/librenms_svc_4.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

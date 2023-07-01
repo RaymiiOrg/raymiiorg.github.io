@@ -1,0 +1,141 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Restrict SSH
+Author      : 	Remy van Elst
+Date        : 	20-01-2013
+URL         : 	https://raymii.org/s/software/Restrict_SSH.html
+Format      : 	Markdown/HTML
+---
+
+
+
+restrict _ssh.sh is a bash script which restricts ssh for a user to a set of
+(flexible) commands via .ssh/authorized_ keys, and log it verbosely.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Purpose
+
+I have a web application which needs to do some things over ssh on a server. It
+runs as a separate user, and this script allows me to restrict the commands it
+can execute as well. It however does allow regexes so filenames can be passed.
+It also logs the commands and session info.
+
+### Installation / Usage
+
+Download the script from github, or clone the repository.
+
+Put this script in the users home directory, or a directory which is accessible
+by that user.
+
+Edit the `allowed_commands` array:
+
+    
+    
+    declare -a allowed_commands=('^ls -[l|d|a]$' 'ls -la' 'w' 'uptime' 'pwd' 'uname -a') 
+    
+
+Make sure that there are no comma's (`,`) between the options, otherwise it will
+fail.
+
+Make it executable for that user: `chown user:usergroup
+/home/user/restrict_ssh.sh` and/or `chmod +x /home/user/restrict_ssh.sh`.
+
+Modify the users `~/.ssh/authorized_keys` file, and before the ssh key(s) put
+the line `command="/home/user/restrict_ssh.sh"` before the key. Like so:
+
+    
+    
+    command="/home/remy/restrict_ssh.sh" ssh-rsa AAAAB[...]X9t remy@macbookpro.raymii.nl
+    
+
+Optional: Disable password login for that user, edit `/etc/ssh/sshd_config` and
+add the following:
+
+    
+    
+    Match User remy
+        PasswordAuthentication no
+    
+
+This will disable password logins only for user `remy`.
+
+### Regexing / Safety
+
+The default setup has a regex command allowed. It is the `ls` command, and the
+regex allows either `ls -l`, `ls -d` or `ls -a`. If you know basic Perl style
+regexes you can be very creative with this, for example `^ping -c 4
+[a-zA-Z0-9]{2,20}.(com|org|net)$` allows the command ping to be executed for any
+2 to 20 character .com, .net or .org domain. domain and nothing else.
+
+_BE CAREFUL WITH THIS. IF YOU CONFIGURE IT WRONG USER MAY BE ABLE TO GET A SHELL
+(vim, :!bash) OR OVERWRITE THE .ssh/authorized_ keys FILE. IF YOU ARE NOT SURE,
+THEN DO NOT USE IT AT ALL!_
+
+Also, if you allow `vim`, `less`, `man`, or any other program, a user might get
+a shell. If the program you allow includes the possibility to run a shell, this
+script/restriction is of no use.
+
+### Logging
+
+By default it logs lines like these to syslog:
+
+    
+    
+    Jan 20 20:39:23 vps11 RESTRICTED_SSH[9015]: INFO: SSH Connection: 'x.x.x.x 32309 x.x.x.x 22'
+    Jan 20 20:39:23 vps11 RESTRICTED_SSH[9014]: INFO: SSH Client: 'x.x.x.x 32309 22'
+    Jan 20 20:39:23 vps11 RESTRICTED_SSH[9017]: INFO: SSH Username: 'remy'
+    Jan 20 20:39:23 vps11 RESTRICTED_SSH[9016]: INFO: SSH Shell: '/bin/bash'
+    Jan 20 20:39:23 vps11 RESTRICTED_SSH[9013]: INFO: Sent SSH command: 'vim'
+    Jan 20 20:39:23 vps11 RESTRICTED_SSH[9018]: ERROR: Command "vim" is not allowed.
+    
+
+### Other info
+
+I think it requires `Bash 4+` because of the array search function. I have no
+bash lower than v4 to test it with.
+
+### Links
+
+<https://raymii.org/s/software/Restrict_SSH.html>  
+<https://github.com/RaymiiOrg/restrict_ssh>
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

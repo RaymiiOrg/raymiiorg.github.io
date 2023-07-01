@@ -1,0 +1,99 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Ansible - Only if host is also in other hostgroup
+Author      : 	Remy van Elst
+Date        : 	25-11-2014
+URL         : 	https://raymii.org/s/tutorials/Ansible_-_Only_if_host_is_also_in_other_hostgroup.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This trick helps you execute actions only when a host is in another hostgroup in
+Ansible. For example, you might deploy munin-node via ansible, but you only want
+your apache and NGINX plugins deployed on your webservers, not on your database
+servers. I found this hard to find in the Ansible documentation, only in the
+mailing list was more information.
+
+This example playbook is rolled out to all the hosts (`hosts: all`), because all
+the hosts are monitored via Munin. In my ansible-hosts file I also have two
+groups, `webservers` and `databaseservers`. I only want my `http-status` plugin
+on the webservers, and the `postgres-status` plugin only on the datase servers.
+This is how you do that.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Sample from the playbook:
+
+    
+    
+          - name: Deploy munin http status code plugin
+            copy: 
+              src: files/http-status 
+              dest: /usr/share/munin/plugins/http-status.sh 
+              owner: root 
+              group: root 
+              mode: 0755
+    
+          - name: Deploy postgres status plugin
+            copy: 
+              src: files/postgres-status 
+              dest: /usr/share/munin/plugins/posgres-status.py 
+              owner: root 
+              group: root 
+              mode: 0755
+    
+          - name: Link munin apache plugin
+            command: ln -sf /usr/share/munin/plugins/http-status /etc/munin/plugins/http-status
+            when: "'webservers' in {{ group_names }}" 
+    
+          - name: Link munin postgres plugin
+            command: ln -sf /usr/share/munin/plugins/postgres-status.py /etc/munin/plugins/postgres-status
+            when: "'databaseservers' in {{ group_names }}"    
+    
+
+In newer versions of Ansible you would replace the symlink command with the
+`file` module, that creates a symlink as well.
+
+By using the `when: "'GROUP_NAME' in {{ group_names }}"` statement in an action
+you get more control over the nodes specific actions are run on.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,1461 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	That time when one of my HP-UX servers lost half of it's RAM (and how to connect to an HP iLO 2 with modern OpenSSH (7.6+))
+Author      : 	Remy van Elst
+Date        : 	06-06-2018
+URL         : 	https://raymii.org/s/blog/That_time_one_of_my_HP-UX_machines_lost_half_its_ram_openssh_7.3_ilo_2.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![][1]
+
+One of my favorite sayings is: 'Hardware is stupid, move everything to the
+cloud!'. The cloud is just someone elses computer, but at least I'm not
+responsible for the hardware anymore, since hardware breaks. When a VM breaks,
+because you use configuration management and version control, just roll out a
+new one. We all know that's not true, but still, the thought of it is nice. A
+man can have hopes and dreams, even if the harsh reality shoots them down every
+time.
+
+[Last week one of the HP-UX machines had a failing disk][2] and this week it's
+back with a whole new issue. After it was rebooted (due to issues with the
+services running on it), the Event Monitoring Service (EMS) sent an email
+regarding RAM issues and after manual checking it seems the machine lost half of
+it's RAM.
+
+It should have 16 GB and now it only has 8 GB. You might imagine my suprise.
+This post goes into my troubleshooting, since I was not able to go to the
+machine, shut it down and check if the RAM was still there or note part numbers.
+I'll cover the use of cstm (Support Tool Manager), how to connect to the HP iLO
+(out of band access) with modern OpenSSH (7.2) and the steps I took to gather
+information on what might have happened.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+This machine is not under monitoring yet, therefore it is regularly visited and
+checked manually. You could call that monitoring as well, but I rather have
+Icinga (or any other tool) doing work for me. An intern doing said things is not
+considered a tool, sadly (this is a joke). The machine furthermore is part of an
+older setup (10 years) and is being replaced, so there is not a lot of budget or
+time allocated. I like to learn new things, so I seize the oppertunity to expand
+my UNIX knowledge, thus allocating some of my own time to research (and
+hopefully fix) these issues. [Read my other HP-UX articles as well][4] if you
+like that kind of stuff.
+
+Now that you know some background, let's dive in.
+
+### DRAM failure on DIMM XX, deallocate rank
+
+It all started with this nice email from the HP-UX system:
+
+    
+    
+    Onderwerp: hpux09: Event Monitor Notification
+    
+    >------------ Event Monitoring Service Event Notification ------------<
+    
+    Notification Time: Fri Jun  1 10:59:36 2018
+    
+    hpux09 sent Event Monitor notification information:
+    
+    /system/events/ipmi_fpl/ipmi_fpl is >= 3.
+    Its current value is MAJORWARNING(3).
+    
+    
+    Event data from monitor:
+    
+    Event Time..........: Fri Jun  1 10:59:36 2018
+    Severity............: MAJORWARNING
+    Monitor.............: fpl_em
+    Event #.............: 890
+    System..............: hpux09
+    
+    Summary:
+         DRAM failure on DIMM XX, deallocate rank
+    
+    Description of Error:
+    
+    SFW has detected that a DRAM is failing on the DIMM specified by the physical location. The rank the failing DIMM is part of will be deallocated.
+    
+    Probable Cause / Recommended Action:
+    
+    
+    SFW detected a failing DIMM
+    Replace the DIMM flagged by SFW
+    
+    
+    Additional Event Data:
+         System IP Address...: 198.51.100.30
+         Event Id............: 0x5b110af800000000
+         Monitor Version.....: A.01.00
+         Event Class.........: System
+         Client Configuration File...........:
+         /var/stm/config/tools/monitor/default_fpl_em.clcfg
+         Client Configuration File Version...: A.01.00
+              Qualification criteria met.
+                   Number of events..: 1
+         Associated OS error log entry id(s):
+              None
+         Additional System Data:
+              System Model Number.............: ia64 hp server rx3600
+              EMS Version.....................: A.04.20.31.02
+              STM Version.....................: D.04.00
+              System Serial Number............: DEH48456BK
+         Latest information on this event:
+              http://docs.hp.com/hpux/content/hardware/ems/fpl_em.htm#890
+    
+    v-v-v-v-v-v-v-v-v-v-v-v-v    D  E  T  A  I  L  S    v-v-v-v-v-v-v-v-v-v-v-v-v
+    
+    
+    IPMI event hex: 0x7a800fa000e00250 0xffffffff010cff74 Time Stamp: Fri Jun  1 08:44:24 2018 Event keyword: MEM_CHIPSPARE_DEALLOC_RANK Alert level name: Warning Reporting vers: 1 Data field type: Reserved Decoded data field:
+    Reporting entity ID: 0 ( Cab 0 Cell 0 CPU 0 ) Reporting entity Full Name: System Firmware IPMI Event ID : 4000 (0xfa0)
+    
+    
+    >---------- End Event Monitoring Service Event Notification ----------<
+    
+
+The HP-UX error message is not very helpful, since no actual DIMM location is
+given:
+
+    
+    
+    DRAM failure on DIMM XX, deallocate rank
+    SFW has detected that a DRAM is failing on the DIMM specified by the physical location. The rank the failing DIMM is part of will be deallocated.
+    
+
+The machine has no DIMM slot XX. The purchase order stated that the machine came
+with 16 GB of RAM installed. It now only reported 8 GB of memory.
+
+My first thought was to search the part number and purchase replacement modules
+(or search our own stash of "old stuff"), then doing my regular procedure with
+RAM issues, only executing the next step if the previous action did not resolve
+the issue. I've had my fair share of Dell hardware issues (looking at you,
+noncritical raid controller error after upgrading OpenManage...) so my procedure
+has proven itself.
+
+  * Apply all available firmware updates for the hardware
+  * Do a DIMM swap (slot XX to slot YY) to see if the error is in the slot or in the DIMM
+  * Replace the DIMM
+  * Replace the motherboard and CPU
+  * Contact the manufacturer for warranty
+
+Since this machine is not under a support contract anymore, step 1 and 5 are off
+the table. HP requires an active support contract to get firmware updates. I do
+not have access to replacement DIMM's and I was not able to go to the machine to
+do a DIMM swap (or note part numbers).
+
+The only thing left to do was to dig into the issue and gather as much logging
+and information as possible, to prepare for a visit to the machine.
+
+However, first I ended up researching a term unfamiliar to me, Memory Ranks.
+
+### Memory Ranking
+
+I had never heard of the term Rank in RAM context, but [Wikipedia][5] came to
+the rescue:
+
+> Sometimes memory modules are designed with two or more independent sets of
+DRAM chips connected to the same address and data buses; each such set is called
+a rank.
+
+There is even an article on [Memory Ranking][6]:
+
+> A memory rank is a set of DRAM chips connected to the same chip select, which
+are therefore accessed simultaneously.
+
+That still didn't tell me much, how correct it might be. [This site][7] had a
+very helpfull and practical explanation:
+
+> The term "rank" simply refers to a 64-bit chunk of data. In its simplest form,
+a DIMM with DRAM chips on just one side would contain a single 64-bit chunk of
+data and would be called a single-rank (1R) module. DIMMs with chips on both
+sides often contain at least two 64-bit chunks of data and are referred to as
+dual-rank (2R) modules. Some DIMMs can have DRAM chips on both sides but are
+configured so that they contain two 64-bit data chunks on each sidefour in
+totaland are referred to as quad-rank (4R) modules. Quad-rank DIMMs run at a
+maximum PC3-8500 (DDR3-1066) speed in current architecture.
+
+Now that I had a better understanding of what a memory rank is, my suspicion is
+that there is one failed memory module and the rest of the modules (after that
+failed module) are not loaded anymore.
+
+### Support Tool Manager
+
+Using `cstm` I hope to find the part number of the DIMM's so I can at least
+order a few replacement modules. According to multiple [HPe forum][8] [posts][9]
+`ctsm` should report the part number with this command:
+
+    
+    
+    echo "selclass qualifier memory;info;wait;infolog" | /usr/sbin/cstm 
+    
+    In my case, the output did not contain the part number:
+    
+    Running Command File (/usr/sbin/stm/ui/config/.stmrc).
+    
+    -- Information --
+    Support Tools Manager
+    
+    
+    Version D.04.00
+    
+    Product Number B4708AA
+    
+    (C) Copyright Hewlett Packard Co. 1995-2008
+    All Rights Reserved
+    
+    Use of this program is subject to the licensing restrictions described
+    in "Help-->On Version".  HP shall not be liable for any damages resulting
+    from misuse or unauthorized use of this program.
+    
+    cstm>selclass qualifier memory;info;wait;infolog
+    -- Updating Map --
+    Updating Map...
+    -- Converting a (4036) byte raw log file to text. --
+    Preparing the Information Tool Log for IPF_MEMORY on path memory File ...
+    
+    .... hpux09  :  198.51.100.30 .... 
+    
+    -- Information Tool Log for IPF_MEMORY on path memory --
+    
+    Log creation time: Fri Jun  1 12:13:01 2018
+    
+    Hardware path: memory
+    
+    
+    Basic Memory Description 
+    
+       Module Type: MEMORY
+       Page Size: 4096 Bytes
+       Total Physical Memory: N/A 
+       Total Configured Memory: 8192 MB
+       Total Deconfigured Memory: N/A 
+    
+    Memory Board Inventory 
+    
+       DIMM Location          Size(MB)     DIMM Location          Size(MB)
+       --------------------   --------     --------------------   --------
+       Ext 0 DIMM 0A          2048         Ext 0 DIMM 0B          2048    
+       Ext 0 DIMM 0C          2048         Ext 0 DIMM 0D          2048    
+       Ext 0 DIMM 1A          ----         Ext 0 DIMM 1B          ----    
+       Ext 0 DIMM 1C          ----         Ext 0 DIMM 1D          ----    
+       Ext 0 DIMM 2A          ----         Ext 0 DIMM 2B          ----    
+       Ext 0 DIMM 2C          ----         Ext 0 DIMM 2D          ----    
+    
+       Ext 0 Total: 8192 (MB)
+    
+       ===========================================================================
+    
+       DIMM Location          Size(MB)     DIMM Location          Size(MB)
+       --------------------   --------     --------------------   --------
+       Ext 1 DIMM 0A          ----         Ext 1 DIMM 0B          ----    
+       Ext 1 DIMM 0C          ----         Ext 1 DIMM 0D          ----    
+       Ext 1 DIMM 1A          ----         Ext 1 DIMM 1B          ----    
+       Ext 1 DIMM 1C          ----         Ext 1 DIMM 1D          ----    
+       Ext 1 DIMM 2A          ----         Ext 1 DIMM 2B          ----    
+       Ext 1 DIMM 2C          ----         Ext 1 DIMM 2D          ----    
+    
+       Ext 1 Total: 0 (MB)
+    
+       ===========================================================================
+    
+    Memory Error Log Summary 
+    
+       The memory error log is empty.
+    
+    Page Deallocation Table (PDT) 
+    
+       The Page Deallocation Table is empty.
+    
+       PDT Entries Used: 0
+       PDT Entries Free: 100
+       PDT Total Size: 100 
+    
+    -- Information Tool Log for IPF_MEMORY on path memory --
+    View   - To View the file.
+    Print  - To Print the file.
+    SaveAs - To Save the file.
+    Enter Done, Help, Print, SaveAs, or View: [Done] #.
+    
+
+It did gave me a better idea of the physical memory layout.
+
+According to [this post][9], the output with part number should look like this:
+
+    
+    
+    DIMM  Location       Size(MB)  State   Serial Num       Part Num
+    -------------------- --------  ------- ---------------- ------------------
+    Cab 0 Cell 0 DIMM 0A 2048      Config  PRY07064US       A9846-60301
+    Cab 0 Cell 0 DIMM 0B 2048      Config  PRY07063JF       A9846-60301
+    Cab 0 Cell 0 DIMM 1A 2048      Config  PRY06372A2       A9846-60301
+    -------------------- -------- ------- ---------------- ------------------
+    
+
+But, as can be seen, no part numbers in my output. I guess it's a version
+difference. I found another command to get ALL the hardware in the machine:
+
+    
+    
+    echo "selall;infolog;wait"|cstm
+    
+
+but except for a ton of output, it did not contain any part number. The post did
+reference the following:
+
+    
+    
+    You can get the memory dimm part number from cstm and also from GSP/MP
+    
+    Run the following command..
+    
+    GSP>cm
+    GSP:CM>df ==> Select A for selecting all and D to dump.
+    
+    From this out put you would get the exact part number for the dimm and also other HW connected to this box.
+    
+
+The `MP` referred here is the "HP Integrated Lights Out Management Processor",
+shortly known as the iLO. Dell calls them iDrac (integrated Dell remote access
+controller) and on a SuperMicro server it's just called IPMI or OOB (out of band
+access). It provides a way to power on/off and troubleshoot the server when you
+cannot access it, often also a remote console.
+
+Since I was not able to go to the machine and reboot into some kind of BIOS or
+iLO console, I had to resort to connecting via the web or SSH. The web interface
+was useless on gathering RAM information, so SSH was my last resort.
+
+### SSH with modern OpenSSH (7.6) to an HP iLO2
+
+With good hope I connected to the iLO IP from my Ubuntu 18.04 box. Only to be
+greeted by a happy little error message:
+
+    
+    
+    $ ssh Admin@192.0.2.30
+    Unable to negotiate with 192.0.2.30 port 22: no matching key exchange method found. Their offer: diffie-hellman-group1-sha1
+    
+
+Time to configure some old settings. In my `~/.ssh/config` file I started with
+the following:
+
+    
+    
+    Host hpux09-ilo
+      HostName 192.0.2.30
+      KexAlgorithms diffie-hellman-group1-sha1
+    
+
+But of course, just a KeyAlgorithm is not enough:
+
+    
+    
+    $ ssh Admin@hpux09-ilo
+    Unable to negotiate with 192.0.2.30 port 22: no matching cipher found. Their offer: aes128-cbc,3des-cbc
+    
+
+Let's add that ciphersuite to my `~/.ssh/config`:
+
+    
+    
+    Host hpux09-ilo
+      HostName 192.0.2.30
+      KexAlgorithms diffie-hellman-group1-sha1
+      Ciphers aes128-cbc,3des-cbc
+    
+
+We know that the setting did something, because now it just fails with no
+helpful error:
+
+    
+    
+    $ ssh Admin@hpux09-ilo
+    Received disconnect from 192.0.2.30 port 22:11:  Client Disconnect
+    
+    Disconnected from 192.0.2.30 port 22
+    
+
+Lucky for me, the iLO 2 was horribly old and insecure in 2013 already, as [this
+post][10] shows. With OpenSSH 6.2 there were problems connecting to the iLO,
+back then. I'm on OpenSSH 7.6 so let's hope that their fix works for me as well.
+
+In a [firmware update for the iLO2][11] some of these bugs are fixed, but not all of them, and quoting [Oscar A. Perez][12] (who lists "Senior Embedded System Engineer, 100% committed to make Embedded Systems reliable, safe and secure" on it's LinkedIn for 15 years, so I guess probably is legit), it will be hard to fix in the future due to the limited iLO 2 memory:
+
+> I had to make lots of changes to the mpSSH server code to get it to work with
+the new OpenSSH 6.2p1. I hope this is the last time we have to make changes like
+this one. iLO2 memory is very limited and already full so, we won't be able to
+spin new firmware releases, every time the OpenSSH folks decide to increase the
+size of the payload during Key Exchange.
+
+Lower on in the post I do find the correct OpenSSH options to connect. I missed
+the `HostKeyAlgorithms` and the `MACs`. The complete, working configuration in
+my `~/.ssh/config` file looks like this:
+
+    
+    
+    Host hpux09-ilo
+      HostName 192.0.2.30
+      HostKeyAlgorithms ssh-rsa,ssh-dss
+      KexAlgorithms diffie-hellman-group1-sha1
+      Ciphers aes128-cbc,3des-cbc
+      MACs hmac-md5,hmac-sha1
+    
+
+A one-liner with these options:
+
+    
+    
+    ssh -o HostKeyAlgorithms=ssh-rsa,ssh-dss -o KexAlgorithms=diffie-hellman-group1-sha1 -o Ciphers=aes128-cbc,3des-cbc -o MACs=hmac-md5,hmac-sha1 Admin@hpux09-ilo
+    
+
+*Do note that a better solution here is to upgrade the hardware and get it under _a support contract._
+
+### iLO Management Processor hardware information
+
+Logging in gives me a few options to work with:
+
+    
+    
+    Admin@192.0.2.30's password: 
+    
+                  Hewlett-Packard Integrity Integrated Lights-Out 2
+    
+        (c) Copyright Hewlett-Packard Company 1999-2008.  All Rights Reserved.
+    
+                               MP Host Name: mphpux09
+    
+                                  Revision F.02.23
+    
+       MP MAIN MENU:
+    
+             CO: Console
+            VFP: Virtual Front Panel
+             CM: Command Menu
+          SMCLP: Server Management Command Line Protocol
+             CL: Console Log
+             SL: Show Event Logs
+             HE: Main Help Menu
+              X: Exit Connection
+    
+    [mphpux09] MP> 
+    
+
+The forum post stated to go into the Command Menu:
+
+    
+    
+    [mphpux09] MP> cm
+    
+
+(Use Ctrl-B to return to MP main menu.)
+
+Then to enter the following command:
+
+    
+    
+    [mphpux09] MP:CM> df -nc -a
+    
+
+The output contains a long, long list of hardware. You can find it at the bottom
+of this article. We are interested in the RAM parts. To my pleasent suprise it
+did list the actual RAM in the machine, the 16 GB, including the part numbers.
+The Operating system does not see the Ext1 DIMM's, the iLO does:
+
+#### Ext0
+
+The `cstm` output showed me that Ext0 is filled with 4 DIMM's of 2 GB each:
+
+    
+    
+    Memory Board Inventory 
+    
+       DIMM Location          Size(MB)     DIMM Location          Size(MB)
+       --------------------   --------     --------------------   --------
+       Ext 0 DIMM 0A          2048         Ext 0 DIMM 0B          2048    
+       Ext 0 DIMM 0C          2048         Ext 0 DIMM 0D          2048    
+       Ext 0 DIMM 1A          ----         Ext 0 DIMM 1B          ----    
+       Ext 0 DIMM 1C          ----         Ext 0 DIMM 1D          ----    
+       Ext 0 DIMM 2A          ----         Ext 0 DIMM 2B          ----    
+       Ext 0 DIMM 2C          ----         Ext 0 DIMM 2D          ----    
+    
+       Ext 0 Total: 8192 (MB)
+    
+
+The ILO confirms that:
+
+    
+    
+    PRODUCT INFO:
+    
+    FRU Entry #  16 :
+    FRU NAME                : MemExt0 DIMM0A
+    FRU ID                  : 0128
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0xCE00000000000000
+    JEDEC Mfg Location      : 0x01
+    JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+    JEDEC Mfg Revision Code : 0x3343
+    JEDEC Mfg Year          : 0x06
+    JEDEC Mfg Week          : 0x40
+    JEDEC Mfg Serial #      : 0x711D209E
+    Mfg Unique Serial #     : 0x00CE010640711D209E
+    
+    FRU Entry #  17 :
+    FRU NAME                : MemExt0 DIMM0B
+    FRU ID                  : 0136
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0xCE00000000000000
+    JEDEC Mfg Location      : 0x01
+    JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+    JEDEC Mfg Revision Code : 0x3343
+    JEDEC Mfg Year          : 0x06
+    JEDEC Mfg Week          : 0x40
+    JEDEC Mfg Serial #      : 0x711D20AA
+    Mfg Unique Serial #     : 0x00CE010640711D20AA
+    
+    FRU Entry #  18 :
+    FRU NAME                : MemExt0 DIMM0C
+    FRU ID                  : 0144
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0xCE00000000000000
+    JEDEC Mfg Location      : 0x01
+    JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+    JEDEC Mfg Revision Code : 0x3343
+    JEDEC Mfg Year          : 0x06
+    JEDEC Mfg Week          : 0x40
+    JEDEC Mfg Serial #      : 0x711D20A2
+    Mfg Unique Serial #     : 0x00CE010640711D20A2
+    
+    FRU Entry #  19 :
+    FRU NAME                : MemExt0 DIMM0D
+    FRU ID                  : 0152
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0xCE00000000000000
+    JEDEC Mfg Location      : 0x01
+    JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+    JEDEC Mfg Revision Code : 0x3343
+    JEDEC Mfg Year          : 0x06
+    JEDEC Mfg Week          : 0x40
+    JEDEC Mfg Serial #      : 0x711D20A8
+    Mfg Unique Serial #     : 0x00CE010640711D20A8
+    
+
+I cannot easily find a replacement for this part number, but it comes up in a HP
+[forum post][13] as a Samsung 2GB module.
+
+#### Ext1
+
+Ext1 according to the operating system is empty:
+
+    
+    
+       DIMM Location          Size(MB)     DIMM Location          Size(MB)
+       --------------------   --------     --------------------   --------
+       Ext 1 DIMM 0A          ----         Ext 1 DIMM 0B          ----    
+       Ext 1 DIMM 0C          ----         Ext 1 DIMM 0D          ----    
+       Ext 1 DIMM 1A          ----         Ext 1 DIMM 1B          ----    
+       Ext 1 DIMM 1C          ----         Ext 1 DIMM 1D          ----    
+       Ext 1 DIMM 2A          ----         Ext 1 DIMM 2B          ----    
+       Ext 1 DIMM 2C          ----         Ext 1 DIMM 2D          ----    
+    
+       Ext 1 Total: 0 (MB)
+    
+
+The iLO thinks differently:
+
+    
+    
+    FRU Entry #  20 :
+    FRU NAME                : MemExt1 DIMM0A
+    FRU ID                  : 0160
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0x2C00000000000000
+    JEDEC Mfg Location      : 0x0C
+    JEDEC Mfg Part #        : 36HTF25672PY-667D1
+    JEDEC Mfg Revision Code : 0x0100
+    JEDEC Mfg Year          : 0x08
+    JEDEC Mfg Week          : 0x36
+    JEDEC Mfg Serial #      : 0xD925C4D3
+    Mfg Unique Serial #     : 0x002C0C0836D925C4D3
+    
+    FRU Entry #  21 :
+    FRU NAME                : MemExt1 DIMM0B
+    FRU ID                  : 0168
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0x2C00000000000000
+    JEDEC Mfg Location      : 0x0C
+    JEDEC Mfg Part #        : 36HTF25672PY-667D1
+    JEDEC Mfg Revision Code : 0x0100
+    JEDEC Mfg Year          : 0x08
+    JEDEC Mfg Week          : 0x36
+    JEDEC Mfg Serial #      : 0xD72FB723
+    Mfg Unique Serial #     : 0x002C0C0836D72FB723
+    
+    FRU Entry #  22 :
+    FRU NAME                : MemExt1 DIMM0C
+    FRU ID                  : 0176
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0x2C00000000000000
+    JEDEC Mfg Location      : 0x0C
+    JEDEC Mfg Part #        : 36HTF25672PY-667D1
+    JEDEC Mfg Revision Code : 0x0100
+    JEDEC Mfg Year          : 0x08
+    JEDEC Mfg Week          : 0x36
+    JEDEC Mfg Serial #      : 0xD925C4D9
+    Mfg Unique Serial #     : 0x002C0C0836D925C4D9
+    
+    FRU Entry #  23 :
+    FRU NAME                : MemExt1 DIMM0D
+    FRU ID                  : 0184
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0x2C00000000000000
+    JEDEC Mfg Location      : 0x0C
+    JEDEC Mfg Part #        : 36HTF25672PY-667D1
+    JEDEC Mfg Revision Code : 0x0100
+    JEDEC Mfg Year          : 0x08
+    JEDEC Mfg Week          : 0x36
+    JEDEC Mfg Serial #      : 0xD925C4CB
+    Mfg Unique Serial #     : 0x002C0C0836D925C4CB
+    
+
+So the DIMM's are still in the system, and of all places, [Amazon][14] sells
+these DIMM's. The type is `2GB DDR2 PC2-5300 667MHz 240pin ECC`, which is
+exactly what I need to order a replacement or look into our hardware stash. It
+took me a good hour, but the part number and some more type information has been
+found.
+
+I still need to figure out which specific DIMM broke, but that is not in the
+above output.
+
+### iLO Event Log
+
+In the iLO menu, I also saw `SL: Show Event Logs`. Maybe that will tell me
+specifically which DIMM could be the culprit.
+
+    
+    
+     [mphpux09] MP> sl
+    
+    
+    Event Log Viewer Menu:
+    
+           Log Name            Entries    % Full      Latest Timestamped Entry
+    ---------------------------------------------------------------------------
+       E - System Event           32         4 %      01 Jun 2018 08:47:06
+       F - Forward Progress     4000       100 % 
+       B - Current Boot          130        43 % 
+       P - Previous Boot         130        43 % 
+       I - iLO Event             316        63 %      01 Jun 2018 11:14:55
+       C - Clear All Logs
+       L - Live Events
+    
+
+Let's view the `System Event log`, using option `E`:
+
+    
+    
+    Enter menu item or [Ctrl-B] to Quit: E 
+    
+    
+           Log Name            Entries    % Full      Latest Timestamped Entry
+    ---------------------------------------------------------------------------
+       E - System Event           32         4 %      01 Jun 2018 08:47:06
+    
+    
+    Event Log Navigation Help:
+    
+       +       View next block     (forward in time,  e.g. from 3 to 4)
+       -       View previous block (backward in time, e.g. from 3 to 2)
+       <CR>    Continue to the next or previous block
+       D       Dump the entire log
+       F       First entry
+       L       Last entry
+       J       Jump to entry number
+       H       View mode configuration - Hex
+       K       View mode configuration - Keyword
+       T       View mode configuration - Text
+       A       Alert Level Filter options
+       U       Alert Level Unfiltered
+       ?       Display this Help menu
+       Q       Quit and return to the Event Log Viewer Menu
+       Ctrl-B  Exit command, and return to the MP Main Menu
+    
+
+Just give me everything, `D` it is:
+
+    
+    
+    MP:SL (+,-,<CR>,D, F, L, J, H, K, T, A, U, ? for Help, Q or Ctrl-B to Quit) >d
+       Confirm? (Y/[N]): y
+    
+    
+    #  Location|Alert| Encoded Field    |  Data Field    |   Keyword / Timestamp
+    -------------------------------------------------------------------------------
+    0     BMC      2  0x205A9918E5020010 FFFF0103FCC00300 TIME_SET
+                                                          02 Mar 2018 09:27:01
+    1     BMC      2  0x205A991B79020020 FFFF0103FCC00300 TIME_SET
+                                                          02 Mar 2018 09:38:01
+    2     BMC      2  0x205ABBA1FC020030 FFFF0103FCC00300 TIME_SET
+                                                          28 Mar 2018 14:09:00
+    3     BMC      2  0x205ABBA490020040 FFFF0103FCC00300 TIME_SET
+                                                          28 Mar 2018 14:20:00
+    4     BMC      2  0x205B0FEF26020050 FFFF006F04140300 POWER_BUTTON_PRESSED
+                                                          31 May 2018 12:48:38
+    5     BMC      2  0x205B0FEF28020060 040EA37004120300 CHASSIS_CONTROL_REQUEST
+                                                          31 May 2018 12:48:40
+    6     HPUX 2   2  0x54801C3002E00070 00000000001A100C HP-UX_OS_NORMAL_SHUTDOWN
+                                                          31 May 2018 12:48:54
+    7     BMC      2  0x205B0FEF38020090 FFFF006F04140300 POWER_BUTTON_PRESSED
+                                                          31 May 2018 12:48:56
+    8     BMC      2  0x205B0FEF3B0200A0 040EA37004120300 CHASSIS_CONTROL_REQUEST
+                                                          31 May 2018 12:48:59
+    9     BMC      2  0x205B0FEF420200B0 FFFF056FFA220300 ACPI_SOFT_OFF
+                                                          31 May 2018 12:49:06
+    10    BMC      2  0x205B0FEF430200C0 FA00A370FA120300 CHASSIS_CONTROL_REQUEST
+                                                          31 May 2018 12:49:07
+    11    BMC      2  0x205B0FEF440200D0 FFFF000943090300 POWER_UNIT_DISABLED
+                                                          31 May 2018 12:49:08
+    12    BMC      2  0x205B0FEF550200E0 FFFF006F04140300 POWER_BUTTON_PRESSED
+                                                          31 May 2018 12:49:25
+    13    BMC      2  0x205B0FEF560200F0 FFFF027000120300 SOFT_RESET
+                                                          31 May 2018 12:49:26
+    14    BMC      2  0x205B0FEF56020100 FFFF010943090300 POWER_UNIT_ENABLED
+                                                          31 May 2018 12:49:26
+    15    BMC      2  0x205B0FEF57020110 FFFF006FFA220300 ACPI_ON
+                                                          31 May 2018 12:49:27
+    16    BMC      2  0x205B0FEF57020120 0401A37004120300 CHASSIS_CONTROL_REQUEST
+                                                          31 May 2018 12:49:27
+    17    BMC      2  0x205B0FEF64020130 FFFF027000120300 SOFT_RESET
+                                                          31 May 2018 12:49:40
+    18    SFW      2  0xC15B0FEF71020140 FFFF000A001D0300 CPU_START_BOOT
+                                                          31 May 2018 12:49:53
+    19    SFW  0   2  0x5480006300E00150 0000000000000000 BOOT_START
+                                                          31 May 2018 12:49:53
+    20    SFW  0  *3  0x7A800FA000E00170 FFFFFFFF010CFF74 MEM_CHIPSPARE_DEALLOC_RANK
+                                                          31 May 2018 12:50:01
+    21    SFW  0  *3  0x7A800FA000E00190 FFFFFFFF010BFF74 MEM_CHIPSPARE_DEALLOC_RANK
+                                                          31 May 2018 12:50:01
+    22    SFW  0   2  0x40801CBB00E001B0 0000000000000000 BOOT_SWITCH_INSECURE_MODE
+                                                          31 May 2018 12:50:24
+    23    HPUX 0   2  0x54801C2F00E001D0 0000000000001001 HP-UX_BOOT_COMPLETE
+                                                          31 May 2018 12:52:39
+    24    HPUX 0   2  0x54801C3000E001F0 00000000001A100C HP-UX_OS_NORMAL_SHUTDOWN
+                                                          01 Jun 2018 08:44:01
+    25    BMC      2  0x205B110757020210 FFFF027000120300 SOFT_RESET
+                                                          01 Jun 2018 08:44:07
+    26    SFW      2  0xC15B110760020220 FFFF000A001D0300 CPU_START_BOOT
+                                                          01 Jun 2018 08:44:16
+    27    SFW  0   2  0x5480006300E00230 0000000000000000 BOOT_START
+                                                          01 Jun 2018 08:44:16
+    28    SFW  0  *3  0x7A800FA000E00250 FFFFFFFF010CFF74 MEM_CHIPSPARE_DEALLOC_RANK
+                                                          01 Jun 2018 08:44:24
+    29    SFW  0  *3  0x7A800FA000E00270 FFFFFFFF010BFF74 MEM_CHIPSPARE_DEALLOC_RANK
+                                                          01 Jun 2018 08:44:24
+    30    SFW  0   2  0x40801CBB00E00290 0000000000000000 BOOT_SWITCH_INSECURE_MODE
+                                                          01 Jun 2018 08:44:48
+    31    HPUX 0   2  0x54801C2F00E002B0 0000000000001001 HP-UX_BOOT_COMPLETE
+                                                          01 Jun 2018 08:47:06
+    
+       -> This is the last entry in the selected log.
+    
+    MP:SL (+,-,<CR>,D, F, L, J, H, K, T, A, U, ? for Help, Q or Ctrl-B to Quit) >
+    
+
+Filtering out all the logs (reboots were expected), focussing on the DIMM parts:
+
+    
+    
+    28    SFW  0  *3  0x7A800FA000E00250 FFFFFFFF010CFF74 MEM_CHIPSPARE_DEALLOC_RANK
+    29    SFW  0  *3  0x7A800FA000E00270 FFFFFFFF010BFF74 MEM_CHIPSPARE_DEALLOC_RANK
+    
+
+Not much help, no clear DIMM location yet. But, I did search around and found
+[this HP support page][15] titled "HP Integrity rx3600 Servers - BOOT _DECONFIG_
+CPU Can Be Caused by Memory Dimm Failure". In the log output there are these
+lines, looking a lot like the above output:
+
+    
+    
+    SFW  0   0  0x040000E500E00000 FFFFFFFF000AFF74 MEM_SPD_2G_DIMM_FOUND
+    SFW  0   0  0x040000E500E00000 FFFFFFFF000BFF74 MEM_SPD_2G_DIMM_FOUND
+    SFW  0   0  0x040000E500E00000 FFFFFFFF001AFF74 MEM_SPD_2G_DIMM_FOUND
+    SFW  0   0  0x040000E500E00000 FFFFFFFF001BFF74 MEM_SPD_2G_DIMM_FOUND
+    SFW  0   0  0x040000E500E00000 FFFFFFFF010AFF74 MEM_SPD_2G_DIMM_FOUND
+    SFW  0   0  0x040000E500E00000 FFFFFFFF010BFF74 MEM_SPD_2G_DIMM_FOUND
+    SFW  0   0  0x040000E500E00000 FFFFFFFF011AFF74 MEM_SPD_2G_DIMM_FOUND
+    SFW  0   0  0x040000E500E00000 FFFFFFFF011BFF74 MEM_SPD_2G_DIMM_FOUND
+    
+
+In this part I do see a pattern in the Data Field column, the only thing
+changing looks an awfull lot like a memory location:
+
+  * 00 0A
+  * 00 0B
+  * 00 1A
+  * 00 1B
+  * 01 0A
+  * 01 0B
+  * 01 1A
+  * 01 AB
+
+Comparing that to the DIMM layout output from earlier:
+
+    
+    
+      DIMM Location          Size(MB)     DIMM Location          Size(MB)
+       --------------------   --------     --------------------   --------
+       Ext 0 DIMM 0A          2048         Ext 0 DIMM 0B          2048    
+       Ext 0 DIMM 0C          2048         Ext 0 DIMM 0D          2048   
+    
+       DIMM Location          Size(MB)     DIMM Location          Size(MB)
+       --------------------   --------     --------------------   --------
+       Ext 1 DIMM 0A          ----         Ext 1 DIMM 0B          ----    
+       Ext 1 DIMM 0C          ----         Ext 1 DIMM 0D          ---- 
+    
+
+Not exactly the same but good enough, since it's a different server (the above
+output seems to be for the 8 port memory carrier board). [This post][16]
+confirms my suspicion on the HEX values corresponding to the DIMM Slots.
+
+### HP Integrity rx3600 Server User Service Guide
+
+The [HP Integrity rx3600 Server User Service Guide][17], chapter 5
+Troubleshooting, subsection CPU, Memory and SBA, subsection Troubleshooting
+rx3600 memory has a picture of the 24 slot memory carrier board:
+
+![][18]
+
+I know this server has 2 24 slot memory carrier boards due to the full output of
+the hardware list, it states 4 `12 DIMM Memory Extender` components.
+
+The service guide also lists the error message:
+
+  * IPMI events: Type E0h, 4000d:26d MEM _CHIPSPARE_ DEALLOC_RANK
+  * Cause: An SDRAM is failing on the DIMM.
+  * Notes: The failing DIMM quad will be deallocated.
+
+Furthermore, the service manual states this:
+
+    
+    
+    * Troubleshooting rx3600 Memory
+    The memory controller logic in the zx2 chip supports three versions of memory expanders. An eight
+    DIMM memory carrier provides two memory boards that hold two or four memory DIMMs in both
+    memory cells 0 and 1. A 24 DIMM memory carrier provides two 12-DIMM memory boards that
+    hold four, eight, or twelve DIMMs in both memory cells 0 and 1.
+    All three versions of memory expanders must have their memory DIMMs installed in groups of four,
+    known as a quad. DIMM quads of different sizes can be installed in any physical rank on all
+    versions of memory expanders, but they must be grouped by their size.
+    
+    * Memory Subsystem Behaviors
+    You must replace DIMMs or memory carriers when a threshold is reached for multiple double-byte
+    errors from one or more DIMMs on the same board. When any uncorrectable memory error (more
+    than 2 bytes) or when no quad of like memory DIMMs is loaded in rank 0 of side 0, you must
+    replace the DIMMs. All other DIMM errors are corrected by zx2 and reported to the Page
+    Deallocation Table (PDT) and the diagnostic LED panel.
+    
+    * Memory DIMM Load Order
+    For a minimally loaded server, four equal-size memory DIMMs must be installed in slots 0A, 0B,
+    0C, and 0D on the same side of the 24/48 slot memory expander; and in the 0A and 0B slots
+    on both 0 and 1 sides of the 8 slot memory expander.
+    The first quad of DIMMs are always loaded into rank 0s slots for side 0 then in the rank 0s slots
+    for side 1. The next quad of DIMMs are loaded into rank 1s slots for side 0, then for side 1, and
+    so on, until all ranks slots for both sides are full.
+    Best memory subsystem performance result when both memory sides 0 and 1 have the same number
+    of DIMM quads in them.
+    
+
+In chapter 6. "Removing and replacing server components", there are 11 pages
+(185-196), with picutes and example configurations, on replacing the DIMM's. It
+also has Memory loading guidelines:
+
+Use the following rules and guidelines when installing memory:
+
+  * Install DIMMs in pairs in the 8-DIMM memory carrier and in quads in the 24-DIMM memory carrier.
+  * Ensure all DIMMs within a pair or quad are identical.
+  * Install quads in order of capacity from largest to smallest. For example, install all 2 GB quads before 1 GB or smaller quads, and install all 1 GB quads before 512 MB quads.
+  * Side 0 must have equal or greater memory capacity than side 1.
+  * Install DIMM pairs or quads based on the following rules: 
+    * 1\. Load pairs or quads into the memory carrier in order, starting with slot 0 and ending with slot 2.
+    * 2\. Install the first pair or quad in side 0.
+    * 3\. Install the second pair or quad in side 1.
+    * 4\. For the remaining pairs or quads: 
+      * a. If both sides of the memory carrier contain the same capacity of memory, install the next pair or quad in side 0.
+      * b. If side 0 contains more memory capacity than side 1, install the next quad in side 1.
+      * c. If side 1 is full, install the remaining quads in side 0.
+
+(Nested lists in Markdown are fun)
+
+The guide even has a list of Customer Replacable parts including HP and
+replacement part numbers. For my 2GB memory module, it would be `AD328A`, for
+sale on [lots of places][19].
+
+### Conclusion
+
+Combining all the knowledge and logging, my best guess is that the following
+slots have issues:
+
+  * Side 1 Slot 0B
+  * Side 1 Slot 0C
+
+Replacement DIMM's are ordered and on their way, soon to be replaced in the
+correct order. Let's hope that the machine get's the other half of it's RAM back
+and the problem is fixed.
+
+### Reference, complete output of MP:CM> df -nc -a
+
+    
+    
+    FRU Entry #   0 : 
+    FRU NAME: Core I/O Board ID:0000
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 7462080
+     Manufacturer       : CELESTICA 
+     Product Name       : Core IO Board with VGA          
+     S/N                : MYL011Y014      
+     Part Number        : AB463-60003
+     Fru File ID        : 10
+     Custom Info        : A       
+     Custom Info        : 4848
+     Custom Info        : A5
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+    
+    FRU Entry #   1 :
+    FRU NAME: Mem Extender 0 ID:0001
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 6729120
+     Manufacturer       : CELESTICA 
+     Product Name       : 12 DIMM Memory Extender         
+     S/N                : TH9842X51H      
+     Part Number        : AB463-60112
+     Fru File ID        : 10
+     Custom Info        : A       
+     Custom Info        : 4721
+     Custom Info        : A2
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+    
+    FRU Entry #   2 :
+    FRU NAME: Mem Extender 1 ID:0002
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 6729120
+     Manufacturer       : CELESTICA 
+     Product Name       : 12 DIMM Memory Extender         
+     S/N                : TH9842X51J      
+     Part Number        : AB463-60112
+     Fru File ID        : 10
+     Custom Info        : A       
+     Custom Info        : 4721
+     Custom Info        : A2
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+    
+    FRU Entry #   3 :
+    FRU NAME: Power Supply 0 ID:0003
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 6662537
+     Manufacturer       : C&D       
+     Product Name       : BULK POWER SUPPLY               
+     S/N                : A804070ET3      
+     Part Number        : 0957-2198  
+     Fru File ID        : 10
+     Custom Info        : 00000000
+     Custom Info        : 0804
+     Custom Info        : 07
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+    
+    FRU Entry #   4 :
+    FRU NAME: Power Supply 1 ID:0004
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 6675416
+     Manufacturer       : muRata-ps 
+     Product Name       : BULK POWER SUPPLY               
+     S/N                : A8371000F7      
+     Part Number        : 0957-2198  
+     Fru File ID        : 10
+     Custom Info        : 00000000
+     Custom Info        : 0837
+     Custom Info        : 10
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+    
+    FRU Entry #   5 :
+    FRU NAME: I/O Assembly ID:0005
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 6655680
+     Manufacturer       : CELESTICA 
+     Product Name       : 10 Slot PCI-E 1.1 IOBP          
+     S/N                : TH9834955H      
+     Part Number        : AB463-60028
+     Fru File ID        : 10
+     Custom Info        : A       
+     Custom Info        : 4832
+     Custom Info        : A2
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+    
+    FRU Entry #   6 :
+    FRU NAME: Display Board ID:0006
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 6703200
+     Manufacturer       : CELESTICA 
+     Product Name       : DVD/Display Board               
+     S/N                : TH983910DA      
+     Part Number        : AB463-60020
+     Fru File ID        : 10
+     Custom Info        : A       
+     Custom Info        : 4814
+     Custom Info        : A3
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+    
+    FRU Entry #   7 :
+    FRU NAME: Disk Backplane ID:0007
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 6668640
+     Manufacturer       : CELESTICA 
+     Product Name       : 8 Disk Drive SAS Backplane      
+     S/N                : TH9835V650      
+     Part Number        : AB463-60006
+     Fru File ID        : 10
+     Custom Info        : A       
+     Custom Info        : 4814
+     Custom Info        : A3
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+    
+    FRU Entry #   8 :
+    FRU NAME: ProcessorCarrier ID:0009
+    
+    CHASSIS INFO:
+     Type:Rack Mount Chassis
+     Part Number        :            
+     Serial Number      :             
+    
+    BOARD INFO:
+     Mfg Date/Time      : 6732745
+     Manufacturer       : JABIL     
+     Product Name       : 2 Socket CPU Carrier            
+     S/N                : MYJ84203PH      
+     Part Number        : AB463-60113
+     Fru File ID        : 10
+     Custom Info        : C       
+     Custom Info        : 4818
+     Custom Info        : A3
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+     Manufacturer       : hp
+     Product Name       : server rx3600                   
+     Part/Model         :            
+     Version            :       
+     S/N                :                     
+     Asset Tag          :                                 
+     FRU File ID        : 11
+     Custom Info        : 411
+    
+    FRU Entry #   9 :
+    FRU NAME: Interconnect Bd ID:0010
+    
+    CHASSIS INFO:
+     Type:Rack Mount Chassis
+     Part Number        :            
+     Serial Number      :             
+    
+    BOARD INFO:
+     Mfg Date/Time      : 6694560
+     Manufacturer       : CELESTICA 
+     Product Name       : SAS Interconnect Board          
+     S/N                : TH9838Z061      
+     Part Number        : AB463-60025
+     Fru File ID        : 10
+     Custom Info        : A       
+     Custom Info        : 4814
+     Custom Info        : A2
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+     Manufacturer       : hp
+     Product Name       : server rx3600
+     Part/Model         : AB596A
+     Version            :       
+     S/N                : DEH48456BK
+     Asset Tag          :                                 
+     FRU File ID        : 11
+     Custom Info        : 411
+    
+    FRU Entry #  10 :
+    FRU NAME: Hot-Plug Board ID:0011
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 6658560
+     Manufacturer       : CELESTICA 
+     Product Name       : PCI Hot Plug Control Board      
+     S/N                : TH983515H7      
+     Part Number        : AB463-60002
+     Fru File ID        : 10
+     Custom Info        : A       
+     Custom Info        : 4711
+     Custom Info        : A2
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+    
+    FRU Entry #  11 :
+    FRU NAME: I/O Power Module ID:0015
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 2105376
+     Manufacturer       : C&D       
+     Product Name       : PCI POWER BOARD                 
+     S/N                : 9080708250F8    
+     Part Number        : 0950-4677  
+     Fru File ID        : 10
+     Custom Info        : X1      
+     Custom Info        : 0825
+     Custom Info        : A1
+     Custom Info        : 0
+    
+    PRODUCT INFO:
+    
+    FRU Entry #  12 :
+    FRU NAME: Processor 0 ID:0032
+    
+    PROCESSOR DATA 
+     S-spec/QDF:  LAB5
+     Sample/Prod: 01
+    
+    CORE DATA 
+     Arch Revision                :  00
+     Core Family                  :  20
+     Core Model                   :  01
+     Core Stepping                :  01
+     Max Core Frequency           : 1666 MHZ
+     Max SysBus Frequency         :  333 MHZ
+     Core Voltage                 : 1150 mV
+     Core Voltage Tolerance,High  :   64 mV
+     Core Voltage Tolerance,Low   :   3F mV
+    
+    CACHE DATA 
+     Cache Size                   :   18 MB
+    
+    PACKAGE DATA 
+     Package Revision             : NE Substrate Revision: 01
+    
+    PROC PART NUMBER DATA 
+     Part Number                  : 80567KF
+     Electronic Signature         : 0003AB71B8C89784
+    
+    THERMAL REF DATA 
+     Upper Temp Ref               :  92 C
+     Calibr Offset                :  18 C
+    
+    FEATURES DATA 
+     IA-32 Proc Core Feature Flags:  FFFB8743
+     IA-64 Proc Core Feature Flags:  1B81806300000000
+     Package Feature Flags        :  3F010000
+     Devices on TAP Chain         :  2
+    
+    FRU Entry #  13 :
+    FRU NAME: Processor 1 ID:0033
+    
+    PROCESSOR DATA 
+     S-spec/QDF:  LAB5
+     Sample/Prod: 01
+    
+    CORE DATA 
+     Arch Revision                :  00
+     Core Family                  :  20
+     Core Model                   :  01
+     Core Stepping                :  01
+     Max Core Frequency           : 1666 MHZ
+     Max SysBus Frequency         :  333 MHZ
+     Core Voltage                 : 1150 mV
+     Core Voltage Tolerance,High  :   64 mV
+     Core Voltage Tolerance,Low   :   3F mV
+    
+    CACHE DATA 
+     Cache Size                   :   18 MB
+    
+    PACKAGE DATA 
+     Package Revision             : NE Substrate Revision: 01
+    
+    PROC PART NUMBER DATA 
+     Part Number                  : 80567KF
+     Electronic Signature         : 0001E4BA8B93CDD5
+    
+    THERMAL REF DATA 
+     Upper Temp Ref               :  92 C
+     Calibr Offset                :  17 C
+    
+    FEATURES DATA 
+     IA-32 Proc Core Feature Flags:  FFFB8743
+     IA-64 Proc Core Feature Flags:  1B81806300000000
+     Package Feature Flags        :  3F010000
+     Devices on TAP Chain         :  2
+    
+    FRU Entry #  14 :
+    FRU NAME: Processor 0 RAM ID:0036
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 0
+     Manufacturer       : 
+     Product Name       : MTV_A1_1618     
+     S/N                : PR1084441T  
+     Part Number        : AD391-2100C
+     Fru File ID        : B
+     Custom Info        : 
+     Custom Info        : 4733
+     Custom Info        :   
+     Custom Info        : 2H64014D2b82    
+     Custom Info        : 1
+    
+    PRODUCT INFO:
+    
+    FRU Entry #  15 :
+    FRU NAME: Processor 1 RAM ID:0037
+    
+    CHASSIS INFO:
+    
+    BOARD INFO:
+     Mfg Date/Time      : 0
+     Manufacturer       : 
+     Product Name       : MTV_A1_1618     
+     S/N                : PR108443XV  
+     Part Number        : AD391-2100C
+     Fru File ID        : B
+     Custom Info        : 
+     Custom Info        : 4733
+     Custom Info        :   
+     Custom Info        : 2H64014D2b82    
+     Custom Info        : 1
+    
+    PRODUCT INFO:
+    
+    FRU Entry #  16 :
+    FRU NAME                : MemExt0 DIMM0A
+    FRU ID                  : 0128
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0xCE00000000000000
+    JEDEC Mfg Location      : 0x01
+    JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+    JEDEC Mfg Revision Code : 0x3343
+    JEDEC Mfg Year          : 0x06
+    JEDEC Mfg Week          : 0x40
+    JEDEC Mfg Serial #      : 0x711D209E
+    Mfg Unique Serial #     : 0x00CE010640711D209E
+    
+    FRU Entry #  17 :
+    FRU NAME                : MemExt0 DIMM0B
+    FRU ID                  : 0136
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0xCE00000000000000
+    JEDEC Mfg Location      : 0x01
+    JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+    JEDEC Mfg Revision Code : 0x3343
+    JEDEC Mfg Year          : 0x06
+    JEDEC Mfg Week          : 0x40
+    JEDEC Mfg Serial #      : 0x711D20AA
+    Mfg Unique Serial #     : 0x00CE010640711D20AA
+    
+    FRU Entry #  18 :
+    FRU NAME                : MemExt0 DIMM0C
+    FRU ID                  : 0144
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0xCE00000000000000
+    JEDEC Mfg Location      : 0x01
+    JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+    JEDEC Mfg Revision Code : 0x3343
+    JEDEC Mfg Year          : 0x06
+    JEDEC Mfg Week          : 0x40
+    JEDEC Mfg Serial #      : 0x711D20A2
+    Mfg Unique Serial #     : 0x00CE010640711D20A2
+    
+    FRU Entry #  19 :
+    FRU NAME                : MemExt0 DIMM0D
+    FRU ID                  : 0152
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0xCE00000000000000
+    JEDEC Mfg Location      : 0x01
+    JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+    JEDEC Mfg Revision Code : 0x3343
+    JEDEC Mfg Year          : 0x06
+    JEDEC Mfg Week          : 0x40
+    JEDEC Mfg Serial #      : 0x711D20A8
+    Mfg Unique Serial #     : 0x00CE010640711D20A8
+    
+    FRU Entry #  20 :
+    FRU NAME                : MemExt1 DIMM0A
+    FRU ID                  : 0160
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0x2C00000000000000
+    JEDEC Mfg Location      : 0x0C
+    JEDEC Mfg Part #        : 36HTF25672PY-667D1
+    JEDEC Mfg Revision Code : 0x0100
+    JEDEC Mfg Year          : 0x08
+    JEDEC Mfg Week          : 0x36
+    JEDEC Mfg Serial #      : 0xD925C4D3
+    Mfg Unique Serial #     : 0x002C0C0836D925C4D3
+    
+    FRU Entry #  21 :
+    FRU NAME                : MemExt1 DIMM0B
+    FRU ID                  : 0168
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0x2C00000000000000
+    JEDEC Mfg Location      : 0x0C
+    JEDEC Mfg Part #        : 36HTF25672PY-667D1
+    JEDEC Mfg Revision Code : 0x0100
+    JEDEC Mfg Year          : 0x08
+    JEDEC Mfg Week          : 0x36
+    JEDEC Mfg Serial #      : 0xD72FB723
+    Mfg Unique Serial #     : 0x002C0C0836D72FB723
+    
+    FRU Entry #  22 :
+    FRU NAME                : MemExt1 DIMM0C
+    FRU ID                  : 0176
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0x2C00000000000000
+    JEDEC Mfg Location      : 0x0C
+    JEDEC Mfg Part #        : 36HTF25672PY-667D1
+    JEDEC Mfg Revision Code : 0x0100
+    JEDEC Mfg Year          : 0x08
+    JEDEC Mfg Week          : 0x36
+    JEDEC Mfg Serial #      : 0xD925C4D9
+    Mfg Unique Serial #     : 0x002C0C0836D925C4D9
+    
+    FRU Entry #  23 :
+    FRU NAME                : MemExt1 DIMM0D
+    FRU ID                  : 0184
+    JEDEC SPD Rev           : 0x12
+    JEDEC Mfg ID            : 0x2C00000000000000
+    JEDEC Mfg Location      : 0x0C
+    JEDEC Mfg Part #        : 36HTF25672PY-667D1
+    JEDEC Mfg Revision Code : 0x0100
+    JEDEC Mfg Year          : 0x08
+    JEDEC Mfg Week          : 0x36
+    JEDEC Mfg Serial #      : 0xD925C4CB
+    Mfg Unique Serial #     : 0x002C0C0836D925C4CB
+    
+       -> This is the last entry in the selected list.
+    
+    -> Command successful.
+    
+    
+    
+    [mphpux09] MP:CM> sysrev
+    
+    
+    SYSREV
+    
+    Current firmware revisions
+    
+     MP FW     : F.02.23
+     BMC FW    : 05.25
+     EFI FW    : ROM A 07.12, ROM B 07.12
+     System FW : ROM A 04.03, ROM B 04.03, Boot ROM A
+     PDH FW    : 50.07
+     DHPC FW   : 01.23
+     UCIO FW   : 03.0b
+     PRS FW    : 00.08 UpSeqRev: 0c, DownSeqRev: 08
+     HFC FW    : 00.04 SetRev: 00
+    
+
+   [1]: https://raymii.org/s/inc/img/nocloud.png
+   [2]: https://raymii.org/s/tutorials/Find_part_number_of_failed_disk_on_HP-UX_with_sasmgr.html
+   [3]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [4]: https://raymii.org/s/tags/hp-ux.html
+   [5]: https://en.wikipedia.org/wiki/DIMM#Ranking
+   [6]: https://en.wikipedia.org/wiki/Memory_rank
+   [7]: https://web.archive.org/web/20180605191021/http://www.dataram.com/blog/?p=32
+   [8]: https://web.archive.org/web/20180605193125/https://community.hpe.com/t5/General/How-to-find-Memory-DIMM-part-number/td-p/5265571
+   [9]: https://web.archive.org/web/20180605193526/https://community.hpe.com/t5/HPE-9000-and-HPE-e3000-Servers/checking-part-number-of-memory/m-p/4501569/highlight/true
+   [10]: https://web.archive.org/web/20180605195032/https://community.hpe.com/t5/Server-Management-Remote-Server/Unable-to-SSH-to-iLO2-with-OpenSSH-6-2/td-p/6050925
+   [11]: http://web.archive.org/web/20180601112113/https://community.hpe.com/t5/Server-Management-Remote-Server/iLO-2-Firmware-version-2-20-released/td-p/6067313
+   [12]: https://www.linkedin.com/in/oscar-perez-7a861549
+   [13]: https://web.archive.org/web/20180605200950/https://community.hpe.com/t5/Integrity-Servers/Hardware-Information-finding-How-in-HP-UX-Server/m-p/6697829/highlight/true
+   [14]: https://web.archive.org/web/20180605200737/https://www.amazon.com/PC2-5300-667MHz-240pin-Registered-MT36HTF25672PY-667D1/dp/B0050JMQFS
+   [15]: https://web.archive.org/web/20180605204015/https://support.hpe.com/hpsc/doc/public/display?docId=c02454812
+   [16]: https://web.archive.org/web/20180605202816/https://community.hpe.com/t5/Integrity-Servers/RX2620-Memory-Errors/m-p/4794083/highlight/true#M7674
+   [17]: https://raymii.org/s/inc/downloads/emr_na-c01290179-9.pdf
+   [18]: https://raymii.org/s/inc/img/rx3600-mem.png
+   [19]: https://web.archive.org/web/20180605205753/http://www.memory4less.com/hp-2gb-ddr2-pc4200-ad328a
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,349 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Building opkg .ipk packages by hand (for OpenEmbedded/Yocto/OpenWRT)
+Author      : 	Remy van Elst
+Date        : 	05-04-2019
+URL         : 	https://raymii.org/s/tutorials/Building_IPK_packages_by_hand.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![VAR-SOM-MX6][1]
+
+> Variscite VAR-SOM-MX6 - a high-performance ARM System on Module that can run
+Yocto
+
+`.ipk` packages are used by a variety of embedded linux systems, like routers
+running OpenWRT and appliances running on OpenEmbedded (Yocto). The `opkg`
+command installs these packages and OpenEmbedded comes with a set of tools to
+build `.ipk` packages.
+
+Recently I had to create ipk packages in a scripted fashion for a few hundred
+systems, all unique per system. The `.ipk` packages includes a few software
+changes for debugging, a systemd service and one precompiled binary. The yocto
+build tools were not available on the machine where these packages would be made
+so I had to figure out how to make them by hand, which means, automatically. The
+packages are actually just compressed files containing a few control files and
+the data to be extracted on the filesystem.
+
+This article will walk you through the steps of creating these packages by hand.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+All steps are executed as the root user. The system the packages are built on is
+running Ubuntu 18.04. If you haven't got `ar` installed, make sure to
+
+    
+    
+    apt-get install binutils
+    
+
+### IPK packages
+
+An IPK package is very simple. It's like a `.deb` debian package, as in that is
+has both data and control files packaged up into an archive. The data will be
+extracted onto the filesystem where the package is installed, the control files
+are used for dependency management and to execute pre and post install actions.
+
+In my case, the `postinst` script is used to start the service (the binary we're
+packaging up). The `prerm` script is used to stop the service and disable it
+before uninstalling the package. The `postinst` script is used to check if the
+serial number matches the machine.
+
+An `ipk` is an archive (either `tar` or `ar` or `gzip`) containing two archives
+(`control.tar.gz` & `data.tar.gz`) and a `debian-binary` file with the contents
+`2.0`:
+
+    
+    
+    tar -tzf example_package_1.3.3.7.varam335x.ipk
+    
+
+Output:
+
+    
+    
+    ./debian-binary
+    ./data.tar.gz
+    ./control.tar.gz
+    
+
+### Folder structure & Data
+
+The following folder structure is used for the package build. There is a `main`
+folder named `packages`, which has a subfolder for each machine based on the
+machines serial number. Under the machine folder there is a folder named after
+the package we're building (`examplepackage`), which has a `control` and `data`
+folder. The `data` folder contains the files that will be extracted on the
+filesystem and the `control` folder contains the pre and post scripts and some
+package information.
+
+    
+    
+    packages/serialnumber/
+    |-- ipkbuild
+    |   `-- example_package
+    |       |-- control
+    |       |   |-- control
+    |       |   |-- postinst
+    |       |   |-- preinst
+    |       |   `-- prerm
+    |       |-- data
+    |       |   |-- usr
+    |       |   |   `-- bin
+    |       |   |       `-- my_binary
+    |       |   `-- lib
+    |       |       `-- systemd
+    |       |           `-- system
+    |       |               `-- example_package.service
+    |       `-- debian-binary
+    `-- example_package_1.3.3.7_varam335x.ipk
+    
+
+To create the folder structure listed above, use this command:
+
+    
+    
+    mkdir -p packages/serial/ipkbuild/example_package/{control,data}
+    
+
+Then copy all the files you need installed (including folder structure and
+permissions) into the `data` folder. As you can see in the above listing, my
+`data` folder contains one binary and a systemd script (to start that binary).
+
+Make sure that your binaries have executable permissions and are for the correct
+architecture. A binary for a `mipsel` machine will not run on an `armv7l`, even
+if it's in that `ipk` package.
+
+### Control & Postint, preinst, postrm and prerm scripts
+
+The `control` folder must contain at least a file named `control`. This has
+information on the package, like name, version, dependencies, etc. My control
+file is simple and contains just the bare minimum:
+
+    
+    
+    cat packages/serial/ipkbuild/example_package/control/control
+    
+
+Output:
+
+    
+    
+    Package: example_package
+    Version: 1.3.3.7
+    Architecture: varam335x
+    Maintainer: user@domain.tld
+    Description: This is an example IPK package
+    Priority: optional
+    Depends: systemd other_package
+    
+
+The `debian-binary` file must contain just `2.0`:
+
+    
+    
+    echo 2.0 > packages/serial/ipkbuild/example_package/debian-binary
+    
+
+Some systems use this to check the MIME type of the package.
+
+The `postinst`, `postrm`, `preinst` and `prerm` are executed in their respective
+phases during installation or removal. Exit code 0 means all is well and the
+action will continue. Other exit codes (>1) mean that something went wrong and
+the action will stop. By default these scripts are executed with `sh`, but that
+depends entirely on your embedded system. In my case I know `bash` is available,
+but make sure to hold back onto `bash` specifics.
+
+My `preinst` file contains a check on the machine serial number. Since I build
+the packages for a specific machine, I know this beforehand. I want to make sure
+that packages can only run on the machine they're built for:
+
+    
+    
+    cat packages/serial/ipkbuild/example_package/control/preinst
+    
+
+Ouput:
+
+    
+    
+    #!/bin/bash
+    confserial=123456789
+    machineserial=`cat /example/serial.txt`
+    if [ $confserial -ne $machineserial ]; then
+        echo "Configured serial does not match machine serial"
+        exit 1
+    fi
+    
+
+Make sure this file is executable. It will not run otherwise, `opkg` will fail
+with a `Permission Denied` error.
+
+    
+    
+    chmod +x packages/serial/ipkbuild/example_package/control/preinst
+    
+
+The `postinst` file is executed after successfull installation. I use it to
+start the service we just installed:
+
+    
+    
+    cat packages/serial/ipkbuild/example_package/control/postinst
+    
+
+Output:
+
+    
+    
+    #!/bin/bash
+    systemctl --system daemon-reload
+    systemctl enable example_service
+    systemctl start example_service
+    
+
+This file must be executable as well:
+
+    
+    
+    chmod +x packages/serial/ipkbuild/example_package/control/postinst
+    
+
+The `prerm` file is used to stop the service and remove it from systemd:
+
+    
+    
+    cat packages/serial/ipkbuild/example_package/control/prerm
+    
+
+Output:
+
+    
+    
+    #!/bin/bash
+    systemctl stop example_service
+    systemctl disable example_service
+    systemctl --system daemon-reload
+    
+
+This one has to be executable as like all the others:
+
+    
+    
+    chmod +x packages/serial/ipkbuild/example_package/control/prerm
+    
+
+If you have all your data files and your control files in the correct folder you
+can continue to package it all up.
+
+### Packing it all up
+
+The archive files must not contain any paths, therefore we create them in the
+folder structure we've created. I use `pushd` and `popd` because it's all
+scripted, but `cd` might work just as well. The paths and archive structure were
+a bit of a try, fail and retry experiment for me.
+
+    
+    
+    pushd packages/serial/ipkbuild/example_package/control/
+    tar --numeric-owner --group=0 --owner=0 -czf ../control.tar.gz ./*
+    popd
+    
+    pushd packages/serial/ipkbuild/example_package/data
+    tar --numeric-owner --group=0 --owner=0 -czf ../data.tar.gz ./*
+    popd
+    
+    pushd packages/serial/ipkbuild/example_package
+    tar --numeric-owner --group=0 --owner=0 -cf ../../example_package_1.3.3.7.varam335x.ipk ./debian-binary ./data.tar.gz ./control.tar.gz 
+    popd
+    
+
+You will now have an `ipk` package built:
+
+    
+    
+    packages/serial/example_package_1.3.3.7_varam335x.ipk
+    
+
+#### gzip vs debian binary package (mime type)
+
+If you have a system that does specific MIME type checks, you might want to use
+`ar` to create the package. If you use `tar` to create a package, the mimetype
+will be that of a tar or gzip file. Using `ar`, it will be a Debian Binary
+package format.
+
+`tar` packaged package:
+
+    
+    
+    example_package_1.3.3.7.varam335x.ipk: gzip compressed data, last modified: Thu Apr  4 07:51:34 2019, from Unix (application/gzip)
+    
+
+`ar` packaged package:
+
+    
+    
+    example_package_1.3.3.7.varam335x.ipk: Debian binary package (format 2.0) (application/vnd.debian.binary-package)
+    
+
+To create the package with `ar`, use the following command:
+
+    
+    
+    pushd packages/serial/ipkbuild/example_package
+    ar rv ../../example_package_1.3.3.7.varam335x.ipk debian-binary ./data.tar.gz ./control.tar.gz 
+    popd
+    
+
+Output:
+
+    
+    
+    ar: creating example_package_1.3.3.7.varam335x.ipk
+    a - ./debian-binary
+    a - ./data.tar.gz
+    a - ./control.tar.gz
+    
+
+   [1]: https://raymii.org/s/inc/img/var-som-mx6.png
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

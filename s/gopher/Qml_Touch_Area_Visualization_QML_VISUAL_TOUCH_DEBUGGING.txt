@@ -1,0 +1,116 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	QML Touch Area visualization with QML_VISUAL_TOUCH_DEBUGGING
+Author      : 	Remy van Elst
+Date        : 	07-02-2022
+URL         : 	https://raymii.org/s/tutorials/Qml_Touch_Area_Visualization_QML_VISUAL_TOUCH_DEBUGGING.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+This guide shows you how to enable a red visual square around your `Mouseareas` and `MultiPointTouchArea` controls. It visualizes where you can click/touch and also shows any overlapping touch area's. It's helpful on full screen device interfaces like a coffee-machine or other HMI.
+The environment flag `QML_VISUAL_TOUCH_DEBUGGING` needs to be set, but this is not documented on the Qt Docs site, only on a cheat sheet from 2016 by ISC. If you google for the environment flag, the only pages you get are the Qt source code and that cheat sheet. I've found this flag to be very useful when debugging touch issues, like overlapping touch or when a touch area is too small to use.
+One of my co-workers found it when we had touch issues and since there is a lack of documentation, perfect for a small guide.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Here's an image of my [earlier demo app on Qml Drag and Drop][2], slightly
+edited to show text with a larger touch area (`MouseArea` inside `Text` 
+with `anchors.margins: -5`) and the default `Text` `MouseArea`:
+
+![demo grid][1]
+
+
+As you can see, the `Text` and `Rectangle` controls that have a `MouseArea` 
+inside of them, are now highlighted red, overlapping parts darker. 
+
+This variable works best for your home-grown Qml controls that have a `MouseArea`.
+It does not work on other controls like `Button` or `TextArea`.
+
+### QML VISUAL TOUCH DEBUGGING = True
+
+To enable this feature, set the environment variable `QML_VISUAL_TOUCH_DEBUGGING`
+to `true` (anything will work but I prefer true) and run your Qt application:
+
+    QML_VISUAL_TOUCH_DEBUGGING=true ./myApp
+
+You can set it in Qt Creator under `Projects`, then `Build & Run`:
+
+![qt creator env settings][3]
+
+Another Qt environment flag like this [can be used to expose any Qt app
+over VNC][8].
+
+### Caveats
+
+There is a significant performance impact when using this option. At work, the 
+coffee machine application runs noticeably slower, multiple second delays,
+touches not registering right away, so use with caution.
+
+
+I've saved the current [web search results][4] and there are 4 current results 
+for `QML_VISUAL_TOUCH_DEBUGGING`. Two are the Qt 5 source code on 
+`code.woboq.org/qt5`, one is a github mirror and the last one is the `ics.com`
+[QML Quick Reference PDF][5]. Old PDF, for Qt 5.6 and it just lists this variable,
+no explanation what it does. The Qt Docs site (5 and 6) also don't have
+[any results][6]. So I'm not sure how supported this flag is, or if it
+will work in the future. As of Qt 5.15.2 (and up to 5.15.8, work pays for the LTS release) 
+it does, but I haven't tested Qt 6.
+
+Also note that only `MouseArea` and `MultiPointTouchArea` work with this variable. If you've
+styled `Button` for example, that won't show a red overlay. See the below screenshot
+of my monitoring program, the check squares are `MouseAreas`, but the buttons for
+`Edit` and `Pause` are styled `Buttons`, those look like home-made button controls, 
+a `Rectangle` with a `MouseArea`, but aren't and thus have no red square overlay.
+
+![leafnode][7]
+
+
+[1]: /s/inc/img/qt-touch-debug.png
+[2]: /s/tutorials/Qml_Drag_and_Drop_example_including_reordering_the_Cpp_Model.html
+[3]: /s/inc/img/qt-touch-debug-2.png
+[4]: http://web.archive.org/web/20220207184958/https://www.startpage.com/do/dsearch?query=QML_VISUAL_TOUCH_DEBUGGING&cat=web&pl=ext-ff&language=nederlands&extVersion=1.3.0
+[5]: /s/inc/downloads/QML_CheatSheet_Letter.pdf
+[6]: https://archive.md/aSNgu
+[7]: /s/inc/img/qt-touch-debug-3.png
+[8]: /s/articles/Expose_any_QT_program_via_VNC.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

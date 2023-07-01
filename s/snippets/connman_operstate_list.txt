@@ -1,0 +1,119 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	connman operstate list
+Author      : 	Remy van Elst
+Date        : 	25-06-2019
+URL         : 	https://raymii.org/s/snippets/connman_operstate_list.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+
+Recently I was debugging connection issues with a system that uses
+connman as it's network management software. In the log it was visible that 
+the connection went away and came back, logged with ' `operstate $number $state`.
+I couldn't easily find an overview of all the possible states, but since it's 
+open source we can take a look at the code to find out. Publishing it here
+for future reference.
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Log
+
+The relevant parts of the logging look like this:
+
+    Jun 22 19:41:33 hostname connmand[8080]: eth1 {newlink} index 5 operstate 6 <UP>
+    Jun 23 16:34:07 hostname connmand[26069]: eth1 {update} flags 36866 <DOWN>
+    Jun 23 16:34:07 hostname connmand[26069]: eth1 {newlink} index 5 operstate 2 <DOWN>
+    Jun 23 16:34:08 hostname connmand[26069]: eth1 {newlink} index 5 operstate 6 <UP>
+    Jun 23 16:34:08 hostname connmand[26069]: eth1 {update} flags 36867 <UP>
+    Jun 23 16:34:08 hostname connmand[26069]: eth1 {newlink} index 5 operstate 2 <DOWN>
+    Jun 23 16:34:10 hostname connmand[26069]: eth1 {newlink} index 5 operstate 6 <UP>
+
+
+The different manpages and online search results didn't give me the information 
+I was looking for, so I cloned the repository and turned to trusty old `grep`.
+
+    git clone https://git.kernel.org/pub/scm/network/connman/connman.git/
+    cd connman
+
+Searching recursively:
+
+    grep -iInHr "operstate" * 
+
+The first hit was what I was looking for:
+
+    src/rtnl.c:344:static const char *operstate2str(unsigned char operstate)
+    src/rtnl.c:346: switch (operstate) {
+
+
+You can view the code [online via gitweb][1], but here's the list, I've added
+the comments with the numbers per state:
+
+    static const char *operstate2str(unsigned char operstate)
+    {
+        switch (operstate) {
+        case IF_OPER_UNKNOWN: //0
+            return "UNKNOWN";
+        case IF_OPER_NOTPRESENT: //1
+            return "NOT-PRESENT";
+        case IF_OPER_DOWN: //2
+            return "DOWN";
+        case IF_OPER_LOWERLAYERDOWN: //3
+            return "LOWER-LAYER-DOWN";
+        case IF_OPER_TESTING: //4
+            return "TESTING"; 
+        case IF_OPER_DORMANT: //5
+            return "DORMANT";
+        case IF_OPER_UP: //6
+            return "UP";
+        }
+
+        return "";
+    }
+
+
+This info is what I was looking for to use in further automated log analysis.
+
+[1]: https://git.kernel.org/pub/scm/network/connman/connman.git/tree/src/rtnl.c#n344
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

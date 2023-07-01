@@ -1,0 +1,1488 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Installing the es40 AlphaServer emulator 0.18 on Ubuntu 16.04, and trying to install OpenVMS 8.4 on es40
+Author      : 	Remy van Elst
+Date        : 	24-04-2018
+URL         : 	https://raymii.org/s/blog/Installing_the_es40_AlphaServer_emulator_0.18_on_Ubuntu_16.04_and_trying_to_install_openVMS_8.4_on_es40.html
+Format      : 	Markdown/HTML
+---
+
+
+
+[![openvms][1]][2]
+
+(You can read all my OpenVMS articles by [clicking the picture above][2])
+
+OpenVMS 7.3 is the latest version of OpenVMS for the VAX architecture. Since the
+[DECUS][3] system uses OpenVMS 8.4 there were some version differences. I could
+not set my 'BACKSPACE=DELETE' ([see my article here][4]) on 7.3. The hobbyist
+license also covers the Alpha and Itanium versions of OpenVMS so I want to try
+the Alpha version, which is consequently also 8.4, the latest release. This
+article describes my attempt to compile and install the es40 open source Alpha
+emulator on Ubuntu 16.04 and subsequently the installation of OpenVMS Alpha. The
+emulator is not under active development since 2008, and the installation of
+OpenVMS fails. OpenVMS does boot however, very very slowly.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### AlphaServer and ES40
+
+Wikipedia defines the Alphaserver, of which ES40 is a type:
+
+> AlphaServer was the name given to a series of server computers, produced from
+1994 onwards by Digital Equipment Corporation, and later by Compaq and HP. As
+the name suggests, the AlphaServers were based on the DEC Alpha 64-bit
+microprocessor. As part of the roadmap to phase out Alpha-, MIPS- and PA-RISC-
+based systems in favor of Itanium-based systems at HP, the most recent
+AlphaServer systems reached their end of general availability on 27 April 2007.
+The availability of upgrades and options was discontinued on 25 April 2008,
+approximately one year after the systems were discontinued.
+
+The [es40][6] project is the only open source Alpha emulator for Linux but sadly
+the development halted around 2009. The author, Camiel Vanderhoeven, is now
+working for VMS Software inc, the company that now develops OpenVMS and the x86
+port. He is also doing [talks and video's][7] on OpenVMS:
+
+The ES40 Emulator Project aims to create portable emulator for the HP (DEC,
+Compaq) AlphaServer ES40.
+
+There are other Alpha emulators, like FreeAXP, but those are Windows only.
+
+Via [this page][8] I found a picture of the actual hardware ES40:
+
+![][9]
+
+[Here][10] are more pictures and manuals of the ES40 hardware.
+
+### Dependencies
+
+To build the emulator on Ubuntu 16.04, a lot of development dependencies are
+required. Install all of them using apt:
+
+    
+    
+    apt-get install libpcap-dev build-essential unzip libx11-dev libsdl-dev automake autotools-dev libpoco-dev libxt-dev checkinstall
+    
+
+The actual source code is hosted on sourceforge and you can do a CVS checkout,
+but that is slow and someone put the code on Github, so lets check out the
+repository:
+
+    
+    
+    git clone https://github.com/RaymiiOrg/es40
+    
+
+Output:
+
+    
+    
+    Cloning into 'es40'...
+    remote: Counting objects: 317, done.
+    remote: Total 317 (delta 0), reused 0 (delta 0), pack-reused 317
+    Receiving objects: 100% (317/317), 867.65 KiB | 733.00 KiB/s, done.
+    Resolving deltas: 100% (112/112), done.
+    Checking connectivity... done.
+    
+
+### ./configure
+
+This was one of the parts that gave me problems. First go into the code folder:
+
+    
+    
+    cd es40
+    
+
+If all the dependencies are installed, the output should be like this:
+
+    
+    
+    $ ./configure
+    
+
+Output:
+
+    
+    
+    checking for a BSD-compatible install... /usr/bin/install -c
+    checking whether build environment is sane... yes
+    checking for a thread-safe mkdir -p... /bin/mkdir -p
+    checking for gawk... gawk
+    checking whether make sets $(MAKE)... yes
+    checking whether make supports nested variables... yes
+    checking for g++... g++
+    [...]
+    checking for strncasecmp... yes
+    checking for _stricasecmp... no
+    checking for strspn... yes
+    checking that generated files are newer than configure... done
+    configure: creating ./config.status
+    config.status: creating Makefile
+    config.status: creating doc/Makefile
+    config.status: creating m4/Makefile
+    config.status: creating src/Makefile
+    config.status: creating src/config.h
+    config.status: executing depfiles commands
+    
+
+Start the compilation. This gave me an error right away:
+
+    
+    
+    $ make
+    
+
+Output:
+
+    
+    
+    CDPATH="${ZSH_VERSION+.}:" && cd . && /bin/bash /home/username/tmp/es40/missing aclocal-1.14 -I m4
+    /home/username/tmp/es40/missing: line 81: aclocal-1.14: command not found
+    WARNING: 'aclocal-1.14' is missing on your system.
+             You should only need it if you modified 'acinclude.m4' or
+             'configure.ac' or m4 files included by 'configure.ac'.
+             The 'aclocal' program is part of the GNU Automake package:
+             <http://www.gnu.org/software/automake>
+             It also requires GNU Autoconf, GNU m4 and Perl in order to run:
+             <http://www.gnu.org/software/autoconf>
+             <http://www.gnu.org/software/m4/>
+             <http://www.perl.org/>
+    Makefile:383: recipe for target 'aclocal.m4' failed
+    make: *** [aclocal.m4] Error 127
+    
+
+I had to make two symlinks to these specific versions to get make to continue:
+
+    
+    
+    $ sudo ln -s /usr/bin/aclocal /usr/bin/aclocal-1.14
+    $ sudo ln -s /usr/bin/automake /usr/bin/automake-1.14
+    
+
+The next try also failed:
+
+    
+    
+    $ make
+    
+
+Output:
+
+    
+    
+    config.status: creating m4/Makefile
+    make[1]: Nothing to be done for 'all'.
+    make[1]: Leaving directory '/home/username/tmp/es40/m4'
+    Making all in src
+    make[1]: Entering directory '/home/username/tmp/es40/src'
+     cd .. && /bin/bash ./config.status src/Makefile depfiles
+    config.status: creating src/Makefile
+    config.status: executing depfiles commands
+    make  all-am
+    make[2]: Entering directory '/home/username/tmp/es40/src'
+    depbase=`echo AliM1543C.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+    g++ -DHAVE_CONFIG_H -I.     -g -O2 -I/usr/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT -DHAVE_SDL -I/usr/include -DHAVE_PCAP nope -DHAVE_X11 -pthread -MT AliM1543C.o -MD -MP -MF $depbase.Tpo -c -o AliM
+    1543C.o AliM1543C.cpp &&\
+    mv -f $depbase.Tpo $depbase.Po
+    g++: error: nope: No such file or directory
+    Makefile:1065: recipe for target 'AliM1543C.o' failed
+    make[2]: *** [AliM1543C.o] Error 1
+    make[2]: Leaving directory '/home/username/tmp/es40/src'
+    Makefile:557: recipe for target 'all' failed
+    make[1]: *** [all] Error 2
+    make[1]: Leaving directory '/home/username/tmp/es40/src'
+    Makefile:404: recipe for target 'all-recursive' failed
+    make: *** [all-recursive] Error 1
+    
+
+Where does this error come from: `g++: error: nope: No such file or directory`?
+I don't know any Nope binary. Lets see if it's in the Makefile:
+
+    
+    
+    $ grep nope Makefile
+    
+
+Output:
+
+    
+    
+    X11_CFLAGS = nope
+    CXXFLAGS = -g -O2 -I/usr/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT -DHAVE_SDL -I/usr/include -DHAVE_PCAP nope -DHAVE_X11 -pthread
+    
+
+Looking in the macro, the `nope` is there as well.
+<https://github.com/RaymiiOrg/es40/blob/master/m4/x11.m4#L52>
+
+It looks for the following C header file:
+
+    
+    
+    X11/Intrinsic.h
+    
+
+According to the [Ubuntu package site][11] that file is in the `libxt-dev`
+package. I missed that when installing the dependencies. After installing it,
+the make ran without breaking errors:
+
+    
+    
+    make
+    
+
+Output:
+
+    
+    
+    Making all in m4
+    make[1]: Entering directory '/home/username/tmp/es40/m4'
+    make[1]: Nothing to be done for 'all'.
+    make[1]: Leaving directory '/home/username/tmp/es40/m4'
+    Making all in src
+    make[1]: Entering directory '/home/username/tmp/es40/src'
+    make  all-am
+    make[2]: Entering directory '/home/username/tmp/es40/src'
+    depbase=`echo AliM1543C.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+    g++ -DHAVE_CONFIG_H -I.     -g -O2 -I/usr/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT -DHAVE_SDL -I/usr/include -DHAVE_PCAP  -DHAVE_X11 -pthread -MT AliM1543C.o -MD -MP -MF $depbase.Tpo -c -o AliM1543
+    C.o AliM1543C.cpp &&\
+    mv -f $depbase.Tpo $depbase.Po
+    AliM1543C.cpp: In member function 'virtual int CAliM1543C::RestoreState(FILE*)':
+    AliM1543C.cpp:1237:33: warning: ignoring return value of 'size_t fread(void*, size_t, size_t, FILE*)', declared with attribute warn_unused_result [-Wunused-result]
+       fread(&ss, sizeof(long), 1, f);
+                                     ^
+    AliM1543C.cpp:1250:37: warning: ignoring return value of 'size_t fread(void*, size_t, size_t, FILE*)', declared with attribute warn_unused_result [-Wunused-result]
+       fread(&state, sizeof(state), 1, f);
+                                         ^
+    depbase=`echo AliM1543C_ide.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+    g++ -DHAVE_CONFIG_H -I.     -g -O2 -I/usr/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT -DHAVE_SDL -I/usr/include -DHAVE_PCAP  -DHAVE_X11 -pthread -MT AliM1543C_ide.o -MD -MP -MF $depbase.Tpo -c -o AliM
+    1543C_ide.o AliM1543C_ide.cpp &&\
+    mv -f $depbase.Tpo $depbase.Po
+    AliM1543C_ide.cpp: In member function 'virtual int CAliM1543C_ide::RestoreState(FILE*)':
+    AliM1543C_ide.cpp:484:33: warning: ignoring return value of 'size_t fread(void*, size_t, size_t, FILE*)', declared with attribute warn_unused_result [-Wunused-result]
+       fread(&ss, sizeof(long), 1, f);
+    [...]
+    .
+    o es40-cfg.cpp &&\
+    mv -f $depbase.Tpo $depbase.Po
+    g++  -g -O2 -I/usr/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT -DHAVE_SDL -I/usr/include -DHAVE_PCAP  -DHAVE_X11 -pthread   -o es40_cfg es40-cfg.o base/Exception.o  -L/usr/lib/x86_64-linux-gnu -lSDL -
+    L/usr/ng/lib -lpcap -lX11
+    make[2]: Leaving directory '/home/username/tmp/es40/src'
+    make[1]: Leaving directory '/home/username/tmp/es40/src'
+    Making all in doc
+    make[1]: Entering directory '/home/username/tmp/es40/doc'
+    make[1]: Nothing to be done for 'all'.
+    make[1]: Leaving directory '/home/username/tmp/es40/doc'
+    make[1]: Entering directory '/home/username/tmp/es40'
+    make[1]: Nothing to be done for 'all-am'.
+    make[1]: Leaving directory '/home/username/tmp/es40'
+    
+
+So it seems it worked? At least in the `src/` folder there now are binaries.
+
+### SIGSEGV
+
+Lets try to run the compiled binary:
+
+    
+    
+    $ ./src/es40
+    
+
+Output:
+
+    
+    
+       **======================================================================**
+       ||                             ES40  emulator                           ||
+       ||                              Version 0.18+                           ||
+       ||                                                                      ||
+       ||  Copyright (C) 2007-2008 by the ES40 Emulator Project                ||
+       ||  Website: http://sourceforge.net/projects/es40                       ||
+       ||  E-mail : camiel@camicom.com                                         ||
+       ||                                                                      ||
+       ||  This program is free software; you can redistribute it and/or       ||
+       ||  modify it under the terms of the GNU General Public License         ||
+       ||  as published by the Free Software Foundation; either version 2      ||
+       ||  of the License, or (at your option) any later version.              ||
+       **======================================================================**
+    
+    
+    Segmentation fault (core dumped)
+    
+
+My favorite program output, I love me a good segfault. Lets debug with `strace`.
+
+  * `-f`: Follow threads and child processes that are created
+  * `-T`: Print time spent in system call
+  * `-e trace=open,read,write,close`: Trace only specific system calls
+
+strace -Tfe trace=open,read,write,close ./src/es40
+
+Relevant output:
+
+    
+    
+    open("./es40.cfg", O_RDONLY)            = -1 ENOENT (No such file or directory)
+    open("/etc/es40.cfg", O_RDONLY)         = -1 ENOENT (No such file or directory)
+    open("/usr/etc/es40.cfg", O_RDONLY)     = -1 ENOENT (No such file or directory)
+    open("/usr/local/etc/es40.cfg", O_RDONLY) = -1 ENOENT (No such file or directory)
+    open("/usr/local/etc/es40.cfg", O_RDONLY) = -1 ENOENT (No such file or directory)
+    --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=0} ---
+    +++ killed by SIGSEGV (core dumped) +++
+    Segmentation fault (core dumped)
+    
+
+So maybe it is missing the configuration. I did not do a `make install` since I
+hoped that would't be needed. Using `checkinstall` we can create a debian
+package. I like that over just a `make install` since it allows you to remove
+the software from your system and overall general house keeping. After
+`checkinstall` I copied the provided default configuration:
+
+    
+    
+    cp src/es40.cfg /etc/es40.cfg
+    
+
+Since there is no documentation on the configuration format, I'll run it and see
+where the ship sails.
+
+Let's run it again.
+
+    
+    
+    es40
+    
+
+Output:
+
+    
+    
+       **======================================================================**
+       ||                             ES40  emulator                           ||
+       ||                              Version 0.18+                            ||
+       ||                                                                      ||
+       ||  Copyright (C) 2007-2008 by the ES40 Emulator Project                ||
+       ||  Website: http://sourceforge.net/projects/es40                       ||
+       ||  E-mail : camiel@camicom.com                                         ||
+       ||                                                                      ||
+       ||  This program is free software; you can redistribute it and/or       ||
+       ||  modify it under the terms of the GNU General Public License         ||
+       ||  as published by the Free Software Foundation; either version 2      ||
+       ||  of the License, or (at your option) any later version.              ||
+       **======================================================================**
+    
+    
+    %GUI-I-INS: Installing sdl module as the ES40 GUI
+    sys0(tsunami): $Id: System.cpp,v 1.79 2008/06/12 07:29:44 iamcamiel Exp $
+    %FLS-F-NOREST: Flash could not be restored from rom\flash.rom
+    sys0(tsunami): $Id: Flash.cpp,v 1.19 2008/03/24 22:11:50 iamcamiel Exp $
+    dma: $Id: DMA.cpp,v 1.9 2008/04/29 09:24:52 iamcamiel Exp $
+    pci0.15(ali_ide).disk0.0(file): Could not open file img\disk0.img!
+    pci0.15(ali_ide).disk0.0(file): writing 600 1kB blocks: 100%
+    pci0.15(ali_ide).disk0.0(file): 600 MB file img\disk0.img created.
+    pci0.15(ali_ide).disk0.0(file): Mounted file img\disk0.img, 1228800 512-byte blocks, 1536/16/50.
+    pci0.15(ali_ide).disk1.0(file): Could not open file img\vms83.iso!
+    *** Error in `es40': double free or corruption (fasttop): 0x0000000001167df0 ***
+    ======= Backtrace: =========
+    /lib/x86_64-linux-gnu/libc.so.6(+0x777e5)[0x7f8245d977e5]
+    /lib/x86_64-linux-gnu/libc.so.6(+0x8037a)[0x7f8245da037a]
+    /lib/x86_64-linux-gnu/libc.so.6(cfree+0x4c)[0x7f8245da453c]
+    es40[0x43b4b3]
+    es40[0x4321cf]
+    es40[0x4319b8]
+    es40[0x4319b8]
+    es40[0x432f80]
+    es40(main+0x19f)[0x40573f]
+    /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf0)[0x7f8245d40830]
+    es40[0x405c09]
+    ======= Memory map: ========
+    00400000-00497000 r-xp 00000000 00:00 489903                     /usr/local/bin/es40
+    00696000-00697000 r--p 00096000 00:00 489903                     /usr/local/bin/es40
+    00697000-0069d000 rw-p 00097000 00:00 489903                     /usr/local/bin/es40
+    0069d000-006bf000 rw-p 00000000 00:00 0
+    010c3000-01188000 rw-p 00000000 00:00 0                          [heap]
+    7f81fc000000-7f81fc021000 rw-p 00000000 00:00 0
+    
+
+The output gave a lot more debug information, the actual relevant issue was at
+the top:
+
+    
+    
+    Could not open file img\vms83.iso!
+    
+
+From the HP hobbyist download server I downloaded the `ALPHA084.ISO` file. Copy
+it to the right place and edit `es40.cfg` to reflect the correct filesystem
+path.
+
+Run it again and see what breaks:
+
+    
+    
+    %GUI-I-INS: Installing sdl module as the ES40 GUI
+    sys0(tsunami): $Id: System.cpp,v 1.79 2008/06/12 07:29:44 iamcamiel Exp $
+    %FLS-F-NOREST: Flash could not be restored from rom\flash.rom
+    sys0(tsunami): $Id: Flash.cpp,v 1.19 2008/03/24 22:11:50 iamcamiel Exp $
+    dma: $Id: DMA.cpp,v 1.9 2008/04/29 09:24:52 iamcamiel Exp $
+    pci0.15(ali_ide).disk0.0(file): Could not open file img\disk0.img!
+    pci0.15(ali_ide).disk0.0(file): writing 600 1kB blocks: 100%
+    pci0.15(ali_ide).disk0.0(file): 600 MB file img\disk0.img created.
+    pci0.15(ali_ide).disk0.0(file): Mounted file img\disk0.img, 1228800 512-byte blocks, 1536/16/50.
+    pci0.15(ali_ide).disk1.0(file): Mounted file ALPHA084.ISO, 337251 2048-byte blocks, 112417/3/1.
+    Emulator Failure: Illegal state: More than one SCSI device at the same ID: SCSIBus.cpp, line 78
+    Segmentation fault (core dumped)
+    
+
+There is an IDE controller defined in the config and an SCSI controller. Comment
+out the SCSI controller:
+
+    
+    
+      // Symbios SCSI controller
+      //
+      // There are two flavors of SCSI controllers on the emulator; 53c810
+      // and 53c895. The 53c810 supports 7 disks (0.0..0.6), the 53c895
+      // supports 15 disks (0.0..0.6 and 0.8..0.15).
+      //
+      // Right now, the 53c810 is the only controller that works with OpenVMS.
+    //  pci0.3 = sym53c810
+    //  {
+    //   disk0.0 = file
+    //    {
+    //      file =          "img\dka0.img";
+    //      read_only  
+    //    }
+    //  }
+    
+
+The next issue had to do with another file not found:
+
+    
+    
+    %GUI-I-INS: Installing sdl module as the ES40 GUI
+    sys0(tsunami): $Id: System.cpp,v 1.79 2008/06/12 07:29:44 iamcamiel Exp $
+    %FLS-F-NOREST: Flash could not be restored from rom\flash.rom
+    sys0(tsunami): $Id: Flash.cpp,v 1.19 2008/03/24 22:11:50 iamcamiel Exp $
+    dma: $Id: DMA.cpp,v 1.9 2008/04/29 09:24:52 iamcamiel Exp $
+    pci0.15(ali_ide).disk0.0(file): Mounted file img\disk0.img, 1228800 512-byte blocks, 1536/16/50.
+    pci0.15(ali_ide).disk1.0(file): Mounted file ALPHA084.ISO, 337251 2048-byte blocks, 112417/3/1.
+    pci0.15(ali_ide).disk1.1(ramdisk): Mounted RAMDISK, 20480 512-byte blocks, 32/16/40.
+    pci0.19(ali_usb): $Id: AliM1543C_usb.cpp,v 1.6 2008/03/14 15:30:50 iamcamiel Exp $
+    %DPR-F-NOREST: DPR could not be restored from rom\dpr.rom
+    sys0(tsunami): $Id: DPR.cpp,v 1.23 2008/06/12 07:29:44 iamcamiel Exp $
+    cpu0(ev68cb)(0): $Id: AlphaCPU.cpp,v 1.82 2009/03/16 01:33:27 iamcamiel Exp $
+    cpu1(ev68cb)(1): $Id: AlphaCPU.cpp,v 1.82 2009/03/16 01:33:27 iamcamiel Exp $
+    pci0.7(ali): $Id: AliM1543C.cpp,v 1.66 2008/05/31 15:47:07 iamcamiel Exp $
+    kbc: $Id: Keyboard.cpp,v 1.10 2008/05/31 15:47:09 iamcamiel Exp $
+    %IDE-I-INIT: New IDE emulator initialized.
+    Emulator Failure: File not found: cirrus rom file rom\vgabios-0.6a.debug.bin not found.: Cirrus.cpp, line 295
+    Stop threads:
+    Freeing memory in use by system...
+    pci0.15(ali_ide).disk0.0(file): Closing file.
+    *** Error in `es40': double free or corruption (fasttop): 0x0000000001f53aa0 ***
+    ======= Backtrace: =========
+    /lib/x86_64-linux-gnu/libc.so.6(+0x777e5)[0x7f6f1a9977e5]
+    /lib/x86_64-linux-gnu/libc.so.6(+0x8037a)[0x7f6f1a9a037a]
+    /lib/x86_64-linux-gnu/libc.so.6(cfree+0x4c)[0x7f6f1a9a453c]
+    es40[0x43ade9]
+    es40[0x45597f]
+    
+
+In this case the VGA bios. Later on I ended up turning this off, but for now
+lets download it:
+
+    
+    
+    wget http://savannah.gnu.org/download/vgabios/vgabios-0.6a.debug.bin -O "rom\vgabios-0.6a.debug.bin"
+    
+
+To skip ahead to a working situation, comment out these sections as well:
+
+    
+    
+    //  pci0.4 = dec21143 {
+    // }
+    
+
+and
+
+    
+    
+    //    action = """c:\Program Files\PuTTY\putty.exe"" telnet://localhost:21264";
+    //    action = """c:\Program Files\PuTTY\putty.exe"" telnet://localhost:21265";
+    
+
+and
+
+    
+    
+    //  pci0.2 = cirrus
+    //  {
+    //    rom = "rom\vgabios-0.6a.debug.bin";
+    //  }
+    
+
+As you might have guessed I had to figure out all these issues by slowly
+tweaking the configuration until it booted up.
+
+### Configuration that boots without segfaults
+
+Our configuration now looks like this:
+
+    
+    
+      //gui = sdl
+      {
+        keyboard.use_mapping = false;
+        keyboard.map = "keys.map";
+      }
+      sys0 = tsunami
+      {
+        rom.srm = "cl67srmrom.exe";
+        rom.decompressed = "decompressed.rom";
+        rom.flash = "flash.rom";
+        rom.dpr = "rdpr.rom";
+        memory.bits = 30;
+        cpu0 = ev68cb
+        {
+          icache = true;
+          speed = 800M;
+        }
+        cpu1 = ev68cb
+        {
+          icache = true;
+          speed = 800M;
+        }
+        pci0.7 = ali{
+          mouse.enabled = true;
+          lpt.outfile = "lpt.out";
+        }
+        pci0.15 = ali_ide
+        {
+          disk0.0 = file
+          {
+            file =          "disk0.img";
+            serial_number = "VMS";
+            rev_number    = "8.4";
+            model_number  = "OpenVMS8.3";
+            read_only     = false;
+            cdrom         = false;
+            autocreate_size = 600M;
+          }
+          disk1.0 = file
+          {
+            file =          "ALPHA084.ISO";
+            read_only     = true;
+            cdrom         = true;
+          }
+          disk1.1 = ramdisk
+          {
+            size = 10M;
+          }
+        }
+        pci0.19 = ali_usb {}
+        serial0 = serial {
+          port = 21264;
+        }
+      }
+    
+
+### SRM (System Reference Manual) firmware
+
+The emulator needs special firmware [from HP][12], the SRM.
+
+The SRM firmware (also called the SRM console) is the boot firmware written by
+DEC for systems based on the Alpha AXP microprocessor. The acronym SRM is
+derived from the phrase Alpha System Reference Manual, the publication detailing
+the Alpha AXP architecture and which specified various features of the SRM
+firmware. The SRM console was initially designed to boot DEC's OSF/1 AXP (later
+called Digital UNIX and finally Tru64 UNIX) and OpenVMS operating systems,
+although various other operating systems (such as Linux, NetBSD, OpenBSD, and
+FreeBSD, for example) were also written to boot from the SRM console. The third
+proprietary operating system published for the Alpha AXP architecture -
+Microsoft Windows NT - did not boot from SRM; instead, Windows booted from the
+ARC (multi platform "Advanced RISC Computing") boot firmware. (ARC is also known
+as AlphaBIOS.)
+
+When the system is booted, the SRM console is displayed as a blue screen with a
+prompt. The prompt looks like `P00>>>` (the `00` indicates the primary
+processor). On multi-processor machines, the prompt could be `P01>>>`, `P02>>>`,
+etc. It views your NVRAM and devices as a pseudo-filesystem. You can see this if
+you use the `ls` command. Also, it contains a fairly large set of diagnostic,
+setup, and debugging utilities As well, SRM has environment variables, a number
+of which are pre-defined and correspond to locations in NVRAM. You can view the
+entire list of environment variables and their values with the `show` command
+(there are quite a few of them, so you will probably want to pipe its output to
+`more`). You can also show variables matching a "glob" pattern, for example,
+`show boot*` will show all the variables starting in "boot". Read more about the
+[SRM here][13] or [on wikipedia][14].
+
+Download rom image [from here: cl67srmrom.exe][15]. It can be found on HP's
+public FTP servers as well if needed, see the link above.
+
+Make sure the filename in the configuration matches:
+
+    
+    
+    rom.srm = "cl67srmrom.exe";
+    
+
+### Boot up es40, finally
+
+Now that we have a configuration file that does not cause a segfault, we can
+boot up and connect to telnet to access the emulator.
+
+    
+    
+      $ es40
+    
+
+Output:
+
+    
+    
+         **======================================================================**
+         ||                             ES40  emulator                           ||
+         ||                              Version 0.18+                            ||
+         ||                                                                      ||
+         ||  Copyright (C) 2007-2008 by the ES40 Emulator Project                ||
+         ||  Website: http://sourceforge.net/projects/es40                       ||
+         ||  E-mail : camiel@camicom.com                                         ||
+         ||                                                                      ||
+         ||  This program is free software; you can redistribute it and/or       ||
+         ||  modify it under the terms of the GNU General Public License         ||
+         ||  as published by the Free Software Foundation; either version 2      ||
+         ||  of the License, or (at your option) any later version.              ||
+         **======================================================================**
+    
+    
+      %GUI-I-INS: Installing sdl module as the ES40 GUI
+      sys0(tsunami): $Id: System.cpp,v 1.79 2008/06/12 07:29:44 iamcamiel Exp $
+      %FLS-F-NOREST: Flash could not be restored from rom\flash.rom
+      sys0(tsunami): $Id: Flash.cpp,v 1.19 2008/03/24 22:11:50 iamcamiel Exp $
+      dma: $Id: DMA.cpp,v 1.9 2008/04/29 09:24:52 iamcamiel Exp $
+      pci0.15(ali_ide).disk0.0(file): Mounted file img\disk0.img, 1228800 512-byte blocks, 1536/16/50.
+      pci0.15(ali_ide).disk1.0(file): Mounted file ALPHA084.ISO, 337251 2048-byte blocks, 112417/3/1.
+      pci0.15(ali_ide).disk1.1(ramdisk): Mounted RAMDISK, 20480 512-byte blocks, 32/16/40.
+      pci0.19(ali_usb): $Id: AliM1543C_usb.cpp,v 1.6 2008/03/14 15:30:50 iamcamiel Exp $
+      %DPR-F-NOREST: DPR could not be restored from rom\dpr.rom
+      sys0(tsunami): $Id: DPR.cpp,v 1.23 2008/06/12 07:29:44 iamcamiel Exp $
+      cpu0(ev68cb)(0): $Id: AlphaCPU.cpp,v 1.82 2009/03/16 01:33:27 iamcamiel Exp $
+      cpu1(ev68cb)(1): $Id: AlphaCPU.cpp,v 1.82 2009/03/16 01:33:27 iamcamiel Exp $
+      pci0.7(ali): $Id: AliM1543C.cpp,v 1.66 2008/05/31 15:47:07 iamcamiel Exp $
+      kbc: $Id: Keyboard.cpp,v 1.10 2008/05/31 15:47:09 iamcamiel Exp $
+      %IDE-I-INIT: New IDE emulator initialized.
+      pci0.2(cirrus): $Id: Cirrus.cpp,v 1.23 2008/05/31 15:47:09 iamcamiel Exp $
+      %SYS-I-READROM: Reading original ROM image from cl67srmrom.exe.
+      %SYS-I-DECOMP: Decompressing ROM image.
+      0%....10%....20%....30%....40%....50%....60%....70%....80%....90%......100%
+      %SYS-I-ROMWRT: Writing decompressed rom to rom\decompressed.rom.
+      %SYM-I-PATCHROM: Patching ROM for speed.
+      %SYS-I-ROMLOADED: ROM Image loaded successfully!
+      %DPR-F-NOREST: DPR could not be restored from rom\dpr.rom
+      sys0(tsunami): $Id: DPR.cpp,v 1.23 2008/06/12 07:29:44 iamcamiel Exp $
+      Start threads: cpu0 cpu1 ali kbd ide0 ide1 cirrus
+    
+
+It will wait with booting until you connect to telnet, then it will boot
+through:
+
+    
+    
+      serial0(serial): Waiting for connection on port 21264.
+      serial0(serial): $Id: Serial.cpp,v 1.51 2008/06/03 09:07:56 iamcamiel Exp $
+      %SYS-I-READROM: Reading decompressed ROM image from rom\decompressed.rom.
+      %SYM-I-PATCHROM: Patching ROM for speed.
+      %SYS-I-ROMLOADED: ROM Image loaded successfully!
+      dpr: 16384 bytes restored.
+      %DPR-I-RESTST: DPR state restored from rom\dpr.rom
+      sys0(tsunami): $Id: DPR.cpp,v 1.23 2008/06/12 07:29:44 iamcamiel Exp $
+      Start threads: cpu0 ali kbd ide0 ide1 srl0
+      *** CPU0 *** STARTING ***
+      Arbitration 0000000000010000 from CPU 0 (@13e39)... won  0000000800010000
+      Arbitration clear from CPU 0 (@13f55).
+      Arbitration 0000000000010000 from CPU 0 (@13351)... won  0000000800010000
+      Arbitration clear from CPU 0 (@133b9).
+      Arbitration 0000000000010000 from CPU 0 (@13351)... won  0000000800010000
+      Arbitration clear from CPU 0 (@133b9).
+      Arbitration 0000000000010000 from CPU 0 (@13351)... won  0000000800010000
+      Arbitration clear from CPU 0 (@133b9).
+    
+
+Connect to telnet on port 21264 from a different terminal:
+
+    
+    
+    $ telnet 127.0.0.1 21264
+    
+
+Output:
+
+    
+    
+    Trying 127.0.0.1...
+    Connected to 127.0.0.1.
+    Escape character is '^]'.
+         This is serial port #0 on ES40 Emulator
+    
+
+Quoting from the [es40][6] site:
+
+> The port 21264 was choosen on purpose. Actually this was the first EV6 Alpha
+processor CPU model number.
+
+There seems to be a GUI option, but that window was very tall and small and was
+not resizable. I therefore choose to use telnet only.
+
+### SYSFAULT CPU1 - pc = 001a0e84
+
+The boot continued, and I was happy:
+
+    
+    
+         OpenVMS PALcode V  1  .  9  8  -  1  0  4    , Tru64 UNIX PALcode V 1  .  9  2  -  1  0  5
+    
+           starting console on CPU 0
+    initialized idle PCB
+    initializing semaphores
+    initializing heap
+    initial heap 240c0
+    memory low limit = 1b0000 heap = 240c0, 17fc0
+    initializing driver structures
+    initializing idle process PID
+    initializing file system
+    initializing hardware
+    initializing timer data structures
+    lowering IPL
+    CPU 0 speed is 800 MHz
+    create dead eater
+    create poll
+    create timer
+    create powerup
+    access NVRAM
+    Memory size 1024 MB
+    testing memory
+    ..
+    
+    probe I/O subsystem
+    probing hose 1, PCI
+    probing hose 0, PCI
+    probing PCI-to-ISA bridge, bus 1
+    bus 0, slot 15 -- dqa -- Acer Labs M1543C IDE
+    bus 0, slot 15 -- dqb -- Acer Labs M1543C IDE
+    starting drivers
+    entering idle loop
+    starting console on CPU 1
+    initialized idle PCB
+    initializing idle process PID
+    lowering IPL
+    
+    [...]
+    
+    SYSFAULT CPU1 - pc = 001a0e84
+    
+    exception context saved starting at 001ACD10
+    
+      CPU 1 speed is 7692 MHz
+      create powerup
+    
+
+And it hang. My happiness was short. Searching around the internet lead me to
+[the following support information][16]. It states:
+
+> This is not an error caused by a hardware failure. The SRM console decreases
+or increases its dynamic memory allocation (called heap space) to accomodate the
+hardware configuration, to include the PCI devices installed. The system will
+add 64kb of heap space for each re-init until it has adequate space. A few re-
+inits are possible until it has enough.
+
+The windows way of solving problems. Reboot until it works. I tried it a few
+times, and suprisingly, it worked.
+
+    
+    
+         OpenVMS PALcode V  1  .  9  8  -  1  0  4    , Tru64 UNIX PALcode V 1  .  9  2  -  1  0  5
+    
+           starting console on CPU 0
+    initialized idle PCB
+    initializing semaphores
+    initializing heap
+    initial heap 240c0
+    memory low limit = 1b0000 heap = 240c0, 17fc0
+    initializing driver structures
+    initializing idle process PID
+    initializing file system
+    initializing hardware
+    initializing timer data structures
+    lowering IPL
+    CPU 0 speed is 800 MHz
+    create dead eater
+    create poll
+    create timer
+    create powerup
+    access NVRAM
+    Memory size 1024 MB
+    testing memory
+    ...
+    probe I/O subsystem
+    probing hose 1, PCI
+    probing hose 0, PCI
+    probing PCI-to-ISA bridge, bus 1
+    bus 0, slot 15 -- dqa -- Acer Labs M1543C IDE
+    bus 0, slot 15 -- dqb -- Acer Labs M1543C IDE
+    starting drivers
+    entering idle loop
+    starting console on CPU 1
+    initialized idle PCB
+    initializing idle process PID
+    lowering IPL
+    *** system serial number not set. use set sys serial num command.
+    Partition 0, Memory base: 000000000, size: 040000000
+    initializing GCT/FRU at 1c8000
+    Initializing dqa dqb
+    Memory Testing and Configuration Status
+      Array       Size       Base Address    Intlv Mode
+    ---------  ----------  ----------------  ----------
+        0       1024Mb     0000000000000000    4-Way
+    
+         1024 MB of System Memory
+    Testing the System
+    [...]
+    
+
+And at last, it dropped me into the SRM prompt:
+
+    
+    
+    AlphaServer ES40 Console V7.3-1, built on Feb 27 2007 at 12:57:47
+    P00>>>
+    
+
+Using the reference manual I found out that you have to issue a boot command
+with a device. Use `show dev` to show all devices
+
+    
+    
+    P00>>>show dev
+    dqa0.0.0.15.0              DQA0                    OpenVMS8 .3
+    dqb0.0.1.15.0              DQB0                  ALPHA084 .ISO
+    dqb1.1.1.15.0              DQB1                   ES40RAMD ISK
+    dva0.0.0.1000.0            DVA0
+    P00>>>
+    
+
+Since we want to boot from the ISO, our boot device is `DQB0`:
+
+    
+    
+    P00>>>boot dqb0
+    (boot dqb0.0.1.15.0 -flags 0)
+    
+    block 0 of dqb0.0.1.15.0 is a valid boot block
+    
+    reading 1230 blocks from dqb0.0.1.15.0
+    bootstrap code read in
+    base = 200000, image start = 0, image bytes = 99c00(629760)
+    initializing HWRPB at 2000
+    initializing page table at 3ff54000
+    initializing machine state
+    setting affinity to the primary CPU
+    jumping to bootstrap code
+    
+    CPU 1 unable to complete console mode transition 1
+    CPU 1: begin = 501958484969, end = 525958485958, delta = 24000000989
+    
+    CPU 1 unable to complete console mode transition 2
+    CPU 1: begin = 525961938442, end = 549961938919, delta = 24000000477
+    
+    SYSFAULT CPU0 - pc = 001a0e84
+    
+    exception context saved starting at 0002D9E0
+    
+
+A CPU error? Searching the internet gave no real help so I decided to comment
+out the second CPU from the config, so that we emulate a single CPU machine:
+
+    
+    
+    //cpu1 = ev68cb
+    //{
+    //  icache = false;
+    //  speed = 800M;
+    //}
+    
+
+### Installing OpenVMS 8.4
+
+Finally, after a few hours of compiling, tinkering and tweaking, it boots up!
+
+    
+    
+           OpenVMS (TM) Alpha Operating System, Version V8.4
+          Copyright 1976-2010 Hewlett-Packard Development Company, L.P.
+    
+    
+    Please enter date and time (DD-MMM-YYYY  HH:MM)
+    
+
+This looks like a normal installation screen. Yay! It is very slow however, it
+takes almost 10 seconds after I entered the date for the next line of text to
+show up.
+
+    
+    
+    Please enter date and time (DD-MMM-YYYY  HH:MM)  24-APR-2018 21:12
+    
+    
+    
+        Installing required known files...
+    
+        Configuring devices...
+    
+    
+    
+        ****************************************************************
+    
+        You can install or upgrade the OpenVMS ALPHA operating system
+        or you can install or upgrade layered products that are included
+        on the OpenVMS ALPHA distribution media (CD/DVD).
+    
+        You can also execute DCL commands and procedures to perform
+        "standalone" tasks, such as backing up the system disk.
+    
+        Please choose one of the following:
+    
+            1)  Upgrade, install or reconfigure OpenVMS ALPHA Version V8.4
+            2)  Display layered products that this procedure can install
+            3)  Install or upgrade layered products
+            4)  Show installed products
+            5)  Reconfigure installed products
+            6)  Remove installed products
+            7)  Find, Install or Undo patches; Show or Delete Recovery Data
+            8)  Execute DCL commands and procedures
+            9)  Shut down this system
+    
+    Enter CHOICE or ? for help: (1/2/3/4/5/6/7/8/9/?)
+    
+
+We want to install, so choose 1.
+
+    
+    
+     ***********************************************************
+    
+        This procedure will ask a series of questions.
+    
+              () - encloses acceptable answers
+              [] - encloses default answers
+    
+        Type your response and press the <Return> key.  Type:
+    
+              ? - to repeat an explanation
+              ^ - to change prior input (not always possible)
+              Ctrl/Y - to exit the installation procedure
+    
+        There are two choices for installation/upgrade:
+    
+        Initialize - Removes all software and data files that were
+            previously on the target disk and installs OpenVMS ALPHA.
+    
+        Preserve -- Installs or Upgrades OpenVMS ALPHA on the target disk
+            and retains all other contents of the target disk.
+    
+       * Note: You cannot use preserve to install OpenVMS ALPHA on a disk on
+            which any other operating system is installed.  This includes
+            implementations of OpenVMS for other architectures.
+    
+    Do you want to INITIALIZE or to PRESERVE? [PRESERVE] INITIALIZE
+    
+
+This is a new installation, so wipe all the things.
+
+    
+    
+    Enter device name for target disk: (? for choices) DQA0
+    
+
+Our boot device is the CDROM, `DQB0`, the prompt earlier shows `DQA0` as the
+(virtual) disk.
+
+    
+    
+    Enter volume label for target system disk: [ALPHASYS] username2
+    
+
+If you're going to cluster, every disk must have a unique name. I tend to go
+with the system hostname as system disk name.
+
+    
+    
+        The target system disk can be initialized with On-Disk Structure
+        Level 2 (ODS-2) or Level 5 (ODS-5).  (? for more information)
+    
+    Do you want to initialize with ODS-2 or ODS-5? (2/5/?) 5
+    
+
+ODS, meaning `on disk structure`, is part of the `Files-11` filesystem. Compare
+it with `ext2/3/4`.
+
+"Files-11" is the general term for five separate file systems, known as on-disk
+"structure (ODS) levels 1 through 5.
+
+  * ODS-1 is the flat file system used by the RSX-11 OS, supported by older VMS systems for RSX compatibility, but never used to support VMS itself; it has been largely superseded by ODS-2 and ODS-5.
+  * ODS-2 is the standard VMS file system, and remains the most common file system for system disks (the disk on which the operating system is installed).
+  * Although seldom referred to by their ODS level designations, ODS-3 and ODS-4 are the Files-11 support for the CD-ROM ISO 9660 and High Sierra Format file systems, respectively.
+  * ODS-5 is an extended version of ODS-2 available on Alpha and IA-64 platforms which adds support for case-preserving filenames with non-ASCII characters and improvements to the hierarchical directory support. 
+
+[Read more here][17]
+
+    
+    
+    Do you want to enable hard links? (Yes/No/?) yes
+    
+
+Not sure what the impact is but lets do it. Enable those hard links.
+
+    
+    
+        You have chosen to install OpenVMS ALPHA on a new disk.
+    
+        The target system disk, DQA0:, will be initialized
+        with structure level 5 (ODS-5).
+        Hard links WILL be enabled.
+        The disk will be labeled username2.
+        Any data currently on the target system disk will be lost.
+    
+    Is this OK? (Yes/No) yes
+    
+
+This is an overview of what we selected. Go ahead.
+
+    
+    
+        Initializing and mounting target....
+    %MOUNT-F-ACCVIO, access violation, reason mask=!XB, virtual address=!XH, PC=!XH, PS=!XL
+    
+        DQA0: was previously selected as the target system.
+        DQA0: has been modified.
+    
+        If you need to return the target system to its original state,
+        you may need to restore your backup of the target system.
+    
+        If you want to re-do the installation, HP recommends that you
+        restore your backup of the target system.  Repeating the
+        installation may succeed, but it may also introduce subtle problems.
+    
+
+A failure again? Remember, I'm several hours into this project without success.
+Let's try again then.
+
+    
+    
+    Enter device name for target disk: [DQA0] (? for choices) ?
+    
+    Device                  Device           Error    Volume         Free  Trans Mnt
+     Name                   Status           Count     Label        Blocks Count Cnt
+    DQB0:                   Mounted wrtlck       0  ALPHA084        135393    79   1
+    DQB1:                   Online               0
+    DVA0:                   Offline              0
+    DQA0:                   Online               0
+    DQA1:                   Offline              1
+    DAD0:                   Online               0
+    
+    
+        ? was previously selected as the target system.
+        ? has been modified.
+    
+        If you need to return the target system to its original state,
+        you may need to restore your backup of the target system.
+    
+        If you want to re-do the installation, HP recommends that you
+        restore your backup of the target system.  Repeating the
+        installation may succeed, but it may also introduce subtle problems.
+    
+    
+    Enter device name for target disk: [DQA0] (? for choices)
+    
+        DQA0: is now labeled username2.
+    
+    Do you want to keep this label? (Yes/No) [Yes]
+    
+        The target system disk can be initialized with On-Disk Structure
+        Level 2 (ODS-2) or Level 5 (ODS-5).  (? for more information)
+    
+    Do you want to initialize with ODS-2 or ODS-5? (2/5/?) 5
+    
+        Hard links can be enabled on ODS-5 disks.  (? for more information)
+    
+    Do you want to enable hard links? (Yes/No/?) yes
+    
+    
+        You have chosen to install OpenVMS ALPHA on a new disk.
+    
+        The target system disk, DQA0:, will be initialized
+        with structure level 5 (ODS-5).
+        Hard links will NOT be enabled.
+        The disk will be labeled username2.
+        Any data currently on the target system disk will be lost.
+    
+    Is this OK? (Yes/No) yes
+    
+        Initializing and mounting target....
+    
+        Creating page and swap files....
+    
+
+That's weird, none of my choices were different but the result is that it does
+continue with the installation.
+
+    
+    
+        You must enter a password for the SYSTEM account.
+    
+        The password must be a minimum of 8 characters in length, and
+        may not exceed 31 characters.  It will be checked and verified.
+        The system will not accept passwords that can be guessed easily.
+    
+        The password will not be displayed as you enter it.
+    
+     Password for SYSTEM account:
+    
+    Re-enter SYSTEM password for verification:
+    
+
+This is just like the OpenVMS 7.3 install. Enter a system password.
+
+    
+    
+    Will this system be a member of an OpenVMS Cluster? (Yes/No)
+    
+    Will this system be an instance in an OpenVMS Galaxy? (Yes/No) no
+    
+
+Clustering will be configured later.
+
+    
+    
+        For your system to operate properly, you must set two parameters:
+        SCSNODE and SCSSYSTEMID.
+    
+        SCSNODE can be from 1 to 6 letters or numbers.  It must contain at
+        least one letter.
+    
+        If you plan to use DECnet, SCSNODE must be the DECnet Phase IV
+        node name, or the DECnet-Plus (Phase V) node synonym.
+    
+        If you have multiple OpenVMS systems, the SCSNODE on each system
+        must be unique.
+    
+    Enter SCSNODE: username2
+    
+        If you plan to use DECnet, SCSSYSTEMID must be set based on the
+        DECnet Phase IV address.
+    
+    Do you plan to use DECnet? (Yes/No) [Yes] yes
+    
+        DECnet Phase IV addresses are in the format
+    
+            DECnet area number.DECnet node number
+    
+        DECnet area number is a number between 1 and 63.
+        DECnet node number is a number between 1 and 1023.
+    
+        If you plan to use DECnet WITHOUT Phase IV compatible addresses,
+        enter 0.0.
+    
+    
+    Enter DECnet (Phase IV) Address: [1.1]
+    
+          SCSSYSTEMID will be set to 1025.
+    
+          This was calculated as follows:
+    
+              (DECnet area number * 1024) + DECnet node number
+    
+
+This is the networking stuff for DECnet. Since this is a test setup we can use
+the defaults.
+
+    
+    
+      Configuring the Local Time Zone
+    
+    
+    TIME ZONE SPECIFICATION -- MAIN Time Zone Menu            "*" indicates a menu
+    
+      0* GMT
+      1* AFRICA          17) EST             33) IRAN            49) PORTUGAL
+      2* AMERICA         18) EST5EDT         34) ISRAEL          50) PRC
+      3* ANTARCTICA      19* ETC             35) JAMAICA         51) PST8PDT
+      4* ARCTIC          20* EUROPE          36) JAPAN           52) ROC
+      5* ASIA            21) FACTORY         37) KWAJALEIN       53) ROK
+      6* ATLANTIC        22) GB-EIRE         38) LIBYA           54) SINGAPORE
+      7* AUSTRALIA       23) GB              39) MET             55) TURKEY
+      8* BRAZIL          24) GMT-0           40* MEXICO          56) UCT
+      9* CANADA          25) GMT             41* MIDEAST         57) UNIVERSAL
+     10) CET             26) GMT0            42) MST             58* US
+     11* CHILE           27) GMTPLUS0        43) MST7MDT         59) UTC
+     12) CST6CDT         28) GREENWICH       44) NAVAJO          60) W-SU
+     13) CUBA            29) HONGKONG        45) NZ-CHAT         61) WET
+     14) EET             30) HST             46) NZ              62) ZULU
+     15) EGYPT           31) ICELAND         47* PACIFIC
+     16) EIRE            32* INDIAN          48) POLAND
+    
+    Press "Return" to redisplay, enter "=" to search or "?" for help, or
+    Select the number above that best represents the desired time zone: 0
+    
+    ETC Time Zone Menu                                        "*" indicates a menu
+    
+      0* RETURN TO MAIN TIME ZONE MENU
+      1) GMT-0           10) GMT-4           19) GMTPLUS1        28) GMTPLUS7
+      2) GMT-1           11) GMT-5           20) GMTPLUS10       29) GMTPLUS8
+      3) GMT-10          12) GMT-6           21) GMTPLUS11       30) GMTPLUS9
+      4) GMT-11          13) GMT-7           22) GMTPLUS12       31) GREENWICH
+      5) GMT-12          14) GMT-8           23) GMTPLUS2        32) UCT
+      6) GMT-13          15) GMT-9           24) GMTPLUS3        33) UNIVERSAL
+      7) GMT-14          16) GMT             25) GMTPLUS4        34) UTC
+      8) GMT-2           17) GMT0            26) GMTPLUS5        35) ZULU
+      9) GMT-3           18) GMTPLUS0        27) GMTPLUS6
+    
+    Press "Return" to redisplay, enter "=" to search or "?" for help, or
+    Select the number above that best represents the desired time zone: 19
+    
+    
+    You selected ETC / GMTPLUS1 as your time zone.
+    Is this correct? (Yes/No) [YES]: yes
+    
+
+Time zone here in The Netherlands is GMT+1.
+
+    
+    
+        Configuring the Time Differential Factor (TDF)
+    
+    
+        Default Time Differential Factor is -1:00.
+    
+        The Time Differential Factor (TDF) is the difference between your
+        system time and Coordinated Universal Time (UTC).  UTC is similar
+        in most respects to Greenwich Mean Time (GMT).
+    
+        The TDF is expressed as hours and minutes, and should be entered
+        in the hh:mm format.  TDFs for the Americas will be negative
+        (-3:00, -4:00, etc.); TDFs for Europe, Africa, Asia and Australia
+        will be positive (1:00, 2:00, etc.).
+    
+    
+    Enter the Time Differential Factor [-1:00]:
+    
+        NEW SYSTEM TIME DIFFERENTIAL FACTOR = -1:00
+    
+    Is this correct? [Y]:
+    
+
+Defaults are fine here.
+
+    
+    
+    Do you want to register any Product Authorization Keys? (Yes/No) [Yes] no
+    
+
+Entering the license later on is way easier then during the installation.
+
+    
+    
+        The following products are part of the the OpenVMS installation;
+        they will be installed along with the OpenVMS operating system:
+    
+            o Availability Manager (base) for OpenVMS Alpha
+            o CDSA for OpenVMS Alpha
+    %SYSTEM-F-ACCVIO, access violation, reason mask=00, virtual address=FFFFFFFFFFFFFFB8, PC=000000007
+    FDC5210, PS=0000001B
+    
+      Improperly handled condition, image exit forced.
+        Signal arguments:   Number = 0000000000000005
+                            Name   = 000000000000000C
+                                     0000000000000000
+                                     FFFFFFFFFFFFFFB8
+                                     000000007FDC5210
+                                     000000000000001B
+    
+        Register dump:
+        R0  = 000000007FD1A7B8  R1  = 000000007FC71748  R2  = 000000007FD1A888
+        R3  = 000000007FC717C0  R4  = 00000000000310FC  R5  = 000000007FFEFD00
+        R6  = 000000007FC71768  R7  = 000000007FCC526C  R8  = 000000007FF9CDE8
+        R9  = 000000007FC719B0  R10 = 000000007FC717C0  R11 = 0000000000000001
+        R12 = 000000007FFCDA98  R13 = 000000007FD22318  R14 = 0000000000000000
+        R15 = 000000007FD1E970  R16 = 000000007FC71768  R17 = 0000000000000000
+        R18 = 000000007FC71710  R19 = 0000000000000001  R20 = 0000000000000003
+        R21 = 000000007FC7174E  R22 = 0000000000000007  R23 = 000000007FC71719
+        R24 = 0000000000000000  R25 = 0000000000010B44  R26 = 000000007FDC5204
+        R27 = 000000007FD1A790  R28 = 0000000000000001  R29 = 000000007FC71740
+        SP  = 000000007FC71740  PC  = 000000007FDC5210  PS  = 000000000000001B
+    %SYSTEM-F-ACCVIO, access violation, reason mask=!XB, virtual address=!XH, PC=!XH, PS=!XL
+    
+    
+        Installation has been terminated by an unexpected error.
+    
+        The installation has not completed normally.
+    
+        You should correct the situation which caused the termination
+        and then re-do the installation or upgrade.
+    
+      Process AXPVMS INSTALL logged out at 23-APR-2018 20:37:00.40
+    
+    Press Return to continue...
+    
+
+No! We were so far this time. I tried the install another time, this time with
+ODS-2 as the filesystem, and it failed again, just a little further than the
+previous time. Literally, 1 line later:
+
+    
+    
+        The following products are part of the the OpenVMS installation;
+        they will be installed along with the OpenVMS operating system:
+    
+            o Availability Manager (base) for OpenVMS Alpha
+            o CDSA for OpenVMS Alpha
+            o KERBEROS for OpenVMS Alpha
+    %SYSTEM-F-ACCVIO, access violation, reason mask=00, virtual address=FFFFFFFFFFFFFFB8, PC=000000007
+    FDC5210, PS=0000001B
+    
+      Improperly handled condition, image exit forced.
+        Signal arguments:   Number = 0000000000000005
+                            Name   = 000000000000000C
+                                     0000000000000000
+                                     FFFFFFFFFFFFFFB8
+                                     000000007FDC5210
+                                     000000000000001B
+    
+        Register dump:
+        R0  = 000000007FD1A7B8  R1  = 000000007FC71748  R2  = 000000007FD1A888
+        R3  = 000000007FC717C0  R4  = 00000000000310FC  R5  = 000000007FFEFD00
+        R6  = 000000007FC71768  R7  = 000000007FCC526C  R8  = 000000007FF9CDE8
+        R9  = 000000007FC719B0  R10 = 000000007FC717C0  R11 = 0000000000000001
+        R12 = 000000007FFCDA98  R13 = 000000007FD22318  R14 = 0000000000000000
+        R15 = 000000007FD1E970  R16 = 000000007FC71768  R17 = 0000000000000000
+        R18 = 000000007FC71710  R19 = 0000000000000001  R20 = 0000000000000003
+        R21 = 000000007FC7174E  R22 = 0000000000000007  R23 = 000000007FC71719
+        R24 = 0000000000000000  R25 = 0000000000010B44  R26 = 000000007FDC5204
+        R27 = 000000007FD1A790  R28 = 0000000000000001  R29 = 000000007FC71740
+        SP  = 000000007FC71740  PC  = 000000007FDC5210  PS  = 000000000000001B
+    %SYSTEM-F-ACCVIO, access violation, reason mask=!XB, virtual address=!XH, PC=!XH, PS=!XL
+    
+    
+        Installation has been terminated by an unexpected error.
+    
+        The installation has not completed normally.
+    
+        You should correct the situation which caused the termination
+        and then re-do the installation or upgrade.
+    
+      Process AXPVMS INSTALL logged out at 23-APR-2018 20:41:53.85
+    
+    Press Return to continue...
+    
+
+Reading through [more dev docs from the emulator][18], I found this:
+
+> There is a permissions violation during install. Do not abort it, and the
+install will work anyway. (note Camiel: differing results of installation
+reported. A lot seems to depend on timing).
+
+I tried a few more times, playing with the config file (different CPU speed,
+different disk sizes etc), but I ran into other failures like these:
+
+    
+    
+    Exception in CPU thread: System exception: cannot signal semaphore: count would exceed maximum.
+    Emulator Failure: Threading error: CPU thread has died: AlphaCPU.cpp, line 532
+    Stop threads: cpu0 ali kbd ide0 ide1 srl0
+    Freeing memory in use by system...
+    pci0.15(ali_ide).disk0.0(file): Closing file.
+    *** Error in `es40': double free or corruption (fasttop): 0x0000000001886fe0 ***
+    ======= Backtrace: =========
+    /lib/x86_64-linux-gnu/libc.so.6(+0x777e5)[0x7fe419d977e5]
+    /lib/x86_64-linux-gnu/libc.so.6(+0x8037a)[0x7fe419da037a]
+    /lib/x86_64-linux-gnu/libc.so.6(cfree+0x4c)[0x7fe419da453c]
+    es40[0x43ade9]
+    es40[0x45597f]
+    es40[0x4559e9]
+    es40(main+0x367)[0x405907]
+    /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf0)[0x7fe419d40830]
+    es40[0x405c09]
+    ======= Memory map: ========
+    00400000-00497000 r-xp 00000000 00:00 489903                     /usr/local/bin/es40
+    00696000-00697000 r--p 00096000 00:00 489903                     /usr/local/bin/es40
+    00697000-0069d000 rw-p 00097000 00:00 489903                     /usr/local/bin/es40
+    0069d000-006bf000 rw-p 00000000 00:00 0
+    01868000-018aa000 rw-p 00000000 00:00 0      
+    
+
+Since I already spent a few hours tinkering without result, [the only post
+here][19] wasn't very usefull since my disk is only 600 MB, and I didn't find
+any other information, I decided to stop here and try it in another emulator,
+probably FreeAXP for Windows.
+
+Let's hope the x86 port is finished soon so it can run under KVM and virtualbox.
+
+   [1]: https://raymii.org/s/inc/img/ovmsdec.png
+   [2]: https://raymii.org/s/tags/openvms.html
+   [3]: http://decus.org
+   [4]: https://raymii.org/s/blog/Backspace_and_delete_key_behaviour_on_OpenVMS.html
+   [5]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [6]: http://es40.org
+   [7]: https://www.youtube.com/user/ibm360m65/videos
+   [8]: http://dipc.ehu.es/cc/computing_resources/erebo.html
+   [9]: https://raymii.org/s/inc/img/es-40.jpg
+   [10]: http://web.archive.org/web/20180424094256/http://vaxhaven.com/AlphaServer_ES40
+   [11]: https://packages.ubuntu.com/search?suite=lucid&arch=any&mode=exactfilename&searchon=contents&keywords=X11%2FIntrinsic.h
+   [12]: ftp://ftp.hp.com/pub/alphaserver/firmware/current_platforms/v7.3_release/ES40_series/updateviawindows-es40.html
+   [13]: https://web.archive.org/web/20140106183813/http://www.alphalinux.org/faq/SRM-HOWTO/srm-whatis.html
+   [14]: https://en.wikipedia.org/wiki/System_Reference_Manual
+   [15]: https://raymii.org/s/inc/downloads/es40-srmon/cl67srmrom.exe
+   [16]: https://web.archive.org/web/20180424175732/https://support.hpe.com/hpsc/doc/public/display?docId=emr_na-c03082736
+   [17]: https://en.wikipedia.org/wiki/Files-11#Overview
+   [18]: https://web.archive.org/web/20180424184218/http://es40.org/dox/guest_os.html
+   [19]: https://web.archive.org/web/20180424185148/http://www.openvmshobbyist.com/forum/viewthread.php?forum_id=163&thread_id=1616&rowstart=20
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

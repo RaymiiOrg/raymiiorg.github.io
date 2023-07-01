@@ -1,0 +1,432 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	IPSEC L2TP VPN on Ubuntu 13.10 with OpenSwan, xl2tpd and ppp
+Author      : 	Remy van Elst
+Date        : 	01-12-2014
+URL         : 	https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.10.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This is a guide on setting up an IPSEC/L2TP vpn server with Ubuntu 13.10 using
+Openswan as the IPsec server, xl2tpd as the l2tp provider and ppp or local users
+/ PAM for authentication. It has a detailed explanation with every step. We
+choose the IPSEC/L2TP protocol stack because of recent vulnerabilities found in
+pptpd VPNs.
+
+This tutorial is available for the following platforms:
+
+  * [Raspberry Pi with Arch Linux ARM][1]
+
+  * [CentOS 7, Scientific Linux 7 or Red Hat Enterprise Linux 7 (IKEv2,no L2TP)][2]
+
+  * [CentOS 6, Scientific Linux 6 or Red Hat Enterprise Linux 6][3]
+
+  * [Ubuntu 16.04, (IKEv2,no L2TP)][4]
+
+  * [Ubuntu 15.10, (IKEv2,no L2TP)][5]
+
+  * [Ubuntu 15.04, (IKEv2,no L2TP)][6]
+
+  * [Ubuntu 14.04 LTS][7]
+
+  * [Ubuntu 13.10][8]
+
+  * [Ubuntu 13.04][9]
+
+  * [Ubuntu 12.10][10]
+
+  * [Ubuntu 12.04 LTS][11]
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+IPSec encrypts your IP packets to provide encryption and authentication, so no
+one can decrypt or forge data between your clients and your server. L2TP
+provides a tunnel to send data. It does not provide encryption and
+authentication though, that is why we need to use it together with IPSec.
+
+To work trough this tutorial you should have:
+
+  * 1 ubuntu 13.10 server with at least 1 public IP address and root access
+  * 1 (or more) clients running an OS that support IPsec/L2tp vpns (Ubuntu, Mac OS, Windows, Android).
+  * Ports 1701 TCP, 4500 UDP and 500 UDP opened in the firewall.
+
+If you are not running Ubuntu 13.10 you might have to compile the packages
+manually because openswan and xl2tpd in the older repositories seem to have
+critical bugs which make this all fail.
+
+I do all the steps as the root user. You should do to, but only via * -i* or *
+su -*. Do not allow root to login via SSH!
+
+#### Install ppp openswan and xl2tpd
+
+First we will install the required packages:
+
+    
+    
+    apt-get install openswan xl2tpd ppp lsof
+    
+
+The openswan installation will ask some questions, this tutorial works with the
+default answers (just enter through it).
+
+#### Firewall and sysctl
+
+We are going to set the firewall and make sure the kernel forwards IP packets:
+
+Execute this command to enable the iptables firewall to allow vpn traffic:
+
+    
+    
+    iptables -t nat -A POSTROUTING -j SNAT --to-source %SERVERIP%
+    
+
+Replace %SERVERIP% with the external IP of your VPS.
+
+Execute the below commands to enable kernel IP packet forwarding and disable ICP
+redirects.
+
+    
+    
+    echo "net.ipv4.ip_forward = 1" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.conf.all.accept_redirects = 0" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.conf.all.send_redirects = 0" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.conf.default.rp_filter = 0" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.conf.default.accept_source_route = 0" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.conf.default.send_redirects = 0" |  tee -a /etc/sysctl.conf
+    echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" |  tee -a /etc/sysctl.conf
+    
+
+Now apply these settings for other network interfaces:
+
+    
+    
+    for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 > $vpn/accept_redirects; echo 0 > $vpn/send_redirects; done
+    
+
+And apply them:
+
+    
+    
+    sysctl -p
+    
+
+##### Persistent settings via /etc/rc.local
+
+To make sure this keeps working at boot you might want to add the following to
+/etc/rc.local:
+
+    
+    
+    for vpn in /proc/sys/net/ipv4/conf/*; do echo 0 > $vpn/accept_redirects; echo 0 > $vpn/send_redirects; done
+    iptables -t nat -A POSTROUTING -j SNAT --to-source %SERVERIP%
+    
+
+Add it before the `exit 0` line and replace %SERVERIP% with the external IP of
+your VPS.
+
+#### Configure Openswan (IPSEC)
+
+Use your favorite editor to edit the following file:
+
+    
+    
+    /etc/ipsec.conf  
+    
+
+Replace the contents with the following:
+
+(Most lines have a comment below it explaining what it does.)
+
+    
+    
+    config setup
+        dumpdir=/var/run/pluto/
+        #in what directory should things started by setup (notably the Pluto daemon) be allowed to dump core?
+        nat_traversal=yes
+        #whether to accept/offer to support NAT (NAPT, also known as "IP Masqurade") workaround for IPsec
+        virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v6:fd00::/8,%v6:fe80::/10
+        #contains the networks that are allowed as subnet= for the remote client. In other words, the address ranges that may live behind a NAT router through which a client connects.
+        protostack=netkey
+        #decide which protocol stack is going to be used.
+    
+    conn L2TP-PSK-noNAT
+        authby=secret
+        #shared secret. Use rsasig for certificates.
+        pfs=no
+        #Disable pfs
+        auto=add
+        #start at boot
+        keyingtries=3
+        #Only negotiate a conn. 3 times.
+        ikelifetime=8h
+        keylife=1h
+        type=transport
+        #because we use l2tp as tunnel protocol
+        left=%SERVERIP%
+        #fill in server IP above
+        leftprotoport=17/1701
+        right=%any
+        rightprotoport=17/%any
+    
+
+Replace %SERVERIP% with the external IP of your server.
+
+**Do note that the config file has changed with this Ubuntu release. If you have
+upgraded Ubuntu or followed an earlier tutorial, make sure you change the config
+for ipsec.**
+
+##### The shared secret
+
+The shared secret is defined in the `/etc/ipsec.secrets` file. Make sure it is
+long and random:
+
+    
+    
+    %SERVERIP%  %any:   PSK "69EA16F2C5DCED8B29E74A7D1B0FE99E69F6BDCD3E44"
+    
+
+##### Verify IPSEC Settings
+
+Now to make sure IPSEC works, execute the following command:
+
+    
+    
+    ipsec verify
+    
+
+My output looks like this:
+
+    
+    
+    Checking your system to see if IPsec got installed and started correctly:
+    Version check and ipsec on-path                                 [OK]
+    Linux Openswan U2.6.38/K3.8.0-19-generic (netkey)
+    Checking for IPsec support in kernel                            [OK]
+     SAref kernel support                                           [N/A]
+     NETKEY:  Testing XFRM related proc values                      [OK]
+        [OK]
+        [OK]
+    Checking that pluto is running                                  [OK]
+     Pluto listening for IKE on udp 500                             [OK]
+     Pluto listening for NAT-T on udp 4500                          [OK]
+    Checking for 'ip' command                                       [OK]
+    Checking /bin/sh is not /bin/dash                               [WARNING]
+    Checking for 'iptables' command                                 [OK]
+    Opportunistic Encryption Support                                [DISABLED]
+    
+
+The `/bin/sh` and `Opportunistic Encryption` warnings can be ignored. The first
+one is a openswan bug and the second one causes xl2tpd to trip.
+
+#### Configure xl2tpd
+
+Use your favorite editor to edit the following file:
+
+    
+    
+    /etc/xl2tpd/xl2tpd.conf  
+    
+
+Replace the contents with the following:
+
+    
+    
+    [global]
+    ipsec saref = yes
+    saref refinfo = 30
+    
+    [lns default]
+    ip range = 172.16.1.30-172.16.1.100
+    local ip = 172.16.1.1
+    refuse pap = yes
+    require authentication = yes
+    ppp debug = yes
+    pppoptfile = /etc/ppp/options.xl2tpd
+    length bit = yes
+    
+
+  * ip range = range of IPs to give to the connecting clients
+  * local ip = IP of VPN server
+  * refuse pap = refure pap authentication
+  * ppp debug = yes when testing, no when in production
+
+**Do note that the config file has changed with this Ubuntu release. If you have
+upgraded Ubuntu or followed an earlier tutorial, make sure you change the config
+for xl2tpd.**
+
+#### Local user (PAM//etc/passwd) authentication
+
+To use local user accounts via pam (or /etc/passwd), and thus not having plain
+text user passwords in a text file you have to do a few extra steps. Huge thanks
+to `Sascha Scandella` for the hard work and troubleshooting.
+
+In your `/etc/xl2tpd/xl2tpd.conf` add the following line:
+
+    
+    
+    unix authentication = yes
+    
+
+and remove the following line:
+
+    
+    
+    refuse pap = yes
+    
+
+In the file `/etc/ppp/options.xl2tpd` make sure you do not add the following
+line (below it states to add it, but not if you want to use UNIX
+authentication):
+
+    
+    
+    require-mschap-v2
+    
+
+Also in that file (`/etc/ppp/options.xl2tpd`) add the following extra line:
+
+    
+    
+    login
+    
+
+Change `/etc/pam.d/ppp` to this:
+
+    
+    
+    auth    required        pam_nologin.so
+    auth    required        pam_unix.so
+    account required        pam_unix.so
+    session required        pam_unix.so
+    
+
+Add the following to `/etc/ppp/pap-secrets`:
+
+    
+    
+    *       l2tpd           ""              *
+    
+
+(And, skip the `chap-secrets` file below (adding users).)
+
+#### Configuring PPP
+
+Use your favorite editor to edit the following file:
+
+    
+    
+    /etc/ppp/options.xl2tpd  
+    
+
+Replace the contents with the following:
+
+    
+    
+    require-mschap-v2
+    ms-dns 8.8.8.8
+    ms-dns 8.8.4.4
+    auth
+    mtu 1200
+    mru 1000
+    crtscts
+    hide-password
+    modem
+    name l2tpd
+    proxyarp
+    lcp-echo-interval 30
+    lcp-echo-failure 4
+    
+
+  * ms-dns = The dns to give to the client. I use googles public DNS.
+  * proxyarp = Add an entry to this systems ARP [Address Resolution Protocol] table with the IP address of the peer and the Ethernet address of this system. This will have the effect of making the peer appear to other systems to be on the local ethernet.
+  * name l2tpd = is used in the ppp authentication file.
+
+#### Adding users
+
+Every user should be defined in the `/etc/ppp/chap-secrets` file. Below is an
+example file.
+
+    
+    
+    # Secrets for authentication using CHAP
+    # client       server  secret                  IP addresses
+    alice          l2tpd   0F92E5FC2414101EA            *
+    bob            l2tpd   DF98F09F74C06A2F             *
+    
+
+  * client = username for the user
+  * server = the name we define in the ppp.options file for xl2tpd
+  * secret = password for the user
+  * IP Address = leave to * for any address or define addresses from were a user can login.
+
+#### Testing it
+
+To make sure everything has the newest config files restart openswan and xl2tpd:
+
+    
+    
+    /etc/init.d/ipsec restart 
+    /etc/init.d/xl2tpd restart
+    
+
+On the client connect to the server IP address (or add a DNS name) with a valid
+user, password and the shared secret. Test if you have internet access and which
+IP you have (via for example <http://whatsmyip.org>. If it is the VPN servers IP
+then it works.
+
+If you experience problems make sure to check the client log files and the
+ubuntu `/var/log/syslog` and `/var/log/auth.log` files. If you google the error
+messages you most of the time get a good answer.
+
+   [1]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_a_Raspberry_Pi_with_Arch_Linux.html
+   [2]: https://raymii.org/s/tutorials/IPSEC_vpn_with_CentOS_7.html
+   [3]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_CentOS_-_Red_Hat_Enterprise_Linux_or_Scientific_-_Linux_6.html
+   [4]: https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_16.04.html
+   [5]: https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_15.10.html
+   [6]: https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_15.04.html
+   [7]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_14.04.html
+   [8]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.10.html
+   [9]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.04.html
+   [10]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.10.html
+   [11]: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html
+   [12]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

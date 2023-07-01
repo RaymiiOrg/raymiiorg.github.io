@@ -1,0 +1,641 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html lang="en" xmlns="http://www.w3.org/1999/xhtml"><head><meta content="text/html;charset=utf-8" http-equiv="content-type"/><title>nursecalcinfuus</title><script src="javascript/prototype.js" type="text/javascript"></script><script src="javascript/scriptaculous.js" type="text/javascript"></script><style type="text/css">body { background: url('img/pagebg.jpg') repeat-x; background-color: #FFFFFF; font-family: arial, verdana, sans-serif; font-size: 12px; } a { color: #cde2ff; font-weight: bold; font-size: 11px; } .window { background: #E0E0E0; position: absolute; padding: 1px; border: 1px solid #424242; } .window p { margin: 3px; } .windowinner { padding: 7px; } .windowinner input { margin-top: 20px; } .window h1 { padding: 6px; display: block; background-color: #A6A6A6; font-size: 13px; margin: 0px; color: #424242; }</style><script type="text/javascript">
+
+var iscVtxttotaldrips = "";
+var iscVtxttotaltime = "";
+var iscVtxtdrperml = "";
+var iscVtxtdrmin = "";
+var iscVinttotaldrips = 0;
+var iscVinttotaltime = 0;
+var iscVintdrperml = 0;
+var iscVintdrpermin = 0;
+var iscVintcalc = 0;
+var iscVintanswer = 0;
+var iscVtxtanswer = "";
+var iscVtxtmltodripsan = "";
+var iscVtxtdripstomlan = "";
+var iscVintmltodripsan = 0;
+var iscVintdripstomlan = 0;
+var iscVintmldripcalc = 0;
+var iscVintdripmlcalc = 0;
+var iscVintextracalc1 = 0;
+var iscVintextracalc2 = 0;
+var iscVintzero = 0;
+var iscVinttotalml = 0;
+var iscVtxttotalml = "";
+var iscVlbldripspeed = "Drip speed in dr/min:";
+var iscVlbltimemin = "Total time in min: ";
+var iscVlbltotaldrips = "Total amount of drips:";
+//EndOfGlobalVariables
+
+function init()
+{
+
+iscWindow8();
+//iscApp1Launched
+}
+
+Event.observe(window, 'load', init, false);
+
+function iscGetTextBox12()
+{
+iscVtxtdrperml = document.getElementById("iscWindow8tbdrperml5").value;
+iscGetTextBox13();
+//iscGetTextBox12Done
+}
+
+
+function iscGetTextBox11()
+{
+iscVtxttotaltime = document.getElementById("iscWindow8tbtotaltime4").value;
+iscGetTextBox12();
+//iscGetTextBox11Done
+}
+
+
+function iscGetTextBox10()
+{
+iscVtxttotaldrips = document.getElementById("iscWindow8tbtotaldrips3").value;
+iscGetTextBox11();
+//iscGetTextBox10Done
+}
+
+
+function iscGetTextBox13()
+{
+iscVtxtdrmin = document.getElementById("iscWindow8tbdrmin6").value;
+iscConvertTextToNumber14();
+//iscGetTextBox13Done
+}
+
+
+function iscConvertTextToNumber16()
+{
+iscVintdrperml = parseInt(iscVtxtdrperml);
+iscConvertTextToNumber17();
+//iscConvertTextToNumber16Done
+}
+
+
+function iscConvertTextToNumber15()
+{
+iscVinttotaltime = parseInt(iscVtxttotaltime);
+iscConvertTextToNumber16();
+//iscConvertTextToNumber15Done
+}
+
+
+function iscConvertTextToNumber14()
+{
+iscVinttotaldrips = parseInt(iscVtxttotaldrips);
+iscConvertTextToNumber15();
+//iscConvertTextToNumber14Done
+}
+
+
+function iscIfThen19()
+{
+if (iscVinttotaltime == iscVintzero)
+{
+iscDivide30();
+//iscIfThen19True
+
+}
+else
+{
+iscIfThen20();
+//iscIfThen19False
+}
+}
+
+
+function iscDivide30()
+{
+iscVintanswer = iscVinttotaldrips / iscVintdrpermin;
+iscConvertNumberToText35();
+//iscDivide30Done
+}
+
+
+function iscConvertTextToNumber17()
+{
+iscVintdrpermin = parseInt(iscVtxtdrmin);
+iscIfThen21();
+//iscConvertTextToNumber17Done
+}
+
+
+function iscMessageBox23()
+{
+alert("One or more of the entered values are wrong.");
+}
+
+
+function iscMessageBox33()
+{
+alert("DRIPS PER ML IS REQUIRED!");
+}
+
+
+function iscDivide29()
+{
+iscVintanswer = iscVinttotaldrips / iscVinttotaltime;
+iscConvertNumberToText34();
+//iscDivide29Done
+}
+
+
+function iscConvertNumberToText34()
+{
+iscVtxtanswer = iscVintanswer + '';
+iscSetLabel38();
+//iscConvertNumberToText34Done
+}
+
+
+function iscConvertNumberToText35()
+{
+iscVtxtanswer = iscVintanswer + '';
+iscSetLabel39();
+//iscConvertNumberToText35Done
+}
+
+
+function iscSetLabel39()
+{
+if (document.innerText)
+{
+document.getElementById("iscWindow8lblanswercalc12").innerText=iscVtxtanswer;
+}
+else
+{
+document.getElementById("iscWindow8lblanswercalc12").textContent=iscVtxtanswer;
+}
+iscDivide51();
+iscSetLabel74();
+//iscSetLabel39Done
+}
+
+
+function iscSetLabel38()
+{
+if (document.innerText)
+{
+document.getElementById("iscWindow8lblanswercalc12").innerText=iscVtxtanswer;
+}
+else
+{
+document.getElementById("iscWindow8lblanswercalc12").textContent=iscVtxtanswer;
+}
+iscDivide51();
+iscSetLabel73();
+//iscSetLabel38Done
+}
+
+
+function iscConvertNumberToText49()
+{
+iscVtxttotalml = iscVinttotalml + '';
+iscSetLabel50();
+//iscConvertNumberToText49Done
+}
+
+
+function iscSetLabel50()
+{
+if (document.innerText)
+{
+document.getElementById("iscWindow8lbldripsanswer16").innerText=iscVtxttotalml;
+}
+else
+{
+document.getElementById("iscWindow8lbldripsanswer16").textContent=iscVtxttotalml;
+}
+//iscSetLabel50Done
+}
+
+
+function iscDivide51()
+{
+iscVinttotalml = iscVinttotaldrips / iscVintdrperml;
+iscConvertNumberToText49();
+//iscDivide51Done
+}
+
+
+function iscWindow8tbtotaldripsChanged()
+{
+//iscWindow8tbtotaldripsChanged
+}
+
+
+function iscWindow8tbtotaltimeChanged()
+{
+//iscWindow8tbtotaltimeChanged
+}
+
+
+function iscWindow8tbdrpermlChanged()
+{
+//iscWindow8tbdrpermlChanged
+}
+
+
+function iscWindow8tbdrminChanged()
+{
+//iscWindow8tbdrminChanged
+}
+
+
+function iscWindow8btncalcClicked()
+{
+iscGetTextBox10();
+//iscWindow8btncalcClicked
+}
+
+
+function iscWindow8tbmltodripsChanged()
+{
+//iscWindow8tbmltodripsChanged
+}
+
+
+function iscWindow8tbdriptomlChanged()
+{
+//iscWindow8tbdriptomlChanged
+}
+
+
+function iscWindow8btncalcmltodripsClicked()
+{
+iscGetTextBox54();
+//iscWindow8btncalcmltodripsClicked
+}
+
+
+function iscWindow8btncalcdripstomlClicked()
+{
+iscGetTextBox53();
+//iscWindow8btncalcdripstomlClicked
+}
+
+
+function iscWindow8()
+{
+new Draggable('iscWindow8mainwindow1');
+document.getElementById("iscWindow8mainwindow1").style.visibility = "visible";
+//iscWindow8Done
+//iscWindow8Opened
+}
+
+function iscWindow8Closed()
+{
+iscAppQuit2();
+//iscWindow8Closed
+}
+
+
+function iscAppQuit2()
+{
+//iscAppQuit2Done
+}
+
+
+function iscGetTextBox61()
+{
+iscVtxtdrperml = document.getElementById("iscWindow8tbdrperml5").value;
+iscConvertTextToNumber62();
+//iscGetTextBox61Done
+}
+
+
+function iscConvertTextToNumber62()
+{
+iscVintdrperml = parseInt(iscVtxtdrperml);
+iscIfThen58();
+//iscConvertTextToNumber62Done
+}
+
+
+function iscIfThen63()
+{
+if (iscVintdrperml > iscVintzero)
+{
+iscDivide64();
+//iscIfThen63True
+
+}
+else
+{
+//iscIfThen63False
+}
+}
+
+
+function iscIfThen57()
+{
+if (iscVintmldripcalc > iscVintzero)
+{
+iscIfThen70();
+//iscIfThen57True
+
+}
+else
+{
+//iscIfThen57False
+}
+}
+
+
+function iscGetTextBox67()
+{
+iscVtxtdrperml = document.getElementById("iscWindow8tbdrperml5").value;
+iscConvertTextToNumber68();
+//iscGetTextBox67Done
+}
+
+
+function iscConvertTextToNumber68()
+{
+iscVintdrperml = parseInt(iscVtxtdrperml);
+iscIfThen57();
+//iscConvertTextToNumber68Done
+}
+
+
+function iscIfThen70()
+{
+if (iscVintdrperml > iscVintzero)
+{
+iscMultiply71();
+//iscIfThen70True
+
+}
+else
+{
+//iscIfThen70False
+}
+}
+
+
+function iscGetTextBox53()
+{
+iscVtxtdripstomlan = document.getElementById("iscWindow8tbdriptoml18").value;
+iscConvertTextToNumber56();
+//iscGetTextBox53Done
+}
+
+
+function iscGetTextBox54()
+{
+iscVtxtmltodripsan = document.getElementById("iscWindow8tbmltodrips14").value;
+iscConvertTextToNumber55();
+//iscGetTextBox54Done
+}
+
+
+function iscConvertTextToNumber55()
+{
+iscVintmldripcalc = parseInt(iscVtxtmltodripsan);
+iscGetTextBox67();
+//iscConvertTextToNumber55Done
+}
+
+
+function iscIfThen58()
+{
+if (iscVintdripmlcalc > iscVintzero)
+{
+iscIfThen63();
+//iscIfThen58True
+
+}
+else
+{
+//iscIfThen58False
+}
+}
+
+
+function iscConvertTextToNumber56()
+{
+iscVintdripmlcalc = parseInt(iscVtxtdripstomlan);
+iscGetTextBox61();
+//iscConvertTextToNumber56Done
+}
+
+
+function iscDivide64()
+{
+iscVintdripstomlan = iscVintdripmlcalc / iscVintdrperml;
+iscConvertNumberToText65();
+//iscDivide64Done
+}
+
+
+function iscConvertNumberToText65()
+{
+iscVtxtdripstomlan = iscVintdripstomlan + '';
+iscSetLabel66();
+//iscConvertNumberToText65Done
+}
+
+
+function iscSetLabel66()
+{
+if (document.innerText)
+{
+document.getElementById("iscWindow8lbldripsinmlanswer20").innerText=iscVtxtdripstomlan;
+}
+else
+{
+document.getElementById("iscWindow8lbldripsinmlanswer20").textContent=iscVtxtdripstomlan;
+}
+//iscSetLabel66Done
+}
+
+
+function iscMultiply71()
+{
+iscVintmltodripsan = iscVintmldripcalc * iscVintdrperml;
+iscConvertNumberToText69();
+//iscMultiply71Done
+}
+
+
+function iscConvertNumberToText69()
+{
+iscVtxtmltodripsan = iscVintmltodripsan + '';
+iscSetLabel72();
+//iscConvertNumberToText69Done
+}
+
+
+function iscSetLabel72()
+{
+if (document.innerText)
+{
+document.getElementById("iscWindow8lbldripsanswer16").innerText=iscVtxtmltodripsan;
+}
+else
+{
+document.getElementById("iscWindow8lbldripsanswer16").textContent=iscVtxtmltodripsan;
+}
+//iscSetLabel72Done
+}
+
+
+function iscSetLabel73()
+{
+if (document.innerText)
+{
+document.getElementById("iscWindow8lblanswertitle11").innerText=iscVlbldripspeed;
+}
+else
+{
+document.getElementById("iscWindow8lblanswertitle11").textContent=iscVlbldripspeed;
+}
+//iscSetLabel73Done
+}
+
+
+function iscSetLabel74()
+{
+if (document.innerText)
+{
+document.getElementById("iscWindow8lblanswertitle11").innerText=iscVlbltimemin;
+}
+else
+{
+document.getElementById("iscWindow8lblanswertitle11").textContent=iscVlbltimemin;
+}
+//iscSetLabel74Done
+}
+
+
+function iscIfThen18()
+{
+if (iscVintdrpermin == iscVintzero)
+{
+iscDivide29();
+//iscIfThen18True
+
+}
+else
+{
+iscIfThen19();
+//iscIfThen18False
+}
+}
+
+
+function iscIfThen21()
+{
+if (iscVintdrperml > iscVintzero)
+{
+iscIfThen18();
+//iscIfThen21True
+
+}
+else
+{
+iscMessageBox33();
+//iscIfThen21False
+}
+}
+
+
+function iscIfThen20()
+{
+if (iscVinttotaldrips == iscVintzero)
+{
+iscMultiply31();
+//iscIfThen20True
+
+}
+else
+{
+iscMessageBox23();
+//iscIfThen20False
+}
+}
+
+
+function iscMultiply31()
+{
+iscVintanswer = iscVintdrpermin * iscVinttotaltime;
+iscDivide32();
+//iscMultiply31Done
+}
+
+
+function iscDivide32()
+{
+iscVinttotalml = iscVintanswer / iscVintdrperml;
+iscConvertNumberToText37();
+//iscDivide32Done
+}
+
+
+function iscConvertNumberToText36()
+{
+iscVtxttotalml = iscVinttotalml + '';
+iscSetLabel40();
+//iscConvertNumberToText36Done
+}
+
+
+function iscSetLabel40()
+{
+if (document.innerText)
+{
+document.getElementById("iscWindow8lblanswercalc12").innerText=iscVtxtanswer;
+}
+else
+{
+document.getElementById("iscWindow8lblanswercalc12").textContent=iscVtxtanswer;
+}
+iscSetLabel41();
+//iscSetLabel40Done
+}
+
+
+function iscSetLabel75()
+{
+if (document.innerText)
+{
+document.getElementById("iscWindow8lblanswertitle11").innerText=iscVlbltotaldrips;
+}
+else
+{
+document.getElementById("iscWindow8lblanswertitle11").textContent=iscVlbltotaldrips;
+}
+//iscSetLabel75Done
+}
+
+
+function iscConvertNumberToText37()
+{
+iscVtxtanswer = iscVintanswer + '';
+iscConvertNumberToText36();
+//iscConvertNumberToText37Done
+}
+
+
+function iscSetLabel41()
+{
+if (document.innerText)
+{
+document.getElementById("iscWindow8lbldripsanswer16").innerText=iscVtxttotalml;
+}
+else
+{
+document.getElementById("iscWindow8lbldripsanswer16").textContent=iscVtxttotalml;
+}
+iscSetLabel75();
+//iscSetLabel41Done
+}
+
+
+//EndOfFunctions
+
+</script></head><body><div class="window" id="iscWindow8mainwindow1" style="visibility:hidden;height:378px;width:300px;x:20px;y:20px;"><h1>Nursecalc Infuus</h1><div class="windowinner"><div style="position: absolute; left: 9px; top: 33px;"><label id="iscWindow8lbldrips2">Total drips</label></div><div style="position: absolute; left: 10px; top: 30px;"><input id="iscWindow8tbtotaldrips3" onchange="iscWindow8tbtotaldripsChanged()" style="width:80px;" type="text" value="0"/></div><div style="position: absolute; left: 10px; top: 90px;"><input id="iscWindow8tbtotaltime4" onchange="iscWindow8tbtotaltimeChanged()" style="width:80px;" type="text" value="0"/></div><div style="position: absolute; left: 160px; top: 90px;"><input id="iscWindow8tbdrperml5" onchange="iscWindow8tbdrpermlChanged()" style="width:80px;" type="text" value="20"/></div><div style="position: absolute; left: 160px; top: 30px;"><input id="iscWindow8tbdrmin6" onchange="iscWindow8tbdrminChanged()" style="width:80px;" type="text" value="0"/></div><div style="position: absolute; left: 160px; top: 33px;"><label id="iscWindow8lbldripspeed7">Drip Speed (dr/min)</label></div><div style="position: absolute; left: 10px; top: 88px;"><label id="iscWindow8lbltotaltime8">Total time (min)</label></div><div style="position: absolute; left: 160px; top: 88px;"><label id="iscWindow8lbldripsml9">Drips per ml in fluid</label></div><div style="position: absolute; left: 10px; top: 125px;"><input id="iscWindow8btncalc10" onclick="iscWindow8btncalcClicked()" type="button" value="Calculate"/></div><div style="position: absolute; left: 160px; top: 153px;"><label id="iscWindow8lblanswertitle11">Answer:</label></div><div style="position: absolute; left: 160px; top: 173px;"><label id="iscWindow8lblanswercalc12">.</label></div><div style="position: absolute; left: 10px; top: 208px;"><label id="iscWindow8lbldripstoml13">ml to drips:</label></div><div style="position: absolute; left: 10px; top: 205px;"><input id="iscWindow8tbmltodrips14" onchange="iscWindow8tbmltodripsChanged()" style="width:80px;" type="text" value="0"/></div><div style="position: absolute; left: 160px; top: 208px;"><label id="iscWindow8lbltotaldripsinml15">Total drips in ml:</label></div><div style="position: absolute; left: 160px; top: 238px;"><label id="iscWindow8lbldripsanswer16">.</label></div><div style="position: absolute; left: 10px; top: 263px;"><label id="iscWindow8lbldripstoml17">drips to ml</label></div><div style="position: absolute; left: 10px; top: 260px;"><input id="iscWindow8tbdriptoml18" onchange="iscWindow8tbdriptomlChanged()" style="width:80px;" type="text" value="0"/></div><div style="position: absolute; left: 160px; top: 263px;"><label id="iscWindow8lbldripstomlhead19">Total ml in drips</label></div><div style="position: absolute; left: 160px; top: 288px;"><label id="iscWindow8lbldripsinmlanswer20">.</label></div><div style="position: absolute; left: 10px; top: 338px;"><label id="iscWindow8lblhelp121">Enter the value you want to calculate as 0.</label></div><div style="position: absolute; left: 10px; top: 358px;"><label id="iscWindow8lblcr22">Nursecalc Infuus by Remy van Elst @ raymii.org</label></div><div style="position: absolute; left: 110px; top: 205px;"><input id="iscWindow8btncalcmltodrips23" onclick="iscWindow8btncalcmltodripsClicked()" type="button" value="&gt;"/></div><div style="position: absolute; left: 110px; top: 260px;"><input id="iscWindow8btncalcdripstoml24" onclick="iscWindow8btncalcdripstomlClicked()" type="button" value="&gt;"/></div></div></div></body></html>

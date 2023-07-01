@@ -1,0 +1,180 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Openstack Glance Image Download, download Openstack images
+Author      : 	Remy van Elst
+Date        : 	25-02-2015
+URL         : 	https://raymii.org/s/tutorials/Openstack_Glance_Image_Download.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This guide shows you how download Openstack Images to your local machine using
+the command line Glance client. You can use this, for example, to download a
+copy of an image created from a VM, or to download the images your Openstack
+provider provides and adapt those.
+
+You can see all my [Openstack related articles here][1]. For example, how to use
+[Duplicity to create Encrypted backups to the Openstack Swift Object Store][2]
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Command Line tools
+
+Make sure you have the Openstack command line tools installed. Follow the
+official openstack guide [here][4]. If you have `pip` installed you can use that
+to install the tools:
+
+    
+    
+    pip install python-novaclient
+    pip install python-cinderclient
+    pip install python-glanceclient
+    pip install python-keystoneclient
+    pip install python-neutronclient
+    pip install python-swiftclient
+    
+
+Save yourself some time and create a file named `computerc` with the below
+contents:
+
+    
+    
+    export OS_AUTH_URL="https://identity.stack.cloudvps.com/v2.0"
+    export OS_TENANT_NAME="<tenant name>"
+    export OS_USERNAME="<username>"
+    export OS_PASSWORD="<password>"
+    export OS_TENANT_ID="<tenant id>"
+    
+
+When you are going to do stuff with the Openstack command line clients, load
+this file:
+
+    
+    
+    source computerc
+    
+
+That way, your authentication data are loaded and you don't have to give
+parameters like `--os-username` and such.
+
+### Openstack Overview
+
+Openstack is a datacenter virtualization plaform consisting out of many
+different tools and services. Here is a short overview of the different services
+you might encounter.
+
+#### Compute (Nova)
+
+This is the virtualization service. It works with a hypervisor to create and
+manage virtual machines. You can create a VM based on a specific "Flavour",
+which is just a definition of specs like disk, cpu and ram.
+
+#### Block Storage (Cinder)
+
+This is the service which makes block devices (volumes) available to services. A
+flavour can not be changed, just resized. If you want extra storage you need to
+create a volume, attach it to the VM and mount it there for use.
+
+#### Images (Glance)
+
+This is the service which holds all the images. Images can be used to boot a VM
+from. Images can be prepared with tools like `cloud-init` to make them behave
+better in a cloud environment, for example, setting an SSH key or password at
+boot.
+
+### Listing images
+
+When you've created a `computerc` file and loaded it up in your shell you can
+start the process. You need the UUID of the image you want to download. Get a
+list of all images using the `glance image-list` command:
+
+    
+    
+    $ glance image-list
+    
+
+Output:
+
+    
+    
+    +------------+---------------------+--------+-----------+------------+--------+
+    | ID         | Name                | Disk   | Container | Size       | Status |
+    +------------+---------------------+--------+-----------+------------+--------+
+    | 0a[...]5dd | example-test        | raw    | bare      | 4843700224 | active |
+    | 13[...]b30 | example-2           | qcow2  | bare      | 4762632192 | active |
+    | 22[...]eeb | FreeBSD-10.1        | qcow2  | bare      | 736981504  | active |
+    | d2[...]625 | pfSense 2.1.5       | iso    | bare      | 403243008  | active |
+    +------------+---------------------+--------+-----------+------------+--------+
+    
+
+The `ID` part is what you need. In this example it is trimmed.
+
+### Download Image
+
+Use the `glance image-download` command to download the image. By default it
+will go to STDOUT, use the `--file` parameter to place the output in a file.
+
+    
+    
+    $ glance image-download --file ./example-test.img 0a[...]5dd
+    
+
+The command syntax is:
+
+    
+    
+    $ glance image-download --file $FILENAME $UUID
+    
+
+If you get the following error:
+
+    
+    
+    object of type 'generator' has no len()
+    
+
+Try executing the command without the `--progress` option.
+
+   [1]: https://raymii.org/s/tags/openstack.html
+   [2]: https://raymii.org/s/tutorials/Encrypted_Duplicity_Backups_to_Openstack_Swift_Objectstore.html
+   [3]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [4]: http://docs.openstack.org/user-guide/content/install_clients.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

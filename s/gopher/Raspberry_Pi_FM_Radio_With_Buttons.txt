@@ -1,0 +1,224 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Raspberry Pi FM radio transmitter with Buttons
+Author      : 	Remy van Elst
+Date        : 	04-02-2015
+URL         : 	https://raymii.org/s/articles/Raspberry_Pi_FM_Radio_With_Buttons.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![PiFM 1][1]
+
+The [PiFM][2] project allows you to use a Raspberry Pi to send out a WAV file on
+the FM band.
+
+This is awesome because every normal radio then can receive your music/podcast
+without expensive (sonos) equipment. It also allows you to listen in any car
+without the need for a radio that handles USB or Bluetooth.
+
+I've used a [lasercutter][3] to craft a new top plate for my Pi which has room
+for three buttons. These are hooked up to a python script which allows me to
+start and stop the transmission, and skip or go back songs. It also allows me to
+shut down the Pi instead of just pulling the power cable.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Please do note that transmitting radio like this might be restricted in your
+country. In The Netherlands this setup (on FM bands 87,5 to 108 MHz) forbidden
+because it has too much transmission power. Transmitting on those frequencies is
+allowed if your transmittor has a maximum capacity of 50nW, and this setup has
+way more than that. [Source: Agentschap Telecom][5].
+
+### Video
+
+A small demo, shot with a phone and an Android app for lack of better equipment:
+
+### The Case
+
+![Short Crust][6]
+
+The base of my case is a [Short Crust][7] case for the Model B. I initially
+bought this case because it reroutes the USB power to the front of the Pi. I
+mostly used it as a server back then, so having a power and a network cable at
+one side of the device is quite nice. The case also looks beautifull. I bought
+my case at [Pi Supply][8].
+
+Initially I wanted to use a 3D printer to make a case because I [have some
+experience with that][9]. My hackerspace, [Revspace][10] has a [Lasercutter][3]
+and I'd never used that before.
+
+![Lasercutter][11]
+
+I decided to replace the default top plate on the Short Crust with my own PMMA
+version which should have place for the three buttons and easy access to the
+GPIO. I don't find a flat ribbon cable easy access. After receiving the
+instructions and doing a few test cuts in plywood I fired up Inkscape and found
+myself a good ruler. I'd also never used Inkscape before but that is quite easy
+to figure out after some fiddling around.
+
+The SVG file of the top case can be downloaded [here][12]. It was cut at power
+60% and speed 1.5. Below is a PNG version of the SVG:
+
+![Top Plate][13]
+
+My first attempts were not that great. Some measures were gambled the first
+time, as you can see in the below picture.
+
+![Compare][14]
+
+  * A: the rounding on the corners was way off
+  * B: the big access point to the GPIO pins was in the wrong spot
+
+The holes for the screws were also a gamble, but, that was a lucky one, the are
+in exactly the correct spot. The button holes were measured up and since it are
+three standard [R13-57][15] buttons that was easy.
+
+After two attempts and correct measurements I succeeded in printing the correct
+top plate. It also has my website logo in it, the resistor symbol. That is just
+a nice touch.
+
+### The Buttons
+
+![R13-57][16]
+
+I used three R13-57 push buttons for the input. They have wires soldered on to
+them and a few pieces of electrical tape so that they do not short the Pi. There
+is little space in the case.
+
+The buttons are wired up to GPIO pin 18, 23 and 24 (and ground of course). I've
+used the built in Raspberry Pi Pull Up resistor. If you are using another board
+of some kind please check if there is a pull up/down resistor built in,
+otherwise you need to place one in between the button and your GPIO pin, you
+will get drifting otherwise.
+
+![PiFM 2][17]
+
+### The Python Script
+
+You can find the [Python script in my github][18]. It is inspired by the [Pirate
+Radio][19] script frome Make Magazine.
+
+The only part used from that script is the config and the ffmpeg to pifm
+converting. That script has no concept of a global playlist so implementing
+start, stop and skip functions in it would be harder.
+
+I've used GPIO callbacks to handle the button input. The button functions are
+listed below, where bottom is where the network and USB ports are:
+
+  * Top button: Previous Song
+  * Middle button: Stop / Start playing
+  * Bottom button: Next song
+
+If you first press the Middle (Stop) button and then the Top (Previous) button
+the Raspberry Pi will shut itself down using the `shutdown -h now` command.
+After a few seconds you can safely disconnect the power of the Pi without
+corrupting your SD card.
+
+![PiFM 3][20]
+
+### Setup Instructions
+
+  * Wire up three buttons to GPIO pins 18, 23, 24 and ground.
+  * Wire up a simple wire on GPIO pin 4 for the antenna.
+  * Load up Raspbian on your SD card.
+  * Install `ffmpeg` and `python3`.
+  * Create a folder `/rasplayerfm/` and place all your music there.
+  * Place a config file there:
+    
+        # /rasplayerfm/rasplayerfm.conf
+    
+
+[rasplayerfm] frequency = 101.0 shuffle = False repeat _all = True stereo_
+playback = True music_dir = /rasplayerfm
+
+  * Place the compiled `pifm` binary and the `RasplayerFM.py` script there as well.
+
+  * Add the following to `/etc/rc.local` (above the `exit 0` line):
+    
+        /usr/bin/python3 /rasplayerfm/RasplayerFM.py &
+    
+
+  * Mark the `/etc/rc.local` file as executable:
+    
+        chmod +x /etc/rc.local
+    
+
+  * Tune your FM radio to the frequency set in the config file.
+
+  * Reboot the Pi.
+
+  * Wait a few moments.
+
+  * Enjoy.
+
+When you boot the Pi up it will automatically start playing on the set
+frequency. With the buttons you can start, stop and skip music as described
+above.
+
+This was an interesting project for me because it upped my knowledge and
+experience with a Lasercutter, Inkscape, GPIO, soldering and Python programming
+with callbacks and external inputs.
+
+All the code (plus SVG file) from this article is released under the GPLv3. The
+images are Creative Commons BY-NC-SA.
+
+   [1]: https://raymii.org/s/inc/img/Pi_FM_1.png
+   [2]: http://www.icrobotics.co.uk/wiki/index.php/Turning_the_Raspberry_Pi_Into_an_FM_Transmitter
+   [3]: https://revspace.nl/Lasercutter
+   [4]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [5]: http://www.agentschaptelecom.nl/gsearch/vergunningsvrije%2Bradiotoepassingen
+   [6]: https://raymii.org/s/inc/img/Short_Crust.jpg
+   [7]: http://shortcrust.net/
+   [8]: https://www.pi-supply.com/
+   [9]: https://raymii.org/s/articles/3D_modelling_a_real_world_object_in_OpenSCAD.html
+   [10]: https://revspace.nl
+   [11]: https://raymii.org/s/inc/img/Lasercutter.jpg
+   [12]: https://raymii.org/s/inc/img/Pi_Crust_Laser.svg
+   [13]: https://raymii.org/s/inc/img/Pi_Crust_Laser.png
+   [14]: https://raymii.org/s/inc/img/Pi_FM_4.png
+   [15]: https://www.google.nl/search?q=R13-57&rct=j
+   [16]: https://raymii.org/s/inc/img/R13-57.jpg
+   [17]: https://raymii.org/s/inc/img/Pi_FM_2.png
+   [18]: https://github.com/RaymiiOrg/rasplayer-fm
+   [19]: https://github.com/Make-Magazine/PirateRadio
+   [20]: https://raymii.org/s/inc/img/Pi_FM_3.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

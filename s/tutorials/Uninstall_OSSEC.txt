@@ -1,0 +1,103 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Uninstall and Remove OSSEC
+Author      : 	Remy van Elst
+Date        : 	01-10-2013
+URL         : 	https://raymii.org/s/tutorials/Uninstall_OSSEC.html
+Format      : 	Markdown/HTML
+---
+
+
+
+OSSEC is an Open Source Host-based Intrusion Detection System that performs log
+analysis, file integrity checking, policy monitoring, rootkit detection, real-
+time alerting and active response. It runs on most operating systems, including
+Linux, MacOS, Solaris, HP-UX, AIX and Windows. It also includes agentless
+monitoring for use with for example Cisco or Juniper hardware.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+[If you are looking for an OSSEC installation tutorial, check this link. It
+covers the OSSEC client and server install, and includes MySQL support plus an
+awesome dashboard][2]
+
+This tutorial covers the removal of OSSEC, both the client or the server install
+type. Because OSSEC is installed from source, you don't have all the nice
+package management options. You have to remove all the things manually, that is,
+all the ossec files, the init files, the ossec users and ossec groups. The
+following shell commands do that:
+
+    
+    
+    sudo rm -f /etc/init.d/ossec /etc/rc0.d/K20ossec /etc/rc1.d/K20ossec /etc/rc2.d/S20ossec /etc/rc3.d/S20ossec /etc/rc4.d/S20ossec /etc/rc5.d/S20ossec /etc/rc6.d/K20ossec;
+    sudo rm -rf /var/ossec; 
+    sudo /usr/sbin/deluser ossec; 
+    sudo /usr/sbin/deluser ossecm; 
+    sudo /usr/sbin/deluser ossecr; 
+    sudo /usr/sbin/deluser ossecd; 
+    sudo /usr/sbin/delgroup ossec; 
+    sudo /usr/sbin/delgroup ossecd;
+    
+
+Here is all that in a nice one line copy command:
+
+    
+    
+    sudo rm -f /etc/init.d/ossec /etc/rc0.d/K20ossec /etc/rc1.d/K20ossec /etc/rc2.d/S20ossec /etc/rc3.d/S20ossec /etc/rc4.d/S20ossec /etc/rc5.d/S20ossec /etc/rc6.d/K20ossec; sudo rm -rf /var/ossec; sudo /usr/sbin/deluser ossec; sudo /usr/sbin/deluser ossecm; sudo /usr/sbin/deluser ossecr; sudo /usr/sbin/deluser ossecd; sudo /usr/sbin/delgroup ossec; sudo /usr/sbin/delgroup ossecd
+    
+
+Using Chef to deploy OSSEC and want to remove it from all nodes? Another handy
+one liner:
+
+    
+    
+    knife ssh -a ipaddress -x [SSH USERNAME] -c ~/path/to/knife.rb 'name:*' 'sudo rm -f /etc/init.d/ossec /etc/rc0.d/K20ossec /etc/rc1.d/K20ossec /etc/rc2.d/S20ossec /etc/rc3.d/S20ossec /etc/rc4.d/S20ossec /etc/rc5.d/S20ossec /etc/rc6.d/K20ossec; sudo rm -rf /var/ossec; sudo /usr/sbin/deluser ossec; sudo /usr/sbin/deluser ossecm; sudo /usr/sbin/deluser ossecr; sudo /usr/sbin/deluser ossecd; sudo /usr/sbin/delgroup ossec; sudo /usr/sbin/delgroup ossecd'
+    
+
+Using Ansible? Here you go:
+
+    
+    
+    ansible all -s -k -a "sudo rm -f /etc/init.d/ossec /etc/rc0.d/K20ossec /etc/rc1.d/K20ossec /etc/rc2.d/S20ossec /etc/rc3.d/S20ossec /etc/rc4.d/S20ossec /etc/rc5.d/S20ossec /etc/rc6.d/K20ossec; sudo rm -rf /var/ossec; sudo /usr/sbin/deluser ossec; sudo /usr/sbin/deluser ossecm; sudo /usr/sbin/deluser ossecr; sudo /usr/sbin/deluser ossecd; sudo /usr/sbin/delgroup ossec; sudo /usr/sbin/delgroup ossecd"
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://raymii.org/s/tutorials/OSSEC_and_webui_and_analogi_dashboard_installation_on_Ubuntu.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

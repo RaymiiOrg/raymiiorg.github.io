@@ -1,0 +1,173 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	and & or are valid in C++ (alternative tokens)
+Author      : 	Remy van Elst
+Date        : 	16-12-2019
+URL         : 	https://raymii.org/s/blog/and_or_are_valid_Cpp.html
+Format      : 	Markdown/HTML
+---
+
+
+
+[A post][3] on [lobste.rs][1] on the C feature trigraphs triggered me to write 
+this piece on the C++ feature, alternative tokens. I've recently suprised a co-
+worker by using an if statement with 'or' instead of '||', which works fine, but
+he never saw it before. It's in C++ since C++ 11, but MSVC requires a specific
+compiler flag ('/Za') or the "iso646.h" header. This post has a few samples on 
+the usage inclusing other alternative tokens like bitor, xor and or_eq.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+The `or` and `and` feel more natural to me. Even though I perfectly know and 
+understand the `||` and `&&` operators, I would prefer the alternative tokens 
+when reading code. For bitsets, the `bitand`, `compl` and `bitor` also read 
+better, in my opinion. The trigraph feature of C was removed in C++ 17. Those 
+are weird.
+
+
+### Alternative tokens
+
+The motivation for the alternative tokens can be found [on cppreference][4]:
+
+C++ (and C) source code may be written in any non-ASCII 7-bit character set that
+includes the [ISO 646:1983][11] invariant character set. However, several C++
+operators and punctuators require characters that are outside of the ISO 646
+codeset: `{, }, [, ], #, , ^, |, ~`. To be able to use character encodings where
+some or all of these symbols do not exist (such as the German [DIN 66003][12]),
+C++ defines the following alternatives composed of ISO 646 compatible
+characters. 
+
+There are alternative spellings for several operators and other tokens that use
+non-ISO646 characters. In all respects of the language, each alternative token
+behaves exactly the same as its primary token, except for its spelling (the
+stringification operator can make the spelling visible). The two-letter
+alternative tokens are sometimes called "digraphs" 
+
+The characters `&` and `!` are invariant under ISO-646, but alternatives are
+provided for the tokens that use these characters anyway to accomodate even more
+restrictive historical charsets.
+
+There is no alternative spelling (such as `eq`) for the equality operator `==`
+because the character `=` was present in all supported charsets. 
+
+
+### Some examples
+
+An few examples on the use of alternative tokens, starting with `and` and `or`.
+
+    bool ex1 { false };
+    bool ex2 { true };
+    if ( ex1 or ex2) // instead of ||
+    {
+        std::cout << "Hello, World!" << std::endl;
+    }
+
+Result:
+
+    Hello, World!
+
+#### Example 2, not and
+
+    bool ex1 { false };
+    bool ex2 { true };
+    if (not ex1 and ex2) // instead of (!ex && ex2)
+    {
+        std::cout << "Hello, World!" << std::endl;
+    }
+
+Result:
+
+    Hello, World!
+
+#### Example 3, square brackets and curly braces
+
+    bool b<:2:> <%true, true%>; // instead of bool b[2] {true, true}
+    if (b<:1:>)
+    {
+        std::cout << "Hello, World!" << std::endl;
+    }
+
+Result:
+
+    Hello, World!
+
+#### Example 4, bitand
+
+    std::bitset<4> bs1 { 0011 };
+    std::bitset<4> bs2 { 0001 };
+    auto bs3 = bs1 bitand bs2; //instead of | 
+    std::cout << bs3 << std::endl;
+
+Result:
+
+    0001
+
+
+### All tokens
+
+The [full list][2] of alternative tokens:
+
+    Alternative Primary
+    <%          {
+    %>          }
+    <:          [
+    :>          ]
+    %:          #
+    %:%:        ##
+    and         &&
+    bitor       |
+    or          ||
+    xor         ^
+    compl       ~
+    bitand      &
+    and_eq      &=
+    or_eq       |=
+    xor_eq      ^=
+    not         !
+    not_eq      !=
+
+
+[1]: https://lobste.rs/s/zaiaip/c_what_fuck#c_hmvlv3
+[2]: https://en.cppreference.com/w/cpp/language/operator_alternative
+[3]: https://bowero.nl/blog/2019/12/15/c-what-the-fuck/
+
+[11]: https://en.wikipedia.org/wiki/ISO_646 
+[12]: http://de.wikipedia.org/wiki/DIN_66003
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

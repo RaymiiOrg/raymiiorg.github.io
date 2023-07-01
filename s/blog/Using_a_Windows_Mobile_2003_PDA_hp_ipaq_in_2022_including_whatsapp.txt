@@ -1,0 +1,552 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Using a Windows Mobile 2003 PDA (HP iPAQ h4350) in 2022, including WhatsApp!
+Author      : 	Remy van Elst
+Date        : 	29-05-2022 01:30
+URL         : 	https://raymii.org/s/blog/Using_a_Windows_Mobile_2003_PDA_hp_ipaq_in_2022_including_whatsapp.html
+Format      : 	Markdown/HTML
+---
+
+
+
+While cleaning out my collection of electronics, I [found a PDA][0]. Not the
+modern kind (voice assistant), but the old school precursor to the
+smartphone. It's a HP iPAQ h4350, it was a model [used][2] [by][3] the
+[Dutch Railways][1]. I picked it up in working condition years ago and was
+wondering, how does a mobile device from 2003 stack up to a modern
+smartphone? The first thing I did [was][24] [run linux on it][5] which worked
+surprisingly well, it however was noticeably slower than Windows Mobile. This post
+shows you how well the device still works in 2022, including using WhatsApp
+to chat. Almost all things I use my smartphone for, I can do with this PDA!
+
+![pda1][0]
+
+> The unit showing the default home screen
+
+![PDA home screenshot][12]
+
+> A screenshot of the home screen
+
+![PDA linux][5]
+
+> [Linux][8] on the iPAQ h4350
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+One huge issue I have is that the internet from, say, 10 years ago
+(or earlier), is gone. Many broken or dead links, software downloads no
+longer available, the git repository for angstrom gone, even with a mirror
+almost all dependencies are dead or hard to find or no longer compile on a
+modern machine. Archive.org [has][6] [been][7] [a][8] [lifesaver][9], but
+it's sad to see so many sites just gone. I've uploaded most of the stuff I've
+dug up from other sources to Archive.org. You should [donate to them, it's an
+invaluable resource][10].
+
+There are two nice video's showing off other iPAQ models, [this one from
+Linus Tech Tips][49] and [this one from LGR][50]. Fun to watch if you're 
+not familiar with this type of device.
+
+
+### HP iPAQ h4350 device summary
+
+The executive [spec summary][31]: 
+
+> Powered by an Intel XScale PXA255 processor running at 400Mhz and Windows
+  Mobile 2003, the H4350 includes a hardware keyboard, 64MB of RAM and a 32MB
+  ROM (about two megabytes are available for permanent storage). Both
+  802.11b (WiFi) and Bluetooth are both embedded in the device with a
+  standard IrDA port. For expandability, the H4350 has an SDIO expansion
+  slot, and for audio output, a standard 1/8" jack is included. The device
+  recharges and syncs through the same port on the bottom of the device, and
+  includes a removable, rechargeable 1650mAh lithium battery.
+
+As you have seen on the pictures above, the device has a hardware keyboard. I
+love that and I wish modern phones would bring that back. It works so well,
+intuitive and you're not loosing half your screen on a virtual keyboard.
+
+The iPAQ has a touchscreen, but it's a resistive touchscreen, which means you
+need a stylus (included in the device). Pull-to-refresh or scrolling as we do
+now by swiping do not work, you have to use a scrollbar. Tiny controls, but
+with a stylus that works quite well. The screen has a QVGA resolution,
+320x240, which is small compared to today's devices, but when using it, you
+don't really notice, it feels big enough.
+
+The device has no built-in persistent storage, everything is in RAM. That
+means, once the battery is empty, everything (all settings, appointments,
+files, etc) is lost. There is a small backup battery which holds data long
+enough to swap the battery, but that backup battery is dead in my unit and I
+cannot find a replacement, it's a very specific part. If you happen to know
+more, send me an email please.
+
+![backup battery][20]
+
+You can work around that problem though. The docking cradle has a spare
+battery to charge and the main battery in my unit still works for at least
+three full days. The ROM (which the device resets to after power loss) has a
+utility, iPAQ Backup, which can backup and restore all settings. It even has
+the option to automatically backup when the battery reaches a certain
+percentage. If the device was reset, just restore the last backup from the SD
+card and you're up and running again. Takes 5 minutes, so not a huge issue,
+just a minor annoyance.
+
+![backup][11]
+
+This is a screenshot (actual resolution) of the backup program.
+
+
+Development for Windows Mobile was easy back in the day, Microsoft
+made sure MFC and .NET compact worked well. My day job even made a 
+few PDA applications, one to sync coffee machine counters via irDA
+(infrared) to a PDA. If you have the correct infrared PCB, it still
+[works today][28]. It was never removed from the coffee software code,
+since we still have one customer that uses it. Not sure why, the 
+counters are available via a web interface for over a decade now.
+
+![pda-evadts][27]
+
+
+
+### Using ActiveSync on Windows 10
+
+The PDA syncs with a windows computer, via ActiveSync. After Windows Vista,
+Microsoft renamed the tool to WMDC (Windows Mobile Device Sync) and it's not
+supposed to work on Windows 10, but the community has fixed that by providing
+patches and workarounds. I've uploaded the [WMDC client with Windows 10
+patches][4] to Archive.org so you can enjoy it as well. Installation is
+simple, first install `drvupdate-amd64.exe`, then `WMDC-fixes-for-Win10.msi`.
+Reboot and you should be greeted with the screen below after plugging in the
+PDA.
+
+ActiveSync (or WMDC) can sync files, but most importantly, it can sync Office
+Outlook to the PDA. Later on in this document I'll show you how to get your
+email via Outlook 2003 on Windows 10. ActiveSync also installs software to
+the device. Some software comes as a `.cab` archive, those you just transfer
+and [open on the PDA][25], but most software is a regular Windows `.exe` setup
+file, which installs via ActiveSync.
+
+![WMDC on Windows 10][13]
+
+Using ActiveSync and a utility named [GetPDAScreen][9], I can also take
+screenshots of the device. ActiveSync also provides [an internet connection][26]
+to the device (via the USB cable). 
+
+
+This PDA also has WiFi and Bluetooth, but WiFi only supports WPA and WEP, not
+WPA2. When I use it on the go, I use my smartphone to create an open access
+point that the PDA can connect to. This means I can browse everywhere.
+
+![Screenshot activesync][14]
+
+ActiveSync should also work via Bluetooth, which this device has, but that 
+failed to setup on Windows 10.
+
+### Web browsing via Opera Mini
+
+The built in Pocket Internet Explorer works, but fails to display modern sites
+correctly. Most HTTPS sites just fail outright. The [Floodgap Gopher]
+[15] proxy works, making Internet Explorer a decent Gopher browser:
+
+![gopher via pocket ie][18]
+
+Opera Mini [still provides][17] a [windows mobile 2003][16]
+`.cab` file of their browser, which still installs and works. 
+It uses their proxy service so all modern sites work, including
+HTTPS sites.
+
+![opera mini][19]
+
+Using Opera Mini makes browsing super fast, due to their proxying service. I'm
+not sure how long they will keep that up and running, I have not found
+another browser that works. Fennec (old Firefox) for Windows does not install
+and the other browsers that once were, are no longer downloadable.
+
+Whenever Opera Mini stops working, [Web Rendering Proxy (wrp)][29] would
+be a great alternative. 
+
+> A browser-in-browser "proxy" server that allows to use historical / vintage
+  web browsers on the modern web. It works by rendering a web page in to a
+  GIF or PNG image with clickable image map.
+
+Since web browsing is 90% of what I use my smartphone for, I tried to use Opera
+Mini full time for a few days. My RSS reader (miniflux) works and all pages
+load quickly, so that part of the modern workflow is covered. Even replying
+to comments and forum posts is doable with Opera. Did I mention the hardware
+keyboard? It's wonderful to type on.
+
+### Email via Outlook 2003 & ActiveSync
+
+Syncing my email (google apps, or whatever it's called nowadays) to the PDA was
+easy. The best version of Office, Microsoft Office 2003, ships with Outlook.
+Setting up gmail as a POP3 mailbox (make sure you select the checkbox that
+does not delete mail from the server) is easy peasy. Google Mail has an
+option to select which mails are offered via POP3, I selected "after today"
+instead of my entire mailbox, which goes back at least 2009. That would
+probably crash outlook, I've got my fair share of bad experiences with PST
+files.
+
+Why not IMAP? ActiveSync only lets you sync one folder, and that is the 
+folder in which the POP3 emails go in. I was able to sync to Outlook via 
+IMAP, but not able to select that mailbox to sync up with the PDA.
+
+![PDA email overview][30]
+
+Since everything is offline on the device, only a small portion of the mail
+is downloaded. You can mark a mail for complete download on the next sync.
+Sending emails is fun, due to the hardware keyboard. Everything you send 
+goes into the OUTBOX, once you sync up with ActiveSync again, it is sent.
+HTML emails do not display very well, but most of my email is plaintext.
+
+
+I can imagine myself syncing up in the morning before my commute and in the
+train processing all emails, replying, scheduling meetings, deleting and such
+and once back in the office, plugging the PDA in the dock and having
+everything synced up.
+
+I also tried using Office 365, my work account, but that fails to connect
+in Outlook via the Exchange method. IMAP did work, but POP3 is disabled per
+policy. Outlook versions up to and below 2013 do not work with Office 365,
+they just won't connect. No easy calendaring or contact syncing.
+
+#### Google Calendar via OGCS
+
+With email synced up via Outlook, all that was left is the calendar. I use the
+Google provided calendar, with offline backups via a custom python script.
+Outlook 2003 does not support remote `ical` files, only local files, so no
+easy import from google calendar.
+
+I first tried the old google provided tool to sync google calendar to outlook,
+but that does not work anymore. You can login, but you get a vague error message.
+Then I found this wonderful open source utility: [OGCS, Outlook Google Calendar Sync][32]
+
+![ogcs][33]
+
+It still supports Outlook 2003 and does bi-directional sync with Google Calendar.
+Setup is easy, login with your Google account, set the sync direction and 
+that's all. Many more options are available, but just simple synchronization
+is done in minutes. 
+
+
+![calendar][34]
+
+The home screen shows the next few appointments as well, and when a reminder
+is set, an annoying ringtone (actual ringing) wakes up the entire house so to
+say. New appointments made are first ActiveSynced back to Outlook and then to
+Google Calendar. Bi-directional sync works so well, appointments I make on
+the PDA are setup correctly, including contacts and reminders. My phone now
+buzzes for an appointment reminder I made on the PDA. I love this utility so
+much that I've donated GBP 10 to the guy. Wonderful that he still supports
+Outlook 2003. 
+
+
+### WhatsApp (via IRC/Matrix)
+
+The part I'm most proud of is being able to chat via WhatsApp. It's a complex
+setup involving Matrix and two bridges, but it works. Matrix is a hip new
+open source chat ecosystem, IRC is old-school chat. Matrix can bridge to
+other chat networks like Slack or IRC or WhatsApp, allowing you to use 
+one client for all your chats. Messages you send on Matrix are relayed
+to the other party (IRC for example) and they can chat back to you via 
+their client (IRC). With the WhatsApp bridge, even audio and video calls
+work.
+
+Using PocketIRC on the PDA, I can join IRC channels which are bridged to
+Matrix rooms. These Matrix rooms are WhatsApp chats with relay turned on.
+Effectively, the Matrix room is a multi-user chat with my IRC user, my Matrix
+user and the other person via the WhatsApp bridge. Relaying means, in case of
+the WhatsApp bridge, that other accounts in the room (room meaning the
+WhatsApp chat, a room of 2, your matrix account and the other persons
+WhatsApp account) can send messages that are relayed to the other persons
+WhatsApp. By default it's disabled so only your matrix account and the other
+persons WhatsApp account can chat.
+
+A bit complicated, but effectively Matrix just relays my messages from IRC
+to WhatsApp. Couldn't find a working IRC->WhatsApp bridge and I already
+have a Matrix server to chat on the Jupiter Broadcasting Podcast channels,
+so why not use it for this experiment.
+
+First you need to install your own Matrix Homeserver (self hosted instance). 
+As stated, I already had Matrix Synapse (the semi-official server) running.
+The [official guide][35] is fine, even for Debian/Ubuntu. Follow that 
+on a VPS of your choice and make sure you use LetsEncrypt to get a working
+TLS certificate, otherwise most clients won't connect. 
+
+If you want to chat up with me, I'm [@remy:c.spnw.nl][36]. 
+
+You also need your own IRC server. It does not need to be 
+public, but the Matrix server must be able to connect. I
+run a private [ngircd][39] instance. Make sure to check your hosting
+providers terms of service, not all VPS providers allow IRC. My IRC 
+server is firewalled to my home IP. On the go, my phone (which provides
+an access point to the PDA) connects via a VPN back to the home network
+so the IP whitelist works everywhere. I've also setup a password to
+connect up to the server. 
+
+Next, on your Matrix server, install and configure the [WhatsApp][38]
+bridge. Make sure it works, chat up with a few contacts. Setup is
+not complicated, the installation guide is terse, but gets 
+the job done.
+
+Once you have the WhatsApp bridge setup, install the [IRC][37]
+bridge. In the config, create a mapping for each WhatsApp
+contact to a specific IRC channel. I have 1 IRC channel per
+WhatsApp chat. Example configuration:
+
+      mappings:
+        "#jeffrey":
+          roomIds: ["!E...T:c.spnw.nl"]
+        "#wb...":
+          roomIds: ["!x...j:c.spnw.nl"]
+
+In the Element client, in a WhatsApp chat, issue the command to 
+enable relaying (`!wa set-relay`), otherwise your messages won't 
+arrive from IRC:
+
+![relay][43]
+
+You also must invite your IRC bot user to each WhatsApp contact
+channel.
+
+Using PocketIRC on the PDA, connect to the IRC server and join
+the channels you want. It has an option to auto-join channels on startup,
+so I set that up for each WhatsApp contact channel I bridged.
+
+Below you'll see screenshots of a test chat I had with a friend,
+first one is the PocketIRC client:
+
+![pocketirc][40]
+
+This is WhatsApp Web, showing the same messages and a picture I sent 
+of the IRC client on the PDA:
+
+![whatsapp][41]
+
+And here is the same chat inside Element, the semi-official Matrix
+client:
+
+![element][42]
+
+This setup can be improved with an IRC bouncer. That logs all your IRC
+messages when you're offline and once you are online, relays them to you.
+With the current setup, if the PDA is not online, messages that were sent do
+not arrive. Only messages sent while the PDA is connected to IRC are
+received. Not a huge issue for this test setup, enough hours were spent
+figuring out the bridge setup. If I would use this "for real", then I'd
+put something like ZNC (an IRC bounder) in between.
+
+
+### Games
+
+
+
+The PDA ships with 2 built in games, Solitaire and Jawbreaker, the
+latter being some sort of Bejeweled clone. Fun to play, but I have
+something else in mind. There are ports of my favorite games for the
+device, like Warcraft 2, Age of Empires and SimCity 2000.
+
+![games][44]
+
+There is a [huge archive of pocket pc games][46] (grab them while that
+archive is still online) and I've tried out most of them. Age of Empires
+is my favorite, followed by SimCity. Since the device has limited storage
+(RAM), I can only put a few games on it, play for a while and then swap 
+the games for new ones, but that is fun, just like the N64 used to be,
+only one cartridge at a time. When you have all the ROMS available (like
+with modern emulators), I notice that I'm less invested in each game
+then when the quantity is limited.
+
+AstraWare has an enormous collection of puzzle games, like bejeweled, 
+all without advertisements or micro transactions (like modern games). 
+Just as YouTube, the experience is way better than modern apps, 
+no tracking, no advertisements. I also found a few poker games, 
+one being regular poker (not strip-poker), which is fun as well.
+
+### YouTube
+
+Watching YouTube video's via the website, either Internet
+Explorer or Opera Mini does not work. I found a few old `.cab`
+files but those fail to install. The alternative is to first
+download the video's you want to watch locally, convert them
+and sync them up for later consumption. Fits in the style of 
+ActiveSync (download via PC, sync up to PDA to work offline).
+
+Using `youtube-dl` and `ffmpeg`, I got a few video's on the 
+device. It supports background playback, so you can write 
+emails while audio/video plays in the background. No ad's,
+background playback, all features you have to pay for nowadays.
+
+![video playback][22]
+
+Download [a video][23] (or a playlist) and specify the format to be
+less or equal to the screen size of the PDA:
+
+    $ youtube-dl --format 'bestvideo[width<=320]+bestaudio' https://www.youtube.com/watch?v=K4tN8XBsba4
+
+Output:
+
+    [youtube] K4tN8XBsba4: Downloading webpage
+    WARNING: Requested formats are incompatible for merge and will be merged into mkv.
+    [download] Destination: Nederland Zingt - Psalm 121 - 1 en 3-K4tN8XBsba4.f278.webm
+    [download] 100% of 1.44MiB in 00:20
+    [download] Destination: Nederland Zingt - Psalm 121 - 1 en 3-K4tN8XBsba4.f140.m4a
+    [download] 100% of 1.92MiB in 00:27
+    [ffmpeg] Merging formats into "Nederland Zingt - Psalm 121 - 1 en 3-K4tN8XBsba4.mkv"
+    Deleting original file Nederland Zingt - Psalm 121 - 1 en 3-K4tN8XBsba4.f278.webm (pass -k to keep)
+    Deleting original file Nederland Zingt - Psalm 121 - 1 en 3-K4tN8XBsba4.f140.m4a (pass -k to keep)
+
+Convert the video to `.wmv`, I haven't found other formats that work:
+
+    $ ffmpeg -i ./Nederland\ Zingt\ -\ Psalm\ 121\ -\ 1\ en\ 3-K4tN8XBsba4.mkv ./nz-ps121.wmv
+
+Lots of output, but in the end I got a 5MB Windows Media Video file. This is 
+the file information as displayed by Windows Media Player 9:
+
+![wmv info][21]
+
+Audio files are supported as `.wma` files, I was not able to get `.mp3` files
+to work in the built-in media player, but other alternative players are still
+available. 
+
+#### Podcasts
+
+For my podcasts, I use [yt-dlp][47], a fork of `youtube-dl` with [SponsorBlock][48]
+integration. This strips out any sponsored messages in podcasts, very helpful for 
+Twit.tv. For the Jupiter Broadcasting shows I have sponsorblock disabled, their ads
+are short and I rather give Chris the eyeballs (earballs?) than a big podcast network
+like Twit. 
+
+This is the command I use to download [a podcast][45], extract the audio, with
+sponsorblock removing segments:
+
+    yt-dlp --format 'bestaudio' --extract-audio  --audio-format mp3  --sponsorblock-remove all https://www.youtube.com/watch?v=CugpX0hnLfo
+
+Output:
+
+    [youtube] CugpX0hnLfo: Downloading webpage
+    [youtube] CugpX0hnLfo: Downloading android player API JSON
+    [SponsorBlock] Fetching SponsorBlock segments
+    [SponsorBlock] Found 4 segments in the SponsorBlock database
+    [info] CugpX0hnLfo: Downloading 1 format(s): 251
+    [download] Resuming download at byte 31989133
+    [download] Destination: Dis-CONTI-nued - The End of Conti - Clearview AI in Ukraine, Vancouver Pwn2Own, Voyager 1 [CugpX0hnLfo].webm
+    [download] 100% of 102.19MiB in 00:35
+    [ExtractAudio] Destination: Dis-CONTI-nued - The End of Conti - Clearview AI in Ukraine, Vancouver Pwn2Own, Voyager 1 [CugpX0hnLfo].mp3
+    Deleting original file Dis-CONTI-nued - The End of Conti - Clearview AI in Ukraine, Vancouver Pwn2Own, Voyager 1 [CugpX0hnLfo].webm (pass -k to keep)
+    [ModifyChapters] Removing chapters from Dis-CONTI-nued - The End of Conti - Clearview AI in Ukraine, Vancouver Pwn2Own, Voyager 1 [CugpX0hnLfo].mp3
+    Deleting original file Dis-CONTI-nued - The End of Conti - Clearview AI in Ukraine, Vancouver Pwn2Own, Voyager 1 [CugpX0hnLfo].uncut.mp3 (pass -k to keep)
+
+Using the `ffmpeg` command above, the podcasts are converted to `.wma` audio files. Change
+the last extension to `.wma` instead of `.wmv`. Transfer the files to your SD card and 
+enjoy your ad-free podcast.
+
+
+### Conclusion
+
+The only thing missing, to fully replace my smartphone, is the built-in
+camera. The PDA has no camera, and back in those days, if it would've had 
+one, it would probably be a low quality / resolution one. All other things
+I use my smartphone, browsing, email, calendar, chatting and some games, 
+yes, absolutely possible. Battery life is better than my current smartphone,
+usage patterns like scrolling with a scrollbar and using a stylus work fine.
+
+I'm a bit too young to have used a PDA for business, I was still in college
+when they were in use. But I am a big nerd, so I would have used one for sure
+if I got the change.
+
+Except for most of the "old-web" being offline, a PDA is surprisingly usable
+still. The workflow of offline-first (syncing via a cradle/dock and desktop PC)
+suits me well and I might just keep this device in use a bit longer than most of my 
+experiments.
+
+One other thing I like a lot is that there is no tracking and no advertisements. 
+Modern apps are infested with trackers and ads, requiring adblockers, but this
+old device just has none. Wonderful.
+
+[0]: /s/inc/img/pda1.jpg
+[1]: https://web.archive.org/web/20220527041341/https://www.spoorwegmuseum.nl/ontdek/de-collectie/techniek/railpocket/
+[2]: /s/inc/img/railpocket.jpg
+[3]: /s/inc/img/railpocket2.png
+[4]: https://archive.org/details/wmdc-pack
+[5]: /s/inc/img/pda-linux.jpg
+[6]: https://archive.org/details/sp-28375
+[7]: https://archive.org/details/wmdc-pack
+[8]: https://archive.org/details/angstrom-x-11-image-glibc-ipk-2007.12-h-4000.rootfs.tar
+[9]: https://archive.org/details/get-pdascreen
+[10]: https://archive.org/donate?origin=raymii.org
+[11]: /s/inc/img/pda-backup1.png
+[12]: /s/inc/img/pda-home.png
+[13]: /s/inc/img/pda-wmdc.png
+[14]: /s/inc/img/pda-screenshot.png
+[15]: https://gopher.floodgap.com/gopher/gw?=raymii.org+70+312f6c696e6b732f
+[16]: https://get.geo.opera.com/pub/opera/winmobile/865b/
+[17]: http://m.opera.com/?act=lp&region&ua=SAMSUNG-C6625%2F1.0%20(compatible%3B%20MSIE%206.0%3B%20Windows%20CE%3B%20IEMobile%207.11)%20Profile%2FMIDP-2.0%20Configuration%2FCLDC-1.1&rnd=2013285493&vid=0x0d6869c60e71e356&tag=mobile10_android&cert=none
+[18]: /s/inc/img/pda-gopher.png
+[19]: /s/inc/img/pda-opera.png
+[20]: /s/inc/img/pda-battery.png
+[21]: /s/inc/img/pda-wmv.png
+[22]: /s/inc/img/pda-wmv2.png
+[23]: https://www.youtube.com/watch?v=K4tN8XBsba4
+[24]: /s/inc/img/pda-linux.png
+[25]: /s/inc/img/pda-install.png
+[26]: /s/inc/img/pda-nic.png
+[27]: /s/inc/img/pda-evadts.png
+[28]: https://youtu.be/FEurUmiXlI4
+[29]: https://github.com/tenox7/wrp
+[30]: /s/inc/img/pda-email3.png
+[31]: /s/inc/img/pda-over.png
+[32]: http://www.outlookgooglecalendarsync.com/
+[33]: /s/inc/img/ogcs.png
+[34]: /s/inc/img/pda-calendar.png
+[35]: https://matrix.org/docs/guides/installing-synapse
+[36]: https://matrix.to/#/@remy:c.spnw.nl
+[37]: https://github.com/matrix-org/matrix-appservice-irc
+[38]: https://github.com/mautrix/whatsapp
+[39]: https://ngircd.barton.de/
+[40]: /s/inc/img/pda-irc.png
+[41]: /s/inc/img/pda-irc2.png
+[42]: /s/inc/img/pda-irc3.png
+[43]: /s/inc/img/pda-irc4.png
+[44]: /s/inc/img/pda-games.png
+[45]: https://www.youtube.com/watch?v=CugpX0hnLfo
+[46]: https://oldhandhelds.com/?dir=Pocket%20Pc%20Software/Games/
+[47]: https://github.com/yt-dlp/yt-dlp
+[48]: https://sponsor.ajay.app/
+[49]: https://www.youtube.com/watch?v=xeM1KD70_D4
+[50]: https://www.youtube.com/watch?v=wm5omDCENPo
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,1566 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	OpenVMS 7.3 install log with simh VAX on Ubuntu 16.04
+Author      : 	Remy van Elst
+Date        : 	16-04-2018
+URL         : 	https://raymii.org/s/blog/OpenVMS_7.3_install_log_with_simh_vax_on_Ubuntu_16.04.html
+Format      : 	Markdown/HTML
+---
+
+
+
+[![openvms][1]][2]
+
+(You can read all my OpenVMS articles by [clicking the picture above][2])
+
+Using [this guide][3] I was able to install OpenVMS 7.3 for VAX on simh on
+Ubuntu 16.04.
+
+This is a copy-paste of my terminal for future reference. This is not one of my
+usual articles, a guide with comprehensive information an background. Just a log
+of my terminal.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Prepare config files and place ISO
+
+    
+    
+    sudo apt-get install simh
+    
+    mkdir -p REMY1
+    cd REMY1
+    
+    wget https://raw.githubusercontent.com/simh/simh/master/VAX/ka655x.bin
+    
+
+Place VAXVMS 073 OS ISO from the Hobbyist program download
+
+    
+    
+    cat vax.ini
+    
+
+Output:
+
+    
+    
+    LOAD -r /home/remy/REMY1/ka655x.bin
+    ATTACH nvr /home/remy/REMY1/nvram.bin
+    
+    SET RQ0 RA90
+    SET RQ1 RA90
+    ATTACH RQ0 /home/remy/REMY1/VMS-RQ0.dsk
+    ATTACH RQ1 /home/remy/REMY1/VMS-RQ1.dsk
+    SET RQ2 RRD40
+    ATTACH RQ2 /home/remy/REMY1/VMS-VAX.iso
+    SET RL DISABLE
+    SET TS DISABLE
+    
+    SET CPU 64M
+    SET CPU IDLE
+    
+    SET XQ MAC=DE:AD:BE:EF:11:11
+    ATTACH XQ eth0
+    
+    BOOT CPU
+    
+
+### Restore saveset
+
+Startup:
+
+    
+    
+    $ vax
+    
+    %SYSBOOT-I-SYSBOOT Mapping the SYSDUMP.DMP on the System Disk
+    %SYSBOOT-W-SYSBOOT Can not map SYSDUMP.DMP on the System Disk
+      YSBOOT-W-SYSBOOT Can not map PAGEFILE.SYS on the System Disk
+         OpenVMS (TM) VAX Version X7G7 Major version id = 1 Minor version id = 0
+       %WBM-I-WBMINFO Write Bitmap has successfully completed initialization.
+    
+
+Enter time and date, mind the MONTH format:
+
+    
+    
+    PLEASE ENTER DATE AND TIME (DD-MMM-YYYY  HH:MM)  12-APR-2018 22:30
+    
+    Configuring devices . . .
+    Now configuring HSC, RF, and MSCP-served devices . . .
+    
+    Please check the names of the devices which have been configured,
+    to make sure that ALL remote devices which you intend to use have
+    been configured.
+    
+    If any device does not show up, please take action now to make it
+    available.
+    
+    
+    Available device  DUA0:                            device type RA90
+    Available device  DUA1:                            device type RA90
+    Available device  DUA2:                            device type RRD40
+    Available device  DUA3:                            device type RX50
+    Available device  DYA0:                            device type RX02
+    Available device  DYA1:                            device type RX02
+    Available device  MUA0:                            device type TK50
+    Available device  MUA1:                            device type TK50
+    Available device  MUA2:                            device type TK50
+    Available device  MUA3:                            device type TK50
+    
+
+Yes everything is here:
+
+    
+    
+    Enter "YES" when all needed devices are available: yes
+    %BACKUP-I-IDENT, Stand-alone BACKUP T7.2; the date is 12-APR-2018 22:31:59.85
+    
+
+Restore the save set:
+
+    
+    
+    $ BACKUP DUA2:VMS073.B/SAVE_SET DUA0:
+    %BACKUP-I-PROCDONE, operation completed.  Processing finished at 12-APR-2018 22:32:15.68
+    If you do not want to perform another standalone BACKUP operation,
+    use the console to halt the system.
+    
+    If you do want to perform another standalone BACKUP operation,
+    ensure the standalone application volume is online and ready.
+    
+
+Yes:
+
+    
+    
+    Enter "YES" to continue: yes
+    %BACKUP-I-IDENT, Stand-alone BACKUP T7.2; the date is 12-APR-2018 22:32:20.40
+    $
+    
+
+PRESS CTRL+E to exit simh
+
+    
+    
+    Simulation stopped, PC: 839ABD40 (MOVL (R5),R4)
+    
+
+Then type `quit`.
+
+### Update simh ini file
+
+Edit `vax.ini`:
+
+    
+    
+    LOAD -r /home/remy/REMY1/ka655x.bin
+    ATTACH nvr /home/remy/REMY1/nvram.bin
+    
+    SET RQ0 RA90
+    SET RQ1 RA90
+    ATTACH RQ0 /home/remy/REMY1/VMS-RQ0.dsk
+    ATTACH RQ1 /home/remy/REMY1/VMS-RQ1.dsk
+    SET RQ2 RRD40
+    ATTACH RQ2 /home/remy/REMY1/VMS-VAX.iso
+    SET RL DISABLE
+    SET TS DISABLE
+    
+    SET CPU 64M
+    SET CPU IDLE
+    
+    SET XQ MAC=DE:AD:BE:EF:11:11
+    ATTACH XQ eth0
+    
+    SET CPU CONHALT
+    DEP BDR 0
+    BOOT CPU
+    EXIT
+    
+
+Remove `BOOT CPU` and add the new 4 lines at the bottom. Continue simh:
+
+### Install part 2
+
+    
+    
+    $ vax
+    
+    VAX simulator V3.8-1
+    NVR: buffering file in memory
+    Eth: opened enp0s3
+    
+    
+    KA655-B V5.3, VMB 2.7
+    Performing normal system tests.
+    40..39..38..37..36..35..34..33..32..31..30..29..28..27..26..25..
+    24..23..22..21..20..19..18..17..16..15..14..13..12..11..10..09..
+    08..07..06..05..04..03..
+    Tests completed.
+    Loading system software.
+    (BOOT/R5:0 DUA0
+    
+    
+    
+      2..
+    -DUA0
+      1..0..
+    
+    
+    %SYSBOOT-I-SYSBOOT Mapping the SYSDUMP.DMP on the System Disk
+    %SYSBOOT-W-SYSBOOT Can not map SYSDUMP.DMP on the System Disk
+    %SYSBOOT-I-SYSBOOT Mapping PAGEFILE.SYS on the System Disk
+      YSBOOT-I-SYSBOOT SAVEDUMP parameter not set to protect the PAGEFILE.SYS
+         OpenVMS (TM) VAX Version BI73-7G7 Major version id = 1 Minor version id = 0
+       %WBM-I-WBMINFO Write Bitmap has successfully completed initialization.
+    
+               OpenVMS VAX V7.3 Installation Procedure
+    
+                             Model: VAXserver 3900 Series
+                     System device: RA90 - _DUA0:
+                       Free Blocks: 2289780
+                          CPU type: 10-01
+    
+
+Date again:
+
+    
+    
+    * Please enter the date and time (DD-MMM-YYYY HH:MM) 12-APR-2018 22:31
+    
+    
+    *********************************************************
+    %SYSTEM-W-TZGMT, your local timezone has defaulted to GMT
+    %SYSTEM-I-SETTZ, to set your local timezone use:
+    
+         $ @SYS$MANAGER:UTC$TIME_SETUP.COM
+    
+    *********************************************************
+    On MIN or UPGRADE system startup - CLUE is not run.
+    %%%%%%%%%%%  OPCOM  12-APR-2018 22:31:00.88  %%%%%%%%%%%
+    Operator _OPA0: has been enabled, username SYSTEM
+    
+    %%%%%%%%%%%  OPCOM  12-APR-2018 22:31:00.88  %%%%%%%%%%%
+    Operator status for operator _OPA0:
+    CENTRAL, PRINTER, TAPES, DISKS, DEVICES, CARDS, NETWORK, CLUSTER, SECURITY,
+    LICENSE, OPER1, OPER2, OPER3, OPER4, OPER5, OPER6, OPER7, OPER8, OPER9, OPER10,
+    OPER11, OPER12
+    
+    %%%%%%%%%%%  OPCOM  12-APR-2018 22:31:00.89  %%%%%%%%%%%
+    Logfile has been initialized by operator _OPA0:
+    Logfile is SYS$SYSROOT:[SYSMGR]OPERATOR.LOG;1
+    
+    %%%%%%%%%%%  OPCOM  12-APR-2018 22:31:00.89  %%%%%%%%%%%
+    Operator status for operator SYS$SYSROOT:[SYSMGR]OPERATOR.LOG;1
+    CENTRAL, PRINTER, TAPES, DISKS, DEVICES, CARDS, NETWORK, CLUSTER, SECURITY,
+    LICENSE, OPER1, OPER2, OPER3, OPER4, OPER5, OPER6, OPER7, OPER8, OPER9, OPER10,
+    OPER11, OPER12
+    
+    %SYSTEM-I-BOOTUPGRADE, security auditing disabled
+    %LICENSE-F-EMTLDB, license database contains no license records
+    %SYSTEM-I-BOOTUPGRADE, security server not started
+    %%%%%%%%%%%  OPCOM  12-APR-2018 22:31:01.71  %%%%%%%%%%%
+    Message from user SYSTEM
+    %LICENSE-E-NOAUTH, DEC VAX-VMS use is not authorized on this node
+    -LICENSE-F-NOLICENSE, no license is active for this software product
+    -LICENSE-I-SYSMGR, please see your system manager
+    
+    
+    %LICENSE-E-NOAUTH, DEC VAX-VMS use is not authorized on this node
+    -LICENSE-F-NOLICENSE, no license is active for this software product
+    -LICENSE-I-SYSMGR, please see your system manager
+    Startup processing continuing...
+    
+    %SET-I-INTSET, login interactive limit = 1, current interactive value = 0
+    %SET-I-INTSET, login interactive limit = 0, current interactive value = 0
+    %JBC-E-OPENERR, error opening SYS$COMMON:[SYSEXE]QMAN$MASTER.DAT;
+    -RMS-E-FNF, file not found
+    
+        If this system disk is to be used in an OpenVMS Cluster with multiple
+        system disks, then each system disk must have a unique volume label.
+        Any nodes having system disks with duplicate volume labels will fail
+        to boot into the cluster.
+    
+        You can indicate a volume label of 1 to 12 characters in length.  If you
+        want to use the default name of OVMSVAXSYS, press RETURN in response
+        to the next question.
+    
+
+Give your systemdisk a unique name:
+
+    
+    
+    * Enter the volume label for this system disk [OVMSVAXSYS]: REMY1SYS
+    
+
+ISO is `DUA2`:
+
+    
+    
+    * Enter name of drive holding the OpenVMS distribution media: DUA2
+    
+
+Yes:
+
+    
+    
+    * Is the OpenVMS media ready to be mounted? [N] y
+    %MOUNT-I-MOUNTED, VAXVMS073 mounted on _DUA2:
+    
+        Select optional software you want to install.  You can install one
+        or more of the following OpenVMS or DECwindows components:
+    
+        o OpenVMS library                              -  52200 blocks
+        o OpenVMS optional                             -  19000 blocks
+        o OpenVMS Help Message                         -  10400 blocks
+        o OpenVMS Management Station                   -  20000 blocks
+        o DECwindows base support                      -   4400 blocks
+        o DECwindows workstation support               -  23800 blocks
+              -  75 dots per inch video fonts          -    (included)
+              - 100 dots per inch video fonts          -   6200 blocks
+        o DECnet-Plus networking                       -  80000 blocks
+        o DECnet Phase IV networking                   -    800 blocks
+    
+        Space remaining on system disk:  2289591 blocks
+    
+    Install all the things:
+    
+    * Do you want to install the OpenVMS library files? (Y/N) y
+    
+        Space remaining on system disk:  2237391 blocks
+    
+    * Do you want to install the OpenVMS optional files? (Y/N) y
+    
+        Space remaining on system disk:  2218391 blocks
+    
+    
+        The Help Message utility (MSGHLP) provides online explanations
+        and user actions for OpenVMS messages in place of the hardcopy
+        OpenVMS System Messages and Recovery Procedures Reference Manual,
+        which is now separately orderable.
+    
+        The MSGHLP database file, MSGHLP$LIBRARY.MSGHLP$DATA,
+        consumes approximately 10400 blocks and will be
+        placed by default on your system disk in SYS$COMMON:[SYSHLP]
+        unless you specify an alternate device when prompted.
+    
+    * Do you want to install the MSGHLP database? (Y/N) y
+    
+        You can install this database on your system disk in SYS$COMMON:[SYSHLP]
+        or on an alternate device.  If you specify an alternate device, but no
+        directory, MSGHLP$LIBRARY.MSGHLP$DATA is placed in [HELP_MESSAGE].  When
+        prompted, take the default of the system disk or specify an alternate
+        device using this format:
+    
+                               device:[directory]
+    
+    * Where do you want to install the MSGHLP database?
+        [SYS$COMMON:[SYSHLP]]
+    
+        Space remaining on system disk:  2207991 blocks
+    
+    
+        The OpenVMS Management Station is a client-server application that
+        provides OpenVMS system management capabilities through a client
+        application on a personal computer (PC) running Microsoft Windows.
+    
+        The server application runs on OpenVMS systems and is automatically
+        installed as part of the OpenVMS operating system.
+    
+        This option provides the files used to install the PC client software.
+        If you want to use the OpenVMS Management Station, you must install
+        these optional files on at least one OpenVMS system and then use one or
+        both of them to install the PC client on one or more PCs.  There are two
+        files:  TNT030_I.EXE for Intel systems (Windows 95 and Windows NT), and
+        TNT030_A.EXE for Alpha Windows NT systems.
+    
+        The OpenVMS Management Station optional files consume approximately 20000
+        blocks and will be placed on your system disk in SYS$COMMON:[TNT.CLIENT].
+    
+    * Do you want to install the optional OpenVMS Management Station files? (Y/N) n
+    
+        You can select DECwindows now, or you can use the DECW$TAILOR utility
+        to provide or remove DECwindows support after the installation.
+    
+        Some media, TK50s in particular, can be very slow when tailoring on files.
+        You might want to select DECwindows now and tailor off unwanted files later.
+    
+        NOTE: This kit does NOT contain full DECwindows.
+              To obtain full DECwindows, you must also install the separate
+              layered product, DECwindows Motif for OpenVMS VAX.
+              V1.2-3 is the minimum version of DECwindows Motif for OpenVMS VAX
+              that can be used with OpenVMS VAX V7.3.
+    
+        The DECwindows components provided in this kit requires approximately
+        34400 blocks, broken down as follows:
+    
+            o DECwindows base support                    -   4400 blocks
+            o DECwindows workstation support             -  23800 blocks
+              -  75 dots per inch video fonts            -    (included)
+              - 100 dots per inch video fonts (optional) -   6200 blocks
+    
+        You must select the DECwindows base support option if
+            - you plan to run DECwindows software, or
+            - you are installing this kit on
+                * a workstation or
+                * an OpenVMS Cluster that contains workstations, or
+            - you want to provide font files for Xterminals.
+    
+        If you are installing this kit on a system that includes Xterminals
+        and you do NOT select DECwindows base support, then you will have to use
+        the DECW$TAILOR utility to provide font files.
+    
+    * Do you want the DECwindows base support? (Y/N) y
+    
+        Space remaining:  2203591 blocks
+    
+    
+        You must select the DECwindows workstation support option if
+            - you are installing this kit on
+                * a workstation or
+                * an OpenVMS Cluster that contains workstations, or
+            - you want to provide font files for Xterminals.
+    
+        If you are installing this kit on a system that includes Xterminals
+        and you do NOT select DECwindows workstation support, then you will have
+        to use the DECW$TAILOR utility to provide font files.
+    
+    * Do you want to install DECwindows workstation support? (Y/N) y
+    
+        Space remaining:  2179791 blocks
+    
+    
+        DECwindows workstation support includes the 75 dots per inch video fonts.
+    
+        All DECwindows applications run with 75 dots per inch video fonts.
+        By default, most systems startup with 75 dots per inch video fonts.
+        Certain applications can take advantage of 100 dots per inch video fonts.
+    
+        For the VAXstation 4000 series machines, 100 dots per inch video fonts
+        are used by default.  If you decide not to install 100 dots per inch
+        video fonts, you must edit SYS$MANAGER:DECW$PRIVATE_SERVER_SETUP.COM
+        to force 75 dots per inch video fonts to be the default.  Otherwise,
+        certain applications may not space text properly.
+    
+        For instructions on how to configure your system with both 75 and 100
+        dots per inch video fonts, see the installation guide or look at the
+        template command procedure SYS$MANAGER:DECW$PRIVATE_SERVER_SETUP.TEMPLATE.
+    
+    * Do you want 100 dots per inch video fonts installed? (Y/N) y
+    
+        Space remaining:  2173591 blocks
+    
+    
+        Beginning with OpenVMS V7.1, the DECnet-Plus kit is provided with
+        the OpenVMS operating system kit.  Compaq strongly recommends that
+        DECnet users install DECnet-Plus.  DECnet Phase IV applications are
+        supported by DECnet-Plus.
+    
+        DECnet Phase IV is also provided as an option.  Support for DECnet
+        Phase IV is available through a Prior Version Support Contract.
+    
+        If you install DECnet-Plus and TCP/IP you can run DECnet
+        applications over a TCP/IP network.  Please see the OpenVMS
+        Management Guide for information on running DECnet over TCI/IP.
+    
+        If you plan to install DECnet Phase IV do NOT select DECnet-Plus.
+    
+    * Do you want to install DECnet-Plus? (Y/N) y
+    
+        Space remaining on system disk:  2093591 blocks
+    
+        DECnet Phase IV will not be installed.
+    
+    
+        The following options will be provided:
+    
+            OpenVMS library
+            OpenVMS optional
+            OpenVMS Help Message
+            DECwindows base support
+            DECwindows workstation support with:
+                -  75 dots per inch video fonts
+                - 100 dots per inch video fonts
+            DECnet-Plus
+    
+        Space remaining on system disk:  2093591 blocks
+    
+    Of course this is correct:
+    
+    * Is this correct? (Y/N) y
+    
+        Restoring OpenVMS library save set ...
+    %BACKUP-I-STARTVERIFY, starting verification pass
+    
+        Restoring OpenVMS optional save set ...
+    %BACKUP-I-STARTVERIFY, starting verification pass
+    
+        Restoring OpenVMS Help Message save set ...
+    %BACKUP-I-STARTVERIFY, starting verification pass
+    
+        Restoring DECwindows base support save set ...
+    %BACKUP-I-STARTVERIFY, starting verification pass
+    
+        Restoring DECwindows workstation support save set ...
+    %BACKUP-I-STARTVERIFY, starting verification pass
+    
+        Restoring DECwindows 75 dots per inch video fonts save set ...
+    %BACKUP-I-STARTVERIFY, starting verification pass
+    
+        Restoring DECwindows 100 dots per inch video fonts save set ...
+    %BACKUP-I-STARTVERIFY, starting verification pass
+    
+        Now registering the OpenVMS operating system in the
+        POLYCENTER Software Installation product database
+    
+    
+    The following product will be registered:
+        DEC VAXVMS VMS V7.3                    DISK$VAXVMSV73:[VMS$COMMON.]
+    
+    The following product has been registered:
+        DEC VAXVMS VMS V7.3                    Transition (registration)
+    
+        You can now remove the distribution kit from DUA2:.
+    
+    
+    
+        In an OpenVMS Cluster, you can run multiple systems sharing all files
+        except PAGEFILE.SYS, SWAPFILE.SYS, SYSDUMP.DMP, and VAXVMSSYS.PAR.
+    
+        Cluster configuration cannot be done at this time because no network
+        is present.  In order to configure a cluster you must FIRST do one
+        or both of the following:
+    
+            o Install DECnet-Plus (or DECnet Phase IV), or
+            o Execute SYS$STARTUP:LAN$STARTUP.COM by removing the
+              comment delimiter ("!") from the line
+    
+                    $! @SYS$STARTUP:LAN$STARTUP
+    
+              in SYS$MANAGER:SYSTARTUP_VMS.COM.
+    
+        Then configure the cluster by executing the following command:
+    
+                    @ @SYS$MANAGER:CLUSTER_CONFIG
+    
+        See the OpenVMS System Manager's Manual: Essentials for more information.
+    
+
+I want to experiment with remote X sessions, so yes:
+
+    
+    
+    * Do you want DECwindows Motif as the default windowing system? (Y/N) y
+    
+        Now we will ask you for new passwords for the following accounts:
+    
+            SYSTEM, SYSTEST, FIELD
+    
+        Passwords must be a minimum of 8 characters in length.  All passwords
+        will be checked and verified.  Any passwords that can be guessed easily
+        will not be accepted.
+    
+
+Enter a password, but make sure it has no `!` in them and is at least 8
+characters long:
+
+    
+    
+    * Enter password for SYSTEM:
+    * Re-enter for verification:
+    %UAF-I-MDFYMSG, user record(s) updated
+    %VMS-I-PWD_OKAY, account password for SYSTEM verified
+    
+    * Enter password for SYSTEST:
+    * Re-enter for verification:
+    %UAF-I-MDFYMSG, user record(s) updated
+    %VMS-I-PWD_OKAY, account password for SYSTEST verified
+    
+    
+        The SYSTEST_CLIG account will be disabled.  You must re-enable
+        it before running UETP but do not assign a password.
+    
+    %UAF-I-PWDLESSMIN, new password is shorter than minimum password length
+    %UAF-I-MDFYMSG, user record(s) updated
+    
+    * Enter password for FIELD:
+    * Re-enter for verification:
+    %UAF-I-MDFYMSG, user record(s) updated
+    %VMS-I-PWD_OKAY, account password for FIELD verified
+    
+    
+        Creating RIGHTS database file, SYS$SYSTEM:RIGHTSLIST.DAT
+        Ignore any "-SYSTEM-F-DUPIDENT, duplicate identifier" errors.
+    
+    %UAF-I-RDBCREMSG, rights database created
+    %UAF-I-RDBADDMSGU, identifier DEFAULT value [000200,000200] added to rights database
+    %UAF-I-RDBADDMSGU, identifier FIELD value [000001,000010] added to rights database
+    %UAF-I-RDBADDMSGU, identifier SYSTEM value [000001,000004] added to rights database
+    %UAF-I-RDBADDMSGU, identifier SYSTEST value [000001,000007] added to rights database
+    %UAF-E-RDBADDERRU, unable to add SYSTEST_CLIG value [000001,000007] to rights database
+    -SYSTEM-F-DUPIDENT, duplicate identifier
+    %UAF-I-NOMODS, no modifications made to system authorization file
+    %UAF-I-RDBDONEMSG, rights database modified
+    
+        Creating MODPARAMS.DAT database file, SYS$SYSTEM:MODPARAMS.DAT
+    
+
+Hostname:
+
+    
+    
+    * Please enter the SCSNODE name: REMY1
+    
+
+Explanation taken from the article linked above:
+
+For the SCSNODE name - the hostname, if you will - you'll have to remember to
+use only 6 characters or less. The SCSSYSTEMID is a bit more complex. It's
+calculated through the formula X * 1024 + Y, where X is the DECnet area number,
+and Y the DECnet node number in that area.
+
+Since we're starting from scratch, we can use X=1; for the node numbers, it
+makes sense to think this through properly. Useful tip: use the last octet of
+the IP address you want to assign to this machine! Since I want to give IPs
+10.20.1.131 and 10.20.1.132 to the nodes, I'll give WHISKY Y=131, COGNAC Y=132.
+This leaves us with a SCSSYSTEMID of 1155 for WHISKY, and DECnet code 1.131.
+COGNAC will get 1156 as SCSSYSTEMID and DECnet code 1.132.
+
+If you want machines to communicate with others over DECnet, you really, really
+should communicate with those people on how to decide on DECnet addresses. If
+you would want to join my cluster, you'll HAVE to use DECnet area 1, and you'll
+HAVE to use a DECnet node number that's not 131 or 132.
+
+Why? Because DECnet overwrites your MAC address, based on the DECnet address.
+The 16-bit decimal address is converted to a hexadecimal number and appended to
+the address AA:00:04:00 in byte-swapped order, with the least significant byte
+first. For example, DECnet address 12.75 becomes 12363 (base 10), which equals
+304B (base 16). After this byte-swapped address is appended to the standard
+DECnet MAC address prefix, the resulting address is AA:00:04:00:4B:30 (thanks to
+Cisco for that brief explanation). And, in the end, we really don't want to have
+two identical MAC addresses on the same network, do we?
+
+    
+    
+    * Please enter the SCSSYSTEMID:  1155
+    
+        After the installation finishes, you might want to do one or more of the
+        following tasks:
+    
+        o DECOMPRESS THE SYSTEM LIBRARIES - To save space, many of the system
+          libraries are shipped in a data-compressed format.  If you have
+          enough disk space, you can decompress the libraries for faster access.
+          To data expand the libraries, type:
+    
+            $ @SYS$UPDATE:LIBDECOMP.COM
+    
+          If you do not decompress these libraries, you will experience
+          slower response to the HELP and LINK commands.
+    
+        o BUILD A STANDALONE BACKUP KIT - You can build a standalone backup kit
+          using the procedure described in the "Backup Procedures" chapter of
+          tye upgrade and installation supplement provided for your VAX computer.
+    
+        o TAILOR THE SYSTEM DISK - You might want to review the files provided or
+          not provided during this installation.  If you find there are files
+          you want to remove from the system disk (TAILOR OFF) or files you want
+          to add (TAILOR ON), use the following utilities to perform the
+          desired tailoring.
+    
+              OpenVMS tailoring:          $ RUN SYS$UPDATE:VMSTAILOR
+    
+              DECwindows tailoring:       $ RUN SYS$UPDATE:DECW$TAILOR
+    
+          NOTE:  The tailor procedure cannot be used to TAILOR ON or TAILOR OFF
+                 files located on an alternate disk.
+    
+    
+    =================================================================
+        Continuing with OpenVMS VAX V7.3 Installation Procedure.
+    
+    
+    
+        Configuring all devices on the system ...
+    
+        If you have Product Authorization Keys (PAKs) to register, you can
+        register them now.
+    
+
+No, later on we can copy paste the entire text file from HP in the terminal
+instead of manually typing over everything:
+
+    
+    
+    * Do you want to register any Product Authorization Keys? (Y/N): n
+    
+    ********************************************************************************
+    
+        After the system has rebooted you must register any Product
+        Authorization Keys (PAKs) that you have received with this kit.
+        You can register these PAKs by executing the following procedure:
+    
+            $ @SYS$UPDATE:VMSLICENSE
+    
+        See the OpenVMS License Management Utility Manual for any additional
+        information you need.
+    
+    ********************************************************************************
+    
+    
+    %UTC-I-UPDTIME, updating Time Zone information in SYS$COMMON:[SYSEXE]
+    
+    
+        Configuring the Local Time Zone
+    
+    
+        TIME ZONE SPECIFICATION -- Main Time Zone Menu
+    
+          1) Australia       11) GMT             21) Mexico          31) Turkey
+          2) Brazil          12) Greenwich       22) NZ              32) UCT
+          3) CET             13) Hong Kong       23) NZ-CHAT         33) US
+          4) Canada          14) Iceland         24) Navajo          34) UTC
+          5) Chile           15) Iran            25) PRC             35) Universal
+          6) Cuba            16) Israel          26) Poland          36) W-SU
+          7) EET             17) Jamaica         27) ROC             37) WET
+          8) Egypt           18) Japan           28) ROK             38) Zulu
+          9) Factory         19) Libya           29) Singapore
+         10) GB-Eire         20) MET             30) SystemV
+    
+          0) None of the above
+    
+
+I'm in Europe, GMT+1:
+
+    
+    
+    Select the number above that best describes your location: 11
+    
+    You selected GMT as your time zone.
+    Is this correct? (Yes/No) [YES]:
+    
+        GMT Time Zone Menu
+    
+           1) GMT             12) GMT10           23) GMT-7           34) GMTPLUS5
+           2) GMT0            13) GMT11           24) GMT-8           35) GMTPLUS6
+           3) GMT1            14) GMT12           25) GMT-9           36) GMTPLUS7
+           4) GMT2            15) GMT13           26) GMT-10          37) GMTPLUS8
+           5) GMT3            16) GMT-0           27) GMT-11          38) GMTPLUS9
+           6) GMT4            17) GMT-1           28) GMT-12          39) GMTPLUS10
+           7) GMT5            18) GMT-2           29) GMTPLUS0        40) GMTPLUS11
+           8) GMT6            19) GMT-3           30) GMTPLUS1        41) GMTPLUS12
+           9) GMT7            20) GMT-4           31) GMTPLUS2        42) GMTPLUS13
+          10) GMT8            21) GMT-5           32) GMTPLUS3
+          11) GMT9            22) GMT-6           33) GMTPLUS4
+    
+          0) None of the above
+    
+
+Again, GMT+1:
+
+    
+    
+    Select the number above that best describes your location: 30
+    
+    You selected GMTPLUS1 as your time zone.
+    Is this correct? (Yes/No) [YES]:
+    
+        Default Time Differential Factor is 1:00.
+    
+    
+        The Time Differential Factor (TDF) is the difference between your
+        system time and Coordinated Universal Time (UTC).  UTC is similar
+        in most repects to Greenwich Mean Time (GMT).
+    
+        The TDF is expressed as hours and minutes, and should be entered
+        in the hh:mm format.  TDFs for the Americas will be negative
+        (-3:00, -4:00, etc.); TDFs for Europe, Africa, Asia and Australia
+        will be positive (1:00, 2:00, etc.).
+    
+    
+    Enter the Time Differential Factor [1:00]:
+    
+        NEW SYSTEM TIME DIFFERENTIAL FACTOR = 1:00.
+    
+    Is this correct? [Y]: y
+    
+    
+    
+    
+        DECnet-Plus will now be installed.
+    
+        Media containing the DECnet-Plus kit must be available.
+    
+        If you are installing OpenVMS from an Infoserver (DAD1)
+        or local CD-ROM, there is a DECnet-Plus kit on the CD-ROM.
+    
+        If you are installing from a cartridge tape (TK50) or
+        from an open reel tape, you should have a DECnet-Plus kit
+        on cartidge tape or open reel tape.
+    
+        An appropriate DECnet-Plus kit may also be available on
+        the Consolidated Distribution CD-ROM, or you may have a
+        separate DECnet-Plus kit.
+    
+        NOTE: You may choose any available media for the
+        DECnet-Plus kit.  It is NOT NECESSARY to use the same
+        type of media that contained the OpenVMS kit.
+    
+        If you do not have a DECnet-Plus kit available, or if you
+        have decided NOT to install/upgrade DECnet-Plus, you can
+        bypass the DECnet-Plus installation by entering "EXIT"
+        for the "name of drive holding the DECnet-Plus kit".
+    
+
+Install disk is `DUA2`
+
+    
+    
+    * Enter name of drive holding the DECnet-Plus kit: dua2
+    * Is DUA2: ready to be mounted? [N] y
+    
+    The following product has been selected:
+        DEC VAXVMS DECNET_OSI V7.3             Layered Product
+    
+    
+    Configuration phase starting ...
+    
+    You will be asked to choose options, if any, for each selected product and for
+    any products that may be installed to satisfy software dependency requirements.
+    
+    DEC VAXVMS DECNET_OSI V7.3: DECnet-Plus V7.3 for OpenVMS VAX
+    
+        Copyright 2001 Compaq Computer Corporation.
+    
+        Compaq Computer Corporation
+    
+        This product requires one of two PAKs: DVNETEND or DVNETRTG.
+    
+    Yes and No:
+    
+    Do you want the defaults for all options? [YES]
+    
+    Do you want to review the options? [NO]
+    
+    Execution phase starting ...
+    
+    The following product will be installed to destination:
+        DEC VAXVMS DECNET_OSI V7.3             DISK$VAXVMSV73:[VMS$COMMON.]
+    
+    Portion done: 0%...10%...20%...30%...40%...80%...90%...100%
+    
+    The following product has been installed:
+        DEC VAXVMS DECNET_OSI V7.3             Layered Product
+    ********************************************************************************
+    
+    
+        Running AUTOGEN to compute the new SYSTEM parameters ...
+    
+    %AUTOGEN-I-BEGIN, GETDATA phase is beginning.
+    %AUTOGEN-I-NEWFILE,  Previous contents of SYS$SYSTEM:CLU$PARAMS.DAT have
+      been copied to SYS$SYSTEM:CLU$PARAMS.OLD.  You may wish to purge
+      SYS$SYSTEM:CLU$PARAMS.OLD.
+    %AUTOGEN-I-NEWFILE, A new version of SYS$SYSTEM:PARAMS.DAT has been created.
+            You may wish to purge this file.
+    %AUTOGEN-I-END, GETDATA phase has successfully completed.
+    %AUTOGEN-I-BEGIN, GENPARAMS phase is beginning.
+    %AUTOGEN-I-NEWFILE, A new version of SYS$MANAGER:VMSIMAGES.DAT has been created.
+            You may wish to purge this file.
+    %AUTOGEN-I-NEWFILE, A new version of SYS$SYSTEM:SETPARAMS.DAT has been created.
+            You may wish to purge this file.
+    %AUTOGEN-I-END, GENPARAMS phase has successfully completed.
+    %AUTOGEN-I-BEGIN, GENFILES phase is beginning.
+    %SYSGEN-I-EXTENDED, SYS$SYSROOT:[SYSEXE]PAGEFILE.SYS;1 extended
+    %SYSGEN-I-EXTENDED, SYS$SYSROOT:[SYSEXE]SWAPFILE.SYS;1 extended
+    %SYSGEN-I-CREATED, SYS$SPECIFIC:[SYSEXE]SYSDUMP.DMP;1 created
+    %SYSGEN-I-CREATED, DUA0:[SYS0.SYSEXE]ERRORLOG.DMP;1 created
+    
+    %AUTOGEN-I-REPORT, AUTOGEN has produced some informational messages which
+            have been stored in the file SYS$SYSTEM:AGEN$PARAMS.REPORT.  You may
+            wish to review the information in that file.
+    
+    %AUTOGEN-I-END, GENFILES phase has successfully completed.
+    %AUTOGEN-I-BEGIN, SETPARAMS phase is beginning.
+    %AUTOGEN-I-END, SETPARAMS phase has successfully completed.
+    %AUTOGEN-I-BEGIN, REBOOT phase is beginning.
+    
+
+### First reboot
+
+    
+    
+        The system is shutting down to allow the system to boot with the
+        generated site-specific parameters and installed images.
+    
+        The system will automatically reboot after the shutdown and the
+        installation will be complete.
+    
+
+Now the system will reboot automatically:
+
+    
+    
+            SHUTDOWN -- Perform an Orderly System Shutdown
+    
+    
+    %SHUTDOWN-I-BOOTCHECK, performing reboot consistency check...
+    %SHUTDOWN-I-CHECKOK, basic reboot consistency check completed
+    
+    %SHUTDOWN-I-OPERATOR, this terminal is now an operator's console
+    %OPCOM-W-NOOPCOM, the request was not sent, the OPCOM process is not running
+    %SHUTDOWN-I-DISLOGINS, interactive logins will now be disabled
+    %SET-I-INTSET, login interactive limit = 0, current interactive value = 0
+    %SHUTDOWN-I-STOPQUEUES, the queues on this node will now be stopped
+    %JBC-E-OPENERR, error opening SYS$COMMON:[SYSEXE]QMAN$MASTER.DAT;
+    -RMS-E-FNF, file not found
+    
+    SHUTDOWN message from user SYSTEM at  Batch   22:35:48
+    The system will shut down in 0 minutes; back up SOON.  Please log off.
+    Reboot system with AUTOGENerated parameters
+    
+    
+    %SHUTDOWN-I-STOPUSER, all user processes will now be stopped
+    %SHUTDOWN-I-REMOVE, all installed images will now be removed
+    %SHUTDOWN-I-DISMOUNT, all volumes will now be dismounted
+    %OPCOM-W-NOOPCOM, the request was not sent, the OPCOM process is not running
+    %OPCOM-W-NOOPCOM, the request was not sent, the OPCOM process is not running
+    ?06 HLT INST
+            PC = 8443B709
+    Loading system software.
+    (BOOT/R5:0 DUA0
+    
+    
+    
+      2..
+    -DUA0
+      1..0..
+    
+    
+    %SYSBOOT-I-SYSBOOT Mapping the SYSDUMP.DMP on the System Disk
+    %SYSBOOT-I-SYSBOOT SYSDUMP.DMP on System Disk successfully mapped
+    %SYSBOOT-I-SYSBOOT Mapping PAGEFILE.SYS on the System Disk
+      YSBOOT-I-SYSBOOT SAVEDUMP parameter not set to protect the PAGEFILE.SYS
+         OpenVMS (TM) VAX Version V7.3     Major version id = 1 Minor version id = 0
+      %DECnet-I-LOADED, network base image loaded, version = 05.0E.00
+    
+      %DECnet-W-NOOPEN, could not open SYS$SYSROOT:[SYSEXE]NET$CONFIG.DAT
+       %WBM-I-WBMINFO Write Bitmap has successfully completed initialization.
+    
+
+### Installation complete
+
+If this message appears you're on the right path:
+
+    
+    
+    *****************************************************************
+    
+    OpenVMS VAX V7.3
+    
+    You have SUCCESSFULLY installed the OpenVMS VAX Operating System.
+    
+    The system is now executing the STARTUP procedure.  Please
+    wait for the completion of STARTUP before logging in to the
+    system.
+    
+    *****************************************************************
+    
+    %STDRV-I-STARTUP, OpenVMS startup begun at 15-APR-2018 21:57:55.61
+    %RUN-S-PROC_ID, identification of created process is 00000206
+    %DCL-S-SPAWNED, process SYSTEM_1 spawned
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:01.85  %%%%%%%%%%%
+    Operator _REMY1$OPA0: has been enabled, username SYSTEM
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:01.86  %%%%%%%%%%%
+    Operator status for operator _REMY1$OPA0:
+    CENTRAL, PRINTER, TAPES, DISKS, DEVICES, CARDS, NETWORK, CLUSTER, SECURITY,
+    LICENSE, OPER1, OPER2, OPER3, OPER4, OPER5, OPER6, OPER7, OPER8, OPER9, OPER10,
+    OPER11, OPER12
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:01.86  %%%%%%%%%%%
+    Logfile has been initialized by operator _REMY1$OPA0:
+    Logfile is REMY1::SYS$SYSROOT:[SYSMGR]OPERATOR.LOG;1
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:01.86  %%%%%%%%%%%
+    Operator status for operator REMY1::SYS$SYSROOT:[SYSMGR]OPERATOR.LOG;1
+    CENTRAL, PRINTER, TAPES, DISKS, DEVICES, CARDS, NETWORK, CLUSTER, SECURITY,
+    LICENSE, OPER1, OPER2, OPER3, OPER4, OPER5, OPER6, OPER7, OPER8, OPER9, OPER10,
+    OPER11, OPER12
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:01.92  %%%%%%%%%%%
+    Message from user AUDIT$SERVER on REMY1
+    %AUDSRV-I-NEWSERVERDB, new audit server database created
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:01.95  %%%%%%%%%%%
+    Message from user AUDIT$SERVER on REMY1
+    %AUDSRV-I-REMENABLED, resource monitoring enabled for journal SECURITY
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:01.95  %%%%%%%%%%%
+    Message from user AUDIT$SERVER on REMY1
+    %AUDSRV-I-NEWOBJECTDB, new object database created
+    
+    %SET-I-NEWAUDSRV, identification of new audit server process is 0000020C
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:02.02  %%%%%%%%%%%
+    Message from user JOB_CONTROL on REMY1
+    %JBC-E-OPENERR, error opening SYS$COMMON:[SYSEXE]QMAN$MASTER.DAT;
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:02.02  %%%%%%%%%%%
+    Message from user JOB_CONTROL on REMY1
+    -RMS-E-FNF, file not found
+    
+    %LICENSE-F-EMTLDB, license database contains no license records
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:02.23  %%%%%%%%%%%
+    Message from user SYSTEM on REMY1
+    %SECSRV-E-NOPROXYDB, cannot find proxy database file NET$PROXY.DAT
+    %RMS-E-FNF, file not found
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:02.24  %%%%%%%%%%%
+    Message from user SYSTEM on REMY1
+    %SECSRV-E-NOPROXYDB, cannot find proxy database file NET$PROXY.DAT
+    %RMS-E-FNF, file not found
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:02.25  %%%%%%%%%%%
+    Message from user SYSTEM on REMY1
+    %SECSRV-I-CIACRECLUDB, security server created cluster intrusion database
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:02.25  %%%%%%%%%%%
+    Message from user SYSTEM on REMY1
+    %SECSRV-I-SERVERSTARTINGU, security server starting up
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:02.27  %%%%%%%%%%%
+    Message from user SYSTEM on REMY1
+    %SECSRV-I-CIASTARTINGUP, breakin detection and evasion processing now starting up
+    
+    Copyright 2000 Compaq Computer Corporation. All rights reserved.
+    %NET$STARTUP-W-NONETCONFIG, this node has not been configured to run DECnet-Plus for OpenVMS
+            use SYS$MANAGER:NET$CONFIGURE.COM if you wish to configure DECnet
+    %NET$STARTUP-I-OPERSTATUS, DECnet-Plus for OpenVMS operational status is OFF
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:03.27  %%%%%%%%%%%
+    Message from user SYSTEM on REMY1
+    %LICENSE-E-NOAUTH, DEC VAX-VMS use is not authorized on this node
+    -LICENSE-F-NOLICENSE, no license is active for this software product
+    -LICENSE-I-SYSMGR, please see your system manager
+    
+    
+    %LICENSE-E-NOAUTH, DEC VAX-VMS use is not authorized on this node
+    -LICENSE-F-NOLICENSE, no license is active for this software product
+    -LICENSE-I-SYSMGR, please see your system manager
+    Startup processing continuing...
+    
+    %DECdtm-F-NODECnet, the TP_SERVER process was not started because either:
+    
+    o  DECnet-Plus is not started or is not configured, or
+    
+    o  The SYS$NODE_FULLNAME logical name is not defined
+    
+       This could be because when you installed DECnet-Plus and were prompted
+       for the system's full name, you specified a local name instead of a
+       DECdns or Domain name.
+    
+    If you want to use DECdtm services, make sure that DECnet-Plus is started and
+    configured and that SYS$NODE_FULLNAME is defined, then use the following
+    command to start the TP_SERVER process:
+    
+        $ @SYS$STARTUP:DECDTM$STARTUP.COM
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:03.52  %%%%%%%%%%%
+    Message from user AUDIT$SERVER on REMY1
+    Security alarm (SECURITY) and security audit (SECURITY) on REMY1, system id: 1155
+    Auditable event:          Audit server starting up
+    Event time:               15-APR-2018 21:58:03.49
+    PID:                      00000203
+    Username:                 SYSTEM
+    
+    %STARTUP-I-AUDITCONTINUE, audit server initialization complete
+    
+    The OpenVMS VAX system is now executing the site-specific startup commands.
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 21:58:03.65  %%%%%%%%%%%
+    Message from user AUDIT$SERVER on REMY1
+    Security alarm (SECURITY) and security audit (SECURITY) on REMY1, system id: 1155
+    Auditable event:          Identifier added
+    Event time:               15-APR-2018 21:58:03.64
+    PID:                      00000203
+    Process name:             STARTUP
+    Username:                 SYSTEM
+    Process owner:            [SYSTEM]
+    Image name:               REMY1$DUA0:[SYS0.SYSCOMMON.][SYSEXE]AUTHORIZE.EXE
+    Identifier name:          SYS$NODE_REMY1
+    Identifier value:         %X80010000
+    Attributes:               none
+    
+    %UAF-I-RDBADDMSG, identifier SYS$NODE_REMY1 value %X80010000 added to rights database
+    %SET-I-INTSET, login interactive limit = 64, current interactive value = 0
+      SYSTEM       job terminated at 15-APR-2018 21:58:03.88
+    
+      Accounting information:
+      Buffered I/O count:            1628         Peak working set size:    1694
+      Direct I/O count:               613         Peak page file size:      5504
+      Page faults:                   5867         Mounted volumes:             0
+      Charged CPU time:           0 00:00:05.26   Elapsed time:     0 00:00:08.69
+    
+
+Finally, we can login:
+
+    
+    
+     Welcome to OpenVMS (TM) VAX Operating System, Version V7.3
+    
+    Username: SYSTEM
+    Password:
+    %LICENSE-I-NOLICENSE, no license is active for this software product
+    %LOGIN-S-LOGOPRCON, login allowed from OPA0:
+     Welcome to OpenVMS (TM) VAX Operating System, Version V7.3
+    
+     $
+    
+
+### Add licenses
+
+Now open up your PAK license key from the hobbyist program (the text file) and
+paste it right in the shell. It will take a while. It will end with the
+following:
+
+    
+    
+     $ $!
+     $ $! [End of File]
+     $
+    
+
+To check if it worked:
+
+    
+    
+     $ show license
+    
+
+Output:
+
+    
+    
+    Active licenses on node REMY1:
+    
+    ------- Product ID --------    ---- Rating ----- -- Version --
+    Product            Producer    Units Avail Activ Version Release    Termination
+    ACMS               DEC             0  0     100    0.0  (none)       1-APR-2019
+    ACMS-REM           DEC             0  0     100    0.0  (none)       1-APR-2019
+    ACMS-RT            DEC             0  0     100    0.0  (none)       1-APR-2019
+    ACMSXP-DEV         DEC             0  0     100    0.0  (none)       1-APR-2019
+    ACMSXP-RT          DEC             0  0     100    0.0  (none)       1-APR-2019
+    ADA                DEC             0  0     100    0.0  (none)       1-APR-2019
+    ADA-PDO            DEC             0  0     100    0.0  (none)       1-APR-2019
+    ADAO-PDO           DEC             0  0     100    0.0  (none)       1-APR-2019
+    ALLIN1-MAIL-DW-CLI DEC             0  0     100    0.0  (none)       1-APR-2019
+    ALLIN1-MAIL-SERVER DEC             0  0     100    0.0  (none)       1-APR-2019
+    ALLIN1-MAIL-SERVER DEC             0  0     100    0.0  (none)       1-APR-2019
+    ALLIN1-MAIL-VT-CLI DEC             0  0     100    0.0  (none)       1-APR-2019
+    ALLIN1-MAIL-VT-USE DEC             0  0     100    0.0  (none)       1-APR-2019
+    ALLIN1-MAIL-WAN-SE DEC             0  0     100    0.0  (none)       1-APR-2019
+    
+
+The article suggest also changing the license to include your hostname:
+
+    
+    
+     $ LICENSE MODIFY/INCLUDE=REMY1 VAX-VMS
+     $ LICENSE LOAD
+    %LICENSE-I-UNLOADED, DEC ACMS has been unloaded
+    %LICENSE-I-LOADED, DEC ACMS was successfully loaded with 0 units
+    %LICENSE-I-UNLOADED, DEC ACMS-REM has been unloaded
+    %LICENSE-I-LOADED, DEC ACMS-REM was successfully loaded with 0 units
+    %LICENSE-I-UNLOADED, DEC ACMS-RT has been unloaded
+    %LICENSE-I-LOADED, DEC ACMS-RT was successfully loaded with 0 units
+    
+
+Uncompress the system libraries to speed the system up:
+
+    
+    
+     $ @SYS$UPDATE:LIBDECOMP.COM
+    
+                     OpenVMS Library Decompression Utility
+    
+         1  HELPLIB.HLB          15  SDA.HLB              28  PHONEHELP.HLB
+         2  STARLET.OLB          16  SHWCLHELP.HLB        29  LIB.MLB
+         3  ACLEDT.HLB           17  SYSGEN.HLB           30  STARLET.MLB
+         4  ANLRMSHLP.HLB        18  ANALAUDIT$HELP.HLB   31  STARLETSD.TLB
+         5  DBG$HELP.HLB         19  SYSMANHELP.HLB       32  SYS$STARLET_C.TLB
+         6  DBG$UIHELP.HLB       20  TFF$TFUHELP.HLB      33  ERFLIB.TLB
+         7  DISKQUOTA.HLB        21  EXCHNGHLP.HLB        34  VAXCCURSE.OLB
+         8  EDFHLP.HLB           22  TPUHELP.HLB          35  VAXCRTL.OLB
+         9  INSTALHLP.HLB        23  EVE$HELP.HLB         36  VAXCRTLG.OLB
+        10  LATCP$HELP.HLB       24  EVE$KEYHELP.HLB      37  IMAGELIB.OLB
+        11  MAILHELP.HLB         25  UAFHELP.HLB          38  DECCCURSE.OLB
+        12  MNRHELP.HLB          26  TECO.HLB             39  DECCRTL.OLB
+        13  EDTHELP.HLB          27  PATCHHELP.HLB        40  DECCRTLG.OLB
+        14  NCPHELP.HLB
+    
+              A  ALL libraries to be decompressed
+              E  EXIT this procedure
+    
+    * Enter letter or number(s) of libraries to be decompressed
+      (Separate multiple entries with a comma)A
+    %UPGRADE-I-EXPANDING, decompressing library SYS$COMMON:[SYSHLP]HELPLIB.HLB
+    
+
+### Install TCPIP
+
+Install TCPIP, first mount the `DUA2` disk and then install:
+
+    
+    
+     $ MOUNT/OVER=ID DUA2
+    %MOUNT-I-WRITELOCK, volume is write locked
+    %MOUNT-I-MOUNTED, VAXVMS073 mounted on _REMY1$DUA2:
+     $ SET DEF DUA2:[TCPIP_VAX051.KIT]
+     $ SET DEF DUA2:[TCPIP_VAX051.KIT]
+     $ PRODUCT INSTALL *
+    
+    The following product has been selected:
+        DEC VAXVMS TCPIP V5.1-15               Layered Product
+    
+    Do you want to continue? [YES]
+    
+    Configuration phase starting ...
+    
+    You will be asked to choose options, if any, for each selected product and for
+    any products that may be installed to satisfy software dependency requirements.
+    
+    DEC VAXVMS TCPIP V5.1-15: Compaq TCP/IP Services for OpenVMS.
+    
+        (c) Compaq Computer Corporation 2000. All Rights Reserved.
+    
+        Compaq Computer Corporation
+    
+        Compaq TCP/IP Services for OpenVMS offers several license options.
+    
+    Do you want the defaults for all options? [YES]
+    
+    Do you want to review the options? [NO]
+    
+    Execution phase starting ...
+    
+    The following product will be installed to destination:
+        DEC VAXVMS TCPIP V5.1-15               DISK$REMY1SYS:[VMS$COMMON.]
+    
+    Portion done: 0%
+    Portion done: 0%...10%...20%...30%...40%...50%...60%...70%...80%...90%
+    %PCSI-I-PRCOUTPUT, output from subprocess follows ...
+    % - HELP has been updated. You may purge SYS$COMMON:[SYSHLP]HELPLIB.HLB
+    %
+    %PCSI-I-PRCOUTPUT, output from subprocess follows ...
+    % TCPIP-W-PCSI_INSTALL
+    % - Execute SYS$MANAGER:TCPIP$CONFIG.COM to proceed with configuration of
+    %   Compaq TCP/IP Services.
+    %
+    Portion done: 100%
+    
+    The following product has been installed:
+        DEC VAXVMS TCPIP V5.1-15               Layered Product
+    
+    DEC VAXVMS TCPIP V5.1-15: Compaq TCP/IP Services for OpenVMS.
+    
+        Check the release notes for current status of the product.
+    
+
+### Create a user
+
+Create a user:
+
+    
+    
+     $ SET DEFAULT SYS$SYSTEM
+     $ RUN AUTHORIZE
+     UAF> ADD REMY/PASSWORD=TEMP/OWNER="Remy van Elst"/DEV=DUA0/DIR=[REMY]/UIC=[200,201]/FLAG=NODISUSER/PRIV=ALL
+    
+
+Output:
+
+    
+    
+    %UAF-I-PWDLESSMIN, new password is shorter than minimum password length
+    %UAF-I-ADDMSG, user record successfully added
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:34:45.16  %%%%%%%%%%%
+    Message from user AUDIT$SERVER on REMY1
+    Security alarm (SECURITY) and security audit (SECURITY) on REMY1, system id: 1155
+    Auditable event:          System UAF record addition
+    Event time:               15-APR-2018 22:34:45.15
+    PID:                      0000020F
+    Process name:             SYSTEM
+    Username:                 SYSTEM
+    Process owner:            [SYSTEM]
+    Terminal name:            OPA0:
+    Image name:               REMY1$DUA0:[SYS0.SYSCOMMON.][SYSEXE]AUTHORIZE.EXE
+    Object class name:        FILE
+    Object name:              SYS$COMMON:[SYSEXE]SYSUAF.DAT;1
+    User record:              REMY
+    Default Device:           New:      DUA0:
+                              Original: SYS$SYSDEVICE:
+    Default Directory:        New:      [REMY]
+                              Original: [USER]
+    Flags:                    New:      (none)
+                              Original: DISUSER
+    Owner:                    New:      Remy van Elst
+                              Original: <none>
+    Privileges:               New:      CMKRNL,CMEXEC,SYSNAM,GRPNAM,ALLSPOOL,IMPERSONATE,DIAGNOSE,LOG_IO,GROUP,NOACNT,PRMCEB,PRMMBX,PSWA
+    PM,SETPRI,SETPRV,TMPMBX,WORLD,MOUNT,OPER,EXQUOTA,NETMBX,VOLPRO,PHY_IO,BUGCHK,PRMGBL,SYSGBL,PFNMAP,SHMEM,SYSPRV,BYPASS,SYSLCK,SHARE,U
+    PGRADE,DOWNGRADE,GRPPRV,READALL,IMPORT,AUDIT,SECURITY
+                              Original: TMPMBX,NETMBX
+    UIC:                      New:      [200,201]
+                              Original: [200,200]
+    Password Date:            New:      (pre-expired)
+                              Original: (pre-expired)
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:34:45.17  %%%%%%%%%%%
+    Message from user AUDIT$SERVER on REMY1
+    Security alarm (SECURITY) and security audit (SECURITY) on REMY1, system id: 1155
+    Auditable event:          Identifier added
+    Event time:               15-APR-2018 22:34:45.17
+    PID:                      0000020F
+    Process name:             SYSTEM
+    Username:                 SYSTEM
+    Process owner:            [SYSTEM]
+    Terminal name:            OPA0:
+    Image name:               REMY1$DUA0:[SYS0.SYSCOMMON.][SYSEXE]AUTHORIZE.EXE
+    Identifier name:          REMY
+    Identifier value:         %X00800081
+    Attributes:               none
+    
+    %UAF-I-RDBADDMSGU, identifier REMY value [000200,000201] added to rights database
+    
+
+Also create the homefolder:
+
+    
+    
+    $ CREATE /DIRECTORY DUA0:[REMY]
+    $ SET DIRECTORY/OWNER=REMY DUA0:[REMY]
+    
+
+Test the login:
+
+    
+    
+    $ LOG
+    
+
+Logs the SYSTEM user out. Login with your new user:
+
+    
+    
+    Username: remy
+    Password:
+     Welcome to OpenVMS (TM) VAX Operating System, Version V7.3
+            1 failure since last successful login
+    
+    Your password has expired; you must set a new password to log in
+    
+    
+    New password:
+    Verification:
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:37:36.97  %%%%%%%%%%%
+    Message from user AUDIT$SERVER on REMY1
+    Security alarm (SECURITY) and security audit (SECURITY) on REMY1, system id: 1155
+    Auditable event:          System UAF record modification
+    Event time:               15-APR-2018 22:37:36.97
+    PID:                      00000213
+    Process name:             REMY
+    Username:                 REMY
+    Process owner:            [REMY]
+    Terminal name:            OPA0:
+    Image name:               REMY1$DUA0:[SYS0.SYSCOMMON.][SYSEXE]LOGINOUT.EXE
+    Object class name:        FILE
+    Object name:              SYS$COMMON:[SYSEXE]SYSUAF.DAT;1
+    User record:              REMY
+    Password Date:            New:      15-APR-2018 22:37
+                              Original: (pre-expired)
+    
+
+Test some basic commands:
+
+    
+    
+     $ show system /noproc
+    OpenVMS V7.3  on node REMY1  15-APR-2018 22:41:54.31  Uptime  0 00:11:48
+    
+    
+     $ show users
+          OpenVMS User Processes at 15-APR-2018 22:42:10.13
+        Total number of users = 1,  number of processes = 1
+    
+     Username     Interactive  Subprocess   Batch
+     REMY              1
+    
+     $ show cpu
+    
+    REMY1, a VAXserver 3900 Series
+    Multiprocessing is DISABLED. Uniprocessing synchronization image loaded.
+    
+    PRIMARY CPU = 00
+    Active CPUs:      00
+    Configured CPUs:  00
+    
+    
+    
+     $ show memory
+                  System Memory Resources on 15-APR-2018 22:43:14.30
+    
+    Physical Memory Usage (pages):     Total        Free      In Use    Modified
+      Main Memory (64.00Mb)           131072      100240       29400        1432
+    
+    Virtual I/O Cache Usage (pages):   Total        Free      In Use     Maximum
+      Cache Memory                      4611           0        4611       97641
+    
+    Slot Usage (slots):                Total        Free    Resident     Swapped
+      Process Entry Slots                300         288          12           0
+      Balance Set Slots                  247         237          10           0
+    
+    Dynamic Memory Usage (bytes):      Total        Free      In Use     Largest
+      Nonpaged Dynamic Memory        3224576     2163904     1060672     2024704
+      Paged Dynamic Memory           2547200     1779456      767744     1778624
+    
+    Paging File Usage (pages):                      Free  Reservable       Total
+      DISK$REMY1SYS:[SYS0.SYSEXE]SWAPFILE.SYS      45000       45000       45000
+      DISK$REMY1SYS:[SYS0.SYSEXE]PAGEFILE.SYS     122000       98432      122000
+    
+    Of the physical pages in use, 22447 pages are permanently allocated to OpenVMS.
+    
+
+### Shutdown the system
+
+To save a copy of your freshly installed system:
+
+    
+    
+     $ @SYS$SYSTEM:SHUTDOWN
+    
+
+Output:
+
+    
+    
+            SHUTDOWN -- Perform an Orderly System Shutdown
+                        on node REMY1
+    
+    How many minutes until final shutdown [0]:
+    Reason for shutdown [Standalone]:
+    Do you want to spin down the disk volumes [NO]? yes
+    Do you want to invoke the site-specific shutdown procedure [YES]?
+    Should an automatic system reboot be performed [NO]?
+    When will the system be rebooted [later]:
+    Shutdown options (enter as a comma-separated list):
+     REBOOT_CHECK        Check existence of basic system files
+     SAVE_FEEDBACK       Save AUTOGEN feedback information from this boot
+     DISABLE_AUTOSTART   Disable autostart queues
+    
+    Shutdown options [NONE]:
+    
+    %SHUTDOWN-I-OPERATOR, this terminal is now an operator's console
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:53:07.61  %%%%%%%%%%%
+    Operator status for operator _REMY1$OPA0:
+    CENTRAL, PRINTER, TAPES, DISKS, DEVICES, CARDS, NETWORK, CLUSTER, SECURITY,
+    LICENSE, OPER1, OPER2, OPER3, OPER4, OPER5, OPER6, OPER7, OPER8, OPER9, OPER10,
+    OPER11, OPER12
+    
+    %SHUTDOWN-I-DISLOGINS, interactive logins will now be disabled
+    %SET-I-INTSET, login interactive limit = 0, current interactive value = 1
+    %SHUTDOWN-I-STOPQUEUES, the queues on this node will now be stopped
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:53:07.69  %%%%%%%%%%%
+    Message from user JOB_CONTROL on REMY1
+    %JBC-E-OPENERR, error opening SYS$COMMON:[SYSEXE]QMAN$MASTER.DAT;
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:53:07.69  %%%%%%%%%%%
+    Message from user JOB_CONTROL on REMY1
+    -RMS-E-FNF, file not found
+    
+    
+    SHUTDOWN message on REMY1 from user REMY at _REMY1$OPA0:   22:53:07
+    REMY1 will shut down in 0 minutes; back up later.  Please log off node REMY1.
+    Standalone
+    
+    1 terminal has been notified on REMY1.
+    
+    %SHUTDOWN-I-SITESHUT, the site-specific shutdown procedure will now be invoked
+    %SHUTDOWN-I-STOPUSER, all user processes will now be stopped
+    %SHUTDOWN-I-STOPAUDIT, the security auditing subsystem will now be shut down
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:53:07.90  %%%%%%%%%%%
+    Message from user AUDIT$SERVER on REMY1
+    Security alarm (SECURITY) and security audit (SECURITY) on REMY1, system id: 1155
+    Auditable event:          Audit server shutting down
+    Event time:               15-APR-2018 22:53:07.87
+    PID:                      00000213
+    Username:                 REMY
+    
+    %SHUTDOWN-I-STOPSECSRV, the security server will now be shut down
+    %SHUTDOWN-I-REMOVE, all installed images will now be removed
+    %SHUTDOWN-I-DISMOUNT, all volumes will now be dismounted
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:53:08.47  %%%%%%%%%%%
+    Message from user SYSTEM on REMY1
+    %SECSRV-I-CIASHUTDOWN, breakin detection and evasion processing is shutting down
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:53:08.47  %%%%%%%%%%%
+    Message from user SYSTEM on REMY1
+    %SECSRV-I-PROXYSHUTDOWN, proxy processing is shutting down
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:53:08.58  %%%%%%%%%%%
+    Message from user REMY on REMY1
+    _REMY1$OPA0:, REMY1 shutdown was requested by the operator.
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:53:08.60  %%%%%%%%%%%
+    Logfile was closed by operator _REMY1$OPA0:
+    Logfile was REMY1::SYS$SYSROOT:[SYSMGR]OPERATOR.LOG;2
+    
+    %%%%%%%%%%%  OPCOM  15-APR-2018 22:53:08.62  %%%%%%%%%%%
+    Operator _REMY1$OPA0: has been disabled, username SYSTEM
+    
+            SYSTEM SHUTDOWN COMPLETE - use console to halt system
+    Infinite loop, PC: 832FAAD3 (BRB 832FAAD3)
+    Goodbye
+    NVR: writing buffer to file
+    Eth: closed enp0s3
+    
+
+   [1]: https://raymii.org/s/inc/img/ovmsdec.png
+   [2]: https://raymii.org/s/tags/openvms.html
+   [3]: https://web.archive.org/web/20180324181059/https://vanalboom.org/node/18
+   [4]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

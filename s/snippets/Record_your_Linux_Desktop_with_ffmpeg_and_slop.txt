@@ -1,0 +1,112 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Record your Linux Desktop with ffmpeg and slop to any format
+Author      : 	Remy van Elst
+Date        : 	17-03-2021
+URL         : 	https://raymii.org/s/snippets/Record_your_Linux_Desktop_with_ffmpeg_and_slop.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This two-line shell script allows you to record a region of your linux desktop to a video file, or a `.gif`, using `slop` and `ffmpeg`. I use it often when a screenshot is not enough, or when you need to explain a sequence of events to someone.
+
+Here is a `.gif` recorded of my current KDE desktop:
+
+![desktop][3]
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+This script was adapted from the examples given in the `slop` [README][1].
+
+### Recording with slop and ffmpeg
+
+
+By combining two programs, `slop`, to get the screen region to record, and `ffmpeg` 
+to do the actual recording, you can select a region of your screen to record, in
+any format `ffmpeg` supports. I often do it as a `gif` or `.mp4`.
+
+[slop][1] is a small and simple tool that does one thing, the [manpage][2]
+describes it best:
+
+	slop is an application that queries for a selection from the user and prints the region to
+	stdout. It grabs the mouse and turns it into a crosshair, lets the user click and drag  to
+	make a selection (or click on a window) while drawing a pretty box around it, then finally
+	prints the selection's dimensions to stdout.
+
+
+`ffmpeg` is a very fast audio and video converter, also able to do live stuff and in this case, record 
+the desktop. Both tools are in the Ubuntu repository, so you can install them with the package manager:
+
+	apt install slop ffpmeg
+
+Place the following in a script, I named it `recgif.sh`:
+
+	#!/bin/bash
+	geometry=$(slop -f "-video_size %wx%h -i :0.0+%x,%y")
+	ffmpeg -framerate 30 -f x11grab $geometry "$1"
+
+Make sure it is in your `$PATH` so you can execute it in any terminal. I have the folder
+`$HOME/bin` in my `$PATH`, which is where all my scripts live, including this one. You can
+set the `$PATH` in multiple places, but I have it in my `~/.bashrc` file:
+
+	PATH="/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/snap/bin:$HOME/bin:$HOME/.bin:$PATH"
+
+Try it out in your shell, by typing:
+
+	recgif.sh test.gif
+
+Your cursor changes to a crosshair which you use to select a region. Then recording starts, until you
+kill the shell command with `CTRL+C`. 
+
+If you specify a different extension, the video save format will reflect that:
+
+	recgif.sh test.mkv 
+
+
+`.gif` files are rather large, the image at the top of this page is almost 50 MB whereas the same 
+recording in `.mkv` is about 0,5 MB.
+
+
+[1]: https://github.com/naelstrof/slop
+[2]: http://manpages.ubuntu.com/manpages/bionic/en/man1/slop.1.html
+[3]: /s/inc/img/recgif.gif
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

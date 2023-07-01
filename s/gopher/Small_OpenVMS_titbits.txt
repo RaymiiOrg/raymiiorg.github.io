@@ -1,0 +1,350 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Small OpenVMS titbits
+Author      : 	Remy van Elst
+Date        : 	22-04-2018
+URL         : 	https://raymii.org/s/blog/Small_OpenVMS_titbits.html
+Format      : 	Markdown/HTML
+---
+
+
+
+[![openvms][1]][2]
+
+(You can read all my OpenVMS articles by [clicking the picture (above][2])
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Here are some small titbits I found out this week on the DECUServe OpenVMS
+system. Not enough to write a blogpost on their own, but collected together.
+
+### .bash_history
+
+To show your shell history from the current session:
+
+    
+    
+    $ RECALL/ALL
+    
+
+Output:
+
+    
+    
+      1 show proc
+      2 proc
+      3 htop
+      4 top
+      5 notes
+      6 t
+      7 hobbyist
+      8 hobbyi
+      9 show license
+     10 show terminal
+     11 set terminal /backspace=delete
+     12 show terminal
+     13 set terminal /backspace=backspace
+     14 show terminal
+     15 hello this is a test
+    $
+    
+
+### Uptime and /etc/redhat_release
+
+To view system uptime and OpenVMS version:
+
+    
+    
+    $ SHOW SYSTEM /NOPROC
+    
+
+Output:
+
+    
+    
+    OpenVMS V8.4-2L2  on node EISNER    8-APR-2018 14:13:11.07   Uptime  17 03:22:55
+    
+
+### w
+
+Show all the logged in users and their process, like the `w` command on linux:
+
+    
+    
+    $ SHOW USERS /FULL
+          OpenVMS User Processes at  8-APR-2018 14:19:05.07
+        Total number of users = 6,  number of processes = 6
+    
+     Username     Process Name      PID     Terminal
+     <login>      _VTA4425:       00009B23  VTA4425: (disconnected)
+     EXAMPLE         SSHD 0355A PTD  00008EE4  FTA550:  (ssh/$IP:57039)
+     GOATLEY      Goat Busters    00009A55  FTA547:
+                                        (ssh/$HOSTNAME.com:17251)
+     JACKSON      JACKSON         00005314  FTA269:
+                                 (ssh/host-$IP.static.as$AS.net:59656)
+     MALMBERG     >>>B ewa0:      00009664  FTA543:
+                                         (ssh/$IP:59826)
+     SCHENKENBERG SCHENKENBERG    00007E83  FTA442:
+                                          (ssh/ool-$HOSTNAME:47078)
+    
+
+### cd ~
+
+Your home directory on OpenVMS is not known as `~` (as on UNIX) but as
+`SYS$LOGIN`. As we learned in an earlier article, OpenVMS uses the `SET/SHOW
+DEFAULT` commands to navigate directories. So the equivalent of `cd ~` on linux,
+or even shorter, `cd` is `SET DEF SYS$LOGIN`:
+
+    
+    
+    $ SET DEFAULT SYS$LOGIN
+    $ SHOW DEF
+      DISK_USER:[DECUSERVE_USER.EXAMPLE]
+    
+    $ DIR SYS$LOGIN
+    
+    Directory EISNER$DRA3:[DECUSERVE_USER.EXAMPLE]
+    
+    $MAIN.TPU$JOURNAL;1 .VIMINFO;1          A.;1                ICREATEDAFOLDERYAY.DIR;1
+    LOGIN.COM;2         LOGIN.COM;1         LOGIN_COM.TPU$JOURNAL;1
+    MAIL$AC8D2981000500B2.MAI;1             MAIL.MAI;1          NOTES$NOTEBOOK.NOTE;1
+    RAYMII.DIR;1        REMY.DAT;3          REMY.DAT;2          REMY.DAT;1
+    SSH.DIR;1           SSH2.DIR;1          SSH3.DIR;1          WWW.DIR;1
+    Total of 18 files.
+    
+
+### cd ..
+
+The equivalent of the `cd ..`, to go up one folder on linux, on OpenVMS is
+`[-]`. So if you are in `EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.WWW]` and want to
+go up one level to `EISNER$DRA3:[DECUSERVE_USER.EXAMPLE]` then enter:
+
+    
+    
+     $ SET DEFAULT [-]
+    
+
+### %SYSTEM-F-ACCVIO, access violation,
+
+I also hit my first bug. I was writing a note (in `NOTES`, a kind of forum) and
+I pasted a link. It crashed with the following error:
+
+    
+    
+    Fatal DECTPU internal error, please submit an SPR including:
+    
+         1.  A description of the actions that revealed the bug
+         2.  The versions of DECTPU and the operating system you are running
+         3.  Machine-readable media containing:
+             - The source files of your DECTPU section and command files
+             - Copies of the data files used during the session
+             - The keystroke journal file if one exists
+         4.  Your terminal characteristics, if applicable
+         5.  A description of the command used to invoke DECTPU
+    
+    Shareable base: 7BC54884  Ident: DECTPU V3.2  2017-05-22 22:49
+    Updater base:   7C03E034  Ident: DECTPU V3.2  2017-05-22 22:49
+    Updater file:   TPU$CCTSHR
+    
+    %SYSTEM-F-ACCVIO, access violation, reason mask=00, virtual address=0000000000000024, PC=00000000000B5A14, PS=0000001B
+    $
+    
+
+So I retyped the note and pasted the error in, maybe someone knows more.
+
+Edit: they know more on the DECUS system. This happens when you CRTL+C out of
+the NOTES application.
+
+### MAIL, folders and mail management
+
+See [this article][4] as well.
+
+#### List email
+
+    
+    
+    MAIL> dir
+                                                                                MAIL
+          # From                 Date         Subject
+    
+          1 EISNER::CORNELIUS    29-MAR-2018  Hello again
+        2 (Deleted)
+          3 EISNER::CORNELIUS    31-MAR-2018  RE: Hello again
+          4 EISNER::PARRIS        2-APR-2018  RE: Test message
+    
+    MAIL>
+    
+
+#### List folders
+
+    
+    
+        MAIL> DIR /FOLDER
+        Listing of folders in EISNER$DRA3:[DECUSERVE_USER.EXAMPLE]MAIL.MAI
+             Press CTRL/C to cancel listing
+        MAIL                                    TEST
+    
+        MAIL>
+    
+
+#### List mail in folder
+
+    
+    
+    MAIL> dir TEST
+                                                                                TEST
+          # From                 Date         Subject
+    
+          1 IN%"example@example.nl"  31-MAR-2018  RE: Tesrt message
+    
+    MAIL>
+    
+
+Regular `DIR` will list the `MAIL` folder.
+
+#### Move message into a folder
+
+To store a message in a folder, use the `FILE` command in the `MAIL` program:
+
+    
+    
+    MAIL> file test
+    Folder TEST does not exist.
+    Do you want to create it (Y/N, default is N)? y
+    %MAIL-I-NEWFOLDER, folder TEST created
+    
+    MAIL>
+    
+
+As you can see, if the folder does not exist, it will be created.
+
+#### Delete a message
+
+OpenVMS `MAIL` doesn't delete messages immediately but moves them from your
+default folder to a folder called `WASTEBASKET`.
+
+On most OpenVMS systems the `WASTEBASKET` is purged when the you use the
+command, `EXIT` to exit `MAIL`. If you use the command, `QUIT`, the old, deleted
+mail remains in the `WASTEBASKET`. If you're in a hurry to purge the
+`WASTEBASKET`, then you can do it manually with the `PURGE` command.
+
+    
+    
+    MAIL> dir TEST
+                                                                                TEST
+          # From                 Date         Subject
+    
+          1 IN%"example@example.nl"  31-MAR-2018  RE: Tesrt message
+    
+    MAIL> del 1
+    
+    MAIL> dir WASTEBASKET
+                                                                         WASTEBASKET
+          # From                 Date         Subject
+    
+          1 IN%"example@example.nl"  31-MAR-2018  RE: Tesrt message
+    
+    MAIL> purge
+    %MAIL-I-DELMSGS, 1 message deleted
+    
+
+#### Mail filesystem folder
+
+By default all mail related files are stored in your home directory. This can
+become quite a full listing, you can change it to another folder. In the `MAIL`
+program, enter the following command:
+
+    
+    
+    MAIL> SET MAIL [.MAIL]
+    %MAIL-I-CREATED, DISK_USER:[DECUSERVE_USER.EXAMPLE.MAIL] created
+    
+
+Now mail related files will be placed in `[.MAIL]` and your home directory will
+stay a bit cleaner.
+
+### ls -la (list files, owner and permissions)
+
+With the `DIR` command, two flags can be given, `/PROTECTION` and `/OWNER`, to
+get a more comprehensive list including the file owner and permissions:
+
+    
+    
+     $ DIR /OWNER /PROTECTION
+    
+    Directory DSA3:[DECUSERVE_USER.EXAMPLE]
+    
+    $MAIN.TPU$JOURNAL;1
+                         [EXAMPLE]                           (RWED,RWED,,)
+    .VIMINFO;1           [EXAMPLE]                           (RWED,RWED,,)
+    A.;1                 [EXAMPLE]                           (RWED,RWED,,)
+    ICREATEDAFOLDERYAY.DIR;1
+                         [EXAMPLE]                           (RWE,RWE,,)
+    LOGIN.COM;2          [EXAMPLE]                           (RWED,RWED,,)
+    LOGIN.COM;1          [EXAMPLE]                           (RWED,RWED,,)
+    LOGIN_COM.TPU$JOURNAL;1
+                         [EXAMPLE]                           (RWED,RWED,,)
+    MAIL.DIR;1           [EXAMPLE]                           (RWE,RWE,,)
+    NOTES$NOTEBOOK.NOTE;1
+                         [DECUSERVE]                      (RWE,RWE,,)
+    RAYMII.DIR;1         [EXAMPLE]                           (RWE,RWE,,)
+    REMY.DAT;3           [EXAMPLE]                           (RWED,RWED,,)
+    REMY.DAT;2           [EXAMPLE]                           (RWED,RWED,,)
+    REMY.DAT;1           [EXAMPLE]                           (RWED,RWED,,)
+    SSH.DIR;1            [EXAMPLE]                           (RWE,RWE,,)
+    SSH2.DIR;1           [EXAMPLE]                           (RWE,RWE,,)
+    SSH3.DIR;1           [EXAMPLE]                           (RWE,RWE,,)
+    WWW.DIR;1            [EXAMPLE]                           (RWE,RWE,,RE)
+    
+    Total of 17 files.
+    
+
+The permission column includes in order:
+
+  * SYSTEM (root)
+  * OWNER (you)
+  * GROUP (groups you are part of)
+  * WORLD (everyone)
+
+   [1]: https://raymii.org/s/inc/img/ovmsdec.png
+   [2]: https://raymii.org/s/tags/openvms.html
+   [3]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [4]: https://raymii.org/s/blog/My_second_OpenVMS_-_MAIL.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,108 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Keepalived notify script, execute action on failover
+Author      : 	Remy van Elst
+Date        : 	26-10-2014
+URL         : 	https://raymii.org/s/tutorials/Keepalived_notify_script_execute_action_on_failover.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Keepalived supports running scripts on VRRP state change. This can come in handy
+when you need to execute an action when a failover occurs. In my case, I have a
+VPN running on a Virtual IP and want to make sure the VPN only runs on the node
+with the Virtual IP.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+If you want to set up a simple keepalived cluster, see [my tutorial on that][2].
+
+The VPN uses `strongswan` and is a simple ipsec site to site VPN. The two nodes
+are datacenter redundant. The nodes function as NAT/firewall proxies for a
+backend network. The backend servers need access to some other servers only
+reachable over the VPN.
+
+A notify script can be used to take actions, not only removing or adding an IP
+to an interface. It can for example start or stop a daemon, depending on the
+VRRP state.
+
+It is defined in the keepalived config like this:
+
+    
+    
+    vrrp_instance Example_VRRP {
+        [...]
+        notify /usr/local/sbin/notify-keepalived.sh
+    }
+    
+
+The script can be written in any language as long as it is executable. It
+receives the following parameters:
+
+  * $1 = "INSTANCE" or "GROUP"
+  * $2 = name of instance or group
+  * $3 = target state of transition, "MASTER", "BACKUP" or "FAULT"
+
+This is the bash script I use for the strongswan VPN:
+
+    
+    
+    #!/bin/bash
+    TYPE=$1
+    NAME=$2
+    STATE=$3
+    case $STATE in
+            "MASTER") /usr/sbin/service strongswan start
+                      ;;
+            "BACKUP") /usr/sbin/service strongswan stop
+                      ;;
+            "FAULT")  /usr/sbin/service strongswan stop
+                      exit 0
+                      ;;
+            *)        /sbin/logger "ipsec unknown state"
+                      exit 1
+                      ;;
+    esac
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://raymii.org/s/tutorials/Keepalived-Simple-IP-failover-on-Ubuntu.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

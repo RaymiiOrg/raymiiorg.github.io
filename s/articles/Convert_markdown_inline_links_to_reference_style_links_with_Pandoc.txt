@@ -1,0 +1,178 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Convert markdown inline links to reference style links with Pandoc
+Author      : 	Remy van Elst
+Date        : 	10-04-2019
+URL         : 	https://raymii.org/s/articles/Convert_markdown_inline_links_to_reference_style_links_with_Pandoc.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Markdown has two options to create a link. A link is the [piece of text][1] you
+click to go to another webpage. Actually, three ways, since you can just embed
+HTML code in Markdown.
+
+I write all the content for this site in Markdown files, which are then
+converted by [my static site generator][2] to HTML, text and a [gopher
+version][1]. I'm used to using the inline link style, which is where you paste
+the link right in the text. Since I've enabled the Gopher version of raymii.org,
+I noticed that there was no line wrapping.
+
+The HTML website all arranges that via CSS, but the text-only Gopher does not.
+Sometimes Gopher clients wrap text, but most don't. I'm re-wrapping all articles
+to make them fit, but the wrapping is way off with inline style markdown links.
+By converting them to reference style markdown links, the wrapping looks way
+better, and as an added bonus, reference style links give a better overview.
+
+There are a few scripts floating around to convert these links, but either Ruby
+or NodeJS. It turns out after a bit of research that Pandoc, the anything-to-
+anything text conversion tool, has [an option][3] to use reference style links.
+With this option, I converted all the articles here (almost 400) to the
+reference style Markdown links.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Markdown style links
+
+In Markdown you can [create links using two styles][5]. The first is inline, it
+looks like this:
+
+    
+    
+    [link title](https://url.tld/)
+    
+
+The second is reference style, it looks like this:
+
+    
+    
+    [link title][1]
+    
+
+Somewhere else in your document, you then have the referenced ID:
+
+    
+    
+    [1]: https://url.tld/
+    
+
+The ID can be anything, but for clearity I often use numbers.
+
+Reference style links have the advantage that you can link multiple parts to the
+same ID, instead of pasting the link multiple times.
+
+With a long URL inline link, the text gets cluttered and, as in my case,
+wrapping fails.
+
+### Pandoc conversion
+
+Pandoc is a tool to convert one markup language to another. It can for example
+convert markdown to mediawiki syntax, or markdown to Word/OpenOffice, or vice
+versa. It can, in this usecase, also convert to the same format as you put in.
+This can be useful to change the wrapping or add a table of contents.
+
+In this case it can convert inline style links to reference style links.
+
+The following command will convert a markdown document to a markdown document
+with inline links, while not touching the wrapping.
+
+    
+    
+    pandoc --from markdown --to markdown --wrap=preserve --reference-links \ 
+     --output outputfile.md inputfile.md
+    
+
+A small annoyance is that the links are not referenced by a numeric ID.
+
+This is an example document:
+
+    
+    
+    [inline_link1](https://raymii.org/s/)
+    
+    [Inline link 2](https://raymii.org)
+    
+    [Reference link 1 ][1]
+    
+    
+    [1]: http://raymii.org
+    
+
+This is the conversion result:
+
+    
+    
+    [inline\_link1]
+    
+    [Inline link 2]
+    
+    [Reference link 1]
+    
+      [inline\_link1]: https://raymii.org/s/
+      [Inline link 2]: https://raymii.org
+      [Reference link 1]: http://raymii.org
+    
+
+Whereas I would do it manually like this:
+
+    
+    
+    [inline\_link1][1]
+    
+    [Inline link 2][2]
+    
+    [Reference link 1][3]
+    
+    [1]: https://raymii.org/s/
+    [2]: https://raymii.org
+    [3]: http://raymii.org
+    
+
+Doesn't matter syntax wise, it will still be valid markdown, but since the goal
+was to have the plain text version more readable, in my opinion this doesn't
+really fit the bill.
+
+   [1]: https://raymii.org/s/blog/Site_updates_raymii.org_now_on_gopher.html
+   [2]: https://raymii.org/s/software/ingsoc.html
+   [3]: https://pandoc.org/MANUAL.html#option--reference-links
+   [4]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [5]: https://daringfireball.net/projects/markdown/syntax#link
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

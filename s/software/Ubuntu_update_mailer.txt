@@ -1,0 +1,186 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Ubuntu/Debian update mailer
+Author      : 	Remy van Elst
+Date        : 	10-06-2012
+URL         : 	https://raymii.org/s/software/Ubuntu_update_mailer.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This is a bash script for Ubuntu and Debian, to be run by cron on a set
+interval. It checks if there are apt-updates, and if so, mails an overview of
+the packages which can be updated, whith their local version, the version
+available and an URL to the Ubuntu package site where you can see the changelog.
+I wrote this as an addition for my Nagios monitoring, that only shows how many
+updates there are, this is a lot more verbose. It also runs on Debian since 1
+Nov 2012. Only the links don't work then, because the packages are different.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+#### Example output:
+
+If there are no updates:
+
+    
+    
+    No updates available for host vps11.sparklingclouds.nl on date 21.09.2012
+    
+
+If there are updates:
+
+    
+    
+    --- Updates for host: vps11.sparklingclouds.nl ---
+    Date: 21.09.2012 
+    
+    Total updates available: 44
+    
+    -- Package: apport --
+     Installed: 2.0.1-0ubuntu12
+     Candidate: 2.0.1-0ubuntu13
+    Package Information: http://packages.ubuntu.com/precise/apport
+    -- End package apport --
+    
+    -- Package: base-files --
+     Installed: 6.5ubuntu6
+     Candidate: 6.5ubuntu6.2
+    Package Information: http://packages.ubuntu.com/precise/base-files
+    -- End package base-files --
+    
+    -- Package: bind9-host --
+     Installed: 1:9.8.1.dfsg.P1-4ubuntu0.2
+     Candidate: 1:9.8.1.dfsg.P1-4ubuntu0.3
+    Package Information: http://packages.ubuntu.com/precise/bind9-host
+    -- End package bind9-host --
+    
+    -- Package: build-essential --
+     Installed: 11.5ubuntu2
+     Candidate: 11.5ubuntu2.1
+    Package Information: http://packages.ubuntu.com/precise/build-essential
+    -- End package build-essential --
+    
+    -- Package: dbus --
+     Installed: 1.4.18-1ubuntu1
+     Candidate: 1.4.18-1ubuntu1.1
+    Package Information: http://packages.ubuntu.com/precise/dbus
+    -- End package dbus --
+    
+
+### The script
+
+    
+    
+    #!/bin/bash
+    #Copyright (c) 2012 Remy van Elst
+    #Permission is hereby granted, free of charge, to any person obtaining a copy
+    #of this software and associated documentation files (the "Software"), to deal
+    #in the Software without restriction, including without limitation the rights
+    #to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    #copies of the Software, and to permit persons to whom the Software is
+    #furnished to do so, subject to the following conditions:
+    #
+    #The above copyright notice and this permission notice shall be included in
+    #all copies or substantial portions of the Software.
+    #
+    #THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    #IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    #FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    #AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    #THE SOFTWARE.
+    # 01-11-2012 update version 2, now also supports Debian.
+    
+    
+    if [ -f /etc/lsb-release ]; then
+        TYPE="UBUNTU"
+    elif [ -f /etc/debian_version ]; then
+        TYPE="DEBIAN"
+    fi
+    
+    case ${TYPE} in
+        "UBUNTU")
+            VERSION=`grep "DISTRIB_CODENAME" /etc/lsb-release | awk -F = '{ print $2 }'`   
+            ;;
+        "DEBIAN")
+            VERSION="Debian `cat /etc/debian_version`"
+            ;;    
+    esac
+    
+    
+    HOSTNAME=`hostname`
+    EMAIL="user@domain.com"
+    SUBJECT="Updates for host ${HOSTNAME}"
+    DATE=`date +%d.%m.%Y`
+    AVAIL_UPD=`apt-get -s upgrade | awk '/[0-9]+ upgraded,/ {print $1}'`
+    
+    function mailupdates {
+    
+    echo -e "--- Updates for host: ${HOSTNAME} ---"
+    echo -e "Date: ${DATE} \n\n"
+    
+    echo -n "Total updates available: "
+    apt-get -s upgrade | awk '/[0-9]+ upgraded,/ {print $1}'
+    echo -e "\n\n"
+    
+    for i in `aptitude search ~U | cut -c 5- | awk '{ print $1  }'`; do 
+        echo "-- Package: ${i} --"
+        apt-cache policy ${i} | grep 'Installed\|Candidate'
+        if [ $TYPE="UBUNTU" ]; then
+            echo "Package Information: http://packages.ubuntu.com/${VERSION}/${i}"
+        fi
+        echo -e "-- End package ${i} --\n"
+    done
+    
+    }
+    
+    
+    if [[ ${AVAIL_UPD} == 0 ]]; then
+        #echo "No updates available for host $HOSTNAME on date ${DATE}" | mail -s "${SUBJECT}" ${EMAIL}
+        sleep 1
+    else
+        mailupdates | mail -s "${SUBJECT}" ${EMAIL}
+    fi
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

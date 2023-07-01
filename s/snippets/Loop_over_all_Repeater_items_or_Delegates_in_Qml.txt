@@ -1,0 +1,289 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Loop over all Repeater items or Delegate's in Qml
+Author      : 	Remy van Elst
+Date        : 	09-02-2022
+URL         : 	https://raymii.org/s/snippets/Loop_over_all_Repeater_items_or_Delegates_in_Qml.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+This small snippet shows how to loop over all Repeater items in Qml and also over all Delegate items in Qml. There are sublte differences between the two.
+I'm using this to update visual all items in a control, before syncing state to a networked backend, and if the backend actions fails, I undo the visual state change. The network backend could be slow, by keeping state locally and syncing in the background, the user can continue working.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+ 
+
+
+![demo program][1]
+
+> A demo program that loops over both a `Repeater` and a `GridViews` `Delegates`
+
+
+This is the `ListModel` i'm using, but it could also be a C++ `QAbstractListModel`.
+
+    ListModel {
+        id: exampleModel
+        ListElement {
+            name: "Apple"
+            price: 0.50
+        }
+        ListElement {
+            name: "Orange"
+            price: 2.00
+        }
+        ListElement {
+            name: "Banana"
+            price: 1.50
+        }
+    }
+
+This is the `GridLayout` with a `Repeater`:
+
+    GridLayout {
+      id: exampleLayout
+      Repeater {
+          id: exampleRepeater
+          model: exampleModel
+          delegate: Button {
+              text: model.name + ": " + model.price
+              readonly property var price: model.price
+          }
+      }
+}
+
+This is the snippet to loop over all items in that `Repeater` and acces their properties:
+
+    function logRepeaterItems(repeaterItem) {
+        for (var i = 0; i < repeaterItem.count; i++) {
+            console.log("repeater price: " + repeaterItem.itemAt(i).price)
+            console.log("repeater text: " + repeaterItem.itemAt(i).text)
+        }
+    }
+
+This is the `GridView` with `Delegates`:
+
+    GridView {
+      id: exampleView
+      model: exampleModel
+      delegate: Button {
+          text: model.name + ": " + model.price
+          readonly property var price: model.price
+      }
+    }
+
+This is the snippet to loop over all `Delegates`:
+
+    // warning: its better to loop over the actual model than the delegates.
+    // Only visible delegates are guaranteed to be in this loop.
+    function logDelegateItems(delegateItem) {
+        for (var child in delegateItem.contentItem.children) {
+            var item = delegateItem.contentItem.children[child]
+            console.log("delegate price: " + item.price)
+            console.log("delegate text: " + item.text)
+        }
+    }
+
+
+If you're looping over all delegates, think twice. It's better to loop
+over the backing `model`, since not all delegates are always available. 
+If they're not visible, they might not be there.
+
+
+### Demo Qml Program
+
+Here is the demo program showcasing both methods:
+
+
+**main.qml**
+
+    import QtQuick 2.15
+    import QtQuick.Window 2.15
+    import QtQuick.Layouts 1.3
+    import QtQuick.Controls 2.12
+    
+    Window {
+        width: 640
+        height: 480
+        visible: true
+        title: qsTr("Loop over model/repeater example")
+    
+        function listProperties(item) {
+            var properties = ""
+            for (var p in item)
+                properties += (p + ": " + item[p] + "\n")
+            return properties
+        }
+    
+        // warning: its better to loop over the actual model than the delegates.
+        // Only visible delegates are guaranteed to be in this loop.
+        function logDelegateItems(delegateItem) {
+            for (var child in delegateItem.contentItem.children) {
+                var item = delegateItem.contentItem.children[child]
+                console.log("delegate price: " + item.price)
+                console.log("delegate text: " + item.text)
+            }
+        }
+    
+        function logRepeaterItems(repeaterItem) {
+            for (var i = 0; i < repeaterItem.count; i++) {
+                console.log("repeater price: " + repeaterItem.itemAt(i).price)
+                console.log("repeater text: " + repeaterItem.itemAt(i).text)
+            }
+        }
+    
+        ListModel {
+            id: exampleModel
+            ListElement {
+                name: "Apple"
+                price: 0.50
+            }
+            ListElement {
+                name: "Orange"
+                price: 2.00
+            }
+            ListElement {
+                name: "Banana"
+                price: 1.50
+            }
+        }
+    
+        Button {
+            id: loopButton
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.margins: 10
+            text: "Loop over GridLayout Repeater"
+            onClicked: logRepeaterItems(exampleRepeater)
+        }
+    
+        Button {
+            id: loopViewButton
+            anchors.top: parent.top
+            anchors.left: loopButton.right
+            anchors.margins: 10
+            text: "Loop over GridView Delegates"
+            onClicked: logDelegateItems(exampleView)
+        }
+    
+        Text {
+            id: gridlayouttext
+            text: "GridLayout with Repeater"
+            anchors.top: loopButton.bottom
+            anchors.margins: 5
+            anchors.left: parent.left
+        }
+    
+        GridLayout {
+            anchors.top: gridlayouttext.bottom
+            anchors.left: parent.left
+            anchors.margins: 5
+            id: exampleLayout
+            height: 100
+            columns: 3
+            columnSpacing: 5
+            Repeater {
+                id: exampleRepeater
+                model: exampleModel
+                delegate: Button {
+                    text: model.name + ": " + model.price
+                    readonly property var price: model.price
+                }
+            }
+        }
+    
+        Text {
+            id: gridviewtext
+            text: "GridView with Delegate and model"
+            anchors.top: exampleLayout.bottom
+            anchors.margins: 5
+            anchors.left: parent.left
+        }
+    
+        GridView {
+            anchors.top: gridviewtext.bottom
+            anchors.left: parent.left
+            anchors.margins: 5
+            height: 200
+            width: 300
+            id: exampleView
+            model: exampleModel
+            delegate: Button {
+                text: model.name + ": " + model.price
+                readonly property var price: model.price
+            }
+        }
+    }
+
+
+
+
+**main.cpp**
+
+    #include <QGuiApplication>
+    #include <QQmlApplicationEngine>
+    
+    
+    int main(int argc, char *argv[])
+    {
+    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    #endif
+    
+        QGuiApplication app(argc, argv);
+    
+        QQmlApplicationEngine engine;
+        const QUrl url(QStringLiteral("qrc:/main.qml"));
+        QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                         &app, [url](QObject *obj, const QUrl &objUrl) {
+            if (!obj && url == objUrl)
+                QCoreApplication::exit(-1);
+        }, Qt::QueuedConnection);
+        engine.load(url);
+    
+        return app.exec();
+    }
+
+
+
+
+[1]: /s/inc/img/qml_loop_over_delegates.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

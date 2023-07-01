@@ -1,0 +1,200 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Bonding NIC Teaming on Ubuntu 12.04
+Author      : 	Remy van Elst
+Date        : 	14-02-2014
+URL         : 	https://raymii.org/s/tutorials/NIC_Bonding_on_Ubuntu_12.04.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Bonding, also called port trunking or link aggregation means combining several
+network interfaces (NICs) to a single link, providing either high-availability,
+load-balancing, maximum throughput, or a combination of these.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+**Warning! Make sure you have ILO/BMC out of band remote access to your server.
+You are going to change vital network settings, this may result in loss of
+connectivity if done wrong.**
+
+### Install required packages
+
+`ifenslave` is used to attach and detach slave network interfaces to a bonding
+device. Install the package:
+
+apt-get install ifenslave
+
+### Kernel Module
+
+Before Ubuntu can configure your network cards into a NIC bond, you need to
+ensure that the correct kernel module `bonding` is present, and loaded at boot
+time.
+
+Edit the file:
+
+    
+    
+    vim  /etc/modules
+    
+
+Add the word `bonding` to the file:
+
+    
+    
+    bonding
+    
+
+Also, load the module manually for now:
+
+    
+    
+    modprobe bonding
+    
+
+### Bonding network config
+
+Edit the file:
+
+    
+    
+    vim /etc/network/interfaces
+    
+
+Example config for an round-robin load balancing setup:
+
+    
+    
+    auto lo
+    iface lo inet loopback
+    
+    auto eth0
+    iface eth0 inet manual
+        bond-master bond0
+    
+    auto eth1
+    iface eth1 inet manual
+        bond-master bond0
+    
+    auto bond0
+    iface bond0 inet static
+        # For jumbo frames, change mtu to 9000
+        mtu 1500
+        address 172.16.20.1
+        netmask 255.255.255.0
+        network 172.16.20.0
+        broadcast 172.16.20.255
+        gateway 172.16.20.1
+        dns-nameservers 172.16.20.2
+        bond-miimon 100 # Specifies the MII link monitoring frequency in milliseconds. This determines how often the link state of each slave is inspected for link failures. 
+        bond-downdelay 200 # Specifies the time, in milliseconds, to wait before disabling a slave after a link failure has been detected.
+        bond-updelay 200 # Specifies the time, in milliseconds, to wait before enabling a slave after a link recovery has been detected.
+        bond-mode 0
+        bond-slaves none # we already defined the interfaces above with bond-master
+    
+
+For round-robin/load balancing, use `bond-mode: balance-rr`.
+
+### Bonding modes explained
+
+#### Mode 0 - balance-rr
+
+Round-robin policy: Transmit packets in sequential order from the first
+available slave through the last. This mode provides load balancing and fault
+tolerance.
+
+#### Mode 1 - active-backup
+
+Active-backup policy: Only one slave in the bond is active. A different slave
+becomes active if, and only if, the active slave fails. The bond's MAC address
+is externally visible on only one port (network adapter) to avoid confusing the
+switch. This mode provides fault tolerance. The primary option affects the
+behavior of this mode.
+
+#### Mode 2 - balance-xor
+
+XOR policy: Transmit based on [(source MAC address XOR'd with destination MAC
+address) modulo slave count]. This selects the same slave for each destination
+MAC address. This mode provides load balancing and fault tolerance.
+
+#### Mode 3 - broadcast
+
+Broadcast policy: transmits everything on all slave interfaces. This mode
+provides fault tolerance.
+
+#### Mode 4 - 802.3ad
+
+IEEE 802.3ad Dynamic link aggregation. Creates aggregation groups that share the
+same speed and duplex settings. Utilizes all slaves in the active aggregator
+according to the 802.3ad specification.
+
+##### Prerequisites:
+
+  * Ethtool support in the base drivers for retrieving the speed and duplex of each slave.
+  * A switch that supports IEEE 802.3ad Dynamic link aggregation (LACP) . Most switches will require some type of configuration to enable 802.3ad mode. 
+
+#### Mode 5 - balance-tlb
+
+Adaptive transmit load balancing: channel bonding that does not require any
+special switch support. The outgoing traffic is distributed according to the
+current load (computed relative to the speed) on each slave. Incoming traffic is
+received by the current slave. If the receiving slave fails, another slave takes
+over the MAC address of the failed receiving slave.
+
+##### Prerequisites:
+
+  * Ethtool support in the base drivers for retrieving the speed of each slave. 
+
+#### Mode 6 - balance-alb
+
+Adaptive load balancing: includes balance-tlb plus receive load balancing (rlb)
+for IPV4 traffic, and does not require any special switch support. The receive
+load balancing is achieved by ARP negotiation. The bonding driver intercepts the
+ARP Replies sent by the local system on their way out and overwrites the source
+hardware address with the unique hardware address of one of the slaves in the
+bond such that different peers use different hardware addresses for the server.
+
+### Sources
+
+  * documentation on linux network bonding: <https://www.kernel.org/doc/Documentation/networking/bonding.txt>
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

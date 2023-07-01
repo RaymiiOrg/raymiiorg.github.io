@@ -1,0 +1,224 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Run CLion native on Android, ditch your desktop!
+Author      : 	Remy van Elst
+Date        : 	27-12-2019
+URL         : 	https://raymii.org/s/blog/Run_CLion_on_Android.html
+Format      : 	Markdown/HTML
+---
+
+
+
+How often do you read articles that state that people have replaced their main
+computer with an iPad and are fully content? Now, how many of those articles just
+use a linux server (vps) somewhere with some native apps, but mostly SSH to that
+server? Well, what if I told you that you can run a full blown IDE, the best 
+IDE for C++ there is, CLion by JetBrains, on Android? Including compiling, just
+native GCC, CMake, GDB and all the stuff you are used to? Just for fun I've installed
+CLion on an old Samsung Tab S2 I had lying around, using Ubuntu in a chroot. It 
+works way better than I'd expected, with a Bluetooth keyboard and mouse it's almost
+as if your on a desktop. I wonder if you could run Android Studio and use the 
+tablet to compile app's for itself. This article shows some photo's, including
+a mechanical keyboard, different window managers and had instructions to replicate
+this setup.
+
+![photo1][3]
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+At my job I use CLion as my editor of choice. All of our C++ (embedded) developers
+do, with one or two that prefer a different tool (nano). At home I use it as well
+for my training, the [codewars kata's][4] I often do and sometimes [write about][5]. 
+
+However, it's not always possible to use such a big bulky workstation. What if you
+want a more mobile setup? Maybe a laptop suits your needs, but what if you could
+use one of those old tablets you probably have in a drawer gathering dust? 
+
+I get about 6 hours of battery life, so even that is better than I expected of 
+such an old device running Jetbrains resource hungry software.
+
+Since CLion is Java software, I thought, lets try to get it up and running on one 
+of my older tablets. I also had a bluetooth keyboard lying around, perfect combo
+for some development on the couch, or in the train.
+
+With a powerbank and a USB-OTG cable, I could even use my CODE keyboard:
+
+![photo2][6]
+
+Who doens't want that on the train every day riding to work?
+
+My hardware consists of a 2015 Samsung Galaxy Tab S2, running a custom rom, 
+[LineageOS 16][12] and a generic (Rapoo, china fluff) bluetooth keyboard/mouse.
+
+### Chroot, easy or hard?
+
+By using a chroot environment, one can install just about any modern linux distro
+via an easy to use GUI app on Android, no root required. Copy and paste a few
+commands into [Termux][1], start the VNC server and connect with a [VNC app][2], bVNC is [open source as well][19]
+and you're in your Linux distro of choice. 
+
+#### Easy
+
+The easy way is to use an app like [AnLinux][7] or [Andronix][8]. The latter one,
+Andronix, will ask for money to use
+some of the app's features. You don't need to pay for a basic Ubuntu installation.
+
+The first, [AnLinux][7] is open source and a bit more spartan, but works just fine.
+It even offers IceWM as an easy option. IceWM is my favorite legacy window manager,
+and on a tablet in a chroot, it uses almost no resources (storage/ram). We all know 
+that jetbrains IDE's use all resources they can get and then some.
+
+For my first attempt, I used Andronix. Works, installs XFCE, but the default setup
+is a bit off. Icons are missing, firefox gives a segfault, I was unable to run as
+a non-root user and more of those minor annoyances. The distro is more recent though,
+they provide Ubuntu 19.10.
+
+Here's a screenshot of the XFCE environment Andronix provides, note the smoother
+looking text:
+
+![xfce][13]
+
+For my second and latter attempts, I used [AnLinux][7]. It offers Ubuntu 18.04, but
+next to XFCE they also have IceWM, which I like. Here's a screenshot of CLion and 
+IceWM via AnLinux:
+
+![icewm][9]
+
+On anlinux I could add a regular user and run firefox without segfaults. The GCC 
+version provided by Ubuntu 18.04 is 7.3.0 and by Ubuntu 19.10 it's 8.1.0. 
+
+My preference would go to [Anlinux][7] due to the less intrusive application and
+all the source code being available. Andronix looks like a shady site, incomplete
+documentation, pushing their premium version and their paid modded OS versions. 
+
+#### Hard
+
+You can setup your own chroot on Android. Back when I had my first android phone,
+the very first [HTC G1][10] (or HTC Dream outside of T-Mobile), I already ran a 
+desktop environment via the chroot way. Boy was I proud to have OpenOffice running
+on my small phone screen.
+
+The [Debian Wiki][11] has a bunch of information and a guide for a manual chroot.
+Debian should work just as well as Ubuntu for CLion.
+
+
+### Development tools
+
+Once you have Ubuntu installed and are up and running with your GUI, you need 
+to use the package manager to install the development tools. The bundled CLion
+versions won't work due to the different architecture. Fire up termux or another
+terminal, enter the chroot/vnc and install the basics:
+
+    apt install openjdk-8-jre build-essential cmake gdb clang-format git wget sudo
+
+Do note that not everything will work correctly due to being started in a chroot.
+Anything related to systemd will fail since systemd can only run as PID1 (not in a chroot).
+There is also no `/proc/` by default, so `ps auxf` and `top` won't work.
+
+For our purposes of just running CLion and a browser to do [codewars kata's][4]
+that aren't major problems.
+
+You should now consider adding a regular user. You can run everything as root, but
+it's less secure.
+
+    adduser yourUserName
+
+There will be some questions on user information and a password. Stop the VNC 
+server and restart (via Termux) as the newly created user, for example:
+
+    sudo -u yourUserName vncserver-start
+
+### Installing CLion
+
+Once you've installed the packages, go ahead and [download the clion tar.gz file][14].
+Via their `Other Versions` page you avoid having to enter your email address.
+
+    wget https://download.jetbrains.com/cpp/CLion-2019.3.2.tar.gz
+
+Extract the file:
+
+    tar -xf  CLion-2019.3.2.tar.gz
+
+Fire up clion via their script:
+
+
+    ~/clion-2019.3.2/bin/clion.sh
+
+The magical fancy splash screen should now greet you:
+
+![clion icewm][16]
+
+
+### Debugging and Unit testing
+
+You might wonder what kind of binaries are compiled. In my case, for this tablet's
+ARM specific architecture:
+
+    
+    /home/remy/CLionProjects/untitled/cmake-build-debug/untitled: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, BuildID[sha1]=2bce76cd5fbd36776f4023a3cb9c33049549e957, with debug_info, not stripped
+
+If you've installed GDB you can use it via CLion to debug like you are used to, breakpoints,
+watches, the whole shebang:
+
+![gdb][17]
+
+Even [GoogleTest][18] and my layout for CMake projects works without any problems. 
+
+
+[1]: https://termux.com/
+[2]: https://play.google.com/store/apps/details?id=com.iiordanov.freebVNC&hl=en_US
+[3]: /s/inc/img/clion-android1.jpg
+[4]: https://www.codewars.com/r/KjbvJA
+[5]: /s/blog/Weight_for_Weight_a_coding_exersize_that_kept_me_busy.html
+[6]: /s/inc/img/clion-android2.jpg
+[7]: https://github.com/EXALAB/AnLinux-App
+[8]: https://andronix.app/
+[9]: /s/inc/img/clion-android3.png
+[10]: https://en.wikipedia.org/wiki/HTC_Dream
+[11]: https://wiki.debian.org/ChrootOnAndroid
+[12]: http://web.archive.org/web/20191223212448/https://forum.xda-developers.com/tab-s2/orig-development/rom-lineageos-16-0-t3838617
+[13]: /s/inc/img/clion-android4.png
+[14]: https://www.jetbrains.com/clion/download/other.html
+[15]: /s/inc/img/clion-android6.jpg
+[16]: /s/inc/img/clion-android7.jpg
+[17]: /s/inc/img/clion-android8.jpg
+[18]: https://raymii.org/s/tutorials/Cpp_project_setup_with_cmake_and_unit_tests.html
+[19]: https://github.com/iiordanov/remote-desktop-clients
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

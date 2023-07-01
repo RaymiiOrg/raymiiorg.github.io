@@ -1,0 +1,709 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <?xml-stylesheet href="/s/inc/rss.xsl" type="text/xsl"?>
+    <rss version="2.0"  xmlns:atom="http://www.w3.org/2005/Atom">
+        <channel>
+            <title>RSS feed for tag ubuntu on Raymii.org</title> 
+            <link>https://raymii.org/s/tags/ubuntu.xml</link> 
+            <description>RSS feed for tag ubuntu on Raymii.org</description>
+            <atom:link href="https://raymii.org/s/tags/ubuntu.xml" rel="self" type="application/rss+xml" />
+    
+            <item>
+                <title>APT keeps complaining that the HTTPS certificate cannot be validated?</title> 
+                <link>https://raymii.org/s/blog/Syncthing_apt_repo_keeps_complaining_HTTPS_certificate_could_not_be_validated.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/Syncthing_apt_repo_keeps_complaining_HTTPS_certificate_could_not_be_validated.html</guid>
+                <description>Recently a few of my Ubuntu 20.04 and Debian 11 servers failed to run an `apt update` because it insisted that the HTTPS certificate for a repository could not be validated, while `curl` on the same system had no issues connecting. Join me on a deep dive into certificate validation and troubleshooting `apt`, digging into the C++ source code for `apt` and `GnuTLS` and in the end, it turned out to be my own fault due to permission on a folder. However, the error messages were totally unhelpful resolving the mysterious validation problem. This article was written over the period of a few days, chronologically during troubleshooting.</description> 
+                <pubDate>Wed, 11 Jan 2023 05:31:00 GMT</pubDate>
+                <lastBuildDate>Wed, 11 Jan 2023 05:31:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Expose any Qt5 program via VNC</title> 
+                <link>https://raymii.org/s/articles/Expose_any_QT_program_via_VNC.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/Expose_any_QT_program_via_VNC.html</guid>
+                <description>A few months ago I wrote about [Microsoft Teams running on a coffee machine. That was a fun work experiment where I got a VNC client running on the Linux-based coffee machines that we produce at work. In the comments on hackernews Jean-Micha&amp;euml;l Celerier pointed me to the reverse, a way to expose any Qt application over VNC. This article shows you how I use this feature to work on our Qt 5 based coffee machine frontend as well as how you can use this on your machine, for example, to expose Dolphin, the KDE file manager, over VNC.</description> 
+                <pubDate>Mon, 20 Sep 2021 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 20 Sep 2021 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>All packages that were present in Ubuntu 18.04 but absent in Ubuntu 20.04</title> 
+                <link>https://raymii.org/s/articles/All_packages_that_were_present_in_Ubuntu_18.04_but_removed_in_20.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/All_packages_that_were_present_in_Ubuntu_18.04_but_removed_in_20.04.html</guid>
+                <description>Otherwise titled `Figure out the differences between two apt repositories`. Recently I've had a few packages that I often use but were missing from Ubuntu 20.04 LTS. One is [ckermit](/s/blog/Ive_packaged_up_CKermit_as_a_snap_for_Ubuntu_20.04.html) and the other is [gnash](/s/blog/Ive_packaged_up_Gnash_as_a_Snap_for_modern_linux.html), both of which I 'converted' to a snap. (In air quotes because I just converted the 18.04 deb). This made me wonder if I could figure out a list of that are present in Ubuntu 18.04, but absent in Ubuntu 20.04. As `apt` and `dpkg` are standardized tools and and package formats, we can use a few shell tools to parse the package lists and compare them side by side.
+This post shows you how to do the comparison yourself and I discuss the removed packages a bit. Some are version increments (like `gcc-6` in Ubuntu 18.04 but `gcc-7`in Ubuntu 20.04),  and some are packages that were combined into one instead of split up  (like `ltsp` in Ubuntu 20.04 but a bunch of seperate `ltsp-$postfix` packages instead  in Ubuntu 18.04). Many others are just replaced by newer versions (`python-ceph` vs `python3-ceph`). The list of differences is provided as a download, both ways.</description> 
+                <pubDate>Wed, 19 May 2021 00:00:00 GMT</pubDate>
+                <lastBuildDate>Wed, 19 May 2021 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>I've packaged up CKermit as a snap, for Ubuntu 20.04</title> 
+                <link>https://raymii.org/s/blog/Ive_packaged_up_CKermit_as_a_snap_for_Ubuntu_20.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/Ive_packaged_up_CKermit_as_a_snap_for_Ubuntu_20.04.html</guid>
+                <description>Last year I packaged up [gnash as a snap](/s/blog/Ive_packaged_up_Gnash_as_a_Snap_for_modern_linux.html) because it was missing from the Ubuntu 20.04 apt repositories. Recently I found out that `ckermit` is also not in Ubuntu 20.04, as far as I can tell because it wasn't in the Debian repositories when the Ubuntu 20.04 initial sync happened. Which is very inconvenient for an LTS release.
+I often use `ckermit` to connect to our hardware via a script, to automatically boot from NFS (via u-boot). I could do that manually via `screen` or `minicom`, but I have a `kermit` script that does it for me, which is very convenient. Since the snapping of `gnash` was so easy, I decided to do it for `ckermit` as well, since I now know how to convert deb packages to snaps. I also have a few colleagues who also use those kermit scripts and are going to update to 20.04 in the (near) future.
+The snap packaging is based on work by Phil Roche, he wrote about re-packaging older debian packages with an Ubuntu 18.04/16.04 base layer as a snap. My `ckermit` package is confined (no `--classic` needed), the source code for the snap is on my github and on any snap-enabled distro you can now 'snap install ckermit-raymii' to enjoy CKermit.</description> 
+                <pubDate>Sun, 16 May 2021 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 16 May 2021 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>I've packaged up Gnash as a snap, for modern linux</title> 
+                <link>https://raymii.org/s/blog/Ive_packaged_up_Gnash_as_a_Snap_for_modern_linux.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/Ive_packaged_up_Gnash_as_a_Snap_for_modern_linux.html</guid>
+                <description>I hate snaps just as much as the next guy but last week I did something unexpected. I packaged up Gnash as a snap.  Gnash is a GNU flash media player, not updated since 2011, and  thus removed from the Ubuntu 20.04 repositories. The snap packaging is based on work by phil roche, he wrote about re-packaging older debian packages with an Ubuntu 18.04/16.04 base layer as a snap. My gnash package is confined (no '--classic' needed), the source code for the snap is on my github and on any snap-enabled distro you can now 'snap install gnash-raymii' to enjoy Gnash again.</description> 
+                <pubDate>Mon, 07 Dec 2020 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 15 May 2021 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Limit specific process memory on desktop linux with cgroups and earlyoom</title> 
+                <link>https://raymii.org/s/articles/Limit_specific_process_memory_on_desktop_linux_with_cgroups.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/Limit_specific_process_memory_on_desktop_linux_with_cgroups.html</guid>
+                <description>On my laptop I recently had trouble with out of memory issues when running `clion`, `firefox`, `thunderbird`, `teams` and a virtualbox VM. To combat this, I've setup cgroups to limit how much RAM specific applications can use and configured `earlyoom`, a very nifty tool that checks available memory and kills the process with the highest `oom_score` if available memory falls below 5%. Otherwise, my laptop would first grind to a halt (even without swap) and only after half an hour of seemingly being stuck would the OOM killer kick in. With `earlyoom` this hanging behavior is gone, although sometimes applications get killed when I don't expect it. I've given firefox, thunderbird and teams a cgroup with memory limit and clion and virtualbox use their own configuration to limit their RAM usage.This post details how to setup `cgroups` to limit memory of specific processes including automatically placing process inside a cgroup.</description> 
+                <pubDate>Sat, 13 Feb 2021 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 13 Feb 2021 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>The Common Desktop Environment (CDE) is still developed and modern in 2021</title> 
+                <link>https://raymii.org/s/blog/The_Common_Desktop_Environment_CDE_is_still_developed_in_2021.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/The_Common_Desktop_Environment_CDE_is_still_developed_in_2021.html</guid>
+                <description>While playing around with the GUI on OpenVMS I was looking for CDE documentation and I found out CDE is still being developed and can be installed on modern linux. This quick post shows you how to install CDE on Debian 10 and includes a bit on compiling GENERIC TETRIS, the same program I installed on OpenVMS. Really cool to compile and run a game from 1992 on a retro/modern desktop environment.</description> 
+                <pubDate>Thu, 28 Jan 2021 00:00:00 GMT</pubDate>
+                <lastBuildDate>Thu, 28 Jan 2021 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Local incremental backups of Google Photos on Ubuntu with gphotos-sync</title> 
+                <link>https://raymii.org/s/tutorials/Local_incremental_Google_Photos_backup_on_Ubuntu.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Local_incremental_Google_Photos_backup_on_Ubuntu.html</guid>
+                <description>'Google Photos' no longer syncs with 'Google Drive' or with their 'Backup and Sync' desktop software. There used to be a checkbox to get your 'Google Photos' pictures in 'Google Drive' but that has been disabled. I used that feature together with their 'Backup and Sync' tool to sync all the photos in 'Google Photos' to my local Windows computer. From there I use 'DigiKam'  to manage the photos and backup them offline and offsite. Due to Google removing that feature, I had to go find another way to get the pictures out of 'Google Photos', which, after a few months of (automated) use, 'gphotos-sync' on Ubuntu seems to be the best, stable choice. In this guide I'll show you how to setup incremental backups from 'Google Photos' on Ubuntu. My 'DigiKam' database moved over without problems, and now I'm glad I don't have to use Windows for picture managemant anymore.</description> 
+                <pubDate>Mon, 24 Aug 2020 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 24 Aug 2020 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Get webcam resolution and info on Ubuntu and fix HD</title> 
+                <link>https://raymii.org/s/tutorials/Get_webcam_resolution_and_info_on_Ubuntu_and_fix_HD.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Get_webcam_resolution_and_info_on_Ubuntu_and_fix_HD.html</guid>
+                <description>With all the video calling nowdays due to working from home I decided to get a webcam. Since I mostly work at a workstation, I have no microphone or camera built in. A friend gave me a spare webcam, a generic non-brand. It says 'HD Camera' on the box, but by default it records in 640x480. Using a few tools on Ubuntu you can figure out what resolutions are supported for your device. It turned out to be Cheese, the webcam capture program I used, not supporting the 'mjpeg' format, just the 'yuyv' RAW format. Using another webcam program named Webcamoid solved it, that program was able to use mjpeg.</description> 
+                <pubDate>Sun, 23 Aug 2020 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 23 Aug 2020 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Ubuntu Snap auto updates broke my development setup and there is no way to turn them off</title> 
+                <link>https://raymii.org/s/blog/Ubuntu_Snap_auto_updates_broke_my_development_setup.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/Ubuntu_Snap_auto_updates_broke_my_development_setup.html</guid>
+                <description>After updating-by-reinstall to Ubuntu 20.04, I installed CLion via snap since that  seemed more convinient than manually downloading a java installation. CLion is the best thing since sliced bread, or I mean a C/C++ IDE by JetBrains. Ubuntu snap is  a packaging system made by Canonical and pushed hard in Ubuntu. Today I found out the hard way that snap auto-updates and that there is no way to turn that off permanently. CLion was updated, which I noticed because the process was killed. The update broke several key plugins for my workflow  and the theme was weird. In this article I'll discuss my disgust, I as the owner of the computer want to be in full control, not some developer that decides I need auto updates. I ended up removing snap completely, and my next install will not be Ubuntu due to this.</description> 
+                <pubDate>Sat, 01 Aug 2020 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 02 Aug 2020 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Running gnash on Ubuntu 20.04 (in Docker with X11 forwarding)</title> 
+                <link>https://raymii.org/s/tutorials/Running_gnash_on_Ubuntu_20.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Running_gnash_on_Ubuntu_20.04.html</guid>
+                <description>As you might have noticed, I'm slowly updating servers and workstations to Ubuntu 20.04, and as always with major upgrades, things break or are removed. Earlier this week I fixed up pygopherd and today I'll get gnash running again. Gnash is not updated since 2011 and therefore, finally, removed from the Ubuntu 20.04 repositories. Compiling it from source proved to be a lot of effort due to gstreamer dependencies and after a few hours I thought, why not just spin up a Ubuntu 18.04 Docker container, install gnash and forward X11. That took just about 10 minutes and now I'm happily running gnash again. In this tutorial I'll show you how to setup gnash in a docker container with x11 forwarding and host networking.</description> 
+                <pubDate>Sun, 05 Jul 2020 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 05 Jul 2020 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Installing PyGopherd on Ubuntu 20.04</title> 
+                <link>https://raymii.org/s/tutorials/Installing_PyGopherd_on_Ubuntu_20.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Installing_PyGopherd_on_Ubuntu_20.04.html</guid>
+                <description>Ubuntu 20.04 dropped the Pygopherd package. There is no way to install it from the official repositories. In this guide I'll show you two ways to install the version from Ubuntu 18.04, which still works perfectly on 20.04. Either via just downloading the 2 deb packages, or via `apt pinning` from the previous (18.04) repository.</description> 
+                <pubDate>Sat, 04 Jul 2020 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 04 Jul 2020 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Github Actions, C++ with Boost and cmake, almost a 50% speedup with caching</title> 
+                <link>https://raymii.org/s/articles/Github_Actions_cpp_boost_cmake_speedup.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/Github_Actions_cpp_boost_cmake_speedup.html</guid>
+                <description>For a personal project I use Github for source code hosting and Github Actions as an automated build and test tool. Github Actions compiles my cmake project and runs all the unit tests on every commit. It also saves a build artifact, the actual compiled program. By utilizing some dependency caching and make flags I sped up the build process by 43% by caching the apt install libboost1.65-dev and giving cmake a -j2 makeflag. This article shows my simple setup to compile a C++ project with cmake and Boost on Github Actions. After compilation, it runs all the tests and uploads the compiled binary for download. For my one man project it's overkill, but when collaborating or when builds take a long time on your own machine, it's great to have an automated build / test system.</description> 
+                <pubDate>Wed, 27 May 2020 00:00:00 GMT</pubDate>
+                <lastBuildDate>Wed, 27 May 2020 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Run CLion native on Android, ditch your desktop!</title> 
+                <link>https://raymii.org/s/blog/Run_CLion_on_Android.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/Run_CLion_on_Android.html</guid>
+                <description>How often do you read articles that state that people have replaced their main computer with an iPad and are fully content? Now, how many of those articles just use a linux server (vps) somewhere with some native apps, but mostly SSH to that server? Well, what if I told you that you can run a full blown IDE, the best IDE for C++ there is, CLion by JetBrains, on Android? Including compiling, just native GCC, CMake, GDB and all the stuff you are used to? Just for fun I've installed CLion on an old Samsung Tab S2 I had lying around, using Ubuntu in a chroot. It works way better than I'd expected, with a Bluetooth keyboard and mouse it's almost as if your on a desktop. I wonder if you could run Android Studio and use the tablet to compile app's for itself. This article shows some photo's, including a mechanical keyboard, different window managers and had instructions to replicate this setup.</description> 
+                <pubDate>Fri, 27 Dec 2019 00:00:00 GMT</pubDate>
+                <lastBuildDate>Fri, 27 Dec 2019 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>GNUplot tips for nice looking charts from a CSV file</title> 
+                <link>https://raymii.org/s/tutorials/GNUplot_tips_for_nice_looking_charts_from_a_CSV_file.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/GNUplot_tips_for_nice_looking_charts_from_a_CSV_file.html</guid>
+                <description>Recently I had to do some testing which resulted in a lot of log data. Looking at a bunch of text is not the same as seeing things graphically, this particular logdata was perfect to put in a graph. My goto favorite tool for graphs and charts is gnuplot. Not only is it very extensible, it is also reproducable. Give me a configfile and command over 'do this, then this and then such and such' in Excel to get a consistent result. In this article I'll give tips for using gnuplot, which include parsing a CSV file, a second axis, environment variables, A4 PDF's and a ton of styling options for a nice looking chart.</description> 
+                <pubDate>Sat, 06 Jul 2019 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 06 Jul 2019 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Convert markdown inline links to reference style links with Pandoc</title> 
+                <link>https://raymii.org/s/articles/Convert_markdown_inline_links_to_reference_style_links_with_Pandoc.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/Convert_markdown_inline_links_to_reference_style_links_with_Pandoc.html</guid>
+                <description>Markdown has two options to create a link. A link is the piece of text you click to go to another webpage. Actually, three ways, since you can just embed HTML code in Markdown. I write all the content for this site in Markdown files, which are then converted by my static site generator to HTML, text and a gopher version. I'm used to using the inline link style, which is  where you paste the link right in the text. Since I've enabled the Gopher  version of raymii.org, I noticed that there was no line wrapping. The HTML  website all arranges that via CSS, but the text-only Gopher does not. Sometimes  Gopher clients wrap text, but most don't. I'm re-wrapping all articles to make them fit, but the wrapping is way off with inline style markdown links. By  converting them to reference style markdown links, the wrapping looks way better, and as an added bonus, reference style links give a better overview. There are a few scripts floating around to convert these links, but either  Ruby or NodeJS. It turns out after a bit of research that Pandoc, the anything-to-anything text conversion tool, has an option to use reference style links. With this option, I converted all the articles here (almost 400) to the reference style Markdown links.</description> 
+                <pubDate>Wed, 10 Apr 2019 00:00:00 GMT</pubDate>
+                <lastBuildDate>Wed, 10 Apr 2019 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Where is dropbearconvert on Ubuntu?</title> 
+                <link>https://raymii.org/s/snippets/Where_is_dropbearconvert_on_ubuntu.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/snippets/Where_is_dropbearconvert_on_ubuntu.html</guid>
+                <description>Dropbear is a lightweight SSH server and client implementation, often used on embedded systems and routers. If you use the dropbear SSH client (dbclient) and want to use a private key, it needs to be in the dropbear format and cannot have a passphrase. Dropbear provides a conversion utility to convert openssh style keys to dropbear style keys, dropbearconvert, but on Ubuntu it's not in your $PATH. This means you have to provide the full path to execute it, which is cumbersome. There is a bug in Ubuntu that has been reported in 2012, but in Ubuntu 18.04 (2019) it's still not fixed.</description> 
+                <pubDate>Tue, 02 Apr 2019 00:00:00 GMT</pubDate>
+                <lastBuildDate>Tue, 02 Apr 2019 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Disable motd news or (parts of) the dynamic motd on Ubuntu</title> 
+                <link>https://raymii.org/s/tutorials/Disable_dynamic_motd_and_motd_news_spam_on_Ubuntu_18.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Disable_dynamic_motd_and_motd_news_spam_on_Ubuntu_18.04.html</guid>
+                <description>On Ubuntu 18.04 and up, when you login via SSH you are greeted with some news via motd (message of the day) that includes advertisements and messages from Canonical (via motd.ubuntu.com). This small guide shows you how to disable news, (parts of) the dynamic motd or just revert back to a plain old /etc/motd file.</description> 
+                <pubDate>Mon, 18 Mar 2019 00:00:00 GMT</pubDate>
+                <lastBuildDate>Tue, 19 Mar 2019 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Use Ubuntu behind a Microsoft ForeFront TMG proxy with cntlm</title> 
+                <link>https://raymii.org/s/tutorials/Use_Ubuntu_behind_a_Microsoft_ForeFront_TMG_proxy_with_cntlm.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Use_Ubuntu_behind_a_Microsoft_ForeFront_TMG_proxy_with_cntlm.html</guid>
+                <description>Recently I had to deploy a few machines in a network where outgoing network access was forced through a Microsoft Forefront TMG proxy. For all the Windows clients this went automatically due to domain policies, for Linux this has to be set up manually. Defining the proxy in /etc/environment was not enough since NTML authentication is required, which is not supported by default. I found cntlm, a piece of software which acts as a local proxy, translating all requests to authenticated NTLM requests to your upstream proxy. This guide covers the (offline) installation, setup, getting the correct password hash and system-wide configuration. It should work on a desktop as well, but I did not test that.</description> 
+                <pubDate>Sat, 27 Oct 2018 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 27 Oct 2018 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Linux on Microsoft Azure? Disable this built-in root-access backdoor (wa-linux-agent)</title> 
+                <link>https://raymii.org/s/blog/Linux_on_Microsoft_Azure_Disable_this_built_in_root_access_backdoor.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/Linux_on_Microsoft_Azure_Disable_this_built_in_root_access_backdoor.html</guid>
+                <description>Are you running Linux on Microsoft Azure? Then by default anyone with access to your Azure portal can run commands as root in your VM, reset SSH keys, user passwords and SSH configuration. This article explains what the backdoor (wa-linux-agent) is, what it is meant to do, how it can be disabled and removed and what the implications are. OpenStack/QEMU also have an agent/backdoor which is covered in this article as well.</description> 
+                <pubDate>Wed, 22 Aug 2018 00:00:00 GMT</pubDate>
+                <lastBuildDate>Wed, 22 Aug 2018 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Windows 7 installer on a KVM Linux VPS (Windows on Digital Ocean)</title> 
+                <link>https://raymii.org/s/tutorials/Windows_7_Installer_on_KVM_Linux_VPS_Digital_Ocean.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Windows_7_Installer_on_KVM_Linux_VPS_Digital_Ocean.html</guid>
+                <description>For fun I wanted to install Windows 7 on a KVM Linux VPS (on [Digital Ocean) but it should work for any KVM or XEN-HVM VPS with console access). I was experimenting with Grub2 and ISO booting, since grub2 can natively boot a linux ISO. For Windows this is not possible, the installer needs to be extracted on a FAT32 partition from which you boot. On a normal system I would repartition the disk using a live CD, but on a VPS where an ISO cannot be booted this is troublesome. If I could boot from an ISO I would use that to install Windows, but where's the fun in that? I had to figure out how to shrink an EXT4 filesystem from a running Ubuntu VPS, which is possible, however very risky, with pivot_root. Next the partiton table can be converted to MBR, the partition can be resized, a FAT32 partiton and filesystem can be created, the Windows Installer files copied onto that, some Grub config and a reboot later, you're in the Windows 7 Installer.</description> 
+                <pubDate>Sun, 01 Jul 2018 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 01 Jul 2018 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>snap install mosaic, the first graphical webbrowser on Ubuntu</title> 
+                <link>https://raymii.org/s/blog/snap_install_mosaic_the_first_graphical_webbrowser_on_Ubuntu.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/snap_install_mosaic_the_first_graphical_webbrowser_on_Ubuntu.html</guid>
+                <description>On one of my favorite podcasts from Jupiter Broadcasting, either Linux Action News or Linux unplugged (252 I think, not sure), Allan Pope was talking about Snap packages and how there are now WinePacks, a snap with Wine and a single (Windows) application packaged. During the discussion he dropped that Mosaic, the first graphical web browser, is available as a snap package, for modern distributions. I installed it, after huge download (1.5 MB), playing around with it is quite fun. In this post I'll discuss how to install it, what works and what doens't in the modern age on Ubuntu 18.04</description> 
+                <pubDate>Thu, 14 Jun 2018 00:00:00 GMT</pubDate>
+                <lastBuildDate>Thu, 14 Jun 2018 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>GPG noninteractive batch sign, trust and send gnupg keys</title> 
+                <link>https://raymii.org/s/articles/GPG_noninteractive_batch_sign_trust_and_send_gnupg_keys.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/GPG_noninteractive_batch_sign_trust_and_send_gnupg_keys.html</guid>
+                <description>Recently a team I consult for started using a shared password manager, pass. It uses GPG keys and presents itself as the standard unix password manager, but in essence it's nothing more than a wrapper around GPG encrypted files. We all had to generate new keys since the team is new and we were not allowed to use existing keys. Using a new, empty keyring, I generated my key and imported their keys. I wanted to trust, sign and publish all keys to a keyserver, this article shows how to do that noninteractively in batch form. Saves me doing the same thing four times, since now it's just four people, but next time it might be a hundred.</description> 
+                <pubDate>Fri, 01 Jun 2018 00:00:00 GMT</pubDate>
+                <lastBuildDate>Fri, 01 Jun 2018 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Ansible - add apt_key inline</title> 
+                <link>https://raymii.org/s/snippets/Ansible_-_add_apt_key_inline.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/snippets/Ansible_-_add_apt_key_inline.html</guid>
+                <description>Using the apt_key module one can add an APT key with ansible. You can get the key from a remote server or from a file, or just a key ID. I got the request to do some stuff on a machine which was quite rescricted (so no HKP protocol) and I was asked not to place to many files on the machine. The apt_key was needed but it could not be a file, so using a YAML Literal Block Scalar I was able to add the key inline in the playbook. Not the best way to do it, but one of the many ways Ansible allows it.</description> 
+                <pubDate>Thu, 19 Apr 2018 00:00:00 GMT</pubDate>
+                <lastBuildDate>Thu, 19 Apr 2018 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Synergy, no mouse cursor on Ubuntu 17.10</title> 
+                <link>https://raymii.org/s/snippets/Synergy_no_mouse_cursor_on_Ubuntu_17.10.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/snippets/Synergy_no_mouse_cursor_on_Ubuntu_17.10.html</guid>
+                <description>Synergy is an application to control remote screens with your local mouse and keyboard over the network, cross platform. You could use Linux as your main OS and have a seperate box with Windows next to it, and use your Linux mouse to control windows. On Ubuntu 17.10 the mouse cursor is not visible, but does work. This snippet provides a fix. Hint, wayland is in the way.</description> 
+                <pubDate>Wed, 11 Apr 2018 00:00:00 GMT</pubDate>
+                <lastBuildDate>Wed, 11 Apr 2018 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Essential Monitoring checks</title> 
+                <link>https://raymii.org/s/articles/Essential_Monitoring_checks.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/Essential_Monitoring_checks.html</guid>
+                <description>In this article I'll provide a list of checks I consider essential for monitoring and why they are usefull. It's on different levels, ranging from your application (health checks), to operating system (disk usage, load) and hardware (iDrac, disks, power). Use it as a starting point when setting up your monitoring.</description> 
+                <pubDate>Tue, 20 Mar 2018 00:00:00 GMT</pubDate>
+                <lastBuildDate>Tue, 20 Mar 2018 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>atop is broken on Ubuntu 16.04 (version 1.26): trap divide error</title> 
+                <link>https://raymii.org/s/articles/atop_is_broken_on_Ubuntu_16.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/atop_is_broken_on_Ubuntu_16.04.html</guid>
+                <description>Recently a few of my Ubuntu 16.04 machines had issues and I was troubleshooting them, noticing `atop` logs missing. atop is a very handy tool which can be setup to record system state every X minutes, and we set it up to run every 5 minutes. You can then at a later moment see what the server was doing, even sorting by disk, memory, cpu or network usage. This post discusses the error and a quick fix.</description> 
+                <pubDate>Mon, 18 Sep 2017 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 18 Sep 2017 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>OpenStack: Quick and automatic instance snapshot backup and restore (and before an apt upgrade) with nova backup</title> 
+                <link>https://raymii.org/s/tutorials/OpenStack_Quick_and_automatic_instance_snapshot_backups.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/OpenStack_Quick_and_automatic_instance_snapshot_backups.html</guid>
+                <description>This is a guide that shows you how to create OpenStack instance snapshots automatically, quick and easy. This allows you to create a full backup of the entire instance. This guide has a script that makes creating snapshots from an OpenStack VM automatic via cron. The script uses the `nova backup` function, therefore it also has retention and rotation of the backups. It also features an option to create a snapshot before every apt action, upgrade/install/remove. This way, you can easily restore from the snapshot when something goes wrong after an upgrade. Snapshots are very usefull to restore the entire instance to an earlier state. Do note that this is not the same as a file based backup, you can't select a few files to restore, it's all or nothing.</description> 
+                <pubDate>Tue, 20 Dec 2016 00:00:00 GMT</pubDate>
+                <lastBuildDate>Tue, 20 Dec 2016 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>MySQL restore after a crash and disk issues</title> 
+                <link>https://raymii.org/s/blog/MySQL_restore_after_a_crash_and_disk_issues.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/MySQL_restore_after_a_crash_and_disk_issues.html</guid>
+                <description>Recently I had to restore a MySQL server. The hardware had issues with the storage and required some FSCK's, disk replacements and a lot of RAID and LVM love to get working again. Which was the easy part. MySQL was a bit harder to fix. This post describes the proces I used to get MySQL working again with a recent backup. In this case it was a replicated setup so the client had no actual downtime. </description> 
+                <pubDate>Mon, 10 Oct 2016 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 10 Oct 2016 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Firefox History stats with Bash</title> 
+                <link>https://raymii.org/s/snippets/Firefox_History_Stats_with_Bash.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/snippets/Firefox_History_Stats_with_Bash.html</guid>
+                <description>This is a small script to gather some statistics from your Firefox history. First we use sqlite3 to parse the Firefox history database and get the last three months, then we remove all the IP addresses and port numbers and finally we sort and count it.</description> 
+                <pubDate>Sun, 25 Sep 2016 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 25 Sep 2016 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>IPSEC VPN on Ubuntu 16.04 with StrongSwan</title> 
+                <link>https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_16.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_16.04.html</guid>
+                <description>This is a guide on setting up an IPSEC VPN server on Ubuntu 16.04 using StrongSwan as the IPsec server and for authentication. It has a detailed explanation with every step. We choose the IPSEC protocol stack because of vulnerabilities found in pptpd VPNs and because it is supported on all recent operating systems by default. More than ever, your freedom and privacy when online is under threat. Governments and ISPs want to control what you can and can't see while keeping a record of everything you do, and even the shady-looking guy lurking around your coffee shop or the airport gate can grab your bank details easier than you may think. A self hosted VPN lets you surf the web the way it was intended: anonymously and without oversight.</description> 
+                <pubDate>Mon, 12 Sep 2016 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 12 Sep 2016 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Nagios 4 + Nagiosgraph (latest) installation on Ubuntu 12.04 &amp; 14.04</title> 
+                <link>https://raymii.org/s/tutorials/Nagios_Core_4_Installation_on_Ubuntu_12.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Nagios_Core_4_Installation_on_Ubuntu_12.04.html</guid>
+                <description>This is a guide on installing the latest Nagios Core (4.2.1) on Ubuntu 12.04 and 14.04. Nagios is an open source computer system monitoring, network monitoring and infrastructure monitoring software application. Nagios offers monitoring and alerting services for servers, switches, applications, and services. It alerts the users when things go wrong and alerts them a second time when the problem has been resolved. The version in the Ubuntu 12.04 repositories is quite old, it is still the in the 3 branch. This guide helps to fix that by using the latest Nagios version. We also install Nagiosgraph, a plugin for Nagios which gives you graps of the metrics.</description> 
+                <pubDate>Sun, 11 Sep 2016 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 11 Sep 2016 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Migrating personal webapps and services</title> 
+                <link>https://raymii.org/s/blog/Migrating_personal_services_and_webapps.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/Migrating_personal_services_and_webapps.html</guid>
+                <description>Recently I've migrated some of my personal servers and services to new machines and newer operating system versions. I prefer to migrate instead of upgrading the OS for a number of reasons. I'll also talk about the migration process and some stuff to remember when migrating web applications and services.</description> 
+                <pubDate>Thu, 05 May 2016 00:00:00 GMT</pubDate>
+                <lastBuildDate>Thu, 05 May 2016 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Deborphan cleanup until no more orphaned packages left</title> 
+                <link>https://raymii.org/s/snippets/Deborphan_cleanup_until_no_more_orphaned_packages_left.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/snippets/Deborphan_cleanup_until_no_more_orphaned_packages_left.html</guid>
+                <description>Deborphan removes packages it thinks your system doesn't need anymore. It is a great tool for package cleanup and maintenance. Sometimes, after cleaning up the packages, it will find new packages that are orphaned (because you just cleaned up). This is a small script that cleans up with deborphan until there is nothing more to cleanup.</description> 
+                <pubDate>Mon, 11 Jan 2016 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 11 Jan 2016 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Microsoft Office 2013 and 2010 on Linux</title> 
+                <link>https://raymii.org/s/tutorials/Office_2013_and_2010_on_Linux.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Office_2013_and_2010_on_Linux.html</guid>
+                <description>This guide shows you how to run Microsoft Office 2013 and 2010 on Linux using CrossOver. It guides you through the installation and gives a review on what parts of the Office suite work with Linux.</description> 
+                <pubDate>Sat, 02 Jan 2016 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 02 Jan 2016 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Recursively find all [installed] package dependencies</title> 
+                <link>https://raymii.org/s/software/Recursively_find_all_installed_package_dependencies.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/software/Recursively_find_all_installed_package_dependencies.html</guid>
+                <description>This small script shows you all packages [installed] that are a dependency from a package, and the dependencies of those packages. I installed the build-essential package, but apt-get remove-ing that package doens't remove the development tools. So I was wondering what packages were installed, including those dependencies, to remove the ones I didn't want. This small script shows you all packages that are dependencies of a package, and repeats that for those packages.</description> 
+                <pubDate>Thu, 31 Dec 2015 00:00:00 GMT</pubDate>
+                <lastBuildDate>Thu, 31 Dec 2015 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>IPSEC VPN on Ubuntu 15.04 with StrongSwan</title> 
+                <link>https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_15.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_15.04.html</guid>
+                <description>This is a guide on setting up an IPSEC VPN server on Ubuntu 15.04 using StrongSwan as the IPsec server and for authentication. It has a detailed explanation with every step. We choose the IPSEC protocol stack because of vulnerabilities found in pptpd VPNs and because it is supported on all recent operating systems by default. More than ever, your freedom and privacy when online is under threat. Governments and ISPs want to control what you can and can't see while keeping a record of everything you do, and even the shady-looking guy lurking around your coffee shop or the airport gate can grab your bank details easier than you may think. A self hosted VPN lets you surf the web the way it was intended: anonymously and without oversight.</description> 
+                <pubDate>Sun, 20 Dec 2015 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 20 Dec 2015 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>IPSEC VPN on Ubuntu 15.10 with StrongSwan</title> 
+                <link>https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_15.10.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/IPSEC_vpn_with_Ubuntu_15.10.html</guid>
+                <description>This is a guide on setting up an IPSEC VPN server on Ubuntu 15.04 using StrongSwan as the IPsec server and for authentication. It has a detailed explanation with every step. We choose the IPSEC protocol stack because of vulnerabilities found in pptpd VPNs and because it is supported on all recent operating systems by default. More than ever, your freedom and privacy when online is under threat. Governments and ISPs want to control what you can and can't see while keeping a record of everything you do, and even the shady-looking guy lurking around your coffee shop or the airport gate can grab your bank details easier than you may think. A self hosted VPN lets you surf the web the way it was intended: anonymously and without oversight.</description> 
+                <pubDate>Sun, 20 Dec 2015 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 20 Dec 2015 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Install Ubuntu Linux on the LG Chromebase</title> 
+                <link>https://raymii.org/s/articles/LG_Chromebase_Linux.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/LG_Chromebase_Linux.html</guid>
+                <description>I recently acquired the LG Chromebase 22CV241-W. It is an All in One type machine with Chrome OS. The hardware, excluding the screen and lack of battery, is largely the same as the Acer C720. Of course I removed Chrome OS and installed a real Linux on it, of which you'll find instructions below. In my case it is Ubuntu Mate. Arch Linux also works fine, but this was for someone else, so a more beginner friendly distro seemed to be a better choise. This article will cover the removal of Chrome OS and the installation of Ubuntu Mate on the LG Chromebase.</description> 
+                <pubDate>Mon, 03 Aug 2015 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 03 Aug 2015 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Find all services using libssl to restart after an OpenSSL update</title> 
+                <link>https://raymii.org/s/snippets/Find_all_services_using_libssl_to_restart_after_an_OpenSSL_update.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/snippets/Find_all_services_using_libssl_to_restart_after_an_OpenSSL_update.html</guid>
+                <description>When you update OpenSSL, the software that currently has the ssl libraries loaded in memory do not automatically load the updated libraries. A full system reboot resolves that problem, but sometimes that is not possible. This command shows you all the software that has loaded the libraries, allowing you to restart only those services. If you don't restart or reload after an update, the software might still be vulnerable to issues that the update fixed.</description> 
+                <pubDate>Tue, 14 Jul 2015 00:00:00 GMT</pubDate>
+                <lastBuildDate>Tue, 14 Jul 2015 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Installing Virtual Machines with virt-install, plus copy pastable distro install one-liners</title> 
+                <link>https://raymii.org/s/articles/virt-install_introduction_and_copy_paste_distro_install_commands.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/virt-install_introduction_and_copy_paste_distro_install_commands.html</guid>
+                <description>virt-install is a command line tool for creating new KVM , Xen or Linux container guests using the libvirt hypervisor management library. It allows you to create a VM and start an installation from the command line. This article has a few copy pastable getting started examples for different distro's.</description> 
+                <pubDate>Sun, 08 Feb 2015 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 08 Feb 2015 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Clear Uncluttered SSH client config with Ansible</title> 
+                <link>https://raymii.org/s/blog/Clear_Uncluttered_SSH_client_config_with_Ansible.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/Clear_Uncluttered_SSH_client_config_with_Ansible.html</guid>
+                <description>Openssh allows you to configure parameters like username, port, proxycommand, key and more in the ~/.ssh/config file. If you have many servers this file can become cluttered and maintaining it can become a not so nice task. This simple guide shows you how you can use a conf.d directory with seperate smaller files which gets converted to the big config file by Ansible</description> 
+                <pubDate>Sun, 21 Dec 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 21 Dec 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>IPSEC L2TP VPN on Ubuntu 12.04 with OpenSwan, xl2tpd and ppp</title> 
+                <link>https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html</guid>
+                <description>Not available.</description> 
+                <pubDate>Mon, 01 Dec 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 01 Dec 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>IPSEC L2TP VPN on Ubuntu 14.04 with OpenSwan, xl2tpd and ppp</title> 
+                <link>https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_14.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_14.04.html</guid>
+                <description>This is a guide on setting up an IPSEC/L2TP vpn server with Ubuntu 14.04 using Openswan as the IPsec server, xl2tpd as the l2tp provider and ppp or local users / PAM for authentication. It has a detailed explanation with every step. We choose the IPSEC/L2TP protocol stack because of recent vulnerabilities found in pptpd VPNs and because it is supported on all major operating systems by default. More than ever, your freedom and privacy when online is under threat. Governments and ISPs want to control what you can and can't see while keeping a record of everything you do, and even the shady-looking guy lurking around your coffee shop or the airport gate can grab your bank details easier than you may think. A self hosted VPN lets you surf the web the way it was intended: anonymously and without oversight.</description> 
+                <pubDate>Mon, 01 Dec 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 01 Dec 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>IPSEC L2TP VPN on Ubuntu 13.10 with OpenSwan, xl2tpd and ppp</title> 
+                <link>https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.10.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.10.html</guid>
+                <description>This is a guide on setting up an IPSEC/L2TP vpn server with Ubuntu 13.10 using Openswan as the IPsec server, xl2tpd as the l2tp provider and ppp or local users / PAM for authentication. It has a detailed explanation with every step.</description> 
+                <pubDate>Mon, 01 Dec 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 01 Dec 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>IPSEC L2TP VPN on Ubuntu 12.10 with OpenSwan, xl2tpd and ppp</title> 
+                <link>https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.10.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.10.html</guid>
+                <description>Not available.</description> 
+                <pubDate>Mon, 01 Dec 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 01 Dec 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>IPSEC L2TP VPN on Ubuntu 13.04 with OpenSwan, xl2tpd and ppp</title> 
+                <link>https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_13.04.html</guid>
+                <description>This is a guide on setting up an IPSEC/L2TP vpn server with Ubuntu 13.04 using Openswan as the IPsec server, xl2tpd as the l2tp provider and ppp or local users / PAM for authentication. It has a detailed explanation with every step.</description> 
+                <pubDate>Mon, 01 Dec 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 01 Dec 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Check and Fix SSL servers for SSLv3 connections or the Poodle CVE-2014-3566 bug</title> 
+                <link>https://raymii.org/s/articles/Check_servers_for_the_Poodle_bug.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/Check_servers_for_the_Poodle_bug.html</guid>
+                <description>The POODLE CVE-2014-3566 bug is a new bug discovered by Google in the SSLv3 protocol. The fix is easy, disable support for SSLv3. See https://cipherli.st for a good list of SSL ciphers. You can use this check from the shell to check your servers. This command can easily be automated with other shell scripts. It also allows you to check your services without exposing them to an external checking website.</description> 
+                <pubDate>Tue, 14 Oct 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Tue, 14 Oct 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Configserver Firewall and Security (CSF and LFD)</title> 
+                <link>https://raymii.org/s/articles/Configserver_Firewall_and_Security_CSF_LFD.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/Configserver_Firewall_and_Security_CSF_LFD.html</guid>
+                <description>his page covers my notes about csf and lfd. csf is an easy SPI iptables firewall suite. lfd is the login failure daemon, which scans log files for failed authentication and blocks the IP's doing that. This page covers installation, populair command line options and popular config file options.</description> 
+                <pubDate>Sun, 12 Oct 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 12 Oct 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Patch Shellshock)with Ansible</title> 
+                <link>https://raymii.org/s/articles/Patch_CVE-2014-6271_Shellshock_with_Ansible.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/Patch_CVE-2014-6271_Shellshock_with_Ansible.html</guid>
+                <description>This is a simple ansible playbook to patch Debian, CentOS, Ubuntu and derivatives for the Shellshock vulnerability (CVE-2014-6271).</description> 
+                <pubDate>Wed, 24 Sep 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Wed, 24 Sep 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Statically (cross) compiled vim for x86, x86-64 and mipsel</title> 
+                <link>https://raymii.org/s/blog/Statically_cross_compiled_vim_for_x86_x86-64_and_mips.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/Statically_cross_compiled_vim_for_x86_x86-64_and_mips.html</guid>
+                <description>Sometimes I need to manage a few systems with either low resources or a very restricted set of packages. On those systems no compilers or development libraries are available, however it is allowed to bring binaries.A few of those systems are 32 bit x68 systems, some are MIPS systems, even worse. They serve a secure purpose, I cannot go in to much detail about them, except for they require a high level of security, they process certificates. I really like vim as my editor, the only editor available by default on those systems is ed. I have an ed cheatsheet for this purpose. The solution for this problem is to create a statically (cross) compiled version of vim. This article shows you how to create a statically compiled vim that runs everywhere.</description> 
+                <pubDate>Wed, 17 Sep 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Wed, 17 Sep 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Building HA Clusters with Ansible and Openstack</title> 
+                <link>https://raymii.org/s/articles/Building_HA_Clusters_With_Ansible_and_Openstack.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/Building_HA_Clusters_With_Ansible_and_Openstack.html</guid>
+                <description>This is an extensive guide on building high available clusters with Ansible and Openstack. We'll build a Highly available cluster consisting out of two load balancers, two database servers and two application servers running a simple wordpress site. This is all done with Ansible, the cluster nodes are all on Openstack. Ansible is a super awesome orchestration tool and Openstack is a big buzzword filled software suite for datacenter virtualization.</description> 
+                <pubDate>Fri, 25 Jul 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Fri, 25 Jul 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Openstack Horizon installation with SSL on Ubuntu</title> 
+                <link>https://raymii.org/s/tutorials/Openstack-Set-Up-Horizon-Dashboard-on-Ubuntu.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Openstack-Set-Up-Horizon-Dashboard-on-Ubuntu.html</guid>
+                <description>This is a guide on installing the Openstack Horizon (icehouse) dashboard on Ubuntu 12.04 or 14.04, including SSL setup. It features nice screenshots and even an Ansible playbook to automate it all.</description> 
+                <pubDate>Thu, 29 May 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Thu, 29 May 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Openstack Swift Objectstore Access via FTP</title> 
+                <link>https://raymii.org/s/tutorials/Openstack-Swift-Objectstore-FTP-Access.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Openstack-Swift-Objectstore-FTP-Access.html</guid>
+                <description>This is a guide on accessing the Openstack Swift Object Storage system using an FTP client. Openstack Swift has a beautiful API which you can program to. However, sometimes it is handy to quickly be able to access your Swift/Objectstore data without programming around it. We will use ftp-cloudfs to do this. There is also Softlayers swftp, but that does not support Keystone Authentication (2.0). ftp-cloudfs does support this. The OS X Cyberduck FTP client also has Openstack Swift support, however that is a native implementation, not using FTP. With ftp-cloudfs we can use any ftp client, from Filezilla to midnight commander.</description> 
+                <pubDate>Sun, 25 May 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 25 May 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Encrypted Duplicity Backups to Openstack Swift Objectstore</title> 
+                <link>https://raymii.org/s/tutorials/Encrypted_Duplicity_Backups_to_Openstack_Swift_Objectstore.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Encrypted_Duplicity_Backups_to_Openstack_Swift_Objectstore.html</guid>
+                <description>This is a guide on backing up your data to an Openstack Swift (Objectstore) instance using Duplicity. It provides encrypted backups using gpg so that you can safely use any public cloud storage to store them. This tutorial is for Ubuntu and CentOS and includes initial setup plus a script to automate it all. We will be using the Dutch provider CloudVPS, which is a non american company, so your data is more safe than it is with a provider that is vulnerable to the patriot act. Although your data is already encrypted with GPG, you can never be to sure. CloudVPS provides 10GB free ObjectStore, if you have VPS with them, the data is stored on at least 3 machines in 3 locations and they have a boatload of certifications.</description> 
+                <pubDate>Mon, 19 May 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 19 May 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>IPv6 at Home</title> 
+                <link>https://raymii.org/s/blog/IPv6_at_Home.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/IPv6_at_Home.html</guid>
+                <description>One of my Raspberry Pi's was running a test setup of the Citadel groupware service. The test was sucessfull, so I set up a real world setup. The Raspberry Pi would serve another purpose, namely, a Linux Torrent seedbox. As in, to seed Linux torrents from linuxtracker.org. I choose Transmission for this, because it is simple, fast and stable. Transmission has a good webinterface, plus it allows access from remote clients with the transmission-remote gui packages. This article shows you how to set it up on a Raspberry Pi running Arch Linux.</description> 
+                <pubDate>Sat, 03 May 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 03 May 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Linux software raid, rebuilding broken raid 1</title> 
+                <link>https://raymii.org/s/blog/Linux_software_raid_rebuilding_broken_raid_1.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/blog/Linux_software_raid_rebuilding_broken_raid_1.html</guid>
+                <description>Last week Nagios alerted me about a broken disk in one of my clients testing servers. There is a best effort SLA on the thing, and there were spare drives of the same type and size in the datacenter. Lucky me. This particular data center is on biking distance, so I enjoyed a sunny ride there. Simply put, I needed to replace the disk and rebuild the raid 1 array. This server is a simple Ubuntu 12.04 LTS server with two disks running in raid 1, no spare. Client has a tight budget, and with a best effort SLA not in production, fine with me. Consultant tip, make sure you have those things signed. </description> 
+                <pubDate>Mon, 14 Apr 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 14 Apr 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>KVM add disk image or swap image to virtual machine with virsh</title> 
+                <link>https://raymii.org/s/tutorials/KVM_add_disk_image_or_swap_image_to_virtual_machine_with_virsh.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/KVM_add_disk_image_or_swap_image_to_virtual_machine_with_virsh.html</guid>
+                <description>This tutorial shows you how to create and add a disk image to a KVM vm using virsh. This is useful when you for example want to expand the disk space of your virtual machine when it is using LVM, or if you want to add a swap disk to a virtual machine.</description> 
+                <pubDate>Sun, 23 Feb 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 23 Feb 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>KVM convert qcow2 disk images to raw disk images for performance</title> 
+                <link>https://raymii.org/s/tutorials/KVM_convert_qcow2_disk_images_to_raw_disk_images_for_performance.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/KVM_convert_qcow2_disk_images_to_raw_disk_images_for_performance.html</guid>
+                <description>This tutorial shows you how to convert KVM qcow2 disk images to raw disk images. The qcow2 disk format has some decent features like encryption, compression and copy to write support. However, the compression and the copy processes make it quite a bit slower than raw disk images. Sometimes you want to convert the disk images so that the VM will perform better. </description> 
+                <pubDate>Sun, 16 Feb 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 16 Feb 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>KVM host with bonding and VLAN tagged Virtual Machines setup on Ubuntu 12.04</title> 
+                <link>https://raymii.org/s/tutorials/KVM_with_bonding_and_VLAN_tagging_setup_on_Ubuntu_12.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/KVM_with_bonding_and_VLAN_tagging_setup_on_Ubuntu_12.04.html</guid>
+                <description>This tutorial shows you how to setup Ubuntu 12.04 as a KVM host with multiple virtual machines. The kvm host will have VM's in multiple VLAN's and will handle the VLAN tagging over a bonded interface. It also covers creation of an example virtual machine with the ubuntu vmbuilder tool and shows you how to add a serial console to an ubuntu 12.04 virtual machine for troubleshooting.</description> 
+                <pubDate>Sat, 15 Feb 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 15 Feb 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Bonding NIC Teaming on Ubuntu 12.04</title> 
+                <link>https://raymii.org/s/tutorials/NIC_Bonding_on_Ubuntu_12.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/NIC_Bonding_on_Ubuntu_12.04.html</guid>
+                <description>This tutorial shows you how to setup NIC bonding / NIC teaming on Ubuntu 12.04. Bonding, also called port trunking or link aggregation means combining several network interfaces (NICs) to a single link, providing either high-availability, load-balancing, maximum throughput, or a combination of these.</description> 
+                <pubDate>Fri, 14 Feb 2014 00:00:00 GMT</pubDate>
+                <lastBuildDate>Fri, 14 Feb 2014 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Back Up Thunderbird Message Filters</title> 
+                <link>https://raymii.org/s/tutorials/Thunderbird_Back_Up_Mail__Message_Filters.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Thunderbird_Back_Up_Mail__Message_Filters.html</guid>
+                <description>This tutorial shows you how to backup and restore the message filters in Thunderbird on multiple platforms.</description> 
+                <pubDate>Sun, 15 Dec 2013 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 15 Dec 2013 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>ntop-ng 1.1 installation on Ubuntu 12.04</title> 
+                <link>https://raymii.org/s/tutorials/ntop-ng-installation-on-Ubuntu.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/ntop-ng-installation-on-Ubuntu.html</guid>
+                <description>This is a guide on installing the latest ntop-ng (1.1) on Ubuntu 12.04. ntopng is the next generation version of the original ntop, a network traffic probe that shows the network usage, similar to what the popular top Unix command does. ntop is based on libpcap and it has been written in a portable way in order to virtually run on every Unix platform, MacOSX and on Win32 as well. ntopng users can use a a web browser to navigate through ntop (that acts as a web server) traffic information and get a dump of the network status. In the latter case, ntop can be seen as a simple RMON-like agent with an embedded web interface. This tutorial will walk you through the compilation and installation of ntopng from source.</description> 
+                <pubDate>Fri, 29 Nov 2013 00:00:00 GMT</pubDate>
+                <lastBuildDate>Fri, 29 Nov 2013 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Remove unused Ubuntu kernels</title> 
+                <link>https://raymii.org/s/snippets/Remove_Old_Ubuntu_Kernels.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/snippets/Remove_Old_Ubuntu_Kernels.html</guid>
+                <description>This one liner will help you remove unused Ubuntu kernels. Ubuntu does not remove kernels when they install a new one, however the default /boot partition is relatively small, about 100MB. So after 10 kernels, you can get No Space Left On Device errors with apt-get upgrading. Then you can eitehr remove them manually, or use this one liner to automatically remove them all.</description> 
+                <pubDate>Mon, 28 Oct 2013 00:00:00 GMT</pubDate>
+                <lastBuildDate>Mon, 28 Oct 2013 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Install the latest ZNC from source on Ubuntu</title> 
+                <link>https://raymii.org/s/tutorials/Install_the_Lastest_ZNC_from_Source_in_Ubuntu.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Install_the_Lastest_ZNC_from_Source_in_Ubuntu.html</guid>
+                <description>This tutorial will show you how to install the latest (1.0) version of ZNC (an advanced IRC bouncer) on Ubuntu from source. Why from source? The package in the repositories is quite old and missing features like multiple IRC networks. It also includes an upstart script, and an example config for ZNC. ZNC is an advanced IRC bouncer that is left connected so an IRC client can disconnect/reconnect without losing the chat session.</description> 
+                <pubDate>Fri, 25 Oct 2013 00:00:00 GMT</pubDate>
+                <lastBuildDate>Fri, 25 Oct 2013 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>My Todo.txt Workflow, including Unison, Todour and Android</title> 
+                <link>https://raymii.org/s/articles/My_Todo.txt_Workflow.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/articles/My_Todo.txt_Workflow.html</guid>
+                <description>Todo.txt is a way to manage your tasks/todo items in a plaintext format. It has a few simple rules, there are a lot of applications to work with it, but in its core it is a plaintext file, so a text editor is sufficient to use it. Recently I started using todo.txt, including syncing on all my devices via my own servers. This article shows you my workflow, and how to set up a similar environment, including ssh, unison, todour for OS X, DayTasks for Ubuntu and Simpletasks Cloudless for Android.</description> 
+                <pubDate>Wed, 24 Jul 2013 00:00:00 GMT</pubDate>
+                <lastBuildDate>Wed, 24 Jul 2013 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Samba Shares with Active Directory Login on Ubuntu 12.04</title> 
+                <link>https://raymii.org/s/tutorials/SAMBA_Share_with_Active_Directory_Login_on_Ubuntu_12.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/SAMBA_Share_with_Active_Directory_Login_on_Ubuntu_12.04.html</guid>
+                <description>This tutorial shows you how to set up a SAMBA server which authenticates all users to an Active Directory, including group based permissions. It uses Samba, Winbind, Kerberos and nsswitch. This allows you to have a Linux machine serving files via SMB, where your authentication and autorization for the files and folders is done via Active Directory.</description> 
+                <pubDate>Thu, 27 Jun 2013 00:00:00 GMT</pubDate>
+                <lastBuildDate>Thu, 27 Jun 2013 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Screenfetch installation tutorial</title> 
+                <link>https://raymii.org/s/tutorials/Screenfetch_installation_tutorial.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Screenfetch_installation_tutorial.html</guid>
+                <description>This tutorial will show you how to install screenfetch, a bash information tool. It displays handy system information at login, including distro name, kernel, uptime, cpu, ram and nice distro-based artwork. The tutorial includes support for bash and zsh, for every supported linux OS (ubuntu, centos, arch, redhat, solusOS, linux mint and more.)</description> 
+                <pubDate>Sat, 09 Mar 2013 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 09 Mar 2013 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Systemd rosetta / cheatsheet</title> 
+                <link>https://raymii.org/s/snippets/Systemd_Rosetta_Reference.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/snippets/Systemd_Rosetta_Reference.html</guid>
+                <description>A reference for systemd, for sysadmins who love plain old init.</description> 
+                <pubDate>Sun, 10 Feb 2013 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 10 Feb 2013 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Munin - Fix MySQL plugin on Ubuntu 12.04 and Debian 6</title> 
+                <link>https://raymii.org/s/snippets/Munin-Fix-MySQL-Plugin-on-Ubuntu-12.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/snippets/Munin-Fix-MySQL-Plugin-on-Ubuntu-12.04.html</guid>
+                <description>On Debian 6 and Ubuntu 12.04 the Munin MySQL plugin does not work by default because of a missing package. Here is a little trick on fixing it.</description> 
+                <pubDate>Sat, 02 Feb 2013 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 02 Feb 2013 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Munin - Set up the NGINX status plugin on Ubuntu 12.04</title> 
+                <link>https://raymii.org/s/snippets/Munin-NGINX-Status-Plugin-Ubuntu-12.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/snippets/Munin-NGINX-Status-Plugin-Ubuntu-12.04.html</guid>
+                <description>This post will show you how to set up the Munin plugin to monitor NGINX (nginx_request and nginx_status) and graph it. You need to change some URLs in the config because by default this is wrong.</description> 
+                <pubDate>Thu, 31 Jan 2013 00:00:00 GMT</pubDate>
+                <lastBuildDate>Thu, 31 Jan 2013 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Munin optimization guide for Debian (rrdcached, tmpfs, ionice and nice)</title> 
+                <link>https://raymii.org/s/tutorials/Munin_optimalization_on_Debian.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Munin_optimalization_on_Debian.html</guid>
+                <description>This is a tutorial to help you tune the performance of Munin using rrdcached, tmpfs, ionice, nice and a few other tricks.</description> 
+                <pubDate>Sat, 08 Dec 2012 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 08 Dec 2012 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>ClamAV installation and daily scan + report on Ubuntu</title> 
+                <link>https://raymii.org/s/tutorials/ClamAV.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/ClamAV.html</guid>
+                <description>Not available.</description> 
+                <pubDate>Sat, 01 Dec 2012 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sat, 01 Dec 2012 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Ubuntu/Debian update mailer</title> 
+                <link>https://raymii.org/s/software/Ubuntu_update_mailer.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/software/Ubuntu_update_mailer.html</guid>
+                <description>This is a bash script for Ubuntu and Debian, to be run by cron on a set interval. It checks if there are apt-updates, and if so, mails an overview of the packages which can be updated, whith their local version, the version available and an URL to the Ubuntu package site where you can see the changelog. I wrote this as an addition for my Nagios monitoring, that only shows how many updates there are, this is a lot more verbose. It also runs on Debian since 1 Nov 2012. Only the links don't work then, because the packages are different.</description> 
+                <pubDate>Sun, 10 Jun 2012 00:00:00 GMT</pubDate>
+                <lastBuildDate>Sun, 10 Jun 2012 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Set up a local Ubuntu (apt) repository with apt-mirror</title> 
+                <link>https://raymii.org/s/tutorials/Set_up_a_local_Ubuntu_debian_apt_mirror.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Set_up_a_local_Ubuntu_debian_apt_mirror.html</guid>
+                <description>This tutorial shows you how to setup your own debian/ubuntu package repository with apt-mirror.</description> 
+                <pubDate>Wed, 28 Mar 2012 00:00:00 GMT</pubDate>
+                <lastBuildDate>Wed, 28 Mar 2012 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Stopping fail2ban.server : ERROR Unexpected communication error and other errors in fail2ban on ubuntu 9.04</title> 
+                <link>https://raymii.org/s/tutorials/Stopping-fail2ban.server-ERROR-Unexpected-communication-error-and-other-errors-in-fail2ban-on-ubuntu-9.04.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Stopping-fail2ban.server-ERROR-Unexpected-communication-error-and-other-errors-in-fail2ban-on-ubuntu-9.04.html</guid>
+                <description>This tutorial will show you how to stop fail2ban.server : ERROR Unexpected communication errors on Ubuntu 9.04.</description> 
+                <pubDate>Thu, 23 Jun 2011 00:00:00 GMT</pubDate>
+                <lastBuildDate>Thu, 23 Jun 2011 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+            <item>
+                <title>Debian packages clean up commands</title> 
+                <link>https://raymii.org/s/tutorials/Debian-apt-get-dpkg-packages-cleanup-commands.html?utm_medium=rss&amp;utm_source=raymii&amp;utm_campaign=tagrss</link> 
+                <guid>https://raymii.org/s/tutorials/Debian-apt-get-dpkg-packages-cleanup-commands.html</guid>
+                <description>Not available.</description> 
+                <pubDate>Fri, 01 Jan 2010 00:00:00 GMT</pubDate>
+                <lastBuildDate>Fri, 01 Jan 2010 00:00:00 GMT</lastBuildDate>
+            </item>
+    
+        </channel>
+    </rss>
+    
+    

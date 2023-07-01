@@ -1,0 +1,187 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Windows 10 updates with PowerShell
+Author      : 	Remy van Elst
+Date        : 	06-01-2020
+URL         : 	https://raymii.org/s/blog/Windows_10_Updates_with_PowerShell_PSWindowsUpdpate.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Recently I had issues updating one of my machines that runs Windows 10. Turns out 
+the network firewall was to restrictive. However, the information provided by the
+update dialog was just, "Oh, updating failed, maybe try again". Nothing useful,
+so I tried to figure out if it's possible to use Powershell for updating. Since
+Windows 10 build 1709 Microsoft provides a built in module, but that is not that
+user friendly. In this article I'll talk about using `PSWindowsUpdate` and the 
+built in Microsoft `WindowsUpdateProvider` to update a Windows 10 machine via 
+the command line.
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+These steps were tested on a Windows 10 machine running build 1703 and one
+running 1903. 
+
+The module is not open source and the source is also not available since version 
+2 of the module. It is a compiled `.dll` file.
+
+### PSWindowsUpdate vs WindowsUpdateProvider (Install-WUUpdates)
+
+I choose to use this module instead of the `Install-WUUpdates` / `Start-WUScan`
+powershell module provided by Microsoft because the machine I was using did not
+run build 1709 or later. These microsoft modules are not available on Windows 
+10 1703, which the machine ran. Also, the powershell module is way more user 
+friendly.
+
+Later I updated the machine to build 1909, after which the modules are available:
+
+    Get-Command -Module WindowsUpdateProvider
+
+Output:
+
+    CommandType     Name                  Version    Source
+    -----------     ----                  -------    ------
+    [...]
+    Function        Install-WUUpdates     1.0.0.2    WindowsUpdateProvider
+    Function        Start-WUScan          1.0.0.2    WindowsUpdateProvider
+
+#### Updating with WindowsUpdateProvider
+
+Once you're on a new enough build you can use the following commands to install
+updates. Not as verbose and easy to use, but it does not require an external 
+module installation. 
+
+Scan for updates and install them, including other microsoft products:
+
+    $Updates = Start-WUScan -SearchCriteria "IsInstalled=0 AND IsHidden=0 AND IsAssigned=1"
+    Write-Host "Updates found: " $Updates.Count
+    Install-WUUpdates -Updates $Updates
+
+If you want a bit of a progress report or information, you need to write up a
+loop yourself. Now back to the `PSWindowsUpdate` module, which features more
+information, filtering  and more user friendly features.
+
+### PSWindowsUpdate Installation
+
+Fire up Powershell as an Administrator and install the module with this command:
+
+    Install-Module -Name PSWindowsUpdate -Force
+
+In my case I was asked to update the NUGet modules before the installation started. 
+I also had to confirm installation from an untrusted source. Once the module is 
+installed you can check the version:
+
+    Get-Package -Name PSWindowsUpdate
+
+Output:
+
+    Name              Version   Source                           ProviderName
+    ----              -------   ------                           ------------
+    PSWindowsUpdate   2.1.1.2   https://www.powershellgallery... PowerShellGet
+
+
+Set the execution policy to unrestricted, for the [current process only][1]:
+
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
+
+Try not to just set the entire execution policy to unrestricted. That feels the 
+same as just disabling SELinux.
+
+When you are going to install updates in the future, remember to change the 
+the execution policy with this command.
+
+### PSWindowsUpdate Usage
+
+Since the graphical dialog window didn't show my any information on errors or
+what went wrong, I was happy to find this module having a `-Verbose` flag. With
+that flag I found out the [network firewall][3] was blocking specific requests.
+After fixing that, Windows was able to find updates again.
+
+Get a list of available updates:
+
+    Get-WindowsUpdate -MicrosoftUpdate -Verbose
+
+Output:
+
+    VERBOSE: GATEWAY (5-1-2020 13:15:47): Connecting to Microsoft Update server. Please wait...
+    VERBOSE: Found [3] Updates in pre search criteria
+    VERBOSE: Found [3] Updates in post search criteria
+
+    ComputerName Status     KB          Size Title
+    ------------ ------     --          ---- -----
+    GATEWAY      -------    KB4533002   63MB 2019-12 Cumulatieve update voor .NET Framework 3.5 en 4.8 voor Windows 10 V...
+    GATEWAY      -------    KB2267602  720MB Beveiligingsinformatie-update voor Windows Defender Antivirus - KB2267602 (...
+    GATEWAY      -------                 3MB Intel - net - 8/26/2019 12:00:00 AM - 20.70.12.5
+
+
+Install everything without prompting:
+
+    Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -AutoReboot
+
+Output:
+
+    X ComputerName Result     KB          Size Title
+    - ------------ ------     --          ---- -----
+    1 GATEWAY      Accepted   KB4533002   63MB 2019-12 Cumulatieve update voor .NET Framework 3.5 en 4.8 voor Windows 10...
+    2 GATEWAY      Downloaded KB4533002   63MB 2019-12 Cumulatieve update voor .NET Framework 3.5 en 4.8 voor Windows 10...
+    3 GATEWAY      Installed  KB4533002   63MB 2019-12 Cumulatieve update voor .NET Framework 3.5 en 4.8 voor Windows 10...
+
+Everything includes updates for office and other microsoft products. Accept all 
+and autoreboot are self-explanatory I think.
+
+If you omit the flags and just use `Install-WindowsUpdate`, it will ask you to 
+accept each update and confirm the reboot.
+
+### Extended usage
+
+The module seems to be quite comprehensive, including support for remote 
+computers, WSUS servers, uninstalling updates, search filtering and a few more
+bits and pieces I have no use for at the moment. [This website][2] describes
+the usage in more details. 
+
+For me, just having the commandline to list and install updates was good enough.
+
+
+[1]: https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-6#examples
+[2]: http://woshub.com/pswindowsupdate-module/
+[3]: https://github.com/joeypiccola/PSWindowsUpdate/blob/359f595ff1eb22b7a1d6b7487cccbd9f815fd978/Hide-WUUpdate.ps1#L393
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

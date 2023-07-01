@@ -1,0 +1,233 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Clonezilla Backup Script v0.2
+Author      : 	Remy van Elst, David Bekker
+Date        : 	18-05-2009
+URL         : 	https://raymii.org/s/software/Clonezilla-custom-backup-script.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Clonezilla is wonderful software. At work we use it daily to image laptops. We
+have a windows PC with a big hard drive, which is shared via samba. Because we
+image an average of 10 laptops every morning, I decided to customize the script.
+So together with a colleague we made a script which automatically grabs our
+latest image from the share and restores it.
+
+Our images are named `schoon#`. It restores the image to `/dev/sda`, you can
+change the clonezilla command. Make sure your share is writable. It gets network
+from dhcp on eth0. The steps to get the script in clonezilla:
+
+  * Install the squashfs-tools for your distro, this is important. 
+
+  * Unetbootin the ISO to a USB. 
+
+  * Copy the files to a dir on your pc and open a terminal in the dir. 
+
+Execute this command:
+
+    
+    
+     cd live
+     sudo unsquashfs -f ./filesystem.squashfs 
+    
+
+Now make a dir in the `squashfs-root`. Put the scripts in there, change them or
+not, and chmod them so that they are executable.
+
+Don't forget to change the path in the launcher script, else it won't work.  
+Now make it back to a life system:
+
+    
+    
+    sudo mksquashfs ./squashfs-root ./filesystem.squashfs.new
+    
+
+And change the syslinux.cfg so that the paths are correct if you changed them:
+
+    
+    
+    label ubnentry0
+    menu label RESTORE
+    kernel /live/vmlinuz1
+    append initrd=/live/initrd1.img boot=live union=aufs  hostname=jaunty edd=on nolocales ocs_live_run="/laptop03/startr.sh" ocs_live_extra_param="" ocs_live_keymap="NONE" ocs_live_batch="no" ocs_lang="" noprompt mode_option=1024x768 toram=filesystem.squashfs ip=frommedia
+    
+
+Now, here are the scripts: backup-schoon.sh (this makes a backup image)
+
+    
+    
+    #!/bin/bash
+    dhclient
+    clear
+    echo "################################"
+    echo "# Daniel Imager for Erasmus MC #"
+    echo "################################"
+    echo
+    echo
+    echo "Mounting the image share. If asked for a password, enter 1234"
+    echo
+    mount -t cifs -o username="example",password="example" //192.168.1.2/image /home/partimag
+    echo
+    #clear
+    cd /home/partimag
+    echo "We zitten in map:"
+    pwd
+    echo ;
+    DIRS="$(ls -d */ | grep '')"
+    GROOTSTE_GETAL=0
+    # Met alle directories gaan we een voor een aan de slag 
+    for DIR in $DIRS;
+    do
+    # Stop de naam van de directory in RUWE_STRING
+    RUWE_STRING=$DIR
+    # Haal de slash aan het eind van RUWE_STRING af 
+    RUWE_STRING=${RUWE_STRING%/} 
+    # Haal aan het begin van RUWE_STRING "schoon" af. We houden nu het GEZOCHTE_GETAL over
+    GEZOCHTE_GETAL=${RUWE_STRING#schoon} 
+    # De volgende twee commando's zorgen er voor dat als GEZOCHTE_GETAL geen getal is
+    # deze de waarde 0 krijgt 
+    let GEZOCHTE_GETAL++
+    let GEZOCHTE_GETAL--
+    # Als GEZOCHTE_GETAL ongelijk is aan 0 dan gaan we er mee aan de gang
+    if (( $GEZOCHTE_GETAL > 0 )) 
+    then
+    # Als GEZOCHTE_GETAL groter is dan GROOTSTE_GETAL
+    # dan wordt GROOTSTE_GETAL gelijk gemaakt aan GEZOCHTE_GETAL
+    if (( $GEZOCHTE_GETAL > $GROOTSTE_GETAL )) 
+    then
+    GROOTSTE_GETAL=$GEZOCHTE_GETAL 
+    fi
+    #    echo "I: $I  J: $GEZOCHTE_GETAL"
+    fi
+    done
+    
+    # Als GROOTSTE_GETAL groter is dan nul is er een schone backup aanwezig en 
+    # hogen we GROOTSTE_GETAL met een op maken we een nieuwe schone backup: schoon(GROOTSTE_GETAL+1)
+    # Zo niet dan nieuwe schone backup: schoon01
+    if (( $GROOTSTE_GETAL > 0 ))
+    then
+    let GROOTSTE_GETAL++
+    echo "Starting latest backup: schoon$GROOTSTE_GETAL"
+    NAME="schoon$GROOTSTE_GETAL"
+    /opt/drbl/sbin/ocs-sr -q -j2 -z1p -i 3900 -p true savedisk "$NAME" "sda"
+    else
+    echo "No backups found, making a new one: schoon01"
+    /opt/drbl/sbin/ocs-sr -q -j2 -z1p -i 3900 -p true savedisk "schoon11" "sda"
+    fi
+    
+
+restore-schoon.sh (this restores the image)
+
+    
+    
+     #!/bin/bash
+    dhclient
+    clear
+    echo "################################"
+    echo "# Daniel Imager for Erasmus MC #"
+    echo "#       Made on 01-04-10       #"
+    echo "################################"
+    echo
+    echo
+    echo "Mounting the image share. If asked for a password, enter 1234"
+    echo
+    mount -t cifs -o username="example",password="example" //192.168.1.2/image /home/partimag
+    #clear
+    cd /home/partimag
+    echo "We zitten in map:"
+    pwd
+    echo ;
+    DIRS="$(ls -d */ | grep '')"
+    GROOTSTE_GETAL=0
+    # Met alle directories gaan we een voor een aan de slag 
+    for DIR in $DIRS;
+    do
+    # Stop de naam van de directory in RUWE_STRING
+    RUWE_STRING=$DIR
+    # Haal de slash aan het eind van RUWE_STRING af 
+    RUWE_STRING=${RUWE_STRING%/} 
+    # Haal aan het begin van RUWE_STRING "schoon" af. We houden nu het GEZOCHTE_GETAL over
+    GEZOCHTE_GETAL=${RUWE_STRING#schoon} 
+    # De volgende twee commando's zorgen er voor dat als GEZOCHTE_GETAL geen getal is
+    # deze de waarde 0 krijgt 
+    let GEZOCHTE_GETAL++
+    let GEZOCHTE_GETAL--
+    # Als GEZOCHTE_GETAL ongelijk is aan 0 dan gaan we er mee aan de gang
+    if (( $GEZOCHTE_GETAL > 0 )) 
+    then
+    # Als GEZOCHTE_GETAL groter is dan GROOTSTE_GETAL
+    # dan wordt GROOTSTE_GETAL gelijk gemaakt aan GEZOCHTE_GETAL
+    if (( $GEZOCHTE_GETAL > $GROOTSTE_GETAL )) 
+    then
+    GROOTSTE_GETAL=$GEZOCHTE_GETAL 
+    fi
+    fi
+    done
+    
+    # Als GROOTSTE_GETAL groter is dan nul is er een schone backup aanwezig en 
+    # kunnen we met de restore beginnen. Zo niet dan geven we de error terug
+    if (( $GROOTSTE_GETAL > 0 ))
+    then
+    echo "Start met restore van schoon$GROOTSTE_GETAL"
+    NAME="schoon$GROOTSTE_GETAL"
+    /opt/drbl/sbin/ocs-sr -g auto -e1  auto -e2 -j2 -p true restoredisk "$NAME" "sda"
+    else
+    echo "Er is geen schone restore aanwezig."
+    echo "Controleer of de server aanstaat en of de share aanwezig is. Maak anders een nieuw image."
+    echo "Selecteer dadelijk de optie Start Over."
+    fi
+    
+
+`start.sh` (bootstrapper for backup script):
+
+    
+    
+     #!/bin/sh
+     sudo su -c /laptop03/backup-schoon.sh
+    
+
+`startr.sh` (bootstrapper for restore script):
+
+    
+    
+     #!/bin/sh
+     sudo su -c /laptop03/restore-schoon.sh
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

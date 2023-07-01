@@ -1,0 +1,803 @@
+Getting Comfortable With OpenVMS
+
+The lessons in this section of "Introduction to OpenVMS" are intended to help you understand how to login and logout of the OpenVMS system, use the DCL user interface, identify the various components of the file system in order to access different information and find the answers to questions not addressed in this introductory course. To accomplish this there are four basic lessons in this section:
+
+    Login / Logout
+
+    OpenVMS DCL Prompt
+
+    The file system and some of its commands
+
+    Help Command 
+
+After completing this section, the next major section deals with commands to help you navigate this new universe we call OpenVMS. 
+
+How to Login and Logout of OpenVMS
+
+This basic module demonstrates how to LOGIN to an OpenVMS computer. It also introduces the LOGOUT command that is used to end your OpenVMS session.
+
+"Logging on" to an OpenVMS computer, or almost any other computer, performs two primary functions. First it prepares the computer to accept and execute commands and secondly it lets the computer know who you are. Why should the computer care who you are? Well, identifying yourself with a username and verifying, using a password, that you are who you say you are, enables the computer to determine to what files and other resources you may be granted access. It's really just another type of ID. Since sharing data and/or networking became a major part of computing, logging onto a computer or network has become necessary for security of the data and network. Very few people in an organization have access to EVERY file and resource on the computer. The majority of people sharing a computer can only run programs and manipulate files that have been authorized for them by the System Manager, also known as the System Administrator.
+
+Since there are a number of different types of hardware and software which one could use to access and log into an OpenVMS system, the core of this lesson will be basic and common to all implementations of VMS systems. Specific details of how some types of hardware and software affect the login process are provided in Appendix I, Terminals and Terminal Emulators.
+
+For this login and logout lesson, the goal is to show you how to log into this class's (or any other) VMS system, change your password, and logout. This course provides an OpenVMS system for practice and labs. To continue with the course you will need a username and password for the class OpenVMS system. If you have not been issued a username and password by the Course Administrator then please click on the Course Administrator icon to the right and request a username and password. After you have obtained the username and password, you may continue with the lesson.
+
+The course uses the application you have set up as your TELNET client application on your personal computer to connect to the OpenVMS systems used for practice and labs. If you click on the link in the upper right corner of this page "Telnet Lab Systems" you will be connected to the CCSS Interactive OpenVMS Lab Systems' Alpha environment. If you wish to telnet to this environment without being logged into the web course you can telnet to charon.stromasys.com.
+
+You have access to both an Alpha environment and a VAX environment as part of the courses presented here by CCSS Interactive Learning. You must first log in to the OpenVMS Alpha environment and then you can access the OpenVMS VAX environment by using the SET HOST VAXLAB command to access the VAX. You have the same username and password on both systems as well as the same directory environment - initally. You will learn more about moving around different OpenVMS systems as you progress through the courses.
+
+When the terminal window comes up on your screen, you will be presented with a LOGIN prompt as shown below. On some other types of equipment this prompt is obtained by pressing [RETURN] key several times. This is explained in Appendix I, Terminals and Terminal Emulators.
+
+Type the username you were assigned during the registration process and press [RETURN]. It's not case sensitive so you can use all capitals, all lower case, or any combination of the two. You will then be prompted for your password.
+
+Type the password you provided when you signed up for the first course - this is also the password you use to access each course as you sign up for them. Note that for security reasons, the password is not echoed (i.e. you type it but you don't see it on the screen.) Now press [RETURN]. The password on most VMS systems is not case sensitive. However certain VMS systems released which participate in Windows NT domains or use Windows NT for security or user authentication now require that the password be case sensitive. This is not the case on the class OpenVMS system; the password will not be case sensitive.
+
+The first time you use an OpenVMS username, the system may prompt you to change your password immediately.
+
+Think up a new password between 6 and 32 characters which you will be able to remember. Type it in at the prompt and press [RETURN]. Since you can't see the password when you type it, you will always be prompted to verify a new password by typing it in a second time.
+
+The reason you are required to change your password on your first login, is to make sure that you are the only person in the world who knows your password. This is by design as OpenVMS is a very secure computer operating system. Even the IS programmers who manage the system cannot find out or tell you your password. If you forget it, you can ask the system manager to change your password to something temporary so you can log onto the system and change it. But, the manager cannot look up your password from the system data. This means that if you are careful with your password and your OpenVMS sessions, there is not another person in the world who can use your account without your permission.
+
+You should note that this does not happen on your CCSS Interactive Learning OpenVMS Lab System accounts. We have not enabled this feature allow synchronization between your OpenVMS accounts and your CCSS Interactive Learning web accounts.
+
+Don't be afraid of rejection!
+
+After you type the new password twice, you might see a rejection notice. If you make a mistake and the first and second times you typed the password don't match, you will be prompted to enter the new password again. Also, on some OpenVMS systems, trying to use an English word (e.g. COWBOY, MOUNTAIN, blackberry) for a password will be rejected automatically by the computer. This feature called Password Dictionary is not enabled on the class OpenVMS system so you may use an English word for a password without rejection.
+
+LOGOUT: Leave the system gracefully, don't crash.
+
+If you successfully set the new password and have a '$' prompt then you are logged into the class OpenVMS system and have your own password. Logging out is very easy. Simply enter LO (short for LOgout) and your session is ended. When finishing your work with the OpenVMS system it is a very good habit to stop or exit from applications and then use the LOGOUT command to end your OpenVMS session. Some users, without realizing it, damage the health of the system and safety of data by just turning their terminal off or clicking on the X box on their terminal emulator software. There is no telling what damage terminating your session in this manner might do since it's not possible for the programmers to predict what you are doing when you turn the power off. They can predict what is happening if you use the LOGOUT command and that is why it's safer. This is not such an unusual concept since Windows, Macintosh, Linux and Unix all ask that you go through a planned shutdown procedure.
+
+Welcome Messages and Announcements
+
+On your own company's OpenVMS computer, a "welcome" message may be displayed both before and after your login. These messages often contain information about when the computer will be shut down for maintenance and other important news that you should know. Many companies also use this login message to explain the company policy regarding use of the computer. Often this message states that bad things will happen to people who do bad things to the computer and is sometimes humorously called the dis-welcome message.
+
+Expired Password:
+Every so often the password must change
+
+Passwords on OpenVMS systems expire after a period predetermined by the system manger; usually about 3 months. When the password is expired OpenVMS will prompt the user at login to change the password. You can expect every so often to be prompted to change your password when you log onto any OpenVMS system, just as you did on the class system. The procedure for changing an expired password is exactly the same as described for changing the password the first time your log onto the system.
+
+SET PASSWORD: Change the password anytime you want
+
+Also, you can change the password when ever you like especially at times when you think someone else may know your password. To change your password enter the command, SET PASSWORD, and you will be prompted once for your present password (to verify that it's really you who wants to change the password,) and then twice for your new password (to make sure that you typed it in correctly.)
+
+Note that a new password may (or may not, depending on the level of security required for the system,) be rejected as in the example above for any of the following reasons:
+
+    New password is the same as the old. (Example above)
+    It is the same as the username.
+    Password History, new password has been used by same username in the past X number of months where X (usually 12) is set by system manager.
+    Password Dictionary, new password is a word in the English dictionary.
+    Password Dictionary, new password is a word that has been added to the password dictionary by the system manager so it won't be used by employees as a password. For example, if you work for XYZ company then XYZCOMPANY may be made part of the Password Dictionary.
+
+Sometimes these controls and precautions on passwords and system access can seem overwhelming to users who just want get their job done. The system managers know this. But, they also know that there are a lot of bad guys in the world who for personal gain and ego like to exploit weakness in computer security. If they are successful, they are likely to cause chaos and ruin for the unlucky company they target. For your own self-interest and that of your company, guarding your password and access to OpenVMS sessions is essential. Remember what the sergeant on Hill Street Blues said, "It's a jungle out there; Be careful!"
+
+
+
+
+At the OpenVMS Prompt
+The beginning of a more literate approach to computing
+
+ 
+
+This module will show you how to successfully utilize the OpenVMS DCL command line interface to give instructions to the computer.
+
+After you've successfully entered your new password you will see a "$" prompt which also is referred to as the command prompt. Although it is possible to modify the prompt character for any given workstation in this class the default command prompt of "$" is used. This is the OpenVMS DCL command line. Most computing in OpenVMS can be done by typing a command(s) after this prompt. Typically, people start out on Windows or Macintosh computers in which point and click is the preferred command method. So the idea of typing commands into the computer might seem old fashioned or slow. But, this course will show you is that once you get the hang of it, the command line can be as fast, if not faster, than point and click.
+
+Windows and Macintosh computers use graphical images to create a user interface to the computer. What an icon representing a command looks like and where it is located on the screen is as significant as what the command does. When you see the Windows Explorer icon you know that if you put the cursor on top of it and click the mouse that it will provide a graphical representation of which files are in which folders and on which disk drive. Similarly, you know that if you want to exit an application you can put the cursor on the word FILE at the top left side of the application window, click the mouse, pull the cursor down to the word EXIT, and click the mouse again, and that those actions will stop or EXIT the application. This user interface is a system where an icon's appearance and it's location have significance. In this system, the user interface uses the location and appearance of the icon and the touch of the mouse cursor to execute a command. This is a graphical user interface, GUI (pronounced gooey,) which you probably already have learned to use with various flavors of MS Windows, Unix, X11, Motif, and Macintosh OS.
+
+Now imagine that instead of looking for a command on the screen and clicking on it with the mouse, that instead we just speak the commands to the computer as seen on Star Trek; it would be much easier. Of course the Star Trek computer is more advanced than computers today. It takes on human intelligence to the point where the crew of the Enterprise can pretty much phrase the command anyway they like to get what they want. Unfortunately, computers today cannot interpret voice without making errors and they certainly can't understand nuances of language.
+
+OpenVMS DIGITAL Command Language, DCL
+
+But today there is a way to direct commands in English that will control a computer. It is called OpenVMS DCL or DIGITAL Command Language. Most of the commands in DCL are English words. (That's the English version I'm talking about, OpenVMS comes in other languages, too.) Although it is possible to abbreviate the commands to three letters or less, it is also possible to write a program using unabbreviated, DCL commands in English which anyone might understand. On the side bar you will see an example of such a program. See if you can understand it at this stage in the class.
+
+The OpenVMS DCL command line can be an easier and more efficient way to control a computer than the GUI in Windows. In one sense, it is simpler and quicker to type a command at the OpenVMS DCL prompt than to find a similar command in a maze of pull down graphical menus. And in another sense, it's more precise and detailed because the user is able to add as many qualifiers to a command as their knowledge of OpenVMS allows. The complexity of GUIs is limited by various factors relative to the computer display capacity.
+
+Once users have become sufficiently familiar with OpenVMS DCL there are some who decide the command line is an easier way to work with a computer. In fact, some people may find it easier to use the command line more effectively and more comfortably than the GUI. Either way, there should be no apprehension about learning OpenVMS DCL just because it uses a command line and not a GUI. We all know how to give commands. In using the Windows interface you find the commands on the screen and click on them, in OpenVMS you type in the words of a known command or you use the HELP utility at your finger tips to find the command words and enter them. It's that simple.
+
+Abbreviating DCL Commands
+
+Most of the DCL commands are English words like PRINT, DIFFERENCE, DIRECTORY, DELETE, and STOP. If you type the entire word at the prompt and hit [RETURN] they will work. But since we all like to eliminate unnecessary work, DCL allows us to abbreviate these commands to three characters. The only restriction for abbreviation of DCL commands is that the abbreviation not be ambiguous with another command. For example you can abbreviate DIRECTORY to DIR and it will be understood by the OpenVMS system. But if you abbreviate DIRECTORY to just the letters DI then the system will have no way to tell if you mean Directory or Difference. The command becomes ambiguous and the computer will ask for more characters.
+
+Command Line History and Editing
+
+Besides command abbreviation, OpenVMS DCL has two other time and effort saving features for entering DCL commands. OpenVMS retains the commands you have typed in memory for recall using the up arrow key. At least the last 20 commands are saved. Each time the up arrow is pressed the command line will show one command further back until the command retention limit has been reached. If the desired command has been passed the process can be reversed by pressing the down arrow key. A list of all the commands in the buffer will be displayed with the command, RECALL/ALL. It is recommended that the you take advantage of the command line buffer by using frequently and becoming familiar with command recall.
+
+Any command line either recalled or typed in OpenVMS DCL can be edited or changed to suit the user's needs. The user can move the cursor to any spot in an existing command by using the left and right arrow keys. When the cursor is correctly positioned, the user can type changes either over the existing command text or inserted into the command text. This is called command line editing and it saves an immense amount of time.
+
+For more information on command recall and command editing you can check out the "OpenVMS User's Guide".
+
+The user is strongly urged to practice and become proficient in recalling and editing command lines as these techniques save more than just time and effort, they save your patience.
+
+
+Disks, Directories and Files
+
+This module gives you an understanding of the manner in which in OpenVMS data is stored and arranged in directories and files. Files can be created, altered, searched, copied, sorted or deleted using DCL commands and software programs. This lesson does not give an exhaustive explanation of the OpenVMS file system but will enable you to find files in your home directory and organize them in a manner that is comfortable to you for location and retrieval. It will introduce a number of important DCL commands giving you several, though not all, ways to use each new command presented.
+
+Much of what you do on your OpenVMS system revolves around manipulating files. There are many types of files found on computers. Some contain plain text that can be read off the screen or sent to a printer to produce a hard copy. There are executable files that, when run, perform a task but when looked at with an editor might appear as so much garbage. There are many other file types upon which we will eventually focus. Now, for simplicity and clarity we will focus on text files. If you understand the Windows or Unix formats for organizing and identifying disks, directories, and files, you will find that OpenVMS is similar and you will only have to learn a slightly different nomenclature. The main similarity in all these operating systems is a hierarchical directory structure which starts with a top level directory (folder in Windows) under which are placed subdirectories (or subfolders.) The difference is that OpenVMS has it own format or syntax used to name disks, directories, and files.
+
+Disk names are identified by a colon
+
+Disks in OpenVMS are shown as the disk name followed by a colon. Another phrase used in OpenVMS for disk name is "device name". For Windows users this should not be unusual since disk names in Windows are followed by a colon, too. (e.g. A:,C:) What is different from Windows is that in OpenVMS a disk can have any name of up to 255 characters. Windows disk names are single letters of the alphabet, A through Z. (What happens when you have more than 26 disks on an NT server?) But many OpenVMS systems have more than 26 disks and the actual limit of disks the OpenVMS system can address is in the thousands. In UNIX, some may recall, storage devices like disks are represented as directories. OpenVMS does not represent disks as directories but ironically, you can represent directories as disk devices!
+
+Here are some typical names for disks:
+
+    DKA100:
+
+this is a hardware name assigned at boot by the computer.
+
+    DSA2:
+    USER$:
+    DISK$SYSTEM:
+
+the rest of these device names were created by a programmer to be descriptive of location, function, owner, etc.
+
+Note that the name can be almost anything but remember that if it is followed by a colon then it is a disk or some type of physical or storage device. (Actually, the device could be a tape drive or terminal, too, but since you're currently learning the basics do not worry about tape drives or other physical devices.)
+
+When you login to your computer you are placed in a location known as your home directory. Exactly where your home directory is located was decided by the System Manager when your account was created. Let's find it. At the prompt, type:
+
+(press ENTER) Your screen should show something like:
+
+This tells you that your files are on a disk called USER1$DISK: and that they are in a directory called WAPEDERSEN. The SHOW DEFAULT command will always show you where you currently are in the file system. This combination of disk and directory information is called your directory path. Another important directory path is SYS$LOGIN. In a way this is not so much a path as a pointer to the disk and directory that you are placed in when you first log in. No matter where you are in your travels through the system you can always return to your home directory by typing:
+
+Notice that SHOW DEFAULT and SET DEFAULT are complementary commands. This symmetry is shared by many OpenVMS commands. On your terminal use the HELP command to explore the options for SET and SHOW. These two commands have many options although most users use only a few of them.
+
+Directories are enclosed in brackets []
+
+OpenVMS directories (called folders in Windows) are enclosed in brackets. The structure is hierarchical which is similar to Windows and Unix.
+
+It is even similar to an old-fashioned non-computerized office environment where the document room is equivalent to the disk, the file cabinet is equivalent to the top-level directory, the file drawer is the first sub-directory, an area of the drawer devoted to e.g. "vendors" is the second level sub-directory, a hanging folder within that group is equivalent to the third level sub-directory, a manilla file within that hanging folder is the fourth level sub-directory and a letter within the manilla folder is the file.
+
+A hierarchical directory structure starts with a top level directory in which are situated subdirectories which in turn contain other subdirectories and so on until in OpenVMS a depth of 7 levels is reached. The subdirectories or subfolders in OpenVMS are identified by enclosure in square brackets and are separated with periods. In Windows they are separated by a back slash, in UNIX, a forward slash. So if [DUMMY] is a top level OpenVMS directory then a subdirectory in [DUMMY] called LOGITECH would be written as [DUMMY.LOGITECH] in Windows and DOS it would look like \DUMMY\LOGITECH and in UNIX, /DUMMY/LOGITECH.)
+
+When you log onto an OpenVMS system you will start in your login directory which typically, will look like a top level directory and be named after your username. In most cases, it should look something like this, [USERNAME] where USERNAME is your OpenVMS account name. If you were to create a subdirectory called WORK, it would be identified as [USERNAME.WORK]. And just as in DOS (but not in Windows) you would see that there is a file called WORK.DIR in the [USERNAME] directory. Those files that end in .DIR contain the directory information which makes the subdirectories exist. In Windows you see those files in Windows Explorer as yellow folder icons and just like in Windows, if you delete the .DIR file (the yellow folder icon) you delete the subdirectory. Click on the OpenVMS example icon and take a look at the comparison of the same directory or folder tree presented in DOS, Windows, and OpenVMS.
+
+Filesnames have:
+a period,
+a semicolon,
+and a version number
+
+Filenames are identified with a file name, a period, a file type, a semicolon, and a version number. Diagrammed, OpenVMS file identification should look like this:
+
+    name.type;X
+
+where X is the version number of the file.
+
+The best way to explain this is to show some examples.
+
+    login.com;2
+    temp.datatype;1
+    data.;3
+    program.exe;1
+
+If you've worked with DOS or UNIX then the period or dot in the name shouldn't be too strange. The one difference is that a filename in DOS (or Unix) can exist without a dot but all files in OpenVMS must have ONE, AND ONLY ONE, dot and the DOT CANNOT BEGIN THE FILE NAME (as is possible in Unix). Actually, the "dot" is not part of the name or the type of a file, it is a separator. The Examples of filenames that cannot exist in OpenVMS.
+
+    .login.
+
+why? because it begins with a dot.
+
+    data.type.experimental
+
+why? because it has more than one dot.
+
+File Type, first impressions
+
+The file type, usually 3 characters coming after the filename and dot, is optional in OpenVMS but highly recommended. Windows and DOS use this three digit ending extensively to identify the file types for applications. (E.g. .DOC is a Word document, .XLS is an Excel file, and .HTML is a browser file.) If you are going to share files between Windows, DOS, and OpenVMS then it is highly recommended to maintain the file type ending system. Also, keep in mind when working with files that matching the file type ending with the actual file type is a process partially controlled by humans and therefore not precise or free from error. For example, you can change the file type ending on a Word document to .XLS from .DOC but it's still a Word document; the ending does not make the file but the file type should make the ending (but doesn't always.)
+
+File names and file types can be any combination of alphanumeric characters and some special characters, including: "$", "_", and "-". The dash or hyphen can only be an interior character in the name or type of a file, since if it is at the end of a DCL command line the DCL command interpreter thinks that there is going to be a continuation line. Since Version 4 of OpenVMS the length of file names and file types can be up to 39 characters, each. There is now an "Extended File Specification" which expands the number of characters in the filename up to 236 (excluding version number) and increases the number of special characters which can be used to be the entire ISO Latin-1 character set, except:
+
+    C0 control codes (0x00 to 0x1F inclusive)
+    Double quotation marks (")
+    Asterisk (*)
+    Backslash (\)
+    Colon (:)
+    Left and right angle brackets (< >)
+    Slash (/)
+    Question mark (?)
+    Vertical bar (|)
+
+Additionally, with Version 7.2 there is now the ability to maintain the case of the characters in the file name.
+
+All of these changes will make use of the OpenVMS file system more flexible and more compatible with file systems for other computer operating systems. They are generally beyond the requirements of this course.
+
+Semicolons:
+What's the deal with the with the semicolons and versions?
+
+One of the really great features of OpenVMS file system is the use of file versions and version numbers. In DOS, UNIX, and Windows, when a new version of a file is created the old version is destroyed and written over by the new version. In OpenVMS this is not the case. Create a new version of a file and it will be written as an entirely new file with the same name but a new version number. The version number eliminates the need to destroy the old version to make name space for the new. The old version remains in it's directory with it's unique version number waiting as a backup until it is no longer needed and can be deleted.
+
+This priceless feature of OpenVMS undoubtedly has saved hours of effort by saving old versions and essentially backing up the work done on files and documents. The downside to this system is that it also has used up megabytes of disk space with old versions of files. So along with the advantages of the file version system goes the responsibility of purging the old versions of files when they are no longer needed. (Just like emptying the recycle bin in Windows before the disk is full.)
+
+So, what does a full disk, directory, file name look like in OpenVMS?
+
+disk:[directory.subdirectory]name.;X
+or
+disk:[directory.subdirectory]name.type;X
+
+where X is version number.
+
+Wild Cards in File Names,
+One asterisk is worth a thousand characters,
+but a percent-sign is just worth one.
+
+Wild cards in OpenVMS DCL are characters, the asterisk and the percent. They are used to represent any valid characters or character which might go into a directory or file name but not a disk name. This concept also exists in Unix, DOS, and to some extent in Windows. The idea behind wild cards is that if you're looking for or at a file called ANTHROPOGENESIS.DAT, and all the other files in the directory are starting with some other letter besides A, why can't you refer to the file as the file with the name that begins with 'A' instead of writing out ANTHROPOGENESIS.DAT. Why, not?
+
+The asterisk represents any number of valid characters in the row. So A*.* would represent the file or files that begin with the letter 'A' or in the example above, ANTHROPOGENESIS.DAT, with a lot less typing. Or if you want to know how many subdirectories a folder has you might request a list of all the directory files like this, *.DIR. Wild cards can be used in a directory to represent characters, too. If you were looking for all the text files in the subdirectories, you might use this notation, [.*], meaning all the subdirectories of any name.
+
+The percent sign, %, wild card, just like the asterisk, represents any valid character but it represents only one character while asterisk represents any number of characters. To represent ANTHROPOGENESIS.DAT with just one 'A' and percents one would have to use a lot of percents, A%%%%%%%%%%%%%%.DAT. But that's not what the percent wild card is for. In cases where one is looking in a directory with a lot of files, the percent allows the search to be narrowed to a single column. If the files in a directory look like DATA_DDMMYY.DAT where DD is the day, MM is the month, and YY is the last two characters of the 4 character year, and you want to find all the files from August, 2000, then you can use the percent to narrow the search like this, DATA_%%0800.DAT. 
+
+
+
+
+Who ya gonna call? OpenVMS HELP
+
+This module introduces what may be the most useful tool on an OpenVMS computer. It will provide you with detailed information and examples on all of the many OpenVMS commands. It is a reference that will prove invaluable as your skills increase.
+
+You've learned the basics of some OpenVMS DCL commands. Some commands you'll use so much that you'll want to improve your control by learning new command qualifiers. Other commands you'll use less frequently and you might forget the details of how to use those commands. So you might end up logged into the VMS system, knowing what you want to do but not quite remembering what the appropriate command is or how to use the qualifiers. Who or where are you going inquire to get this information? The answer is at your finger tips and it's in plain English, too. It's the OpenVMS self help tool; accessible from the DCL command line with the command, you guessed it, HELP.
+
+To invoke OpenVMS Help, enter the command, HELP, at the DCL prompt.
+
+Read the introductory text and then press [RETURN] until you reach a list of help topics. You will be presented with the "TOPIC?" prompt. This is where you enter the name of the command upon which you require more detailed information.
+
+This produces a brief overview of the PRINT command, it's format (or syntax,) and then a list of parameters (arguments,) examples, and command qualifiers.
+
+Most of the topics are VMS DCL commands and are standard English words so you can almost guess what each command might do. Other topics are descriptions of applications or VMS features (e.g. V72_Features, TCPIP_Services.)
+
+On a typical VMS system this list can be over 150 topics making it somewhat cumbersome to navigate. You can skip the initial introduction and instructions by entering HELP followed by the command with which you would like help or clarification. Using the PRINT command as an example, type the command:
+
+As before this produces a brief overview of the PRINT command, its format (or syntax,) and then a list of parameters (arguments,) examples, and command qualifiers. You can query HELP on how a qualifier works by entering that qualifier, as an example....
+
+HELP then shows how this qualifier is used to tell the computer to print your file after a certain time.
+
+You can see from the list of 42 qualifiers for the PRINT command that it's probably impossible for anyone to remember all the qualifiers much less the correct syntax for using them. This is why everyone who uses OpenVMS DCL uses the HELP command over and over, no matter how long they've been using OpenVMS or how great their knowledge of this system. The HELP command allows OpenVMS DCL to include an extensive command set and at the same time maintain it's user friendliness by displaying the commands and qualifiers and their descriptions and directions.
+
+As an exercise, use the HELP command to display information on all the OpenVMS DCL commands which you've learned so far in this course. Keep in mind, the object of HELP is to keep you from having to learn every command and qualifier. Remember the old engineering adage, "you don't need to know any particular piece of information, just how to look it up."
+
+
+Finding your way in a maze of passages all different.
+
+In the prior section, where you were introduced to the OpenVMS file system and naming conventions for devices and the filename definitions it probably looked like everything was "a maze of passages, all the same". This quote is from the computer role playing game ADVENTURE, initially written in the 1970s. And, in truth, the various paths do all look very similar to someone who has just been introduced to them. But, in actuality, they are all different. If they were not, the operating system would become hopelessly confused since there would be more than one place with the same name - this is not allowed in OpenVMS and for that matter all major operating systems now in use rely on unique addressing, whether to files on disks or devices or memory.
+
+To help us with this "maze of passages, all different" we have several commands and features in OpenVMS. These are the topics of this set of lessons. They include:
+
+    DIRECTORY
+
+    Default Directory
+
+    Navigation Commands
+
+    Creating Directories
+
+
+Once you have completed this set of lessons you are left with only one more set of what we consider the preliminary lessons - E-mail. And then we will get into the meat of the course, how to work with files. 
+
+
+
+DIRECTORY: Displays the files in a directory
+
+The DIRECTORY command lists files in a directory together with their characteristics. After you have logged onto the class OpenVMS system and you have the $ prompt, enter the command:
+
+at the DCL prompt. Remember you can abbreviate the command to three or more characters, ($ DIR).
+
+You will see a listing titled something like this*:
+
+ 
+
+followed by the names of two or more files. The directory is identified with a disk name, USER1$DISK: and a directory name, [WAPEDERSEN]. No directory name was specified in the DIRECTORY command so why did it produce a listing of files in that particular directory and not some other? The answer is, it used the DEFAULT directory. When no disk or directory is specified in a command, the DIRECTORY command uses the DEFAULT directory.
+
+The DIRECTORY command is also used to display information about files. This information can relate to important dates for a file - creation date, last modified date, last recorded backup date and others. Or it could be information about the size and structure of the file. The display of this additional information is controlled by applying command option switches to the basic DIRECTORY command. Review the information on DIRECTORY to learn more about some of these options.
+
+
+    *Note that examples in these lessons use the username, WAPEDERSEN, so if you see WAPEDERSEN expect to see that string replaced with your own username when you use your account. 
+
+
+
+The Default Directory: Where it's at
+
+In OpenVMS there is always one directory in which you are working by DEFAULT. That directory, called the Default Directory, is the first place the system looks when you request a file or request a listing of files. The Default Directory consists not just of a directory but also a disk. If you issue a command and no directory is specified in the command, then OpenVMS assumes you mean the Default Directory. If no disk is specified in the command, then OpenVMS assumes you mean the Default Directory's disk.
+
+The default directory concept is also central to DOS and Unix (e.g. current directory {cd without argument} for DOS and present working directory {pwd} for Unix) but specified with each program's icon in Windows. In Windows the default directory is established by either the location from which the file is executed or by the directory specified in the "Start In" field describing the working directory to use for the program. If you look at the MS Word icon to find the short cut to the actual MS Word program, the "Target" shows the entire path to the Word program:
+
+    "C:\Program Files\Microsoft Office\Office\WINWORD.EXE"
+
+On an OpenVMS system you are only required to include the path of the file if the file is not in your DEFAULT DIRECTORY.
+
+The Login Directory: Where you start
+
+When you log onto an OpenVMS system, the default directory at the beginning of the session is called your home or login directory. Your login directory is important because that is the directory in which you do your work, store your files, and create subdirectories. You can identify that directory by logging onto an OpenVMS system and using the SHOW DEFAULT command. Try this command and you will see something like this:
+
+In this user's case, the command indicates that the login or home directory is [WAPEDERSEN] and it is located on the disk, USER1$DISK:.
+
+When the DIRECTORY command was used, earlier in the lessons, it listed files which were in the login directory, USER1$DISK:[WAPEDERSEN]. They were, among others, LOGIN.COM;2 and WORK.DIR;1. The file WORK.DIR;1 indicates that there is a subdirectory in the [WAPEDERSEN] directory. If you want to use the DIRECTORY command to see what files are in the subdirectory you will have to specify the path which leads to the subdirectory. That would look like this:
+
+Your default directory description includes the disk on which it is located so you can leave the disk name out of the command to save time:
+
+But since your default directory is the [WAPEDERSEN] directory you can shorten the path further using this shorthand: put the subdirectory's name in brackets and precede it with a dot or period:
+
+So, from the Default Directory, USER1$DISK:[WAPEDERSEN], there are at least three ways to specify the subdirectory named USER1$DISK:[WAPEDERSEN.WORK].
+
+
+
+
+SET/SHOW DEFAULT: Changing your Default Directory
+
+Another way to specify the contents of the subdirectory, [WAPEDERSEN.WORK], would be to change the Default Directory to [WAPEDERSEN.WORK]. You could change your Default Directory to the WORK subdirectory by using the SET DEFAULT command to change the Default Directory. Again it is possible to use the existing Default Directory to shorten the SET DEFAULT command. If your current Default Directory is USER1$DISK:[WAPEDERSEN] then all the following commands have the same effect.
+
+Now use the SHOW DEFAULT command to verify that your default directory is USER1$DISK:[WAPEDERSEN.WORK]. Then enter the command, DIRECTORY. You should see something like this:
+
+In DOS and Unix the SET DEFAULT equivalent command is "cd", short for "Change Directory." In DOS, this command without a directory path argument will echo back the current Default Directory but in Unix one has to use the "pwd" command, short for present working directory. Of course, we already know the equivalent command for finding the Default Directory in OpenVMS, it's SHOW DEFAULT.
+
+Directory Specification Shorthand
+
+[-] Up one directory
+
+Now go back to your original login directory. How to? The longest command would be SET DEFAULT USER1$DISK:[WAPEDERSEN]. However there are two shorter command tricks that will do the same thing. First, the short hand for the directory level above the one which is default is [-]. So if you are in USER1$DISK:[WAPEDERSEN.WORK] and want to go up one level to [WAPEDERSEN] then enter:
+
+SYS$LOGIN means "Your Login Directory"
+
+Second, you can use a logical name for the login directory. Your login directory is so important to OpenVMS that it has a shorthand that is equivalent to the login directory called SYS$LOGIN. It is what is called in OpenVMS a logical name (or in Unix an alias). Logical names are not going to be discussed in this part of the course but you can assume that it's a name that represents something else.
+
+From every user's account, for the entire session, SYS$LOGIN means their login directory; the one which you own and in which you start and do your work. So if you want to see what files are in your login directory, you can use this command from any location and it will mean, the login directory:
+
+Similarly, you can use SYS$LOGIN: with the set default command to set your default directory back to your login directory. Try it now and then check your default directory with either SHOW DEFAULT or DIRECTORY.
+
+
+
+
+CREATE/DIRECTORY:
+Organization, Creating New Subdirectories
+
+Just as in DOS, Widows and Unix, directories (or folders) are for separating and organizing files. A disk can hold thousands of files so even if they are in alphabetical order it wouldn't be feasible to work with them if they were all in one big directory. That's where subdirectories come in. Using clever subdirectory names one can store thousands of files so that they can be found with reasonable ease. The command in OpenVMS for creating a directory or subdirectory is CREATE/DIRECTORY (directory name). The argument, directory name, can include the disk name and the full directory path or can use the abbreviated notation with the default directory as reference point. From your login directory, try creating a subdirectory, [.TEST] with this command.
+
+Note that this command creates the new file, TEST.DIR;1. This file IS the directory; it is the file which contains the directory information and makes the directory exist. If you were to delete this file then the directory will be deleted as well, which is how one deletes directories (more on that later.) In OpenVMS as in DOS, the .DIR file type is used to show which file has the directory information. We can create another directory level below test. From the login directory, the command to create a subdirectory called LEVEL3 would look like this:
+
+OpenVMS E-mail
+
+The OpenVMS E-mail user interface, MAIL, is easy to use and flexible. Although there are clear advantages to graphics based systems like Outlook, Eudora, and Netscape Messenger, OpenVMS E-mail augments those system in situations where only a character cell terminal is available or where a text message without graphics is all that is required or possible,(think alpha pager or PDA.) OpenVMS supports POP (internet mail) and IMAP (Outlook email) servers as well as its native delivery agent so as a mail server OpenVMS is more flexible for users who need a graphics based and terminal E-mail access. You can view your email recieved on OpenVMS either with MAIL or on properly configured system with Outlook, Eudora, Netscape Messenger and even a web-based email viewer like yahMAIL or soyMAIL.
+
+The mail utility will notify the user of a newly received E-mail message if the user is logged onto the OpenVMS system regardless of the user's location. Notification does not require that the user be at their own computer or terminal, just that the user be logged onto the OpenVMS system using their own account, (i.e. username and password.) Once notified of the new E-mail message, the user may open the MAIL utility and read the new message from any location. If the user chooses, he or she may send a response to the message from any location as well. Below is an example of a new mail notification:
+
+At this point you may be wondering if the writer has thrown out the rules of style? You're hearing that phrase, "from any location," over and over again. It is for emphasis that the phase, "from any location," is repeated. One of the great advantages of the OpenVMS MAIL utility is that the mail messages are kept in a central location and do not have to be downloaded to a PC in order to be read. This means that the user is able to perform mail activities from any location. (Oops, did it again!) On PC based mail systems, messages are downloaded to the PC so to read your messages when you are not at your desk or at home means that you have to download your private mail to someone else's PC. This is not the case with OpenVMS mail. The user can use anyone else's terminal or PC without leaving any information on the terminal or the PC's disk. For persons who are required to move around a large work site like a university campus or an industrial park this central mail access feature can help to keep them in touch.
+
+One other advantage of OpenVMS MAIL's central mail location is the ability to restore a mail message from backup. This operation can be quite difficult on some PC based systems which require that the entire mail server disk be restored. OpenVMS allows the restoration to a user's mail folder without affecting anyone else's folder. One word of caution, just because it is possible, don't ask your IS department to do this too often; it's always a lot of work to do any restore from a backup.
+
+
+
+
+Starting OpenVMS MAIL
+
+The OpenVMS MAIL utility is opened with the command, MAIL. Upon opening, mail will notify the user of the number of new mail messages and leave the user at the MAIL> prompt.
+
+After starting MAIL and being notified of new mail the user need only press the RETURN key to read the new mail. If the new mail message arrives after the user has already started MAIL then the user must use the READ/NEW command to read new mail. A new mail message looks something like this:
+
+
+Sending Messages with OpenVMS MAIL
+
+The command to send a message from the MAIL> prompt is MAIL or SEND. These commands are interchangeable but from now on in this class, we will use MAIL to send messages. Now is a good time to send a first OpenVMS E-mail message for practice. Enter MAIL at the MAIL> prompt. Send the message to yourself so at the To: prompt type in your own username and type whatever you like in the Subject: and text sections. When you have finished, press CONTROL-Z (it echos as "EXIT") to send the message.
+
+The response from the TUTOR email account is automated. It will come shortly after you send the email. The message is also saved for your tutor to review and respond to as well if it is necessary.
+
+While we will not go into the exact details of how to do all the steps it is possible to send files as "attachments" using the text oriented OpenVMS MAIL facility. The primary tool to accomplishing this is the use of the UUENCODE and UUDECODE programs or the MIME Utility to encode the file as a series of ASCII characters. This resultant file is then included in the email message from OpenVMS MAIL. More detail on these programs can be found in the OpenVMS documentation and Unix documentation (UUENCODE/UUDECODE are Unix commands, OpenVMS variants can usually be found in SYS$SYSTEM and are TCPIP$UUENCODE and TCPIP$UUDECODE). MIME is a supported portion of OpenVMS. Some implementations of UUENCODE/UUDECODE are not supported but are open-source.
+
+This inclusion can be done in a few different ways. You can use an editor to create email messages from within OpenVMS MAIL using SEND/EDIT (as detailed in our course "Introduction to OpenVMS Editors"). Or you can use an editor to create a text file which has the encoded file as part of that file which is then added to the message while in the SEND/EDIT operation. Or you can simply send the encoded file by using the command line version of the OpenVMS MAIL utility which will send the specified file to the desired recipients or use the SEND [optional_file] form of the SEND command where "[optional_file]" is sent to recipients specified by the user. To learn more about this and the command line interface to mail type HELP MAIL at the DCL prompt or you can check out the online documentation on MAIL.
+
+
+
+MAIL Folders for Storing and Organizing Messages
+
+Now before you try to read the message, let's take a look at the folder in OpenVMS MAIL. The folder system is used to organize and store E-mail messages just as it's done in PC based mail systems except that the folders are words and not icons. To see the folders present in your OpenVMS MAIL enter this command:
+
+What the display says is that you have one folder called NEWMAIL. Since you just entered mail and you had a new mail message waiting, it notifies you that you have a new message. At this point you can just hit RETURN to read your new E-mail messages. After you see the new mail message hit RETURN again. When you are reading new mail, each message is displayed by hitting RETURN. When you've read all the new mail, RETURN produces a "no more messages" notice. Pressing RETURN again will start back to reading the first new mail message.
+
+Now look at the folders in your mail account again with the DIRECTORY/FOLDER command.
+
+Hint: you can abbreviate the command to DIR/FOL
+
+The NEWMAIL folder has disappeared and in its place is a folder called, MAIL. In OpenVMS MAIL, new E-mail messages are put in the NEWMAIL folder. After they are read, NEWMAIL messages are moved from the NEWMAIL folder to the MAIL folder. The NEWMAIL folder had one message, the new message was read and then moved to the MAIL folder. Folders cannot exist without messages (unlike PC mail systems) so the NEWMAIL folder disappeared when its one and only new mail message was moved to MAIL. Go to the MAIL folder now by entering the command, DIRECTORY MAIL.
+
+Hint: you can abbreviate DIRECTORY to DIR but folder names can never be abbreviated.
+
+Just as in DCL where the user has a default directory, in OpenVMS MAIL the user has a default folder. When MAIL starts the default folder is either NEWMAIL, if there are new mail messages, or the default folder is MAIL if there are no new mail messages.
+
+DIRECTORY: Changing Folders and Displaying Contents
+
+The DIRECTORY command with the /FOLDER qualifier, lists the folders in the user's mail. The DIRECTORY command without any qualifier lists the mail messages in the present default folder. And DIRECTORY with a folder name as an argument, changes the default folder to the one specified and lists the mail messages in that folder.
+
+To read a message in a given folder, you must set the default folder to the folder which contains the message. In the default folder, mail messages may be read either by pressing return which displays the messages in numerical order, (e.g. message1, message2,...) or by entering the number of the message at the MAIL> prompt.
+
+Try reading this message by entering a 1 at the MAIL> prompt.
+
+
+FILE: Create Folders and Put Messages in Folders
+
+To move a message to a folder, use the FILE command with a folder name argument. If the folder does not exist, you will be prompted as to whether the folder should be created or not. Creating a folder in OpenVMS MAIL is as simple as filing the message in that folder. The FILE command without qualifiers only works on messages that are being read. Only one important qualifier exists for FILE, /ALL, which causes all the messages in the present default folder to be moved to the target folder. Try filing the present message into a folder called class_test and then do a DIRECTORY/FOLDER command to see the change.
+
+Notice that the MAIL folder has not disappeared but that a new folder named CLASS_TEST has appeared. Now set the default folder to CLASS_TEST and create a listing of the message in that folder with the command, DIRECTORY CLASS_TEST:
+
+At this point you have the basics of the OpenVMS MAIL environment under your belt. But you have only been working with email inside the OpenVMS environment. In the next lesson we will show you how to send email to addressees on the internet and open a world of possibilities.
+
+How to send Internet Messages
+
+The test message you just sent was sent to a local user. If it was sent to a user on another OpenVMS system it might be sent using the default transport in OpenVMS MAIL, DECnet. DECnet is a network protocol which was developed for OpenVMS before the Internet protocol TCPIP became popular. DECnet is the most useful protocol to use with and between OpenVMS systems but it won't get you anywhere on the Internet. The Internet uses only TCPIP so if your OpenVMS system is on the Internet, you need to find out how to send those types of messages.
+
+Messages sent using the Internet transport, TCPIP, look slightly different. Sending an Internet message is the same as sending an Internet message on any computer; at the To: prompt you enter, emailname@address. This is different than sending email to a user on another DECnet node, you may have noticed the DANTE::SYSTEM earlier this is the format for DECnet based email - NODE::USERNAME. Try sending an Internet style E-mail message to yourself. The address of the CCSS Interactive Learning class machine is charon.stromasys.com:
+
+Note that the sender's name and address is listed in the new mail notification just as it was when you used the normal OpenVMS MAIL transport. But, it is encapsulated in this string SMTP%"..." which tells the mail system, "this is an Internet mail mesage." Before OpenVMS version 6.2 it was necessary to use this string when sending Internet mail from OpenVMS. People didn't like the extra work this evolved so like good users everywhere, they complained to Digital Equipment Corporation. The Digital Equipment Corporation engineers realized that only Internet addresses had the "@" symbol so they just wrote the MAIL software to recognize the "@" as an indication that the message was an Internet message. This saved the users the trouble of typing the SMTP%"..." around each message. The string still pops up here and there as an artifact of a past age. The SMTP% string is used to identify the specific "foreign" mail transport mechanism for the message. OpenVMS supports multiple transports transports, DECnet is considered native, SMTP% is for internet mail, there have also been UUCP% and other transports.
+
+Now read the new message which you have just sent to yourself. Even though it could be done this way, reading new mail does not require using the DIRECTORY command to change the default folder to NEWMAIL. You can use the READ/NEW command which changes the folder to NEWMAIL and displays message 1 in the NEWMAIL folder.
+
+Notice that between the Subject and the text of the message, there is a block of information called an SMTP mail header. This information is useful for debugging but many will find it annoying or disconcerting. Just ignore it for now. Remember that problems with Internet mail are not uncommon and a little bit of debugging information might come in handy someday.
+
+If you are used to using Outlook or Outlook Express for internet email then this same header information is hidden from you by your mail client. It can be examined using the View>Options command.
+
+Now file the message in the folder which you just created for the other test message. If you've forgotten the name, just enter DIRECTORY/FOLDER at the MAIL> prompt. Then use the FILE (folder name) command.
+
+If you set the default folder to CLASS_TEST and wanted to read the second message, you could jump over the first message by entering the message number, 2.
+
+So now you know how to send email to addressees on the internet. You can also identify email from senders on the internet. We have also given you an initial introduction about email management. The next lesson will give you more tools to assist you in managing your email messages and the email folders of OpenVMS MAIL.
+
+As of 8 December 2008 internet email does not support in-bound internet email. We expect this to be rectified in the near future. Additionally, out-bound internet email is only directly supported by the OpenVMS Alpha Lab System. The OpenVMS VAX Lab System (VAXLAB) only supports internet mail via a "DECnet Bridge". To address email for the internet from the VAXLAB node the address needs to look like this:
+
+    axpdem::"smtp%pedersen@ccsscorp.com"
+
+Note the axpdem:: is the DECnet node name of the Alpha Lab System. The smtp%"..." tells the mail system that the address is for the internet mail system (simple mail transport protocol).
+
+
+Managing Mail Messages and Folders
+
+In this lesson you will learn about commands which are helpful managing your email messages and folders in OpenVMS MAIL. The primary commands we introduce here are DELETE and PURGE.
+
+DELETE:
+Moving Messages to WASTEBASKET Folder
+
+There are three main ways to use the DELETE command to delete mail. First, if you are reading a message, you may enter DELETE and the message you were reading will be deleted. Second, if you know the message numbers of those to be deleted, you can use the DELETE command followed by the message numbers. For example DELETE 1,4-6,9 would delete messages 1, 4 through 6, and 9. Third, you can delete all the messages in a folder with the command, DELETE/ALL, and all the messages in your default folder will be deleted.
+
+PURGE:
+Delete Messages from WASTEBASKET folder For Good
+
+OpenVMS MAIL doesn't delete messages immediately but moves them from your default folder to a folder called WASTEBASKET. The WASTEBASKET folder is very much similar to the Recycle Bin in Windows. While in the WASTEBASKET folder, messages may be read and moved to another folder for saving. When the WASTEBASKET folder is emptied depends on your own OpenVMS MAIL setup and management practices on your OpenVMS system. On most OpenVMS systems the WASTEBASKET is purged when the user uses the command, EXIT, to leave MAIL. If the user uses the command, QUIT, the old, deleted mail remains in the WASTEBASKET. If you're in a hurry to purge the WASTEBASKET, then you can do it manually with the PURGE command. Finally, on some OpenVMS systems the system manager runs a program periodically which runs the PURGE command on all the users' MAIL accounts.
+
+Try deleting your messages using variations of the DELETE command. After you have deleted one or more messages, check the results with the DIRECTORY/FOLDER command. Try going into the WASTEBASKET folder and reading the mail there. Then leave the mail utility using the QUIT command, restart MAIL and check to see what folders exist. Then repeat that process but use the EXIT command. Notice that the WASTEBASKET folder was emptied and therefore gone from view.
+
+As can be seen, once these steps are executed the WASTEBASKET and its contents are removed from the OpenVMS MAIL enviroment.
+
+The final lesson on OpenVMS MAIL is on customizing the environment.
+
+Customizing OpenVMS E-mail
+
+OpenVMS MAIL Settings and Setup
+
+OpenVMS MAIL settings can be viewed with the SHOW ALL command at the MAIL> prompt. Try this command now.
+
+PERSONAL_NAME:
+More Personal than an E-mail Address
+
+There are a number of settings over which the user has control but most are beyond the scope of this introductory class. However one more setting that is useful to set as soon as possible is the PERSONAL_NAME. The PERSONAL_NAME is shown when someone one receives and E-mail from you. Set PERSONAL_NAME with information about yourself which you want people to see when they receive your message, things like your name, telephone number, title, department, or room number. It can be up to 127 characters long. Set PERSONAL_NAME with the command:
+
+at the mail prompt and then send an E-mail to yourself to see what it looks like.
+
+No matter how bad it sounds, it still makes more sense than getting a message from DANTE::WAPEDERSEN or any E-mail username and address which most of the time is not going to mean anything to anybody. Notice that there is a slight change in the way that the personal name is used with Internet message. Try sending yourself a test Internet message and note that the personal name turns up in the SMTP header, so it does have some use.
+
+In Internet mail the PERSONAL_NAME in OpenVMS message notification doesn't appear. However, it will appear in messages you send to other people on the Internet.
+
+SET MAIL:
+Put Mail where it's not in the Way
+
+While you are at the OpenVMS DCL $ prompt, execute a DIRECTORY command:
+
+on your login directory and look for mail files which will have been created while you were sending and deleting mail. There is just one mail file visible, MAIL.MAI, but if nothing is done and you continue to use OpenVMS MAIL, the directory will become full of mail files making it difficult to work with other files. To avoid this problem, it is wise to set the MAIL program to use a subdirectory [.MAIL] and put all the mail files in that subdirectory. To do this, start MAIL and use this command:
+
+Then go back to the DCL prompt to see what has changed using the DIRECTORY command. You'll see that instead of the MAIL.MAI file that there is a new subdirectory called [.MAIL] which is where all mail files will be placed in the future. Bear in mind that a mail file is not a mail message but a storage area where the MAIL program puts mail messages.
+
+This concludes the lessons on Email and the OpenVMS MAIL application. The next lesson is command which affect files.
+
+
+Commands Which Affect Files
+
+As mentioned earlier, OpenVMS commands generally can be broken down into commands which affect files in general, commands which affect or use the contents of files and then commands which have no direct impact on files. This section of the Introduction to OpenVMS explores a set of commands which affect files as entities. They are used to copy the files, or change their filenames or control access to files as well as removing the files from the computer. These topics are covered in:
+
+    COPY
+
+    RENAME
+
+    DELETE
+
+    PURGE 
+
+Our next section will deal with E-mail. And specifically it will assist you in getting help in this course as it will show you how to exchange E-mail with a tutor from CCSS Interactive Learning.
+
+
+COPY: Duplicating files in other locations
+
+The COPY command is used to duplicate a file. This is similar to making a Xerox copy or photocopy of a document from a file in the filing cabinet and placing it in another file in the filing cabinet. For example, if you wanted to make a duplicate of an invoice while keeping the original, you could keep the original in the vendor file while placing the copy in the customer file. You could also send a second copy to the customer with your invoice. Today all of this is can be done electronically these days, and each instance of the expense invoice is a separate file.
+
+OpenVMS COPY is much the same type of operation as copying files in DOS, Windows, and Unix. The main difference is the OpenVMS file version system. In DOS, Windows and Unix copying a file to a directory with a file of the same name will overwrite the file in the target directory. In OpenVMS when you copy a file to a directory with a file of the same name, the COPY procedure does not erase the old version; it creates a new version with the same name and a version number incremented by one.
+
+The COPY command copies a file to new location or it can copy a file to the same location. In the process of copying the file, COPY can change the file name or leave the same. So what it really does is create a duplicate of file, one that is internally the same as the original but the new file can have the same name, or a new name, or a new location, or any combination of those. Copy makes no changes in the original and it make no changes in the internal data contained in the file. But name,version, and location of the duplicate file is controlled by the user with the COPY command.
+
+The basic format or syntax for COPY is as follows:
+
+  where SOURCE is a file to be copied, TARGET is the location where the copy is put and also if applicable, a new name for the copy. As with other command, the Default Directory is assumed for both SOURCE and TARGET if none is specified.
+
+For example, lets say that for a practice example, you need to create a few extra files in one of subdirectories of your class OpenVMS login directory. First, execute a DIRECTORY command to find out what's there.
+
+In this example there are six files that we might copy in this directory. It's recommended that .DIR directory files not be copied so we can ignore them and concentrate on the other three.
+
+It should be noted that the directory structure of your lab system accounts is slightly different that shown above. There are directories for each lesson as well as the work.dir directory. The lesson directories contain the initial course files for each lesson. These files are also copied into the work.dir directory for your use. If you need a fresh copy of the files you can always get them from the individual lesson directories.
+
+Let's copy LOGIN.COM to the [.WORK] subdirectory but we want to change the name so we know it's just a test. When we construct the COPY command we use a different name for the target and COPY will make the name change.
+
+Or we could maintain the name by specifying a directory but not a name:
+
+Or we can make copies in the same directory with the same name or a different name:
+
+Since there was already a file by the name of LOGIN.COM;2 the new file copied into the same directory and using the same name is called LOGIN.COM;3.
+
+So the basics of COPY are:
+
+    makes a duplicate of a file,
+    it doesn't change the contents of a file but it can change the location, name, or version of the new duplicate file, and
+    has no effect on the original.
+
+
+
+  RENAME: Moving a file a short distance
+
+Unlike the COPY command, RENAME does not make a duplicate of the file and its contents. In fact RENAME does not even move the file from its current PHYSICAL location on a disk. Because of this, RENAME is limited to being able to change the logical location of the file on a given disk. To equate this to our office analogy RENAME is similar to moving a file folder in a file cabinet to someplace else in the same cabinet, with the possibility that you change the label on the file as you change its location. This is not the best analogy, as in this case the file folder may have moved in the cabinet, but not to another cabinet (another disk).
+
+The RENAME command also does not change the contents of a file but it can change the file's location or name or both. RENAME is useful for:
+
+    changing the name of a file
+    moving a file to a new location when a duplicate in the old location is not needed
+    or both
+
+Since RENAME changes location as well as file name, it could have been called the 'move' command. And the similar command in Unix is an abbreviated move, mv. In DOS, the command is called RENAME or REN in short form. The RENAME command equivalent in Windows involves at least two or three steps:
+
+    drag icon to new location
+    change/rename icon title
+    if necessary, delete file from old location
+
+The format or syntax for the RENAME command is,
+
+In the RENAME command the Default Directory is assumed for the SOURCE unless otherwise specified. The TARGET's directory is the same as that of the SOURCE unless specified. So this command, RENAME [.WORK]TEST.DAT DATA.DAT, will not change the location of the file even though [.WORK] is clearly not the Default Directory and no directory is specified for the TARGET. The target always assumes the directory of the SOURCE unless otherwise specified.
+
+As with COPY, RENAME will cause the version number to be incremented if the target directory already has a file with the same name. Unlike Windows and Unix, RENAME will not overwrite a file if the file name and version are the same. If you specify a TARGET name with version and an identically named file version exists then the operation will terminate with an error message. With RENAME you also can change the version number of a file by specifying the old version number in the SOURCE and the new version number in the TARGET.
+
+RENAME Examples:
+
+This example shows what happens when a file is moved to a new directory containing files with the same name. LOGIN.COM;2 is RENAMEd to subdirectory [.WORK]. The only file with the same name in [.WORK] is version 4. Will RENAME move LOGIN.COM;2 to [.WORK] as its original version or as version 5?
+
+This example shows that you can force the version if you specify in the TARGET argument.
+
+Finally, this example shows what happens if you try to RENAME a file over a file with the identical name and version.
+
+As can be seen, RENAME is a very effective and efficient command. If the file is to be "moved" on the same disk, it can easily be renamed from one directory to another. This is especially important and dramatic if the file is huge - multiple gigabytes.
+
+Your next lessons deal with removing files from the file system.
+
+
+
+
+DELETE: Into the trash bin it goes
+
+So far this course has been teaching you how to create files with CREATE, EDIT and COPY. Now you probably have a surplus of files and should get rid of some. Two commands for thinning the file herd in OpenVMS are DELETE for removing a specific file or files and PURGE for removing lower versions of files.
+
+One of the great features of OpenVMS is the file version system which keeps the old versions of files when they are changed and keep track of the versions with a version number. After a while the old versions start to get in the way. They take up disk space and they make the DIRECTORY listing too long.
+
+DELETE removes user specified files. This command will not work without a complete file name including the version number. The version and the file name can be represented as wild cards % and *. But the more wild cards the scarier the command gets. (The most scary line in OpenVMS is DELETE *.*;* which means DELETE EVERYTHING.) The /LOG and /CONFIRM qualifiers also work with DELETE and can make deleting files a little safer by keeping the user informed and asking the user if each file should be deleted. Try using DELETE to remove some unnecessary files from your directory.
+
+To remove directories, use DELETE to remove the .DIR file for that directory. You first must make sure that their are no files in the directory to be deleted. If a directory has files in it, unlike Windows, it is not possible to delete the directory file. For example, if you want to remove the subdirectory, [WAPEDERSEN.TEST], all you have to do is remove all the files (and subdirectories) in that subdirectory, [.TEST], and then delete TEST.DIR in the directory [WAPEDERSEN].
+
+DELETE can remove the highest level version of a file using notation for the file name which includes the semicolon but omits the version number. Including the semicolon and leaving out the version number means the highest version in that directory:
+
+The following example demonstrates this feature of the DELETE command:
+
+The DELETE command is also used to maintain the directory structure of OpenVMS. Directories are really nothing other than special files. So, using the same syntax as for deleting files you can remove a directory:
+
+Notice that the attempt to delete the subdirectory, [.TEST.LEVEL3] failed. We will now learn a bit about file and directory protection to then be able to delete the subdirectory successfully.
+
+How File Protections affect commands
+
+If you tried deleting the subdirectory as was just explained, you should have encountered a file protection problem announced by this error message:
+
+DELETE and PURGE can only remove files which have permissions set to allow the user to delete them. In order to delete the directory file, it is necessary to check and change if necessary, the ownership and protection of the file. Ownership and protection of files in OpenVMS is a long and involved topic which will be covered thoroughly in advanced lessons. The following is a brief summary of how to change the protection of a file so that the protection will allow you to delete it.
+
+The concept of ownership and protection is similar in OpenVMS, Unix, and Windows NT, only the terms and organization are slightly different in each. All involve ownership, identity, and protection. Ownership of a file is the name of the user or users who own the file. File protections are assigned to a file based on the relationship of the user accessing the file to the OWNER. These relationships or identities are the OWNER, the SYSTEM (sometimes called the root), in the OWNER's GROUP, and everyone else not previously mentioned, sometimes referred to as the WORLD. The protections that are assigned to each of these, OWNER, SYSTEM , GROUP, and WORLD vary from Operating System to Operating System but in general they include:
+
+    READ, the ability to see what's in the file,
+    EXECUTE, the ability to run or execute the file if it is a program,
+    WRITE, the ability to change the file, and
+    DELETE, the ability to remove it completely.
+
+Once you know who you are as a user and you know who owns a certain file, you can decide which class of user you fit into with respect to the file OWNER, that is, OWNER, SYSTEM, GROUP, WORLD. You can look at the file to see what the protections are on the file for a user with your relationship to the OWNER. This is the general way file protections work on OpenVMS, Windows NT, and Unix.
+
+When you try to TYPE, EDIT, COPY, RENAME or DELETE a file you may get an error message saying that you don't have privilege to execute this action. Privilege is based on who you are, who owns the file, and what protections are set on a file. The DIRECTORY command can display the names of the files and also display the ownership and protection of those files with the /PROTECTION and the /OWNER qualifiers. If you cannot execute a command on file because of protection then check the file ownership and protection with the DIRECTORY /PROTECTION /OWNER command. This will list the file(s) with the OWNER in brackets and the protection for SYSTEM, OWNER, GROUP, WORLD in that order, separated by commas and enclosed in parenthesis:
+
+In this example, the user is WAPEDERSEN in the group, STUDENT. The DIRECTORY/PROT/OWN command shows that the file to delete, LEVEL3.DIR;1, is owned by [STUDENT,WAPEDERSEN] meaning the user, WAPEDERSEN, in group STUDENT. It also displays the protections in parenthesis, (RWE,RWE,RE,E). The protections are represented by four fields separated by commas. Each field represents a class of user, from left to right SYSTEM, OWNER, GROUP, WORLD. Within each field are some letters which stand for types of protections, R for READ, W for WRITE, E for EXECUTE, and D for DELETE. So to diagram the DIRECTORY/PROTECTION/OWNER display would look like this:
+
+and comparing it to the display for LEVEL3.DIR;1 show that:
+
+    SYSTEM has Read,Write, Execute privilege
+    OWNER (that's WAPEDERSEN) has Read,Write, Execute privilege
+    GROUP (STUDENT of which OWNER is a member) has Read, Execute privilege
+    WORLD (of which everyone is a member) has Execute privilege
+
+Finally, we can see why WAPEDERSEN cannot delete a file in his own directory, neither he nor anyone else has DELETE privilege for that file. does have WRITE privilege which means that he can change or modify the file including his privilege on that file, LEVEL3.DIR;1 by using another command:
+
+Note that the protections in the above example have been written out to make this more understandable but normally all the protections MUST BE ABBREVIATED TO ONE LETTER (e.g. protections: RWED.) With abbreviation the command looks like:
+
+As you can see there is a bit to be learned about protections and ownership. More advanced courses will go into more depth on this topic. For now, when you get a message saying you don't have privilege to execute a command against a file, just use the brute force method for changing the protection for the OWNER:
+
+If you're not allowed to change the owner protection then you're probably not the owner.
+
+
+
+PURGE: Thinning the forest of files
+
+The PURGE command is designed to remove old versions, can be tailored to leave some of the old versions if desired, and will never delete the highest version of a file. So if you have version 2, 3, 6, 7, and 10 of file TEMP.DAT and you run PURGE against TEMP.DAT, it will delete all the versions except for version 10.
+
+The PURGE command can be focused on a specific filename:
+
+where the TARGET is a file name, or on a directory either using the default directory:
+
+or calling out a specific directory:
+
+If you have too many versions but would like to keep some of the most recent, the PURGE command can use the /KEEP=(number of versions) qualifier to keep that number of highest versions. In the following example, there are 5 versions of TEST.TXT. The first PURGE command uses the /KEEP=3 qualifier to save the highest 3 versions and this used the PURGE command with no qualifiers to remove all but the highest level version.
+
+Two useful additions to the PURGE command are the /CONFIRM qualifier and the /LOG qualifier.
+
+The /CONFIRM qualifier causes PURGE to query the user with a file name to be deleted and requires the user to confirm each deletion of a file with a Yes or No. Using /CONFIRM the user has more opportunity to reconsider whether they want a file deleted or not.
+
+The /LOG qualifier makes PURGE list on the screen which files it is deleting. Normally, all the files are deleted without a announcement but the /LOG qualifier allows the user to see what files are being deleted.
+
+The next section discusses operations affection the contents of a file rather than the file itself.
+
+
+
+CREATE: A simple way to fill a file with words
+
+The CREATE command is a very simple way to create a file with words, or text as it is called in computer jargon. This command will create a file with what ever you type into it, up until the special closing key-stroke.
+
+There are special keys on all keyboards of all computers. OpenVMS is no different from other computer operating systems in this regard. In the Windows and, prior to that, the DOS environment, the "Control-Alt-Delete" key-stroke sequence is used to either get the attention of the operating environment, or to force a reboot of the personal computer. In the case of CREATE the key-stroke sequence of "Control-Z" is used to tell the program that there is no more input and to close the file.
+
+Let us try this.
+
+At the DCL prompt on the OpenVMS training system type the following:
+
+At the end of each line you should have pressed the ENTER key (or CARRIAGE RETURN) and at the end of the last line you should have pressed the "Control-Z" key-stroke sequence, done by holding down the "Ctrl" key and then pressing the "Z" key.
+
+Lets make sure that file is there:
+
+You should have a directory listing with the filename as shown above as one of the files in the directory.
+
+But how do we see what is in the file? Well, that is the next lesson, TYPE. 
+
+
+
+TYPE: Display the contents of a file
+
+There's the file but what is in it? You can use the TYPE command to quickly display the contents of a text file. Enter this command, TYPE TEST.TXT and you will see the contents of the file TEST.TXT.
+
+You can also type the contents of the file you created in the prior lesson, MY_TEXT_FILE.TXT.
+
+The TYPE command will display the contents of a text file on the screen by scrolling it from top to bottom. If the file is too long, TYPE can be made to display it, page by page, with the /PAGE qualifier. A long test file with many pages of text, OpenVMS_NEW_FEATURES.TXT, has been included in your login directory. It is long enough that if you just entered:
+
+you would not be able to see the contents as they scroll by on the screen. But if you use the /PAGE qualifier, you can look at each screen size piece of the file. Try the command now with OpenVMS_NEW_FEATURES.TXT. When you are done, stop by either pressing any key and RETURN or CONTROL Z.
+
+Now is a good time to explain that most command qualifiers in OpenVMS DCL are not affected by where they appear in the command as long as they come after the command itself. Since they are identified with a forward slash, "/," they are not affected by spaces either. This being the case, the following commands would also have the same effect:
+
+If the file is long and just the end is of interest, TYPE will display only the last screen of the file with the /TAIL qualifier. If you want more lines from the end of the file use /TAIL=X where X is the number of line which you desire.
+
+Now that you can CREATE a file and display its contents with TYPE we will go on to a very basic introduction to editors in our next lesson. For a more detailed introduction to the OpenVMS Editor we recommend the "Introduction to OpenVMS Editors".
+
+
+EDIT: Modify the contents of a file
+
+This lesson introduces you to the concept of an editor, as used in OpenVMS. There are several editors, we will introduce you here to both EDT and EVE. The course "Introduction to OpenVMS Editor" goes through the use of EVE in more detail, but still at an introductory level.
+
+Editors enable users to create text files by typing text into the files and saving, or to edit or modify the text already in text files. Although a sentence can be typed into a file with an editor, editors fall short of being word processors because they manipulate only the text or characters and not any format or style information. Editors were invented to write computer programs and probably 99.9% of all computer programs ever written have been written with a text editor. Because of this they assume column justified characters and because computer programs require it, they allow the user to pay great attention to what character is in what column. Since text editors were the precursor to word processors, they also provide some features for composing paragraphs and messages. In this capacity editors are very useful for composing E-mail messages in OpenVMS.
+
+The two main OpenVMS editors are EDT and EVE or TPU. They are similar in function to the EDIT command in DOS and the Notepad utility in Windows. However, by comparison, EDT and EVE are feature rich; so much so, that many professional programmers never learn all the features available in these editors. Learning the editors is such a big topic that there is an entire introductory course devoted to one editor, EVE. You may take that course after you finish this one but editors are so useful in OpenVMS that it is necessary to provide a bare bones introduction now. This intro contains only the most important commands including starting, saving, exiting, quitting, moving the cursor with the arrow keys and deleting with the back space key.
+
+Start the editor in OpenVMS just as you would in DOS, EDIT filename.type or just EDIT without a filename. If you don't include a file name then you will be prompted for a file name when you start the EDT editor and when you exit in the EVE editor.
+
+So which editor are you using?
+
+Depending on the version of OpenVMS on the system you are using and what kind of programming changes have been made by the system manager, when you enter the command, EDIT, you may start the EDT editor or the EVE editor. We have to learn how to identify which editor is running; to do this we just enter the EDIT command and see what happens. If you enter the EDIT command with no arguments, (without a file name,) and you see a prompt for a file name like this, _File: then you are running the EDT editor. Otherwise, starting EVE without an argument will start the editor normally and you will see a blank page with a status line displayed at the bottom. EVE will prompt for a file name at the end of the session instead of the beginning as EDT does. If you are doing this exercise on the class OpenVMS system, then you will see the EVE editor start after the EDIT command. If you are running EVE, stop the editor with a CONTROL-Z and jump ahead to the subsection, Creating a text file in EVE.
+
+Creating a text file in the EDT editor
+
+The EDT editor can be started with or without a file name argument. Enter just EDIT and you will be prompted for a filename. Otherwise, enter EDIT followed by a file name. The file can either be one that already exists or one that you would like to create. For an exercise, try creating a file named TEMP.TXT. Enter the edit command as shown.
+
+The asterisk which you see there is a line editor. A line editor uses only one line for displaying text and for entering commands. This particular EDT line editor is a powerful editor but the page editor is easier to use so to change mode (switch from line edit mode) to page edit mode, enter the letter "C" (for CHANGE MODE,) like this:
+
+The screen will clear itself and you will see this string at the top, [EOB], which indicates the end of file you are editing. As you type in new text and the size of the file increases, the [EOB] will move towards the bottom of the screen and then below, off screen. At this point you may being typing (anything) on the keyboard and as you do, you will see the characters on the editor screen. Below is an example of roughly what it will look like. Hit return to start a new line. Use the back space to delete, and use the arrows to move your cursor around the page.
+
+When you are satisfied that you know how to enter text, delete text, and move the cursor around the page to edit the text which you just created, you'll need to save your work and stop the editor. First, press CONTROL Z to go to the line or command mode. "Stop and save" and "stop and don't save" are accomplished in one command, EXIT and QUIT. At the asterisk prompt enter EXIT if you want to stop the editor and save the file which you just created. Enter QUIT if you want to stop the editor and not save the new file.
+
+If you want to edit a file that already exists, enter EDIT with the name of that file. For a sample, try the LOGIN.COM file in your login directory. Use this command to open it:
+
+Enter a "C" to view the entire file and then enter "CONTROL-Z" to return to command or line edit mode. You don't want to make any changes on LOGIN.COM (it's important) so enter QUIT at the asterisk prompt to stop the editor and not save any changes that were made during the edit session.
+
+Using the EVE or TPU editor to create a text file
+
+You have identified EVE as the editor activated by the EDIT command on the OpenVMS system you're using. As with the EDT editor you can use the EDIT command with or without a file name argument. In EVE you will be prompted for a file name not when you start the editor but when you exit. At that time, if you don't enter a file name at the prompt, the file will be discarded. Try starting the EVE editor using a file name, TEST.TXT. Enter the command:
+
+A status line will appear at the bottom and a marker, [End of file], will appear at the top. You can type text into the edit window now. Type in a few lines of text for practice. As you type you will see the text echoed on the screen and the [End of file] marker will move down with each line of text you add to the page.
+
+When you are satisfied with the text which you just created, you'll need to save your work and stop the editor. There are some hot keys which will do this but a more useful way to save your work is to go to command mode. To get a command mode prompt, press the DO key, F16 and a Command: prompt will appear at the bottom left of the screen. Alternatively, if you are using a PC with no F16 "DO" key, press PF4 key on the keypad. PF4 key is also a "DO" key and will put your editing session in command mode. If you have a laptop without a keypad, check the Appendix I for information on how to use a laptop keyboard as a VT420 terminal keyboard. You should now see a "Command:" prompt at the bottom of your screen.
+
+Remeber, "stop and save" and "stop and don't save" are accomplished in one command, EXIT and QUIT, respectively. At the Command prompt enter EXIT if you want to stop the editor and save the file which you just created or enter QUIT if you want to stop the editor and not save the new file. You should save the file so enter EXIT.
+
+To check to make sure that the TEST.TXT file was really created, let's see if the file exists. Enter the command that list the files in a directory, DIRECTORY, and you should see something like this:
+
+You can also use the TYPE command to verify the contents of the file.
+
+
+
+SEARCH: The CAT Scan for Text Files
+
+The EDIT and TYPE commands will allow the user to view the contents of a text file. The one problem with the TYPE and EDIT commands is that they tend to be slow and awkward. SEARCH looks into text files and unlike EDIT and TYPE they are quick, easy, and safe for the contents of the file. SEARCH finds lines with specific character strings. The text files being inspected cannot be changed by these commands and that is one reason why they run faster than EDIT. The other reason is that they do most of the work in the processor and not on the screen and in your head.
+
+SEARCH is similar to the FIND command in DOS and the grep command in unix. It is not used to find files but to search inside files for sections which have a specified character string. If you run SEARCH on your LOGIN.COM file and search for the string "login" SEARCH will find the lines in LOGIN.COM that have the string "login" and print them on the screen. If you type out the file you will see that it is much bigger than what the SEARCH command finds.
+
+Basic command syntax:
+
+An example of the use of SEARCH is to search to login command procedure for the word "LOGIN":
+
+Notice how the word "LOGIN" is highlighted as part of the SEARCH results. This is an optional feature, control by a command line option, to make your searchs more efficient.
+
+There are many command qualifiers to the SEARCH command. Among them are mechanisms to control matching behavior by means of Boolean operators, form of output, whether matched items are highlighted and how, as well as output behavior. There is also a mechanism to provide page mode display of the results with navigation between the pages.
+
+The next lesson is on DIFFERENCES, a perfect compliment to SEARCH.
+
+
+DIFFERENCES: A compliment to SEARCH
+
+While the SEARCH command will give the existence or not of a word in a file DIFFERENCES compares the file to another file. If any differences are found they are reported. The text files being inspected cannot be changed by these commands and that is one reason why they run faster than EDIT. The other reason is that they do most of the work in the processor and not on the screen and in your head.
+
+The DIFFERENCES command is useful for identifying changes you've made with the editor. Each time you save your work you create a new version of the file, by comparing version you can see what changes you've made. I added one line to the 9571 line file, OpenVMS_NEW_FEATURES.TXT, saved as version 2, and then tried to type it and find the line. It took a number of minutes to type this text file and I didn't see the new line. But using DIFFERENCES I was able to identify the added line in two seconds.
+
+Basic Syntax:
+
+Now, here is what you should see given the change made to the OpenVMS_NEW_FEATURES.TXT file:
+
+Note that the DIFFERENCES command is smart enough to not call out all the following lines as being different since they have a different line number due to the added line. DIFFERENCES will identify the pattern after the added and register that it is the same on the other file. Thus lines 6082 to the end do not become different lines just because the line numbers differ.
+
+There are many command qualifiers to the DIFFERENCES command. Among them are mechanisms to ignore comments, specify different comment characters, specify change bar behavior as well as output behavior. There is also a mechanism to provide page mode display of the results with navigation between the pages.
+
+The next, final, section and lesson introduce the PRINT command of OpenVMS.
+
+PRINTING FILES IN OpenVMS
+
+The the user's point of view printing in OpenVMS is no harder than printing on PC's and Mac's. Instead of pop-up windows, there is the PRINT command which accepts the options for the print request. These options include number of copies, destination printer, requests for special forms to control format and style and more.
+
+Additionally there are some optional products, most notably DEC Print Supervisor DCPS, which do know all the characteristics of the printer and can interpret different printer languages automatically.
+
+In OpenVMS, Windows, MAC OS, and Unix printers are accessed through software devices called queues. The queue is just a software construct, a program, that accepts print requests from users and then sends the print jobs to a specific printer. So users can identify a queue and it's printer, print queues need to have a name and a destination printer which the users associate with that name. It also has to deal with priority of print jobs, that is, who's print job goes first and it must be able communicate to the users information about their print jobs and the printer status. Users need to be notified of status, for example, "print job complete" and "printer is out of paper." The queue program also can be responsible for sending format data to the printer (e.g. print on both sides, use this margin, etc.) This idea of queues is not foreign to Windows systems. For an example, look in the folder call Printers; each printer icon you see is a print queue.
+
+SHOW QUEUE Command
+
+How does one find the print queues on an OpenVMS system? Unlike the Windows environment, here is no folder called Printers where the print queues may be found. In OpenVMS, the queues are right at the user's finger tips with the SHOW QEUEUE command. If you enter the SHOW QUEUE command, the screen will display all the queues on the system used for any purpose not just printing.
+
+On large OpenVMS systems with many users there can be a hundred or more queues so it is necessary to limit the display only to print queues in your area. Since this is a beginning class, and queue names are strictly a custom, site controlled item, it is best that you ask a colleague or the IS staff for the name of the queue to the printer in your area. Once you have that information, you can direct your print jobs to that queue and check it to make sure that it's working. The advanced classes will explain in more detail how to look for and at queues. For your exercises on the class OpenVMS system, you should use these queue names for printing, SALES$PRINT and ACCOUNT$PRINT.
+
+The basic PRINT command is simple, PRINT file. This command will print the file named to the printer which is defined in a logical name, SYS$PRINT. A logical name is something like an alias or pseudonym for a device, in this case a queue. You can see if this logical name has been defined on your OpenVMS system with the command, SHOW LOGICAL SYS$PRINT, and if there is a queue name defined, it will be displayed. Otherwise you will see the message below.
+
+If SYS$PRINT has not been defined then it can be by entering this command,
+
+If you enter this command interactively then it has to be done every time you log onto the system or else when you log off it will be removed or cleared. So to make the definition permanent you must put the command in your LOGIN.COM file. The LOGIN.COM file has commands which are executed every time you login into the system. Making changes to the LOGIN.COM file is beyond the scope of this course but is covered in the next course, on using the OpenVMS Editors.
+
+The other way to direct your print job to a specific printer is to add a qualifier to the PRINT command, /QUEUE=queue name. This qualifier will work with or without SYS$PRINT defined and will override the SYS$PRINT logical. Let's try to print the file, LOGIN.COM to the print queue called SALES$PRINT.
+
+To see the job printing, use the SHOW QUEUE command with the qualifier, /ALL. The /ALL qualifier allows the command to show all the print jobs in the queue. Without the /ALL qualifier, only the jobs which you submitted will be displayed. You will want to see everyone's jobs because that way you know where your jobs are in the queue for printing. If the SHOW QUEUE command is used without a queue name then information on all queues on the system will be displayed. On most systems this would be too much information so after the SHOW QUEUE/ALL command we put the name of the queue, SALES$PRINT so that only the information about SALES$PRINT is shown.
+
+Notice that when we use the SHOW QUEUE command that one line of the queue information is a description of the queue and printer,
+
+If it exists, this description information can help you to identify which printer you want to use. However, the description is an optional field for the system manager to fill in and there is no hard and fast rule as to what information is put in the description if any at all. A good description will include printer model, owner, dept., location, and what type of print formats are allow (e.g. postscript, text, pcl5, etc.)
+
+If you would like to be notified when the print queue has successfully spooled (transferred) the print job to the printer, add the qualifier, /NOTIFY, to the PRINT command. The /NOTIFY qualifier will cause a message to be sent to any OpenVMS session in which you are the user. If you are logged on at three different locations then all three will be notified of the print job completion.
+
+Congratulations! You have completed the "Introduction to OpenVMS".
+
+
+ 

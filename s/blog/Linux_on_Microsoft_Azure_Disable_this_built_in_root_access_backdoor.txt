@@ -1,0 +1,407 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Linux on Microsoft Azure? Disable this built-in root-access backdoor (wa-linux-agent)
+Author      : 	Remy van Elst
+Date        : 	22-08-2018
+URL         : 	https://raymii.org/s/blog/Linux_on_Microsoft_Azure_Disable_this_built_in_root_access_backdoor.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![][1]
+
+Are you running Linux on Microsoft Azure? Then by default anyone with access to
+your Azure portal can run commands as root in your VM, reset SSH keys, user
+passwords and SSH configuration. This article explains what the backdoor is,
+what it is meant to do, how it can be disabled and removed and what the
+implications are.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Azure is Microsoft's Cloud platform. It provides virtual machines and related
+datacenter virtualization, next to software as a service (hosted stuff like
+databases). I currently work on a project where an hosted application platform
+is built on Azure using Linux (Ubuntu, CentOS), and recently found out about
+this backdoor. Or, useful feature, since it's not just a blatant and deliberate
+backdoor
+
+I have no idea how the situation on Windows on Azure is, and have not researched
+this.
+
+### The backdoor
+
+Azure, as any other good Cloud provider, has images which you use to create new
+VM's (sometimes calles VPSes, instances, droplets). It speeds up the rollout of
+new VM's, because mounting an ISO and manually installing a VM is time-
+consuming. In that image, they often change stuff to make it run better on their
+cloud. When I created images for an OpenStack provider, we pre-installed `cloud-
+init` and `haveged` for example. Microsoft does that as well, they install their
+own agent, the `wa-linux-agent`. Later on in this article I explain what this
+agent is meant to do. It is not just a backdoor, it provides actual useful
+features. One of those features is root access outside of the VM.
+
+In the [Azure portal][3] one can login and configure their Azure cloud. For this
+project I use Ansible and Terraform, so I don't have to regularly interact with
+this webpage (which is kind of slow to work with). However, I also have a
+personal Azure account for playing around, which is where I found this feature.
+
+Via the Azure portal one can execute commands as root inside a VM and change SSH
+keys, user passwords and SSH configuration.
+
+I'll let the pictures speak for themself:
+
+#### Remote command execution as root
+
+![][4]
+
+#### Remote SSH key injection, user password reset and SSH configuration reset
+
+![][4]
+
+You can read more on the backdoor feature [here][5] ([mirror][6]) and [here][7] ([mirror][8]), Microsoft is very transparent about this, quoting from the pages:
+
+> Scripts run by default as elevated user on Linux
+
+>
+
+> Think of the Azure VMAccess extension as that KVM switch that allows you to
+access the console to reset access to Linux or perform disk level maintenance.
+
+Microsoft puts this feature in a positive way so that it looks less like a
+backdoor:
+
+    
+    
+    The disk on your Linux VM is showing errors. You somehow reset the root password for your Linux VM or accidentally deleted your SSH private key. If that happened back in the days of the datacenter, you would need to drive there and then open the KVM to get at the server console. Think of the Azure VMAccess extension as that KVM switch that allows you to access the console to reset access to Linux or perform disk level maintenance.
+    
+    This article shows you how to use the Azure VMAccess Extension to check or repair a disk, reset user access, manage administrative user accounts, or update the SSH configuration on Linux when they are running as Azure Resource Manager virtual machines. 
+    
+
+For command execution as well:
+
+    
+    
+    This capability is useful in all scenarios where you want to run a script within a virtual machines, and is one of the only ways to troubleshoot and remediate a virtual machine that doesn't have the RDP or SSH port open due to improper network or administrative user configuration.
+    
+
+I believe that this is a useful feature. I however also am of the opinion that
+this is a backdoor. It is not made obvious that this agent is running in your VM
+or that it provides root access. Only after looking (in the output of `ps aux`
+and in the Microsoft docs) I found out what it is and what risks are connected
+to it. Took me a good hour.
+
+A tickbox when deploying VM's (or API flag) to disable this agent would be nice.
+
+### Impact and implications
+
+Anybody with access to VM's in the Azure portal is able to execute commands as
+root inside any VM they have access to.
+
+This also means anybody working for or on Microsoft (Azure) is able to run
+commands as root inside your VM. (They can already take a live snapshot of your
+VM with RAM included, but that is a know risk you take when using a cloud/VPS
+provider. So consider all your private keys, certificates and data compromised
+as soon as you don't control the entire chain of equipment).
+
+Microsoft Azure however is audited regularly and [has an ISO 27001
+certificate][9], so let's hope they don't abuse this power.
+
+If you are the only one with an Azure portal account, the impact is probably not
+that bad.
+
+If you have multiple people working on a project, (multiple people having access
+to the portal), the risk is larger. Any one of those people (and all that had
+access to the portal in the past, like contractors or employees that moved on),
+has (had) root access to all your VM's.
+
+Any one (or all) of your VM's could be compromised. Maybe your manager has
+access to the portal but not SSH, or not root, and want's to put you in a bad
+position. Installing that rootkit or cryptocoin miner under your account and
+removing all the logging just got way easier.
+
+### Removing the agent/backdoor
+
+The agent is just a package, so using your package manager you can remove it:
+
+    
+    
+    # dpkg -l | grep walinuxagent
+    ii  walinuxagent                        2.2.21+really2.2.20-0ubuntu1~16.04.1       amd64        Windows Azure Linux Agent
+    
+    
+    # rpm -qa | grep LinuxAgent
+    WALinuxAgent-2.2.18-1.el7.centos.noarch
+    
+
+On Debian/Ubuntu:
+
+    
+    
+    apt-get purge walinuxagent
+    
+
+On CentOS/RHEL:
+
+    
+    
+    yum remove WALinuxAgent
+    
+
+If you just want to stop the service (for example, to see what the impact is),
+you can do so using your init system of choice:
+
+CentOS/RHEL:
+
+    
+    
+    # systemctl list-unit-files | grep agent
+    waagent.service                               enabled 
+    
+    systemctl disable waagent
+    systelctl stop waagent
+    
+
+Debian/Ubuntu:
+
+    
+    
+    # systemctl list-unit-files | grep agent
+    walinuxagent.service                       enabled 
+    
+    systemctl stop walinuxagent
+    systemctl disable walinuxagent
+    
+
+[This guy][10] on Reddit, who claims to work on azure, took the time to write a comprehensive response with more workarounds and possible fixes for this issue. **[Quoting verbatim][11]:**
+
+I believe your commentary has more to do with [RBAC][12] than with the agent,
+but I'm trying to better understand your concerns.
+
+Even if you remove [waagent][13] (link to the code on GitHub, thanks for mentioning the code is open source in your post) from an Azure VM, an administrator in your subscription could lock you out with a firewall rule, can restart or stop the VM or can delete it altogether. 
+
+If your primary partition isn't encrypted, they can stop the VM and attach that
+disk to another running VM they control and change user passwords, SSH
+configuration, etc. And without getting into those weeds, even without `waagent`
+you can pass custom data to `cloud-init` (`cloud-init` and `waagent` aren't
+mutually exclusive in Azure) using, say, the Azure CLI.
+
+In an organizational setting (a team, a company) it's likely you as the VM
+operator have been granted _less_ permissions than the administrator of the
+subscription, so it'd actually be expected that they (the administrator) can
+perform operations on your VM. Your subscription (your team) shouldn't be an
+adversarial scenario, but there are still ways the team can use RBAC here.
+
+If you run `az provider operation list` you'll see that adding an extension to a
+virtualMachine is an operation you can actually [write a custom role for][14].
+If you're trying to enforce rather than delegate, you can also use a custom
+[Azure Policy][15]. All of those methods are enforced at the API level, so the
+end result is the same whether you use the portal, the CLI or 3rd party tools
+like Ansible or Terraform.
+
+It's also worth mentioning that when you run a custom script from the portal,
+the operation is not only logged in the VM but also in the Activity Log for that
+resource in Azure itself - even if that was someone else in your team that is a
+subscription administrator.
+
+If you open up SSH and have concerns that someone could manipulate SSH or PAM
+configuration from outside the VM, there are Azure features such as [just in
+time access][16] that are designed to help you exactly with that. But I still
+think your commentary has more to do with RBAC than it has with `waagent` or the
+`VMAccess` extension. Other redditors have commented, like you did, that there's
+a troubleshooting aspect to this. It is true that many features you see in the
+portal such as the ability to reset SSH configuration, run a particular command
+or see the serial console output are used for troubleshooting (including when
+guided by our own Linux Support Escalation team) but there are also there for
+composability.
+
+By that I mean someone that has heavily automated/scripted their Linux setup in Azure and instead of maintaining their own custom image (a [documented scenario][17] including extensive discussion on the agent) they rely on standard images and attach extensions with custom scripts, `cloud-init` custom data, pulling SSH keys from Azure Key Vault (or using a third-party tool like Hashicorp's Vault) or using the [AAD login extension][18] (in preview, and not much to do with the AD we love to hate) You said it's not made obvious this agent runs in the VM, and imply that the backdoor nature is concealed. 
+
+I personally always make the point to introduce the agent at any public
+presentation (including recently at OSCON) so I'm genuinely interested in your
+suggestions for changes in documentation, portal prompts, etc., so people are
+more aware that this agent is running and how it helps them? I work on Azure.
+
+(Edit - adding details on Azure Policy and Activity Log)
+
+**End quote.**
+
+### Logging?
+
+When executing a command, the following appears on Ubuntu in
+`/var/log/waagent.log`:
+
+    
+    
+    2018/08/22 11:58:07.546949 INFO [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Target handler state: enabled
+    2018/08/22 11:58:07.657715 INFO [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] [Enable] current handler state is: enabled
+    2018/08/22 11:58:07.769027 INFO [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Update settings file: 1.settings
+    2018/08/22 11:58:07.883364 INFO [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Enable extension [./vmaccess.py -enable]
+    2018/08/22 11:58:08 VMAccess started to handle.
+    2018/08/22 11:58:08 [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] cwd is /var/lib/waagent/Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1
+    2018/08/22 11:58:08 [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Change log file to /var/log/azure/Microsoft.OSTCExtensions.VMAccessForLinux/1.4.7.1/extension.log
+    2018/08/22 11:58:10.012703 INFO Event: name=Microsoft.OSTCExtensions.VMAccessForLinux, op=Enable, message=Launch command succeeded: ./vmaccess.py -enable, duration=2025
+    2018/08/22 11:58:10.161467 INFO [Microsoft.CPlat.Core.RunCommandLinux-1.0.0] Target handler state: enabled
+    2018/08/22 11:58:10.212205 INFO [Microsoft.CPlat.Core.RunCommandLinux-1.0.0] [Enable] current handler state is: enabled
+    2018/08/22 11:58:10.262973 INFO [Microsoft.CPlat.Core.RunCommandLinux-1.0.0] Update settings file: 1.settings
+    2018/08/22 11:58:10.313158 INFO [Microsoft.CPlat.Core.RunCommandLinux-1.0.0] Enable extension [bin/run-command-shim enable]
+    2018/08/22 11:58:11.444806 INFO Event: name=Microsoft.CPlat.Core.RunCommandLinux, op=Enable, message=Launch command succeeded: bin/run-command-shim enable, duration=1031
+    2018/08/22 11:58:11.704326 INFO Event: name=WALinuxAgent, op=ProcessGoalState, message=Incarnation 5, duration=4836
+    
+
+When changing an SSH key, the following is in that same log:
+
+    
+    
+    2018/08/22 11:27:00.603980 INFO [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Target handler state: enabled
+    2018/08/22 11:27:00.713193 INFO [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] [Enable] current handler state is: notinstalled
+    2018/08/22 11:27:01.042711 INFO Event: name=Microsoft.OSTCExtensions.VMAccessForLinux, op=Download, message=Download succeeded, duration=0
+    2018/08/22 11:27:01.364254 INFO [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Initialize extension directory
+    2018/08/22 11:27:01.509190 INFO [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Update settings file: 0.settings
+    2018/08/22 11:27:01.656294 INFO [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Install extension [./vmaccess.py -install]
+    2018/08/22 11:27:05 VMAccess started to handle.
+    2018/08/22 11:27:05 [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] cwd is /var/lib/waagent/Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1
+    2018/08/22 11:27:05 [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Change log file to /var/log/azure/Microsoft.OSTCExtensions.VMAccessForLinux/1.4.7.1/extension.log
+    2018/08/22 11:27:05.788982 INFO Event: name=Microsoft.OSTCExtensions.VMAccessForLinux, op=Install, message=Launch command succeeded: ./vmaccess.py -install, duration=0
+    2018/08/22 11:27:06.105463 INFO [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Enable extension [./vmaccess.py -enable]
+    2018/08/22 11:27:06 VMAccess started to handle.
+    2018/08/22 11:27:06 [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] cwd is /var/lib/waagent/Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1
+    2018/08/22 11:27:06 [Microsoft.OSTCExtensions.VMAccessForLinux-1.4.7.1] Change log file to /var/log/azure/Microsoft.OSTCExtensions.VMAccessForLinux/1.4.7.1/extension.log
+    2018/08/22 11:27:08.271645 INFO Event: name=Microsoft.OSTCExtensions.VMAccessForLinux, op=Enable, message=Launch command succeeded: ./vmaccess.py -enable, duration=0
+    2018/08/22 11:27:08.438678 INFO Event: name=WALinuxAgent, op=ProcessGoalState, message=Incarnation 2, duration=8933
+    
+
+Since this is a root access backdoor, the logging on the VM can be compromised.
+If you have a centralized logging system, now would be a good time to check if
+any of your VM's could have been exploited with this feature.
+
+### What is this (wa-linux-agent)?
+
+This agent is a piece of software created by Microsoft to make life in "the
+cloud" easier. OpenStack and Digital Ocean for example have a comparable piece
+of software called [cloud-init][19] and the `qemu-guest-agent`. The code is open
+source, can be found [here on github][20].
+
+You can read more on the backdoor feature [here][5] ([mirror][6]) and [here][7] ([mirror][8]).
+
+It states the following features:
+
+  * Image Provisioning
+
+    * Creation of a user account
+    * Configuring SSH authentication types
+    * Deployment of SSH public keys and key pairs
+    * Setting the host name
+    * Publishing the host name to the platform DNS
+    * Reporting SSH host key fingerprint to the platform
+    * Resource Disk Management
+    * Formatting and mounting the resource disk
+    * Configuring swap space
+  * Networking
+
+    * Manages routes to improve compatibility with platform DHCP servers
+    * Ensures the stability of the network interface name
+  * Kernel
+
+    * Configure virtual NUMA (disable for kernel <2.6.37)
+    * Consume Hyper-V entropy for /dev/random
+    * Configure SCSI timeouts for the root device (which could be remote)
+  * Diagnostics
+
+    * Console redirection to the serial port
+  * SCVMM Deployments
+
+    * Detect and bootstrap the VMM agent for Linux when running in a System Center Virtual Machine Manager 2012R2 environment
+  * VM Extension
+
+    * Inject component authored by Microsoft and Partners into Linux VM (IaaS) to enable software and configuration automation
+    * VM Extension reference implementation on [GitHub][21]
+
+### OpenStack / QEMU
+
+OpenStack/QEMU also has an agent, which could be in the image your cloud
+provider uses. It's the [qemu-guest-agent][22]. More information on [the
+features here][23].
+
+Since OpenStack is not as widespread as Azure and cloud-providers all build
+their own images, the impact of this is much lower.
+
+The OpenStack provider I used to work for included this in their images (since
+it can help freeze the VM when a snapshot is made, to keep data consistent).
+
+Using the [nova set-password][24] command one can reset a user password via this
+agent.
+
+Following the [nova][25] [source code][26] we can see that in the case of
+Libvirt (KVM/QEMU) it calls [virDomainSetUserPassword][27].
+
+Bottom line, inspect the software running in your VM before you put it in
+production. Check daemons and agents you don't know, check for rouge SSH
+keys/users, make use of the firewall, build multiple layers of security, defense
+in depth, and most important, use your head.
+
+   [1]: https://raymii.org/s/inc/img/azure-logo.png
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://portal.azure.com
+   [4]: https://raymii.org/s/inc/img/azure-backdoor-2.png
+   [5]: https://docs.microsoft.com/en-gb/azure/virtual-machines/extensions/vmaccess
+   [6]: http://web.archive.org/web/20180822113038/https://docs.microsoft.com/en-gb/azure/virtual-machines/extensions/vmaccess
+   [7]: https://docs.microsoft.com/en-gb/azure/virtual-machines/linux/run-command
+   [8]: http://web.archive.org/web/20180822121145/https://docs.microsoft.com/en-gb/azure/virtual-machines/linux/run-command
+   [9]: http://web.archive.org/web/20180822121005/https://www.microsoft.com/en-us/TrustCenter/Compliance/ISO-IEC-27001
+   [10]: https://www.reddit.com/user/bureado
+   [11]: https://www.reddit.com/r/linux/comments/99dd5a/linux_on_microsoft_azure_disable_this_builtin/e4n1wr5/
+   [12]: https://docs.microsoft.com/en-us/azure/role-based-access-control/
+   [13]: https://github.com/azure/walinuxagent
+   [14]: https://docs.microsoft.com/en-us/azure/role-based-access-control/custom-roles
+   [15]: https://docs.microsoft.com/en-us/azure/azure-policy/create-manage-policy
+   [16]: https://docs.microsoft.com/en-us/azure/security-center/security-center-just-in-time
+   [17]: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/create-upload-generic
+   [18]: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/login-using-aad
+   [19]: https://wiki.archlinux.org/index.php/Cloud-init
+   [20]: https://github.com/Azure/WALinuxAgent
+   [21]: https://github.com/Azure/azure-linux-extensions
+   [22]: https://wiki.libvirt.org/page/Qemu_guest_agent
+   [23]: https://wiki.qemu.org/Features/GuestAgent
+   [24]: https://raymii.org/s/tutorials/OpenStack_nova_get_-_password_set_-_password_and_post_encrypted_password_to_metadata_service.html
+   [25]: https://github.com/openstack/nova/blob/master/nova/virt/libvirt/guest.py#L506
+   [26]: https://github.com/openstack/nova/blob/master/nova/virt/libvirt/driver.py#L2072
+   [27]: https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainSetUserPassword
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
