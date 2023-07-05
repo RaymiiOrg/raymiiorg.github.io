@@ -1,0 +1,734 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Drawing a Cirle in Qt QML three different ways
+Author      : 	Remy van Elst
+Date        : 	05-07-2023 23:59
+URL         : 	https://raymii.org/s/articles/Drawing_a_Circle_in_Qt_QML_three_different_ways.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Qt has no `Circle` built in to QML as a basic type, as for example the `Rectangle` or the `Button` control. This post shows you how to get a `Circle` in QML, from the most basic method (a `Rectangle` with a `radius` of 180) to more advanced methods, using the `Canvas` JavaScript API (which allows us to draw a partially filled Circle, for a Pie Chart) and a `c++` control based on `QQuickPaintedItem`. I wanted to experiment with the `Canvas` QML control and the `QQuickPaintedItem` C++ interfact to get a better understanding of Qt and QML drawing interfaces, this post reflects that journey including showing your grouped QML properties exposed from C++.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+
+With all the controls in it, the program looks like:
+
+
+![qml_circle_all.gif][1]
+
+
+In this post I'm going to show you QML Profiler screenshots. These are shown as
+a comparison between the 3 methods on my specific machine. Don't treat them as
+a benchmark, do that yourself if you experience performance issues.
+
+The QML program has a grid with all the controls in it. Per section I'm
+commenting out all but one and then taking a screenshot. Without any controls,
+so just the grid, the QML profiler looks like this:
+
+![QML profiler empty][3]
+
+
+
+This article also shows how to expose a [Grouped QML Property][4]. This allows
+you to set  `border.width` and `border.color` in your custom C++ exposed QML
+control.
+
+For this example I'm using Qt 5.15, the code also works with Qt 6.4. 
+
+### QML Rectangle Circle
+
+The simplest and most basic method to get a `Circle` in QML is a `Rectangle`
+with a `radius` property set to `width / 2` or `180`:
+
+
+    Rectangle {
+       width: 150
+       height: 150
+       color: "dodgerblue"
+       radius: 180
+    }
+
+
+Which looks like:
+
+![rectangle circle][6]
+
+
+The QML Profiler shows that this is quite fast:
+
+![rectangle circle profiler][7]
+
+
+The rectangle drawing method has a few advantages, namely that you get a
+`border`, a fill color and all the other advantages that this QML Control gives
+you. Later on in the `C++` example you'll see that we need to provide that all
+ourselves.
+
+
+
+### QML Canvas Circle
+  
+Most of the examples you'll find online regarding a Circle in QML refer to the
+`Canvas` or `Shapes` API. The `Canvas` API is a JavaScript way to draw stuff on
+screen. The disatvantage is that this requires a lot more memory and resources,
+but you do get a lot of flexibility.
+
+My `QMLCircle.qml` file is pasted at the end of thic post and supports being
+used as a Pie chart. One section is filled in with one color and a different
+section is filled with another color, including an `Animation` so that it looks
+nice. Useful for a `Chart`-like graphics.
+
+The basic circle looks the same as the `Rectangle`-with-radius circle:
+
+
+    QMLCircle {
+      primaryColor: "skyblue"
+    }
+
+
+![qml circle][8]
+
+The QML profiler shows that a lot more is happening:
+
+![qml circle profiler][9]
+
+Is this slower? Probably, and almost certainly on embedded deviced
+
+When using the 'pie-chart' feature it looks like this:
+
+    QMLCircle {
+        primaryColor: "skyblue"
+        secondaryColor: "tomato"
+        value: 0.87
+    }
+
+
+![qml circle filled][10]
+
+
+Using it combined with the `Animation` is also quite cool:
+
+![qml_circle filled.gif][11]
+
+
+    property int timerDuration: 10
+    property int timerSecDone: 0  
+
+    QMLCircle {
+      value: (timerSecDone * 100 / timerDuration) / 100
+      primaryColor: "skyblue"
+      secondaryColor: "tomato"
+    }
+
+    Timer {
+      interval: 1000
+      running: true
+      triggeredOnStart: true
+      repeat: true
+      onTriggered: {
+        timerSecDone++
+        if (timerSecDone > timerDuration+1) {
+          timerSecDone = 0;
+        }
+      }
+    }
+
+
+Using `Canvas` gives you a bunch of flexibility, this `Animation` was really
+easy and quick to add. (Especially in comparison to the C++ style in the next
+section).  In one of the Coffee Machines we make at work almost this exact code
+is used in one of the UI's to show a progress bar of the consumption status. It
+includes a bit more 'fancyness', styling, animation, but it boils down to the
+same code. I know because I wrote it.
+
+### C++ QML Circle
+
+The last example I want to show is a C++ based `Circle`. It uses the Qt
+[Drawing API][5] 
+
+I've coded up a basic `QQuickPaintedItem` which draws a Circle. It has two
+properties, `color` and `antialiassing`. The latter is to make it look smooth,
+the first is for the fill color. It looks like this:
+
+    CppCircle {
+      width: 150
+      height: 150
+      color: "greenyellow"
+      antialiasing: true
+      border.color: "black"
+      border.width: 1
+    }
+
+    CppCircle {
+      width: 150
+      height: 150
+      color: "hotpink"
+      antialiasing: false
+      border.color: "black"
+      border.width: 5
+    }
+
+![cpp circle][12]
+
+The second (`hotpink`) circle is not anti-aliassed. The basic code is a class derived from `QQuickPaintedItem`. The most important method is the `paint` method:
+
+
+    void CppCircle::paint(QPainter *painter)
+    {
+        // make it smooth
+        if(antialiasing())
+            painter->setRenderHint(QPainter::Antialiasing);
+
+        // create rect which will be used to draw circle in
+        QRectF rect(0 + border()->width(), 0 + border()->width(), width() - 1 - (border()->width()*2), height() - 1 - (border()->width()*2));
+
+        // create brush based on QML color property
+        QBrush brush(m_color);
+        // use brush to fill figures
+        painter->setBrush(brush);
+
+
+        // create pen
+        QPen pen;
+        if(border()->width() > 0) {
+            pen.setBrush(border()->color());
+            pen.setWidth(border()->width());
+            pen.setStyle(Qt::SolidLine);
+        }
+        else {
+            pen.setStyle(Qt::NoPen);
+        }
+        painter->setPen(pen);
+
+
+        // Draw the circle
+        painter->drawEllipse(rect);
+    }
+
+
+The full code is at the end of the article but the gist should be clear. A `Pen`
+is used to draw lines and outlines, a `Brush` is used to fill figures. The full
+code  at the end of this page shows `border` as a [QML Property Group][4] so
+that I can set `border.width` and `border.color`. 
+
+The QML profiler seems to show that this custom control is even faster than the
+`Rectangle` (which was  `28 microseconds` compared to `21`): 
+
+![cpp circle profiler][13]
+
+
+The C++ method is the fastest of the bunch, but it is also the most limited.
+Adding the `border` property took way more time than the `Animation` in the 
+Javascript QML Control, so this is a tradeoff you need to make for yourself.
+
+
+
+### Full source code
+
+
+Here below you'll find the full source code for the program. First an animated
+gif of the full program. Any artifacts or stuttering are caused by the
+recording software. It's super smooth on my local machine.
+
+
+![qml_circle_all.gif][1]
+
+
+
+#### main.qml
+
+    /*
+     * Copyright (c) 2023 Remy van Elst
+     *
+     * This program is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation, version 3.
+     *
+     * This program is distributed in the hope that it will be useful, but
+     * WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+     * General Public License for more details.
+     *
+     * You should have received a copy of the GNU General Public License
+     * along with this program. If not, see <http://www.gnu.org/licenses/>.
+     *
+     */
+
+
+    import QtQuick 2.15
+    import QtQuick.Controls 2.15
+    import QtQuick.Window 2.15
+    import org.raymii.shapes 1.0
+
+    Window {
+        width: 640
+        height: 480
+        visible: true
+        title: qsTr("QML Circles demo by Raymii.org")
+        
+        property int timerDuration: 10
+        property int timerSecDone: 0
+        
+        
+        Grid {
+            anchors.fill: parent
+            anchors.margins: 10
+            spacing: 10
+            columns: 3
+            rows: 3
+            
+            Rectangle {
+                id: rectCircle
+                width: 150
+                height: 150
+                color: "dodgerblue"
+                radius: 180
+            }
+            
+            QMLCircle {
+                primaryColor: "skyblue"
+                secondaryColor: "tomato"
+                value: 0.87
+            }
+            
+            CppCircle {
+                width: 150
+                height: 150
+                color: "greenyellow"
+                antialiasing: true
+                border.color: "black"
+                border.width: 1
+            }
+            
+            CppCircle {
+                width: 150
+                height: 150
+                color: "hotpink"
+                antialiasing: false
+                border.color: "black"
+                border.width: 5
+            }
+            
+            
+            
+            QMLCircle {
+                value: (timerSecDone * 100 / timerDuration) / 100
+                primaryColor: "skyblue"
+                secondaryColor: "tomato"
+            }
+            
+            QMLCircle {
+                value: 0.15
+            }
+        }
+        
+        
+        Timer {
+            interval: 1000
+            running: true
+            triggeredOnStart: true
+            repeat: true
+            onTriggered: {
+                timerSecDone++
+                if (timerSecDone > timerDuration+1) {
+                    timerSecDone = 0;
+                }
+            }
+        }   
+    }
+
+
+#### main.cpp
+
+
+    /*
+     * Copyright (c) 2023 Remy van Elst
+     *
+     * This program is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation, version 3.
+     *
+     * This program is distributed in the hope that it will be useful, but
+     * WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+     * General Public License for more details.
+     *
+     * You should have received a copy of the GNU General Public License
+     * along with this program. If not, see <http://www.gnu.org/licenses/>.
+     *
+     */
+    #include "cppcircle.h"
+
+    #include <QGuiApplication>
+    #include <QQmlApplicationEngine>
+
+
+    int main(int argc, char *argv[])
+    {
+    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    #endif
+        QGuiApplication app(argc, argv);
+
+        QQmlApplicationEngine engine;
+
+        qmlRegisterType<CppCircle>("org.raymii.shapes", 1, 0, "CppCircle");
+        // You MUST make this type know to QML otherwise you'll receive an error:
+        // Invalid grouped property access: Property "border" with type "BorderGroupedProperty*", which is not a value type
+        qmlRegisterType<BorderGroupedProperty>("org.raymii.shapes", 1, 0, "BorderGroupedProperty");
+
+        const QUrl url(QStringLiteral("qrc:/main.qml"));
+        QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+            &app, [url](QObject *obj, const QUrl &objUrl) {
+                if (!obj && url == objUrl)
+                    QCoreApplication::exit(-1);
+            }, Qt::QueuedConnection);
+        engine.load(url);
+        return app.exec();
+    }
+
+
+
+#### cppCircle.h
+
+
+    /*
+     * Copyright (c) 2023 Remy van Elst
+     *
+     * This program is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation, version 3.
+     *
+     * This program is distributed in the hope that it will be useful, but
+     * WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+     * General Public License for more details.
+     *
+     * You should have received a copy of the GNU General Public License
+     * along with this program. If not, see <http://www.gnu.org/licenses/>.
+     *
+     */
+
+    #pragma once
+
+    #include <QObject>
+    #include <QQuickPaintedItem>
+    #include <QPainter>
+
+
+    class BorderGroupedProperty : public QObject
+    {
+        Q_OBJECT
+        Q_PROPERTY(int width READ width WRITE setWidth NOTIFY widthChanged)
+        Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
+    public:
+        BorderGroupedProperty(QObject* parent = nullptr);
+        int width() const;
+        void setWidth(int newWidth);
+        QColor color() const;
+        void setColor(const QColor &newColor);
+
+    signals:
+        void widthChanged();
+        void colorChanged();
+
+    private:
+        int m_width = 0;
+        QColor m_color = QColor(0,0,0);
+    };
+
+
+
+    class CppCircle : public QQuickPaintedItem
+    {
+        Q_OBJECT
+        Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
+        Q_PROPERTY(bool antialiasing READ antialiasing WRITE setAntialiasing NOTIFY antialiasingChanged)
+        Q_PROPERTY(BorderGroupedProperty* border READ border)
+
+    public:
+        explicit CppCircle(QQuickItem *parent = nullptr);
+        virtual void paint(QPainter *painter);
+        QColor color() const;
+        void setColor(const QColor &newColor);
+        bool antialiasing() const;
+        void setAntialiasing(bool newAntialiasing);
+        BorderGroupedProperty *border() const;
+
+    signals:
+        void colorChanged();
+        void antialiasingChanged();
+
+    private:
+        QColor m_color;
+        bool m_antialiasing;
+        BorderGroupedProperty *m_border = nullptr;
+    };
+
+
+#### cppCircle.cpp
+
+    
+    /*
+     * Copyright (c) 2023 Remy van Elst
+     *
+     * This program is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation, version 3.
+     *
+     * This program is distributed in the hope that it will be useful, but
+     * WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+     * General Public License for more details.
+     *
+     * You should have received a copy of the GNU General Public License
+     * along with this program. If not, see <http://www.gnu.org/licenses/>.
+     *
+     */
+
+    #include "cppcircle.h"
+    #include <QPen>
+
+    CppCircle::CppCircle(QQuickItem *parent)
+        : QQuickPaintedItem{parent}, m_border(new BorderGroupedProperty(this))
+    {
+
+    }
+
+
+    QColor CppCircle::color() const
+    {
+        return m_color;
+    }
+
+    void CppCircle::setColor(const QColor &newColor)
+    {
+        if (m_color == newColor)
+            return;
+        m_color = newColor;
+        emit colorChanged();
+    }
+
+
+    bool CppCircle::antialiasing() const
+    {
+        return m_antialiasing;
+    }
+
+    void CppCircle::setAntialiasing(bool newAntialiasing)
+    {
+        if (m_antialiasing == newAntialiasing)
+            return;
+        m_antialiasing = newAntialiasing;
+        emit antialiasingChanged();
+    }
+
+
+    void CppCircle::paint(QPainter *painter)
+    {
+        // make it smooth
+        if(antialiasing())
+            painter->setRenderHint(QPainter::Antialiasing);
+
+        // create rect which will be used to draw circle in
+        QRectF rect(0 + border()->width(), 0 + border()->width(), width() - 1 - (border()->width()*2), height() - 1 - (border()->width()*2));
+
+        // create brush based on QML color property
+        QBrush brush(m_color);
+        // use brush to fill figures
+        painter->setBrush(brush);
+
+
+        // create pen
+        QPen pen;
+        if(border()->width() > 0) {
+            pen.setBrush(border()->color());
+            pen.setWidth(border()->width());
+            pen.setStyle(Qt::SolidLine);
+        }
+        else {
+            pen.setStyle(Qt::NoPen);
+        }
+        painter->setPen(pen);
+
+
+        // Draw the circle
+        painter->drawEllipse(rect);
+    }
+
+
+
+    BorderGroupedProperty::BorderGroupedProperty(QObject *parent) : QObject(parent)
+    {
+
+    }
+
+    int BorderGroupedProperty::width() const
+    {
+        return m_width;
+    }
+
+    void BorderGroupedProperty::setWidth(int newWidth)
+    {
+        if (m_width == newWidth)
+            return;
+        m_width = newWidth;
+        emit widthChanged();
+    }
+
+    QColor BorderGroupedProperty::color() const
+    {
+        return m_color;
+    }
+
+    void BorderGroupedProperty::setColor(const QColor &newColor)
+    {
+        if (m_color == newColor)
+            return;
+        m_color = newColor;
+        emit colorChanged();
+    }
+
+    BorderGroupedProperty *CppCircle::border() const
+    {
+        return m_border;
+    }
+
+
+
+#### QMLCircle.qml 
+
+
+    
+    /*
+     * Copyright (c) 2023 Remy van Elst
+     *
+     * This program is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation, version 3.
+     *
+     * This program is distributed in the hope that it will be useful, but
+     * WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+     * General Public License for more details.
+     *
+     * You should have received a copy of the GNU General Public License
+     * along with this program. If not, see <http://www.gnu.org/licenses/>.
+     *
+     */
+
+    import QtQuick 2.15
+
+    Item {
+        id: root
+        property int size: 150
+        property real value: 0
+        property color primaryColor: "#ff6725"
+        property color secondaryColor: "#52adff"
+        property int animationTime: 1000
+        width: size
+        height: size
+
+        onValueChanged: c.degree = value * 360
+
+        Canvas {
+            id: c
+            property real degree: 0
+
+            anchors.fill: parent
+            antialiasing: true
+            onDegreeChanged: requestPaint()
+
+            onPaint: {
+                var ctx = getContext("2d");
+
+                var x = root.width / 2;
+                var y = root.height / 2;
+
+                var radius = root.size / 2
+                var startAngle = (Math.PI / 180) * 270;
+                var fullAngle = (Math.PI / 180) * (270 + 360);
+                var progressAngle = (Math.PI / 180) * (270 + degree);
+
+                ctx.reset()
+
+                ctx.fillStyle = root.secondaryColor;
+                ctx.beginPath();
+                ctx.moveTo(x,y);
+                ctx.arc(x, y, radius-1, startAngle, fullAngle);
+                ctx.lineTo(x, y)
+                ctx.fill();
+
+                ctx.fillStyle = root.primaryColor;
+                ctx.beginPath();
+                ctx.moveTo(x,y);
+                ctx.arc(x, y, radius, startAngle, progressAngle);
+                ctx.lineTo(x, y)
+                ctx.fill();
+            }
+
+            Behavior on degree {
+                NumberAnimation {
+                    duration: root.animationTime
+                }
+            }
+        }
+    }
+
+
+
+
+[1]: /s/inc/img/qml-circle-1.gif
+[2]: /s/inc/img/qml_circle_2.png
+[3]: /s/inc/img/qml_circle_3.png
+[4]: https://web.archive.org/web/20230705195243/https://doc.qt.io/qt-5/qtqml-cppintegration-exposecppattributes.html#grouped-properties
+[5]: https://web.archive.org/web/20230705193742/https://doc.qt.io/qt-5/paintsystem-drawing.html
+[6]: /s/inc/img/qml_circle_4.png
+[7]: /s/inc/img/qml_circle_5.png
+[8]: /s/inc/img/qml_circle_6.png
+[9]: /s/inc/img/qml_circle_7.png
+[10]: /s/inc/img/qml_circle_8.png
+[11]: /s/inc/img/qml_circle_9.gif
+[12]: /s/inc/img/qml_circle_10.png
+[13]: /s/inc/img/qml_circle_11.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
