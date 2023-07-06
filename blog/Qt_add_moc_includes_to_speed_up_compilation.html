@@ -1,0 +1,302 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Add moc includes to speed up Qt compilation - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>                 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Add moc includes to speed up Qt compilation</h2>
+<p><small>Published: <span data-pagefind-meta='date'>12-12-2022</span> | Author: Remy van Elst | <a href="Qt_add_moc_includes_to_speed_up_compilation.txt">Text only version of this article</a>
+</small></p>
+<br><div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Shell script to include <code>moc_*.cpp</code> files</a>
+</li>
+<li>
+<a href="#toc_1">Background information regarding <code>moc</code></a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p>The Meta-Object Compiler, <code>moc</code>, handles Qt&#39;s C++ extensions and it is required for signals and slots and properties in Qt. <code>moc</code> reads C++ header files and if the <code>Q_OBJECT</code> macro is used, it generates an extra <code>.cpp</code> file named <code>moc_filename.cpp</code> containing extra (meta-object) code. This post has a bit of background information and a shell script to automatically include <code>moc_*.cpp</code> files in your code whenever <code>Q_OBJECT</code> is used. If you use <code>qmake</code>, this will probably speed up your build and if you use <code>cmake</code>, this will probably speed up incremental builds (when <code>CMAKE_AUTOMOC</code> is <code>on</code>).</p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<p>Below you&#39;ll find a shell script that scans your code for missing <code>moc_*.cpp</code>
+includes and if you pass the <code>addinclude</code> flag, the script will add them for you.</p>
+
+<p>Summarized heavily, by including your <code>moc_*.cpp</code> files you save the compiler
+and linker some work allowing for faster builds and even some optimizations.
+Together with something like <code>ccache</code>, <a href="https://web.archive.org/web/20221212141026/https://doc.qt.io/qt-5/qmake-precompiledheaders.html">precompiled headers</a> and different
+<code>qrc</code> files (one for assets and one for <code>.qml</code> code and scripts), you can
+save quite a bit of time of your builds.</p>
+
+<h3 id="toc_0">Shell script to include <code>moc_*.cpp</code> files</h3>
+
+<p>I wrote this script back in 2020, but decided to post it now because
+I recently got an email regarding it and had an interesting conversation
+with the person (which requested to remain anonymous). </p>
+
+<p>Save the following file as <code>fixMocInclude.sh</code> in your project folder:</p>
+
+<pre><code>#!/bin/bash
+# Copyright (c) 2022 Remy van Elst
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+
+for filename in $(grep --recursive --files-with-matches --extended-regexp &#39;Q_OBJECT|Q_GADGET|Q_NAMESPACE&#39;); do 
+    cppfile=&quot;${filename%.*}.cpp&quot;; 
+    if [[ -f &quot;${cppfile}&quot; ]]; then 
+        if grep --quiet &quot;#include \&quot;moc_$(basename ${cppfile})\&quot;&quot; &quot;${cppfile}&quot;; then 
+            echo &quot;OK: ${cppfile} HAS moc include&quot;; 
+        else 
+            echo -n &quot;FAIL: ${cppfile} MISSES moc include. &quot;
+            if [[ ${1} == &quot;addinclude&quot; ]]; then           
+                echo &quot;Addding include...&quot;;
+        echo &quot;&quot; &gt;&gt; ${cppfile}        
+        echo &quot;#include \&quot;moc_$(basename ${cppfile})\&quot;&quot; &gt;&gt; ${cppfile}
+            else
+                echo &quot;Add this line to the end of the file: &quot;;
+                echo -e &quot;\t#include \&quot;moc_$(basename ${cppfile})\&quot;&quot;
+            fi
+      echo
+        fi; 
+    fi; 
+done
+
+if [[ &quot;${1}&quot; != &quot;addinclude&quot; ]]; then
+    echo &quot;Run this script (./${0}) with the flag &#39;addinclude&#39; to automatically add the moc includes&quot;;
+    echo &quot;Warning: make sure you have a backup before running this script with that flag.&quot;
+fi
+</code></pre>
+
+<p>Example output, running on the <a href="https://leafnode.nl/">Leaf Node Monitoring</a> code base:</p>
+
+<pre><code>OK: lib/src/versioncheck/VersionCheck.cpp HAS moc include
+OK: lib/src/traymenu/TrayMenu.cpp HAS moc include
+OK: lib/src/model/MainModel.cpp HAS moc include
+FAIL: lib/src/viewmodel/AboutViewModel.cpp MISSES moc include. Add this line to the end of the file: 
+        #include &quot;moc_AboutViewModel.cpp&quot;
+</code></pre>
+
+<p>The next part of the article bundles background information on <code>moc</code> and 
+this specific optimization. </p>
+
+<h3 id="toc_1">Background information regarding <code>moc</code></h3>
+
+<p>Because the Qt documentation currently does not have clear and concise
+instructions on this and most documentation on speeding up Qt builds is
+spread all over the internet (forum, mailing lists, git repositories, YouTube
+video&#39;s, etc), I have quoted (with sources) the most important statements
+regarding including your <code>moc_*.cpp</code> files in one place.</p>
+
+<p>Quoting the <a href="https://web.archive.org/web/20220922141034/https://doc.qt.io/qt-6/moc.html">Qt documentation</a>: </p>
+
+<blockquote>
+<p>The Meta-Object Compiler, <code>moc</code>, is the program that handles Qt&#39;s C++ extensions.</p>
+
+<p><code>moc</code> reads a C++ header file, if it finds one or more class declarations
+  that contain the <code>Q_OBJECT</code> macro, it produces a C++ source file containing
+  the meta-object code for those classes. Among other things, meta-object
+  code is required for the signals and slots mechanism, the run-time type
+  information, and the dynamic property system.</p>
+
+<p>The C++ source file generated by <code>moc</code> must be compiled and linked with the
+  implementation of the class (or it can be <code>#included</code> into the class&#39;s
+  source file). </p>
+
+<p>If you use <code>qmake</code> to create your <code>Makefiles</code>, build rules will be included
+  that call the <code>moc</code> when required, so you will not need to use the moc
+  directly. For more background information on <code>moc</code>, see <a href="https://web.archive.org/web/20221212135618/https://doc.qt.io/qt-6/why-moc.html">Why Does Qt Use
+  Moc for Signals and Slots</a>?</p>
+</blockquote>
+
+<p>Interestingly, the line <code>(or it can be #included into the class&#39;s source
+file)</code> only appears on <a href="https://web.archive.org/web/20221212135618/https://doc.qt.io/qt-6/why-moc.html">this page</a> and not in <a href="https://web.archive.org/web/20220922141034/https://doc.qt.io/qt-6/moc.html">the overview</a>.</p>
+
+<hr>
+
+<p>KDAB, a large Qt consulting firm, have a python <a href="https://github.com/KDAB/KDToolBox/tree/master/qt/includemocs">script</a> that 
+does the same including a git hook, but that only was published 5 
+months ago and required python. My script is older and only needs
+bash. They have also published <a href="https://www.youtube.com/watch?v=Cx_m-qVnEjo">a video</a> on the subject with 
+benchmarks.</p>
+
+<p>From the <a href="https://github.com/KDAB/KDToolBox/tree/master/qt/includemocs">KDAB</a> python repository, another quote:</p>
+
+<p>If you are using <code>CMake</code>, you will probably have a line like this in your
+<code>CMakeLists.txt</code> file:</p>
+
+<pre><code>set(CMAKE_AUTOMOC ON)
+</code></pre>
+
+<p>This results in all <code>moc_*.cpp</code> files <a href="https://web.archive.org/web/20221212142342/https://cmake.org/cmake/help/latest/prop_tgt/AUTOMOC.html#prop_tgt:AUTOMOC">being included from one file</a>, namely
+<code>mocs_compilation.cpp</code>. The advantage of this is that it speeds up the initial
+build, but the disadvantage is that incremental builds (when you
+for example touch just a single header file) will be much slower.</p>
+
+<p>Including the <code>moc</code> files in the source files, gives us the best of both
+worlds, both fast initial build and fast incremental builds.</p>
+
+<hr>
+
+<p>Via <code>Sze Howe Koh</code> on <a href="https://web.archive.org/web/20221212124242/https://forum.qt.io/topic/117973/how-does-include-moc_-cpp-work/8">the Qt forum</a>, regarding how the <code>moc_*.cpp</code> files are 
+created and included in the build:</p>
+
+<p><code>qmake</code> is responsible for this. It scans your code and your <code>*.pro</code> file to
+generate a <code>Makefile</code>. Your compiler and linker follow the &quot;recipe&quot; contained
+in the <code>Makefile</code>. When you don&#39;t <code>#include &quot;moc_myclass.cpp&quot;</code>, your
+QObject-based class spans 2 separate <code>*.o</code> files: </p>
+
+<pre><code>SOURCES       = ../src/main.cpp \
+                ../src/myclass.cpp moc_myclass.cpp
+OBJECTS       = main.o \
+                myclass.o \
+                moc_myclass.o
+</code></pre>
+
+<p>When you <code>#include</code> your moc file, <code>qmake</code> sees this and adjusts the <code>Makefile</code>
+accordingly, so your class is fully contained within 1 <code>*.o</code> file:</p>
+
+<pre><code>SOURCES       = ../src/main.cpp \
+                ../src/myclass.cpp
+OBJECTS       = main.o \
+                myclass.o
+</code></pre>
+
+<ul>
+<li>KDE code and internal Qt code prefer the tactic of <code>#include</code> the
+<code>moc_file.cpp</code> in the corresponding <code>.cpp.</code> </li>
+<li>This results in fewer <code>*.o</code> files fed into the linker. This has been shown
+to speed up builds. </li>
+<li>This can at times enable the reduction of the header-to-header include
+graph, per <a href="https://web.archive.org/web/20221021073333/https://lists.qt-project.org/pipermail/development/2020-May/039654.html">this email</a>, which is a tactic I had mentioned on this
+other forum thread as being my main weapon overall against long rebuild
+times (in any C/C++ project, Qt or not). </li>
+<li>Per the famous <a href="https://web.archive.org/web/20221021073320/https://lists.qt-project.org/pipermail/development/2020-May/039657.html">Thiago Macieira (see here)</a>, the <code>#include-your-moc</code> will
+also allow Clang to provide better diagnostics regarding your class.</li>
+</ul>
+
+<hr>
+
+<p>Quoting <a href="https://web.archive.org/web/20221021073320/https://lists.qt-project.org/pipermail/development/2020-May/039657.html">the Qt mailing list</a>, regarding the fact that both KDE
+and Qt do this (including <code>moc_</code> files):</p>
+
+<pre><code>On Thursday, 28 May 2020 02:06:01 PDT Shawn Rutledge wrote:
+&gt; &gt; On 2020 May 27, at 17:50, Thiago Macieira &lt;thiago.macieira@intel.com&gt;
+&gt; &gt; wrote:&gt; 
+&gt; &gt; On Wednesday, 27 May 2020 03:42:19 PDT Oswald Buddenhagen wrote:
+&gt; &gt;&gt;&gt; this is not something we can subject our users to.
+&gt; &gt;&gt; 
+&gt; &gt;&gt; orly? kde had been doing that for quite a while.
+&gt; &gt; 
+&gt; &gt; And I fixed QtCore to do the same.
+&gt; &gt; 
+&gt; &gt; The only reason not to include the moc output in your .cpp is if you don&#39;t
+&gt; &gt; have one (a header-only class whose only non-inline methods are the moc-
+&gt; &gt; generated ones). Otherwise, #include your mocs.
+&gt; 
+&gt; The reason is to speed up compilation, right?  Is there another reason?
+
+Aside from that benefit and the reason for this thread, it enables some 
+warnings in Clang that aren&#39;t otherwise. If it can see all members of a class, 
+including non-inline, it can tell if you forgot to use or initialise some of 
+them.
+
+Plus the benefit of more inlining, as there&#39;s more the compiler can see.
+</code></pre>
+
+<p>In that same thread, another reason is given to include your <code>moc_</code> files:</p>
+
+<pre><code>Shawn Rutledge (28 May 2020 11:06)
+&gt; The reason is to speed up compilation, right?  Is there another reason?
+
+Yes, see earlier in this thread: if you #include your .moc in your .cpp,
+your .h can get away with forward-declaring some classes whose headers
+it doesn&#39;t #include; the .moc may need to see the actual definition,
+rather than a forward declaration, and the .cpp shall do the needed
+#include, hence make the definition visible, which the .moc then
+benefits from by being #included in the .cpp.
+
+    Eddy.
+</code></pre>
+Tags: <a href="../tags/bash.html">bash</a>
+, <a href="../tags/blog.html">blog</a>
+, <a href="../tags/c++.html">c++</a>
+, <a href="../tags/cmake.html">cmake</a>
+, <a href="../tags/cpp.html">cpp</a>
+, <a href="../tags/kde.html">kde</a>
+, <a href="../tags/moc.html">moc</a>
+, <a href="../tags/performance.html">performance</a>
+, <a href="../tags/qmake.html">qmake</a>
+, <a href="../tags/qml.html">qml</a>
+, <a href="../tags/qt.html">qt</a>
+, <a href="../tags/qt5.html">qt5</a>
+, <a href="../tags/qt6.html">qt6</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

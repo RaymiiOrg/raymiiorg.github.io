@@ -1,0 +1,527 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Openstack - (Manually) migrating (KVM) Nova compute virtual machines
+Author      : 	Remy van Elst
+Date        : 	13-06-2015
+URL         : 	https://raymii.org/s/articles/Openstack_-_(Manually)_migrating_(KVM)_Nova_Compute_Virtual_Machines.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This guide shows you how to migrate KVM virtual machines with the Openstack Nova
+compute service, either manually or with the Openstack tooling.
+
+Migrating compute instances is very usefull. It allows an administrator to free
+up a compute node for maintenance/updates. It also allows an administrator to
+better distribute resources between compute nodes.
+
+Openstack provides a few different ways to migrate virtual machines from one
+compute node to another. Each option has different requirements and
+restrictions, for example:
+
+  * You can't live-migrate without shared storage. 
+  * You can't live-migrate if you have a configdrive enabled. 
+  * You can't select the target host if you use the nova migrate (non-live) command.
+
+Later on in this guide, I'll list the most common limitations per situation.
+
+This article describes the most common migration scenario's including live and
+manual migration using native linux tools.
+
+You can see all my [Openstack related articles here][1]. For example, how to
+build a [High Available cluster with Ansible and Openstack][2].
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+It is tested on an Openstack cloud running Icehouse with KVM as the only
+hypervisor. If you run Xen or something else, the manual process is mostly the
+same, however might require specific adaptions.
+
+### Configure (live) migration
+
+There are a few things you need to configure (live) migrations on an Openstack
+cloud. The Openstack documentation describes this very well, [read that
+first.][4]
+
+If you have a cloud configured for live migration, read on.
+
+### Migration limitations
+
+Openstack has two commands specific to virtual machine migration:
+
+  * `nova migrate $UUID`
+  * `nova live-migration $UUID $COMPUTE-HOST`
+
+The `nova migrate` command shuts down an instance to move it to another
+hypervisor.
+
+  * The instance is down for a period of time and sees this as a regular shutdown. 
+  * It is not possible to specify the compute host you want to migrate the instance to. (Read on to see how you can do that the dirty way). 
+  * This command does not require shared storage, the migrations can take a long time. 
+  * The Openstack cluster chooses the target hypervisor machine based on the free resources and availability. 
+  * The migrate command works with any type of instance.
+  * The VM clock has no issues.
+
+The `nova live-migration` command has almost no instance downtime.
+
+  * The instance is suspended and does not see this as a shutdown.
+  * The `live-migration` lets you specify the compute host you want to migrate to, however with some limitations.  
+This requires shared storage, instances without a configdrive when block storage
+is used, or volume-backed instances.
+
+  * The migration fails if there are not enough resources on the target hypervisor
+
+  * The VM clock might be off.
+
+Here are some examples when to use which option:
+
+  * If it is important to choose the compute host or to have very little downtime you need to use the `nova live-migration` command. 
+  * If you don't want to choose the compute host, or you have a configdrive enabled, you need to use the `nova migrate` command. 
+  * If you need to specify the compute host and you have a configdrive enabled, you need to manually migrate the machine, or use a dirty trick to fool `nova migrate`. 
+
+All these options are described below in detail.
+
+### Hypervisor Capacity
+
+Before you do a migration, check if the hypervisor host has enough free capacity
+for the VM you want to migrate:
+
+    
+    
+    nova host-describe compute-30
+    
+
+Example output:
+
+    
+    
+    +-------------+----------------------------------+-----+-----------+---------+
+    | HOST        | PROJECT                          | cpu | memory_mb | disk_gb |
+    +-------------+----------------------------------+-----+-----------+---------+
+    | compute-30 | (total)                          | 64  | 512880    | 5928    |
+    | compute-30 | (used_now)                       | 44  | 211104    | 892     |
+    | compute-30 | (used_max)                       | 44  | 315568    | 1392    |
+    | compute-30 | 4[...]0288                       | 1   | 512       | 20      |
+    | compute-30 | 4[...]0194                       | 20  | 4506      | 62      |
+    +-------------+----------------------------------+-----+-----------+---------+
+    
+
+In this table, the first row shows the total amount of resources available on
+the physical server. The second line shows the currently used resources. The
+third line shows the maximum used resources. The fourth line and below shows the
+resources available for each project.
+
+If the VM flavor fits on this hypervisor, continue on with the manual migration.
+If not, free up some resources or choose another compute server.
+
+If the hypervisor node lacks enough capacity, the migration will fail.
+
+### (Live) migration with nova live-migration
+
+The `live-migration` command works with the following types of vm's/storage:
+
+  * Shared storage: Both hypervisors have access to shared storage.
+  * Block storage: No shared storage is required. Instances are backed by image-based root disks. Incompatible with read-only devices such as CD-ROMs and Configuration Drive (`config_drive`).
+  * Volume storage: No shared storage is required. Instances are backed by iSCSI volumes rather than ephemeral disk.
+
+The live-migration command requires the same CPU on both hypervisors. It is
+possible to set a generic CPU for the VM's, or a generic set of CPU features.
+This however does not work on versions lower than Kilo due to [a bug][5] where
+Nova compares the actual CPU instead of the virtual CPU. In my case, all the
+hypervisor machines are the same, lucky me. This is fixed in Kilo or later.
+
+On versions older than Kilo, the Compute service does not use libvirt's live
+migration functionality by default, therefore guests are suspended before
+migration and might experience several minutes of downtime. This is because
+there is a risk that the migration process will never end. This can happen if
+the guest operating system uses blocks on the disk faster than they can be
+migrated.
+
+To enable true live migration using libvirt's migrate functionality, see the
+Openstack documentation linked below.
+
+#### Shared storage / Volume backed instances
+
+A live-migration is very simple. Use the following command with an instance UUID
+and the name of the compute host:
+
+    
+    
+    nova live-migration $UUID $COMPUTE-HOST
+    
+
+If you have shared storage, or if the instance is volume backed, this will send
+the instances memory (RAM) content over to the destination host. The source
+hypervisor keeps track of which memory pages are modified on the source while
+the transfer is in progress. Once the initial bulk transfer is complete, pages
+changed in the meantime are transferred again. This is done repeatedly with
+(ideally) ever smaller increments.
+
+As long as the differences can be transferred faster than the source VM dirties
+memory pages, at some point the source VM gets suspended. Final differences are
+sent to the target host and an identical machine started there. At the same time
+the virtual network infrastructure takes care of all traffic being directed to
+the new virtual machine. Once the replacement machine is running, the suspended
+source instance is deleted. Usually the actual handover takes place so quickly
+and seamlessly that all but very time sensitive applications ever notice
+anything.
+
+You can check this by starting a `ping` to the VM you are live-migrating. It
+will stay online and when the VM is suspended and resumed on the target
+hypervisor, the ping responses will take a bit longer.
+
+#### Block based storage (--block-migrate)
+
+If you don't have shared storage and the VM is not backed by a volume as root
+disk (image based VM's) a live-migration requires an extra parameter:
+
+    
+    
+    nova live-migration ----block-migrate $UUID $COMPUTE-HOST
+    
+
+The process is almost exactly the same as described above. There is one extra
+step however. Before the memory contents is sent the disk content is copied
+over, without downtime. When the VM is suspended, both the memory contents and
+the disk contents (difference to the earlier copy) are sent over. The suspend
+action takes longer and might be noticable as downtime.
+
+The `--block-migrate` option is incompatible with read only devices such as ISO
+CD/DVD drives and the Config Drive.
+
+### Migration with nova migrate
+
+The `nova migrate` command shuts down an instance, copies over the disk to a
+hypervisor with enough free resources, starts it up there and removes it from
+the source hypervisor. The VM is shut down and will be down as long as the
+copying. With a `migrate`, the Openstack cluster chooses an compute-service
+enabled hypervisor with the most resources available. This works with any type
+of instance, with any type of backend storage.
+
+A `migrate` is even simpler than a `live-migration`. Here's the syntax:
+
+    
+    
+    nova migrate $UUID
+    
+
+This is perfect for instances that are part of a clustered service, or when you
+have scheduled and communicated downtime for that specific VM. The downtime is
+dependent on the size of the disk and the speed of the (storage) network.
+
+`rsync` over ssh is used to copy the actual disk, you can test the speed
+yourself with a few regular rsync tests, and combine that with the disksize to
+get an indication of the migration downtime.
+
+### Migrating to a speficic compute node, the dirty way
+
+As seen above, we cannot migrate virtual machines to a specific compute node if
+the compute node does not have shared storage and the virtual machine has a
+configdrive enabled. You can force the Openstack cluster to choose a specific
+hypervisor by disabling the `nova-compute` service on all the other hypervisors.
+The VM's will keep running on there, only new virtual machines and migrations
+are not possible on those hypervisors.
+
+If you have a lot of creating and removing of machines in your Openstack Cloud,
+this might be a bad idea. If you use (Anti) Affinity Groups, vm's created in
+there will also fail to start depending on the type of Affinity Group. See [my
+article on Affinity Groups][6] for more info on those.
+
+Therefore, use this option with caution. If we have 5 compute nodes,
+`compute-30` to `compute-34` and we want to migrate the machine to `compute-34`,
+we need to disable the `nova-compute` service on all other hypervisors.
+
+First check the state of the cluster:
+
+    
+    
+    nova service-list --binary nova-compute # or nova-conductor, nova-cert, nova-consoleauth, nova-scheduler
+    
+
+Example output:
+
+    
+    
+    +----+--------------+--------------+------+----------+-------+----------------------------+-----------------+
+    | Id | Binary       | Host         | Zone | Status   | State | Updated_at                 | Disabled Reason |
+    +----+--------------+--------------+------+----------+-------+----------------------------+-----------------+
+    | 7  | nova-compute | compute-30   | OS1  | enabled  | up    | 2015-06-13T17:04:27.000000 | -               |
+    | 8  | nova-compute | compute-31   | OS2  | enables  | up    | 2015-06-13T17:02:49.000000 | -               |
+    | 9  | nova-compute | compute-32   | OS2  | enabled  | up    | 2015-06-13T17:02:50.000000 | None            |
+    | 10 | nova-compute | compute-33   | OS2  | enabled  | up    | 2015-06-13T17:02:50.000000 | -               |
+    | 11 | nova-compute | compute-34   | OS1  | disabled | up    | 2015-06-13T17:02:49.000000 | Migrations Only |
+    +----+--------------+--------------+------+----------+-------+----------------------------+-----------------+
+    
+
+In this example we have 5 compute nodes, of which one is disabled with reason
+Migrations Only. In our case, before we started migrating we have enabled nova-
+compute on that hypervisor and disabled it on all the other hypervisors:
+
+    
+    
+    nova service-disable compute-30 nova-compute --reason 'migration to specific hypervisor the dirty way'
+    nova service-disable compute-31 nova-compute --reason 'migration to specific hypervisor the dirty way'
+    etc...
+    
+
+Now execute the `nova migrate` command. Since you've disabled all compute
+hypervisors except the target hypervisor, that one will be used as migration
+target.
+
+All new virtual machines created during the migration will also be spawned on
+that specific hypervisor.
+
+When the migration is finished, enable all the other compute nodes:
+
+    
+    
+    nova service-enable compute-30 nova-compute
+    nova service-enable compute-31 nova-compute
+    etc...
+    
+
+In our case, we would disable the `compute-34` because it is for migrations
+only.
+
+This is a bit dirty and might cause problems if you have monitoring on the
+cluster state or spawn a lot of machines all the time.
+
+### Manual migration to a specific compute node
+
+As seen above, we cannot migrate virtual machines to a specific compute node if
+the compute node does not have shared storage and the virtual machine has a
+configdrive enabled. Since Openstack is just a bunch of wrappers around native
+Linux tools, we can manually migrate the machine and update the Nova database
+afterwards.
+
+Do note that this part is specific to the storage you use. In this example we
+use local storage (or, a local folder on an NFS mount not shared with other
+compute nodes) and image-backed instances.
+
+In my case, I needed to migrate an image-backed block storage instance to a non-
+shared storage node, but the instance had a configdrive enabled. Disabling the
+compute service everywhere is not an option, since the cluster was getting about
+a hundred new VM's every 5 minutes and that would overload the hypervisor node.
+
+This example manually migrates a VM from `compute-30` to `compute-34`. These
+nodes are in the same network and can access one another via SSH keys based on
+their hostname.
+
+Shut down the VM first:
+
+    
+    
+    nova stop $VM_UUID
+    
+
+Also detach any volumes:
+
+    
+    
+    nova volume-detach $VM_UUID $VOLUME_UUID
+    
+
+Use the `nova show` command to see the specific hypervisor the VM is running on:
+
+    
+    
+    nova show UUID | grep hypervisor
+    
+
+Example output:
+
+    
+    
+    | OS-EXT-SRV-ATTR:hypervisor_hostname  | compute-30    |
+    
+
+Login to that hypervisor via SSH. Navigate to the folder where this instance is
+located, in our case, `/var/lib/nova-compute/instances/$UUID`.
+
+The instance is booted from an image based root disk, named `disk`. `qemu` in
+our case diffs the root disk from the image the VM was created from. Therefore
+the new hypervisor also needs that backing image. Find out which file is the
+backing image:
+
+    
+    
+    cd /var/lib/nova-compute/instances/UUID/
+    qemu-img info disk # disk is the filename of the instance root disk
+    
+
+Example output:
+
+    
+    
+      image: disk
+      file format: qcow2
+      virtual size: 32G (34359738368 bytes)
+      disk size: 1.3G
+      cluster_size: 65536
+      backing file: /var/lib/nova-compute/instances/_base/d00[...]61
+      Format specific information:
+          compat: 1.1
+          lazy refcounts: false 
+    
+
+The file `/var/lib/nova-
+compute/instances/_base/d004f7f8d3f79a053fad5f9e54a4aed9e2864561` is the backing
+disk. Note that the long filename is not a UUID but a checksum of the specific
+image version. In my case it is a raw disk:
+
+    
+    
+    qemu-img info /var/lib/nova-compute/instances/_base/d00[...]61
+    
+
+Example output:
+
+    
+    
+    image: /var/lib/nova-compute/instances/_base/d00[...]61
+    file format: raw
+    virtual size: 8.0G (8589934592 bytes)
+    disk size: 344M
+    
+
+Check the target hypervisor for the existence of that image. If it is not there,
+copy that file to the target hypervisor first:
+
+    
+    
+    rsync -r --progress /var/lib/nova-compute/instances/_base/d00[...]61 -e ssh compute-34:/var/lib/nova-compute/instances/_base/d00[...]61
+    
+
+On the target hypervisor, set the correct permissions:
+
+    
+    
+    chown nova:nova /var/lib/nova-compute/instances/_base/d00[...]61
+    
+
+Copy the instance folder to the new hypervisor:
+
+    
+    
+    cd /var/lib/nova-compute/instances/
+    rsync -r --progress $VM_UUID -e ssh compute-34:/var/lib/nova-compute/instances/
+    
+
+Set the correct permissions on the folder on the target hypervisor:
+
+    
+    
+    chown nova:nova /var/lib/nova-compute/instances/$VM_UUID
+    chown nova:nova /var/lib/nova-compute/instances/$VM_UUID/disk.info 
+    chown nova:nova /var/lib/nova-compute/instances/libvirt.xml
+    
+    chown libvirt:kvm /var/lib/nova-compute/instances/$VM_UUID/console.log 
+    chown libvirt:kvm /var/lib/nova-compute/instances/$VM_UUID/disk 
+    chown libvirt:kvm /var/lib/nova-compute/instances/$VM_UUID/disk.config
+    
+
+If you use other usernames and groups, change those in the command.
+
+Log in to your database server. In my case that is a MySQL Galera cluster. Start
+up a MySQL command prompt in the `nova` database:
+
+    
+    
+    mysql nova
+    
+
+Execute the following command to update the `nova` database with the new
+hypervisor for this VM:
+
+    
+    
+    update instances set node='compute-34', host=node where uuid='$VM_UUID';
+    
+
+This was tested on an `IceHouse` database scheme, other versions might require
+other queries.
+
+Use the `nova show` command to see if the new hypervisor is set. If so, start
+the VM:
+
+    
+    
+    nova start $VM_UUID
+    
+
+Attach any volumes that were detached earlier:
+
+    
+    
+    nova volume-attach $VM_UUID $VOLUME_UUID
+    
+
+Use the console to check if it all works:
+
+    
+    
+    nova get-vnc-console $VM_UUID novnc
+    
+
+Do note that you must check the free capacity yourself. The VM will work if
+there is not enough capacity, but you do run in to weird issues with the
+hypervisor like bad performance or killed processes (OOM's).
+
+### Conclusion
+
+Openstack offers many ways to migrate machines from one compute node to another.
+Each way is applicable in certain scenario's, and if all else fails you can
+manually migrate machines using the underlying linux tools. This article gives
+you an overview of the most common migration ways and the scenario's when they
+are applicable. Happy migrating.
+
+### Further reading
+
+  * <http://docs.openstack.org/admin-guide-cloud/content/section_configuring-compute-migrations.html>
+  * <http://docs.openstack.org/admin-guide-cloud/content/section_live-migration-usage.html>
+
+   [1]: https://raymii.org/s/tags/openstack.html
+   [2]: https://raymii.org/s/articles/Building_HA_Clusters_With_Ansible_and_Openstack.html
+   [3]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [4]: http://docs.openstack.org/admin-guide-cloud/content/section_configuring-compute-migrations.html
+   [5]: https://bugs.launchpad.net/nova/+bug/1082414
+   [6]: https://raymii.org/s/articles/Openstack_Affinity_Groups-make-sure-instances-are-on-the-same-or-a-different-hypervisor-host.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

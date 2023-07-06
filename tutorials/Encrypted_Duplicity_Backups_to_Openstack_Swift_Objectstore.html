@@ -1,0 +1,668 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Encrypted Duplicity Backups to Openstack Swift Objectstore - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>                 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Encrypted Duplicity Backups to Openstack Swift Objectstore</h2>
+<p><small>Published: <span data-pagefind-meta='date'>19-05-2014</span> | Author: Remy van Elst | <a href="Encrypted_Duplicity_Backups_to_Openstack_Swift_Objectstore.txt">Text only version of this article</a>
+</small></p>
+<br><div class='olderthanayear'><p><strong>&#10071; This post is over nine years old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">CloudVPS</a>
+</li>
+<li>
+<a href="#toc_1">Requirements</a>
+</li>
+<li>
+<a href="#toc_2">Install packages</a>
+</li>
+<li>
+<a href="#toc_3">Generate Keys</a>
+</li>
+<li>
+<a href="#toc_4">Duplicity</a>
+</li>
+<li>
+<a href="#toc_5">Script</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p><img src="https://raymii.org/s/inc/img/openstack.jpg" alt="openStack Logo"></p>
+
+<p>This is a guide on backing up your data to an Openstack Swift (Objectstore)
+instance using Duplicity. It provides encrypted backups using gpg so that you
+can safely use any public cloud storage to store them. This tutorial is for
+Ubuntu and CentOS and includes initial setup plus a script to automate it all.</p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<p>We will be using the Dutch provider <a href="http://www.cloudvps.com">CloudVPS</a>, which is not bound to the
+Patriot Act, so your data is more safe than it is with a provider that is
+vulnerable to the Patriot Act. Although your data is already encrypted with GPG,
+you can never be to sure. <a href="http://www.cloudvps.com">CloudVPS</a> provides 10GB free ObjectStore, if you
+have VPS with them, the data is stored on at least 3 machines in 3 locations and
+they have a boatload of certifications.</p>
+
+<p>If you order a VPS or Objectstore at <a href="http://www.cloudvps.com">CloudVPS</a>, please mention my name or
+this article. I&#39;ll get a little referal bonus, which will be used to keep this
+awesome website running.</p>
+
+<p>Openstack is one of those cloudy cloud projects. Warning, keep your buzzword
+bingo cards ready for the <a href="https://en.wikipedia.org/wiki/OpenStack">Wikipedia</a> definition:</p>
+
+<pre><code>OpenStack is a free and open-source software cloud computing platform. It is primarily deployed as an infrastructure as a service (IaaS) solution. The technology consists of a series of interrelated projects that control pools of processing, storage, and networking resources throughout a data center, able to be managed or provisioned through a web-based dashboard, command-line tools, or a RESTful API. It is released under the terms of the Apache License.
+</code></pre>
+
+<p>Basically it is a very nice project which provides an easy and scalable way to:</p>
+
+<ol>
+<li>Virtualize (Compute / Nova) (KVM, VMWare, Xen)</li>
+<li>Provide scalable object access (Swift / Objectstore) (like s3)</li>
+<li>Manage it all using a nice dashboard (Horizon)</li>
+<li>Have a great API which lets people develop applications for it.</li>
+<li>Be open source. There is no vendor lock in, you can switch between any provider providing OpenStack.</li>
+</ol>
+
+<p>My summary is, lets say, sparse. For the sake of this tutorial, we will be using
+the Swift service (Object Store) to store backups we make with Duplicity.</p>
+
+<p>Duplicity is another wonderfull open source project which lets you easily make
+(encrypted) (remote) full or incremental backups. I&#39;ve been using it for many
+years now, it is awesome and very easy to manage.</p>
+
+<p>As we all know, your data is not backed up until it is at least backed up in
+three places:</p>
+
+<ol>
+<li>Locally (homeserver)</li>
+<li>Off site (the cloud)</li>
+<li>Offline (DVD / Tape in a box at your bank)</li>
+</ol>
+
+<p>Why would we want to use the Openstack Swift service to send our backups to
+instead of your own ssh server? Duplicity supports that as well, right?</p>
+
+<p>To be honest, you can use both to your preference. Objectstore provides a nice
+scalable way to acces data. Because it only needs to provide access to data, it
+(can be)/(mostly is) faster than one VPS or off site Rasberry Pi. It (depending
+on the provider) can also be stored on more than one place, without to much user
+hassle.</p>
+
+<p>An example can be a company providing managed services with their own (Openstack
+based) &quot;private cloud&quot;. They also provide backups, of course, and most of the
+time they use Duplicity to make them. It is easier to scale up ObjectStore then
+it is to scale up an SSH server. Both can be done of course, take a SAN or NFS
+backend and it also scales.</p>
+
+<p>Therefore, the choice is up to you. Both can complement each other, sometimes
+one is better and sometimes the other. Speaking like a lawyer, it depends.</p>
+
+<h3 id="toc_0">CloudVPS</h3>
+
+<p><a href="http://www.cloudvps.com">CloudVPS</a> is the only Dutch company providing Openstack and Objectstore as
+far as I know. It is not bound by the patriot act, because it has no American
+locations and it has no American data centers. As far as I know, they only use
+Dutch Data Centers.</p>
+
+<p><a href="http://www.cloudvps.com">CloudVPS</a> has the following points listed on <a href="http://www.cloudvps.com/openstack/object-store/">their website</a>:</p>
+
+<ul>
+<li>Durable: Your data is stored 3 times on 3 different machines in at least two different datacenters. This means you do not have to worry about data loss. You are getting the security of a datacenter redundant file cluster at a fraction of the cost.</li>
+<li>Privacy concious: We are not subject to the Patriot Act like Amazon and others. This means our cloud storage can be used to store privacy sensitive data.</li>
+<li>Certification: The <a href="http://www.cloudvps.com">CloudVPS</a> Object Store is covered by our strict certification. This platform is covered by the ISO 27002, NEN 7510 and the CloudControls that we developed together with KPMG.</li>
+</ul>
+
+<p>The latter can be very important for companies. I like the first and the second
+most, because it takes away hassle for me to set up multiple backup locations.</p>
+
+<p>If you order a VPS or Objectstore at <a href="http://www.cloudvps.com">CloudVPS</a>, please mention my name or
+this article. I&#39;ll get a little referal bonus, which will be used to keep this
+awesome website running.</p>
+
+<p><strong>Note that this article is not sponsored nor endorsed by<a href="http://www.cloudvps.com">CloudVPS</a>, nor am I
+speaking for or as <a href="http://www.cloudvps.com">CloudVPS</a>. They just happen to be the best Dutch
+Openstack provider.</strong></p>
+
+<h3 id="toc_1">Requirements</h3>
+
+<p>You will need the following for this tutorial:</p>
+
+<ul>
+<li>Data to back up</li>
+<li><a href="http://duplicity.nongnu.org">Duplicity</a></li>
+<li>Openstack Swift/Objectstore access</li>
+</ul>
+
+<p>You will need Duplicity version v0.6.22 or higher. <a href="http://duplicity.nongnu.org/CHANGELOG">v0.6.22</a> added support
+for Openstack Swift as a backend.</p>
+
+<p>This tutorial was written for and tested on Ubuntu 12.04, 14.04 and CentOS 6. It
+also works on any other distro where the above requirements are met.</p>
+
+<p>Note that there are more Openstack providers, for example <a href="http://www.rackspace.com/cloud/files/">Rackspace</a>. Do
+note, that they fall under the Patriot Act and thus the NSA probably can access
+your data.</p>
+
+<p>I will be using an example data set containing photo&#39;s in this tutorial. Since
+the cost can sometimes be unclear with these Cloud providers, it is best to
+start with a small data set.</p>
+
+<h3 id="toc_2">Install packages</h3>
+
+<p>We will be using pip to install the required python modules. We also install gpg
+plus of course Duplicity itself. The following commands wil install them.</p>
+
+<p>For debian/ubuntu:</p>
+
+<pre><code>apt-get install python-pip gnupg2 duplicity
+</code></pre>
+
+<p>For CentOS:</p>
+
+<pre><code>yum install python-pip gnupg2 duplicity
+</code></pre>
+
+<p>If the version of Duplicity in the repositories is to old, you can download
+offcial RPM packages from the <a href="http://duplicity.nongnu.org/">Duplicity Website</a>. There is also an <a href="https://launchpad.net/%7Eduplicity-team/+archive/ppa">official
+PPA</a> for Ubuntu users. The duplicity versions in the Ubuntu 12.04 and CentOS
+6 repositories are to old, so those OS versions require manual install.</p>
+
+<p>Use <code>pip</code> to install the packages Duplicity uses for the Openstack
+authentication (keystone) and the actual storage (swift):</p>
+
+<pre><code>pip install python-swiftclient python-keystoneclient
+</code></pre>
+
+<h3 id="toc_3">Generate Keys</h3>
+
+<p>Because we trust nobody except ourselves with our backups, we will be encrypting
+the backups using GPG.</p>
+
+<p>We will be creating two different keys, one for signing and one for encrypting.</p>
+
+<p>First generate the encryption key:</p>
+
+<pre><code>gpg --gen-key
+</code></pre>
+
+<p>Example output. I choose a 4096 RSA/RSA key whithout expiry date:</p>
+
+<pre><code>gpg (GnuPG) 2.0.14; Copyright (C) 2009 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+gpg: directory `/root/.gnupg&#39; created
+gpg: new configuration file `/root/.gnupg/gpg.conf&#39; created
+gpg: WARNING: options in `/root/.gnupg/gpg.conf&#39; are not yet active during this run
+gpg: keyring `/root/.gnupg/secring.gpg&#39; created
+gpg: keyring `/root/.gnupg/pubring.gpg&#39; created
+Please select what kind of key you want:
+   (1) RSA and RSA (default)
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+Your selection? 1
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (2048) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      &lt;n&gt;  = key expires in n days
+      &lt;n&gt;w = key expires in n weeks
+      &lt;n&gt;m = key expires in n months
+      &lt;n&gt;y = key expires in n years
+Key is valid for? (0) 0
+Key does not expire at all
+Is this correct? (y/N) y
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: Objectstore Backup Encryption
+Email address: user@example.com
+Comment: 
+You selected this USER-ID:
+    &quot;Objectstore Backup Encryption &lt;user@example.com&gt;&quot;
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+You need a Passphrase to protect your secret key.
+
+can&#39;t connect to `/root/.gnupg/S.gpg-agent&#39;: No such file or directory
+gpg-agent[25464]: directory `/root/.gnupg/private-keys-v1.d&#39; created
+
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: /root/.gnupg/trustdb.gpg: trustdb created
+gpg: key 672FBC9E marked as ultimately trusted
+public and secret key created and signed.
+
+gpg: checking the trustdb
+gpg: 3 marginal(s) needed, 1 complete(s) needed, PGP trust model
+gpg: depth: 0  valid:   1  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 1u
+pub   4096R/672FBC9E 2014-05-19
+      Key fingerprint = C3F3 8B08 7699 D9C9 9AE1  BFBF 1B01 60C5 672F BC9E
+uid                  Objectstore Backup Encryption &lt;user@example.com&gt;
+sub   4096R/7695ED36 2014-05-19
+</code></pre>
+
+<p>Remember your passphrase! Do the same thing again, now to create the Signing
+key:</p>
+
+<pre><code>gpg --gen-key
+</code></pre>
+
+<p>Again, I choose a non-expiring 4096 bits RSA/RSA key, with a different name:</p>
+
+<pre><code>gpg (GnuPG) 2.0.14; Copyright (C) 2009 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Please select what kind of key you want:
+   (1) RSA and RSA (default)
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+Your selection? 1
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (2048) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      &lt;n&gt;  = key expires in n days
+      &lt;n&gt;w = key expires in n weeks
+      &lt;n&gt;m = key expires in n months
+      &lt;n&gt;y = key expires in n years
+Key is valid for? (0) 0
+Key does not expire at all
+Is this correct? (y/N) y
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: Objectstore Backup Signing
+Email address: user@example.com
+Comment: 
+You selected this USER-ID:
+    &quot;Objectstore Backup Signing &lt;user@example.com&gt;&quot;
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+You need a Passphrase to protect your secret key.
+
+can&#39;t connect to `/root/.gnupg/S.gpg-agent&#39;: No such file or directory
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: key C65A7536 marked as ultimately trusted
+public and secret key created and signed.
+
+gpg: checking the trustdb
+gpg: 3 marginal(s) needed, 1 complete(s) needed, PGP trust model
+gpg: depth: 0  valid:   2  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 2u
+pub   4096R/C65A7536 2014-05-19
+      Key fingerprint = 1FC8 49E2 9A81 2B0E 1BAC  952A 1BCF 6F51 C65A 7536
+uid                  Objectstore Backup Signing &lt;user@example.com&gt;
+sub   4096R/B569F653 2014-05-19
+</code></pre>
+
+<p>We now have two keys, <code>B569F653</code> for backup signing, and <code>7695ED36</code> for backup
+encryption. You can check it with the command <code>gpg --list-keys</code>:</p>
+
+<pre><code>[root@vps2 ~]# gpg --list-keys
+/root/.gnupg/pubring.gpg
+------------------------
+pub   4096R/672FBC9E 2014-05-19
+uid                  Objectstore Backup Encryption &lt;user@example.com&gt;
+sub   4096R/7695ED36 2014-05-19
+
+pub   4096R/C65A7536 2014-05-19
+uid                  Objectstore Backup Signing &lt;user@example.com&gt;
+sub   4096R/B569F653 2014-05-19
+</code></pre>
+
+<p>Make a backup of these keys! Store it on a safe place. The key (hopefully) has a
+password, but still should be kept as secret as possible.</p>
+
+<p>Use the <code>--export-secret-keys</code> option to backup both keys (as ascii, hence the
+<code>-a</code>) to two files:</p>
+
+<pre><code>[root@vps2 ~]# gpg --export-secret-keys -a B569F653 &gt; signing.asc
+[root@vps2 ~]# gpg --export-secret-keys -a 7695ED36 &gt; encryption.asc
+</code></pre>
+
+<p>If you ever need to import those, use the <code>gpg --import</code> command:</p>
+
+<pre><code>root@vps5:~# gpg --import enc.asc 
+gpg: directory `/root/.gnupg&#39; created
+gpg: new configuration file `/root/.gnupg/gpg.conf&#39; created
+gpg: WARNING: options in `/root/.gnupg/gpg.conf&#39; are not yet active during this run
+gpg: keyring `/root/.gnupg/secring.gpg&#39; created
+gpg: keyring `/root/.gnupg/pubring.gpg&#39; created
+gpg: key 672FBC9E: secret key imported
+gpg: /root/.gnupg/trustdb.gpg: trustdb created
+gpg: key 672FBC9E: public key &quot;Objectstore Backup Encryption &lt;user@example.com&gt;&quot; imported
+gpg: Total number processed: 1
+gpg:               imported: 1  (RSA: 1)
+gpg:       secret keys read: 1
+gpg:   secret keys imported: 1
+</code></pre>
+
+<p>The key setup part is now complete. Let&#39;s continue on to making the actual
+backups.</p>
+
+<h3 id="toc_4">Duplicity</h3>
+
+<p>To use Duplicity with Swift we need to set 4 environment variables:</p>
+
+<ul>
+<li>SWIFT_USERNAME: your username, in the form tenant:user</li>
+<li>SWIFT_PASSWORD: your password</li>
+<li>SWIFT_AUTHURL: URL to the Keystone service. For CloudVPS, it would be <a href="http://www.cloudvps.com/community/knowledge-base/cloudvps-object-store-quickstart/">https://identity.stack.cloudvps.com/v2.0/</a></li>
+<li>SWIFT_AUTHVERSION: for keystone authentication, set it to 2.</li>
+</ul>
+
+<p>More information on CloudVPS Object Store can be found on their <a href="http://www.cloudvps.com/community/knowledge-base/cloudvps-object-store-quickstart/">quickstart</a>
+page. Change this to fit your Cloud Providers settings.</p>
+
+<p>You have to create a container/project at your Openstack Provider. I&#39;ve created
+a project named Duplicity, that is what will be used in this example.</p>
+
+<p>Set the variables in your shell:</p>
+
+<pre><code>export SWIFT_USERNAME=&quot;user@example.com&quot;
+export SWIFT_PASSWORD=&quot;passw0rd&quot;
+export SWIFT_AUTHURL=&quot;https://identity.stack.cloudvps.com/v2.0/&quot;
+export SWIFT_AUTHVERSION=&quot;2&quot;
+</code></pre>
+
+<p>Start a simple test. I have a folder with three photo&#39;s used as example.</p>
+
+<pre><code>duplicity ~/test-backup swift://duplicity
+</code></pre>
+
+<p>The whole credentials part was a bit confusing to me. Why do I have a tenant,
+project, bucket, user, password, url and what more? I got errors like
+<code>Connection failed: ClientException No tenant specified</code> and <code>Connection failed:
+ClientException Unauthorised. Check username, password and tenant name/id</code>.</p>
+
+<p>The format of SWIFT_USERNAME should be &quot;tenant:username&quot;. I did not know my
+tenant name, so I used the <a href="http://docs.openstack.org/api/quick-start/content/">Openstack API</a> to find out. First get an Auth
+Token, using cURL:</p>
+
+<pre><code>curl -i &#39;https://identity.stack.cloudvps.com/v2.0/tokens&#39; -X POST -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/json&quot;  -d &#39;{&quot;auth&quot;: {&quot;tenantName&quot;: &quot;&quot;, &quot;passwordCredentials&quot;: {&quot;username&quot;: &quot;user@example.com&quot;, &quot;password&quot;: &quot;passw0rd&quot;}}}&#39;
+</code></pre>
+
+<p>Response:</p>
+
+<pre><code>HTTP/1.1 200 OK
+Vary: X-Auth-Token
+Content-Type: application/json
+Content-Length: 543
+Connection: close
+
+{
+    &quot;access&quot;: {
+        &quot;token&quot;: {
+            &quot;issued_at&quot;: &quot;2014-05-19T03:24:50.971373&quot;,
+            &quot;expires&quot;: &quot;2014-05-20T03:24:50Z&quot;,
+            &quot;id&quot;: &quot;8g2CeQ3kM0tkRAEiu6KmGaI6M8NLFDJ8WQ&quot;
+        },
+        &quot;serviceCatalog&quot;: [],
+        &quot;user&quot;: {
+            &quot;username&quot;: &quot;user@example.com&quot;,
+            &quot;roles_links&quot;: [],
+            &quot;id&quot;: &quot;J0XPUWipImRpkFXAVxJYELAXnXx26jPPj9w&quot;,
+            &quot;roles&quot;: [],
+            &quot;name&quot;: &quot;user@example.com&quot;
+        },
+        &quot;metadata&quot;: {
+            &quot;is_admin&quot;: 0,
+            &quot;roles&quot;: []
+        }
+    }
+}
+</code></pre>
+
+<p>The token is the first <code>id</code>. In this case: <code>8g2CeQ3kM0tkRAEiu6KmGaI6M8NLFDJ8WQ</code>.
+Use the token to get a list of tenants for that token:</p>
+
+<pre><code>curl -i -X GET &#39;https://identity.stack.cloudvps.com/v2.0/tenants&#39; -H &quot;User-Agent: python-keystoneclient&quot; -H &quot;X-Auth-Token: 8g2CeQ3kM0tkRAEiu6KmGaI6M8NLFDJ8WQ&quot;
+</code></pre>
+
+<p>Response:</p>
+
+<pre><code>HTTP/1.1 200 OK
+Vary: X-Auth-Token
+Content-Type: application/json
+Content-Length: 523
+Connection: close
+
+{
+    &quot;tenants_links&quot;: [],
+    &quot;tenants&quot;: [
+        {
+            &quot;handle&quot;: &quot;HANDLE&quot;,
+            &quot;description&quot;: &quot;HANDLE Projectname&quot;,
+            &quot;enabled&quot;: true,
+            &quot;id&quot;: &quot;zORIDFV4ybpbV9bRg1gwNi7NNnTiCw&quot;,
+            &quot;name&quot;: &quot;HANDLE Projectname&quot;
+        },
+        {
+            &quot;handle&quot;: &quot;HANDLE&quot;,
+            &quot;description&quot;: &quot;Main Customer Tenant&quot;,
+            &quot;enabled&quot;: true,
+            &quot;id&quot;: &quot;vnsdmwzPSl8dHm2RQQe&quot;,
+            &quot;name&quot;: &quot;HANDLE&quot;
+        }
+    ]
+}
+</code></pre>
+
+<p>The part you want to have is the <code>&quot;name&quot;: &quot;HANDLE Projectname&quot;</code> part. That is
+your tenant.</p>
+
+<p>In my case, the SWIFT_USERNAME should be:</p>
+
+<pre><code>SWIFT_USERNAME=&quot;HANDLE Projectname:user@example.com&quot;
+</code></pre>
+
+<p>If you are wondering why you don&#39;t specify an URL like so:</p>
+
+<pre><code>duplicity ~/backup-test swift://https://zORIDFV4ybpbV9bRg1gwNi7NNnTiCw.objectstore.eu/duplicity
+</code></pre>
+
+<p>Well that is because Duplicity is smart enough to get that data from the API. If
+you do try it, you will get an error like this:</p>
+
+<pre><code>Connection failed: ClientException Container PUT failed: https://zORIDFV4ybpbV9bRg1gwNi7NNnTiCw.objectstore.eu/zORIDFV4ybpbV9bRg1gwNi7NNnTiCw.objectstore.eu/duplicity 404 Not Found  [first 60 chars of response] &lt;html&gt;
+ &lt;head&gt;
+  &lt;title&gt;404 Not Found&lt;/title&gt;
+ &lt;/head&gt;
+ &lt;bod
+</code></pre>
+
+<p>If the authentication details are correct, Duplicity should ask for the password
+of your gpg keys and then do its magic:</p>
+
+<pre><code>Local and Remote metadata are synchronized, no sync needed.
+Last full backup date: none
+GnuPG passphrase: 
+Retype passphrase to confirm: 
+No signatures found, switching to full backup.
+--------------[ Backup Statistics ]--------------
+StartTime 1400471008.22 (Mon May 19 05:43:28 2014)
+EndTime 1400471008.30 (Mon May 19 05:43:28 2014)
+ElapsedTime 0.08 (0.08 seconds)
+SourceFiles 10
+SourceFileSize 829395 (810 KB)
+NewFiles 10
+NewFileSize 829395 (810 KB)
+DeletedFiles 0
+ChangedFiles 0
+ChangedFileSize 0 (0 bytes)
+ChangedDeltaSize 0 (0 bytes)
+DeltaEntries 10
+RawDeltaSize 825299 (806 KB)
+TotalDestinationSizeChange 726604 (710 KB)
+Errors 0
+-------------------------------------------------
+</code></pre>
+
+<p>Now using <code>list-current-files</code> we can see what is in the backup:</p>
+
+<pre><code>duplicity list-current-files swift://duplicity
+Local and Remote metadata are synchronized, no sync needed.
+Last full backup date: Mon May 19 05:43:17 2014
+Mon May 19 05:19:36 2014 .
+Mon May 19 05:19:36 2014 Metro-5110 Hdk-02.JPG
+Mon May 19 05:19:36 2014 Metro-5110 brand bij Rhoon 02-06-1993 om 17.00 uur.jpg
+Mon May 19 05:19:36 2014 Metro-5110-5124 brand bij Rho 2-06-1993.jpg
+</code></pre>
+
+<p>If we want to restore out backup, we can do it like this:</p>
+
+<pre><code>mkdir /tmp/backup
+duplicity restore swift://duplicity /tmp/backup
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Local and Remote metadata are synchronized, no sync needed.
+Last full backup date: Mon May 19 05:43:17 2014
+GnuPG passphrase: 
+</code></pre>
+
+<p>And we check <code>/tmp/backup</code> to see it worked:</p>
+
+<pre><code>$ ls /tmp/backup/
+total 820K
+drwxr-xr-x  2 remy remy  220 May 19 05:19 .
+drwxrwxrwt 20 root root  440 May 19 05:49 ..
+-rwxr-xr-x  1 remy remy  45K May 19 05:19 Metro-5110 Hdk-02.JPG
+-rwxr-xr-x  1 remy remy 215K May 19 05:19 Metro-5110 brand bij Rhoon 02-06-1993 om 17.00 uur.jpg
+-rwxr-xr-x  1 remy remy  92K May 19 05:19 Metro-5110-5124 brand bij Rho 2-06-1993.jpg
+</code></pre>
+
+<p>And you know what the cloud provider/a three letter american agency has? Just a
+bunch of encrypted blobs:</p>
+
+<p><img src="https://raymii.org/s/inc/img/haha-nsa2.png" alt="CloudVPS"></p>
+
+<h3 id="toc_5">Script</h3>
+
+<p>The below script automates the entire thing and lets you run a backup from a
+cronjob. It requires that you put in your GPG passphrase to make unattended
+backups possible, so make sure you keep the script just as safe as the keys
+themselves.</p>
+
+<p>The below script takes a full backup every 7 days, the rest is incremental.</p>
+
+<p>Also, edit the variables to fit your needs.</p>
+
+<pre><code>#!/bin/bash
+enc_key=7695ED36
+sign_key=B569F653
+src=&quot;/home/remy/backup-test&quot;
+dest=&quot;swift://duplicity&quot;
+
+# OpenStack
+export SWIFT_USERNAME=&quot;HANDLE Projectname:user@example.com&quot;
+export SWIFT_PASSWORD=&quot;passw0rd&quot;
+export SWIFT_AUTHURL=&quot;https://identity.stack.cloudvps.com/v2.0/&quot;
+export SWIFT_AUTHVERSION=&quot;2&quot;
+
+# GnuPG
+export PASSPHRASE=&quot;passw0rd&quot;
+export SIGN_PASSPHRASE=&quot;passw0rd&quot;
+
+
+
+duplicity --verbosity notice \
+        --encrypt-key &quot;$enc_key&quot; \
+        --sign-key &quot;$sign_key&quot; \
+        --full-if-older-than 7D \
+        --num-retries 3 \
+        --asynchronous-upload \
+        --volsize 10 \
+         &quot;${src}&quot; &quot;${dest}&quot;
+</code></pre>
+
+<p>That&#39;s all for today. Have fun using Openstack for your backups!</p>
+Tags: <a href="../tags/backup.html">backup</a>
+, <a href="../tags/backups.html">backups</a>
+, <a href="../tags/centos.html">centos</a>
+, <a href="../tags/cloud.html">cloud</a>
+, <a href="../tags/debian.html">debian</a>
+, <a href="../tags/duplicity.html">duplicity</a>
+, <a href="../tags/gpg.html">gpg</a>
+, <a href="../tags/keystone.html">keystone</a>
+, <a href="../tags/objectstore.html">objectstore</a>
+, <a href="../tags/openstack.html">openstack</a>
+, <a href="../tags/python.html">python</a>
+, <a href="../tags/swift.html">swift</a>
+, <a href="../tags/tutorials.html">tutorials</a>
+, <a href="../tags/ubuntu.html">ubuntu</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

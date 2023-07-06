@@ -1,0 +1,286 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Storing arbitraty data in the Nitrokey HSM/SmartCard-HSM with Elementary Files (EF)
+Author      : 	Remy van Elst
+Date        : 	17-07-2016
+URL         : 	https://raymii.org/s/articles/Storing_arbitraty_data_in_the_Nitrokey_HSM.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![][1]
+
+> Three Nitrokey's in their bags
+
+This is a guide which shows you how to write small elementary files to a
+nitrokey HSM. This can be usefull if you want to securely store data protected
+by a user pin. You can enter the wrong pin only three times, so offline brute
+forcing is out of the picture.
+
+### Introduction
+
+The [Nitrokey HSM][2] is an open hardware and open software device. It is a USB
+version of the [SmartCard-HSM][3]. Both the [SmartCard-HSM][4] as the [Nitrokey
+HSM][5] have sources available and are fully supported by the [OpenSC][6]
+project.
+
+I have multiple [articles on][7] the [Nitrokey HSM/SmartCard-HSM][8]. I also
+have a lot of professional experience with large expensive HSM hardware.
+
+If you want to know more on the Nitrokey HSM then please read the [getting
+started articles][7].
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+![][10]
+
+> The SmartCard-HSM
+
+You could for example, store a file in the HSM and send it via the old-fashioned
+mail to someone, without sending the required pin. You send that via a different
+channel, preferably privately in person. The other person then can read the file
+of the HSM using the PIN. Since you only have 3 tries for the correct PIN, you
+know that an offline brute force attack is not likely to happen. If you
+encrypted a file an placed it on a regular USB drive, the post could be
+intercepted and stored for offline cracking by a government agency, without you
+knowing it. Because the pin entries are recorded, you know immidiately when the
+device has been tampered with.
+
+THe documentation states that for different PIN lengths there are different
+retry counters:
+
+  * The SmartCard-HSM enforces a retry counter <= 3 for PIN length 6
+  * The SmartCard-HSM enforces a retry counter <= 5 for PIN length 7
+  * The SmartCard-HSM enforces a retry counter <= 10 for PIN length larger than 7
+
+The Nitrokey HSM/SmartCard-HSM implements a smartcard over USB. They allow, next
+to certificates, private keys and public keys, also arbitrary data to be stored
+in so called [elementary files (EF)][11].
+
+Do note that the filesize is limited and this is not meant to store your photo
+collection. At the end of the page the exact filesize limit is specified for the
+Nitrokey HSM/SmartCard-HSM.
+
+I will be using a test file, 16 bytes long, containing the line `Remy is
+awesome`.
+
+### Writing files to the HSM
+
+Using the `pkcs11-tool` we can write data to the HSM:
+
+    
+    
+    pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --write-object ~/tmp/hsm/smallfile --type data --id 5 --label 'data2'
+    
+
+Output:
+
+    
+    
+    Using slot 0 with a present token (0x0)
+    Created Data Object:
+    Data object 26411536
+      label:          'data2'
+      application:    'data2'
+      app_id:         <empty>
+      flags:           modifiable
+    
+
+Make sure to specify a `--label`, otherwise you cannot access it later on. (You
+can, the label will be empty (`''`) but just set a label.)
+
+Set the `--private` flag when writing to make sure you need to login first
+before getting access to the stored data:
+
+    
+    
+    pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --write-object ~/tmp/hsm/smallfile --type data --id 5 --label 'data2' --private
+    
+
+Otherwise the data will be accessible to everone that has access to the device.
+
+### Viewing the data
+
+Both the `pkcs15-tool` and the `pkcs11-tool` can be used to view the data. The
+`pkcs11-tool` is the most convinient way:
+
+    
+    
+    pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --read-object --type data --label 'data2'
+    
+
+Output:
+
+    
+    
+    Using slot 0 with a present token (0x0)
+    Remy is awesome
+    
+
+Using `pkcs15-tool` gives you the HEX output:
+
+    
+    
+    pkcs15-tool --dump
+    Data object 'data'
+      applicationName: data
+      Path:            e82b0601040181c31f0201::cf00
+      Data (16 bytes): 52656D7920697320617765736F6D650A
+    
+
+#### PKCS#15 HEX to ASCII
+
+`pkcs15-tool` can specifically read the data object but it dumps the data in
+HEX:
+
+    
+    
+    pkcs15-tool --read-data-object data 
+    
+
+Output
+
+    
+    
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    Data Object (16 bytes): < 52 65 6D 79 20 69 73 20 61 77 65 73 6F 6D 65 0A >
+    
+
+If you've set the private flag you will need to enter the pin:
+
+    
+    
+    $ pkcs15-tool --read-data-object data2
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    Please enter PIN [UserPIN]: 
+    Data Object (16 bytes): < 52 65 6D 79 20 69 73 20 61 77 65 73 6F 6D 65 0A >
+    
+
+This data can be converted to ascii with the `xxd` command:
+
+    
+    
+    $ echo '52 65 6D 79 20 69 73 20 61 77 65 73 6F 6D 65 0A' |  xxd -r
+    emy is awesome
+    
+
+But there is data missing here. As the manual states, (`SmartCard-HSM, AGD User
+Manual for Version V2.3` section 5.2.2 `Read binary`):
+
+    
+    
+    There is a known incompatibility with the READ BINARY variant defined in [ISO7816-4]:The SmartCard-HSM returns the raw data contained in the EF and does not prefix a tag 53 and the length.
+    
+
+By prefixing the data returned with `00` we get the full string back:
+
+    
+    
+    $ echo '00 52 65 6D 79 20 69 73 20 61 77 65 73 6F 6D 65 0A' |  xxd -r
+    Remy is awesome
+    
+
+Here is a one liner that uses `awk` to print text between `<` and `>` with a
+`00` prefix, piped to `xxd`:
+
+    
+    
+    pkcs15-tool --read-data-object data 2>&1 | awk -F'[<|>]' '/Data Object/ {print "00"$2}' | xxd -r
+    
+
+The one liner doesn't work if you've got `--private` data, since you can't enter
+the PIN.
+
+### Output to a file
+
+The data can be placed in a file as well by using the `--output-file` flag:
+
+    
+    
+    pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --read-object --type data --label data --output-file test
+    
+    $ cat test 
+    Remy is awesome
+    
+
+### Deleting data
+
+You create space on the HSM or just to remove data you don't need anymore, use
+the `--delete-object` flag with the correct label:
+
+    
+    
+    pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type data --application-label data
+    
+
+Make sure you delete the correct data, otherwise you might just have removed
+your keypair.
+
+### Maximum file size
+
+The files I wrote are all small files. Tests show that the maximum filesize for
+these elementary files (EF) is `5000 bytes`.
+
+Specifically tested by writing a file larger than 5000 bytes (`test`) to the HSM
+and reading it back to an output file (`test2`):
+
+    
+    
+    $ du -b test*
+    5008  test
+    5000  test2
+    
+
+That means that in this case you must make sure to write less than 5 KB to the
+HSM. Plenty of space for some sensitive text files.
+
+   [1]: https://raymii.org/s/inc/img/3hsm.jpg
+   [2]: http://nitrokey.com
+   [3]: http://www.smartcard-hsm.com/
+   [4]: http://www.smartcard-hsm.com/opensource.html
+   [5]: https://github.com/nitrokey
+   [6]: https://github.com/OpenSC/OpenSC/wiki/SmartCardHSM
+   [7]: https://raymii.org/s/articles/Get_Started_With_The_Nitrokey_HSM.html
+   [8]: https://raymii.org/s/articles/Nitrokey_HSM_in_Apache_with_mod_nss.html
+   [9]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [10]: https://raymii.org/s/inc/img/sc-hsm.jpg
+   [11]: http://www.cardwerk.com/smartcards/smartcard_standard_ISO7816-4_5_basic_organizations.aspx#chap5_1_3
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

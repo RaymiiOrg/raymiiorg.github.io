@@ -1,0 +1,270 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	All packages that were present in Ubuntu 18.04 but absent in Ubuntu 20.04
+Author      : 	Remy van Elst
+Date        : 	19-05-2021
+URL         : 	https://raymii.org/s/articles/All_packages_that_were_present_in_Ubuntu_18.04_but_removed_in_20.04.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+Otherwise titled `Figure out the differences between two apt repositories`. Recently I've had a few packages that I often use but were missing from Ubuntu 20.04 LTS. One is [ckermit](/s/blog/Ive_packaged_up_CKermit_as_a_snap_for_Ubuntu_20.04.html) and the other is [gnash](/s/blog/Ive_packaged_up_Gnash_as_a_Snap_for_modern_linux.html), both of which I 'converted' to a snap. (In air quotes because I just converted the 18.04 deb). This made me wonder if I could figure out a list of that are present in Ubuntu 18.04, but absent in Ubuntu 20.04. As `apt` and `dpkg` are standardized tools and and package formats, we can use a few shell tools to parse the package lists and compare them side by side.
+This post shows you how to do the comparison yourself and I discuss the removed packages a bit. Some are version increments (like `gcc-6` in Ubuntu 18.04 but `gcc-7`in Ubuntu 20.04),  and some are packages that were combined into one instead of split up  (like `ltsp` in Ubuntu 20.04 but a bunch of seperate `ltsp-$postfix` packages instead  in Ubuntu 18.04). Many others are just replaced by newer versions (`python-ceph` vs `python3-ceph`). The list of differences is provided as a download, both ways.
+
+![snap upload][7]
+
+> Uploading a 'legacy-software' snap package to the snap store
+
+As far as I can see, users find such removal confusing or very annoying, see
+this [zenmap/nmap][5] ticket as an example, or [cherrytree][6]. Which I
+completely  understand. As a user,  I don't care about older toolkits
+(`gtk2`/`qt4`), I just want to use the software or workflow I'm used to. 
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+If you just want to see the list, here are the text files:
+
+- [Packages **present** in 18.04 but **absent** in 20.04][3]
+- [Packages **absent** in 18.04 but **present** in 20.04][4]
+
+Both text files have no filtering of any kind, that is up to you. It's over
+ten thousand lines, so have fun!
+
+### Comparing available apt packages between Ubuntu versions
+
+
+There are many tools to locally query packages or to query packages in your currently
+used repository, but I couldn't find any to compare two repositories. But, not an issue
+since an `apt` repository has a few files that are basically a table of contents for
+what is in that repository. Those files are plain text, which is super because we can 
+then use regular shell tools to operate on those files. Just as I love it, plain and simple
+text.
+
+ I'm skipping over different architectures and just comparing `amd64` in this
+post, as that would complicate things more than I want. Version numbers and names are
+used interchangeably:
+
+- Ubuntu 20.04 has codename `focal`
+- Ubuntu 18.04 has codename `bionic`
+
+You could do this with other ubuntu versions or even debian as long as you use the correct
+names and URL's. 
+
+Ubuntu has multiple repositories, `main`, `universe`, `multiverse` and `$codename-updates`. Some
+packages have crossed over, so I'll be concatenating all repositories into one big file per distro
+version for comparison. `ckermit` for example was in `multiverse` in Ubuntu 18.04 but is in `universe`
+in Ubuntu 21.04 and onwards. 
+
+
+Create a folder to work in, since we'll be downloading and creating files:
+
+	mkdir package-compare
+	cd package-compare
+
+In total we have 6 repositories to compare, so let's start by downloading all of the
+files containing the earlier mentioned table of contents:
+
+	wget -O bionic-main.gz http://nl.archive.ubuntu.com/ubuntu/dists/bionic/main/binary-amd64/Packages.gz
+	wget -O focal-main.gz http://nl.archive.ubuntu.com/ubuntu/dists/focal/main/binary-amd64/Packages.gz
+
+	wget -O bionic-universe.gz http://nl.archive.ubuntu.com/ubuntu/dists/bionic/universe/binary-amd64/Packages.gz
+	wget -O focal-universe.gz http://nl.archive.ubuntu.com/ubuntu/dists/focal/universe/binary-amd64/Packages.gz
+
+	wget -O bionic-multiverse.gz http://nl.archive.ubuntu.com/ubuntu/dists/bionic/multiverse/binary-amd64/Packages.gz
+	wget -O focal-multiverse.gz http://nl.archive.ubuntu.com/ubuntu/dists/focal/multiverse/binary-amd64/Packages.gz
+
+Decompress all files in this folder:
+
+	gunzip *.gz
+
+Each entry in that file has a huge number of fields (`Package`,
+`Architecture`, `Version`, `Priority`, `Section`, `Origin`, `Maintainer`, and
+many more), but we're only interested in the actual package name (`Package:`),
+so extract all package names into a new file using the below commands:
+
+
+	awk '/^Package:/ {print $2}' focal-universe  > focal-universe-pkgs.txt
+	awk '/^Package:/ {print $2}' bionic-universe  > bionic-universe-pkgs.txt
+
+	awk '/^Package:/ {print $2}' focal-multiverse  > focal-multiverse-pkgs.txt
+	awk '/^Package:/ {print $2}' bionic-multiverse  > bionic-multiverse-pkgs.txt
+
+	awk '/^Package:/ {print $2}' focal-main > focal-main-pkgs.txt
+	awk '/^Package:/ {print $2}' bionic-main > bionic-main-pkgs.txt
+
+
+You could of course automate all repeating lines with a loop if you are going
+to do this more often, but for this one-off post doing it manually was just fine.
+
+One last transformation to combine all repository lists per distro version into one
+and we're ready to start comparing:
+
+	cat bionic-*-pkgs.txt > bionic-all.txt
+	cat focal-*-pkgs.txt > focal-all.txt
+
+
+The below diff command will show you all packages **present** in Ubuntu 18.04
+but **absent** in Ubuntu 20.04:
+
+	diff --new-line-format="" --unchanged-line-format=""  <(sort bionic-all.txt)
+	<(sort focal-all.txt) | less
+
+One of the items at the top of the list is `Amarok`, a KDE 4 music player, and scrolling
+through the list gives many more pieces of seemingly outdated or unmaintained packages.
+
+If you want it the other way around, so **absent** in Ubuntu 18.04 but
+**present** in Ubuntu 20.04, change the filename order:
+
+	
+	diff --new-line-format="" --unchanged-line-format="" <(sort focal-all.txt)
+	<(sort bionic-all.txt)  | less
+
+A fun looking package name `darcula`, turns out to only be in the Ubuntu 20.04 and
+upwards repositories, not in 18.04.
+
+To make the list a bit more readable, you can use `grep` to exclude `libs` and packages
+that look like version numbers (`gcc-6` vs `gcc-7`). It's not the best regex, but feel
+free to refine it:
+
+	diff --new-line-format="" --unchanged-line-format=""  <(sort bionic-all.txt)
+	<(sort focal-all.txt) | grep -vE "^lib" | grep -vE -- "-[0-9.]{1,4}-" | less
+
+
+### Discussing the differences
+
+Let's start with the list of removed packages in 20.04. Since we're talking LTS
+releases, all removed packages have major impact if you're a user of such package.
+For me, the removal of [gnash][2] and [ckermit][1] are inconvenient. But, since
+it's all open source software, I can just go and grab the source myself, as I did 
+and turned those into snaps. 
+
+Packages that are missing are mostly removed because they're either
+old/unmaintained or because development libraries used by those applications are old
+or unmaintained. Many applications using Python2 (or bindings to, like gtk-python)
+were removed from the repository (like [zenmap][5] or [cherrytree][6]) and the same can be said for
+a bunch of `KDE4 / QT4` applications like `Amarok`. The CherryTree developer recommends
+to use the flatpak version or enable a PPA. Many many python libraries packaged as 
+packages are removed, or replaced by their versioned-named counterparts. An example
+of this is `python-cepth` vs. `python3-ceph`. Same goes for `ruby-xxx`, `php-xxx` 
+and `node-xxx`. I'm on two minds about programming development libraries as system
+packages, I like the convenience for local development, but for "production" deployments
+I want a versioned environment under my control, like `rbenv` or `pyenv`. 
+
+Then there is a whole bunch of packages with a specific version in their name, like
+`gcc-5`, `cpp-5`, `clang-3.9`, which are technically still present in Ubuntu 20.04,
+but newer versions (`gcc-7` etc). That is a known thing, Ubuntu releases have always
+worked that way. The major package versions on an Ubuntu release don't change, 
+PHP will always be 5.4 (for example) in Ubuntu 12.04 (example). If you want PHP 7, you
+need to upgrade the major ubuntu version or compile yourself.
+
+The same can be said for almost every package with a name starting with `lib`, or `linux`,
+the latter being kernel versions. They probably have not disappeared, but are replaced
+by a more recent version. One package I sometimes use is `libboost`, a C++ development
+library. In 18.04 it's package name is `libboost1.62-dev` (or 1.65) and on 20.04 it is
+`libboost-1.67-dev` (or 1.71). 
+
+
+On [Reddit][10], user `elatllat` gives a nice overview as well. Quoting the
+numbers below. Most packages removed are related to sub-packages:
+
+	738 python
+	151 php
+	144 linux
+	 70 kde
+	 59 ruby
+	 56 eclipse
+	 55 libghc
+	 53 libvisp
+	 49 libgnatvsn
+	 48 libgnatprj
+	 39 node
+	 38 opensips
+	 38 libjs
+	 36 xserver
+
+
+Many additions in 20.04 are also related to subpackages:
+
+	1292 librust
+	 595 python
+	 406 golang
+	 383 r
+	 366 libghc
+	 245 ruby
+	 195 node
+	  98 gambas
+	  79 php
+	  78 elpa
+	  68 fonts
+	  63 librte
+	  62 dict
+	  47 oem
+	  45 linux
+	  40 libmkl
+	  39 puppet
+
+Notable changes are a lot of rust packages added and eclipse removed. Top changes
+are still in the development packages, `node`, `rust`, `python`, `ruby` and `golang`.
+
+All in all the list of packages removed is not that big if you take the above
+in to consideration. Mostly unmaintained software, or software that depends on
+unmaintained libraries. Which still can be annoying. Next to the above
+examples,  one other tool I use daily is `shutter`, a screenshot tool which
+supports simple editing as well as region or window specific screenshots.  But
+it depends on `gtk2`, so I have to do the special dance via the PPA and 
+manually install some other dependencies. Works perfectly fine afterwards,  so
+the developers or package maintainers just moved away the hassle / work  from
+them to the users. [Canonical even blogged about the shutter snap][8], which
+[Allen Pope][9] snapped up.
+
+
+[1]: /s/blog/Ive_packaged_up_CKermit_as_a_snap_for_Ubuntu_20.04.html
+[2]: /s/blog/Ive_packaged_up_Gnash_as_a_Snap_for_modern_linux.html
+[3]: /s/inc/downloads/present-18.04-but-absent-20.04.txt
+[4]: /s/inc/downloads/absent-18.04-but-present-20.04.txt
+[5]: https://github.com/nmap/nmap/issues/2022
+[6]: https://askubuntu.com/questions/1258007/how-to-install-cherrytree-on-ubuntu-20-04-focal-fossa
+[7]: /s/inc/img/snap_upload.png
+[8]: https://ubuntu.com/blog/a-blast-from-the-past-shutter
+[9]: https://github.com/popey/shutter-snap/blob/master/snap/snapcraft.yaml
+[10]: https://old.reddit.com/r/linux/comments/neqgr4/all_packages_that_were_present_in_ubuntu_1804_but/gyhs1k4/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,151 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Ansible - add apt_key inline
+Author      : 	Remy van Elst
+Date        : 	19-04-2018
+URL         : 	https://raymii.org/s/snippets/Ansible_-_add_apt_key_inline.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Using the apt _key module one can add an APT key with ansible. You can get the
+key from a remote server or from a file, or just a key ID. I got the request to
+do some stuff on a machine which was quite rescricted (so no HKP protocol) and I
+was asked not to place to many files on the machine. The apt_ key was needed but
+it could not be a file, so using a YAML Literal Block Scalar I was able to add
+the key inline in the playbook. Not the best way to do it, but one of the many
+ways Ansible allows it.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Literal Block Scalar
+
+In the [Ansible documentation][2] we find the Literal Block Scalar:
+
+> Values can span multiple lines using | or >. Spanning multiple lines using a
+"Literal Block Scalar" | will include the newlines and any trailing spaces.
+
+Since it's still YAML you do need to have the indentation correct.
+
+### Example
+
+In my case it is a playbook for MediaWiki, here's the code:
+
+    
+    
+    - name: Ubuntu | Configuration | Add mediawiki apt key
+      apt_key:
+        data: |
+          -----BEGIN PGP PUBLIC KEY BLOCK-----
+          Version: SKS 1.1.6
+          Comment: Hostname: keyserver.ubuntu.com
+    
+          mQINBFeYfNABEAC6licKZEtY8NbvlDg5l49r3MBksYJ4ggcUQfScLJj8xUZ5Dyqnmw9uPuzr
+          ct4sT/MSuVYE1I8fiWGL2SdjFaVMk7Vao7QFWUj+WLenOg2jLOwoOGRGdqaeMeH4/q71KqPA
+          VyHeDOfyHg+Wuhy4Z7whHDVXpebP6iP6yGfl6XlTyayUqS9C7vqhidAQ4y7mg6NFlAIiuRr8
+          ilkPOz4dQhLvOxlbUEDcOcVANHUQQ7AMKMsA9kGcFZd1fhccjlc3LAkPWDlsUENqHpD9b93+
+          /UkKju3dMOZEOWUrMHxqmGCj3F85QxRqz370MEurq76PhxbbQ3y/U2sG/ge+LxGbqNIytSMt
+          Nc37XNV5wMYIB04WzkCOuQnzvN6egVoeX50OcrCPi7d90UznSRbiBmR/BL2p9J+uP8cdz0Tu
+          UH3I/Ddou/To1l5LibhT4lO1NGjefRDV41fpy+GDZ4QDxeK8au7xsJxrU1f8oGUn9qLSAbZa
+          od4gpfRU/94ayfokf6UiYEkx5JJAzAW+ew7/+85FWKFxn8pymaYD5jtvGVeD7HTv5opBrjvx
+          4hUElh8drt/VufBQxJCNwvNn75CoJfQjhResNqA0S6Dh7UqAPGpcOlo++7N4bXMqEBcIgaXO
+          Q0+PhH/cvwlmR22rSIIVSAb8eWtkujWe7X2R+VjbaUHfjIxMfQARAQABtD5NZWRpYVdpa2kg
+          cmVsZWFzZXMgcmVwb3NpdG9yeSA8d2lraXRlY2gtbEBsaXN0cy53aWtpbWVkaWEub3JnPokC
+          PgQTAQIAKAUCV5h80AIbAwUJBWhHAAYLCQgHAwIGFQgCCQoLBBYCAwECHgECF4AACgkQkOn4
+          PyIlDdeyDRAAo1NNx8dGoet6MuPnu6XgAXZUIDDi2VXTMGCz88gPOZFhOmd991enKpIDowb8
+          wLf93Hr0Ery5vYWUmQ9T5y3wp771JfvZ2ZzrIgGgZ9Gru9PswrPQfDp6HYuAHqy3Tez8VRFf
+          dBYXT3W2bb5t0VCD+dcKaR3vgiXV9Rt0ol/FWVNgoXkBaY234hesveEOUOwuJng6mK5t1qkZ
+          BB7nJRuclZOCeG19UamaVpDZwEg6g2q/e3SnNJf0YfjzKwMAx0kwhggkHc/kpMuN3rfi61F9
+          1fmXrw2teV/1SlDSmFQdslmYrlQDowXaTU0OOU7bGSOUpeVfmIK8vs10i1/2xNRn7ipYzpre
+          kEn8hROYPPnqb801xMWO0vBqBwEnNIpHpb/72UMkYG4NuvpjQ7Ubj86bWm6C8GQvqpNHC3oU
+          yuiZYi8OXrg+kZBfEK/X3OuuE1P9oKsZ4PYfIgRRDZtuS2Prgme2zuSf6hSHf5h7WWYXtB1f
+          sCOcjnHbbh6UjWRbr1Vl3EWd7lupiPODClkDhExKK/VM2KKLjU5UfRPZfWxOLspoJ8dfIDix
+          hNxhmVRAU9Z3AhJUtCsmOvSIhzGhZwwm35B4r+rlZnsVtuLj9Bjs0jouwc1pqSKMAqQmO0gZ
+          yg9N3k2tRxDorAM0S2i0FaLfsM0aovmahbb7lqYTVmmZvmc=
+          =svAF
+          -----END PGP PUBLIC KEY BLOCK-----
+      tags:
+        - mediawiki
+    
+    - name: Ubuntu | Configuration | add mediawiki apt repo
+      apt_repository:
+        repo: deb https://releases.wikimedia.org/debian jessie-mediawiki main
+        state: present
+      tags:
+        - mediawiki
+    
+
+If you do not have the indentation correct, like this:
+
+    
+    
+    - name: Ubuntu | Configuration | Add mediawiki apt key
+      apt_key:
+        data: |
+    -----BEGIN PGP PUBLIC KEY BLOCK-----
+    Version: SKS 1.1.6
+    Comment: Hostname: keyserver.ubuntu.com
+    
+    mQINBFeYfNABEAC6licKZEtY8NbvlDg5l49r3MBksYJ4ggcUQfScLJj8xUZ5Dyqnmw9uPuzr
+    ct4sT/MSuVYE1I8fiWGL2SdjFaVMk7Vao7QFWUj+WLenOg2jLOwoOGRGdqaeMeH4/q71KqPA
+    VyHeDOfyHg+Wuhy4Z7whHDVXpebP6iP6yGfl6XlTyayUqS9C7vqhidAQ4y7mg6NFlAIiuRr8
+    
+
+Ansible will complain and fail:
+
+    
+    
+    ERROR! Syntax Error while loading YAML.
+      could not find expected ':'
+    
+    The error appears to have been in '[...]roles/mediawiki/tasks/main.yml': line 8, column 1, but may
+    be elsewhere in the file depending on the exact syntax problem.
+    
+    The offending line appears to be:
+    
+    -----BEGIN PGP PUBLIC KEY BLOCK-----
+    Version: SKS 1.1.6
+    ^ here
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: http://web.archive.org/web/20180419061010/http://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

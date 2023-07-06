@@ -1,0 +1,520 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Solve word puzzles with bash
+Author      : 	Ben Everard
+Date        : 	08-03-2015
+URL         : 	https://raymii.org/s/articles/Solve_word_puzzles_with_bash.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This article was originaly published in [Linux Voice, issue 1, April 2014][1].
+This issue is now available under a [Creative Commons BY-SA license][2]. In a
+nutshell: you can modify and share all content from the magazine (apart from
+adverts), even for commercial purposes, providing you credit Linux Voice as the
+original source, and retain the same license.
+
+This remix is converted manually to Markdown and HTML for ease of archiving and
+copy-pasting.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Other converted Linux Voice articles [can be found here][4].
+
+* * *
+
+The humble command line interface is amazingly powerful, for both real work and
+playing games.
+
+### Why do this?
+
+  * Get to grips with egrep and extended regular expressions.
+  * Never get stuck on word puzzles again.
+  * Search through all the text files on your system with ease.
+
+### Solve word puzzles with Bash
+
+It's no secret that Bash, the shell on most Linux systems, is an incredibly
+powerful tool, however it's one that many Linux users don't take the time to
+fully learn. A lot of tutorials focus on boring but practical uses like managing
+log files, but it doesn't have to be this way. Bash can be fun.
+
+Here at Linux Voice, we want to give this tool some love, so we're inaugurating
+the Grep Games. This is an event where you use Bash together with grep to solve
+the sort of word puzzles you find in glossy magazines.
+
+Here's an example: what is `aedh` an anagram of? To solve this, you're going to
+need a list of English words. This comes as standard on most Linuxes, and can
+usually be found at `/usr/share/dict/words` or `/usr/dict/words`. If it's not
+there, check for a words or wordlist package in your package manager. Failing
+that, you can grab it from the DVD or [linuxvoice.com][5].
+
+In this article, we'll use `/usr/share/dict/words`, but you should change this
+if your words file is elsewhere. We'll use egrep (like grep but uses extended
+regular expressions, which have a cleaner syntax than plain regular explessions)
+to find the right words. If you haven't come across this tool before, take a
+look at the boxout on grep and regular expressions, right.
+
+You can find any word that contains just the letters `aedh` with this line:
+
+    
+    
+    egrep "^[aedh]*$" /usr/share/dict/words 
+    
+
+The `^` matches the start of the line, `$` the end of the line and `[aedh]*`
+matches any string of the letters `aedh`.
+
+However, these aren't all anagrams. Any anagram must be exactly four letters
+long, so let's only match words of exactly four characters:
+
+    
+    
+    egrep "^[aedh]{4}$" /usr/share/dict/words 
+    
+
+This is a bit better, but there are still some with repeated characters. To
+solve this we're going to pipe the output into a second instance of egrep, like
+this:
+
+    
+    
+    egrep "^[aedh]{4}$" /usr/share/dict/words | egrep -v "(.).*\1" 
+    
+
+If you run this, you'll find that it only returns one line, the anagram of
+`aedh`. The second egrep has the `-v` flag, which means that it works in
+reverse; that is, it only outputs lines that don't match the pattern.
+
+The pattern `(.).*\1` matches any line with a repeated character in it because
+`(.)` matches any character, `.*` matches any string of any length (including
+nothing) and `\1` is a back reference to the first character. For more details
+on this, see backreferences in the boxout on Grep and regular expressions.
+
+Sometimes an anagram will contain a repeated letter, and that would be missed by
+the above. Take, for example, `eeeddh`. The previous method won't work, so
+instead we need to match different letters different numbers of times. The code
+for this is:
+
+    
+    
+    egrep "^[edh]{6}$" /usr/share/dict/words | egrep "*^[^e]*(e[^e]*) {3}[^e]*$" | egrep "^[^d]*(d[^d]*){2}[^d]*$" | egrep -v "([^ed]).*\1]*" 
+    
+
+Here the second and third egreps both work in the same way. They make sure that
+a particular letter is repeated exactly a certain number of times.
+
+`[^e]` matches any character except `e`, so the second egrep matches any string
+that starts at a new line, has any character other than a letter `e` zero or
+more times followed by three occurrences of the bracketed expression (which
+contains `e` once and any string of other characters), then anything that isn't
+an e zero or more times followed by an end of line.
+
+The final egrep makes sure that nothing other than `e` and `d` are repeated.
+
+![regex101][6]
+
+> [www.regex101.com][7] is an online tool to help you understand regular
+expressions. Unfortunately it uses regular expressions from PHP, Python and
+JavaScript, which are slightly different from egrep.
+
+### I'll have a vowel please Carol
+
+This solves complete anagrams, but that's not always what you want to do. In the
+UK there's a quiz show called Countdown, in which the contestants have to make
+the longest word they can out of a given sequence of nine letters.
+
+You can solve this in a similar manner to the above problem, but by using ranges
+for the number of characters rather than an absolute number.
+
+Take a look at this example for the letters `a,e,e,f,d,m,t,t,i`:
+
+    
+    
+    egrep "^[aefdmti]{1,9}$" /usr/share/dict/words | egrep "*^[^e]*(e[^e]*){0,2}[^e]*$" | egrep "^[^t]*(t[^t]*){0,2}[^t]*$" | egrep -v "([^et]).*\1] 
+    
+
+However, this doesn't quite solve our problem. We don't want all the words that
+match, just the longest one.
+
+To get this, we need to go beyond a single line and create a script.
+
+    
+    
+    #!/bin/bash 
+    longestLength=0 
+    longestWord="" 
+    while read word 
+    do 
+      if (( ${#word} > longestLength )) 
+      then 
+        longestLength=${#word} 
+        longestWord=$word 
+      fi 
+    done 
+    echo $longestWord 
+    
+
+This code reads each line from standard in (`while read line`) and checks its
+length against the previous longest word. At the end, it echos (prints) the
+longest word its found.
+
+To include this with the previous egrep commands, just use:
+
+    
+    
+    egrep "^[aefdmnti]{1,9}$" /usr/share/dict/words | egrep "*^[^e]*(e[^e]*){0,2}[^e]*$" | egrep "^[^t]*(t[^t]*){0,2}[^t]*$" | egrep -v "([^et]).*\1]*" | bash longest.sh 
+    
+
+Where `longest.sh` is the filename of the above script (it's on the website and
+DVD).
+
+Another puzzle similar to Countdown is the word wheel. This is where there's a
+series of letters on the outside of a circle and one in the middle. You then
+have to find as many words as possible that contain the letter in the middle and
+two or more of the letters on the outside.
+
+![wordwheel][8]
+
+> Word wheels: a challenging mental puzzle or a simple command?
+
+The example puzzle on the facing page can be solved with:
+
+    
+    
+    egrep "^[fedpt]*i[fedpt]*$" /usr/share/dict/words | egrep -v "(.).*\1" | egrep ".{3,}" 
+    
+
+![gvim][9]
+
+> Many programs have some form of regexes built in. Here, gvim is finding all
+USB messages for user ben in the syslog.
+
+Word ladders are a bit different to the puzzles we've looked at so far. Instead
+of arranging various letters into words, you start with a word, then each rung
+of the ladder you change a single letter from the word above until you end up
+with a final word.
+
+There are two separate parts to look at. The first part is finding all the words
+that can follow a particular word. The second part is finding out if a
+particular word can precede the final word.
+
+Let's try the ladder:
+
+    
+    
+    live 
+    ---- 
+    ---- 
+    ---- 
+    raft 
+    
+
+To solve this you have to come up with three words.
+
+    
+    
+    #!/bin/bash 
+    for x in $(egrep "^liv.$|^li.e$|^l.ve$|^.ive$" /usr/share/dict/words); do 
+      query='^.'${x:1:3}'$|^'${x:0:1}'.'${x:2:2}'$|^'${x:0:2}'.'${x:3:1}'$| ^'${x:0:3}'.$' 
+      for y in $(egrep $query /usr/share/dict/words); do 
+        query2='^.'${y:1:3}'$|^'${y:0:1}'.'${y:2:2}'$|^'${y:0:2}'.'${y:
+    3:1}'$|^'${y:0:3}'.$'
+        for z in $(egrep $query2 /usr/share/dict/words | egrep "^raf.$|^ra.t$|^r.ft$|^.aft$"); do
+          if [ $x != $y ] && [ $x != $z ] && [ $x != "live" ] && [ $x != "raft" ] && [ $y != $z ] && [ $y != "live" ] && [ $y != "raft" ] && [ $z != "live" ] && [ $z != "raft" ]; then 
+            echo "live"
+            echo $x
+            echo $y 
+            echo $z 
+            echo "raft" 
+            echo "---"
+          fi
+        done
+      done
+    done
+    
+
+This code performs three for loops, one for each of the missing words. The first
+for loop runs on every word that matches the regular expression `"^liv.$|^li.
+e$|^l.ve$|^.ive$"` this is effectively four different regular expressions
+separated by `|`. Together, it will return any word that matches any one of
+these sub-expressions.
+
+Inside this for loop it runs the line:
+
+    
+    
+    query='^.'${x:1:3}'$|^'${x:0:1}'.'${x:2:2}'$|^'${x:0:2}'.'${x:3:1}'$|^'$ {x:0:3}'.$' 
+    
+
+This just builds up a regular expression equivalent to the first one but for
+every word returned. `x` is the variable holding the word, and `${x:1:3}` (for
+example) returns characters 1 through 3 of the word held in variable `x` (the
+first character is 0).
+
+The second for loop works in exactly the same way as the first. The final for
+loop is a bit different because it not only has to match the word above it, but
+the word below it as well. For this reason it runs two egreps on the words: one
+to match the words above, and the second to match the words below. The if
+statement simply removes any solutions that repeat words.
+
+![egrep][10]
+
+> egrep will highlight the particular part of each line that matches the regular
+expression.
+
+### Playing GCHQ
+
+Substitution ciphers are easy-to-break encryption systems where you take each
+letter of the alphabet and represent it with a different symbol. The point of
+the puzzle is to work out what letters the symbols represent.
+
+As an example, the cipher:
+
+    
+    
+    12334, 56 7852 90 a27 
+    
+
+could correspond to:
+
+    
+    
+    hello, my name is ben 
+    
+
+because
+
+    
+    
+    h=1, e=2, l=3, o=4, m=5, y=6, n=7, a=8, i=9, b=a. 
+    
+
+Now take a look at the following:
+
+    
+    
+    123452 672 8298a2 bc 9889dbeb9c 
+    
+
+The main clue here are repeated letters which you can match using back
+references. You could try to build a script to match the whole lot in one go,
+but it's far easier and quicker to pick on part with quite a few repeated
+characters and just match that.
+
+Once you've got that, it should be quite trivial to finish it off. We decided to
+work with the final two words. A script to solve them is:
+
+    
+    
+    #!/bin/bash 
+    list2=$(egrep "(.)(.)\2\1.(.).\3\1." /usr/share/dict/words) 
+    for word1 in $(egrep "^.{2}$" /usr/share/dict/words); do 
+      for word2 in $list2; do 
+        echo $word1" "$word2 | egrep "^(.)(.) [[:space:]](.)(.)\4\3.\1.\1\3\2$" 
+      done 
+    done 
+    
+
+The first loop goes through every two letter word while the second one loops
+through every word that matches the particular pattern of backreferences.
+
+The guts of the code is the line:
+
+    
+    
+    echo $word1" "$word2 | egrep "^(.)(.)[[:space:]](.) (.)\4\3.\1.\1\3\2$" 
+    
+
+It checks every pair of words generated by the two loops for a particular
+pattern of back references which correspond to repeated characters in the
+ciphertext.
+
+This method could be expanded to match three or more words, though it will slow
+down significantly with each new word. Once you've got some of the letters, you
+should be able to come up with patterns based on the letters you know to find
+the other words.
+
+> Ben Everard is the co-author of Learning Python with Raspberry Pi, soon to be
+published by Wiley. He's also pretty good at turning foraged fruit into alcohol.
+
+### Boxout 1: Grep and regular expressions
+
+Grep is a popular tool for finding particular pieces of text. As well as solving
+word games, it's also useful in finding particular messages in log files and
+other 'real' work.
+
+egrep is like grep, but it uses extended regular expressions rather than
+ordinary regular expressions. These have a cleaner syntax, so it's these that
+we'll use here. The basic usage is:
+
+    
+    
+    egrep <pattern> <file> 
+    
+
+This will output every line in the file that matches `<pattern>`. It can also be
+used in a pipe like this:
+
+    
+    
+    cat <file> | egrep <pattern> 
+    
+
+This just prints every line that cat outputs that matches `<pattern>`. The trick
+with egrep is in mastering extended regular expressions. A letter just matches
+itself, so for example, `abc` will match any line that contains the string abc
+anywhere in it.
+
+`^` matches the start of the line and `$` matches the end of the line, so `^abc`
+matches any line that starts with `abc`, `abc$` matches any line that ends with
+`abc` and `^abc$` matches any line that contains just `abc`.
+
+The `.` character matches any character, so `^a.c$` will match `abc`, `adc`,
+`aac`, but not `ac`. This is known as backreferencing. You can also match groups
+of characters, eg `^[ab]` will match any line that starts with `a` or `b`, while
+`^[^ab]` will match any line that starts with any character other than `a` or
+`b`.
+
+`^[a-z]` will match any line starting with a lower-case letter. There are also a
+few special options here such as `[[:space:]]`, which matches any whitespace
+(space, tab, etc) and `[[:lower:]]` which matches any lower-case letter.
+
+You can match characters more than once. `*` matches zero or more times, `+` one
+or more time, and `?` zero or one time. So, `^a*$` matches a line that contains
+a number of `a's` but no other characters. `^a.*a$` matches a line that starts
+and finishes with a letter a. `^a.+a$` matches any line that starts and ends
+with an a and has at least one character in between.
+
+You can also specify a range of the number of matches you want by using `{}`.
+For example, `^a{2,3}$` will match the lines `aa` and `aaa`, but nothing else.
+You can bracket parts of regular expressions as well. This is useful because it
+allows you to refer to particular matches.
+
+`\1` matches whatever the first bracketed expression matched, `\2` matches what
+the second matched and so on. For example, `(.).\1` will match any two
+characters that are the same separated by a character, such as `bob`, `did`,
+`aaa`, but not `abc`.
+
+The final part of extended regular expressions that we'll look at is `|`. This
+allows you to match against more than one pattern. For example, `^ab|^bc` will
+match anything that starts with either `ab` or `bc`, but not `ac` or anything
+else. `^(ab|bc)` does the same thing.
+
+### Challenges
+
+Test your skills by writing scripts to solve the following word puzzles.
+
+#### Anagrams
+
+  * ainpprss
+  * abeprrrsy
+  * bbceirssu
+
+#### Countdown
+
+  * tnxpamies
+  * dimtescat
+  * hofanescp
+
+#### Encryption
+
+  * 1 2134 567894550 518824 1a4 a546b4
+  * 1234 34 5641 127 879300309
+  * 123 456 4 378936 8708a8034b
+
+#### Word Wheel
+
+![wordwheel][11]
+
+![wordwheel][12]
+
+![wordwheel][13]
+
+#### Word ladder
+
+First:
+
+    
+    
+    band
+    ----
+    ----
+    ----
+    meat
+    
+
+Second:
+
+    
+    
+    brag
+    ----
+    ----
+    ----
+    plan
+    
+
+Third:
+
+    
+    
+    wire
+    ----
+    ----
+    ----
+    pant
+    
+
+   [1]: http://www.linuxvoice.com/download-linux-voice-issue-1-with-audio/
+   [2]: https://creativecommons.org/licenses/by-sa/3.0/
+   [3]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [4]: https://raymii.org/s/tags/linux-voice.html
+   [5]: http://linuxvoice.com
+   [6]: https://raymii.org/s/inc/img/linuxvoice/1/regex101.png
+   [7]: http://www.regex101.com
+   [8]: https://raymii.org/s/inc/img/linuxvoice/1/wordwheel.png
+   [9]: https://raymii.org/s/inc/img/linuxvoice/1/gvim.png
+   [10]: https://raymii.org/s/inc/img/linuxvoice/1/egrep.png
+   [11]: https://raymii.org/s/inc/img/linuxvoice/1/wordwheel4.png
+   [12]: https://raymii.org/s/inc/img/linuxvoice/1/wordwheel3.png
+   [13]: https://raymii.org/s/inc/img/linuxvoice/1/wordweel2.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,175 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Get webcam resolution and info on Ubuntu and fix HD
+Author      : 	Remy van Elst
+Date        : 	23-08-2020
+URL         : 	https://raymii.org/s/tutorials/Get_webcam_resolution_and_info_on_Ubuntu_and_fix_HD.html
+Format      : 	Markdown/HTML
+---
+
+
+
+With all the video calling nowdays due to working from home I decided to get a
+webcam. Since I mostly work at a workstation, I have no microphone or camera 
+built in. A friend gave me a spare webcam, a generic non-brand. It says "HD Camera"
+on the box, but by default it records in 640x480. Using a few tools on Ubuntu
+you can figure out what resolutions are supported for your device. 
+
+It turned out to be Cheese, the webcam capture program I used, not supporting
+the `mjpeg` format, just the `yuyv` RAW format. Using another webcam program 
+named [Webcamoid][2] solved it, that program was able to use `mjpeg`.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Here's a picture of Cheese showing the possible resolutions, none of which are 
+even near HD:
+
+![cheese resolution][1]
+
+### lsusb
+
+Via the device itself, without installing external software, you should be able 
+to find out what resolutions are supported. First get the correct Bus and device ID:
+
+    lsusb
+
+Output:
+
+    [...]
+    Bus 003 Device 006: ID 1b3f:2247 Generalplus Technology Inc
+
+Along with a bunch of `Linux Foundation 3.0 root hub`, but this is the device
+I want to query. Bus 003, device 006. Query that device and grep for `Width|Height`:
+
+    lsusb -s 003:006 -v | grep -E "Width|Height" 
+
+Output:
+
+        wWidth                           1920
+        wHeight                          1080
+        wWidth                           1280
+        [...]
+
+This should give you a general idea. For more detailed information, you can use
+tools from `video4linux`.
+
+### video4linux
+
+`v4l`, or, video4linux is a long time project regarding all things video, on linux,
+as the name might suggest. I remember using it with Mandrake back in the day to
+get a camera working, and it's still going strong as a project. Install the 
+required packages to get started:
+
+     apt install v4l-utils
+
+Query the camera directly, in my case it's `/dev/video0`:
+
+    v4l2-ctl --list-formats-ext -d /dev/video0 
+
+Output:
+
+    ioctl: VIDIOC_ENUM_FMT
+        Index       : 0
+        Type        : Video Capture
+        Pixel Format: 'MJPG' (compressed)
+        Name        : Motion-JPEG
+            Size: Discrete 1920x1080
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 1280x720
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 800x480
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 640x480
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 640x360
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 320x240
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 176x144
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 800x600
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 1920x1080
+                Interval: Discrete 0.033s (30.000 fps)
+
+        Index       : 1
+        Type        : Video Capture
+        Pixel Format: 'YUYV'
+        Name        : YUYV 4:2:2
+            Size: Discrete 640x480
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 640x360
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 320x240
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 176x144
+                Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 640x480
+                Interval: Discrete 0.033s (30.000 fps)
+
+
+Or, using `ffmpeg` for more compact output:
+
+    ffmpeg -f video4linux2 -list_formats all -i /dev/video0
+
+Output:
+
+    Compressed:       mjpeg :          Motion-JPEG : 1920x1080 1280x720 800x480 640x480 640x360 320x240 176x144 800x600 1920x1080
+    Raw       :     yuyv422 :           YUYV 4:2:2 : 640x480 640x360 320x240 176x144 640x480
+
+
+### Solving the resolution issue with Cheese
+
+I didn't find any options to use a different format or resolution with Cheese.
+I tried `camorama` but that also has no configurable resolution. Then I tried
+`guvcview` but that crashed my KDE desktop and at last I tried [Webcamoid][2].
+
+That did have options for resolution and encoding, as you can see in the below
+image:
+
+![webcamoid][3]
+
+
+
+
+[1]: /s/inc/img/cheese_resolution.png
+[2]: https://webcamoid.github.io/
+[3]: /s/inc/img/webcamoid.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

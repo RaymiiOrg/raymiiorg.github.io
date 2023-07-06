@@ -1,0 +1,540 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Proxmox VE 7 Corosync QDevice in a Docker container - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>                 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Proxmox VE 7 Corosync QDevice in a Docker container</h2>
+<p><small>Published: <span data-pagefind-meta='date'>17-04-2022</span> | Author: Remy van Elst | <a href="Proxmox_VE_7_Corosync_QDevice_in_Docker.txt">Text only version of this article</a>
+</small></p>
+<br><div class='olderthanayear'><p><strong>&#10071; This post is over one year old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Proxmox VE cluster QDevice technical explanation</a>
+<ul>
+<li>
+<a href="#toc_1">Corosync External Vote Support</a>
+</li>
+<li>
+<a href="#toc_2">QDevice Technical Overview</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_3">Proxmox VE host setup, part 1</a>
+</li>
+<li>
+<a href="#toc_4">Docker container setup</a>
+</li>
+<li>
+<a href="#toc_5">Proxmox VE host setup, part 2</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p>At home I have a 2 node Proxmox VE cluster consisting of 2 HP EliteDesk Mini
+machines, both running with 16 GB RAM and both an NVMe and SATA SSD with ZFS
+on root (256 GB). It&#39;s small enough (physically) and is just enough for my
+homelab needs specs wise. I have a few services at home, the rest runs on
+&#39;regular&#39; virtual private servers online. Proxmox VE, a virtualization stack
+based on Debian, has support for clustering. Clustering can mean different
+things to different people, in this case the cluster support means a group
+of physical servers, but Proxmox also supports actual high-availability with
+fail over and (live) migration. I also have a small NAS with spinning disks
+for shared storage via NFS, which is helpful when experimenting with live
+migration. </p>
+
+<p><img src="/s/inc/img/pve-cluster.png" alt="cluster"></p>
+
+<blockquote>
+<p>My modest two node Proxmox VE cluster, with extra quorum device</p>
+</blockquote>
+
+<p>For a cluster (in any sense of the word), you need at least 3 nodes, otherwise
+there is no quorum. Meaning, if one node goes down, it (and the other node)
+cannot know if the problem is at their side or the other side. With an uneven
+number of nodes, one node can always ask another node, hey, it is just me or
+do so see the issue as well? If it receives no reply, it knows it&#39;s their
+problem, if the other node does reply, they know it&#39;s the third node that has
+the problem. Corosync, the cluster software used by Proxmox, supports an external
+Quorum device. This is a small piece of software running on a third node
+which provides an extra vote for the quorum (the extra vote) without being a Proxmox VE
+server. Any cluster with a even number of nodes can get such a split-brain
+situation, and in my experience, those are bad. </p>
+
+<p>A two node proxmox cluster shuts down all virtual machines and containers in
+the case of one node failure, the cluster is in read-only mode. So if you
+power down one of your proxmox servers, the other one is offline as well,
+even if you&#39;ve just migrated all machines to that node. With the extra quorum
+device, you can safely power down one node.</p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<p>In my case I wanted to run this on my NAS, since (physical) space is a
+premium. The NAS supports Docker, this guide explains how to run the QDevice
+for Proxmox in a Docker container. The docker container is a Debian 11
+container with systemd and openssh, since the proxmox QDevice setup requires
+that. More like an LXC container than a docker container. The NAS itself does
+not run Debian and has no corosync packages, which is why I resorted to this
+route. </p>
+
+<p>If you can run an extra debian server, there is no need to go the Docker
+route, you can just follow the regular guide. There is a <a href="https://github.com/modelrockettier/docker-corosync-qnetd">qdevice docker
+image</a> but that guide does not work for Proxmox VE 7 and requires a lot of
+manual setup. Using my method involves a lot less steps, since you&#39;re
+basically running an extra debian VPS (a container with systemd and
+openssh).</p>
+
+<p>I&#39;ve been working with Corosync since 2012, have written <a href="/s/tags/corosync.html">a few posts in 2013</a> so I consider myself experienced in corosync usage. The Proxmox web
+interface makes clustering very easy.</p>
+
+<h3 id="toc_0">Proxmox VE cluster QDevice technical explanation</h3>
+
+<p>My cluster has 2 nodes, both use ZFS as local storage. The <a href="https://pve.proxmox.com/wiki/Cluster_Manager">Proxmox Docs</a>
+explains all the details on running a cluster and the GUI makes it very easy
+to setup. For this guide I&#39;m assuming you already have the 2 node cluster setup.</p>
+
+<p>Quoting the <a href="https://web.archive.org/web/20220323202732/https://pve.proxmox.com/pve-docs/pve-admin-guide.html#_corosync_external_vote_support">documentation page</a> with more information on the QDevice:</p>
+
+<h4 id="toc_1">Corosync External Vote Support</h4>
+
+<p>This section describes a way to deploy an external voter in a Proxmox VE
+cluster. When configured, the cluster can sustain more node failures without
+violating safety properties of the cluster communication.</p>
+
+<p>For this to work, there are two services involved:</p>
+
+<ul>
+<li>A <code>QDevice daemon</code> which runs on each Proxmox VE node</li>
+<li>An external vote daemon which runs on an independent server</li>
+</ul>
+
+<p>As a result, you can achieve higher availability, even in smaller setups
+(for example 2+1 nodes). </p>
+
+<h4 id="toc_2">QDevice Technical Overview</h4>
+
+<p>The Corosync Quorum Device (<code>QDevice</code>) is a daemon which runs on each cluster
+node. It provides a configured number of votes to the cluster&#39;s quorum
+subsystem, based on an externally running third-party arbitrator&#39;s decision.
+Its primary use is to allow a cluster to sustain more node failures than
+standard quorum rules allow. This can be done safely as the external device
+can see all nodes and thus choose only one set of nodes to give its vote.
+This will only be done if said set of nodes can have quorum (again) after
+receiving the third-party vote.</p>
+
+<p>Currently, only <code>QDevice Net</code> is supported as a third-party arbitrator. This is
+a daemon which provides a vote to a cluster partition, if it can reach the
+partition members over the network. It will only give votes to one partition
+of a cluster at any time. It&#39;s designed to support multiple clusters and is
+almost configuration and state free. New clusters are handled dynamically and
+no configuration file is needed on the host running a <code>QDevice</code>.</p>
+
+<p>The only requirements for the external host are that it needs network access
+to the cluster and to have a <code>corosync-qnetd</code> package available. We provide a
+package for Debian based hosts, and other Linux distributions should also
+have a package available through their respective package manager. Note  In
+contrast to corosync itself, a <code>QDevice</code> connects to the cluster over TCP/IP.
+The daemon may even run outside of the cluster&#39;s LAN and can have longer
+latencies than 2 ms.</p>
+
+<p>We support <code>QDevices</code> for clusters with an even number of nodes and recommend it
+for 2 node clusters, if they should provide higher availability. For clusters
+with an odd node count, <strong>we currently discourage the use of QDevices.</strong> The
+reason for this is the difference in the votes which the <code>QDevice</code> provides for
+each cluster type. Even numbered clusters get a single additional vote, which
+only increases availability, because if the <code>QDevice</code> itself fails, you are in
+the same position as with no <code>QDevice</code> at all.</p>
+
+<p>On the other hand, with an odd numbered cluster size, the <code>QDevice</code> provides
+(N-1) votes, where N corresponds to the cluster node count. This alternative
+behavior makes sense; if it had only one additional vote, the cluster could
+get into a split-brain situation. This algorithm allows for all nodes but
+one (and naturally the <code>QDevice</code> itself) to fail. However, there are two
+drawbacks to this:</p>
+
+<ul>
+<li><p>If the QNet daemon itself fails, no other node may fail or the cluster
+immediately loses quorum. For example, in a cluster with 15 nodes, 7 could
+fail before the cluster becomes inquorate. But, if a QDevice is configured
+here and it itself fails, no single node of the 15 may fail. The QDevice acts
+almost as a single point of failure in this case.</p></li>
+<li><p>The fact that all but one node plus <code>QDevice</code> may fail sounds promising at
+first, but this may result in a mass recovery of HA services, which could
+overload the single remaining node. Furthermore, a Ceph server will stop
+providing services if only <code>((N-1)/2)</code> nodes or less remain online.</p></li>
+</ul>
+
+<p>(end quote)</p>
+
+<h3 id="toc_3">Proxmox VE host setup, part 1</h3>
+
+<p>On all your Proxmox VE 7 machines you must manually install an extra 
+package:</p>
+
+<pre><code>apt install corosync-qdevice
+</code></pre>
+
+<p>Again, I&#39;m assuming you have your cluster configured already. I&#39;m also
+using different VLAN&#39;s (extra USB 3 gigabit nic&#39;s) for the different networks,
+but I&#39;m leaving that outside of the scope of this guide to keep it simple.</p>
+
+<p>After installing the package we can continue on configuring our Docker
+container. When the docker container is running, we finish of the setup
+by configuring the new <code>qdevice</code> from one of our Proxmox VE hosts.</p>
+
+<h3 id="toc_4">Docker container setup</h3>
+
+<p>The Docker container cannot run on one of your proxmox servers or inside a 
+VM on proxmox. You must run it on a different, external server. (You technically
+could run it on proxmox, but that defeats the whole point.)</p>
+
+<p>I&#39;m using my NAS, which supports Docker. The container image is based on
+<a href="https://github.com/alehaa/docker-debian-systemd">this image</a>, which builds a debian image with OpenSSH and systemd. Mine
+is simplified to only run Debian Bullseye (11). As opposed to the example
+command, <code>CAP_SYS_ADMIN</code> is not required, the systemd version in Debian 11
+is recent enough. The Docker image also installs the <code>corosync-qnetd</code> including
+changing the permissions on the <code>/etc/corosync</code> folder to the correct user.</p>
+
+<p>The container should automatically start at boot of the docker host,
+but if you want to run it on another host, copy the data volume folder
+and start it there. It will then have all the config files required.</p>
+
+<p>Create a folder on the Docker host where the Corosync container
+will store it&#39;s corosync cluster config:</p>
+
+<pre><code>mkdir -p /volume1/docker/qnetd/corosync-data
+</code></pre>
+
+<p>This can be any path you like, the container will mount it as a volume.</p>
+
+<p>Navigate to the folder one level above, where
+I&#39;ll store the Dockerfile and some other info:</p>
+
+<pre><code>cd /volume1/docker/qnetd
+</code></pre>
+
+<p>On my docker host, all named containers get a folder under
+<code>/volume1/docker/$container-name</code>, with subfolders for each volume.</p>
+
+<p>Create a <code>Dockerfile</code>:</p>
+
+<pre><code>vim Dockerfile
+</code></pre>
+
+<p>Place the following contents inside:</p>
+
+<pre><code>FROM debian:bullseye
+RUN echo &#39;debconf debconf/frontend select teletype&#39; | debconf-set-selections
+RUN apt-get update
+RUN apt-get dist-upgrade -qy
+RUN apt-get install -qy --no-install-recommends systemd systemd-sysv corosync-qnetd  openssh-server 
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/* /var/log/alternatives.log /var/log/apt/history.log /var/log/apt/term.log /var/log/dpkg.log
+RUN sed -i &#39;s/#PermitRootLogin prohibit-password/PermitRootLogin yes/&#39; /etc/ssh/sshd_config
+RUN echo &#39;root:password&#39; | chpasswd
+RUN chown -R coroqnetd:coroqnetd /etc/corosync/
+RUN systemctl mask -- dev-hugepages.mount sys-fs-fuse-connections.mount
+RUN rm -f /etc/machine-id /var/lib/dbus/machine-id
+
+FROM debian:bullseye
+COPY --from=0 / /
+ENV container docker
+STOPSIGNAL SIGRTMIN+3
+VOLUME [ &quot;/sys/fs/cgroup&quot;, &quot;/run&quot;, &quot;/run/lock&quot;, &quot;/tmp&quot; ]
+CMD [ &quot;/sbin/init&quot; ]
+</code></pre>
+
+<p>Change the <code>password</code> part in the line <code>&#39;root:password&#39;</code> to a secure password which will be
+used for SSH root login.</p>
+
+<p>Build the docker image:</p>
+
+<pre><code> docker build . -t debian-qdevice
+</code></pre>
+
+<p>The <code>-t</code> flag will give the image a recognizable name. You can now
+start a container based on that image:</p>
+
+<pre><code>docker run -d -it \
+  --name qnetd \
+  --net=macvlan \
+  --ip=192.0.2.20 \
+  -v /volume1/docker/qnetd/corosync-data:/etc/corosync    \
+  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  --restart=always \
+  debian-qdevice:latest 
+</code></pre>
+
+<p>I&#39;m using <a href="https://docs.docker.com/network/macvlan/">macvlan</a> to give my containers their own IP address. The
+<a href="https://web.archive.org/web/20220417190820/https://github.com/proxmox/pve-cluster/blob/master/data/PVE/CLI/pvecm.pm#L149">Proxmox QDevice Setup</a> code does not show support for a different SSH
+port, which is why I gave the container it&#39;s own IP. You could put a
+name/port combo in your <code>~/.ssh/config</code> file on the Proxmox hosts like so:</p>
+
+<pre><code>Host 192.0.2.19
+  HostName 192.0.2.19
+  Port 2222
+  User root    
+</code></pre>
+
+<p>Then you can start the container without <code>--net=macvlan --ip=192...</code> but you must
+specify the ports used by corosync and SSH: <code>-p 5403:5403 -p 2222:22</code>. The setup
+command later on can use the IP of the docker host, but be extra careful that you
+have setup your SSH config file correctly. <code>192.0.2.19</code> is the example IP
+of my docker host, not of the docker container. You could unexpectedly run
+commands as root on your Docker host. </p>
+
+<p>The start command will print out a UUID of the new container, you can check
+if it&#39;s running with the <code>docker ps</code> command:</p>
+
+<pre><code>docker ps
+</code></pre>
+
+<p>Example output:</p>
+
+<pre><code>CONTAINER ID   IMAGE                  COMMAND        CREATED              STATUS                PORTS     NAMES
+45d861ce6acf   debian-qdevice:latest       &quot;/sbin/init&quot;   About a minute ago   Up About a minute               qnetd
+d07f990f245e   pihole/pihole:latest   &quot;/s6-init&quot;     8 days ago           Up 8 days (healthy)             pihole2
+</code></pre>
+
+<p>Test if you can SSH into the container with the username <code>root</code> and your
+password. If SSH works, continue on with the guide.</p>
+
+<h3 id="toc_5">Proxmox VE host setup, part 2</h3>
+
+<p>This part has to be done on one of your Proxmox VE servers,
+it is synced automatically to the other servers. Execute the
+following command:</p>
+
+<pre><code>pvecm qdevice setup 192.0.2.20
+</code></pre>
+
+<p>You&#39;re asked for the root password:</p>
+
+<pre><code>/bin/ssh-copy-id: INFO: Source of key(s) to be installed: &quot;/root/.ssh/id_rsa.pub&quot;
+/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+root@192.0.2.20&#39;s password: 
+</code></pre>
+
+<p>The rest of the output is all setup of corosync:</p>
+
+<pre><code>Number of key(s) added: 1
+
+Now try logging into the machine, with:   &quot;ssh &#39;root@192.0.2.20&#39;&quot;
+and check to make sure that only the key(s) you wanted were added.
+
+
+INFO: initializing qnetd server
+Certificate database (/etc/corosync/qnetd/nssdb) already exists. Delete it to initialize new db
+
+INFO: copying CA cert and initializing on all nodes
+
+node &#39;pve1&#39;: Creating /etc/corosync/qdevice/net/nssdb
+password file contains no data
+node &#39;pve1&#39;: Creating new key and cert db
+node &#39;pve1&#39;: Creating new noise file /etc/corosync/qdevice/net/nssdb/noise.txt
+node &#39;pve1&#39;: Importing CA
+node &#39;pve2&#39;: Creating /etc/corosync/qdevice/net/nssdb
+password file contains no data
+node &#39;pve2&#39;: Creating new key and cert db
+node &#39;pve2&#39;: Creating new noise file /etc/corosync/qdevice/net/nssdb/noise.txt
+node &#39;pve2&#39;: Importing CA
+INFO: generating cert request
+Creating new certificate request
+
+
+Generating key.  This may take a few moments...
+
+Certificate request stored in /etc/corosync/qdevice/net/nssdb/qdevice-net-node.crq
+
+INFO: copying exported cert request to qnetd server
+
+INFO: sign and export cluster cert
+Signing cluster certificate
+Certificate stored in /etc/corosync/qnetd/nssdb/cluster-cluster1.crt
+
+INFO: copy exported CRT
+
+INFO: import certificate
+Importing signed cluster certificate
+Notice: Trust flag u is set automatically if the private key is present.
+pk12util: PKCS12 EXPORT SUCCESSFUL
+Certificate stored in /etc/corosync/qdevice/net/nssdb/qdevice-net-node.p12
+
+INFO: copy and import pk12 cert to all nodes
+
+node &#39;pve1&#39;: Importing cluster certificate and key
+node &#39;pve1&#39;: pk12util: PKCS12 IMPORT SUCCESSFUL
+node &#39;pve2&#39;: Importing cluster certificate and key
+node &#39;pve2&#39;: pk12util: PKCS12 IMPORT SUCCESSFUL
+INFO: add QDevice to cluster configuration
+
+INFO: start and enable corosync qdevice daemon on node &#39;pve1&#39;...
+Synchronizing state of corosync-qdevice.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable corosync-qdevice
+Created symlink /etc/systemd/system/multi-user.target.wants/corosync-qdevice.service -&gt; /lib/systemd/system/corosync-qdevice.service.
+
+INFO: start and enable corosync qdevice daemon on node &#39;pve2&#39;...
+Synchronizing state of corosync-qdevice.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable corosync-qdevice
+Created symlink /etc/systemd/system/multi-user.target.wants/corosync-qdevice.service -&gt; /lib/systemd/system/corosync-qdevice.service.
+Reloading corosync.conf...
+Done
+</code></pre>
+
+<p>You can check the status of the cluster and quorum device with the following command:</p>
+
+<pre><code>pvecm status
+</code></pre>
+
+<p>Example output with the Quorum device setup:</p>
+
+<pre><code>Cluster information
+-------------------
+Name:             cluster1
+Config Version:   7
+Transport:        knet
+Secure auth:      on
+
+Quorum information
+------------------
+Date:             Sun Apr 17 21:31:06 2022
+Quorum provider:  corosync_votequorum
+Nodes:            2
+Node ID:          0x00000001
+Ring ID:          1.98
+Quorate:          Yes
+
+Votequorum information
+----------------------
+Expected votes:   3
+Highest expected: 3
+Total votes:      3
+Quorum:           2  
+Flags:            Quorate Qdevice 
+
+Membership information
+----------------------
+    Nodeid      Votes    Qdevice Name
+0x00000001          1    A,V,NMW 192.0.2.10 (local)
+0x00000002          1    A,V,NMW 192.0.2.11
+0x00000000          1            Qdevice
+</code></pre>
+
+<p>If you have not setup the QDevice correctly, the last part
+of the output will be different, showing no votes for the
+QDevice:</p>
+
+<pre><code>Votequorum information
+----------------------
+Expected votes:   3
+Highest expected: 3
+Total votes:      2
+Quorum:           2  
+Flags:            Quorate Qdevice 
+
+Membership information
+----------------------
+    Nodeid      Votes    Qdevice Name
+0x00000001          1    A,V,NMW 192.0.2.10 (local)
+0x00000002          1    A,V,NMW 192.0.2.11
+0x00000000          0            Qdevice (votes 1)
+</code></pre>
+
+<p>Check the Docker container (login via SSH), you should see
+the daemon running via <code>ps auxf</code>:</p>
+
+<pre><code>root@d74eb68b6507:~# ps auxf
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.1  17676  9568 ?        Ss   19:30   0:00 /sbin/init
+coroqne+    30  0.0  0.2  17692 13572 ?        Ss   19:30   0:00 /usr/bin/corosync-qnetd -f
+root        33  0.0  0.0   4332  2140 pts/0    Ss+  19:30   0:00 /sbin/agetty -o -p -- \u --noclear --keep-baud console 115200,38400
+root        34  0.0  0.1  13272  7644 ?        Ss   19:30   0:00 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
+root        97  6.5  0.1  13736  8256 ?        Ss   19:34   0:00  \_ sshd: root@pts/1
+root       103  2.0  0.0   3964  3420 pts/1    Ss   19:34   0:00      \_ -bash
+root       106  0.0  0.0   6696  3000 pts/1    R+   19:34   0:00          \_ ps auxf
+</code></pre>
+
+<p>At my first attempt of Dockerizing the QDevice, I forgot to set
+the correct permissions on the <code>/etc/corosync</code> folder. The daemon
+failed to start. There is no logging inside the container, but after
+running the daemon manually as root (which worked) and inspecting the
+systemd unit file, the cause of the issue was clear.</p>
+
+<p>The QDevice is not visible inside the web interface as far as I know.</p>
+Tags: <a href="../tags/cluster.html">cluster</a>
+, <a href="../tags/corosync.html">corosync</a>
+, <a href="../tags/docker.html">docker</a>
+, <a href="../tags/high-availability.html">high-availability</a>
+, <a href="../tags/homelab.html">homelab</a>
+, <a href="../tags/kvm.html">kvm</a>
+, <a href="../tags/linux.html">linux</a>
+, <a href="../tags/lxc.html">lxc</a>
+, <a href="../tags/proxmox.html">proxmox</a>
+, <a href="../tags/proxmox-ve.html">proxmox-ve</a>
+, <a href="../tags/qemu.html">qemu</a>
+, <a href="../tags/sysadmin.html">sysadmin</a>
+, <a href="../tags/tutorials.html">tutorials</a>
+, <a href="../tags/virtualization.html">virtualization</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

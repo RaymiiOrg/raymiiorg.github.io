@@ -1,0 +1,155 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Overflow the Investigatory Powers Bill!
+Author      : 	Remy van Elst
+Date        : 	24-11-2016
+URL         : 	https://raymii.org/s/blog/Overflow_the_Investigatory_Powers_Bill.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![ipbill][1]
+
+I read an article on [The Register][2] ([via][3]) regarding the Investigatory Powers Bill. The part were ISP's are forced to save their customers browsing history for a year is the most horryfing part, just as that whole bill. Let's hope the political process and organizations like the Open Rights Group and the EFF have enough lobbying power to change people's minds. If that fails, then we can all try to overflow the logging. Just as some people put keywords in their mail signatures to trigger automatic filters and generate noise, we should all generate as much data and noise as possible. This way the information they do gather will not be usefull, it will take too much time, storage and effort to process it and thus the project will fail. 2 years ago I wrote a small Python script which browser the web for you, all the time. Running that on one or two Raspberry Pi's or other small low power computers 24/7 will generate a lot of noise in the logging and filtering.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Background
+
+The article on The Register is very well written and has a lot of information on
+the bill. I want to quickly recap why mass Surveillance is a bad idea, both in
+practice as well as the idea itself.
+
+The [EFF][5] has a great article on the statement 'I have nothing to hide, so
+why should I worry?'. They also have an article [which busts a counter
+arguments][6] regarding mass surveillance.
+
+The Dutch organization Bits of Freedom has a few good articles [on European Data retention laws][7], on the [Amsterdam Municipal Register during WWII][8] (having nothing to hide) and [more examples][9] of big data usage. Bruce Schneier also [has written on][10] espionage vs. mass surveilance. The [blog][11] of Bits of Freedom (english) contains a lot of great articles.
+
+I myself try not to get involved with the political side of issues like this,
+since other people, like the EFF, BoF and the ORG are much better on that front.
+I do however am technical enough to try to work against this bill.
+
+### Generating Noise
+
+Just as in the early days where people put the word Bomb in their email
+signature to trigger the filters and generate noise, we use a script to simulate
+real browsing 24/7. If you have a Raspberry Pi or other small, low power linux
+computer, it's perfect for this purpose.
+
+3 years ago I [wrote a script, browsa.py][12]. It is a small python script which
+uses BeautifulSoup4 to browse websites. It saves all the links and chooses a
+random link to visit next. If there are no links, on of the previously saved
+links is selected. There is also a fallback list which includes
+`news.google.com` and such. Between every page there is a small delay to
+simulate a real user and the user agent is set to a Firefox version.
+
+Since the URL it chooses is random, you will never know where you end up, thus
+generating a lot of random data.
+
+Make sure you have Git, Screen and Pip installed
+
+    
+    
+    apt-get install python2 python2-pip git screen
+    
+
+Clone the repository:
+
+    
+    
+    git clone https://github.com/RaymiiOrg/browsa.git
+    cd browsa
+    
+
+Run the script with a starting URL:
+
+    
+    
+    python2 ./browsa.py https://news.google.nl
+    
+
+Example output:
+
+    
+    
+    # Info: Count 1
+    # Info: Downloading URL: https://news.google.nl
+    # Info: URL's on page: 189
+    # Info: New URL: http://www.rtlnieuws.nl/gezondheid/ziekenhuizen-limburg-overvol-operaties-afgezegd
+    # Info: Count 2
+    # Info: Downloading URL: http://www.rtlnieuws.nl/gezondheid/ziekenhuizen-limburg-overvol-operaties-afgezegd
+    # Info: URL's on page: 47
+    # Info: New URL: http://www.rtlnieuws.nl/kleding-presentatoren
+    # Info: Count 3
+    # Info: Downloading URL: http://www.rtlnieuws.nl/kleding-presentatoren
+    # Info: URL's on page: 46
+    
+
+Sometimes the script hangs or crashes. You can start up a screen session and run
+the script for a set amount of time, 5 minutes, then restarting it
+automatically:
+
+    
+    
+    screen
+    while true; do timeout 300 python2 ./browsa.py https://news.google.nl; done
+    
+
+If you run this 24/7, the logging on you will be so large, it will be very hard
+to get anything usefull out of it. Plus, if enough people do this, there will be
+so much useless data that the ISP's, who have to save it, will complain and
+demand money from the government for the storage. (Or they will raise their
+prices to their customers...).
+
+   [1]: https://raymii.org/s/inc/img/ipbill.png
+   [2]: http://www.theverge.com/2016/11/23/13718768/uk-surveillance-laws-explained-investigatory-powers-bill
+   [3]: https://lwn.net/Articles/707227/rss
+   [4]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [5]: https://www.eff.org/deeplinks/2013/11/busting-eight-common-excuses-nsa-surveillance
+   [6]: https://www.eff.org/deeplinks/2014/06/top-5-claims-defenders-nsa-have-stop-making-remain-credible
+   [7]: https://www.bof.nl/2011/04/21/european-commission-top-10-misleading-statements-on-data-retention/
+   [8]: https://www.bof.nl/2015/04/30/during-world-war-ii-we-did-have-something-to-hide/
+   [9]: https://www.bof.nl/2015/06/26/demystifying-the-algorithm-who-designs-your-life/
+   [10]: https://www.schneier.com/blog/archives/2014/05/espionage_vs_su.html
+   [11]: https://www.bof.nl/category/english/
+   [12]: https://github.com/RaymiiOrg/browsa
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,248 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Migrating personal webapps and services
+Author      : 	Remy van Elst
+Date        : 	05-05-2016
+URL         : 	https://raymii.org/s/blog/Migrating_personal_services_and_webapps.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![ubuntu][1]
+
+Recently I've migrated some of my personal servers and services to new machines
+and newer operating system versions. I prefer to migrate instead of upgrading
+the OS for a number of reasons. I'll also talk about the migration process and
+some stuff to remember when migrating web applications and services.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+As many of you might also do, I run a number of servers with applications for my
+personal use and a number of websites for friends and family. My own application
+landscape consists of:
+
+  * 7 Wordpress websites (family and friends)
+  * 3 Drupal websites (family and friends)
+  * OwnCloud for Contacts and Calendar sync
+  * Tiny Tiny RSS
+  * [My SSL tester][3]
+  * [Cipherli.st][4]
+  * [Certificate Expiry Monitor][5]
+  * Seven static websites with email hosting for family.
+
+This was all spread over three servers at different VPS providers, namely
+Linode, Digital Ocean and CloudVPS. The three servers were running Ubuntu 12.04
+and CentOS 6, with Apache, PHP and MySQL. Plus exim and dovecot for email. Quite
+a few servers and setups to maintain.
+
+### Reasons for migrating
+
+There are multiple reasons for migrating and consolidating all the services.
+
+The first one is that the server with the most websites on it, including the
+[SSL Decoder][3] had a broken OpenSSL version. That was my own fault as I was
+playing with compiling prereleases and not using a (docker) container or other
+confinement, thus overwriting system OpenSSL and libssl libraries. In general
+that's not a big problem, but all kinds of little things broke because of this.
+
+The second reason is that I got a nice message from Andrew, the Community
+Manager at [Digital Ocean][2] regarding [Cipherli.st][4]. He said the site was
+used inside of [Digital Ocean][2] and they like it. I got some credits applied
+to my account, so that means free servers for a few months, which is awesome.
+Thanks to [Andrew and DO][2] for that. [If you like this article, consider
+sponsoring me by trying out a Digital Ocean VPS. With this link you'll get a $5
+VPS for 2 months free (as in, you get $10 credit). (referral link)][2]
+
+The third reason is that the servers were running older versions of Operating
+systems, like Ubuntu 12.04 LTS and CentOS 6. Both of those still receive support
+and updates, but lack new technology like Docker, LXD or systemd. I'm planning
+on using both Docker and LXD to test the [SSL Decoder][3].
+
+The SSL Decoder now [includes a Dockerfile][6] which sets up Apache, PHP and the
+latest OpenSSL (1.1.0). That means I can't screw up the system OpenSSL anymore.
+In the future the SSL Decoder will probably run in a container for production as
+well. I've set up a new VPS with Ubuntu 16.04 on [Digital Ocean][2], which
+because it's KVM and not OpenVZ or Xen PV allows me to run Docker without
+problems.
+
+Plus, in my humble opinion this is just regular maintenance. Like you do regular
+maintenance on your car or bicycle, you should also do that for your servers.
+
+In the next few paragraphs I'll talk about the migration itself and what to do
+before and after migrating. The process itself is fairly simple, not much more
+than a few database dumps and `rsync` copy's. As always, it's the small things
+surrounding the process that make it tricky.
+
+### Before the migration
+
+There are a few things to do before you migrate (web)services. The most
+important thing is to make a list of all the things you're going to migrate.
+This includes:
+
+  * Websites (URL, logins, IP)
+  * Databases 
+  * Email accounts
+  * DNS zones
+  * Dependencies
+  * Current monitoring
+
+Note down all these things and make sure you test beforehand. That way you'll
+know what the result should be in a working setup.
+
+The other important thing to do is to lower the DNS TTL (Time-to-live) of the
+domain's DNS zones. If it's a TTL of 1 week, the migration will take a lot
+longer. Lower it to 1 hour (nobody (public DNS) honours anything lower (the 5
+minutes)). Don't forget that you have to await the current TTL before the new
+one is active. If it's now a week, then you'll have to wait a week before the 1
+hour TTL is active.
+
+The TTL is used to point people to the IP when they visit an URL. A high TTL
+lets DNS servers cache the IP longer, so people will be sent to the wrong IP. If
+you want you can raise the TTL after the migration.
+
+Depending on the service you're migrating you also want to send the users a
+prior notice, maybe a few. I notified the relatives and users that the migration
+was upcoming three times and afterwards also emailed them the migration
+completed successfully.
+
+With your list, lowered DNS TTL and notified users, continue on to the actual
+migration.
+
+### Migration process
+
+The migration itself consists out of two things. Setting up the server and
+transferring the data.
+
+In my case the setup of the server was super easy. It is set up with Ansible and
+the playbooks used to set up Apache, PHP and MySQL on Ubuntu 12.04 and CentOS 6
+also worked without issues on Ubuntu 16.04. Within 15 minutes the whole setup
+was done, just by adding a new host to my `ansible_hosts` file and updating the
+`webserver` hostgroup with this extra host.
+
+The dovecot and exim playbook required a few `if` statements in the
+configuration templates, but nothing worldshocking. I tested the playbooks first
+on a disposable Ubuntu 16.04 VPS.
+
+If you have a more manual setup then this step consists of installing and
+configuring all the required software manually and hopefully having some sort of
+checklist.
+
+The data transfer part was just doing a `mysqldump`, recreating those databases
+on the new server with the database users and importing the data. If you don't
+want to recreate the users you can `mysqldump` the `mysql` database, which
+contains the `users` table. The import of that is quite funny:
+
+    
+    
+    mysql mysql < mysql
+    
+
+The first `mysql` is the command, the second is the database name and the third
+is the filename to import, which I cleverly named `mysql`.
+
+The other data, websites, scripts, mailboxes and more were transferred with
+`rsync` over `ssh`. Check the permissions afterwards if you decide to change
+usernames. I didn't do that so it all went without issues or `chown`-ing.
+
+### After the migration
+
+When all the data is transferred and the software has been set up properly it is
+time to test the services. I did that using my `/etc/hosts` file, pointing the
+domains one by one to my new servers IP. I had my list of sites and services to
+test, which I did one by one.
+
+One of the things I forgot to migrate was the certificate for the SMTP and IMAP
+service. I thought Ansible would set that up but appearantly it didn't. I
+updated the playbooks, so now it does set it up correctly. If I hadn't tested,
+my users would complain about a warning, and we put in all this effort to make
+sure that doesn't happen.
+
+When all the tests were finished I changed the DNS for all the domains to point
+to the new IP. Leaving the TTL to one hour, so in case of a failure the fallback
+wouldn't take long.
+
+After a few days of no complaints I shut off the old servers. My monitoring went
+off, but not for the services I migrated. Just the host checks, as expected.
+
+I keep a backup of the machines locally just to be sure. The servers were
+cancelled at the respective providers two weeks after the migration completed.
+
+### Stuff to remember when migrating webapps that email.
+
+My webapplication sends email, so there are a few extra things that need to be
+set up and checked. I've listed them below for my own reference:
+
+  * Reverse DNS for IPv4 Reverse DNS for IPv6 SMTP mailname must match hostname
+  * and reverse name SPF records must include new IP DKIM keys need to be updated
+
+A good service to test email sending in [Mail Tester][7]. If you forget the
+mailsettings your emails will go right into the SPAM folder of many users.
+
+### Conclusion
+
+With a little bit of preparation and thought, a migration like this is easy to
+do and relatively painless. By keeping your servers up to date you are not only
+more secure, you will also have less hassle in the future.
+
+I've seen many last-minute migrations gone wrong. For example, a big new
+security vulnerability affects your services. And particularly those important
+machines were the migration keeps getting deferred for a boatload of (stupid)
+reasons. And then you're forced to migrate them on an inconvinient time, not
+having a good prepared plan or test scheme and getting delays on your other
+projects as well.
+
+Better to just do regular maintenance in your own pace.
+
+I'd like to thank [Digital Ocean][2] again for the generous credit. It was the
+thing that pushed me over the edge to plan and do this consolidation and
+migration.
+
+
+
+
+   [1]: https://raymii.org/s/inc/img/ubuntu-16.04.png
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://ssldecoder.org
+   [4]: https://cipherli.st
+   [5]: https://certificatemonitor.org
+   [6]: https://github.com/RaymiiOrg/ssl-decoder/tree/master/docker
+   [7]: https://www.mail-tester.com/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

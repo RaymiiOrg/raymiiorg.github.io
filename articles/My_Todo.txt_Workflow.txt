@@ -1,0 +1,261 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	My Todo.txt Workflow, including Unison, Todour and Android
+Author      : 	Remy van Elst
+Date        : 	24-07-2013
+URL         : 	https://raymii.org/s/articles/My_Todo.txt_Workflow.html
+Format      : 	Markdown/HTML
+---
+
+
+
+### What is Todo.txt
+
+Todo.txt is a way to manage your tasks/todo items in a plaintext format. It has
+a few simple rules, there are a lot of applications to work with it, but in its
+core it is a plaintext file, so a text editor is sufficient to use it. Recently
+I started using todo.txt, including syncing on all my devices via my own
+servers. This article shows you my workflow, and how to set up a similar
+environment, including ssh, unison, todour for OS X, DayTasks for Ubuntu and
+Simpletasks Cloudless (for Android).
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+In this article I'll describe the applications I use and afterwards describe the
+sync setup I have with unison and Foldersync lite. Most of the applications are
+open source, except for Foldersync on Android.
+
+### Why Plain Text
+
+Plain text is software and operating system agnostic. Its searchable, portable,
+lightweight and easily manipulated. Its unstructured. It works when someone
+elses web server is down or your Outlook .PST file is corrupt. Theres no
+exporting and importing, no databases or tags or flags or stars or prioritizing
+or [Insert company name here]-induced rules on what you can and cant do with it.
+[More][2]
+
+### Todo.txt rules
+
+Todo.txt is a plain text file, but to take advantage of structured task metadata
+like priority, projects, context, creation and completion date, there are a few
+very simple but flexible file format rules.
+
+These rules make the todo.txt file both readable by humans, and easily parsed by
+tools like the Todo.txt Touch mobile app and Todo.txt Command Line interface.
+This format has been developed and refined over the course of 5 years by the
+Todo.txt community of users and developers.
+
+  1. A single line in your todo.txt text file represents a single task. `Write Todo.txt Article`
+  2. If priority exists, it ALWAYS appears first. `(A) Write Todo.txt Article`
+  3. A tasks creation date may optionally appear directly after priority and a space. `(A) 2013-05-01 Write Todo.txt Article`
+  4. Contexts and Projects may appear anywhere in the line after priority/prepended date. `(A) 2013-05-01 Write Todo.txt Article @website +article`
+  5. A completed task starts with an x. `x (A) 2013-05-01 Write Todo.txt Article @website +article`
+  6. The date of completion appears directly after the x, separated by a space. `x 2013-05-29 (A) 2013-05-01 Write Todo.txt Article @website +article`
+
+### My Workflow
+
+My workflow is very simple. I have a few desktops and a few phones and I add and
+remove tasks/todo items on all those devices. By using a central SSH server to
+help with the syncing, [unison][3] on the desktop and [Simpletasks
+Cloudless][4]/[FolderSync][5] on my Android phones.
+
+#### Desktop
+
+Since I use multiple operating systems, I also use multiple programs with
+todo.txt On Ubuntu/Arch Linux I use [DayTasks][6], on Mac OS X I use
+[Todour][7], and mixed between machines I use the [todo.txt commandline
+interface][8].
+
+Syncing is done via Unison to an SSH server, the setup of it is described later
+in this article.
+
+##### Mac OS X
+
+![todour][9]
+
+Todour is a cross-platform (Mac OS X and Windows) application written in QT to
+manage todo.txt files. It is small, simple and works well. I like the refresh
+button, this works very good with my sync process. It also has an Archive
+button, which moves tasks to a done.txt file, which is handy. Search is also
+straight forward and fast, including contexts and projects. Setup is simple,
+download, unpack/install and done.
+
+[Download][7] \- [The code is open source and available on Github][10]
+
+##### Arch and Ubuntu Linux
+
+![daytasks][11]
+
+Daytasks is also a simple todo.txt manager, having most of the features of
+Todour. It also supports the same done.txt file as todour, so that is very nice,
+the search is just as fast and the interface is clean. It doesn't have a refresh
+button, so when I sync from another device I have to close and start the
+application. Not a big issue, could be fixed. On Arch Linux I had to manually
+install the .deb package, but it just works afterwards.
+
+[Source & Download][6]
+
+#### Mobile
+
+On the mobile side I use two applications, Simpletasks Cloudless to use the task
+list, and Foldersync lite to sync the todo.txt file.
+
+##### Simpletasks Cloudless
+
+![simpletasks][12]
+
+Simpletasks is available in two versions, one using Dropbox and one using just
+the local file system. I use the latter one, because I take care of the
+underlying sync. It has a very nice view with projects and contexts, and when
+adding a task it allows you to select previously used projects or contexts,
+which results in less typing on a mobile phone. It does not have an archiving
+function, but since my android phones are used for ad-hoc adding of tasks
+mostly, that is not an issue.
+
+[Android Market/Play store link][4] \- [Source available here][13]
+
+#### Foldersync Lite
+
+![foldersync][14]
+
+Foldersync is used to sync the todo.txt file via ssh back and forth with the
+other devices. I have it set up to sync every 30 minutes, but the sync time can
+vary. It supports SSH with a private key (keys with passwords as well). You
+first set up your account, then you set up a folder pair to the remote server,
+with two-way sync, including subfolders, hidden files, and as action for
+"Conflicting Modifications" you select "Overwrite Oldest". That's it, set up and
+forget.
+
+### Web
+
+![todotextjs][15]
+
+For usage on the go, or on other computers when I don't have my phone with me, I
+use a HTML5 web application. It is also used when I'm in plannings, meetings and
+other business related events on a projector. As you can see, it supports
+priority, sorting, contexts and projects. Works just fine, in all modern
+browsers like Firefox, Safari and Chrome. It is a simple HTML5 application, open
+source and requires no PHP or Ruby on the server side.
+
+[Source on Github][16] \- [Demo][17]
+
+### Synchronization
+
+I'm using a VPS server to sync the todo.txt file on all the above mentioned
+devices. It has SSH enabled, allowing only public-private key login. The server
+and all the *NIX clients use Unison to sync all the files. You can install it on
+Debian/Ubuntu with apt, and on other distro's it is in your repository:
+
+    
+    
+    apt-get install unison
+    
+
+Next make sure you have a folder to use for syncing, e.g. where your todo.txt
+file is located:
+
+    
+    
+    mkdir ~/todo/
+    
+
+Next, on your local machine also create a folder to use for syncing. Also make
+sure you can login with your private key. Then try the first sync:
+
+    
+    
+    unison -prefer newer -batch -ui text ~/todo/ ssh://vps.example.org/sync/
+    
+
+If this works, then you are almost done. Set it up as a cronjob:
+
+    
+    
+    crontab -e
+    */5 * * * * unison -prefer newer -batch -ui text ~/todo/ ssh://vps.example.org/sync/ >> ~/unison.log
+    
+
+This will log to `~/unison.log` for troubleshooting, and sync your todo.txt
+every 5 minutes.
+
+If you are on OS X, the above cronjob might not work because it doesn't detect
+the ssh-agent (because OS X prefers launchd over cron...). You can use this
+cronjob, that will work:
+
+    
+    
+    */5 * * * * declare -x SSH_AUTH_SOCK=$( find /tmp/launch-*/Listeners -user remy -type s | head -1 ) && unison -prefer newer -batch -ui text ~/todo/ ssh://vps.example.org/sync/
+    
+
+### Conclusion
+
+With the above described setup you can have your todo/tasks everywhere, anytime,
+self hosted in a usable and future proof format. It works very well for me, and
+I hope it does for other people too.
+
+### Links:
+
+  * [SimpleTasks Cloudless for Android][4]
+  * [FolderSync Lite for Android][5]
+  * [ToDour for OS X][7]
+  * [DayTasks for Ubuntu/Arch][6]
+  * [Vim Plugin for Todo.txt][18]
+  * [Unison File Syncronizer][3]
+  * [ToDoTXTJS][16]
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format
+   [3]: http://www.cis.upenn.edu/%7Ebcpierce/unison/
+   [4]: https://play.google.com/store/apps/details?id=nl.mpcjanssen.simpletask
+   [5]: https://play.google.com/store/apps/details?id=dk.tacit.android.foldersync.lite
+   [6]: http://burnsoftware.wordpress.com/daytasks/
+   [7]: http://nerdur.com/todour.html
+   [8]: https://github.com/ginatrapani/todo.txt-cli
+   [9]: https://raymii.org/s/inc/img/todour.png
+   [10]: https://github.com/Sveppi/Todour
+   [11]: https://raymii.org/s/inc/img/daytasks.png
+   [12]: https://raymii.org/s/inc/img/simpletasks.png
+   [13]: http://mpcjanssen.nl/cgi-bin/simpletask/home
+   [14]: https://raymii.org/s/inc/img/foldersync.jpg
+   [15]: https://raymii.org/s/inc/img/todotextjs.png
+   [16]: https://github.com/MartinSGill/TodoTxtJs
+   [17]: http://todo.martinsgill.co.uk/
+   [18]: https://github.com/freitass/todo.txt-vim
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

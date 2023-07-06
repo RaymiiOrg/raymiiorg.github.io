@@ -1,0 +1,134 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	std::accumulate in C++
+Author      : 	Remy van Elst
+Date        : 	23-10-2019
+Last update : 	07-11-2020
+URL         : 	https://raymii.org/s/snippets/Cpp_std_accumulate.html
+Format      : 	Markdown/HTML
+---
+
+
+
+I'm using [codewars][1] to practice my development skills. Today I found out 
+about the `std::accumulate` method in C++ while doing an exercise there. I'm
+sharing it here because I never heard of it before. It is the `<numeric>`
+header, and it also accepts a custom binary function to apply instead of 
+`operator+`. This snippet shows some examples including a lambda operator and
+the for loop you would use otherwise.
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Update 2020-11-08: Thank you Martin Blasko for reporting a few errors in this article!
+
+
+
+
+### Plain old loop
+
+It performs a [fold][2] on a given range. Or, in my case, it gives the 
+sum of all int's in a vector without a loop. [Complete documentation here][3].
+
+Consider this code:
+
+    std::vector <int> numbers  { 20, 10, -8, 10, 10, 15, 35 };
+    int sum = 0;
+    for (auto const& number: numbers)
+    {
+        sum += number;
+    }
+    std::cout << "sum: " << sum;
+
+The output after compiling is:
+
+    # C:\Users\Remy\CLionProjects\codewars\cmake-build-debug\src\CodeWars.exe
+     
+    sum: 92
+
+This can be written shorter using the `accumulate` function:
+
+    int sum = std::accumulate(numbers.begin(), numbers.end(), 0);
+
+`std::accumulate` accepts an initial value, so to add 10 to the result of the above sum without an 
+intermidiate variable:
+
+    std::vector <int> numbers  { 20, 10, -8, 10, 10, 15, 35 }; 
+    int sum = std::accumulate(numbers.begin(), numbers.end(), 10);
+
+The result will be `102`.
+
+### Lambdas
+
+`std::accumulate` also accepts a function to perform as the fold operator. For example, if you
+need to get a sum of the result and also multiply every number by 8, in the 
+odd case you need to go from bytes to bits:
+
+    std::vector <int> numbers  { 10, 20, 30 };
+    int sum = std::accumulate(numbers.begin(), 
+            numbers.end(),
+            0, 
+            [](int a, int b) { return a + (b*8);}
+            );
+    std::cout << "sum: " << sum;
+
+Output:
+
+    sum: 480
+    
+The binary operator takes the current accumulation value a (initialized to init) 
+and the value of the current element b. 
+
+This is a simple example of course, but by using a lambda you can do all kinds 
+of crazy stuff. 
+
+From [the documentation][3], on reversing the order:
+
+    std::accumulate performs a left fold. In order to perform a right fold, 
+    one must reverse the order of the arguments to the binary operator, and 
+    use reverse iterators. 
+    
+
+
+
+[1]: https://www.codewars.com/r/KjbvJA
+[2]: https://en.wikipedia.org/wiki/Fold_(higher-order_function)
+[3]: https://en.cppreference.com/w/cpp/algorithm/accumulate
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

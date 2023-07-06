@@ -1,0 +1,381 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Github Actions, C++ with Boost and cmake, almost a 50% speedup with caching
+Author      : 	Remy van Elst
+Date        : 	27-05-2020
+URL         : 	https://raymii.org/s/articles/Github_Actions_cpp_boost_cmake_speedup.html
+Format      : 	Markdown/HTML
+---
+
+
+
+For a personal project I use Github for source code hosting and Github Actions
+as an automated build and test tool. Github Actions compiles my `cmake` project
+and runs all the unit tests on every commit. It also saves a build artifact, the
+actual compiled program. By utilizing some dependency caching and make flags
+I sped up the build process by 43% by caching the `apt install libboost1.65-dev` 
+and giving `cmake` a `-j2` makeflag.   
+
+![build speedup][1]
+
+> The improvements to the build script show the faster build time
+
+This article shows my simple setup to compile a C++ project with cmake and Boost 
+on Github Actions. After compilation, it runs all the tests and uploads the 
+compiled binary for download. For my one man project it's overkill, but when
+collaborating or when builds take a long time on your own machine, it's great
+to have an automated build / test system.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Do note that the build time decreased from 1 minute 48 seconds to 47 seconds for
+a small C++ project. The percentage wise speedup is large, but probably you might 
+find the title a bit clickbaity. The main focus of this article is to show how 
+to build a simple C++ project with Boost included using github actions.
+
+It also shows how to cache an `apt install` and how to provide `cmake` with
+the `MAKEFLAGS` to utilize the two cores that the free github builder virtual 
+machine has.
+
+At work we use Gitlab CI for this and it cuts compilation time of the entire project
+from 2 hours to 20 minutes due to humongous build servers running gitlab runners. 
+A few different binaries are built for different arm architectures, the test suite 
+is run, doxygen docs are generated, code style checks are done and static analysis
+is done with Sonarqube, all from one source. With a team of developers this all 
+gives an enormous speed increase in the process of reviewing code and not 
+forgetting certain things.
+
+I don't have my own gitlab server running (anymore) but I noticed that github
+also have a feature like gitlab ci, but they call it Github Actions, and it's 
+free for public projects, for private projects you get a limited amount of time,
+but 2000 minutes is enough for me. 
+
+### Simple cmake C++ project with Boost on Github Actions
+
+If you host your source code on github, you can use Github Actions. Most of my 
+personal projects follow [this simple cmake structure][2] which integrates well
+with my preferred IDE, CLion by JetBrains. The structure also has unit tests 
+with GoogleTest.
+
+For Boost integration, [check my other article][3] on integrating that in the 
+project setup. On Ubuntu you also need to install the development libraries:
+
+    apt install libboost-dev-all
+
+The Github linux virtual machine that will build the project does have most
+C++ development tools installed (like `gcc` and the `build-essential` package) 
+but boost is missing. In the file you write which specifies your build steps
+you can also use `sudo` to install packages via `apt`, in our case `boost`.
+
+#### Basic workflow
+
+In the root folder of your project, create a folder for the workflow files for
+github:
+
+    mkdir -p .github/workflows
+
+In that folder, create a `.yml` file for your workflow. My basic example to
+run `cmake` and my unit test is listed below.
+
+    name: build and run tests
+    on:
+      push:
+        branches: [ master ]
+      pull_request:
+        branches: [ master ]
+    jobs:
+      build:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v2
+        # install dependencies
+        - name: boost
+          run: sudo apt-get update && sudo apt-get install -yq libboost1.65-dev
+        # build project
+        - name: mkdir
+          run: mkdir build
+        - name: cmake build
+          run: cmake -Bbuild -H.
+        - name: cmake make
+          run: cmake --build build/ --target all
+        # run tests
+        - name: run test 1
+          run: build/tst/Example1_tst
+        - name: run test 2
+          run: build/tst/Example2_tst
+        
+
+If you commit and push, you should be able to look up the action on Github:
+
+![github action][4]
+
+That was easy wasn't is? A remote server builds your program and runs the unit
+tests. If you would do this on your local workstation the steps would be a bit 
+like:
+
+    #build code
+    cd to/project/folder
+    cd build
+    cmake ..
+    make
+    # run tests
+    tst/Example1_tst
+    tst/Example2_tst
+
+
+#### Caching the apt install dependencies
+
+In my case the `apt update && apt install libboost-1.65-dev` takes almost 15 
+seconds. If you have more packages, this takes longer and its also run every
+time, but almost never changes. So a bit of a waste of time and resources.
+
+
+[This][5] post on Stackoverflow has an elaborate example on caching `apt` steps. 
+My example is a simplified version. Replace this step in your workflow file:
+
+    - name: boost
+      run: sudo apt-get update && sudo apt-get install -yq libboost1.65-dev
+
+With the following piece of code:
+
+    - name: Cache boost
+      uses: actions/cache@v1.0.3
+      id: cache-boost
+      with:
+        path: "~/boost"
+        key: libboost1.65-dev
+    - name: Install boost
+      env:
+        CACHE_HIT: ${{steps.cache-boost.outputs.cache-hit}}
+      run: |
+        if [[ "$CACHE_HIT" == 'true' ]]; then
+          sudo cp --force --recursive ~/boost/* /
+        else
+          sudo apt-get update && sudo apt-get install -yq libboost1.65-dev
+          mkdir -p ~/boost
+          for dep in libboost1.65-dev; do
+              dpkg -L $dep | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/boost/
+          done
+        fi
+
+
+What this basically does is, if boost is not installed yet, install it and then
+use `dpkg` to copy all newly installed files to a folder. The next time, the 
+virtual machine will download that `artifact` and just extract it on `/`. The
+effect is the same, the libraries are installed, however the time it takes is 
+just 1 second instead of 15 seconds.
+
+If you need to install a newer version of the package, say, `libboost-1.71-dev`,
+replace the package name by the newer one and you're done.
+
+If you have multiple packages to install, make sure they're the actual packages,
+not a meta-package (a package without files, just dependencies). Meta-packages
+don't have files to copy, so the steps will fail. You can use the Ubuntu or 
+Debian packages site to check, for example [libboost-dev][6] is a meta-package
+(10 kB package size, [no actual files][9]) where as [libboost1.71-dev][7] is an 
+actual package. Larger file size and [lots of included files][8].
+
+With this first improvement, subsequent build will be faster, especially when 
+you have lots of dependencies to install. One more optimalisation we can do is
+provide a `makeflag` to use more resources during building.
+
+#### Provide makeflags to cmake
+
+In a cmake project, the build steps can all be done using cmake itself instead
+of the build system cmake generates for (like make/ninja), [if your cmake 
+version is 3.15 or higher][10]):
+
+    cd to/project/folder
+    cmake --build build/
+    sudo cmake --install build/
+
+No seperate `make`, the last cmake command wraps around that. You can also just 
+do it the old fashioned way:
+
+    cd to/project/folder/build
+    cmake ..
+    make all
+    sudo make install
+
+Using the `cmake` commands works not only for `Makefiles`, but also for `ninja`
+or any other build system `cmake` can generate.
+
+But, in our example, we use `Makefiles` and to use [the two cores][11] the github
+virtual machine has (instead of just one core) we must provide a flag to `make`.
+
+If you would do it with the commandline you would do this:
+
+    make -j2 all
+
+Where `-j#` is the amount of cores you want to use to build. Now with cmake we 
+can do more complicated things in our `CMakeLists.txt`, but that would clutter 
+up our simple example. Github Actions allows you to set environment variables 
+and `make` can use the `MAKEFLAGS` environment variable. If we set that to 
+contain `-j2`, even via `cmake`, the flag will be passed through. 
+
+In our github actions yaml file, replace the following step:
+
+
+    - name: cmake make
+      run: cmake --build build/ --target all
+
+With the following code. You could also just add the last two lines instead 
+of replacing the whole block.
+
+    - name: cmake make
+      run: cmake --build build/ --target all
+      env:
+        MAKEFLAGS: "-j2"
+
+In my case using two cores sped up the build process by another 27 seconds. If 
+your project is larger, the improvement will be bigger as well.
+
+### Upload build artifacts
+
+One of the other usefull features is to be able to download certain files that
+were built. Github calls them `build artifacts` and you can download them via
+the webpage:
+
+![gh action download][12]
+
+At work, via Gitlab, we use this to cross compile for a few different ARM 
+architectures. Not everybody has a crosscompiler setup, but they can just 
+download their freshly built binary and run it on actual hardware. Most of our
+testing is automated with unit tests, but there are edge cases, for example,
+interaction with actual hardware (think valves, pumps, high voltage relais).
+
+If you don't crosscompile, it is still useful, it allows other people to get a 
+binary without having to compile it. A tester could login, download the binary
+for their specific feature branch and use it for testing.
+
+Build artifacts are also reproducable. You can trigger a build of a branch from
+6 months ago and get that binary, just as pristine as it was back then.
+
+Add the following to the bottom of your yml file. The paths are for our example.
+
+    # upload artifact, example binary
+    - name: Upload Example binary
+      uses: actions/upload-artifact@v1
+      with:
+        name: upload binary
+        path: build/src/Example
+
+You can go crazy with this, couple it with github releases for certain branches 
+and automate more, but that is out of scope for our example case.
+
+#### The final yaml file
+
+The yaml file with all improvements is listed below:
+
+    name: build and run tests
+    on:
+      push:
+        branches: [ master ]
+      pull_request:
+        branches: [ master ]
+    jobs:
+      build:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v2
+        # install and cache dependencies
+        - name: Cache boost
+          uses: actions/cache@v1.0.3
+          id: cache-boost
+          with:
+            path: "~/boost"
+            key: libboost1.65-dev
+        - name: Install boost
+          env:
+            CACHE_HIT: ${{steps.cache-boost.outputs.cache-hit}}
+          run: |
+            if [[ "$CACHE_HIT" == 'true' ]]; then
+              sudo cp --force --recursive ~/boost/* /
+            else
+              sudo apt-get update && sudo apt-get install -yq libboost1.65-dev
+              mkdir -p ~/boost
+              for dep in libboost1.65-dev; do
+                  dpkg -L $dep | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/boost/
+              done
+            fi
+        # build project
+        - name: mkdir
+          run: mkdir build
+        - name: cmake build
+          run: cmake -Bbuild -H.
+        - name: cmake make
+          run: cmake --build build/ --target all
+          env:
+            MAKEFLAGS: "-j2"
+        # run tests
+        - name: run test 1
+          run: build/tst/Example1_tst
+        - name: run test 2
+          run: build/tst/Example2_tst
+        # upload artifact, game binary
+        - name: Upload Example binary
+          uses: actions/upload-artifact@v1
+          with:
+            name: upload binary
+            path: build/src/Example
+
+
+### Conclusion
+
+This article discussed both the automated build setup of a `C++` project on Github
+actions, how to upload build artifacts and two improvements to speed up such a 
+build. In my case the improvements are significant percentage wise, but not that 
+impressive if you look at the actual numbers. In the case of larger projects, or 
+when you are billed for runtime, the improvements could have a bigger effect. 
+
+[1]: /s/inc/img/gh-actions-3.png
+[2]: /s/tutorials/Cpp_project_setup_with_cmake_and_unit_tests.html
+[3]: /s/snippets/std_string_to_lowercase_or_uppercase_in_cpp.html#toc_4
+[4]: /s/inc/img/gh-actions-2.png
+[5]: http://web.archive.org/web/20200526180814/https://stackoverflow.com/questions/59269850/caching-apt-packages-in-github-actions-workflow
+[6]: http://web.archive.org/web/20200526180847/https://packages.ubuntu.com/focal/libboost-dev
+[7]: http://web.archive.org/web/20200526180850/https://packages.ubuntu.com/focal/libboost1.71-dev
+[8]: http://web.archive.org/web/20200526180852/https://packages.ubuntu.com/focal/amd64/libboost1.71-dev/filelist
+[9]: http://web.archive.org/web/20200526180848/https://packages.ubuntu.com/focal/amd64/libboost-dev/filelist
+[10]: http://web.archive.org/web/20200526174351/https://cliutils.gitlab.io/modern-cmake/chapters/intro/running.html
+[11]: http://web.archive.org/web/20200526174717/https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners#supported-runners-and-hardware-resources
+[12]: /s/inc/img/gh-actions-1.png
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

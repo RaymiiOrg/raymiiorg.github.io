@@ -1,0 +1,229 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Persistent reverse (NAT bypassing) SSH tunnel access with autossh
+Author      : 	Remy van Elst
+Date        : 	05-10-2012
+URL         : 	https://raymii.org/s/tutorials/Autossh_persistent_tunnels.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Situation: you are in a restricted network (company, hotel, hospital) where you
+have a "server" which you want to access from outside that network. You cannot
+forward ports to that machine, but you can ssh outside (to your own server).
+This tutorial solves this problem.
+
+You need another server to which you setup a persistent ssh connection with a
+reverse tunnel. Then if you need to access the machine you ssh into the other
+server, and from there you ssh through the tunnel to the restriced machine.
+
+Make sure you have permission to do this from the administrators. They generally
+don't like holes in the firewall/security. They don't block it for no reason.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+#### Naming convention:
+
+restricted machine: machine inside the restricted network middleman: machine to
+which the restricted machine sets up the tunnel, and from which you access the
+restricted server
+
+#### Install the tools
+
+We are going to use autossh. This is in the debian/ubuntu repositories. Make
+sure you also install openssh server.
+
+Execute on: restricted machine.
+
+    
+    
+    sudo apt-get install autossh ssh
+    
+
+#### Create your ssh-key.
+
+Execute on: restricted machine.
+
+    
+    
+    ssh-keygen
+    Generating public/private rsa key pair.
+    Enter file in which to save the key (/root/.ssh/id_rsa): */root/.ssh/nopwd*
+    Enter passphrase (empty for no passphrase): *leave empty*
+    Enter same passphrase again: *leave empty*
+    
+
+#### Copy your key to the middleman machine
+
+Execute on: restricted machine.
+
+    
+    
+    ssh-copy-id -i .ssh/nopwd.pub "-p 2222 remy@middleman"
+    
+
+(replace remy@middleman with your username and middleman ssh server. Also note
+how you can give a custom port in the ssh-copy-id.)
+
+#### Test the connection with autossh
+
+Execute on: restricted machine
+
+    
+    
+    autossh -M 10984 -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /root/.ssh/nopwd -R 6666:localhost:22 remy@middleman -p 2222
+    
+
+Explanation"of options:
+
+  * -M 10984: autossh monitoring port.
+  * -o "PubkeyAuthentication=yes": authenticate with ssh-keys instead of password.
+  * -o "PasswordAuthentication=no": explicitly disable password authentication.
+  * -i /root/.ssh/nopwd: the location of the ssh key to use.
+  * -R 6666:localhost:22: reverse tunnel. forward all traffic on port 6666 on host middleman to port 22 on host restricted machine.
+  * remy@middleman -p 2222: ssh user remy, ssh host middleman, ssh port 2222
+
+If this all goes well you should be logged in to the middleman host without
+being asked for a password. You might get the question if you want to add the
+ssh key. Say yes to this.
+
+If it does not go well, check the permissions on the ssh key (should be 600),
+and make sure you have the correct values in the autossh command.
+
+#### SSH back in the restricted host
+
+From another machine (outside the restricted network preferably) ssh into the
+middleman host.
+
+Execute on: other machine
+
+    
+    
+    ssh -p 2222 remy@middleman
+    
+
+From the middleman, ssh into the restricted host via the reverse tunnel we
+created:
+
+Execute on: middleman
+
+    
+    
+    ssh -p 6666 remy@127.0.0.1
+    
+
+If all goes well, you should see a prompt to login to the restricted machine.
+Enter your password and go. If this goes well, you can continue. If this does
+not work, check the values in the command and the ssh configs. Also make sure
+you have executed the steps above correctly.
+
+#### Enable the tunnel on boot
+
+We are going to edit the /etc/rc.local file. This script normally does nothing,
+but gets executed at boot. If you make any errors in this script, your machine
+might not boot so make sure to do this correctly.
+
+Execute on: restricted machine
+
+    
+    
+    sudo nano /etc/rc.local
+    
+
+Add (and change) the following line
+
+    
+    
+    autossh -M 10984 -N -f -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /root/.ssh/nopwd -R 6666:localhost:22 remy@middleman -p 2222 &
+    
+
+We have three new things in this command:
+
+  * -N: Do not execute a command on the middleman machine
+  * -f: drop in the background
+  * &: Execute this command but do not wait for output or an exit code. If this is not added, your machine might hang at boot.
+
+Save the file, and as make it executable:
+
+Execute on: restricted machine
+
+    
+    
+    sudo chmod +x /etc/rc.local
+    
+
+And test it:
+
+Execute on: restricted machine
+
+    
+    
+    sudo /etc/rc.local
+    
+
+If you get your regular promt back without any output you've done it correct.z
+
+#### Forward a website, not ssh
+
+You might want to forward a website on the restricted host. Follow the above
+tutorial, but change the autossh command:
+
+    
+    
+    autossh -M 10984 -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /root/.ssh/nopwd -R 8888:localhost:80 remy@middleman -p 2222
+    
+
+  * -R 8888:localhost:80: this forwards all traffic on host middleman to port 80 on host restrictedhost. (port 80 = website).
+
+#### Other host inside restricted network
+
+You can also forward ports from other restricted hosts in the network:
+
+    
+    
+    autossh -M 10984 -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /root/.ssh/nopwd -R 7777:host2.restrictednetwork:22 remy@middleman -p 2222
+    
+
+This will forward all traffic to port 7777 on host middleman, via host
+restrictedhost, to host host2.restrictednetwork port 22.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

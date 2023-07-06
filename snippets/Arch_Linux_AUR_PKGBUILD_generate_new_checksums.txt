@@ -1,0 +1,86 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Arch Linux AUR PKGBUILD generate new checksums
+Author      : 	Remy van Elst
+Date        : 	29-12-2014
+URL         : 	https://raymii.org/s/snippets/Arch_Linux_AUR_PKGBUILD_generate_new_checksums.html
+Format      : 	Markdown/HTML
+---
+
+
+
+The AUR is a nice feature from Arch Linux, it allows anyone to create and upload
+a simple package build script, PKGBUILD, for a piece of software which is not in
+the repositories. Sometimes however, the PKGBUILD is outdated. You then need to
+manually fix it, by changing the download link or version. With a new version
+you get new checksums, and the `makepkg` command has a neat feature which
+generates the checksums for you.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+After you have updated your `PKGBUILD` you can get new checksums with the
+following command:
+
+    
+    
+    makepkg -g -f -p PKGBUILD
+    
+
+Where `PKGBUILD` is the actual PKGBUILD file with incorrect md5sums.
+
+Output, for `newrelic-php5` in this example:
+
+    
+    
+    ==> Retrieving sources...
+      -> Found newrelic-php5-4.17.0.79-linux.tar.gz
+      -> Found newrelic-daemon.service
+      -> Found .install
+    ==> Generating checksums for source files...
+    md5sums=('c1c01fe1deed8e73508588a30e01046c'
+             '4fc78347663adcb32ed28eddb546619c'
+             'd3f7bb7fc0d84dff40d294384a32ddd3')
+    
+
+Update the `PKGBUILD` file with the new checksums and you are ready to try a new
+build.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

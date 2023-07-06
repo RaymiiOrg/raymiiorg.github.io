@@ -1,0 +1,266 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Run CLion native on Android, ditch your desktop! - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>                 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Run CLion native on Android, ditch your desktop!</h2>
+<p><small>Published: <span data-pagefind-meta='date'>27-12-2019</span> | Author: Remy van Elst | <a href="Run_CLion_on_Android.txt">Text only version of this article</a>
+</small></p>
+<br><div class='olderthanayear'><p><strong>&#10071; This post is over three years old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Chroot, easy or hard?</a>
+<ul>
+<li>
+<a href="#toc_1">Easy</a>
+</li>
+<li>
+<a href="#toc_2">Hard</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_3">Development tools</a>
+</li>
+<li>
+<a href="#toc_4">Installing CLion</a>
+</li>
+<li>
+<a href="#toc_5">Debugging and Unit testing</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p>How often do you read articles that state that people have replaced their main
+computer with an iPad and are fully content? Now, how many of those articles just
+use a linux server (vps) somewhere with some native apps, but mostly SSH to that
+server? Well, what if I told you that you can run a full blown IDE, the best 
+IDE for C++ there is, CLion by JetBrains, on Android? Including compiling, just
+native GCC, CMake, GDB and all the stuff you are used to? Just for fun I&#39;ve installed
+CLion on an old Samsung Tab S2 I had lying around, using Ubuntu in a chroot. It 
+works way better than I&#39;d expected, with a Bluetooth keyboard and mouse it&#39;s almost
+as if your on a desktop. I wonder if you could run Android Studio and use the 
+tablet to compile app&#39;s for itself. This article shows some photo&#39;s, including
+a mechanical keyboard, different window managers and had instructions to replicate
+this setup.</p>
+
+<p><img src="/s/inc/img/clion-android1.jpg" alt="photo1"></p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<p>At my job I use CLion as my editor of choice. All of our C++ (embedded) developers
+do, with one or two that prefer a different tool (nano). At home I use it as well
+for my training, the <a href="https://www.codewars.com/r/KjbvJA">codewars kata&#39;s</a> I often do and sometimes <a href="/s/blog/Weight_for_Weight_a_coding_exersize_that_kept_me_busy.html">write about</a>. </p>
+
+<p>However, it&#39;s not always possible to use such a big bulky workstation. What if you
+want a more mobile setup? Maybe a laptop suits your needs, but what if you could
+use one of those old tablets you probably have in a drawer gathering dust? </p>
+
+<p>I get about 6 hours of battery life, so even that is better than I expected of 
+such an old device running Jetbrains resource hungry software.</p>
+
+<p>Since CLion is Java software, I thought, lets try to get it up and running on one 
+of my older tablets. I also had a bluetooth keyboard lying around, perfect combo
+for some development on the couch, or in the train.</p>
+
+<p>With a powerbank and a USB-OTG cable, I could even use my CODE keyboard:</p>
+
+<p><img src="/s/inc/img/clion-android2.jpg" alt="photo2"></p>
+
+<p>Who doens&#39;t want that on the train every day riding to work?</p>
+
+<p>My hardware consists of a 2015 Samsung Galaxy Tab S2, running a custom rom, 
+<a href="http://web.archive.org/web/20191223212448/https://forum.xda-developers.com/tab-s2/orig-development/rom-lineageos-16-0-t3838617">LineageOS 16</a> and a generic (Rapoo, china fluff) bluetooth keyboard/mouse.</p>
+
+<h3 id="toc_0">Chroot, easy or hard?</h3>
+
+<p>By using a chroot environment, one can install just about any modern linux distro
+via an easy to use GUI app on Android, no root required. Copy and paste a few
+commands into <a href="https://termux.com/">Termux</a>, start the VNC server and connect with a <a href="https://play.google.com/store/apps/details?id=com.iiordanov.freebVNC&amp;hl=en_US">VNC app</a>, bVNC is <a href="https://github.com/iiordanov/remote-desktop-clients">open source as well</a>
+and you&#39;re in your Linux distro of choice. </p>
+
+<h4 id="toc_1">Easy</h4>
+
+<p>The easy way is to use an app like <a href="https://github.com/EXALAB/AnLinux-App">AnLinux</a> or <a href="https://andronix.app/">Andronix</a>. The latter one,
+Andronix, will ask for money to use
+some of the app&#39;s features. You don&#39;t need to pay for a basic Ubuntu installation.</p>
+
+<p>The first, <a href="https://github.com/EXALAB/AnLinux-App">AnLinux</a> is open source and a bit more spartan, but works just fine.
+It even offers IceWM as an easy option. IceWM is my favorite legacy window manager,
+and on a tablet in a chroot, it uses almost no resources (storage/ram). We all know 
+that jetbrains IDE&#39;s use all resources they can get and then some.</p>
+
+<p>For my first attempt, I used Andronix. Works, installs XFCE, but the default setup
+is a bit off. Icons are missing, firefox gives a segfault, I was unable to run as
+a non-root user and more of those minor annoyances. The distro is more recent though,
+they provide Ubuntu 19.10.</p>
+
+<p>Here&#39;s a screenshot of the XFCE environment Andronix provides, note the smoother
+looking text:</p>
+
+<p><img src="/s/inc/img/clion-android4.png" alt="xfce"></p>
+
+<p>For my second and latter attempts, I used <a href="https://github.com/EXALAB/AnLinux-App">AnLinux</a>. It offers Ubuntu 18.04, but
+next to XFCE they also have IceWM, which I like. Here&#39;s a screenshot of CLion and 
+IceWM via AnLinux:</p>
+
+<p><img src="/s/inc/img/clion-android3.png" alt="icewm"></p>
+
+<p>On anlinux I could add a regular user and run firefox without segfaults. The GCC 
+version provided by Ubuntu 18.04 is 7.3.0 and by Ubuntu 19.10 it&#39;s 8.1.0. </p>
+
+<p>My preference would go to <a href="https://github.com/EXALAB/AnLinux-App">Anlinux</a> due to the less intrusive application and
+all the source code being available. Andronix looks like a shady site, incomplete
+documentation, pushing their premium version and their paid modded OS versions. </p>
+
+<h4 id="toc_2">Hard</h4>
+
+<p>You can setup your own chroot on Android. Back when I had my first android phone,
+the very first <a href="https://en.wikipedia.org/wiki/HTC_Dream">HTC G1</a> (or HTC Dream outside of T-Mobile), I already ran a 
+desktop environment via the chroot way. Boy was I proud to have OpenOffice running
+on my small phone screen.</p>
+
+<p>The <a href="https://wiki.debian.org/ChrootOnAndroid">Debian Wiki</a> has a bunch of information and a guide for a manual chroot.
+Debian should work just as well as Ubuntu for CLion.</p>
+
+<h3 id="toc_3">Development tools</h3>
+
+<p>Once you have Ubuntu installed and are up and running with your GUI, you need 
+to use the package manager to install the development tools. The bundled CLion
+versions won&#39;t work due to the different architecture. Fire up termux or another
+terminal, enter the chroot/vnc and install the basics:</p>
+
+<pre><code>apt install openjdk-8-jre build-essential cmake gdb clang-format git wget sudo
+</code></pre>
+
+<p>Do note that not everything will work correctly due to being started in a chroot.
+Anything related to systemd will fail since systemd can only run as PID1 (not in a chroot).
+There is also no <code>/proc/</code> by default, so <code>ps auxf</code> and <code>top</code> won&#39;t work.</p>
+
+<p>For our purposes of just running CLion and a browser to do <a href="https://www.codewars.com/r/KjbvJA">codewars kata&#39;s</a>
+that aren&#39;t major problems.</p>
+
+<p>You should now consider adding a regular user. You can run everything as root, but
+it&#39;s less secure.</p>
+
+<pre><code>adduser yourUserName
+</code></pre>
+
+<p>There will be some questions on user information and a password. Stop the VNC 
+server and restart (via Termux) as the newly created user, for example:</p>
+
+<pre><code>sudo -u yourUserName vncserver-start
+</code></pre>
+
+<h3 id="toc_4">Installing CLion</h3>
+
+<p>Once you&#39;ve installed the packages, go ahead and <a href="https://www.jetbrains.com/clion/download/other.html">download the clion tar.gz file</a>.
+Via their <code>Other Versions</code> page you avoid having to enter your email address.</p>
+
+<pre><code>wget https://download.jetbrains.com/cpp/CLion-2019.3.2.tar.gz
+</code></pre>
+
+<p>Extract the file:</p>
+
+<pre><code>tar -xf  CLion-2019.3.2.tar.gz
+</code></pre>
+
+<p>Fire up clion via their script:</p>
+
+<pre><code>~/clion-2019.3.2/bin/clion.sh
+</code></pre>
+
+<p>The magical fancy splash screen should now greet you:</p>
+
+<p><img src="/s/inc/img/clion-android7.jpg" alt="clion icewm"></p>
+
+<h3 id="toc_5">Debugging and Unit testing</h3>
+
+<p>You might wonder what kind of binaries are compiled. In my case, for this tablet&#39;s
+ARM specific architecture:</p>
+
+<pre><code>/home/remy/CLionProjects/untitled/cmake-build-debug/untitled: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, BuildID[sha1]=2bce76cd5fbd36776f4023a3cb9c33049549e957, with debug_info, not stripped
+</code></pre>
+
+<p>If you&#39;ve installed GDB you can use it via CLion to debug like you are used to, breakpoints,
+watches, the whole shebang:</p>
+
+<p><img src="/s/inc/img/clion-android8.jpg" alt="gdb"></p>
+
+<p>Even <a href="https://raymii.org/s/tutorials/Cpp_project_setup_with_cmake_and_unit_tests.html">GoogleTest</a> and my layout for CMake projects works without any problems. </p>
+Tags: <a href="../tags/android.html">android</a>
+, <a href="../tags/blog.html">blog</a>
+, <a href="../tags/c++.html">c++</a>
+, <a href="../tags/chroot.html">chroot</a>
+, <a href="../tags/cmake.html">cmake</a>
+, <a href="../tags/cpp.html">cpp</a>
+, <a href="../tags/development.html">development</a>
+, <a href="../tags/googletest.html">googletest</a>
+, <a href="../tags/icewm.html">icewm</a>
+, <a href="../tags/linux.html">linux</a>
+, <a href="../tags/testing.html">testing</a>
+, <a href="../tags/ttd.html">ttd</a>
+, <a href="../tags/ubuntu.html">ubuntu</a>
+, <a href="../tags/xfce.html">xfce</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

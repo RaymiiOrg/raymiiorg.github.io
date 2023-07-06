@@ -1,0 +1,216 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Install extra software in the VMWare vCenter Appliance (VCSA)
+Author      : 	Remy van Elst
+Date        : 	05-02-2014
+URL         : 	https://raymii.org/s/tutorials/VMWare_vCenter_Appliance_Install_Extra_Software.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This tutorial shows you how to install extra software in the VMWare vCenter
+appliance. VMWare provides a vCenter appliance, which is a SUSE Linux Enterprise
+Server appliance with the VMWare vCenter server software installed. Because this
+is SUSE, we can add repositories and install software from there. By default it
+comes without repositories enabled. I needed to do this because I want to use
+NRPE on the vCenter appliance.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Make sure you can SSH to your vCenter Appliance. I use my own account with sudo,
+however, if you're feeling lucky you might be able to use the root account.
+Remember, to disable root login.
+
+First we need to make sure we have the correct version. Check the file `/etc
+/SuSE-release`:
+
+    
+    
+    SUSE Linux Enterprise Server 11 (x86_64)
+    VERSION = 11
+    PATCHLEVEL = 2
+    
+
+I use the vCenter 5.5 appliance. If you have another version, change the
+repository URL to match this version.
+
+Add the openSUSE repository:
+
+    
+    
+    zypper addrepo -f http://download.opensuse.org/distribution/11.2/repo/oss/ opensuse
+    
+
+Output:
+
+    
+    
+    Adding repository 'opensuse' [done]
+    Repository 'opensuse' successfully added
+    Enabled: Yes
+    Autorefresh: Yes
+    GPG check: Yes
+    URI: http://download.opensuse.org/distribution/11.2/repo/oss/
+    
+
+Verify that adding the repository went successfully:
+
+    
+    
+    zypper repos -d
+    
+
+Output:
+
+    
+    
+    # | Alias    | Name     | Enabled | Refresh | Priority | Type | URI                                                      | Service
+    --+----------+----------+---------+---------+----------+------+----------------------------------------------------------+--------
+    1 | opensuse | opensuse | Yes     | Yes     |   99     | NONE | http://download.opensuse.org/distribution/11.2/repo/oss/ |
+    
+
+Update the local repository cache (comparable to `apt-get update`):
+
+    
+    
+    zypper refresh
+    
+
+It will ask you if you want to trust the repository:
+
+    
+    
+    Retrieving repository 'opensuse' metadata [\]
+    
+    New repository or package signing key received:
+    Key ID: B88B2FD43DBDC284
+    Key Name: openSUSE Project Signing Key <opensuse@opensuse.org>
+    Key Fingerprint: 22C07BA534178CD02EFE22AAB88B2FD43DBDC284
+    Key Created: Fri Nov  7 14:10:07 2008
+    Key Expires: Sun Nov  7 14:10:07 2010 (EXPIRED)
+    Repository: opensuse
+    
+    Do you want to reject the key, trust temporarily, or trust always? [r/t/a/?] (r): 
+    
+
+Answer with `a` to always trust this repository:
+
+    
+    
+    Retrieving repository 'opensuse' metadata [done]
+    Building repository 'opensuse' cache [done]
+    All repositories have been refreshed.
+    
+
+That's it. If you now for example want to install NRPE, you can use the
+following commands. First search for the correct package name:
+
+    
+    
+    zypper search nrpe
+    
+
+Output:
+
+    
+    
+    Loading repository data...
+    Reading installed packages...
+    
+    S | Name               | Summary                                               | Type
+    --+--------------------+-------------------------------------------------------+--------
+      | nagios-nrpe        | Nagios Remote Plug-In Executor                        | package
+      | nagios-nrpe-client | Client part of Nagios Remote Plug-ins Executor (NRPE) | package
+      | nagios-nrpe-doc    | Nagios Remote Plug-In Executor documentation          | package
+      | nagios-nrpe-server | Server part for Nagios Remote Plug-In Executor        | package
+    
+
+Install the correct one:
+
+    
+    
+    zypper install nagios-nrpe-client
+    
+
+Output:
+
+    
+    
+    Loading repository data...
+    Reading installed packages...
+    Resolving package dependencies...
+    
+    The following NEW packages are going to be installed:
+      nagios-nrpe-client nagios-plugins perl-Crypt-DES perl-Digest-HMAC perl-Net-SNMP
+    
+    The following recommended package was automatically selected:
+      nagios-plugins
+    
+    5 new packages to install.
+    Overall download size: 612.0 KiB. After the operation, additional 2.4 MiB will be used.
+    Continue? [y/n/?] (y):
+    Retrieving package nagios-nrpe-client-2.12-4.5.x86_64 (1/5), 30.0 KiB (52.0 KiB unpacked)
+    Retrieving: nagios-nrpe-client-2.12-4.5.x86_64.rpm [done]
+    Retrieving package perl-Crypt-DES-2.05-135.1.x86_64 (2/5), 19.0 KiB (39.0 KiB unpacked)
+    Retrieving: perl-Crypt-DES-2.05-135.1.x86_64.rpm [done]
+    Retrieving package perl-Digest-HMAC-1.01-630.2.x86_64 (3/5), 21.0 KiB (34.0 KiB unpacked)
+    Retrieving: perl-Digest-HMAC-1.01-630.2.x86_64.rpm [done]
+    Retrieving package perl-Net-SNMP-5.2.0-134.3.x86_64 (4/5), 98.0 KiB (389.0 KiB unpacked)
+    Retrieving: perl-Net-SNMP-5.2.0-134.3.x86_64.rpm [done]
+    Retrieving package nagios-plugins-1.4.13-5.3.x86_64 (5/5), 444.0 KiB (1.9 MiB unpacked)
+    Retrieving: nagios-plugins-1.4.13-5.3.x86_64.rpm [done]
+    Installing: nagios-nrpe-client-2.12-4.5 [done]
+    Installing: perl-Crypt-DES-2.05-135.1 [done]
+    Installing: perl-Digest-HMAC-1.01-630.2 [done]
+    Installing: perl-Net-SNMP-5.2.0-134.3 [done]
+    Installing: nagios-plugins-1.4.13-5.3 [done]
+    
+
+After the install, enable and start the service:
+
+    
+    
+    chkconfig nrpe on
+    /etc/init.d/nrpe start
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

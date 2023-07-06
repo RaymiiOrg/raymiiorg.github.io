@@ -1,0 +1,202 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Complete word count analysis of Security Now, episode 1 trough 370.
+Author      : 	Remy van Elst
+Date        : 	09-09-2012
+URL         : 	https://raymii.org/s/articles/Security_Now_Word_Analyzer.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Security Now is a podcast by Leo Laporte and Steve Gibson released on the
+Twit.tv network.
+
+Steve pays to get the podcast transcribed, and the files are up over are
+[grc.com][1].
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+I decided to run my [analyzer][3] over the complete podcast text archive. This
+is from episode 001 to 371.
+
+#### Get the files:
+
+    
+    
+    for i in {001..371}; do curl http://www.grc.com/sn/sn-${i}.txt >> sn.txt; echo $i; done
+    
+
+#### Clean the files up:
+
+    
+    
+    cat sn.txt | LC_CTYPE=C tr -cd '[:alnum:] [:space:]' > csn.txt
+    
+
+#### Analyze the text file:
+
+    
+    
+    cat csn.txt | LC_CTYPE=C tr [:space:] '\n' | grep -v "^\s*$" | sort | uniq -c | sort -bnr > count-combined.txt
+    
+
+#### Result:
+
+    
+    
+    ed count-combined.txt 
+    461930
+    1,20np
+    1       65548 the
+    2       49919 to
+    3       42284 that
+    4       40759 STEVE
+    5       40065 I
+    6       39496 a
+    7       35321 of
+    8       31706 and
+    9       30845 it
+    10      29930 is
+    11      24634 you
+    12      22213 And
+    13      20365 in
+    14      16467 this
+    15      14406 was
+    16      13811 So
+    17      13761 its
+    18      13711 for
+    19      12847 have
+    20      11599 on
+    
+
+[Full result][4]
+
+### Steve only
+
+    
+    
+    cat sn.txt | grep "STEVE:" > stonly.txt     
+    
+    cat stonly.txt | LC_CTYPE=C tr -cd '[:alnum:] [:space:]' > stonlyclean.txt
+    
+    cat stonlyclean.txt | LC_CTYPE=C tr [:space:] '\n' | grep -v "^\s*$" | sort | uniq -c | sort -bnr > sto.txt
+    
+
+#### Result
+
+    
+    
+    ed sto.txt 
+    461930
+    1,20np
+    1       65548 the
+    2       49919 to
+    3       42284 that
+    4       40759 STEVE
+    5       40065 I
+    6       39496 a
+    7       35321 of
+    8       31706 and
+    9       30845 it
+    10      29930 is
+    11      24634 you
+    12      22213 And
+    13      20365 in
+    14      16467 this
+    15      14406 was
+    16      13811 So
+    17      13761 its
+    18      13711 for
+    19      12847 have
+    20      11599 on 
+    
+
+[Steve only][5]
+
+### Leo Only
+
+    
+    
+    cat sn.txt | grep "LEO:" > leoonly.txt     
+    
+    cat leoonly.txt | LC_CTYPE=C tr -cd '[:alnum:] [:space:]' > leoonlyclean.txt
+    
+    cat leoonlyclean.txt | LC_CTYPE=C tr [:space:] '\n' | grep -v "^\s*$" | sort | uniq -c | sort -bnr > leoc.txt
+    
+
+#### Result
+
+    
+    
+    ed leoc.txt 
+    367236
+    1,20np
+    1       40349 LEO
+    2       30161 the
+    3       25301 to
+    4       24623 I
+    5       23060 a
+    6       19027 you
+    7       17115 it
+    8       16441 that
+    9       15115 of
+    10      13676 and
+    11      12256 is
+    12      9785 in
+    13      8689 And
+    14      8282 this
+    15      7633 have
+    16      7552 on
+    17      7094 for
+    18      6492 its
+    19      6032 do
+    20      5922 know    
+    
+
+[Leo only][6]
+
+   [1]: http://grc.com
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://raymii.org/s/articles/Word_occurrence_counter_and_analyzer.html
+   [4]: /s/inc/downloads/securitynow/sn-full.txt
+   [5]: /s/inc/downloads/securitynow/sn-steve.txt
+   [6]: /s/inc/downloads/securitynow/sn-leo.txt
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

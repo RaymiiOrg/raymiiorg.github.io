@@ -1,0 +1,390 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Configserver Firewall and Security (CSF and LFD) - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>                 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Configserver Firewall and Security (CSF and LFD)</h2>
+<p><small>Published: <span data-pagefind-meta='date'>12-10-2014</span> | Author: Remy van Elst | <a href="Configserver_Firewall_and_Security_CSF_LFD.txt">Text only version of this article</a>
+</small></p>
+<br><div class='olderthanayear'><p><strong>&#10071; This post is over eight years old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">CSF Installation</a>
+</li>
+<li>
+<a href="#toc_1">csf principle</a>
+</li>
+<li>
+<a href="#toc_2">csf command line tips</a>
+<ul>
+<li>
+<a href="#toc_3">Block an IP from the server</a>
+</li>
+<li>
+<a href="#toc_4">Remove an IP from the blocklist</a>
+</li>
+<li>
+<a href="#toc_5">Allow an IP</a>
+</li>
+<li>
+<a href="#toc_6">Search for an IP:</a>
+</li>
+<li>
+<a href="#toc_7">View Ports listening for external connections and the executables running</a>
+</li>
+<li>
+<a href="#toc_8">Disable csf and lfd</a>
+</li>
+<li>
+<a href="#toc_9">Enable csf and lfd</a>
+</li>
+<li>
+<a href="#toc_10">Restart csf</a>
+</li>
+<li>
+<a href="#toc_11">Mail yourself a general security check of the server</a>
+</li>
+<li>
+<a href="#toc_12">Advanced filters</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_13">csf.conf highlights</a>
+<ul>
+<li>
+<a href="#toc_14">Don&#39;t block IP addresses from the allow list with lfd</a>
+</li>
+<li>
+<a href="#toc_15">Open/Allow ports</a>
+</li>
+<li>
+<a href="#toc_16">Allow incoming / outgoing ping / ICMP</a>
+</li>
+<li>
+<a href="#toc_17">Block certain country&#39;s</a>
+</li>
+<li>
+<a href="#toc_18">Disable tracking of long running processes</a>
+</li>
+<li>
+<a href="#toc_19">Enable a Web Management UI</a>
+</li>
+<li>
+<a href="#toc_20">Send an email when a user logs in via ssh</a>
+</li>
+</ul>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p>This page covers my notes about csf and lfd. csf is an easy SPI iptables
+firewall suite. lfd is the login failure daemon, which scans log files for
+failed authentication and blocks the IP&#39;s doing that. This page covers
+installation, populair command line options and popular config file options.</p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<h3 id="toc_0">CSF Installation</h3>
+
+<p>On CentOS systems, first install some required Perl packages:</p>
+
+<pre><code> yum -y install perl-libwww-perl.noarch perl-Time-HiRes
+</code></pre>
+
+<p>Download CSF:</p>
+
+<pre><code>wget http://www.configserver.com/free/csf.tgz
+</code></pre>
+
+<p>Extract it:</p>
+
+<pre><code>tar -xf csf.tgz
+</code></pre>
+
+<p>Start the installation:</p>
+
+<pre><code>cd csf 
+./install.sh
+</code></pre>
+
+<p>If you have a server with Directadmin:</p>
+
+<pre><code>cd csf
+./install.directadmin.sh
+</code></pre>
+
+<p>Set some sane defaults:</p>
+
+<pre><code>perl -pi -w -e &quot;s/TESTING = \&quot;1\&quot;/TESTING = \&quot;0\&quot;/&quot; /etc/csf/csf.conf
+perl -pi -w -e &quot;s/SMTP_BLOCK = \&quot;0\&quot;/SMTP_BLOCK = \&quot;1\&quot;/&quot; /etc/csf/csf.conf
+perl -pi -w -e &quot;s/LF_DSHIELD = \&quot;0\&quot;/LF_DSHIELD = \&quot;86400\&quot;/&quot; /etc/csf/csf.conf
+perl -pi -w -e &quot;s/LF_SPAMHAUS = \&quot;0\&quot;/LF_SPAMHAUS = \&quot;86400\&quot;/&quot; /etc/csf/csf.conf
+perl -pi -w -e &quot;s/LF_DIRWATCH = \&quot;300\&quot;/LF_DIRWATCH = \&quot;120\&quot;/&quot; /etc/csf/csf.conf
+perl -pi -w -e &quot;s/LF_DIRWATCH_DISABLE = \&quot;0\&quot;/LF_DIRWATCH_DISABLE = \&quot;1\&quot;/&quot; /etc/csf/csf.conf
+perl -pi -w -e &quot;s/PT_SKIP_HTTP = \&quot;0\&quot;/PT_SKIP_HTTP = \&quot;1\&quot;/&quot; /etc/csf/csf.conf
+perl -pi -w -e &quot;s/PT_USERPROC = \&quot;10\&quot;/PT_USERPROC = \&quot;15\&quot;/&quot; /etc/csf/csf.conf
+perl -pi -w -e &quot;s/CC_DENY = \&quot;\&quot;/CC_DENY = \&quot;CN,KR,HK,IN,ID,MY,NG,PK,RU,SA,TW,SY,AE\&quot;/&quot; /etc/csf/csf.conf
+perl -pi -w -e &quot;s/IGNORE_ALLOW = \&quot;0\&quot;/IGNORE_ALLOW = \&quot;1\&quot;/&quot; /etc/csf/csf.conf
+</code></pre>
+
+<p>Restart CSF:</p>
+
+<pre><code>csf -r
+</code></pre>
+
+<p>Done. Do note that the IP you installed from has been added to the allow list.</p>
+
+<h3 id="toc_1">csf principle</h3>
+
+<p>The idea with csf, as with most iptables firewall configurations, is to block
+everything and then allow through only those connections that you want. This is
+done in iptables by DROPPING all connections in and out of the server on all
+protocols. Then allow traffic in and out from existing connections. Then open
+ports up in and outgoing for both TCP and UDP individually.</p>
+
+<h3 id="toc_2">csf command line tips</h3>
+
+<h4 id="toc_3">Block an IP from the server</h4>
+
+<pre><code>csf -d 192.168.1.2 
+csf -d 192.168.0/24
+</code></pre>
+
+<h4 id="toc_4">Remove an IP from the blocklist</h4>
+
+<pre><code>csf -dr 192.168.1.2 
+</code></pre>
+
+<h4 id="toc_5">Allow an IP</h4>
+
+<pre><code>csf -a 172.16.20.1
+</code></pre>
+
+<p>Do note that when you allow an IP, it will still be blocked by lfd if it starts
+brute forcing. See below, &quot;Don&#39;t block IP addresses from the allow list with
+lfd&quot; to see how to disable it.</p>
+
+<h4 id="toc_6">Search for an IP:</h4>
+
+<pre><code>csf -g 192.168.1.2
+</code></pre>
+
+<h4 id="toc_7">View Ports listening for external connections and the executables running</h4>
+
+<p>behind them</p>
+
+<pre><code>csf -p
+</code></pre>
+
+<h4 id="toc_8">Disable csf and lfd</h4>
+
+<pre><code>csf -x
+</code></pre>
+
+<h4 id="toc_9">Enable csf and lfd</h4>
+
+<pre><code>csf -e
+</code></pre>
+
+<h4 id="toc_10">Restart csf</h4>
+
+<pre><code>csf -r
+</code></pre>
+
+<h4 id="toc_11">Mail yourself a general security check of the server</h4>
+
+<pre><code>csf -m user@example.com
+</code></pre>
+
+<h4 id="toc_12">Advanced filters</h4>
+
+<p>These can be placed in either csf.allow or csf.deny.</p>
+
+<p>Allow connections over port 443 to a range of IP addresses:</p>
+
+<pre><code>tcp|out|d=443|d=12.34.56.78/27 # csf.allow
+</code></pre>
+
+<p>Allow SSH from one IP:</p>
+
+<pre><code>tcp|in|d=22|s=23.45.67.88 # csf.allow
+</code></pre>
+
+<p>Block traffic to port 80 from a specific range:</p>
+
+<pre><code>tcp|out|d=80|d=12.34.56.78/24 #csf.deny
+</code></pre>
+
+<p>The syntax for the advanced rules:</p>
+
+<pre><code>tcp/udp|in/out|s/d=port|s/d=ip|u=uid
+
+tcp/udp  : EITHER tcp OR udp OR icmp protocol
+in/out   : EITHER incoming OR outgoing connections
+s/d=port : EITHER source OR destination port number (or ICMP type)
+           (use a _ for a port range, e.g. 2000_3000)
+s/d=ip   : EITHER source OR destination IP address
+u/g=UID  : EITHER UID or GID of source packet, implies outgoing connections,
+           s/d=IP value is ignored
+</code></pre>
+
+<h3 id="toc_13">csf.conf highlights</h3>
+
+<p>The <code>/etc/csf/csf/csf.conf</code> file is huge and I recommend you read through it.
+Below I&#39;ll highlight some parts of the config I use more often.</p>
+
+<h4 id="toc_14">Don&#39;t block IP addresses from the allow list with lfd</h4>
+
+<p>By default <code>lfd</code> will also block IP addresses listed in the <code>csf.allow</code> file.
+Change the following to make <code>lfd</code> ignore IP addresses on that list.</p>
+
+<pre><code>IGNORE_ALLOW = &quot;1&quot;
+</code></pre>
+
+<p>Do note that if one of those IP&#39;s starts brute forcing the server, they will not
+be blocked.</p>
+
+<h4 id="toc_15">Open/Allow ports</h4>
+
+<p>To allow incoming connections to a specific port, edit the following part of the
+config:</p>
+
+<pre><code># Allow incoming TCP ports
+TCP_IN = &quot;20,21,22,25,53,80,110,143,443,465,587,993,995,2222&quot;
+
+# Allow incoming UDP ports
+UDP_IN = &quot;20,21,53&quot;
+</code></pre>
+
+<p>To allow outgoing ports:</p>
+
+<pre><code># Allow outgoing TCP ports
+TCP_OUT = &quot;20,21,22,25,53,80,110,113,443,2222&quot;
+
+# Allow outgoing UDP ports
+# To allow outgoing traceroute add 33434:33523 to this list 
+UDP_OUT = &quot;20,21,53,113,123&quot;
+</code></pre>
+
+<h4 id="toc_16">Allow incoming / outgoing ping / ICMP</h4>
+
+<p>To allow ICMP/ping, in/out, change the following:</p>
+
+<pre><code># Allow incoming PING
+ICMP_IN = &quot;1&quot;
+
+# Allow outgoing PING
+ICMP_OUT = &quot;1&quot;
+</code></pre>
+
+<p>To block it, change it to &quot;0&quot;</p>
+
+<h4 id="toc_17">Block certain country&#39;s</h4>
+
+<p>To block all traffic coming from certain country&#39;s:</p>
+
+<pre><code>CC_DENY = &quot;CN,KR,HK,IN,ID,MY,NG,PK,RU,SA,TW,SY,AE&quot;
+</code></pre>
+
+<p>Use the 2 letter ISO code there.</p>
+
+<h4 id="toc_18">Disable tracking of long running processes</h4>
+
+<pre><code>PT_LIMIT = &quot;0&quot;
+</code></pre>
+
+<p>If that is set to 1 you will receive a lot of mails when process resource usage
+spikes or they run longer than a minute.</p>
+
+<h4 id="toc_19">Enable a Web Management UI</h4>
+
+<p>To enable the CSF web management UI, without having a controlpanel (like
+cpanel/directadmin):</p>
+
+<pre><code>UI = &quot;0&quot;
+UI_PORT = &quot;6666&quot;
+UI_USER = &quot;username&quot;
+UI_PASS = &quot;password&quot;
+</code></pre>
+
+<h4 id="toc_20">Send an email when a user logs in via ssh</h4>
+
+<pre><code>LF_SSH_EMAIL_ALERT = &quot;1&quot;
+</code></pre>
+
+<p>The emails are sent to <code>root</code> by default. Change the below line to change that:</p>
+
+<pre><code>LF_ALERT_TO = &quot;user@example.org&quot;
+</code></pre>
+Tags: <a href="../tags/articles.html">articles</a>
+, <a href="../tags/centos.html">centos</a>
+, <a href="../tags/cpanel.html">cpanel</a>
+, <a href="../tags/csf.html">csf</a>
+, <a href="../tags/debian.html">debian</a>
+, <a href="../tags/directadmin.html">directadmin</a>
+, <a href="../tags/firewall.html">firewall</a>
+, <a href="../tags/iptables.html">iptables</a>
+, <a href="../tags/ubuntu.html">ubuntu</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

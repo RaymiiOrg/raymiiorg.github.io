@@ -1,0 +1,202 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Traceroute IPv6 to Smokeping Target config
+Author      : 	Remy van Elst
+Date        : 	05-03-2017
+URL         : 	https://raymii.org/s/snippets/IPv6_Traceroute_to_Smokeping_Target_Config.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This little one-liner converts the output of traceroute for IPv6 to Smokeping
+Target output. This way you can build your smokeping config faster.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+Do note you have to setup your IPv6 probe as described [here][2]. Later in this
+article I'll describe the inheritance by example.
+
+I had only setup my smokepings for IPv4. Recently we had an issue were network
+config was borked and the whole IPv4 network was not announced via BGP anymore.
+I was at home troubleshooting, but finding nothing since I have native IPv6 and
+that part still worked. My Smokeping did show loss, and that explicitly uses
+IPv4. That helped with the debugging a lot. I have a [IPv4][3] version of this
+article as well.
+
+You can see smokeping in action [here at serverius][4]. More info about
+[Smokeping here on the website][5].
+
+### Traceroute one liner
+
+This is the command to get the Smokeping config:
+
+    
+    
+    traceroute -6 -w 3 revspace.nl | grep -v "*" | sed -e 's/(//g' -e 's/)//g' | awk '{ gsub(/\./,"_",$2); gsub(/\:/,"_",$2); print "++ "$2"\nmenu = "$2" - "$3"\ntitle = "$2" - "$3"\nhost = "$3"\n"}'
+    
+
+The "*" are grepped out, the `()` are removed from the IP address and we also
+replace `.` and `:` in the hostname, the Smokeping config doesn't allow that.
+
+### Example
+
+This will give you something like this (for [tweakers.net][6]:
+    
+    
+    ++ lo0_dr11_d12_xs4all_net
+    menu = lo0_dr11_d12_xs4all_net - 2001:888:1:1001::1
+    title = lo0_dr11_d12_xs4all_net - 2001:888:1:1001::1
+    host = 2001:888:1:1001::1
+    
+    ++ 0_ae21_xr3_3d12_xs4all_net
+    menu = 0_ae21_xr3_3d12_xs4all_net - 2001:888:1:4024::1
+    title = 0_ae21_xr3_3d12_xs4all_net - 2001:888:1:4024::1
+    host = 2001:888:1:4024::1
+    
+    ++ 0_ge-0-2-0_xr1_sara_xs4all_net
+    menu = 0_ge-0-2-0_xr1_sara_xs4all_net - 2001:888:1:4006::1
+    title = 0_ge-0-2-0_xr1_sara_xs4all_net - 2001:888:1:4006::1
+    host = 2001:888:1:4006::1
+    
+    ++ 10ge12-12_core1_ams1_he_net
+    menu = 10ge12-12_core1_ams1_he_net - 2001:470:0:e8::1
+    title = 10ge12-12_core1_ams1_he_net - 2001:470:0:e8::1
+    host = 2001:470:0:e8::1
+    
+    ++ amsix_true_nl
+    menu = amsix_true_nl - 2001:7f8:1::a501:5703:1
+    title = amsix_true_nl - 2001:7f8:1::a501:5703:1
+    host = 2001:7f8:1::a501:5703:1
+    
+    ++ 2001_990_0_1378__1a
+    menu = 2001_990_0_1378__1a - 2001:990:0:1378::1a
+    title = 2001_990_0_1378__1a - 2001:990:0:1378::1a
+    host = 2001:990:0:1378::1a
+    
+    ++ tweakers_net
+    menu = tweakers_net - 2001:9a8:0:e:1337:0:80:1
+    title = tweakers_net - 2001:9a8:0:e:1337:0:80:1
+    host = 2001:9a8:0:e:1337:0:80:1
+    
+
+This can be pasted right in to Smokeping's config.
+
+### Probe config
+
+On Debian, add the FPing6 probe to `/etc/smokeping/config.d/Probes`:
+
+    
+    
+    *** Probes ***
+    
+    + FPing
+    binary = /usr/bin/fping
+    
+    + FPing6
+    binary = /usr/bin/fping6
+    
+
+The [documentation][2] has a bigger example.
+
+The inherentance in the `Targets` configuration bit me a bit. If your default
+probe is `FPing`, you cannot add the `probe = FPing6` to a specific check. You
+need to make a seperate section. So instead of this:
+
+    
+    
+    + cloudvps
+    
+    menu = cloudvps
+    title = CloudVPS
+    
+    ++ rt-eu01_cloudvps_nl
+    menu = rt-eu01_cloudvps_nl - 80.246.207.201
+    title = rt-eu01_cloudvps_nl - 80.246.207.201
+    host = 80.246.207.201
+    
+    ++ rt-eq01_cloudvps_nl
+    menu = rt-eq01_cloudvps_nl - 2001:4cb8:40b:1::1d0a
+    title = rt-eq01_cloudvps_nl - 2001:4cb8:40b:1::1d0a
+    host = 2001:4cb8:40b:1::1d0a
+    
+
+You need to seperate the IPv6 hosts out to a new section:
+
+    
+    
+    + cloudvpsv6
+    
+    menu = cloudvpsv6
+    title = CloudVPS IPv6
+    probe = FPing6
+    
+    ++ rt-eq01_cloudvps_nl
+    menu = rt-eq01_cloudvps_nl - 2001:4cb8:40b:1::1d0a
+    title = rt-eq01_cloudvps_nl - 2001:4cb8:40b:1::1d0a
+    host = 2001:4cb8:40b:1::1d0a
+    
+
+### No IPv6?
+
+If a service doesn't have IPv6 setup, it will fail:
+
+    
+    
+    reddit.com: Name or service not known
+    Cannot handle "host" cmdline arg `reddit.com' on position 1 (argc 4)
+    
+
+I use the following version of Traceroute:
+
+    
+    
+    $ traceroute -V
+    Modern traceroute for Linux, version 2.1.0
+    Copyright (c) 2016  Dmitry Butskoy,   License: GPL v2 or any later
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: http://oss.oetiker.ch/smokeping/probe/FPing6.en.html
+   [3]: https://raymii.org/s/snippets/Traceroute_to_Smokeping_Target_Config.html
+   [4]: http://smokeping.serverius.eu/
+   [5]: http://oss.oetiker.ch/smokeping/
+   [6]: https://tweakers.net
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

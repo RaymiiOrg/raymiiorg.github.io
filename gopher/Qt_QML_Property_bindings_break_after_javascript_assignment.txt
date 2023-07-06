@@ -1,0 +1,161 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Qt/QML Property bindings break after a JavaScript assignment
+Author      : 	Remy van Elst
+Date        : 	19-05-2022 05:30
+URL         : 	https://raymii.org/s/articles/Qt_QML_Property_bindings_break_after_javascript_assignment.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Property bindings are one of the most powerful concepts in Qt/QML. Property bindings let you specify relationships between different object properties. When a properties dependencies change in value, the property is automatically updated according to the specified relationship. The QML engine monitors the properties dependencies (that is, the variables in the binding expression). When a change is detected, the QML engine re-evaluates the binding expression and applies the new result to the property.
+One little known caveat with property bindings is that they break after a static JavaScript assignment (`property = value`). This post shows you the different behaviors and how to use `Qt.binding()` to assign property bindings via JavaScript.
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+
+Do note that this behavior is intended, [documented][2] and can be useful in
+situations where you want to purposely want to break a property binding. 
+
+This post is intended to inform you of the different behaviors, as it can be
+confusing if you're unaware of what is happening. A colleague of mine was
+working on a bug, he was not aware of this behavior and it cost him two hours
+to figure out that it was the underlying issue. Could happen to me as well
+when you're knee-deep into a debugging session.
+
+### Demonstration
+
+![demo][1]
+
+The image above demonstrates the issue.
+
+The top `Button` (`id: boundButton`) `text` property is bound to the
+`TextField` (`id: bindableTextField`) `text` property, so when you edit the
+text, the text on the button updates automatically.
+
+The second button breaks the binding by doing a JavaScript assignment in it's
+`onClicked` function:
+
+    onClicked: boundButton.text = "Binding broken"
+
+If you've clicked the button and then change the text in the `TextField`,
+the button's text no longer reflects the text you've typed. 
+
+The last button restores the property binding using the `Qt.binding()` function:
+
+    onClicked: boundButton.text = Qt.binding(function () {
+                return bindableTextField.text
+            })
+        }
+
+A bit convoluted syntax wise, but it gets the job done. 
+
+### Qt.binding()
+
+The [documentation][3] states the following:
+
+> Returns a JavaScript object representing a property binding, with a function
+  that evaluates the binding. There are two main use-cases for the function:
+  firstly, to apply a property binding imperatively from JavaScript code and
+  secondly, to apply a property binding when initializing property values of
+  dynamically constructed objects (via `Component.createObject()` or
+  `Loader.setSource()`).
+
+
+Confusingly, that page has examples for the second use case, not the first. 
+Simpler examples are on [the other doc page][2], transcribed below:
+
+The Rectangle below initially ensures that its height is always twice its
+`width`. However, when the space key is pressed, the current value of
+`width*3` will be **assigned to height as a static value**. After that, the
+height will remain fixed at this value, even if the width changes. The
+assignment of the static value removes the binding.
+
+    Rectangle {
+        width: 100
+        height: width * 2
+
+        focus: true
+        Keys.onSpacePressed: {
+            height = width * 3
+        }
+    }
+
+If the intention is to give the rectangle a fixed height and stop automatic
+updates, then this is not a problem. However, if the intention is to
+establish a new relationship between width and height, then the new binding
+expression must be wrapped in the `Qt.binding()` function instead:
+
+    Rectangle {
+        width: 100
+        height: width * 2
+
+        focus: true
+        Keys.onSpacePressed: {
+            height = Qt.binding(function() { return width * 3 })
+        }
+    }
+
+Now, after the space key is pressed, the rectangle's height will continue
+auto-updating to always be three times its width.
+
+---
+
+The other use case is, in my experience, not used often, or at least not in
+the projects I've worked on. Dynamically creating QML objects is fun at
+first, but you loose type safety and it's all strings, so changing one name
+will work fine at first, until you get runtime errors somewhere else. Maybe
+I'm spoiled by the compile-time safety, but such a small typo or rename has
+caught me more than I'd like to admit. Whereas, in C++ it'll just won't
+compile anymore.
+
+
+
+[1]: /s/inc/img/qt-binding.gif
+[2]: https://web.archive.org/web/20220516083722/https://doc.qt.io/qt-5/qtqml-syntax-propertybinding.html
+[3]: https://web.archive.org/web/20220516084540/https://doc.qt.io/qt-5/qml-qtqml-qt.html#binding-method
+
+
+
+
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,172 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Bash bits: split a file in blocks and do something with each block
+Author      : 	Remy van Elst
+Date        : 	02-09-2019
+URL         : 	https://raymii.org/s/tutorials/Bash_bits_split_a_file_in_blocks_and_do_something_with_each_block.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Bash Bits are small examples, tips and tutorials for the bash shell. This bash
+bit shows you how to split a file into blocks (multiline) and do
+something with each block. This can be used for certificate chains or 
+other files which have multiline blocks.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+[All Bash Bits can be found using this link][98]
+[98]: https://raymii.org/s/tags/bash-bits.html
+
+
+### Splitting a file in blocks
+
+Most actions on text based files like `csv` files allow you to split a line into
+multiple parts seperated by, for example, a comma. If you have a file which has 
+blocks spanning multiple lines, it's harder to find a good guide how to do something
+with that. This guide tries to be as clear as possible. 
+
+The file example I'm using is a certificate chain file. You've probably seen one of those, it has 
+a few certificates in it, truncated example:
+
+    -----BEGIN CERTIFICATE-----
+    MIIGO[...]grxckatBjE6CayMDaIHXKgI8oNu/snqhxGfcnrQyS6iu1libVL9VdsNFgCUyBcgl
+    dtlM9GjvT6JtMVYW
+    -----END CERTIFICATE-----
+    -----BEGIN CERTIFICATE-----
+    MIIE+zCCA+OgAwIBA[...]hS+1NGClXwmgmkMd1L8tRNaN2v11y18WoA5hwnA9Ng==
+    -----END CERTIFICATE-----
+
+This file has clear seperate "entities", namely the certificates. Those entities
+are seperated by the lines `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`.
+When I'm referring to a `block` in this guide, I'm talking about that one part.
+In this example that's one certificate.
+
+It could also be that you have a long list file where entities are seperated between
+blocks, for example a combined `.csv` file you want to split up.
+
+If you need a certificate chain file, fire up your favorite search engine and search for one.
+An example [can be found here][1], scroll down to `Certificate Chain`, open it and save it.
+
+My file is named `test.crt`, replace it in the commands with your filename.
+
+The below command splits up the file into blocks and prints the first two lines of 
+a block to the shell:
+
+    OLDIFS=$IFS; IFS=';' blocks=$(sed -n '/-----BEGIN /,/-----END/ {/-----BEGIN / s/^/\;/; p}'  test.crt);
+    for block in ${blocks#;}; do 
+        echo $block | head -n 2
+        echo "==== SEPERATOR ===="
+    done; IFS=$OLDIFS 
+
+
+Example output:
+
+    -----BEGIN CERTIFICATE-----
+    MIIGODCCBSCgAwIBAgIQD8j++0QhE3owwBaJFRNMGzANBgkqhkiG9w0BAQsFADBk
+    ==== SEPERATOR ====
+    -----BEGIN CERTIFICATE-----
+    MIIE+zCCA+OgAwIBAgIQCHC8xa8/25Wakctq7u/kZTANBgkqhkiG9w0BAQsFADBl
+    ==== SEPERATOR ====
+    -----BEGIN CERTIFICATE-----
+    MIIDtzCCAp+gAwIBAgIQDOfg5RfYRv6P5WD8G/AwOTANBgkqhkiG9w0BAQUFADBl
+    ==== SEPERATOR ====
+
+Here's a short explanation of what the loop does:
+
+* First it saves the old `IFS`, the internal field seperator. The IFS refers to a variable which defines the character or characters used to separate a pattern into tokens for some operations, mostly a newline, space or tab. 
+* Second, the `IFS` is set to a semicolon (`;`)
+* The file is split up into blocks using `sed`, and between each block a semicolon is inserted.
+* Using bash syntax, the blocks are put into a variable in a foreach loop, split on the semicolon
+* Inside the loop an action is done
+* The IFS is restored to what it was.
+
+
+If your file has semicolons in it, you must change the seperator in the commands. It could be a colon, or another unused character.
+
+
+If your file is seperated by another text, the format for the split is as follows:
+
+    sed -n '/TOP SPLIT LINE/,/BOTTOM SPLIT LINE/ {/TOP SPLIT LINE/ s/^/\;/; p
+
+
+The top split line must be there twice.
+
+
+### Doing something with the seperate blocks
+
+Printing out the contents of the blocks isn't super usefull, you could have just done that with the entire file. Maybe you want to split the file up into seperate files. Let's add a counter and split the chain up into seperate files:
+
+
+    COUNTER=1; OLDIFS=$IFS; IFS=';' blocks=$(sed -n '/-----BEGIN /,/-----END/ {/-----BEGIN / s/^/\;/; p}'  test.crt);
+    for block in ${blocks#;}; do 
+        echo "file $COUNTER"
+        echo $block > cert-$COUNTER.crt;
+        COUNTER=$((COUNTER +1))
+    done; IFS=$OLDIFS 
+
+You now have three seperate files:
+
+    $ ls cert*
+    -rw-rw-r-- 1 remy remy 2.2K Sep  2 11:44 cert-1.crt
+    -rw-rw-r-- 1 remy remy 1.8K Sep  2 11:44 cert-2.crt
+    -rw-rw-r-- 1 remy remy 1.4K Sep  2 11:44 cert-3.crt
+
+
+Or maybe you want to print the common name of each certificate:
+
+    OLDIFS=$IFS; IFS=';' blocks=$(sed -n '/-----BEGIN /,/-----END/ {/-----BEGIN / s/^/\;/; p}'  test.crt);
+    for block in ${blocks#;}; do 
+        echo $block | openssl x509 -noout -subject -in -
+    done; IFS=$OLDIFS 
+
+Example output:
+
+    subject=C = NL, L = Den Haag, O = Koninklijke Bibliotheek, OU = ICT, CN = www.bibliotheek.nl
+    subject=C = NL, ST = Noord-Holland, L = Amsterdam, O = TERENA, CN = TERENA SSL CA 3
+    subject=C = US, O = DigiCert Inc, OU = www.digicert.com, CN = DigiCert Assured ID Root CA
+
+
+
+
+
+[1]: https://is.gd/vhXe3E
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

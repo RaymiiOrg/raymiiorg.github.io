@@ -1,0 +1,158 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Postfix snippets - not finished
+Author      : 	Remy van Elst
+Date        : 	09-07-2012
+URL         : 	https://raymii.org/s/snippets/Set_up_an_IMAPS_and_SMTPS_mail_server_with_Postfix_and_Dovecot.html
+Format      : 	Markdown/HTML
+---
+
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+##### /etc/postfix/master.cf
+
+    
+    
+    smtp inet n - - - - smtpd 
+      -o smtpd_tls_security_level=encrypt 
+      -o smtpd_sasl_auth_enable=yes 
+      -o smtpd_sasl_type=dovecot 
+      -o smtpd_sasl_path=private/auth 
+      -o smtpd_sasl_security_options=noanonymous 
+      -o smtpd_sasl_local_domain=$myhostname 
+      -o smtpd_client_restrictions=permit_sasl_authenticated,reject_unauth_destination 
+    #  -o smtpd_sender_restrictions=reject_sender_login_mismatch
+      -o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject_unauth_destination
+    
+      submission inet n - - - - smtpd
+      -o smtpd_tls_security_level=encrypt
+      -o smtpd_sasl_auth_enable=yes
+      -o smtpd_sasl_type=dovecot
+      -o smtpd_sasl_path=private/auth
+      -o smtpd_sasl_security_options=noanonymous
+      -o smtpd_sasl_local_domain=$myhostname
+      -o smtpd_client_restrictions=permit_sasl_authenticated,reject_unauth_destination
+    #  -o smtpd_sender_restrictions=reject_sender_login_mismatch
+      -o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject_unauth_destination
+    
+
+##### /etc/postfix/main.cf
+
+    
+    
+    smtpd_banner = SMTP
+    biff = no
+    append_dot_mydomain = no
+    readme_directory = no
+    smtpd_sasl_type = dovecot
+    smtpd_sasl_path = private/auth
+    smtpd_tls_cert_file=/etc/ssl/certs/postfix-public.pem
+    smtpd_tls_key_file=/etc/ssl/private/postfix-private.key
+    smtpd_use_tls=yes
+    smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+    smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+    smtpd_tls_loglevel = 3
+    smtpd_tls_received_header = yes
+    smtpd_tls_session_cache_timeout = 3600s
+    tls_random_source = dev:/dev/urandom
+    smtpd_tls_auth_only = yes
+    myhostname = vps7.sparklingclouds.nl
+    alias_maps = hash:/etc/aliases
+    alias_database = hash:/etc/aliases
+    myorigin = /etc/mailname
+    mydestination = sparklingclouds.nl, vps7.sparklingclouds.nl, localhost.sparklingclouds.nl, localhost
+    relayhost =
+    mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+    mailbox_size_limit = 0
+    recipient_delimiter = +
+    inet_interfaces = all
+    inet_protocols = ipv4
+    home_mailbox = Maildir/
+    mailbox_command =
+    smtpd_sasl_auth_enable = yes
+    smtpd_sasl_security_options = noanonymous
+    #smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+    smtpd_recipient_restrictions = permit_mynetworks permit_sasl_authenticated reject_unauth_destination
+    
+
+#### Dovecot
+
+##### /etc/dovecot/dovecot.conf
+
+    
+    
+    protocols = imaps
+    disable_plaintext_auth = yes
+    log_timestamp = "%Y-%m-%d %H:%M:%S "
+    ssl = required
+    login_greeting = MAPI.
+    mail_location = maildir:~/Maildir
+    mail_privileged_group = mail
+    mmap_disable = yes
+    protocol imap {
+    }
+    protocol managesieve {
+    }
+    auth default {
+      mechanisms = plain
+      passdb pam {
+      }
+      userdb passwd {
+      }
+      user = root
+    socket listen {
+            client {
+              path = /var/spool/postfix/private/auth
+              mode = 0660
+              user = postfix
+              group = postfix
+            }
+    }
+    }
+    dict {
+    }
+    plugin {
+    }
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

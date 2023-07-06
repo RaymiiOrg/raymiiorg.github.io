@@ -1,0 +1,698 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Olimex OlinuXino A20 LIME2 mainline 4.0.0 kernel, u-boot and debian rootfs image building tutorial - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>                 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Olimex OlinuXino A20 LIME2 mainline 4.0.0 kernel, u-boot and debian rootfs image building tutorial</h2>
+<p><small>Published: <span data-pagefind-meta='date'>21-03-2015</span> | Author: Remy van Elst | <a href="Olimex_OlinuXino_A20_Lime2_Kernel_3.19_uBoot_Debian_7_image_building.txt">Text only version of this article</a>
+</small></p>
+<br><div class='olderthanayear'><p><strong>&#10071; This post is over eight years old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Kernel 4.0 and Allwinner</a>
+</li>
+<li>
+<a href="#toc_1">Install packages</a>
+</li>
+<li>
+<a href="#toc_2">U Boot Bootloader</a>
+</li>
+<li>
+<a href="#toc_3">Build the mainline kernel</a>
+</li>
+<li>
+<a href="#toc_4">Bootstrap Debian</a>
+</li>
+<li>
+<a href="#toc_5">Installing the kernel in the rootfs image</a>
+</li>
+<li>
+<a href="#toc_6">Finishing up the rootfs</a>
+</li>
+<li>
+<a href="#toc_7">Install the bootloader</a>
+</li>
+<li>
+<a href="#toc_8">Packing it up</a>
+</li>
+<li>
+<a href="#toc_9">Installing the image</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p><img src="https://raymii.org/s/inc/img/A20-OLinuXino-LIME.jpeg" alt="olimex"></p>
+
+<p>This is a guide to build a linux image with Debian and the mainline 4.0 kernel
+for the Olimex A20-Lime2 board, from scratch. By default it comes with an 3.4
+kernel with binary blobs and patches from Allwinner. Recently the mainline
+kernel has gained support for these boards, you can now run and use the mainline
+kernel without these awfull non-free binary blobs.</p>
+
+<p>I have an Olimex A10 LIME board for which I&#39;ve made a minimal image, see <a href="https://raymii.org/s/articles/Olimex_A10-OLinuXino-LIME_minimal_debian_7_image.html">this
+page for details</a>. It is a very awesome and powerfull ARM dev board with open
+source hardware. I like it so much that I decided to also get the A20.</p>
+
+<p>The Olimex A20-LIME2 is the big brother of the A10. The <a href="https://www.olimex.com/Products/OLinuXino/A20/A20-OLinuXIno-LIME2/open-source-hardware">Olimex Olinuxino A20
+LIME2</a>, an open source hardware ARM (Allwinner A20) dual core based dev board
+with 160 GPIO&#39;s, 1,2 GHz/1 GB RAM, 2 USB 2.0 ports, 1 esata port, 1 hdmi port,
+USB-OTG, 1 gbit lan (not via the usb bus) and more of those nice features. The
+price is even more awesome, the device costs 45 euro&#39;s, add 5 euro&#39;s and you
+have yourself a nice black case. It consumes very little power, combined with
+all the features a perfect dev / tinkerboard.</p>
+
+<p><a href="http://olimex.com/">Olimex</a> sponsored a board for me to create the image, I would like to thank
+them very much for them.</p>
+
+<p>The difference with the A10-LIME is the dual core ARM processor, 1 GB of ram
+instead of 512 and gigabit networking.</p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<p>This tutorial is inspired by the build scripts of Igor Pecovnik,
+<a href="www.igorpecovnik.com">www.igorpecovnik.com</a>. They&#39;ve made a script which does this all for you in
+one easy go. If you just want an image and do not want to learn anything or
+experience the fun, enjoyment and fullfillment of doing it yourself you can use
+it.</p>
+
+<h3 id="toc_0">Kernel 4.0 and Allwinner</h3>
+
+<p>Allwinner has done a code dump of the 3.4 kernel with specifics for their
+devices. 3.4 is quite an old kernel nowdays. If you run your Olimex (or other
+ARM) board as a server you might want to upgrade to a more recent kernel. This
+will have a few benefits, speed and newer features for example.</p>
+
+<p>There are a few downsides, mostly driver and hardware support. For example, if
+you need graphical output (hdmi) or sound it will not work with the 4.0 kernel.</p>
+
+<p>The 4.0 kernel does have basic support so you can run the A20-Lime2 as a server
+and use the GPIO&#39;s without problems.</p>
+
+<p>This tutorial is easily adaptable to newer kernels, other distributions or other
+boards. The instructions are largely the same.</p>
+
+<p>You can read more about the Linux Sunxi project on their, excellent, wiki and
+website: <a href="https://linux-sunxi.org/Main_Page">https://linux-sunxi.org</a>.</p>
+
+<p>If you want to build an image with the 3.4 kernel provided by Olimex/Allwinner,
+you can read my <a href="https://raymii.org/s/articles/Olimex_OlinuXino%20_10%20Lime_uBoot_Kernel.html">tutorial on it</a>.</p>
+
+<p>We are building the 4.0.0-rc4 version of the kernel, when 4.0 will be released
+this guide will be updated so that the commands and such are up to date.</p>
+
+<p>This tutorial was tested on Ubuntu 14.04.</p>
+
+<h3 id="toc_1">Install packages</h3>
+
+<p>Install the required packages for building the bootloader, kernel and rootfs:</p>
+
+<pre><code>apt-get install debconf-utils pv bc lzop zip binfmt-support bison build-essential ccache debootstrap flex gawk gcc-arm-linux-gnueabihf lvm2 qemu-user-static u-boot-tools uuid-dev zlib1g-dev unzip libusb-1.0-0-dev parted pkg-config expect gcc-arm-linux-gnueabi libncurses5-dev git vim screen
+</code></pre>
+
+<p>Also create a few working directories. We&#39;re working in <code>/root/Lime-Debian/</code>.</p>
+
+<pre><code>mkdir -p /root/Lime-Debian/output/
+cd /root/Lime-Debian/
+</code></pre>
+
+<h3 id="toc_2">U Boot Bootloader</h3>
+
+<p>U-boot, or universal boot is the bootloader used by ARM and other embedded
+devices. It is similar to GRUB or LILO however much smaller. We&#39;ll be building
+it from source for the Olimex A20 LIME2 board.</p>
+
+<p>Get the code:</p>
+
+<pre><code>git clone https://github.com/RobertCNelson/u-boot /root/Lime-Debian/output/u-boot
+cd output/u-boot
+</code></pre>
+
+<p>Start the compile for the A20. See below if you have another board. I have 12
+cores in my machine so I use <code>-j12</code>, if you have more or less cores, change the
+number to that, <code>-j8</code> for example.</p>
+
+<pre><code>make -s CROSS_COMPILE=arm-linux-gnueabihf- clean
+make -j12 A20-OLinuXino-Lime2_defconfig CROSS_COMPILE=arm-linux-gnueabihf-
+make -j12 CROSS_COMPILE=arm-linux-gnueabihf-
+</code></pre>
+
+<p>When the compile is finished we create a tar archive of the u-boot binary:</p>
+
+<pre><code>tar cPfz /root/Lime-Debian/output/u-boot/lime2_next_u-boot_4.0.0-rc4.tgz u-boot-sunxi-with-spl.bin
+</code></pre>
+
+<p>Go back to the working directory:</p>
+
+<pre><code>cd /root/Lime-Debian/
+</code></pre>
+
+<p>I&#39;m building this for the Olimex A20 Lime2. To find all device targets from the
+<code>linux-sunxi</code> project, clone the u-boot repo from Hans de Goede:</p>
+
+<pre><code>git clone https://github.com/jwrdegoede/u-boot-sunxi.git -b sunxi
+</code></pre>
+
+<p>And use the following command inside the <code>u-boot-sunxi</code> folder:</p>
+
+<pre><code>grep sunxi boards.cfg | awk &#39;{print $7}&#39;
+</code></pre>
+
+<p>Find your board model and add <code>_config</code> to the make command, like so: <code>make
+CROSS_COMPILE arm-linux-gnueabihf $target_config</code> line.</p>
+
+<h3 id="toc_3">Build the mainline kernel</h3>
+
+<p>First get the code. Do note that this is quite a lot of code so the clone might
+take some time.</p>
+
+<pre><code>git clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git /root/Lime-Debian/output/linux-mainline
+</code></pre>
+
+<p>We also need the <code>sunxi-tools</code>. This is some code specific for the Allwinner
+boards. Allwinner uses the <code>sunxi</code> codename for their boards. The A10 is the
+<code>sunxi-4i</code>, the A20 is the <code>sunxi-5i</code> and so on.</p>
+
+<p>Clone that git repo as well:</p>
+
+<pre><code>git clone https://github.com/linux-sunxi/sunxi-tools.git /root/Lime-Debian/output/sunxi-tools
+</code></pre>
+
+<p>Navigate to the kernel folder:</p>
+
+<pre><code>cd /root/Lime-Debian/output/linux-mainline/
+</code></pre>
+
+<p>Start the compile. First we clean:</p>
+
+<pre><code>make CROSS_COMPILE=arm-linux-gnueabihf- clean 
+</code></pre>
+
+<p>Download a default kernel config for the sunxi boards:</p>
+
+<pre><code>wget -O /root/Lime-Debian/output/linux-mainline/.config https://raymii.org/s/inc/software/olimex/linux-sunxi-next.config.txt
+</code></pre>
+
+<p>If you want to make changes to the default kernel config, you can now do a <code>make
+menuconfig</code>:</p>
+
+<pre><code> make -j12 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig
+</code></pre>
+
+<p>You can for example remove all kinds of drivers. If you are not going to use a
+firewall, you can leave out netfilter. Or networking entirely if you want.</p>
+
+<p>We start the compile of the uImage (u-boot bootloader image) and the kernel
+modules:</p>
+
+<pre><code>make -j12 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- all zImage modules_prepare    
+</code></pre>
+
+<p>You might get a compiler error about it being to old or buggy. This is a bug and
+has been fixed upstream. Remove that message for now with the following patch.
+Open the following file:</p>
+
+<pre><code>vim /root/Lime-Debian/output/linux-mainline/arch/arm/kernel/asm-offsets.c
+</code></pre>
+
+<p>Remove the version check:</p>
+
+<pre><code>#if (__GNUC__ == 3 &amp;&amp; __GNUC_MINOR__ &lt; 3)
+#error Your compiler is too buggy; it is known to miscompile kernels.
+#error Known good compilers: 3.3, 4.x
+#endif
+#if GCC_VERSION &gt;= 40800 &amp;&amp; GCC_VERSION &lt; 40803
+#error Your compiler is too buggy; it is known to miscompile kernels
+#error and result in filesystem corruption and oopses.
+#endif
+</code></pre>
+
+<p>We then start the debian package building of the kernel. We don&#39;t use threading
+here. Change my name and email address, otherwise it will seem like I&#39;ve built
+your debian kernel packages:</p>
+
+<pre><code>make -j1 deb-pkg KDEB_PKGVERSION=1.5 LOCALVERSION=-lime2 KBUILD_DEBARCH=armhf ARCH=arm &#39;DEBFULLNAME=Raymii&#39; DEBEMAIL=olimex@kernel.raymii CROSS_COMPILE=arm-linux-gnueabihf-
+</code></pre>
+
+<p>Create a folder for the kernel deb packages:</p>
+
+<pre><code>mkdir -p /root/Lime-Debian/output/kernel
+</code></pre>
+
+<p>Create a tar archive of the kernel, headers, libc and other packages and place
+it in the folder:</p>
+
+<pre><code>cd ..
+tar -cPf /root/Lime-Debian/output/kernel/4.0.0-rc4-lime2-next.tar linux-headers-4.0.0-rc4-lime2_1.5_armhf.deb linux-image-4.0.0-rc4-lime2_1.5_armhf.deb linux-libc-dev_1.5_armhf.deb
+</code></pre>
+
+<p>If you need to save some space, you can now remove the packages from the working
+directory:</p>
+
+<pre><code>rm linux-headers-4.0.0-rc4-lime2_1.5_armhf.deb linux-image-4.0.0-rc4-lime2_1.5_armhf.deb linux-libc-dev_1.5_armhf.deb
+</code></pre>
+
+<h3 id="toc_4">Bootstrap Debian</h3>
+
+<p>We&#39;ve built a kernel and we&#39;ve built a boot loader. The only thing left now is
+to build a root filesystem and put it all together.</p>
+
+<p>The root filesystem defines what distribution you run. I choose to set up
+Debian, but you can also get Ubuntu or for example Arch.</p>
+
+<p>We are building the root filesystem (rootfs from now on) in an image. We mount
+the image as a loopback device, that is easier to work and build in. First
+create some folders:</p>
+
+<pre><code>mkdir -p /root/Lime-Debian/output/rootfs /root/Lime-Debian/output/sdcard/ /root/Lime-Debian/output/kernel
+</code></pre>
+
+<p>Go in to the build folder:</p>
+
+<pre><code>cd /root/Lime-Debian/output/
+</code></pre>
+
+<p>Create an empty image. The size in my case is 1.2 gigabytes, you can specify a
+larger or smaller image if you want. 512MB is a safe lowest choice.</p>
+
+<pre><code>dd if=/dev/zero of=/root/Lime-Debian/output/rootfs/wheezy.raw bs=1M count=1200 status=noxfer
+</code></pre>
+
+<p>Mount the image as loop device:</p>
+
+<pre><code>losetup /dev/loop0 /root/Lime-Debian/output/rootfs/wheezy.raw
+</code></pre>
+
+<p>We will a DOS partition table and 2 ext4 partitions. Other tutorials might
+specify a FAT based partition for the bootloader, we don&#39;t need that because we
+are using mainline u-boot and mainline kernel which both support ext4 and do not
+need a FAT boot partition anymore.</p>
+
+<p>Create the DOS partition table:</p>
+
+<pre><code>parted -s /dev/loop0 -- mklabel msdos
+</code></pre>
+
+<p>Create the ext4 partition for booting:</p>
+
+<pre><code>parted -s /dev/loop0 -- mkpart primary ext4 2048s -1s
+</code></pre>
+
+<p>Update the partition table:</p>
+
+<pre><code>partprobe /dev/loop0
+</code></pre>
+
+<p>We detach the loop device and mount it again at a different offset to create the
+ext4 filesystem:</p>
+
+<pre><code>losetup -d /dev/loop0
+losetup -o 1048576 /dev/loop0 /root/Lime-Debian/output/rootfs/wheezy.raw
+mkfs.ext4 /dev/loop0
+</code></pre>
+
+<p>We do a performance tweak on the filesystem:</p>
+
+<pre><code>tune2fs -o journal_data_writeback /dev/loop0
+</code></pre>
+
+<p>This basically means that data may be written to the disk before the journal.
+The data consistency guarantees are the same as the ext3 file system. The
+downside is that if your system crashes before the journal gets written then you
+may loose new data, the old data may magically reappear. This is still better
+than ext2 because file system integrity is maintained, so the file system is at
+least consistent even after an unclean shutdown. In other words, you may loose
+data, but you won&#39;t have corrupt data.</p>
+
+<p>We give the filesystem a name:</p>
+
+<pre><code>e2label /dev/loop0 lime2
+</code></pre>
+
+<p>And we mount it in our working directory:</p>
+
+<pre><code>mount -t ext4 /dev/loop0 /root/Lime-Debian/output/sdcard/
+</code></pre>
+
+<p>We can now start the debian bootstrap. The following command will start a basic
+debian bootstrap for the ARM board, to our freslhy mounted image:</p>
+
+<pre><code>debootstrap --include=openssh-server,debconf-utils --arch=armhf --foreign wheezy /root/Lime-Debian/output/sdcard/
+</code></pre>
+
+<p>Copy the <code>qemu-arm-static</code> binary to the image folder:</p>
+
+<pre><code>cp /usr/bin/qemu-arm-static /root/Lime-Debian/output/sdcard/usr/bin/
+</code></pre>
+
+<p>We need to do this because this is required for the next steps of the image
+build bootstrapping. That next step is the so called second stage of the
+bootstrap. You need to execute that in a chroot on the image.</p>
+
+<p>The chroot will use the qemu binary to make it look like it is an ARM system.</p>
+
+<pre><code>chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;/debootstrap/debootstrap --second-stage&#39;
+</code></pre>
+
+<p>This might take a while. When it is finished we set up a few mounts for <code>/proc/</code>
+and <code>/sys/</code> and such:</p>
+
+<pre><code>mount -t proc chproc /root/Lime-Debian/output/sdcard/proc
+mount -t sysfs chsys /root/Lime-Debian/output/sdcard/sys
+mount -t devtmpfs chdev /root/Lime-Debian/output/sdcard/dev
+mount -t devpts chpts /root/Lime-Debian/output/sdcard/dev/pts
+</code></pre>
+
+<p>Place a <code>sources.list</code> file for the apt package manager.</p>
+
+<pre><code>vim /root/Lime-Debian/output/sdcard/etc/apt/sources.list
+</code></pre>
+
+<p>Contents:</p>
+
+<pre><code>deb http://ftp.nl.debian.org/debian stable main contrib non-free
+deb-src http://ftp.nl.debian.org/debian stable main contrib non-free
+
+deb http://ftp.nl.debian.org/debian/ wheezy-updates main contrib non-free
+deb-src http://ftp.nl.debian.org/debian/ wheezy-updates main contrib non-free
+
+deb http://security.debian.org/ wheezy/updates main contrib non-free
+deb-src http://security.debian.org/ wheezy/updates main contrib non-free
+</code></pre>
+
+<p>You can change the <code>ftp.nl.</code> part to your country code to get a faster mirror.</p>
+
+<p>Set up the system locale language variables and update the sources in the image:</p>
+
+<pre><code>LC_ALL=C
+LANGUAGE=C
+LANG=C
+chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;apt-get -y update&#39;
+</code></pre>
+
+<p>Change the <code>inittab</code> file to not clean the first <code>tty</code> and not start up 6 other,
+unneeded <code>tty&#39;s</code>. We do want to statup a serial console for UART access:</p>
+
+<pre><code>sed -e &#39;s/1:2345:respawn:\/sbin\/getty 38400 tty1/1:2345:respawn:\/sbin\/getty --noclear 38400 tty1/g&#39; -i /root/Lime-Debian/output/sdcard/etc/inittab
+sed -e s/3:23:respawn/#3:23:respawn/g -i /root/Lime-Debian/output/sdcard/etc/inittab
+sed -e s/4:23:respawn/#4:23:respawn/g -i /root/Lime-Debian/output/sdcard/etc/inittab
+sed -e s/5:23:respawn/#5:23:respawn/g -i /root/Lime-Debian/output/sdcard/etc/inittab
+sed -e s/6:23:respawn/#6:23:respawn/g -i /root/Lime-Debian/output/sdcard/etc/inittab
+echo T0:2345:respawn:/sbin/getty -L ttyS0 115200 vt100 &gt;&gt; /root/Lime-Debian/output/sdcard/etc/inittab       
+</code></pre>
+
+<p>Install the locale package in the image:</p>
+
+<pre><code>chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;apt-get -y -qq install locales&#39;
+</code></pre>
+
+<p>Set the locale to <code>en-US.UTF-8</code> and generate the locales:</p>
+
+<pre><code>sed -i &#39;s/^# en_US.UTF-8/en_US.UTF-8/&#39; /root/Lime-Debian/output/sdcard/etc/locale.gen
+chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;locale-gen en_US.UTF-8&#39;
+chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 DEBIAN_FRONTEND=noninteractive  LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 LC_MESSAGES=POSIX update-locale&#39;
+</code></pre>
+
+<p>Install a few more packages in the VM. You can leave out the ones you don&#39;t
+like. Remember you can also remove them later on.</p>
+
+<pre><code>chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;apt-get -y install automake bash-completion bc bridge-utils build-essential cmake curl dosfstools evtest figlet fping git haveged hddtemp hdparm  htop i2c-tools ifenslave-2.6 iperf ir-keytable iw less libbluetooth-dev libbluetooth3 libtool libwrap0-dev libfuse2 libnl-dev libssl-dev lsof makedev module-init-tools mtp-tools nano ntfs-3g ntp parted pkg-config pciutils pv python-smbus rfkill rsync screen stress sudo sysfsutils toilet u-boot-tools unattended-upgrades unzip usbutils wget&#39;
+</code></pre>
+
+<p>Set the timezone in the image:</p>
+
+<pre><code>cp /root/Lime-Debian/output/sdcard/usr/share/zoneinfo/Europe/Amsterdam /root/Lime-Debian/output/sdcard/etc/localtime
+</code></pre>
+
+<p>Set the root password in the image:</p>
+
+<pre><code>chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;(echo olimex;echo olimex;) | passwd root&#39;
+</code></pre>
+
+<p>If you want, you can set the expiry date of the root password to 0, that means
+that the first time you boot the image you need to set a new root password:</p>
+
+<pre><code>chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;chage -d 0 root&#39;
+</code></pre>
+
+<p>Setup <code>/etc/fstab</code> in the image:</p>
+
+<pre><code>echo &#39;/dev/mmcblk0p1  /           ext4    defaults,noatime,nodiratime,data=writeback,commit=600,errors=remount-ro        0       0&#39; &gt; /root/Lime-Debian/output/sdcard/etc/fstab
+</code></pre>
+
+<p>On the first boot of the image you need to regenerate the SSH host keys.
+Otherwise all boards with this image will have the same SSH host keys. You can
+place the following in <code>/etc/rc.local</code>. On this image build that is <code>/root/Lime-
+Debian/output/sdcard/etc/rc.local</code>.</p>
+
+<pre><code>if [[ ! -f /var/lib/firstboot_ssh_host_keys ]]; then
+    rm -f /etc/ssh/ssh_host*
+    ssh-keygen -t dsa -N &quot;&quot; -f /etc/ssh/ssh_host_dsa_key
+    ssh-keygen -t rsa -N &quot;&quot; -f /etc/ssh/ssh_host_rsa_key
+    ssh-keygen -t ecdsa -N &quot;&quot; -f /etc/ssh/ssh_host_ecdsa_key
+    touch /var/lib/firstboot_ssh_host_keys
+fi
+</code></pre>
+
+<p>Also add the following to <code>/etc/rc.local</code> to enable <code>irq</code> on the second core on
+the lime2:</p>
+
+<pre><code>echo 2 &gt; /proc/irq/$(cat /proc/interrupts | grep eth0 | cut -f 1 -d &quot;:&quot; | tr -d &quot; &quot;)/smp_affinity
+</code></pre>
+
+<p>The above is NOT a command. Don&#39;t execute it, copy and paste it in
+<code>/etc/rc.local</code>.</p>
+
+<p>Set a default hostname of the board:</p>
+
+<pre><code>echo lime2 &gt; /root/Lime-Debian/output/sdcard/etc/hostname
+</code></pre>
+
+<p>Set a default hosts file:</p>
+
+<pre><code>vim /root/Lime-Debian/output/sdcard/etc/hosts 
+</code></pre>
+
+<p>Contents:</p>
+
+<pre><code>127.0.0.1   localhost lime2
+::1         localhost lime2 ip6-localhost ip6-loopback
+fe00::0     ip6-localnet
+ff00::0     ip6-mcastprefix
+ff02::1     ip6-allnodes
+ff02::2     ip6-allrouters
+</code></pre>
+
+<h3 id="toc_5">Installing the kernel in the rootfs image</h3>
+
+<p>We&#39;ve built a few nice kernel packages. To install these in the root fs image we
+need to execute a few more steps. We also do some more changes to setup kernel
+module loading, cpu frequency and network settings.Module loading:</p>
+
+<pre><code>echo &#39;hci_uart gpio_sunxi rfcomm hidp bonding spi_sun7i&#39; &gt; /root/Lime-Debian/output/sdcard/etc/modules
+</code></pre>
+
+<p>The actual kernel install in the image is actually quite easy. We mount the
+<code>/tmp/</code> folder of the image over our actual compile machine&#39;s <code>/tmp/</code> folder. We
+place the packages we&#39;ve built earlier in <code>/tmp/</code>, then chroot in the image and
+install them.</p>
+
+<p>The bind mount is required because the paths need to be correct. You don&#39;t want
+to overwrite your compile machine&#39;s kernel with a ARM specific kernel. It will
+probably not boot anymore afterwards.</p>
+
+<pre><code>rm -rf /tmp/kernel
+mkdir -p /tmp/kernel
+cd /tmp/kernel
+tar -xPf /root/Lime-Debian/output/kernel/4.0.0-rc4-lime2-next.tar
+mount --bind /tmp/kernel/ /root/Lime-Debian/output/sdcard/tmp
+chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;dpkg -i /tmp/*.deb&#39;
+</code></pre>
+
+<p>Once the kernel is installed in the chroot we can build some kernel header
+scripts:</p>
+
+<pre><code>chroot /root/Lime-Debian/output/sdcard /bin/bash -c &#39;cd /usr/src/linux-headers-4.0.0-rc4-lime2 &amp;&amp; make scripts&#39;
+</code></pre>
+
+<p>We are going to build and setup a new device tree. This is, as said earlier, the
+hardware layout of the board needed for the bootloader.</p>
+
+<pre><code>rm -rf /root/Lime-Debian/output/sdcard/boot/dtb/4.0.0-rc4-lime2.old
+vim /root/Lime-Debian/output/sdcard/boot/boot-next.cmd
+</code></pre>
+
+<p>Contents:</p>
+
+<pre><code>setenv bootargs console=tty1 root=/dev/mmcblk0p1 rootwait panic=10
+ext4load mmc 0 0x49000000 /boot/dtb/4.0.0-rc4-lime2${fdtfile}
+ext4load mmc 0 0x46000000 /boot/vmlinuz-4.0.0-rc4-lime2
+env set fdt_high ffffffff
+bootz 0x46000000 - 0x49000000
+</code></pre>
+
+<p>We use this boot command file to create the binary form if it, the boot script
+file:</p>
+
+<pre><code>mkimage -C none -A arm -T script -d /root/Lime-Debian/output/sdcard/boot/boot-next.cmd /root/Lime-Debian/output/sdcard/boot/boot.scr
+</code></pre>
+
+<p>Download some linux firmware files and unzip these on the rootfs image:</p>
+
+<pre><code>wget -O /root/Lime-Debian/linux-firmware.zip https://raymii.org/s/inc/software/olimex/linux-firmware.zip
+unzip /root/Lime-Debian/linux-firmware.zip -d /root/Lime-Debian/output/sdcard/lib/firmware
+</code></pre>
+
+<p>This contains firmware binary blobs for the network card and some wifi drivers.</p>
+
+<h3 id="toc_6">Finishing up the rootfs</h3>
+
+<p>You can do any other changes to the image you want from in the chroot. You can
+start an interactive chroot with the following command:</p>
+
+<pre><code>chroot /root/Lime-Debian/output/sdcard /bin/bash 
+</code></pre>
+
+<p>When you are done, unmount the extra partitions:</p>
+
+<pre><code>umount -l /root/Lime-Debian/output/sdcard/dev/pts
+umount -l /root/Lime-Debian/output/sdcard/dev
+umount -l /root/Lime-Debian/output/sdcard/proc
+umount -l /root/Lime-Debian/output/sdcard/sys
+</code></pre>
+
+<p>Unmount the image:</p>
+
+<pre><code>umount -l /root/Lime-Debian/output/sdcard/
+</code></pre>
+
+<p>Detach the loop device:</p>
+
+<pre><code>losetup -d /dev/loop0
+</code></pre>
+
+<h3 id="toc_7">Install the bootloader</h3>
+
+<p>We are going to install the bootloader on the image. We mount and attach the
+loop device without the special offset we gave earlier:</p>
+
+<pre><code>cd /root/Lime-Debian/
+
+tar xvfz /root/Lime-Debian/output/u-boot/lime2_next_u-boot_4.0.0-rc4.tgz
+
+losetup /dev/loop1 /root/Lime-Debian/output/rootfs/wheezy.raw
+
+dd if=u-boot-sunxi-with-spl.bin of=/dev/loop1 bs=1024 seek=8 status=noxfer
+</code></pre>
+
+<p>We detach the loop device again:</p>
+
+<pre><code>losetup -d /dev/loop1
+</code></pre>
+
+<h3 id="toc_8">Packing it up</h3>
+
+<p>We are going to create a zip file with the image and the md5sum of the image for
+easy shipping. Copy the image and create the md5sum:</p>
+
+<pre><code>mv /root/Lime-Debian/output/rootfs/wheezy.raw /root/Lime-Debian/output/Lime2_Debian_1.5_wheezy_4.0.0-rc4.raw
+
+cd /root/Lime-Debian/output/
+
+md5sum Lime2_Debian_1.5_wheezy_4.0.0-rc4.raw &gt; Lime2_Debian_1.5_wheezy_4.0.0-rc4.md5
+</code></pre>
+
+<p>Create a zip file of the two files:</p>
+
+<pre><code>zip Lime2_Debian_1.5_wheezy_4.0.0-rc4.zip Lime2_Debian_1.5_wheezy_4.0.0-rc4.md5 Lime2_Debian_1.5_wheezy_4.0.0-rc4.raw
+</code></pre>
+
+<p>And that&#39;s it. You now have a fully working image for the Olimex a20-Lime2. You
+can copy and distribute the zipfile anywhere you like.</p>
+
+<h3 id="toc_9">Installing the image</h3>
+
+<p>To install the image on your SD card, we take the zip file and extract it, so
+that we have the <code>Lime2_Debian_1.5_wheezy_4.0.0-rc4.raw</code> file. We use <code>dd</code> to
+put it on our SD card, which is at device <code>/dev/mmcblk0</code>:</p>
+
+<pre><code>dd if=Lime2_Debian_1.5_wheezy_4.0.0-rc4.raw of=/dev/mmcblk0 bs=1M
+</code></pre>
+
+<p>Put the SD card in the machine and boot it up. You can hook up UART to your
+machine or wait for the board to get DHCP. The SSH server will start up and you
+can login using your set root password.</p>
+
+<p>The first boot might take a little longer since it will regenerate the host keys
+for the device.</p>
+Tags: <a href="../tags/a20.html">a20</a>
+, <a href="../tags/allwinner.html">allwinner</a>
+, <a href="../tags/arm.html">arm</a>
+, <a href="../tags/articles.html">articles</a>
+, <a href="../tags/debian.html">debian</a>
+, <a href="../tags/gpio.html">gpio</a>
+, <a href="../tags/minimal.html">minimal</a>
+, <a href="../tags/olimex.html">olimex</a>
+, <a href="../tags/olinuxino.html">olinuxino</a>
+, <a href="../tags/raspberry-pi.html">raspberry-pi</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>Javascript IPv4 to Binary to Decimal converter</title></head><body><h1>Javascript IPv4 to Binary to Decimal converter</h1><p><a href="https://raymii.org/s/articles/IPv4_Address_Conversion_Tricks.html">for this article on Raymii.org</a></p><script type="text/javascript">
+            // Copyright (C) 2013 Remy van Elst
+
+            // This program is free software: you can redistribute it and/or modify
+            // it under the terms of the GNU General Public License as published by
+            // the Free Software Foundation, either version 3 of the License, or
+            // (at your option) any later version.
+
+            // This program is distributed in the hope that it will be useful,
+            // but WITHOUT ANY WARRANTY; without even the implied warranty of
+            // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+            // GNU General Public License for more details.
+
+            // You should have received a copy of the GNU General Public License
+            // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+            function ConvertMe()
+                {
+                    var ipbox = document.getElementById("ipbox");
+                    var s = ipbox.value;
+                    
+                    var split = s.split("\.");
+                    var binaryResult = "";
+                    var decimalResult = "";
+                    // seriously, no good foreach?
+                    for(i=0; i<split.length; i++) {
+                        if(split[i].length > 0){
+                            if(split[i] <= 255) {
+                                number=parseInt(split[i]);
+                                // to a binary octet
+                                // we need to add leading zeroes
+                                switch(number.toString(2).length) {
+                                    case 1:
+                                        binaryResult += "0000000"+number.toString(2);
+                                        break;
+                                    case 2:
+                                        binaryResult += "000000"+number.toString(2);
+                                        break;
+                                    case 3:
+                                        binaryResult += "00000"+number.toString(2);
+                                        break;
+                                    case 4:
+                                        binaryResult += "0000"+number.toString(2);
+                                        break;
+                                    case 5:
+                                        binaryResult += "000"+number.toString(2);
+                                        break;
+                                    case 6:
+                                        binaryResult += "00"+number.toString(2);
+                                        break;
+                                    case 7:
+                                        binaryResult += "0"+number.toString(2);
+                                        break;
+                                    default:
+                                        binaryResult += number.toString(2);
+                                        break;
+                                }
+                                decimalResult = parseInt(binaryResult, 2);
+                            }
+                        }
+                    }
+                    var binary = document.getElementById("binary");
+                    var decimal = document.getElementById("decimal");
+                    binary.innerHTML = "<a href=\"http://"+binaryResult+"\">"+binaryResult+"</a>";
+                    decimal.innerHTML = "<a href=\"http://"+decimalResult+"\">"+decimalResult+"</a>";
+                }
+
+        </script><form action="#" name="form1">IP:<input id="ipbox" onkeyup="ConvertMe()" type="text"/><br/></form><div id="results">Binary:<div id="binary"></div><br/>Decimal:<div id="decimal"></div><br/></div></body></html>

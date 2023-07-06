@@ -1,0 +1,277 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	std::string to lowercase or uppercase in C++
+Author      : 	Remy van Elst
+Date        : 	07-11-2019
+URL         : 	https://raymii.org/s/snippets/std_string_to_lowercase_or_uppercase_in_cpp.html
+Format      : 	Markdown/HTML
+---
+
+
+
+I'm using [codewars][9] to practice my development skills. Today I learned
+a method to transform a std::string's casing, either to uppercase or lowercase.
+It uses a lambda and does loop over all characters in the string. Researching it
+further, I also found out how to do unicode strings with Boost. This
+article also includes a mini howto on installing Boost on Windows 10 via `mingw`
+for use with CLion. 
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Case transformation for ascii
+
+The codewars assignment was to count unique lowercase characters in a string, 
+then return the character which was found the most. For the string "hello" this 
+would be `l` since it's found twice. To do this I first needed to convert the 
+string to lowercase. This is the code I used to lowercase the string for the 
+codewars practice:
+
+    int main() {
+        std::string inStr = "UPPERCASE";
+        std::transform(inStr.begin(), inStr.end(), inStr.begin(),
+                       [](unsigned char c){ return std::tolower(c); });
+        std::cout << inStr << std::endl;
+        return 0;
+    }
+
+Example output:
+
+    #C:\Users\Remy\CLionProjects\test1\cmake-build-debug\src\example.exe
+    uppercase
+
+For uppercase:
+
+    int main() {
+        std::string inStr = "lowercase";
+        std::transform(inStr.begin(), inStr.end(), inStr.begin(),
+                       [](unsigned char c){ return std::toupper(c); });
+        std::cout << inStr << std::endl;
+        return 0;
+    }
+
+Example output:
+
+    #C:\Users\Remy\CLionProjects\test1\cmake-build-debug\src\example.exe
+    LOWERCASE
+
+### Non-ASCII
+
+Remember: everytime you assume text is ASCII, a kitten dies somewhere. 
+
+The code above does not work with [Emoji's][1]:
+
+    std::string inStr = "\U0001F4A9 ";
+    std::transform(inStr.begin(), inStr.end(), inStr.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+    std::cout << inStr << std::endl;
+
+This won't give the expected result. I'm using an image since your browser
+will probably not render this correctly:
+
+![img][3]
+
+A unicode string like [a common german word][7] will also not
+work, same kind of weird output.
+
+But, with Boost and ICU you can get this to work. The setup is difficult, but 
+when you have it compiling and working, it's a pleasure to work with. You 
+can just pass entire strings instead of looping over every character.
+
+### Boost
+
+Boost is a set of libraries for C++ development, of which most end up in the 
+standard library after a few years.
+
+To include Boost in your [cmake project][2], either install it with your package
+manager or download it manually.    
+
+#### Installing Boost on Windows 10 or Ubuntu
+
+On Ubuntu 18.04 it's as simple as:
+
+    apt-get install libboost-dev-all
+
+TL;DR: On Windows 10 use [this mingw build][6] or __be warned. Here be dragons.__ 
+
+It cost me multiple hours of  troubleshooting and debugging. Appearantly `mingw`
+and Boost on Windows are  not the best of friends. Especially not if you also
+need `Locale`, then `libICU` is required as well. If you use Visual Studio and
+MSVC or CLion with MSVC instead  of `Mingw` it all should be less problematic.
+`libICU` provides downloads for  `MSVC`, for `MinGW` you're on your own, good
+luck with compiling. 
+
+Open a cmd, navigate to the folder and build Boost. If
+you have visual studio installed you can use that, I use `mingw` so I have to
+specify that and I have to run a `mingw` cmd prompt (via the .bat file provided
+by mingw). Make sure to have `g++` available as command:
+
+    C:\Users\Remy\Downloads\boost_1_71_0\boost_1_71_0>g++ --version
+    g++ (i686-posix-sjlj, built by strawberryperl.com project) 4.9.2
+    Copyright (C) 2014 Free Software Foundation, Inc.
+    This is free software; see the source for copying conditions.  There is NO
+    warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Bootstrap:
+
+    C:\Users\Remy\Downloads\boost_1_71_0\boost_1_71_0>bootstrap.bat gcc
+    Building Boost.Build engine
+     
+    Generating Boost.Build configuration in project-config.jam for msvc...
+     
+    Bootstrapping is done. To build, run:
+     
+        .\b2
+    [...]
+
+
+Build:
+
+    b2 toolset=gcc 
+     
+    [lots and lots of compiling later]
+        1 file(s) copied.
+    ...failed updating 666 targets...
+    ...skipped 204 targets...
+    ...updated 1573 targets...
+
+Install:
+    
+    b2 toolset=gcc install
+
+This will install into `C:\Boost` and the `findBoost` cmake package will detect it.
+If you specify a different folder, you need to set `BOOST_ROOT` as environment variable
+or pass it to cmake. 
+
+In your `CMakeLists.txt` file the following options might help with debugging 
+if you get errors:
+
+    set (Boost_DEBUG ON)
+    set (Boost_ARCHITECTURE "-x32")
+    set (Boost_USE_STATIC_LIBS ON)
+    set (Boost_USE_MULTITHREADED ON)
+    set (Boost_DETAILED_FAILURE_MSG ON)
+
+Do note that I spent a few hours fiddling and trying to get the `boost.Locale`
+library to compile. I ended with a linker error:
+
+    C:/PROGRA~2/MINGW-~1/I686-8~1.0-P/mingw32/bin/../lib/gcc/i686-w64-mingw32/8.1.0/
+    ../../../../i686-w64-mingw32/lib/../lib/libiconv.a(localcharset.o):localcharset.c
+    :(.text+0x73): undefined reference to `_imp__GetACP@0'
+
+Due to not having `libicu` installed. As stated earlier, I gave up due to ICU 
+as far as I could find only providing MSVC compatible builds, not `MinGW` builds.
+
+Continue on with this guide on a Linux system if you want to follow along, or 
+use CLion with MSVC instead of MinGW.
+
+__Update after another few hours of debugging:__ when using [this build of mingw][6]
+by Stephan T. Lavavej, the code and cmake does compile and link without errors.
+
+#### Boost in your CMakeLists file
+    
+If you've followed [my setup guide for CMake][2] then you should add this to
+the main root-folder `CMakeLists.txt` file right before `include_directories`:
+
+    find_package(Boost REQUIRED COMPONENTS locale)
+    if(Boost_FOUND)
+        include_directories(${Boost_INCLUDE_DIR})
+        message("-- Boost found: ${Boost_VERSION_STRING}")
+    else()
+        message(FATAL_ERROR "Boost not found!")
+    endif()
+
+In the `src/CMakeLists.txt` file, add the following at the bottom:
+
+    if(Boost_FOUND)
+        target_link_libraries (${BINARY} ${Boost_LIBRARIES})
+        message("-- Boost link to: ${Boost_VERSION_STRING}")
+    else()
+        message(FATAL_ERROR "Boost not found!")
+    endif()
+
+If all went well, your CMake output should include the two new messages:
+
+    -- Boost found: 1.71.0
+    -- Boost link to: 1.71.0
+     
+    -- Configuring done
+    -- Generating done
+    -- Build files have been written to: C:/Users/Remy/CLionProjects/test1/cmake-build-debug
+
+
+### Boost locale conversion code
+
+This is the code I used with Boost to convert uppercase to lowercase:
+
+    boost::locale::generator gen;
+    std::locale loc=gen("");
+    std::locale::global(loc);
+    std::cout.imbue(loc);
+    std::string grussen = "grussEN";
+    std::string poopla = "\U0001F4A9";
+    std::cout   <<"Upper "<< boost::locale::to_upper(grussen)  << std::endl
+                <<"Lower "<< boost::locale::to_lower(grussen)  << std::endl
+                <<"Title "<< boost::locale::to_title(grussen)  << std::endl
+                <<"Fold  "<< boost::locale::fold_case(grussen) << std::endl
+                <<"Poop  "<< boost::locale::to_lower(poopla)   << std::endl;
+
+It's mostly [example code from Boost][8].
+
+My static site generator doesn't like the german S and U, it will not render it
+correctly. Here's a picture of the code:
+
+![boost1][4]
+
+The result works as you would expect:
+
+![boost2][5]
+
+
+[1]: https://xn--ls8h.la/
+[2]: /s/tutorials/Cpp_project_setup_with_cmake_and_unit_tests.html
+[3]: /s/inc/img/boost-fail1.png
+[4]: /s/inc/img/boost-fail3.png
+[5]: /s/inc/img/boost-fail2.png
+[6]: https://nuwen.net/mingw.html
+[7]: https://en.wiktionary.org/wiki/gr%C3%BC%C3%9Fen
+[8]: https://www.boost.org/doc/libs/1_71_0/libs/locale/doc/html/conversions_8cpp-example.html
+[9]: https://www.codewars.com/r/KjbvJA
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,161 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Nagios plugin to check an OCSP server
+Author      : 	Remy van Elst
+Date        : 	06-05-2013
+URL         : 	https://raymii.org/s/software/Nagios_plugin_to_check_OCSP.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This is a nagios plugin to check an OCSP server. It does so by having either a
+PEM encoded certificate in the code, and the PEM encoded certificate of the
+issuer in the code, or by using two given PEM files. This is sent to the OCSP
+server and the response is then parsed to give the correct nagios result. It is
+targeted at administrators who have their own OCSP and need to know when it is
+not working.
+
+This version has contributions from [Pali Sigurdsson][1].
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+#### Download
+
+[Download the plugin from my github][3]  
+[Download the plugin from raymii.org][4]
+
+#### Usage
+
+`./check_ocsp.sh`:
+
+  * `-H host_name` \- remote host to check
+  * `-P port` \- port to use
+  * `--noverify` \- Don't verify if certificate is valid
+  * `--max-age 4800` \- alert if certificate is about to expire
+  * `--cert filename` \- use this cert file instead of the hardcoded one
+  * `--issuer filename.pem` \- use this issuer certificate instead of the hardcoded one
+  * `--verbose` \- handy for troubleshooting, echos the exact openssl command used
+
+#### Installation
+
+This guide covers the steps needed for Ubuntu 10.04/12.04 and Debian 6. It
+should also work on other distro's, but make sure to modify the commands where
+needed (package installation for example).
+
+First make sure you have the required tools:
+
+    
+    
+    apt-get install gawk grep bash sed wget curl openssl
+    
+
+Place the script on the nagios host (I've placed it in _/etc/nagios/plugins/_ ):
+
+    
+    
+    wget -O */etc/nagios/plugins/check_ocsp_hard.sh http://raymii.org/s/inc/downloads/check_ocsp_hard.sh
+    
+
+Make sure that the script is executable:
+
+    
+    
+    chmod +x /etc/nagios/plugins/check_ocsp_hard.sh
+    
+
+Now test it:
+
+    
+    
+    /etc/nagios/plugins/check_ocsp_hard.sh
+    OK: OCSP up and running - status of certificate for raymii.org GOOD by OCSP: http://ocsp.comodoca.com/
+    
+
+#### Nagios config
+
+Here's some example nagios config:
+
+Lets create a command definition:
+
+    
+    
+    define command{
+        command_name    check_ocsp
+        command_line    /etc/nagios-plugins/check_ocsp.sh -H $USER1$ -p $USER2$ --cert $USER3$ --issuer $USER4$
+    }
+    
+
+And a service check:
+
+    
+    
+    define service {
+            use                             generic-service
+            host_name                       localhost
+            service_description             OCSP check of $OCSP for $DOMAIN
+            contact                         nagiosadmin                 
+            check_command                   check_ocsp!raymii.org!443!/etc/ssl/certs/raymiiorg.pem!/etc/ssl/certs/comodo.pem
+    }
+    
+
+Or if you use a hardcoded certificate:
+
+    
+    
+    define command{
+        command_name    check_ocsp_hard
+        command_line    /etc/nagios-plugins/check_ocsp.sh
+    }
+    
+    define service {
+            use                             generic-service
+            host_name                       localhost
+            service_description             OCSP check of $OCSP for $DOMAIN with hardcoded certificate
+            contact                         nagiosadmin                 
+            check_command                   check_ocsp_hard
+    }
+    
+
+   [1]: https://github.com/palli/
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://github.com/RaymiiOrg/nagios
+   [4]: https://raymii.org/s/inc/downloads/check_ocsp.sh
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,1374 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Get started with the Nitrokey HSM or SmartCard-HSM - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> | 
+                  <a href="gopher://raymii.org:70">Gopher</a>                 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Get started with the Nitrokey HSM or SmartCard-HSM</h2>
+<p><small>Published: <span data-pagefind-meta='date'>19-06-2016</span> | Last update: 20-06-2021 | Author: Remy van Elst | <a href="Get_Started_With_The_Nitrokey_HSM.txt">Text only version of this article</a>
+</small></p>
+<br><div class='olderthanayear'><p><strong>&#10071; This post is over two years old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Changelog</a>
+<ul>
+<li>
+<a href="#toc_1">2021-06-20</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_2">What is an HSM (Hardware Security Module)</a>
+</li>
+<li>
+<a href="#toc_3">Nitrokey and SmartCard HSM</a>
+</li>
+<li>
+<a href="#toc_4">Software installation</a>
+</li>
+<li>
+<a href="#toc_5">PKCS#11, #15 and OpenSC</a>
+</li>
+<li>
+<a href="#toc_6">SO and User Pins</a>
+</li>
+<li>
+<a href="#toc_7">Warnings</a>
+</li>
+<li>
+<a href="#toc_8">HSM Backups with a DKEK</a>
+</li>
+<li>
+<a href="#toc_9">Initialize the HSM</a>
+</li>
+<li>
+<a href="#toc_10">Create a keypair</a>
+</li>
+<li>
+<a href="#toc_11">Backing up and restoring the keys with a DKEK</a>
+</li>
+<li>
+<a href="#toc_12">Using the keys</a>
+</li>
+<li>
+<a href="#toc_13">SSH Keys with the HSM</a>
+<ul>
+<li>
+<a href="#toc_14">EC keys to OpenSSH</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_15">Using the HSM for Thunderbird with S/MIME</a>
+</li>
+<li>
+<a href="#toc_16">Deleting objects from the HSM</a>
+</li>
+<li>
+<a href="#toc_17">Apache with mod_nss</a>
+</li>
+<li>
+<a href="#toc_18">Decrypting the private keys of the HSM</a>
+</li>
+<li>
+<a href="#toc_19">Storing arbitraty data in Elementary Files (EF)</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p>This is a guide to get started with the Nitrokey HSM (or SmartCard-HSM). It
+covers what a HSM is and what it can be used for. It also goes over software
+installation and initializing the device including backups of the device and
+keys. Finally we do some actual crypto operatons via pkcs11, OpenSSH, Apache and
+OpenSSL. We also cover usage in Thunderbird (S/MIME), Elementary Files (EF), a
+Web cluster with Apache and mod_nss and the decryption of the keys.</p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+<p><img src="https://raymii.org/s/inc/img/nitrokey1.jpg" alt=""></p>
+
+<blockquote>
+<p>The Nitrokey HSM in a sealed package</p>
+</blockquote>
+
+<p><img src="https://raymii.org/s/inc/img/sc-hsm-nitrokey.jpg" alt=""></p>
+
+<blockquote>
+<p>The Nitrokey HSM and the SmartCard-HSM</p>
+</blockquote>
+
+<p><img src="https://raymii.org/s/inc/img/sc-hsm.jpg" alt=""></p>
+
+<blockquote>
+<p>The SmartCard-HSM</p>
+</blockquote>
+
+<h3 id="toc_0">Changelog</h3>
+
+<h4 id="toc_1">2021-06-20</h4>
+
+<p>Jan-Piet Mens has written an article on using the HSM with OpenSSH
+and EC keys. When I wrote this article, OpenSSH <code>PKCS#11</code> had no 
+support, he has figured out how to get it working. It does involve
+compiling your own (newer) OpenSSH build. <a href="https://jpmens.net/2021/06/16/ssh-with-a-smartcard-hsm/">Article is here: https://jpmens.net/2021/06/16/ssh-with-a-smartcard-hsm/</a>.</p>
+
+<h3 id="toc_2">What is an HSM (Hardware Security Module)</h3>
+
+<p>A Hardware Security Module, HSM, is a device where secure key material is
+stored. This private data only be accessed by the HSM, it can never leave the
+device. Most HSM devices are also tamper-resistant. This means that when opened,
+moved or otherwise (software) tampered with, they wipe the key material. HSM&#39;s
+come in a variety of formfactors, ranging from SmartCards and small USB devices,
+to full size PCI cards and even 19&quot; rackmountable server-like devices. The
+difference between all those devices is speed and storage capacity. Most
+commercial HSM&#39;s are certified to the <a href="https://en.wikipedia.org/wiki/FIPS_140-2">FIPS-140-2</a> standard.</p>
+
+<p><img src="https://raymii.org/s/inc/img/eracom.jpg" alt=""></p>
+
+<blockquote>
+<p>An Eracom HSM PCI card</p>
+</blockquote>
+
+<p>Since the private key material never leaves the device, all crypto operations
+are done on the device as well. The software usually communicates via
+<a href="https://en.wikipedia.org/wiki/PKCS_11">PKCS#11</a>, sometimes named <code>Cryptoki</code>. PKCS#11 is a software API for
+accessing cryptographic hardware like smart cards or HSM. PKCS#11 is NOT a
+hardware standard or hardware interface. PKCS#15 is a format of on-card
+structures that defines a &quot;filesystem layout&quot; for smart cards. PKCS#15 does not
+define how those structures are generated or written to the card. <code>OpenSSL</code>
+supports this, as well as CA software like <code>Dogtag/Redhat Certificate System</code>
+and <code>EJBCA</code> by using a driver/module. The software doesn&#39;t use the actual key
+files themselves but asks the device to do the operation. For example, the
+software asks the HSM to sign this data with the private key and the HSM returns
+the signed data. It can also encrypt and decrypt data using the keys. In most
+HSM&#39;s you have one or more so called <code>slots</code>. Each slot can have a keypair, RSA,
+EC, DSA, depending on the software on the HSM.</p>
+
+<p><img src="https://raymii.org/s/inc/img/ultimaco.jpg" alt=""></p>
+
+<blockquote>
+<p>An Ultimaco HSM device</p>
+</blockquote>
+
+<p>For example, when you <a href="https://raymii.org/s/software/OpenSSL_Command_Generator.html">generate a certificate for your website with OpenSSL</a>
+you get both a private key and a certificate. The latter might also be called
+the public key (RSA). By using the public key, others can verify that the
+connection is signed and encrypted with the private key. The server software,
+Apache for example, uses the two files directly to do the crypto. Now, when a
+HSM is used, the webserver has a driver loaded and asks the HSM to do the
+operation (signing, encrypting) instead of doing it itself. It uses the data the
+HSM returned, and thus never has access to the private key.</p>
+
+<p><img src="https://raymii.org/s/inc/img/safenetpci.jpg" alt=""></p>
+
+<blockquote>
+<p>An SafeNet Luna PCI 7000 HSM</p>
+</blockquote>
+
+<p>All major Certificate Authorities use HSM&#39;s to store their private keys. By
+doing so, they make sure the private keys used to sign certificates never get
+stolen or leak out. <a href="https://community.letsencrypt.org/t/ca-software-and-hsms-used/14600">Let&#39;s Encrypt</a> uses Gemalto HSM&#39;s. I&#39;ve worked at a
+dutch certificate authority where <a href="http://www.safenet-inc.com/data-encryption/hardware-security-modules-hsms/protectserver-security-module/#tab2">Safenet Protectserver</a> devices were used.
+Actually, Eracom Protectserver, before they got bought up, then Safenet
+Protectserver. For this dutch CA, it was required to store keying material in an
+HSM by the CA/Browser forum and the <a href="https://cert.pkioverheid.nl/">Staat Der Nederlanden CA hierarchy,
+PKIOverheid</a>. A company doing public traffic transaction management (OV
+Chipkaart) uses devices by Thales, <a href="https://www.thales-esecurity.com/products-and-services/products-and-services/hardware-security-modules">nShield HSM&#39;s</a>.</p>
+
+<p><img src="https://raymii.org/s/inc/img/safenethsm.jpg" alt=""></p>
+
+<blockquote>
+<p>An SafeNet Luna 19&quot; rack model HSM</p>
+</blockquote>
+
+<p>As you can see on the pictures, most HSM&#39;s have a COM port. These COM ports can
+be used to attach a smartcard reader. Most HSM&#39;s offer the option to backup the
+keying material inside the HSM to a smartcard.</p>
+
+<p><img src="https://raymii.org/s/inc/img/omnikey.png" alt=""></p>
+
+<blockquote>
+<p>An Omnikey 3121 USB Smartcard reader</p>
+</blockquote>
+
+<p>These backups are made in such a way that only another HSM, often only the same
+type of HSM device, can import these keys with a special password. The Safenet
+Protectservers called this a Transport Key, which was a long (32 bit) password
+used to export and import the key.</p>
+
+<h3 id="toc_3">Nitrokey and SmartCard HSM</h3>
+
+<p><img src="https://raymii.org/s/inc/img/nitrokey2.jpg" alt=""></p>
+
+<blockquote>
+<p>The Nitrokey HSM plugged into my ThinkPad</p>
+</blockquote>
+
+<p>The <a href="http://nitrokey.com">Nitrokey HSM</a> is an open hardware and open software device. It is a USB
+version of the <a href="http://www.smartcard-hsm.com/">SmartCard-HSM</a>. Both the <a href="http://www.smartcard-hsm.com/opensource.html">SmartCard-HSM</a> as the
+<a href="https://github.com/nitrokey">Nitrokey HSM</a> have sources available and are fully supported by the
+<a href="https://github.com/OpenSC/OpenSC/wiki/SmartCardHSM">OpenSC</a> project.</p>
+
+<p>The Nitrokey is as far as I know one of the few fully open source devices. All
+the big HSM&#39;s I&#39;ve used were either under NDA or completely closed source. In my
+opinion a device like this can only be secure when they are open source. The
+device supports up to 60 ECC GF(p) 256-bit keys and up to 48 RSA 2048-bit keys.</p>
+
+<p>The device came in a sealed bag. The bag has only the device in it and a link to
+<a href="http://www.nitrokey.com/start">www.nitrokey.com/start</a> printed on it. The size is about that of an AA
+battery in height and around 1.5 cm width. It is black, the back has the FCC and
+CE logo&#39;s printed in white and the front has the Nitrokey logo and the text
+&quot;Nitrokey HSM&quot; printed. The device feels like a quality product and is very
+sturdy. Inserting the device in a USB port also keeps it secure and still, it
+all fits very well. Not loose or wiggly at all. When the device is inserted a
+red LED blinks once.</p>
+
+<p>Do note that I&#39;m not sponsored nor endorsed by Nitrokey or CardContact. <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">If you
+like this article, consider sponsoring me by trying out a Digital Ocean VPS.
+With this link you&#39;ll get a $5 VPS for 2 months free (as in, you get $10
+credit). (referral link)</a></p>
+
+<h3 id="toc_4">Software installation</h3>
+
+<p>On Arch Linux you need to install the following packages:</p>
+
+<pre><code>pacman -Sy ccid opensc pcsc-tools 
+</code></pre>
+
+<p>Afterwards you need to start the <code>pcscd</code> service:</p>
+
+<pre><code>systemctl enable pcscd
+systemctl start pcscd
+</code></pre>
+
+<p>If you forgot to do so and already insterted the HSM, remove it, start pcscd and
+plug the device back in.</p>
+
+<p>See the <a href="https://wiki.archlinux.org/index.php/Common_Access_Card">Arch Wiki</a> for more information.</p>
+
+<p>On Ubuntu you need to install some software as well:</p>
+
+<pre><code>apt-get install ccid pcscd pcsc-tools
+</code></pre>
+
+<p>See the <a href="https://help.ubuntu.com/community/CommonAccessCard">Ubuntu Wiki</a> for more info.</p>
+
+<p>After you&#39;ve installed all the software and started services, plug the device in
+and check if it all went well.</p>
+
+<p><code>dmesg</code> output when inserting the device:</p>
+
+<pre><code>[701858.879567] usbhid: USB HID core driver
+[701858.890463] input: Nitrokey Nitrokey HSM as /devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.1/1-1.1:1.0/0003:20A0:4230.0001/input/input20
+[701858.942115] hid-generic 0003:20A0:4230.0001: input,hidraw0: USB HID v1.10 Keyboard [Nitrokey Nitrokey HSM] on usb-0000:00:1a.0-1.1/input0
+</code></pre>
+
+<p><code>pcsc_scan</code> output on my laptop which also has a built-in Lenovo cardreader:</p>
+
+<pre><code># pcsc_scan
+PC/SC device scanner
+V 1.4.26 (c) 2001-2011, Ludovic Rousseau &lt;ludovic.rousseau@free.fr&gt;
+Compiled with PC/SC lite version: 1.8.16
+Using reader plug&#39;n play mechanism
+Scanning present readers...
+0: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+1: Lenovo Integrated Smart Card Reader 01 00
+
+Fri Jun 17 19:55:36 2016
+Reader 0: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+  Card state: Card inserted,
+</code></pre>
+
+<p><code>opensc-tool</code> output:</p>
+
+<pre><code># opensc-tool --list-readers
+# Detected readers (pcsc)
+Nr.  Card  Features  Name
+0    Yes             Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+1    No              Lenovo Integrated Smart Card Reader 01 00
+</code></pre>
+
+<p>If you get no output but an error like:</p>
+
+<pre><code>No smart card readers found.
+</code></pre>
+
+<p>It might mean that <code>pcscd</code> is not running. Make sure it&#39;s started.</p>
+
+<p>You can check the exact hardware and software revision of the device using the
+<code>pkcs11-tool --list-slots</code> command:</p>
+
+<pre><code># pkcs11-tool --list-slots 
+Available slots:
+Slot 0 (0xffffffffffffffff): Virtual hotplug slot
+  (empty)
+Slot 1 (0x1): Lenovo Integrated Smart Card Reader 00 00
+  (empty)
+Slot 2 (0x5): Nitrokey Nitrokey HSM (010000000000000000000000) 01 00
+  token label        : SmartCard-HSM (UserPIN)
+  token manufacturer : www.CardContact.de
+  token model        : PKCS#15 emulated
+  token flags        : rng, login required, PIN initialized, token initialized
+  hardware version   : 24.13
+  firmware version   : 2.0
+  serial num         : DENK0100186
+</code></pre>
+
+<h3 id="toc_5">PKCS#11, #15 and OpenSC</h3>
+
+<p>PKCS#11 is, as said, a software API for accessing cryptographic hardware like
+smart cards or HSM. PKCS#11 is NOT a hardware standard or hardware interface.
+PKCS#15 is a format of on-card structures that defines a &quot;filesystem layout&quot; for
+smart cards. PKCS#15 does not define how those structures are generated or
+written to the card.</p>
+
+<h3 id="toc_6">SO and User Pins</h3>
+
+<p>Some functions on the HSM are protected by PIN codes. There are different access
+levels, most common SO (security officer) and user. Each slot can have a
+different user pin, but the SO pin remains the same for the HSM. You could say
+that the SO pin is like the root user.</p>
+
+<p>An HSM needs to be initialized before it can be used. Initialization is a
+factory reset, where all keys, certificates and data elements are erased and you
+set up a new SO pin. When you receive an HSM it has factory default settings.
+For the Nitrokey HSM the SO pin is <code>3537363231383830</code>. This is not secure since
+it&#39;s a publicly known code. Therefore it needs to be changed to something else.
+But before we do that, first a few warnings.</p>
+
+<h3 id="toc_7">Warnings</h3>
+
+<p>Please read the below parts. You might render your device bricked if you use it
+wrong, and there is no way of recovering a blocked/bricked Nitrokey HSM.</p>
+
+<ul>
+<li>The SO pin must be exactly 16 hexadecimal characters. It will be stored internally as an 8-byte key.</li>
+<li>Store the SO pin in a safe place.</li>
+<li>The user pin can be any length from 4 up to 16 ASCII characters.</li>
+<li>You need the SO pin to (re)-initialize the device. </li>
+<li>Wrong SO pins are counted. When you have entered 15 wrong SO pins, the device is forever blocked and unusable. This is non-recoverable. The counter can not be reset as well.</li>
+<li>HSM firmware versions up to 1.0 will not allow you to change this SO PIN ever again. Check with <code>pkcs11-tool --list-slots</code>.</li>
+</ul>
+
+<p>So, TL;DR: NEVER ENTER THE WRONG SO PIN AND NEVER FORGET THE SO PIN.</p>
+
+<h3 id="toc_8">HSM Backups with a DKEK</h3>
+
+<p>As said earlier, most HSM&#39;s offer a backup option. You can export the key
+material in a specific format readably by other HSM&#39;s of that type. The Safenet
+Protectserver wraps the material with a Transport Key.</p>
+
+<p>The Nitrokey HSM and the SmartCard-HSM use a &#39;Device Key Encryption Key&#39;. The
+DKEK is a 256-Bit AES key.</p>
+
+<p>The DKEK must be set during initialization and before any other keys are
+generated. For a device initialized without a DKEK, keys can never be exported.</p>
+
+<p>A DKEK is imported into a SmartCard-HSM using a preselected number of key
+shares. Each key share is given to a key custodian and only all key shares
+together assemble the DKEK. Key shares are individually imported and are
+assembled within the SmartCard-HSM. Key shares can be imported independently of
+time and location, allowing to pass a half-initialized device between key
+custodians until all shares have been imported.</p>
+
+<p>The HSM supports an arbitrary number of DKEK shares. Typical values for the
+number of shares are:</p>
+
+<ul>
+<li>0: The HSM generates an internal DKEK (no backups).</li>
+<li>1: The HSM requests one external DKEK share to be imported.</li>
+<li>3: The HSM requests three external DKEK shares to be imported by three different key custodians.</li>
+</ul>
+
+<p>If you want to enable the option to create a backup, you must do so first,
+before initializing the HSM. In this example I will create one key share, but
+repeating the commands allows you to create more.</p>
+
+<p>Create a DKEK share with the following command:</p>
+
+<pre><code>sc-hsm-tool --create-dkek-share dkek-share-1.pbe
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+
+The DKEK share will be enciphered using a key derived from a user supplied password.
+The security of the DKEK share relies on a well chosen and sufficiently long password.
+The recommended length is more than 10 characters, which are mixed letters, numbers and
+symbols.
+
+Please keep the generated DKEK share file in a safe location. We also recommend to keep a
+paper printout, in case the electronic version becomes unavailable. A printable version
+of the file can be generated using &quot;openssl base64 -in &lt;filename&gt;&quot;.
+Enter password to encrypt DKEK share : &lt;long password&gt;
+
+Please retype password to confirm : 
+
+Enciphering DKEK share, please wait...
+DKEK share created and saved to dkek-share-1.pbe
+</code></pre>
+
+<p>The printable version looks like this:</p>
+
+<pre><code># openssl base64 -in dkek-share-1.pbe 
+U2FsdGVkX19TK+VuViUAPOKAfVPE9puwK7yvJSInvPeBSld+Uh2hHli8RazbFVd3
+dGgOu7ahEjm6YzzYWtxMnA==
+</code></pre>
+
+<p>For testing purposes, the password used above is: 123456789.</p>
+
+<p>Create more key shares if needed.</p>
+
+<h3 id="toc_9">Initialize the HSM</h3>
+
+<p>The following command initializes the HSM. The default SO pin for the Nitrokey
+HSM is <code>3537363231383830</code>. The initialization will be done with one DKEK share
+as described above.</p>
+
+<p>Use the following command to initialize the HSM. If you have a different SO pin,
+please change the command. The user pin we provide will be set as the user pin.</p>
+
+<pre><code>sc-hsm-tool --initialize --so-pin 3537363231383830 --pin 648219 --dkek-shares 1
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+</code></pre>
+
+<p>The card is not initialized yet if you enabled DKEK shares. You can check how
+many DKEK shares need to be imported using the below command:</p>
+
+<pre><code># sc-hsm-tool
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Version              : 2.0
+User PIN tries left  : 3
+DKEK shares          : 1
+DKEK import pending, 1 share(s) still missing
+</code></pre>
+
+<p>Import the share(s) with the following command:</p>
+
+<pre><code># sc-hsm-tool --import-dkek-share dkek-share-1.pbe 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Enter password to decrypt DKEK share : &lt;long password&gt;
+
+Deciphering DKEK share, please wait...
+DKEK share imported
+DKEK shares          : 1
+DKEK key check value : 53CA37CEED5B227F
+</code></pre>
+
+<p>The HSM is initialized now:</p>
+
+<pre><code># sc-hsm-tool
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Version              : 2.0
+User PIN tries left  : 3
+DKEK shares          : 1
+DKEK key check value : 53CA37CEED5B227F
+</code></pre>
+
+<p>Now that the HSM is initialized, we can start using it.</p>
+
+<h3 id="toc_10">Create a keypair</h3>
+
+<p>The HSM supports the <a href="https://www.nitrokey.com/documentation/frequently-asked-questions#which-algorithms-and-maximum-key-length-are-supported">following</a> key types:</p>
+
+<p>RSA:</p>
+
+<ul>
+<li>1024 bit</li>
+<li>2048 bit</li>
+</ul>
+
+<p>ECDSA GF(p) 192-320 bit, elliptic curves:</p>
+
+<ul>
+<li>secp192r1 (aka prime192v1)</li>
+<li>secp256r1 (aka prime256v1)</li>
+<li>brainpoolP192r1</li>
+<li>brainpoolP224r1</li>
+<li>brainpoolP256r1</li>
+<li>brainpoolP320r1</li>
+<li>secp192k1</li>
+<li>secp256k1 (the Bitcoin curve)</li>
+</ul>
+
+<p>Use the below command to generate an 2048 bit RSA keypair in the HSM:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --keypairgen --key-type rsa:2048 --id 10 --label &quot;HSM RSA Key Remy&quot;
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 1 with a present token (0x1)
+Logging in to &quot;SmartCard-HSM (UserPIN)&quot;.
+Key pair generated:
+Private Key Object; RSA 
+  label:      HSM RSA Key Remy
+  ID:         10
+  Usage:      decrypt, sign, unwrap
+Public Key Object; RSA 2048 bits
+  label:      HSM RSA Key Remy
+  ID:         10
+  Usage:      encrypt, verify, wrap
+</code></pre>
+
+<p>If you want to generate an EC key, you can do that as well:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so -l --keypairgen --key-type EC:prime256v1 --id 20 --label &quot;HSM EC Key Remy&quot;
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 1 with a present token (0x1)
+Logging in to &quot;SmartCard-HSM (UserPIN)&quot;.
+Please enter User PIN: 
+Key pair generated:
+Private Key Object; EC
+  label:      HSM EC Key Remy
+  ID:         20
+  Usage:      sign, derive
+Public Key Object; EC  EC_POINT 256 bits
+  EC_POINT:   044104a98140c570507d0fcd9e0d3bbe2b2eea22a591b5b1862a700d1bddfebd85b3708744c870da457f45c23bef634a941ab344b933a74bbf8e3772b77150afcc4f08
+  EC_PARAMS:  06082a8648ce3d030107
+  label:      HSM EC Key Remy
+  ID:         20
+  Usage:      verify
+</code></pre>
+
+<p>You can save more than one key by specifying a different ID. You can list all
+the current objects as well:</p>
+
+<pre><code># pkcs11-tool --list-objects
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 1 with a present token (0x1)
+Public Key Object; RSA 2048 bits
+  label:      HSM RSA Key Remy
+  ID:         10
+  Usage:      none
+Public Key Object; EC  EC_POINT 256 bits
+  EC_POINT:   044104a98140c570507d0fcd9e0d3bbe2b2eea22a591b5b1862a700d1bddfebd85b3708744c870da457f45c23bef634a941ab344b933a74bbf8e3772b77150afcc4f08
+  EC_PARAMS:  06082a8648ce3d030107
+  label:      HSM EC Key Remy
+  ID:         20
+  Usage:      none
+</code></pre>
+
+<p>You can use the <code>test</code> option as well to make sure everything works correctly:</p>
+
+<pre><code>pkcs11-tool --test --login --pin 648219
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 1 with a present token (0x1)
+C_SeedRandom() and C_GenerateRandom():
+  seeding (C_SeedRandom) not supported
+  seems to be OK
+Digests:
+  all 4 digest functions seem to work
+  MD5: OK
+  SHA-1: OK
+  RIPEMD160: OK
+Signatures (currently only RSA signatures)
+  testing key 0 (HSM RSA Key Remy) 
+  all 4 signature functions seem to work
+  testing signature mechanisms:
+    RSA-X-509: OK
+    RSA-PKCS: OK
+    SHA1-RSA-PKCS: OK
+    MD5-RSA-PKCS: OK
+    RIPEMD160-RSA-PKCS: OK
+    SHA256-RSA-PKCS: OK
+warning: PKCS11 function C_GetAttributeValue(MODULUS_BITS) failed: rv = CKR_ATTRIBUTE_TYPE_INVALID (0x12)
+
+  testing key 1 (0 bits, label=HSM EC Key Remy) with 1 signature mechanism -- can&#39;t be used to sign/verify, skipping: can&#39;t obtain modulus
+Verify (currently only for RSA):
+  testing key 0 (HSM RSA Key Remy)
+    RSA-X-509: OK
+    RSA-PKCS: OK
+    SHA1-RSA-PKCS: OK
+    MD5-RSA-PKCS: OK
+    RIPEMD160-RSA-PKCS: OK
+  testing key 1 (HSM EC Key Remy) with 1 mechanism
+warning: PKCS11 function C_GetAttributeValue(MODULUS_BITS) failed: rv = CKR_ATTRIBUTE_TYPE_INVALID (0x12)
+
+ -- can&#39;t get the modulus length, skipping
+Unwrap: not implemented
+Decryption (RSA)
+  testing key 0 (HSM RSA Key Remy) 
+    RSA-X-509: OK
+    RSA-PKCS: OK
+  testing key 1 (HSM EC Key Remy)  -- can&#39;t be used to decrypt, skipping
+No errors
+</code></pre>
+
+<h3 id="toc_11">Backing up and restoring the keys with a DKEK</h3>
+
+<p>Now that we have some keys in the HSM, we want to make a backup. Since we&#39;ve
+generated a DKEK earlier, we can use that to create a backup of the material in
+the HSM. If you are restoring a backup to another HSM, make sure you
+(re)initialize the HSM and import the correct DKEK first.</p>
+
+<p>The backup and restore require that we know the key reference identifier (key
+ref). We can find that with the <code>pkcs15-dump</code> command:</p>
+
+<pre><code>pkcs15-tool --dump
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+PKCS#15 Card [SmartCard-HSM]:
+  Version        : 0
+  Serial number  : DENK0100186
+  Manufacturer ID: www.CardContact.de
+  Flags          : 
+
+[...]
+
+Private RSA Key [HSM RSA Key Remy]
+  Object Flags   : [0x3], private, modifiable
+  Usage          : [0x2E], decrypt, sign, signRecover, unwrap
+  Access Flags   : [0x1D], sensitive, alwaysSensitive, neverExtract, local
+  ModLength      : 2048
+  Key ref        : 1 (0x1)
+  Native         : yes
+  Path           : e82b0601040181c31f0201::
+  Auth ID        : 01
+  ID             : 10
+  MD:guid        : {984bcc96-6524-74f8-535a-83c920612f39}
+    :cmap flags  : 0x0
+    :sign        : 0
+    :key-exchange: 0
+
+Private EC Key [HSM EC Key Remy]
+  Object Flags   : [0x3], private, modifiable
+  Usage          : [0x10C], sign, signRecover, derive
+  Access Flags   : [0x1D], sensitive, alwaysSensitive, neverExtract, local
+  FieldLength    : 256
+  Key ref        : 2 (0x2)
+  Native         : yes
+  Path           : e82b0601040181c31f0201::
+  Auth ID        : 01
+  ID             : 20
+  MD:guid        : {5c924cee-37e3-865e-951b-975cfaf95cad}
+    :cmap flags  : 0x0
+    :sign        : 0
+    :key-exchange: 0
+
+[...]
+</code></pre>
+
+<p>In my example the RSA keypair has key ref 1 and the EC keypair has key ref 2. To
+wrap key 1 to an encrypted file use the following command:</p>
+
+<pre><code>sc-hsm-tool --wrap-key wrap-key-1.bin --key-reference 1 --pin 648219
+</code></pre>
+
+<p>To restore the key, use the unwap command:</p>
+
+<pre><code>sc-hsm-tool --unwrap-key wrap-key-1.bin --key-reference 1 --pin 648219
+</code></pre>
+
+<p>Replace the key ref to backup other keys.</p>
+
+<p>We can test the backup by, after creating a backup first, deleting the key
+material in the slot:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type cert --id 10
+pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type privkey --id 10
+pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type data --label &quot;HSM RSA Key Remy&quot;
+</code></pre>
+
+<p>If you use the <code>pkcs15-tool --dump</code> command or the <code>pkcs11-tool --list-objects</code>
+command you see that the key is gone:</p>
+
+<pre><code>pkcs11-tool --list-objects
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 1 with a present token (0x1)
+Public Key Object; EC  EC_POINT 256 bits
+  EC_POINT:   044104a98140c570507d0fcd9e0d3bbe2b2eea22a591b5b1862a700d1bddfebd85b3708744c870da457f45c23bef634a941ab344b933a74bbf8e3772b77150afcc4f08
+  EC_PARAMS:  06082a8648ce3d030107
+  label:      HSM EC Key Remy
+  ID:         20
+  Usage:      none
+</code></pre>
+
+<p>Restore the key using the above command and it should be back:</p>
+
+<pre><code>sc-hsm-tool --unwrap-key wrap-key-1.bin --key-reference 1 --pin 648219
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Wrapped key contains:
+  Key blob
+  Private Key Description (PRKD)
+  Certificate
+Key successfully imported
+</code></pre>
+
+<p>The restore worked, the key is back an can be used again:</p>
+
+<pre><code>pkcs11-tool --list-objects
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 1 with a present token (0x1)
+Public Key Object; RSA 2048 bits
+  label:      HSM RSA Key Remy
+  ID:         10
+  Usage:      none
+Public Key Object; EC  EC_POINT 256 bits
+  EC_POINT:   044104a98140c570507d0fcd9e0d3bbe2b2eea22a591b5b1862a700d1bddfebd85b3708744c870da457f45c23bef634a941ab344b933a74bbf8e3772b77150afcc4f08
+  EC_PARAMS:  06082a8648ce3d030107
+  label:      HSM EC Key Remy
+  ID:         20
+  Usage:      none
+</code></pre>
+
+<h3 id="toc_12">Using the keys</h3>
+
+<p>You can get the public keys out of the device by using the <code>pkcs15-tool</code>
+command:</p>
+
+<pre><code># pkcs15-tool --read-public-key 10
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzmCaH0j9ujAo83EIZBlK
+U7rJGcoKd4l93HJd7flufUlrwN7QaGuyzO4scgUps97fgWFML7ZIn1RJaJBIPExb
+Mh9dHRlxsAmJoPNmiqFD86wbegRZJsvsfe/HlEZDUuDa25Ef52cOLipetJ7dUWP8
+rsXART+7Ferl9yjMEMcfciaTPGuyo5V1Jvk1xh7DR5pMk0YGk5ZZVbIha79Ya8ut
+gj3nxR58Je63iHcY9RGpb/96UpRKJ2D98LCTQKPUZvF6wY3PPkWroLdZIvwZGd3D
+HgSw/bw9nFTgMXHbvw/xJ2B4aDmnRlY27gKzMXicEEbEqZcuMWVOKaatcaD+kmOV
+cQIDAQAB
+-----END PUBLIC KEY-----
+</code></pre>
+
+<p>EC Key:</p>
+
+<pre><code># pkcs15-tool --read-public-key 20
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEqYFAxXBQfQ/Nng07visu6iKlkbWx
+hipwDRvd/r2Fs3CHRMhw2kV/RcI772NKlBqzRLkzp0u/jjdyt3FQr8xPCA==
+-----END PUBLIC KEY-----
+</code></pre>
+
+<p>To use the HSM with OpenSSL we need to create a config file first. Plate the
+contents of the below file in, for example, <code>hsm.conf</code>:</p>
+
+<pre><code># PKCS11 engine config
+openssl_conf = openssl_def
+
+[openssl_def]
+engines = engine_section
+
+[req]
+distinguished_name = req_distinguished_name
+
+[req_distinguished_name]
+# empty.
+
+[engine_section]
+pkcs11 = pkcs11_section
+
+[pkcs11_section]
+engine_id = pkcs11
+dynamic_path = /usr/lib/engines/engine_pkcs11.so
+MODULE_PATH = /usr/lib/opensc-pkcs11.so
+PIN = 648219
+init = 0
+</code></pre>
+
+<p>You can omit the <code>PIN</code> variable if you don&#39;t want to include that in a config
+file. I had to check the filenames in <code>/usr/lib/engines/</code> to make sure that the
+correct one was loaded. Test it using OpenSSL:</p>
+
+<pre><code>OPENSSL_CONF=./hsm.conf openssl engine  
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>(dynamic) Dynamic engine loading support
+(pkcs11) pkcs11 engine
+</code></pre>
+
+<p>We can create a new certificate signing request, The <code>1:10</code> is a form of
+<code>slotid:keyid</code>.</p>
+
+<pre><code>OPENSSL_CONF=./hsm.conf openssl req -engine pkcs11 -keyform engine -new -key 1:10 -sha256 -out &quot;raymii.org.csr&quot; -subj &quot;/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Dept/CN=raymii.org&quot;
+</code></pre>
+
+<p>Change the parameters to fit your subject. You can send this CSR to a CA to get
+it signed, but you can also generate a self signed certificate:</p>
+
+<pre><code>OPENSSL_CONF=./hsm.conf openssl req -engine pkcs11 -keyform engine -new -key 1:10 -nodes -days 3560 -x509 -sha256 -out &quot;raymii.org.pem&quot; -subj &quot;/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Dept/CN=raymii.org&quot;
+</code></pre>
+
+<p>The difference in the last command is that the <code>-nodes</code>, <code>-x509</code> and -<code>days</code>
+parameters are added, which generate a self singed certificate instead of a CSR.</p>
+
+<p>You can view the CSR with the following command:</p>
+
+<pre><code>openssl req -noout -text -in raymii.org.csr 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Certificate Request:
+    Data:
+        Version: 0 (0x0)
+        Subject: C=NL, ST=Zuid Holland, L=Rotterdam, O=Sparkling Network, OU=IT Dept, CN=raymii.org
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+[...]
+</code></pre>
+
+<p>You can view the self signed certificate with the following command:</p>
+
+<pre><code>openssl x509 -noout -text -in raymii.org.pem 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number: 18137581533109102111 (0xfbb5a24eada7261f)
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=NL, ST=Zuid Holland, L=Rotterdam, O=Sparkling Network, OU=IT Dept, CN=raymii.org
+        Validity
+            Not Before: Jun 18 09:26:45 2016 GMT
+            Not After : Mar 18 09:26:45 2026 GMT
+        Subject: C=NL, ST=Zuid Holland, L=Rotterdam, O=Sparkling Network, OU=IT Dept, CN=raymii.org
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+[...]
+</code></pre>
+
+<p>Sadly, both Apache and NGINX do not support PKCS#11 in their ssl module. For
+Apache you can use <code>mod_nss</code> to use the certificates from the HSM.</p>
+
+<p>You can however use the HSM to encrypt and decrypt data. Please <a href="https://raymii.org/s/tutorials/Encrypt_and_decrypt_files_to_public_keys_via_the_OpenSSL_Command_Line.html">read my article
+on encryption with OpenSSL first</a> since that covers basics like why an RSA
+key is not suitable for large files.</p>
+
+<p>I&#39;ve also written an article on <a href="https://raymii.org/s/tutorials/Sign_and_verify_text_files_to_public_keys_via_the_OpenSSL_Command_Line.html">Signing data with OpenSSL</a>. Read that as
+well.</p>
+
+<p>To encrypt data using your HSM public key (which we exported earlier with
+<code>pkcs15-tool --read-public-key 10</code>), use the following command:</p>
+
+<pre><code>openssl rsautl -inkey publickey.pem -pubin -encrypt -pkcs -in smallfile -out encryptedsmallfile.pkcs1
+</code></pre>
+
+<p>The data will be wrapped in a PKCS#1 (binary) format.</p>
+
+<p>If you want to decrypt the data, use the following command:</p>
+
+<pre><code>pkcs15-crypt --decipher --key 10 --input encryptedsmallfile.pkcs1 --pkcs1 --raw &gt; decryptedsmallfile
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Enter PIN [UserPIN]: &lt;648219&gt;
+</code></pre>
+
+<p>The two files should be the same:</p>
+
+<pre><code>$ sha256sum decryptedsmallfile 
+609ac352197628e57552aac9e66562be9bb8d746826107e15ff4b04e0efdcbdb  decryptedsmallfile
+
+$ sha256sum smallfile 
+609ac352197628e57552aac9e66562be9bb8d746826107e15ff4b04e0efdcbdb  smallfile
+</code></pre>
+
+<p>As described in the two articles, you need to create a small random file and use
+that as the key to encrypt a file using symmetric encryption. asymmetric
+encryption like RSA is not suitable for large files. Please make sure you read
+both the articles to understand the subject, and then use this article to use
+the HSM.</p>
+
+<h3 id="toc_13">SSH Keys with the HSM</h3>
+
+<p>OpenSSH has support for PKCS#11, so we can use the HSM for SSH Key based
+authentication. The private key never leaves the HSM so this is more secure than
+a password on a file. You will know when someone is brute forcing your HSM,
+because you lost possession of it. When someone steals your private key, you
+might not even know it. <a href="https://blog.mozilla.org/security/2015/08/06/firefox-exploit-found-in-the-wild/">Remember the firefox exploit</a> that steals private
+keys and passwords? If you are using the HSM this will never be possible.</p>
+
+<p>It&#39;s best to create a seperate key for SSH:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --keypairgen --key-type rsa:2048 --id 30 --label &quot;HSM SSH Key Remy&quot;
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 1 with a present token (0x1)
+Logging in to &quot;SmartCard-HSM (UserPIN)&quot;.
+Key pair generated:
+Private Key Object; RSA 
+  label:      HSM SSH Key Remy
+  ID:         30
+  Usage:      decrypt, sign, unwrap
+Public Key Object; RSA 2048 bits
+  label:      HSM SSH Key Remy
+  ID:         30
+  Usage:      encrypt, verify, wrap
+</code></pre>
+
+<p>We need to use <code>pkcs15-tool</code> to get the public key in a format usable by
+openSSH. 30 is the ID we gave, you might need to use the <code>pkcs15-tool --dump</code>
+command to lookup the ID if you don&#39;t know it.</p>
+
+<pre><code>pkcs15-tool --read-ssh-key 30
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/HG1cG6ecGnadde9g4aZCWuL1dzsgOKUstyP7yUAclEtd1GwgQKSrVPixp7jllvoW0kCCtvsT8JMV+pEytcenOpfO06n4DvqjJ1aNMqQK6xw3CeJXz1TXJe7Z7L722/w96bHioZuSRBWumAAcGUoANd/WQ3MXNAmocgvW/WGSnl3kb9Vif7hzirecmcFSaU3djeEXpu42wZG6GGdw9WlvrXV1AsrE0mLQxyZmCEOs6CF0/cyaHuUE24Jz6oOfKkeYjCQgvBUK0D1MU3odnisbvfVLGJuF9RPMBY20Hey8z6dUXQV2WMeknV9/vN2n7Nk7pxOSViIQQ3w9rc7y1f4J HSM SSH Key Remy
+</code></pre>
+
+<h4 id="toc_14">EC keys to OpenSSH</h4>
+
+<p>For EC generated keys the <code>pkcs15-tool</code> doesn&#39;t seem to work. However, because
+all keys can be converted one way or another we can dump the EC public key and
+convert it into an SSH compatible key. First dump the EC public key to a file.
+In this case I generated an EC private key with ID 2 and used the following
+command to get the public key:</p>
+
+<pre><code>pkcs15-tool --read-public-key 2 &gt; eckey.pub
+</code></pre>
+
+<p>Then convert the <code>eckey.pub</code> file into something OpenSSH can handle:</p>
+
+<pre><code>ssh-keygen -i -m PKCS8 -f eckey.pub 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKsWLJkl1Dr7IdLPrLpCBtoEFy+qYd/fEu9Mpga1utwMbCU671NWGH3Ppo2q/tzYFq4Fm/jgRHBHFGJ5HrwL1nM= hsm
+</code></pre>
+
+<p>Although using that doesn&#39;t seem to work:</p>
+
+<pre><code>$ pkcs15-tool --verbose --read-ssh-key 2 
+Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+Connecting to card in reader Nitrokey Nitrokey HSM (010000000000000000000000) 00 00...
+Using card driver SmartCard-HSM.
+Trying to find a PKCS#15 compatible card...
+Found SmartCard-HSM!
+Reading ssh key with ID &#39;2&#39;
+</code></pre>
+
+<p>And logging in fails as well with EC keys:</p>
+
+<pre><code>$ ssh -o &quot;PKCS11Provider opensc-pkcs11.so&quot; root@server
+C_GetAttributeValue failed: 18
+no keys
+root@server&#39;s password: 
+</code></pre>
+
+<p>I&#39;ve <a href="https://github.com/OpenSC/OpenSC/issues/803">raised an issue</a> to see how to get EC keys and OpenSSH working.</p>
+
+<p><strong>Update:</strong> <code>Unfortunately OpenSSH PKCS#11 interface does not support ECC</code>. The
+issue was updated and we now know that OpenSSH doesn&#39;t support ECC via PKCS#11.</p>
+
+<p><strong>Update 2</strong>: <a href="https://jpmens.net/2021/06/16/ssh-with-a-smartcard-hsm/">Jan-Piet Mens has figured out how to get EC keys working with OpenSSH. Article is here: https://jpmens.net/2021/06/16/ssh-with-a-smartcard-hsm/</a>.</p>
+
+<p>This public key can be placed in the <code>~/.ssh/authorized_keys</code> file on your
+servers. I spun up a new <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocean VPS to test it.</a></p>
+
+<p>Digital Ocean automatically places the ssh key in the authorized_keys file, if
+you need to do that yourself you can use the following command:</p>
+
+<pre><code>echo &#39;ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/HG1cG6ecGnadde9g4aZCWuL1dzsgOKUstyP7yUAclEtd1GwgQKSrVPixp7jllvoW0kCCtvsT8JMV+pEytcenOpfO06n4DvqjJ1aNMqQK6xw3CeJXz1TXJe7Z7L722/w96bHioZuSRBWumAAcGUoANd/WQ3MXNAmocgvW/WGSnl3kb9Vif7hzirecmcFSaU3djeEXpu42wZG6GGdw9WlvrXV1AsrE0mLQxyZmCEOs6CF0/cyaHuUE24Jz6oOfKkeYjCQgvBUK0D1MU3odnisbvfVLGJuF9RPMBY20Hey8z6dUXQV2WMeknV9/vN2n7Nk7pxOSViIQQ3w9rc7y1f4J HSM SSH Key Remy&#39; &gt;&gt; ~/.ssh/authorized_keys
+</code></pre>
+
+<p>If I try to login without specifying the HSM I will be prompted for a password
+or be rejected:</p>
+
+<p>When we tell OpenSSH to use the HSM, we get asked for the HSM pin and are logged
+in:</p>
+
+<pre><code>$ ssh -o &quot;PKCS11Provider opensc-pkcs11.so&quot; root@testdroplet
+C_GetAttributeValue failed: 18
+Enter PIN for &#39;SmartCard-HSM (UserPIN)&#39;: &lt;648219&gt;
+Welcome to Ubuntu 16.04 LTS (GNU/Linux 4.4.0-22-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com/
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+
+root@hsmtest:~# 
+</code></pre>
+
+<p>If you add the below line to the top of your <code>~/.ssh/config</code> file, OpenSSH will
+automatically use the HSM if needed:</p>
+
+<pre><code># vim ~/.ssh/config
+PKCS11Provider opensc-pkcs11.so
+</code></pre>
+
+<p>A short form for the command line is the <code>-I</code> flag, which is the same as the
+long <code>-o</code> flag:</p>
+
+<pre><code>ssh -I opensc-pkcs11.so root@testdroplet
+</code></pre>
+
+<p>You can also add the key to your <code>ssh-agent</code> if you happen to use an agent:</p>
+
+<pre><code>ssh-add -s opensc-pkcs11.so
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Enter passphrase for PKCS#11: &lt;648219&gt;
+Card added: opensc-pkcs11.so
+</code></pre>
+
+<p>The passphrase is the user pin. You can now login to machines without entering
+the HSM pin every time. Check all the keys in the agent with the following
+command:</p>
+
+<pre><code>ssh-add -l                 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>2048 SHA256:ycaGD3Sdnt82yTnPs14uncaGDjDwEqCMOdnVM /home/remy/.ssh/id_rsa (RSA)
+2048 SHA256:gRJCXat84Ad56Q8qtLxdNjswdZDFLy8w/7N3ObreV5M opensc-pkcs11.so (RSA)
+2048 SHA256:eXXaUUVJzjI6rm8H9/qIB51UWhZCIp+hqi5JEhVGB40 opensc-pkcs11.so (RSA)
+</code></pre>
+
+<p>My own private key is in there as well as the two slots we created earlier.</p>
+
+<p>When you are done, remove the key from the ssh-agent:</p>
+
+<pre><code>ssh-add -e opensc-pkcs11.so
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Card removed: opensc-pkcs11.so
+</code></pre>
+
+<h3 id="toc_15">Using the HSM for Thunderbird with S/MIME</h3>
+
+<p>If you want to sign your email using S/MIME and the HSM you need to generate a
+keypair and a certificate. Make sure your email address is in the label:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --keypairgen --key-type rsa:2048 --id 40 --label &quot;antispam@relst.nl&quot;
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 1 with a present token (0x1)
+Logging in to &quot;SmartCard-HSM (UserPIN)&quot;.
+Key pair generated:
+Private Key Object; RSA 
+  label:      antispam@relst.nl
+  ID:         40
+  Usage:      decrypt, sign, unwrap
+Public Key Object; RSA 2048 bits
+  label:      antispam@relst.nl
+  ID:         40
+  Usage:      encrypt, verify, wrap
+</code></pre>
+
+<p>Create a certficate signing request based on this key. Make sure you have the
+<code>hsm.conf</code> file for OpenSSL loaded as we did above.</p>
+
+<pre><code>OPENSSL_CONF=./hsm.conf openssl req -engine pkcs11 -keyform engine -new -key 1:40 -sha256 -out &quot;antispam.relst.nl.csr&quot; -subj &quot;/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Dept/CN=relst.nl/emailAddress=antispam@relst.nl&quot;
+</code></pre>
+
+<p>Note the extra <code>emailAddress</code> value in the certificate subject. Make sure that
+the <code>CN</code> domain is the same as the domain in the email addres. Also make sure
+you specify the correct <code>slot:id</code>, in our case, slot 1 and ID 40.</p>
+
+<p>You can now send this certificate signing request to a certificate authority and
+get an actual certificate back. Comodo and Globalsign provide certificates for
+S/MIME.</p>
+
+<p>If you want to generate a self singed certificate you can do that as well:</p>
+
+<pre><code>OPENSSL_CONF=./hsm.conf openssl req -engine pkcs11 -keyform engine -new -key 1:40 -nodes -x509 -days 3650 -sha256 -out &quot;antispam.relst.nl.pem&quot; -subj &quot;/C=NL/ST=Zuid Holland/L=Rotterdam/O=Sparkling Network/OU=IT Dept/CN=relst.nl/emailAddress=antispam@relst.nl&quot;
+</code></pre>
+
+<p>I&#39;ve got an actual certificate from Comodo via <a href="https://xolphin.nl">Xolphin</a>, which you can
+inspect with the following command:</p>
+
+<pre><code>openssl x509 -noout -text -inform der -in antispam.relst.nl.pem 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            ff:93:fe:11:a3:e2:c2:58:a8:b3:e9:07:cb:d5:94:2b
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=GB, ST=Greater Manchester, L=Salford, O=COMODO CA Limited, CN=COMODO SHA-256 Client Authentication and Secure Email CA
+        Validity
+            Not Before: Jun 18 00:00:00 2016 GMT
+            Not After : Jun 18 23:59:59 2017 GMT
+        Subject: C=NL, CN=Remy van Elst/emailAddress=antispam@relst.nl
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+</code></pre>
+
+<p>If you have completed the validation of the certificate at the certificate
+provider or you have the self signed certificate ready, we can proceed to load
+the certificate into the HSM. We need to load the certificate in the HSM so that
+Thunderbird is able to use it. Otherwise there would just be a public key.</p>
+
+<p>The HSM only accepts <code>DER</code> format, so first convert the <code>PEM</code> file you generated
+or received from your CA to <code>DER</code>:</p>
+
+<pre><code>openssl x509 -in antispam.relst.nl.pem -out antispam.relst.nl.der -outform der
+</code></pre>
+
+<p>The below command writes the certificate into the HSM:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --write-object antispam.relst.nl.der --type cert --id 40
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Using slot 1 with a present token (0x1)
+Created certificate:
+Certificate Object, type = X.509 cert
+  label:      Certificate
+  ID:         40
+</code></pre>
+
+<p>Make sure the ID is correct.</p>
+
+<p>Start up Thunderbird and go to the <code>Settings/Preferences</code> menu. Open the
+<code>Advanced</code> tab and select the <code>Security</code> Tab. Click the <code>Security Devices</code>
+button:</p>
+
+<p><img src="https://raymii.org/s/inc/img/tbhsm2.png" alt=""></p>
+
+<p>Select the <code>SmartCard-HSM (UserPIN)</code> under <code>opensc</code> and click the <code>Login</code>
+button. Enter the User PIN (648219). The status should change from <code>Not logged
+in</code> to <code>Logged in</code> Click the <code>OK</code> button.</p>
+
+<p><img src="https://raymii.org/s/inc/img/tbhsm1.png" alt=""></p>
+
+<p>To view the certificate, select the <code>View Certificates</code> button. Your certificate
+should be loaded under the <code>Your Certificates</code> tab, with <code>SmartCard-HSM</code> as it&#39;s
+Security Device.</p>
+
+<p><img src="https://raymii.org/s/inc/img/tbhsm3.png" alt=""></p>
+
+<p>Open up the <code>Account Settings</code> window and under the correct email account,
+select <code>Security</code>. Under <code>Digital Signing</code> and <code>Encryption</code> select the correct
+certificate in the HSM:</p>
+
+<p><img src="https://raymii.org/s/inc/img/tbhsm4.png" alt=""></p>
+
+<p>Save all settings and send yourself a test email. You should be able to sign (or
+encrypt if you have someone elses S/MIME key) the message and while sending your
+HSM LED turns on.</p>
+
+<h3 id="toc_16">Deleting objects from the HSM</h3>
+
+<p>If you are done with testing or want to free up space on the HSM you can remove
+objects from it. You can delete certificates and the private keys, either by ID
+or label. For example, when your S/MIME certificate is expired and you need to
+load up a new one, delete the old one first.</p>
+
+<p>The below command removes a certificate from ID 10:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type cert --id 10
+</code></pre>
+
+<p>The below command removes a private key from ID 10:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type privkey --id 10
+</code></pre>
+
+<p>The below command removes the data from label &#39;HSMdata&#39;:</p>
+
+<pre><code>pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --delete-object --type data --label HSMdata
+</code></pre>
+
+<p>You can check before and after a delete command if the object is gone with the
+below command:</p>
+
+<pre><code>pkcs11-tool --list-objects
+</code></pre>
+
+<p>Do note that when you remove a privkey you also remove the certificate and any
+data.</p>
+
+<h3 id="toc_17">Apache with mod_nss</h3>
+
+<p><img src="https://raymii.org/s/inc/img/hsm-icon.png" alt=""></p>
+
+<p>I&#39;ve written a seperate guide on using the HSM with Apache. Please <a href="https://raymii.org/s/articles/Nitrokey_HSM_in_Apache_with_mod_nss.html">read the
+full guide here</a>.</p>
+
+<p>There is a different module you can use next to the OpenSC module, named <code>sc-
+hsm-embedded</code>. This module provides fast, read only access to the HSM, and is
+better suited for production use, since on a production machine you don&#39;t need
+to manage keys on the HSM, you do that on your offline management workstation.</p>
+
+<p>The guide for mod_nss, Apache and the read-only-module <code>sc-hsm-embedded</code> is <a href="https://raymii.org/s/articles/Use_the_Nitrokey_HSM_or_SmartCard-HSM_with_sc-hsm-embedded_mod_nss_and_Apache_read_only_module.html">on
+a seperate page</a> as well.</p>
+
+<h3 id="toc_18">Decrypting the private keys of the HSM</h3>
+
+<p>This is a guide which shows you how to extract private RSA key material from the
+Nitrokey HSM / SmartCard-HSM using the DKEK. This way you can get the private
+key out of the HSM in an unencrypted form. It does require access to the HSM
+device, all the DKEK share and their passwords. Do note that doing this defeats
+the entire purpose of a HSM, namely that you never have access to the keys. In
+the article I&#39;ll go over some explanation why this might be a feature you need
+and why it might be a case of security over convinience.</p>
+
+<p>*** This is not a vulnerability, zero day or exploit. The HSM provides a way to
+do secure backups of private key material and we utilize that in this article.
+To decrypt the keys you need to have all the DKEK files used when the HSM was
+initialized, know all the DKEK passwords and have access to the HSM itself. **</p>
+
+<p>You can prevent decryption by not setting up a DKEK, thus using the random
+internal DKEK of the HSM.</p>
+
+<p>This guide is on <a href="https://raymii.org/s/articles/Decrypt_NitroKey_HSM_or_SmartCard-HSM_private_keys.html">a seperate page</a> as well.</p>
+
+<h3 id="toc_19">Storing arbitraty data in Elementary Files (EF)</h3>
+
+<p>This is a guide which shows you how to write small elementary files to a
+nitrokey HSM. This can be usefull if you want to securely store data protected
+by a user pin. You can enter the wrong pin only three times, so offline brute
+forcing is out of the picture.</p>
+
+<p>You could for example, store a file in the HSM and send it via the old-fashioned
+mail to someone, without sending the required pin. You send that via a different
+channel, preferably privately in person. The other person then can read the file
+of the HSM using the PIN. Since you only have 3 tries for the correct PIN, you
+know that an offline brute force attack is not likely to happen. If you
+encrypted a file an placed it on a regular USB drive, the post could be
+intercepted and stored for offline cracking by a government agency, without you
+knowing it. Because the pin entries are recorded, you know immidiately when the
+device has been tampered with.</p>
+
+<p>This guide is on <a href="https://raymii.org/s/articles/Storing_arbitraty_data_in_the_Nitrokey_HSM.html">a seperate page</a> like the others.</p>
+Tags: <a href="../tags/articles.html">articles</a>
+, <a href="../tags/cryptoki.html">cryptoki</a>
+, <a href="../tags/hsm.html">hsm</a>
+, <a href="../tags/nitrokey.html">nitrokey</a>
+, <a href="../tags/nitrokey-hsm.html">nitrokey-hsm</a>
+, <a href="../tags/openssl.html">openssl</a>
+, <a href="../tags/pkcs11.html">pkcs11</a>
+, <a href="../tags/safenet.html">safenet</a>
+, <a href="../tags/smartcard.html">smartcard</a>
+, <a href="../tags/smartcard-hsm.html">smartcard-hsm</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

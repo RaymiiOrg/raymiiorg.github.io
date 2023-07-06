@@ -1,0 +1,294 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	HP-UX 11.31 System information and find out part number of a failed disk with sasmgr
+Author      : 	Remy van Elst
+Date        : 	18-05-2018
+URL         : 	https://raymii.org/s/tutorials/Find_part_number_of_failed_disk_on_HP-UX_with_sasmgr.html
+Format      : 	Markdown/HTML
+---
+
+
+
+On one of my regular scheduled datacenter visits one of the older HP-UX Itanium
+machines had an orange light on the front. These systems are not (yet)
+monitored, but still in use so the disk had to be replaced. Not knowing anything
+about this system or which parts were used, I managed to find the exact part
+number and device type so we could order a spare. This small guide uses sasmgr
+to get the data on HP-UX 11.31.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
+
+
+### Hardware Information on HP-UX
+
+Since I normally don't manage these systems and have little experience with HP-
+UX, I first had to find out some information on the system. Using a few regular
+Unix tools like `netstat`, `uname` and a few HP-UX specific tools like `model`,
+`machinfo` I was able to gather basic hardware information of this machine.
+
+    
+    
+    $ TERM=vt100 ssh hpux09 -l root
+    
+    Last successful login:       Fri May 18 08:18:05 METDST 2018     
+    Last authentication failure: Fri May 18 08:10:59 METDST 2018     
+    Last login: Thu Jun 24 09:46:55 2010 from   
+    (c)Copyright 1983-2006 Hewlett-Packard Development Company, L.P.
+    (c)Copyright 1979, 1980, 1983, 1985-1993 The Regents of the Univ. of California
+    (c)Copyright 1980, 1984, 1986 Novell, Inc.
+    (c)Copyright 1986-2000 Sun Microsystems, Inc.
+    (c)Copyright 1985, 1986, 1988 Massachusetts Institute of Technology
+    (c)Copyright 1989-1993  The Open Software Foundation, Inc.
+    (c)Copyright 1990 Motorola, Inc.
+    (c)Copyright 1990, 1991, 1992 Cornell University
+    (c)Copyright 1989-1991 The University of Maryland
+    (c)Copyright 1988 Carnegie Mellon University
+    (c)Copyright 1991-2006 Mentat Inc.
+    (c)Copyright 1996 Morning Star Technologies, Inc.
+    (c)Copyright 1996 Progressive Systems, Inc.
+    
+    Confidential computer software. Valid license from HP required for
+    possession, use or copying.  Consistent with FAR 12.211 and 12.212,
+    Commercial Computer Software, Computer Software Documentation, and
+    Technical Data for Commercial Items are licensed to the U.S. Government
+    under vendor's standard commercial license.
+    
+    You have mail.
+    
+    Value of TERM has been set to "vt100". 
+    WARNING:  YOU ARE SUPERUSER !!
+    
+    hpux09:/root# swlist | grep -i oe
+      HPUX11i-BOE                           B.11.31.0809   HP-UX Base Operating Environment 
+    
+    
+    hpux09:/root# model
+    ia64 hp server rx3600
+    
+    
+    hpux09:/root# uname -a
+    HP-UX hpux09 B.11.31 U ia64 [...] unlimited-user license
+    
+    
+    hpux09:/root# machinfo
+    CPU info:
+      2 Intel(R) Itanium 2 9100 series processors (1.67 GHz, 18 MB)
+              666 MT/s bus, CPU version A1
+              4 logical processors (2 per socket)
+    
+    Firmware info:
+       Firmware revision:  04.03
+       FP SWA driver revision: 1.18
+       IPMI is supported on this system.
+       BMC firmware revision: 5.25
+    
+    Platform info:
+       Model:                  "ia64 hp server rx3600"
+       Machine ID number:      2e6e7[...]f36
+       Machine serial number:  D[...]D
+    
+    OS info:
+       Nodename:  hpux09
+       Release:   HP-UX B.11.31
+       Version:   U (unlimited-user license)
+       Machine:   ia64
+       ID Number: [...]
+       vmunix _release_version:               
+    @(#) $Revision: vmunix:    B.11.31_LR FLAVOR=perf 
+    
+
+This system was installed a long while ago:
+
+    
+    
+    hpux09:/root# swlist -l bundle -a date | grep HPUX
+      HPUX-FTPServer        Wed Dec 10 16:58:16 MET 2008 
+      HPUX-MailServer       Wed Dec 10 16:58:16 MET 2008 
+    
+
+`print_manifest` is a usefull command for information on the system.
+
+    
+    
+    hpux09:/root# print_manifest | grep -i created
+        The system was created December 10, 2008, 18:02:06 MET.
+        It was created with Ignite-UX revision C.7.7.93.
+    
+
+This will go into the hardware documentation, since, sadly, that is very
+incomplete.
+
+### Disk information
+
+Now to the good part, for which we logged in to this machine. Find the serial
+number and order a new (probably refurbished) disk. The system uses LVM with
+RAID 1 underneath via a SAS card so when the disk is ordered we can just replace
+it. If it was just LVM we had to do some configuration
+
+This PDF [When _Good_ Disks _Go_ Bad.pdf][2] is very helpfull in preparing and
+researching this issue. When the new disk is here, [this page][3] will be
+helpfull for the replacement.
+
+The first command shows which disk is the failed one plus the raid
+configuration:
+
+    
+    
+    sasmgr get_info -D /dev/sasd0 -q raid
+    
+
+Output:
+
+    
+    
+    Wed May 16 14:54:21 2018
+    
+    ---------- LOGICAL DRIVE 2 ----------
+    
+    Raid Level                                         : RAID 1              
+    Volume sas address                                 : 0x3c5c0600358833e   
+    Device Special File                                : /dev/rdsk/c0t3d0    
+    Raid State                                         : DEGRADED            
+    Raid Status Flag                                   : ENABLED             
+    Raid Size                                          : 139136              
+    Rebuild Rate                                       : 20.00 %             
+    Rebuild Progress                                   : 100.00 %            
+    
+    Participating Physical Drive(s) :
+    
+    SAS Address         Enc   Bay   Size(MB)      Type            State           
+    
+    0x500000e01d33a9c2   1     8    140014        PRIMARY         ONLINE         
+    0x5000c50003aeb459   1     2    140014        SECONDARY       FAILED         
+    
+    ---------- LOGICAL DRIVE 7 ----------
+    
+    Raid Level                                         : RAID 1              
+    Volume sas address                                 : 0xacb8d6daa52eb4d   
+    Device Special File                                : /dev/rdsk/c0t2d0    
+    Raid State                                         : OPTIMAL             
+    Raid Status Flag                                   : ENABLED             
+    Raid Size                                          : 69878               
+    Rebuild Rate                                       : 0.00 %              
+    Rebuild Progress                                   : 100.00 %            
+    
+    Participating Physical Drive(s) :
+    
+    SAS Address         Enc   Bay   Size(MB)      Type            State           
+    
+    0x5000039668124686   1     1    286102        SECONDARY       ONLINE         
+    0x5000c5000b9f5965   1     7    70007         PRIMARY         ONLINE         
+    
+
+The second command shows the location (controller-wise) and the part number of
+the disk:
+
+    
+    
+    sasmgr get_info -D /dev/sasd0 -q lun=all -q lun_locate 
+    
+
+Output:
+
+    
+    
+    RAID VOL ID is 7 : 
+    /dev/rdsk/c0t2d0          0/4/1/0.0.0.2.0          
+    
+    Physical disks in volume are :
+            1     1     OFF           HP            EG0300FCSPH        HPD0
+            1     7     OFF           HP            DG072BB975         HPDC
+    
+    RAID VOL ID is 2 : 
+    /dev/rdsk/c0t3d0          0/4/1/0.0.0.3.0          
+    
+    Physical disks in volume are :
+            1     8     OFF           HP            DG146BABCF         HPD5
+            1     2     OFF           HP            DG146ABAB4         HPD5
+    
+
+In my case disk 1,2 failed:
+
+    
+    
+        0x5000c50003aeb459   1     2    140014        SECONDARY       FAILED         
+        [...]
+            1     2     OFF           HP            DG146ABAB4         HPD5
+    
+
+With this part number we can order a new disk.
+
+`dmesg` was also spitting out warning about this disk issue:
+
+    
+    
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    LVM: VG 64 0x010000: Lost quorum.
+    This may block configuration changes and I/Os. In order to reestablish quorum at least 1 of the following PVs (represented by current link) must become available:
+    <3 0x000006> 
+    LVM: VG 64 0x010000: PVLink 3 0x000006 Failed! The PV is not accessible.
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x0acb8d6daa52eb4d (dev_t 0x03000004) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x03c5c0600358833e (dev_t 0x03000006) failed with CDB status 0x00000400
+    class : lunpath, instance 3
+    lun path (class = lunpath, instance = 3) belonging to LUN (default minor = 0x6) has gone offline.  The lunpath hwpath is 0/4/1/0.0x3c5c0600358833e.0x0
+    
+    SAS driver at 0/4/1/0 (/dev/sasd0) : RAID volume at SAS address 0x03c5c0600358833e is in a degraded state.
+    SAS driver at 0/4/1/0 (/dev/sasd0) : RAID volume at SAS address 0x03c5c0600358833e is in a degraded state.
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x0acb8d6daa52eb4d (dev_t 0x03000004) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x0acb8d6daa52eb4d (dev_t 0x03000004) failed with CDB status 0x00000400
+    SAS driver at 0/4/1/0 (/dev/sasd0) : TM (0x00000002) to SAS address 0x0acb8d6daa52eb4d (dev_t 0x03000004) failed with CDB status 0x00000400
+    LVM: VG 64 0x010000: Reestablished quorum.
+    LVM: VG 64 0x010000: PVLink 3 0x000006 Recovered.
+    LVM: NOTICE: VG 64 0x010000: LV 1: All I/O requests to this LV that were
+            waiting indefinitely for an unavailable PV have now completed.
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://raymii.org/s/inc/downloads/When_Good_Disks_Go_Bad.pdf
+   [3]: http://web.archive.org/web/20180518071714/http://unixpedia.blogspot.nl/2013/11/hpux-sas-physical-disk-replacement_22.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
