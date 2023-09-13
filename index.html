@@ -42,6 +42,16 @@
           
     <h2>Hi there!</h2>   <p>I'm Remy, a developer from The Netherlands with a focus on C++,  C, C#, Linux and embedded systems. </p> <p>I currently work for <ahref="http://www.dejongduke.nl/">De Jong DUKE</a>  were I develop software for an embedded platform that powers coffee machines.  This is a C++ and Qt stack running on Yocto Linux. It controls hardware,  runs the UI and has a few utilities for IoT connectivity and configuration.  Technologies I'm fluid in include C, C# & C++, Windows (MFC/Win32), .NET (Core, Xaml, Framework and C++/CLI),  Flash, Qt, PowerShell and ARM kernel drivers. I was Linux and UNIX sysadmin for over  10 years before I got into development.</p> <p>To read more or get in touch,  <a href="https://raymii.org/s/static/About.html"> click here</a>. This is my personal website, these articles do not reflect or are based on work, opinions or policies of any of my (previous) employers. <b>Any resemblance to reality is pure coincidence.</b></p>
 <h2>Latest Items</h2>
+<h4><a href="blog/Qt_5.15_LTS_Docker_Image_for_Android_with_OpenSSL.html">A docker image for Qt 5.15 LTS for Android, including OpenSSL and the KDE patch collection</a></h4>
+<small>13-9-2023 22:00 | Remy van Elst</small><br />
+<p><p>Recently I got an email from Google regarding the API level of <a href="https://leafnode.nl">Leaf Node Monitoring</a>, my open source monitoring app for Windows, Linux and Android. The Play Store version must be updated to target API level 33.
+For Windows and Linux I&#39;m building the app automatically in a CI environment but the Android build was still a manual process. Until now, because after a bunch of messing around with Android NDK versions, OpenSSL library paths and Qt compile flags I can automatically build Leaf Node Monitoring in my CI.</p>
+
+<p>I&#39;m using Woodpecker CI and that requires every build step to be executed in a Docker image. There are a few Qt docker images floating around but they are all using the pre-built 5.15.2 version by extracting it from the Qt Online Installer. That version is quite old, 5.15.15 LTS was released <a href="http://web.archive.org/web/20230902132649/https://www.qt.io/blog/commercial-lts-qt-5.15.15-released">a few days ago for Commercial License Holders</a> on August 31, so after 1 year it will become available as open source.
+My docker image builds Qt from source using the <code>5.15 KDE Qt Patch Collection</code> branch for Android and it includes OpenSSL. This is as far as I know the most up to date docker image for Qt 5.15, currently at 5.15.10 LTS.</p>
+</p>
+<a href="blog/Qt_5.15_LTS_Docker_Image_for_Android_with_OpenSSL.html">Read more...</a><br />
+<p></p>
 <h4><a href="articles/Drawing_a_Circle_in_Qt_QML_three_different_ways.html">Drawing a Circle in Qt QML three different ways</a></h4>
 <small>05-07-2023 23:59 | Remy van Elst</small><br />
 <p><p>Qt has no <code>Circle</code> built in to QML as a basic type, as for example the <code>Rectangle</code> or the <code>Button</code> control. This post shows you how to get a <code>Circle</code> in QML, from the most basic method (a <code>Rectangle</code> with a <code>radius</code> of 180) to more advanced methods, using the <code>Canvas</code> JavaScript API (which allows us to draw a partially filled Circle, for a Pie Chart) and a <code>c++</code> control based on <code>QQuickPaintedItem</code>. I wanted to experiment with the <code>Canvas</code> QML control and the <code>QQuickPaintedItem</code> C++ interface to get a better understanding of Qt and QML drawing interfaces, this post reflects that journey including showing your grouped QML properties exposed from C++.</p>
@@ -101,12 +111,6 @@
 <p><p>OpenVMS on x86 is now available for hobbyists! Almost a year after <a href="/s/blog/OpenVMS_9.2_for_x86_will_be_released_tomorrow.html">the official release</a>. This is a part 1 of my getting started guide, showing you how to install OpenVMS on VirtualBox on Windows 10/11. More parts will follow, documenting license installation, network setup, ssh, application installation etc.</p>
 </p>
 <a href="blog/OpenVMS_9.2_for_x86_Getting_Started.html">Read more...</a><br />
-<p></p>
-<h4><a href="blog/OpenVMS_9.2_for_x86_is_finally_available_for_hobbyists.html">OpenVMS 9.2 for x86 is finally available for hobbyists!</a></h4>
-<small>Published: 09-04-2023 23:59 | Last update: 11-04-2023 22:29 | Author: Remy van Elst</small><br />
-<p><p>OpenVMS x86 is now available for (most) hobbyists! Almost a year after <a href="/s/blog/OpenVMS_9.2_for_x86_will_be_released_tomorrow.html">the official release</a> most hobbyists can now login to the <a href="https://sp.vmssoftware.com">Service Portal</a> to download their copy of OpenVMS 9.2 for x86, <code>X86E921OE.ZIP</code> and the PAK (license) files (<code>x86community-20240401.zip</code>), valid until April 2024. </p>
-</p>
-<a href="blog/OpenVMS_9.2_for_x86_is_finally_available_for_hobbyists.html">Read more...</a><br />
 <p></p>
 <h4><a href="tags/all.html">View all Items</a>
 </h4>
