@@ -20,9 +20,12 @@ My docker image builds Qt from source using the `5.15 KDE Qt Patch Collection` b
 
 
 Why still use Qt 5.15 you might ask? The short answer is Windows 7 compatibility,
-Qt 6 dropped that and I find it wastefull to not support computers that still
+Qt 6 dropped that and I find it wasteful to not support computers that still
 work perfectly fine. I have a strict policy that all code also compiles and is 
 tested on Qt 6, but my main distribution channel is Qt 5.15.
+
+If you'd like an image for regular Linux, send me an email. If there is enough
+interest I could make one.
 
 
 ### A bit of history regarding the Qt 5.15 policy change
@@ -35,7 +38,7 @@ But due to an [agreement with the KDE Free Qt Foundation]
 (
 http://web.archive.org/web/20230823114232/https://kde.org/community/whatiskde/kdefreeqtfoundation/)
 they must release the source code within 12 months otherwise KDE can release Qt
-under a BSD style licence. 
+under a BSD style license. 
 
 That would be bad for the Qt Company because no one then has to pay for a
 license anymore and they don't have to release source code. Now you must pay
@@ -110,7 +113,7 @@ image:
         - androiddeployqt --input android-$PROJECTNAME-deployment-settings.json --gradle --output ./android-build/ 
 
 
-The [KDE sysadmin CI images][3] dockerfile was the most helpfull in finding the 
+The [KDE sysadmin CI images][3] dockerfile was the most helpful in finding the 
 right NDK version for 5.15.10. The Qt documentation lists a different version (21.0.6113669)
 which, for me, did not work with API level 33. All kinds of errors regarding
 unknown Java methods or other strange errors. This (translated) [article][5] was
