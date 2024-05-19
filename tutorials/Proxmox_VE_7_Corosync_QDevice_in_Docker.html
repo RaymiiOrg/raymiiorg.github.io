@@ -17,7 +17,7 @@
             <header>
                 <h1 class="headheader">
                     <a href="https://raymii.org/s/">Raymii.org 
-                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                        <img src="data:image/png;base64,b'iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC'" alt="Raymii.org Logo">
                     </a>
                 </h1>
                 <small>
@@ -40,10 +40,9 @@
             </header>
           
     <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Proxmox VE 7 Corosync QDevice in a Docker container</h2>
-<p><small>Published: <span data-pagefind-meta='date'>17-04-2022</span> | Author: Remy van Elst | <a href="Proxmox_VE_7_Corosync_QDevice_in_Docker.txt">Text only version of this article</a>
+<p><small>Published: <span data-pagefind-meta='date'>17-04-2022</span> | Last update: 29-01-2024 04:30 | Author: Remy van Elst | <a href="Proxmox_VE_7_Corosync_QDevice_in_Docker.txt">Text only version of this article</a>
 </small></p>
-<br><div class='olderthanayear'><p><strong>&#10071; This post is over one year old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
-<div id="toc">
+<br><div id="toc">
 <h3>Table of Contents</h3>
 <ul>
 <li>
@@ -80,6 +79,12 @@ of physical servers, but Proxmox also supports actual high-availability with
 fail over and (live) migration. I also have a small NAS with spinning disks
 for shared storage via NFS, which is helpful when experimenting with live
 migration. </p>
+
+<ul>
+<li>Update 29-01-2024: The Docker image now contains a health check command
+and sets the sticky bit on <code>/var/run</code> so corosync-qnetd can create its 
+runtime directory.</li>
+</ul>
 
 <p><img src="/s/inc/img/pve-cluster.png" alt="cluster"></p>
 
@@ -263,22 +268,21 @@ I&#39;ll store the Dockerfile and some other info:</p>
 
 <pre><code>FROM debian:bullseye
 RUN echo &#39;debconf debconf/frontend select teletype&#39; | debconf-set-selections
-RUN apt-get update
-RUN apt-get dist-upgrade -qy
-RUN apt-get install -qy --no-install-recommends systemd systemd-sysv corosync-qnetd  openssh-server 
-RUN apt-get clean
-RUN rm -rf /var/lib/apt/lists/* /var/log/alternatives.log /var/log/apt/history.log /var/log/apt/term.log /var/log/dpkg.log
+RUN apt-get update &amp;&amp; apt-get dist-upgrade -qy &amp;&amp; apt-get install -qy --no-install-recommends systemd systemd-sysv corosync-qnetd  openssh-server &amp;&amp; apt-get clean &amp;&amp; rm -rf /var/lib/apt/lists/* /var/log/alternatives.log /var/log/apt/history.log /var/log/apt/term.log /var/log/dpkg.log
 RUN sed -i &#39;s/#PermitRootLogin prohibit-password/PermitRootLogin yes/&#39; /etc/ssh/sshd_config
-RUN echo &#39;root:password&#39; | chpasswd
+# Change password to something secure
+RUN echo &#39;root:password&#39; | chpasswd    
+RUN chmod 1777 /var/run
 RUN chown -R coroqnetd:coroqnetd /etc/corosync/
 RUN systemctl mask -- dev-hugepages.mount sys-fs-fuse-connections.mount
 RUN rm -f /etc/machine-id /var/lib/dbus/machine-id
-
 FROM debian:bullseye
 COPY --from=0 / /
 ENV container docker
 STOPSIGNAL SIGRTMIN+3
 VOLUME [ &quot;/sys/fs/cgroup&quot;, &quot;/run&quot;, &quot;/run/lock&quot;, &quot;/tmp&quot; ]
+HEALTHCHECK CMD corosync-qnetd-tool -s
+EXPOSE 5403
 CMD [ &quot;/sbin/init&quot; ]
 </code></pre>
 
@@ -297,7 +301,7 @@ start a container based on that image:</p>
   --name qnetd \
   --net=macvlan \
   --ip=192.0.2.20 \
-  -v /volume1/docker/qnetd/corosync-data:/etc/corosync    \
+  -v /path/to/your/docker/folder/qnetd/corosync-data:/etc/corosync    \
   -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
   --restart=always \
   debian-qdevice:latest 
@@ -331,7 +335,6 @@ if it&#39;s running with the <code>docker ps</code> command:</p>
 
 <pre><code>CONTAINER ID   IMAGE                  COMMAND        CREATED              STATUS                PORTS     NAMES
 45d861ce6acf   debian-qdevice:latest       &quot;/sbin/init&quot;   About a minute ago   Up About a minute               qnetd
-d07f990f245e   pihole/pihole:latest   &quot;/s6-init&quot;     8 days ago           Up 8 days (healthy)             pihole2
 </code></pre>
 
 <p>Test if you can SSH into the container with the username <code>root</code> and your

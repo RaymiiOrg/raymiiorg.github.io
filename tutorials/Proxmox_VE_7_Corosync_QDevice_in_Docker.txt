@@ -3,6 +3,7 @@ This is a text-only version of the following page on https://raymii.org:
 Title       : 	Proxmox VE 7 Corosync QDevice in a Docker container
 Author      : 	Remy van Elst
 Date        : 	17-04-2022
+Last update : 	29-01-2024 04:30
 URL         : 	https://raymii.org/s/tutorials/Proxmox_VE_7_Corosync_QDevice_in_Docker.html
 Format      : 	Markdown/HTML
 ---
@@ -20,6 +21,11 @@ of physical servers, but Proxmox also supports actual high-availability with
 fail over and (live) migration. I also have a small NAS with spinning disks
 for shared storage via NFS, which is helpful when experimenting with live
 migration. 
+
+* Update 29-01-2024: The Docker image now contains a health check command
+ and sets the sticky bit on `/var/run` so corosync-qnetd can create its 
+ runtime directory.
+
 
 ![cluster][8]
 
@@ -196,22 +202,21 @@ Place the following contents inside:
 
     FROM debian:bullseye
     RUN echo 'debconf debconf/frontend select teletype' | debconf-set-selections
-    RUN apt-get update
-    RUN apt-get dist-upgrade -qy
-    RUN apt-get install -qy --no-install-recommends systemd systemd-sysv corosync-qnetd  openssh-server 
-    RUN apt-get clean
-    RUN rm -rf /var/lib/apt/lists/* /var/log/alternatives.log /var/log/apt/history.log /var/log/apt/term.log /var/log/dpkg.log
+    RUN apt-get update && apt-get dist-upgrade -qy && apt-get install -qy --no-install-recommends systemd systemd-sysv corosync-qnetd  openssh-server && apt-get clean && rm -rf /var/lib/apt/lists/* /var/log/alternatives.log /var/log/apt/history.log /var/log/apt/term.log /var/log/dpkg.log
     RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-    RUN echo 'root:password' | chpasswd
+    # Change password to something secure
+    RUN echo 'root:password' | chpasswd    
+    RUN chmod 1777 /var/run
     RUN chown -R coroqnetd:coroqnetd /etc/corosync/
     RUN systemctl mask -- dev-hugepages.mount sys-fs-fuse-connections.mount
     RUN rm -f /etc/machine-id /var/lib/dbus/machine-id
-
     FROM debian:bullseye
     COPY --from=0 / /
     ENV container docker
     STOPSIGNAL SIGRTMIN+3
     VOLUME [ "/sys/fs/cgroup", "/run", "/run/lock", "/tmp" ]
+    HEALTHCHECK CMD corosync-qnetd-tool -s
+    EXPOSE 5403
     CMD [ "/sbin/init" ]
 
 Change the `password` part in the line `'root:password'` to a secure password which will be
@@ -228,7 +233,7 @@ start a container based on that image:
       --name qnetd \
       --net=macvlan \
       --ip=192.0.2.20 \
-      -v /volume1/docker/qnetd/corosync-data:/etc/corosync    \
+      -v /path/to/your/docker/folder/qnetd/corosync-data:/etc/corosync    \
       -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
       --restart=always \
       debian-qdevice:latest 
@@ -259,7 +264,6 @@ Example output:
 
     CONTAINER ID   IMAGE                  COMMAND        CREATED              STATUS                PORTS     NAMES
     45d861ce6acf   debian-qdevice:latest       "/sbin/init"   About a minute ago   Up About a minute               qnetd
-    d07f990f245e   pihole/pihole:latest   "/s6-init"     8 days ago           Up 8 days (healthy)             pihole2
 
 Test if you can SSH into the container with the username `root` and your
 password. If SSH works, continue on with the guide.
