@@ -39,7 +39,9 @@ more work and more typing than using a macro that does it all for you.
 With this macro, `QObject::connect` still works as you would expect just as
 accessing the property from QML.
 
-
+There also is the `MEMBER` Qt property type but that is still more boilerplate 
+than this because you still need to write the entire line including notify
+signal and member variables.
 
 ### QObject Property Macro
 
@@ -61,8 +63,11 @@ This is the macro I've defined:
     // end macro
 
 
-Due to macro expansion combined with `moc` I'm using `Q_SIGNALS`, `Q_SLOTS` and `Q_EMIT`. The regular `signals`, `slots` and `emit`
-keywords do not work in this construction. These macro's can also be used [if you want to use a third-party signals and slots system](https://doc.qt.io/qt-6/signalsandslots.html#using-qt-with-3rd-party-signals-and-slots).
+Due to macro expansion combined with `moc` I'm using `Q_SIGNALS`, `Q_SLOTS`
+and `Q_EMIT`. The regular `signals`, `slots` and `emit` keywords do not work
+in this construction. These macro's can also be used [if you want to use a
+third-party signals and slots system]
+(https://doc.qt.io/qt-6/signalsandslots.html#using-qt-with-3rd-party-signals-and-slots).
 
 You can use it like this:
 

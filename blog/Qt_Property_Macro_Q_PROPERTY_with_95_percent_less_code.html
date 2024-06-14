@@ -84,6 +84,10 @@ more work and more typing than using a macro that does it all for you.</p>
 <p>With this macro, <code>QObject::connect</code> still works as you would expect just as
 accessing the property from QML.</p>
 
+<p>There also is the <code>MEMBER</code> Qt property type but that is still more boilerplate 
+than this because you still need to write the entire line including notify
+signal and member variables.</p>
+
 <h3 id="toc_1">QObject Property Macro</h3>
 
 <p>This is the macro I&#39;ve defined:</p>
@@ -103,8 +107,10 @@ Q_SIGNALS: \
 // end macro
 </code></pre>
 
-<p>Due to macro expansion combined with <code>moc</code> I&#39;m using <code>Q_SIGNALS</code>, <code>Q_SLOTS</code> and <code>Q_EMIT</code>. The regular <code>signals</code>, <code>slots</code> and <code>emit</code>
-keywords do not work in this construction. These macro&#39;s can also be used <a href="https://doc.qt.io/qt-6/signalsandslots.html#using-qt-with-3rd-party-signals-and-slots">if you want to use a third-party signals and slots system</a>.</p>
+<p>Due to macro expansion combined with <code>moc</code> I&#39;m using <code>Q_SIGNALS</code>, <code>Q_SLOTS</code>
+and <code>Q_EMIT</code>. The regular <code>signals</code>, <code>slots</code> and <code>emit</code> keywords do not work
+in this construction. These macro&#39;s can also be used <a href="https://doc.qt.io/qt-6/signalsandslots.html#using-qt-with-3rd-party-signals-and-slots">if you want to use a
+third-party signals and slots system</a>.</p>
 
 <p>You can use it like this:</p>
 
