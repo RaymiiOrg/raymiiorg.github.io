@@ -11,11 +11,12 @@ Format      : 	Markdown/HTML
 
 
 
-Recently I was gifted a T65 rotary telephone. This was **the** standard telephone in The Netherlands in the seventies and eighties. I remember my parents having one as well. Because this phone does not use DTMF but  pulse dialing it does not work with modern equipment, like the built in telephony / voip server on my FritzBox router. Using a hardware converter it is possible to convert pulse tone dialing to DTMF and to use your rotary phone again. This page covers two such devices, the DialGizmo and the GrandStream HT502 and a more homebrew approach.
+Recently I was gifted a T65 rotary telephone. This was **the** standard telephone in The Netherlands in the seventies and eighties. I remember my parents having one as well. Because this phone does not use DTMF but  pulse dialing it does not work with modern equipment, like the built in telephony / voip server on my FritzBox router. Using a hardware converter it is possible to convert pulse dialing to DTMF and to use your rotary phone again. This page covers two such devices, the DialGizmo and the GrandStream HT502 and a more homebrew approach.
 
 
 
-My collection now consists of two devices. The green one is modified for `tweepuntschakeling`:
+My collection now consists of two devices. The green one is modified for
+`tweepuntschakeling`:
 
 
 ![T65 phones](/s/inc/img/t65-1.png)
@@ -25,9 +26,11 @@ My collection now consists of two devices. The green one is modified for `tweepu
 <p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $100 credit for 60 days. </a><br><br> </p>
 
 
-The T65 had to be rented from Dutch PTT by the subscriber for a monthly fee.
-Today telephones in the Netherlands no longer need to be rented; it is
-allowed to connect any telephone as long as it is approved.
+The [T65 had to be rented from Dutch PTT]
+(https://www.cryptomuseum.com/phone/t65/index.htm) by the subscriber for a
+monthly fee of for Fl. 2.50 (EUR 1,13). Today telephones in the Netherlands no
+longer need to be rented; it is allowed to connect any telephone as long as
+it is approved.
 
 The T stands for (tafelmodel) tabletop device and the 65 for the year of its
 introduction (1965). The German firm, Krone, designed the case. There is some
@@ -76,10 +79,19 @@ in having a regular call. At least that was the case with my setup.
 
 
 I'm using a GandStream HT502 with a DialGizmo in between. The HT502 support
-pulse tone dialing but when buying that device I was not aware of that. I
+pulse dialing but when buying that device I was not aware of that. I
 used to use a Fritz!Box with the DialGizmo, but the T65 phone had to move to
 a location where only wired network was available, no RJ-11 phone connection,
 which is why the HT502 replaced the Fritz!Box.
+
+The VoIP credentials are from my ISP, they must provide those under recent
+regulations that [allow consumers to choose their own internet modem](https://web.archive.org/web/20230921231725/https://www.acm.nl/en/publications/consumers-and-businesses-are-allowed-choose-their-own-modems). 
+Either enter those in the Fritz!Box or the GrandStream ATA 
+(`voip.t-mobilethuis.nl`, username and password) and bob's your uncle. 
+No other setup or firewall rules required.
+
+I have also experimented with an Asterisk server to provide an internal
+SIP network.
 
 The HT502 supports remote syslog, so my local ElasticSearch/Logstash/Kibana
 (ELK) stack sends me an alert if there are any missed calls. The Fritz!Box
@@ -135,7 +147,7 @@ A small rant about Android. IPSEC cannot be setup in Android 12 and up
 anymore, but if you upgrade a device from 11 to 12 your IPSEC VPN still
 works (so it's bull crap to not support it in Android 12 anymore). 
 
-This old device [should support pulse tone dialing]
+This old device [should support pulse dialing]
 (https://web.archive.org/web/20240604101634/https://en.avm.de/service/knowledge-base/dok/FRITZ-Box-7360-int/28_Cannot-make-outgoing-calls-over-the-internet/),
 but it did not work with mine. Might be the custom firmware, might be AVM
 dropping support in later versions, I'm not sure. 
@@ -152,14 +164,14 @@ setup "just works".
 
 The [DialGizmo]
 (https://web.archive.org/web/20240604081001/https://www.dialgizmo.com/)
-converts pulse tone to DTMF without requiring external power. It sits between
+converts pulse to DTMF without requiring external power. It sits between
 your telephone and VoIP device. The DialGizmo also provides a few quality of
 life features like redialing the last number and support for `*` and `#`,
 which my rotary phone does not have. 
 
 I bought one, list price at the time of writing is USD 39.95. Shipping took
 about two weeks from Australia to The Netherlands. Setup was plug and play,
-nothing more required. You can audibly hear the device converting pulse tone
+nothing more required. You can audibly hear the device converting pulse 
 to DTMF.
 
 If your rotary phone has a different numbering scheme (number ordering
@@ -183,8 +195,8 @@ and could still use pulse dialing.
 
 ![HT502](/s/inc/img/t65-6.png)
 
-It does not advertise support for pulse tone dialing anywhere, neither manual
-nor other sources I found, but it does support pulse tone dialing. [This site]
+It does not advertise support for pulse  dialing anywhere, neither manual
+nor other sources I found, but it does support pulse dialing. [This site]
 (https://web.archive.org/web/20240604094053/https://sites.psu.edu/psuvoip/2011/01/14/a-brief-review-of-the-grandstream-ht-502-ata/)
 has some more info regarding syslog debugging and in-call pulse-tone to DTMF
 processing and [here is]
