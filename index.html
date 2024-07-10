@@ -41,6 +41,12 @@
           
     <h2>Hi there!</h2>   <p>I'm Remy, a developer from The Netherlands with a focus on C++,  C, some C#, Linux and embedded systems. </p> <p>I currently work on a C++ and Qt stack running on Yocto Linux. It controls hardware,  runs the UI and has a few utilities for IoT connectivity and configuration.  Technologies I'm fluid in include C, C# & C++, Windows (MFC/Win32), .NET (Core, Xaml, Framework and C++/CLI),  Flash, Qt, Ansible, Bash & PowerShell. I was Linux and UNIX sysadmin for over  10 years before I got into development.</p> <p>To read more or get in touch,  <a href="https://raymii.org/s/static/About.html"> click here</a>. This is my personal website, these articles do not reflect or are based on work, opinions or policies of any of my (previous) employers. <b>Any resemblance to reality is pure coincidence.</b></p>
 <h2>Latest Items</h2>
+<h4><a href="tutorials/Kubernetes_k3s_Ingress_for_different_domains_like_virtual_hosts.html">Kubernetes (k3s) Ingress for different domains (virtual hosts)</a></h4>
+<small>10-07-2024 20:39 | Remy van Elst</small><br />
+<p><p>Now that I have a <a href="/s/tutorials/High_Available_k3s_kubernetes_cluster_with_keepalived_galera_and_longhorn.html">high-available local kubernetes cluster</a> it&#39;s time to learn not just managing the cluster but actually deploying some services on there. Most examples online use a <code>NodePort</code> or a <code>LoadBalancer</code> to expose a service on a port, but I want to have domains, like, <code>grafana.homelab.mydomain.org</code> instead of <code>192.0.2.50:3000</code>. Back in the old days this was called <a href="https://web.archive.org/web/20240515131604/https://httpd.apache.org/docs/2.4/vhosts/">Virtual Host</a>, using 1 IP for multiple domains. My k3s cluster uses <code>traefik</code> for its incoming traffic and by defining an <code>Ingress</code> we can route a domain to a service (like a <code>ClusterIP</code>). This page will show you how. </p>
+</p>
+<a href="tutorials/Kubernetes_k3s_Ingress_for_different_domains_like_virtual_hosts.html">Read more...</a><br />
+<p></p>
 <h4><a href="tutorials/High_Available_k3s_kubernetes_cluster_with_keepalived_galera_and_longhorn.html">High Available k3s kubernetes cluster with keepalived, galera and longhorn</a></h4>
 <small>09-07-2024 22:30 | Remy van Elst</small><br />
 <p><p>After my <a href="/s/tutorials/My_First_Kubernetes_k3s_cluster_on_3_Orange_Pi_Zero_3s_including_k8s_dashboard_hello-node_and_failover.html">first adventure with Kubernetes</a>, getting started with k3s on my small 3 node ARM cluster that <a href="/s/tutorials/Netboot_PXE_Armbian_on_an_Orange_Pi_Zero_3_from_SPI_with_NFS_root_filesystem.html">boots via PXE / NFS</a>, I noticed that there is only one k3s node that has the <code>control-plane,master</code> role. If that node fails you can no longer manager the cluster. Other nodes can fail and then the workloads (pods) will be restarted eventually after 5 minutes, but this node is special. Time to change that and make it a high available cluster.
@@ -102,14 +108,6 @@ K3s <a href="https://web.archive.org/web/20240703112841/https://docs.k3s.io/data
 I&#39;ve made an open source program, <a href="https://github.com/raymiiOrg/certinfo">CertInfo</a> that analyzes your browser history and queries all visited domains for their certificates. It presents a list of used root certificates (meaning, a website you visited was ultimately signed by that root CA) and a list of unused root certificates (meaning, no website in your analyzed history was signed by that root CA). </p>
 </p>
 <a href="software/Which_Root_Certificates_Should_You_Trust_CertInfo.html">Read more...</a><br />
-<p></p>
-<h4><a href="software/YouLessQt.html">YouLessQt, helps you align the YouLess to an analog electricity meter</a></h4>
-<small>16-9-2023 09:00 | Remy van Elst</small><br />
-<p><p>The <a href="https://youless.nl/home.html">YouLess</a> is a device that can help you monitor energy usage. It works on so called smart meters using a P1 port, it can monitor solar panels but it also works with regular old analog meters. I have an old style analog meter but I like gadgets and monitoring / reducing my energy usage just as much as the next guy so I bought one. It has an optical sensor that you paste (with tape) on your meter and that detects a little black bar on the rotor disc and using a rpm factor on your meter it calculates the electricity used.
-I has some trouble with the device when I set it up, it turned out to be aligned wrongly. It sometimes missed the black bar, so the numbers were incorrect.
-I wrote a little application using Qt and QML to show the raw light sensor values in a line graph to help me align the YouLess correctly. This post tells you more about the application, which of course is open source.</p>
-</p>
-<a href="software/YouLessQt.html">Read more...</a><br />
 <p></p>
 <h4><a href="tags/all.html">View all Items</a>
 </h4>
