@@ -52,24 +52,27 @@
 <a href="#toc_1">Installing cert-manager</a>
 </li>
 <li>
-<a href="#toc_2">Create the self signed root CA</a>
+<a href="#toc_2">A warning on security and <code>nameConstraints</code></a>
 </li>
 <li>
-<a href="#toc_3">Create the intermediate CA</a>
+<a href="#toc_3">Create the self signed root CA</a>
 </li>
 <li>
-<a href="#toc_4">Testing the certificates</a>
+<a href="#toc_4">Create the intermediate CA</a>
 </li>
 <li>
-<a href="#toc_5">Ingress (Service) Certificate</a>
+<a href="#toc_5">Testing the certificates</a>
 </li>
 <li>
-<a href="#toc_6">Using an existing regular certificate (not self signed)</a>
+<a href="#toc_6">Ingress (Service) Certificate</a>
+</li>
+<li>
+<a href="#toc_7">Using an existing regular certificate (not self signed)</a>
 </li>
 </ul>
 
 </div><hr><div id="contents">
-<p>Now that I&#39;m learning Kubernetes for a few weeks, I&#39;m finally at the point where I was 20 years ago with regular boring old tech, being able to <a href="/s/tutorials/Kubernetes_k3s_Ingress_for_different_domains_like_virtual_hosts.html">host multiple domains</a>, <a href="/s/tutorials/Password_protect_web_services_in_Kubernetes_k3s_traefik_with_basic_auth.html">password protection</a> and <a href="/s/tutorials/High_Available_k3s_kubernetes_cluster_with_keepalived_galera_and_longhorn.html">high available clusters</a>. It seems we have to re-invent the wheel every time but in the end, it&#39;s just resume-driven development, the underlying stack costs more, is way more complex but for the user, nothing changes, they see the same website as always. <a href="https://luddites.latenightlinux.com/">Not all change is progress</a>. Enough of being a curmudgeon, time to continue with Kubernetes. In this episode of &#39;Remy discovers Kubernetes&#39;, I&#39;m setting up <code>cert-manager</code>, <strong>not with Lets Encrypt</strong>, but with a self-signed certificate authority. I&#39;ll also show you how to set up a regular certificate, one you&#39;ve for example bought somewhere. </p>
+<p>Now that I&#39;m learning Kubernetes for a few weeks, I&#39;m finally at the point where I was 20 years ago with regular boring old tech, being able to <a href="/s/tutorials/Kubernetes_k3s_Ingress_for_different_domains_like_virtual_hosts.html">host multiple domains</a>, <a href="/s/tutorials/Password_protect_web_services_in_Kubernetes_k3s_traefik_with_basic_auth.html">password protection</a> and <a href="/s/tutorials/High_Available_k3s_kubernetes_cluster_with_keepalived_galera_and_longhorn.html">high available clusters</a>. It seems we have to re-invent the wheel every time but in the end, it&#39;s just resume-driven development, the underlying stack costs more, is way more complex but for the user, nothing changes, they see the same website as always. <a href="https://luddites.latenightlinux.com/">Not all change is progress</a>. Enough of being a curmudgeon, time to continue with Kubernetes. In this episode of &#39;Remy discovers Kubernetes&#39;, I&#39;m setting up <code>cert-manager</code>, <strong>not with Lets Encrypt</strong>, but with a self-signed certificate authority. I&#39;ll also show you how to set up a regular certificate, one you&#39;ve for example bought somewhere. I&#39;ll also cover <code>nameConstraints</code> to make the risk of compromise of your trusted root ca lower. </p>
 
 <p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
 
@@ -159,7 +162,26 @@ https://cert-manager.io/docs/usage/ingress/
 cd certmanager
 </code></pre>
 
-<h3 id="toc_2">Create the self signed root CA</h3>
+<h3 id="toc_2">A warning on security and <code>nameConstraints</code></h3>
+
+<p>You are at risk if the Root CA key is compromised. If the key is stolen, it can be 
+used to create trusted certificates for everything. Luckily there is something 
+we can do, using <code>nameConstraints</code> to limit the scope of the Root Certificate to, 
+in our case, a single domain (<code>k3s.homelab.mydomain.org</code>). This means that if 
+your key would be compromised, it would only be able to issue certificates for 
+anything under that domain, not your bank for example.</p>
+
+<p><a href="https://tools.ietf.org/html/rfc5280">RFC 5280</a> provides for something called
+<code>Name Constraints</code>, which allow an X.509 CA to have a scope limited to
+certain names, including the parent domains of the certificates issued by the
+CA. For example, a host constraint of <code>.example.com</code> allows the CA to issue
+certificates for anything under <code>.example.com</code>, but not any other host. For
+other hosts, clients will fail to validate the chain. <a href="https://web.archive.org/web/20240415204151/http://www.pkiglobe.org/name_constraints.html">More info here</a>.</p>
+
+<p><strong>See <a href="/s/tutorials/nameConstraints_on_your_Self_Signed_Root_CA_in_Kubernetes_with_cert_manager.html">my guide on nameConstraints</a>
+to set that up along with this guide.</strong></p>
+
+<h3 id="toc_3">Create the self signed root CA</h3>
 
 <p>The topmost certificate in our certificate chain will be a self signed
 certificate authority, the so called <code>Root CA</code>.  The Root CA signs one or
@@ -335,7 +357,7 @@ Events:                    &lt;none&gt;
 <p>Note the <code>Not After</code> date being 10 years later than the <code>Not Before</code> date. For
 a root certificate you want long validity.</p>
 
-<h3 id="toc_3">Create the intermediate CA</h3>
+<h3 id="toc_4">Create the intermediate CA</h3>
 
 <p>This intermediate CA will sign the certificates for our services. The YAML
 looks a lot like the root ca, but it&#39;s missing the <code>SelfSigned</code> issuer and
@@ -463,7 +485,7 @@ delete -f .</code> the resources:</p>
 <p>Otherwise you might notice that your certificates have not changed, even
 though you thought you re-issued them.</p>
 
-<h3 id="toc_4">Testing the certificates</h3>
+<h3 id="toc_5">Testing the certificates</h3>
 
 <p>This step is optional, but might help you troubleshoot any issues. We&#39;re going
 to issue a test certificate, which we&#39;ll test with the <code>openssl</code> command line
@@ -587,7 +609,7 @@ issuer=CN = spnw-root-ca
 certificate.cert-manager.io &quot;test-server&quot; deleted
 </code></pre>
 
-<h3 id="toc_5">Ingress (Service) Certificate</h3>
+<h3 id="toc_6">Ingress (Service) Certificate</h3>
 
 <p>After all that hard setup and testing we can finally use our self signed CA to
 automatically issue a certificate for our <code>echo</code> app.</p>
@@ -740,7 +762,7 @@ Windows via <code>certmgr.msc</code> as a  <code>Trusted Root Certificate Author
 
 <p><img src="/s/inc/img/k3s-cert-1.png" alt="full chain"></p>
 
-<h3 id="toc_6">Using an existing regular certificate (not self signed)</h3>
+<h3 id="toc_7">Using an existing regular certificate (not self signed)</h3>
 
 <p>If you have bought a certificate somewhere (like <code>Sectigo</code>), or a certificate
 issues by another internal CA (not in Kubernetes) and want to use that on
