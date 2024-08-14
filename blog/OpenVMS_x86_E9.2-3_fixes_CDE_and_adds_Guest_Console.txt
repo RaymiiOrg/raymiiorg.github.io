@@ -1,0 +1,189 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	OpenVMS x86 E9.2-3 fixes CDE (DECWindows) and adds a Guest Console (no serial port required anymore)
+Author      : 	Remy van Elst
+Date        : 	14-08-2024 23:58
+URL         : 	https://raymii.org/s/blog/OpenVMS_x86_E9.2-3_fixes_CDE_and_adds_Guest_Console.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+
+I'm a big fan of OpenVMS. You can [read all my OpenVMS articles here](/s/tags/openvms.html). Since the [licensing changes](https://web.archive.org/web/20240814192656/https://vmssoftware.com/about/news/2024-03-25-community-license-update/) to the Hobbyist Program, I applied and was included in to the Ambassador Program. A new update of the X86 field test is released and this includes to major changes for hobbyists. One is a new feature, the Guest Console, which makes installing easier by no longer requiring a serial port and fiddling with Putty or your telnet client and the second is a fix to the C/C++ compiler which, (probably by accident), fixes CDE and DECWindows. The [Common Desktop Environment (CDE)](/s/blog/The_Common_Desktop_Environment_CDE_is_still_developed_in_2021.html) is still under development and can be installed on Linux quite easily. This post shows the two new features, the Guest Console and CDE working.
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+
+
+![openvms-cde-1](/s/inc/img/openvms-cde-1.png)
+
+> OpenVMS CDE working!
+
+You do need to find a way to download OpenVMS E9.2-3. You can either apply to
+the [Ambassador Program](https://vmssoftware.com/products/licenses/) or wait
+until the [Hobbyist License Virtual Machine]
+(https://vmssoftware.com/community/community-license/) is updated, or, be a
+paying customer.
+
+### OpenVMS Guest Console
+
+![openvms-cde-2](/s/inc/img/openvms-cde-2.png)
+
+> The OpenVMS Guest Console. No serial port required for installation anymore!
+
+Quoting from [the installation guide for E9.2-3](https://web.archive.org/web/20240811064154/https://docs.vmssoftware.com/vsi-openvms-x86-64-v923-installation-guide/)
+
+> In previous versions of OpenVMS x86-64, all console interactions required a
+  legacy serial port device. Starting with version E9.2-3, OpenVMS x86-64
+  features the Guest Console - a console interface that takes advantage of
+  newer networking technologies. The Guest Console provides the necessary
+  keyboard driver and terminal emulator features to allow users to interact
+  with the system from the initial boot through the operator login.
+
+> Note that the current implementation of the Guest Console provides a minimal
+  terminal that lacks certain important features, such as scrolling and
+  copy-paste. This will be addressed in a future release of OpenVMS x86-64.
+
+
+Remember to select `Other/Other Unknown (64 bit)` in VirtualBox. Not regular
+unknown, but 64-bit. For a recap on [installing OpenVMS on x86 in Virtualbox,
+see my other article](/s/blog/OpenVMS_9.2_for_x86_Getting_Started.html).
+
+At the bootloader, type the following to enable the Guest Console:
+
+	OPA0
+
+The screenshot below shows the output:
+
+![openvms-cde-3](/s/inc/img/openvms-cde-3.png)
+
+Continue on with `BOOT DKA100` (or your boot device) and then you should see the
+installation in the VirtualBox window, no need to connect to the serial port
+anymore!
+
+For VMWare, this also enables support for vMotion (vMotion is a zero downtime
+live migration of workloads from one server to another), vMotion does not
+work with a serial port. Big deal!
+
+
+The console is a bit slow, you can see the text coming in character by
+character. But, it helps to make the installation easier since there is no
+longer a requirement to setup a serial port. Here is a GIF to show the text
+flowing in:
+
+![installation](/s/inc/img/openvms-guest-console.gif)
+
+All in all a huge improvement. This makes installation and basic
+troubleshooting way easier. I hope that this console will support VGA one day
+so you can use CDE and DECWindows without SSH Forwarding. But VSI is not
+interested in fixing CDE / DECWindows since there are no paying customers who
+use it and no applications, just hobbyists. 
+
+
+Here are a few more screenshots:
+
+![openvms-cde-4](/s/inc/img/openvms-cde-4.png)
+
+![openvms-cde-5](/s/inc/img/openvms-cde-5.png)
+
+![openvms-cde-6](/s/inc/img/openvms-cde-6.png)
+
+
+The `SYSTEM` password in the E9.2-3 installation has to be at least 15
+characters, big change to earlier versions.
+
+If you want a bigger font on the Guest Console, in the boot manager, enter the
+command `BIG`  before `OPA0`.
+
+### CDE and DECWindows fixes in E9.2-3
+
+
+Due to a [bugfix in the C/C++ compiler]
+(https://forum.vmssoftware.com/viewtopic.php?f=1&t=9138&p=21964&hilit=decwindows#p21751)
+DECWindows and CDE now work. This is an explanation I found on the forum:
+
+> Inside DECWindows there is a mix of calls to `malloc/free/realloc` and
+  `lib$vm_malloc/lib$vm_free/lib$vm_realloc`. For example, `decc$malloc`
+  called, and then the resulting pointer is passed to the
+  `ib$vm_realloc`function. Formally this is mistakes, but before CRTL-V8.0 it
+  was allowed. But in V8.0, the function  `posix_memalign` was added, it
+  required adding some additional information to the internal structures
+  associated with memory allocation. And the functions `free` and
+  `lib$vm_free` became incompatible. I've fixed it. But the fix will probably
+  be available in V9.0
+
+[This forum post also confirms that CDE now works]
+(https://forum.vmssoftware.com/viewtopic.php?f=37&t=9181&p=21987&hilit=decwindows#p21987).
+
+
+After installing or upgrading to OpenVMS E9.2-3 you can start a graphical
+session by executing the following commands. Make sure you have an X11 server
+installed. On Windows this can be [xming](https://sourceforge.net/projects/xming/) 
+or [X410](https://x410.dev/) and on Linux the easiest is to use 
+[Xephyr](/s/blog/OpenVMS_CDE_Desktop_remote_x_axpbox.html) (`Xephyr -screen 1024x768 :1 -ac -listen tcp`).
+
+In the OpenVMS Guest Console, login as the `SYSTEM` user and execute the
+following commands to start the graphical interface:
+
+		SET DISPLAY/CREATE/NODE=<IP of your X11 host>/TRANSPORT=TCPIP/EXEC
+		MCR DECW$STARTLOGIN
+
+
+Your X11 server should show the login screen:
+
+![openvms-cde-7](/s/inc/img/openvms-cde-7.png)
+
+Make sure to install all PAK licenses, otherwise you will receive an error
+when logging in. 
+
+
+Here is another screenshot while [editting DECW$PRIVATE_APPS_SETUP.COM](/s/blog/OpenVMS_CDE_Desktop_remote_x_axpbox.html) 
+to switch from CDE to DECWindows:
+
+![openvms-cde-8](/s/inc/img/openvms-cde-8.png)
+
+Here is a screenshot of  the other style desktop:
+
+![openvms-cde-9](/s/inc/img/openvms-cde-9.png)
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
