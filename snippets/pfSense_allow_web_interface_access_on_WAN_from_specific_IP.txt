@@ -1,0 +1,82 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	pfSense allow web interface access on WAN from specific IP
+Author      : 	Remy van Elst
+Date        : 	31-12-2014
+URL         : 	https://raymii.org/s/snippets/pfSense_allow_web_interface_access_on_WAN_from_specific_IP.html
+Format      : 	Markdown/HTML
+---
+
+
+
+pfSense is a fast and simple FreeBSD based firewall appliance with a nice web
+managent interface and the power of the pf firewall underneath. Normally the web
+interface is only accessible from the management LAN (or LAN by default)
+interface. If you for whatever reason locked yourself out or need access from a
+different IP via the WAN interface you can use the easyrule command line to
+temporarly add a rule that allows your remote IP in. This simple snippet shows
+you how.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+The following command adds a firewall rule, allowing tcp traffic in on port 443
+from remote IP XX.XX.XX.XX: to the WAN IP on YY.YY.YY.YY:
+
+    
+    
+    easyrule pass wan tcp XX.XX.XX.XX YY.YY.YY.YY 443
+    
+
+You can also allow SSH access and set up a remote port forward (`ssh -L
+localport:remoteip:remoteport remoteip`):
+
+    
+    
+    easyrule pass wan tcp XX.XX.XX.XX YY.YY.YY.YY 22
+    
+
+Remember to remove the rule when you've restored access to the web interface via
+your regular way.
+
+See other methods to get back in the webinterface on the [pfSense Wiki.][2]
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://doc.pfsense.org/index.php/Locked_out_of_the_WebGUI
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

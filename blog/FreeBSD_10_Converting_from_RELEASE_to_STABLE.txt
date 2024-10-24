@@ -1,0 +1,287 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	FreeBSD 10, Converting from RELEASE to STABLE 
+Author      : 	Remy van Elst
+Date        : 	17-04-2014
+URL         : 	https://raymii.org/s/blog/FreeBSD_10_Converting_from_RELEASE_to_STABLE.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Because of a [bug in mpd][1] which is fixed in 10-STABLE I wanted to move one of
+my FreeBSD machines from 10.0-RELEASE to 10.0-STABLE. The process to do so is
+fairly simple. Basically, you check out the new source code, build the world,
+build the kernel, install the kernel, install the world, merge some stuff and
+reboot.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+Make sure you have a backup of important stuff on the system.
+
+### Stable?
+
+The name "-STABLE" is frequently misunderstood. It does not mean solid or
+steady. -STABLE means that while code can change, the ABI (Application Binary
+Interface) will remain stable and not change. Programs compiled to run on
+FreeBSD 9.0-RELEASE, or 9.1-RELEASE, or 9.2-RELEASE will continue to work on
+FreeBSD 9-STABLE. Effectively, -STABLE is the latest version of FreeBSD you can
+get without breaking installed software. [[source]][3]
+
+### Procedure
+
+Move the current source code to a backup folder to be sure to get only -STABLE
+code:
+
+    
+    
+    mv /usr/src /usr/src-RELEASE
+    
+
+Do the same thing for the ports tree:
+
+    
+    
+    mv /usr/ports /usr/ports-RELEASE
+    
+
+When I did not moved the `/usr/src` folder and continued this article, everytime
+I would be back in 10.0-RELEASE...
+
+Check out the STABLE source code:
+
+    
+    
+    svn checkout https://svn0.us-west.freebsd.org/base/stable/10 /usr/src
+    
+
+Also for the ports tree:
+
+    
+    
+    svn checkout https://svn0.us-west.freebsd.org/ports/head /usr/ports
+    
+
+Then cd in to the correct folder
+
+    
+    
+    cd /usr/src
+    
+
+Build the world:
+
+    
+    
+    make buildworld -j4
+    
+
+The `-j 4` part means that it should run 4 jobs at once. I have a quad core CPU
+so all the cores will be used.
+
+Build the kernel:
+
+    
+    
+    make buildkernel KERNCONF=VPN
+    make installkernel KERNCONF=VPN
+    
+
+I have a different kernel file for the VPN setup.
+
+Now reboot in to the new kernel:
+
+    
+    
+    shutdown -r now
+    
+
+Next, it was time to install the world. However, `make installworld` complained:
+
+    
+    
+    make installworld
+    ERROR: Required unbound user is missing, see /usr/src/UPDATING.
+    *** Error code 1
+    
+    Stop.
+    make[1]: stopped in /usr/src
+    *** Error code 1
+    
+    Stop.
+    make: stopped in /usr/src
+    
+
+`/usr/src/UPDATING` to the rescue:
+
+    
+    
+    20130916:
+            With the addition of unbound(8), a new unbound user is now
+            required during installworld.  "mergemaster -p" can be used to
+            add the user prior to installworld, as documented in the handbook.
+    
+
+However, `mergemaster -p` did not create the user:
+
+    
+    
+    mergemaster -p
+    
+    *** Creating the temporary root environment in /var/tmp/temproot
+     *** /var/tmp/temproot ready for use
+     *** Creating and populating directory structure in /var/tmp/temproot
+    
+    
+    
+    *** Beginning comparison
+    
+     *** Temp ./etc/group and installed have the same Id, deleting
+     *** Temp ./etc/master.passwd and installed have the same Id, deleting
+    
+    *** Comparison complete
+    
+    *** /var/tmp/temproot is empty, deleting
+    
+
+I already am on FreeBSD 10, but this box is updated from 8 to 9 to 10, so maybe
+that didn't work out quite well. Installing unbound via pkg did work:
+
+    
+    
+    pkg install unbound
+    
+
+It seemed that it was half done:
+
+    
+    
+    Proceed with installing packages [y/N]: y
+    ldns-1.6.17.txz 
+    unbound-1.4.22.txz
+    Checking integrity... done
+    [1/2] Installing ldns-1.6.17... done
+    [2/2] Installing unbound-1.4.22...===> Creating users and/or groups.
+    Using existing group 'unbound'.
+    Creating user 'unbound' with uid '59'.
+     done
+    
+
+Oh wel... Now the `make installworld` continues;
+
+    
+    
+    make installworld
+    
+
+After that finished we can do another mergemaster:
+
+    
+    
+    mergemaster -Ui 
+    
+
+Only `/etc/motd` changed, so, no big things.
+
+Time to reboot:
+
+    
+    
+    shutdown -r now
+    
+
+Remove old files and libraries:
+
+    
+    
+    cd /usr/src
+    make check-old
+    >>> Checking for old files
+    >>> Checking for old libraries
+    >>> Checking for old directories
+    To remove old files and directories run 'make delete-old'.
+    To remove old libraries run 'make delete-old-libs'.
+    
+    make delete-old
+    >>> Removing old files (only deletes safe to delete libs)
+    remove /usr/include/clang/3.3/__wmmintrin_aes.h? y
+    remove /usr/include/clang/3.3/__wmmintrin_pclmul.h? y
+    remove /usr/include/clang/3.3/altivec.h? y
+    remove /usr/include/clang/3.3/ammintrin.h? y
+    [...]
+    >>> Old files removed
+    >>> Removing old directories
+    >>> Old directories removed
+    To remove old libraries run 'make delete-old-libs'.
+    
+    
+    
+    make delete-old-libs
+    >>> Removing old libraries
+    Please be sure no application still uses those libraries, else you
+    can not start such an application. Consult UPDATING for more
+    information regarding how to cope with the removal/revision bump
+    of a specific library.
+    >>> Old libraries removed
+    
+
+Note that freebsd-update does not work with the STABLE branch. Therefore this
+process is required.
+
+That's it. Run `freebsd-version` to see that you are now on stable:
+
+    
+    
+    freebsd-version
+    10.0-STABLE
+    
+
+### Sources
+
+[http://www.wonkity.com/~wblock/docs/html/buildworld.html][4]  
+<http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/makeworld.html>  
+[https://forums.freebsd.org/viewtopic.php?&t=42776][5]
+
+   [1]: www.freebsd.org/cgi/query-pr.cgi?pr=185876&cat=
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: http://www.wonkity.com/%7Ewblock/docs/html/stable.html
+   [4]: http://www.wonkity.com/%7Ewblock/docs/html/buildworld.html
+   [5]: https://forums.freebsd.org/viewtopic.php?&t=42776
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

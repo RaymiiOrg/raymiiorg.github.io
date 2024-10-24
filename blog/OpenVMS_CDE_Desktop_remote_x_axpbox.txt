@@ -1,0 +1,406 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	OpenVMS CDE Desktop Remote X session GUI (on AXPbox)
+Author      : 	Remy van Elst
+Date        : 	26-01-2021
+URL         : 	https://raymii.org/s/blog/OpenVMS_CDE_Desktop_remote_x_axpbox.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![Tetris][4]
+
+> Gaming on OpenVMS over the network, Tetris from 1995
+
+Last year November, I [posted][2] on a new OpenVMS related project, [AXPbox,
+the open source Alpha emulator][0], a fork of es40 by Tom&aacute;&scaron;
+Glozar. [Last week I put together the first official release][3] of AXPbox, one 
+of the changes being in the network code, making it more stable, thus
+being able to run a remote X session. Meaning, you can run the CDE desktop
+and enjoy everything the OpenVMS GUI has to offer. 
+
+This article shows you how to run the CDE GUI in a remote X session, including
+switching between the old Motif look and the new DECWindows and how to run 
+Tetris.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+VSI [offers a hobbyist program][6] where you can get an OpenVMS license for 
+free, and this guide is a great fit for hobbyists. I know of no OpenVMS server
+deployment where a GUI is actually used in day to day operations. (Most clusters
+I'm aware of run Rdb or oracle databases).
+
+### Prerequisites
+
+You need an OpenVMS installation with networking, which can  be the [hobbyist
+program's FreeAXP from VSI][6] if you're on Windows, or [AXPbox][5] on other
+operating systems.
+
+If you install OpenVMS you will be asked if you want to install the GUI, during
+the installation. If you've answered NO there, you can [download the PDF][24]
+from the [VSI product site][23] to install it in your OpenVMS installation. 
+
+You can find my [installation guide for OpenVMS with networking here][5], it sets
+up a networked OpenVMS installation in AXPbox which is my basis for this guide.
+
+The GUI runs in a remote X session. On linux I prefer to use Xephyr, which is what 
+I'll use in this guide. On Windows you can use [xming][7], here on [this topic][8]
+you can find a few pictures of their settings.
+
+The network in AXPbox [is not as stable as it can be][9], it took me a few times, 
+rebooting AXPbox, before I got a stable GUI. But, when I had one, it was rock solid.
+
+In this guide I assume the IP of the OpenVMS machine to be `10.0.2.25` and the IP
+of the linux machine running the X server `10.0.2.15`. 
+
+### Starting the GUI
+
+On your linux machine fire up an X server with Xephyr:
+
+    Xephyr -screen 1024x768 :1 -ac -listen tcp
+
+
+If you use Windows, you can use [xming][7], [here][10] and [here][8] are tips to set that
+up. 
+
+On your OpenVMS machine you must first enable the remote display to your local linux
+machine's X server:
+
+    set display/create/node=10.0.2.15/transport=tcpip/server=1/exec
+
+Replace the IP address by your local linux machine. The `server=1` part must match
+the `:1` display number on your X server.
+
+Start the CDE desktop login manager with the following command:
+
+     run sys$system:decw$startlogin.exe
+
+If you run VSI OpenVMS 8.4-2, this is the login screen:
+
+![VSI logo login][11]
+
+If you run HP OpenVMS 8.4 or 8.3, the logo is different (screenshot is from Tom&aacute;&scaron;):
+
+![HP logo login][12]
+
+If you run COMPAQ OpenVMS 7.3 (on Alpha), the logo is from Compaq:
+
+![Compaq logo login][13]
+
+After entering a correct username and password, a blue screen with one line of
+text (`Starting the New Desktop for OpenVMS`) pops up  while the desktop is
+loading:
+
+![blue screen][15]
+
+When you're logged in, the desktop appears with a help window. This is how it 
+looks for me:
+
+![default login][26]
+
+Click around and open up a few programs. There is not much pre-installed, you
+have a terminal, file manager,  text editor, calendar, clock and a few more
+utilities. Here is a screenshot with  some programs open:
+
+![desktop][14]
+
+On the first login my user password was expired and the login manager prompted 
+me to set a new password. One of the nice features, well thought out, was to 
+choose a new password right then and there:
+
+![new password][19]
+
+### Tetris
+
+This is were you all came for, gaming on OpenVMS. [Digiater][27] hosts
+the OpenVMS freeware archive, which includes [Tetris][28]. A simple game, but
+it's both precompiled and works well enough over this remote X session to be usable.
+
+Lets make a folder and fire up `FTP` to download the file from Digiater. 
+
+Create a new folder to download Tetris into:
+
+    $ create /directory [.tetris]
+
+Go into the folder:
+
+    $ set def [.tetris]
+
+Download the executable via FTP:
+
+    $ ftp ftp.digiater.nl
+    220---------- Welcome to Pure-FTPd [privsep] [TLS] ----------
+    220-You are user number 2 of 12 allowed.
+    220-Local time is now 06:59. Server port: 21.
+    220-Only anonymous FTP is allowed here
+    220 You will be disconnected after 15 minutes of inactivity.
+    Connected to www.digiater.nl. 
+    Name (www.digiater.nl:system): anonymous
+    230 Anonymous user logged in
+
+Don't forget binary and passive, otherwise you will get an error:
+
+    FTP> binary
+    200 TYPE is now 8-bit binary
+    FTP> passive on
+    Passive is ON.
+
+Get the archive:
+
+    FTP> get /openvms/freeware/v40/tetris312/tetris_axp.exe    
+    200 PORT command successful
+    150-Connecting to port 49191
+    150 57.0 kbytes to download
+    226-File successfully transferred
+    226 0.858 seconds (measured here), 58.3 Kbytes per second
+    local: SYS$SYSROOT:[SYSMGR.TETRIS]tetris_axp.exe;1  remote: openvms/freeware/v40/tetris312/tetris_axp.exe    
+    58310 bytes received in 00:00:00.00 seconds (2289.00 Gbytes/s)
+    FTP> 
+
+Exit FTP with `CTRL+Z` and open up a file manager to navigate to that new folder. Click tetris to launch,
+or open up a terminal and fire it up from there (`run tetris_axp.exe`). Below are two screenshots:
+
+![tetris 2][4]
+
+![tetris 3][30]
+
+If you've launched Tetris via a DECterminal, you will be shown the scores:
+
+![tetris scores][29]
+
+The screenshot shows the time being 2018, but that is due to my HP hobbyist license only
+being valid in 2018, I had to set the time on OpenVMS back. But I assure you, it was 
+2021 when I took the screenshot.
+        
+For more gaming on OpenVMS, [here is a guide on compiling DOOM][41].
+
+
+### DECWindows vs Motif
+
+Over the years there have been different GUI's for OpenVMS. Quoting part of [Wikipedia][20]:
+
+- The original graphical user interface for VMS was a proprietary windowing system known as the VMS Workstation Software (VWS), which was first released for the VAXstation I in 1984. It exposed an API called the User Interface Services (UIS). It ran on a limited selection of VAX hardware.
+- In 1989, DEC replaced VWS with a new X11-based windowing system named DECwindows. It was first included in VAX/VMS V5.1. Early versions of DECwindows featured an interface built on top of a proprietary toolkit named XUI. A layered product named UISX was provided to allow VWS/UIS applications to run on top of DECwindows.
+- In 1991, DEC replaced XUI with the Motif toolkit, creating DECwindows Motif. As a result, the Motif Window Manager became the default DECwindows interface in OpenVMS V6.0, although the XUI window manager remained as an option.
+- In 1996, as part of OpenVMS V7.1, DEC released the "New Desktop" interface for DECwindows Motif. The New Desktop consisted of a significant subset of the Common Desktop Environment. On Alpha and Itanium systems, it is still possible to select the older MWM-based UI (referred to as the "DECwindows Desktop") at login time. The New Desktop was never ported to the VAX releases of OpenVMS.
+
+And that's where we're at today as of window systems. There is a [WebUI][21] coming, ([demo video][22]),
+but that is targeted at cluster / systems management, not at us hobbyists. Nonetheless, very cool though.
+
+Here is the text editor in the old Traditional Desktop / Motif style:
+
+![motif style][18]
+
+The same text editor in the "modern" New Desktop / DECWindows style:
+
+![decwindows style][17]
+
+To select the other desktop as the default desktop, perform the following steps. 
+If the file `SYS$MANAGER:DECW$PRIVATE_APPS_SETUP.COM` does not exist, copy it from
+`DECW$PRIVATE_APPS_SETUP.TEMPLATE`:
+
+    COPY SYS$MANAGER:DECW$PRIVATE_APPS_SETUP.TEMPLATE SYS$COMMON:[SYSMGR]DECW$PRIVATE_APPS_SETUP.COM
+
+Edit `SYS$MANAGER:DECW$PRIVATE_APPS_SETUP.COM` and add a symbol definition for
+`DECW$START_NEW_DESKTOP`. In that file it is already there, but commented out.
+Remove the exclamation point (`!`) from the beginning of the line to
+"uncomment" it.
+
+    EDIT /EDT SYS$MANAGER:DECW$PRIVATE_APPS_SETUP.COM
+
+You'll enter a line editor. To switch to visual mode, type `change` followed
+by Return. You can use the arrow keys to scroll down.
+
+Exit visual mode with `CTRL+Z`, then type `exit` to save the file.
+
+If you want the New Desktop as the default:
+
+    DECW$START_NEW_DESKTOP == "TRUE"
+
+If you want the traditional desktop as the default:
+
+    DECW$START_NEW_DESKTOP == "FALSE"
+
+Restart DECwindows using the following command:
+
+    @SYS$MANAGER:DECW$STARTUP RESTART
+
+
+### Built in GUI program commands
+
+On my local installation, network is not as stable as it could be, so often I do not 
+open a full CDE desktop session, but just fire up the programs I want. 
+
+This results in a black background and only the program open in the X session,
+no window  borders like in the screenshot below:
+
+![no window manager][16]
+
+You can also use an alternative command to fire up a desktop session. First find 
+out what's behind the logical name `CDE$SESSIONMAIN`:
+
+    $ show log cde$sessionmain
+       "CDE$SESSIONMAIN" = "mcr cde$system_defaults:[bin]dtsession" (LNM$SYSTEM_TABLE)
+
+Fire up that command:
+
+    $ mcr cde$system_defaults:[bin]dtsession
+
+`dtsession` is the CDE login manager, also [available on linux][25].
+
+You can prefix any command with `spawn/nowait/input=nl: ` to run it in the background,
+so you can start multiple commands without running a desktop. An example to start
+the file manager in the background:
+
+    SPAWN/NOWAIT/INPUT=NL: RUN SYS$SYSTEM:VUE$MASTER
+
+Here is a list of most of the GUI commands: 
+
+- Calculator: `RUN SYS$SYSTEM:DECW$CALC`
+- Calendar: `RUN SYS$SYSTEM:DECW$CALENDAR`
+- Cardfiler: `RUN SYS$SYSTEM:DECW$CARDFILER`
+- Clock: `RUN SYS$SYSTEM:DECW$CLOCK`
+- CDA Viewer: `VIEW/INTERFACE=DECWINDOWS filename`
+- DECsound: `RUN SYS$SYSTEM:DECSOUND`
+- DECterm: `CREATE/TERMINAL=DECTERM`
+- EVE: `EDIT/TPU/DISPLAY=DECWINDOWS`
+- FileView: `RUN SYS$SYSTEM:VUE$MASTER`
+- Mail: `RUN SYS$SYSTEM:DECW$MAIL`
+- Message Panel: `RUN SYS$SYSTEM:DECW$MESSAGEPANEL`
+- Notepad: `RUN SYS$SYSTEM:DECW$NOTEPAD`
+- Print Screen: `RUN SYS$SYSTEM:DECW$PRINTSCREEN`
+- Paint: `RUN SYS$SYSTEM:DECW$PAINT`
+- Puzzle: `RUN SYS$SYSTEM:DECW$PUZZLE`
+- Session Manager: `RUN SYS$SYSTEM:DECW$SESSION`
+- Bookreader: `RUN SYS$SYSTEM:DECW$BOOKREADER`
+
+
+Via the VSI site, [Using DECwindows Motif for OpenVMS PDF][23].
+
+### More Screenshots
+
+Below are a few more screenshots of different programs, to give you a nostalgic feeling of how the OpenVMS GUI looks,
+if you don't want to setup everything yourself but still want to enjoy the looks.
+
+
+![mail][31]
+
+> Mail
+
+![sesson manager][32]
+
+> Session manager
+
+![more session manager][37]
+
+> More session manager
+
+![clock][33]
+
+> Clock and Calendar
+
+![control panel][34]
+
+> Control panel and extended calendar
+
+![decterm options][35]
+
+> DECTerminal options
+
+![notepad][36]
+
+> Notepad (not EVE)
+
+![EVE Split][38]
+
+> EVE editor with split (2 files at once)
+
+![EVE][39]
+
+> EVE editor with the save dialog open
+
+![Bookreader][40]
+
+> Bookreader with the clock help
+
+[0]: https://github.com/lenticularis39/axpbox
+[1]: /s/blog/AXPBox-version-1.0.0-released.html
+[2]: /s/blog/Exciting_OpenVMS_Alpha_emulation_news_es40_has_been_forked_to_axpbox.html
+[3]: /s/blog/AXPBox-version-1.0.0-released.html
+[4]: /s/inc/img/OpenVMS-7.3-tetris.png
+[5]: /s/tutorials/Installing_OpenVMS_8.4_Alpha_in_AXPbox_with_networking.html
+[6]: https://training.vmssoftware.com/hobbyist/
+[7]: https://sourceforge.net/projects/xming/
+[8]: http://web.archive.org/web/20210126134344/https://www.openvmshobbyist.com/forum/viewthread.php?forum_id=161&thread_id=2400
+[9]: https://github.com/lenticularis39/axpbox/issues/23
+[10]: https://sourceforge.net/p/vms-ports/wiki/InteropOtherOs/
+[11]: /s/inc/img/OpenVMS-X-VSI.png
+[12]: /s/inc/img/OpenVMS-X-HP.png
+[13]: /s/inc/img/OpenVMS-X-COMPAQ.png
+[14]: /s/inc/img/OpenVMS-X-desktop.png
+[15]: /s/inc/img/OpenVMS-X-6.png
+[16]: /s/inc/img/OpenVMS-X-no-wm.png
+[17]: /s/inc/img/OpenVMS-7.3-decwindows-editor.png
+[18]: /s/inc/img/OpenVMS-7.3-Motif-Editor.png
+[19]: /s/inc/img/OpenVMS-X-pw.png
+[20]: https://en.wikipedia.org/wiki/OpenVMS#DECwindows
+[21]: http://web.archive.org/web/20201207040826/https://vmssoftware.com/products/webui/
+[22]: https://www.youtube.com/watch?v=I3_0y-WdhcI
+[23]: http://web.archive.org/web/20210126143534/https://vmssoftware.com/products/decwindows-motif/
+[24]: http://web.archive.org/web/20210126143547/https://vmssoftware.com/docs/6434_DECW_INSTALLING.pdf
+[25]: http://cdesktopenv.sourceforge.net/man1/dtsession.html
+[26]: /s/inc/img/OpenVMS-X-8.png
+[27]: https://www.digiater.nl/
+[28]: https://www.digiater.nl/openvms/freeware/v40/tetris312/
+[29]: /s/inc/img/OpenVMS-7.3-tetris-2.png
+[30]: /s/inc/img/OpenVMS-7.3-tetris-3.png
+[31]: /s/inc/img/OpenVMS-X-9.png
+[32]: /s/inc/img/OpenVMS-X-10.png
+[33]: /s/inc/img/OpenVMS-X-11.png
+[34]: /s/inc/img/OpenVMS-X-12.png
+[35]: /s/inc/img/OpenVMS-X-13.png
+[36]: /s/inc/img/OpenVMS-X-14.png
+[37]: /s/inc/img/OpenVMS-X-15.png
+[38]: /s/inc/img/OpenVMS-X-16.png
+[39]: /s/inc/img/OpenVMS-X-17.png
+[40]: /s/inc/img/OpenVMS-X-18.png
+[41]: https://astr0baby.wordpress.com/2019/03/07/compiling-prboom-on-openvms-8-4-alpha/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,325 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	File locking, grep and process killing on OpenVMS
+Author      : 	Remy van Elst
+Date        : 	06-05-2018
+URL         : 	https://raymii.org/s/blog/File_locking_grep_and_process_killing_on_OpenVMS.html
+Format      : 	Markdown/HTML
+---
+
+
+
+[![openvms][1]][2]
+
+(You can read all my OpenVMS articles by [clicking the picture above][2])
+
+On the [DECUS][3] OpenVMS system there is no `curl` or `wget` installed. I
+wanted to download a remote `C` file to play around with the compiler and some
+simple `Hello World` code, to get a feel of the build system. After a bit of
+searching around the internet I was not able to find a command like curl or wget
+to download a remote file. But, the searches led me to the OpenVMS port of curl,
+which, I hoped, might be able to run on the DECUS system. Just like on a linux
+system, running the binary under my user account, not install it system wide.
+This ended up to be another adventure in which I figured out how to trace a
+locked file to a process, grep the output of a process on OpenVMS and kill a
+process. I did not get curl to work or compile my code, yet.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+The `cc` command is installed on the DECUS system:
+
+    
+    
+    $ CC /VERSION
+    HP C V7.3-010 on OpenVMS Alpha V8.4-2L2
+    
+
+When I get to my C code I will probably play around and write another small
+article on it here.
+
+I downloaded the OpenVMS curl version from the [vmsports][5] project to my
+computer. This is a project that compiles some software for OpenVMS, like
+`find`, `python` and the one I was looking for, `curl`.
+
+Using an sFTP client (filezilla), I uploaded the file to the DECUS system.
+You're all probably thinking, why did he not just upload his C code with sFTP?
+It simply did not occur, yet. When I was typing this article I thought, hmm. But
+it was too late already, plus, I did learn new stuff in the process. As Bob Ross
+would say, `We don't make mistakes, just happy little accidents.`
+
+Filezilla however did complain and kept uploading the file. I closed Filezilla
+and went to check what was wrong via SSH. The file was there, leaving 5
+versions. Probably an upload failure. Delete the files and try again.
+
+### -RMS-E-FLK, file currently locked by another user
+
+I found out how to remove files and folders [and wrote an article on that][6].
+To remove all versions of a file, using big scary wildcards:
+
+    
+    
+    $ DELETE vmsports*.*;*
+    %DELETE-W-FILNOTDEL, error deleting DSA3:[DECUSERVE_USER.EXAMPLE]VMSPORTS-AXPVMS-83-CURL-V0747--1.ZIP;1
+    -RMS-E-FLK, file currently locked by another user
+    
+
+Huh? I was not aware of multiple users or sessions in this account.
+
+That error message refers to the `RMS`. I saw that [here][6] as well, I might
+need to look into it some more.
+
+I remembered something about locking when reading `HELP` pages earlier. In this
+case, I tried the following:
+
+    
+    
+    $ SET FILE /UNLOCK VMSPORTS*.*;*
+    %SET-I-NOTLOCKED, DSA3:[DECUSERVE_USER.EXAMPLE]VMSPORTS-AXPVMS-83-CURL-V0747--1.ZIP;1 notlocked
+    
+
+That didn't help. Lets read the `HELP`:
+
+    
+    
+    $ HELP SET FILE /UNLOCK
+    
+    SET
+    
+      FILE
+    
+        /UNLOCK
+    
+           Clears a file marked as deaccess locked. Deaccess locking is
+           required by and used by those few applications that maintain
+           their own locking and consistency, typically without the use
+           of the OpenVMS distributed lock manager, and potentially also
+           without the use of RMS. When an application using deaccess
+           locking does not correctly deaccess the file (often due to an
+           application or system failure), the file is marked as locked, and
+           is thus inaccessible until the integrity of the contents of the
+           file are verified and the SET FILE/UNLOCK command is used.
+    
+           This command does not affect the state of files that are locked
+           using RMS or the distributed lock manager.
+    
+           For details on file deaccess locking, see the VSI OpenVMS I/O
+           User's Reference Manual, the ACP-QIO interface documentation, and
+           specifically the FIB$V_DLOCK option available on the IO$_CREATE
+           and IO$_ACCESS functions.
+    
+           The SET FILE/UNLOCK command can clear the cause of the following
+           error message:
+    
+           %SYSTEM-W-FILELOCKED, file is deaccess locked
+    
+           However, this command cannot resolve the cause of the error
+           message:
+    
+           %RMS-W-FLK, file currently locked by another user
+    
+
+That explains why it did not work. I suspected that there might be a process
+which locked my file.
+
+### Tracing a process' open files (lsof)
+
+The HPe forums where of help here. First I needed the root disk name, which is
+in the `DIR` output:
+
+    
+    
+    $ DIR
+    
+    Directory DSA3:[DECUSERVE_USER.EXAMPLE]
+    
+    $MAIN.TPU$JOURNAL;1 .VIMINFO;1          A.;1                FTP_SERVER.LOG;3
+    FTP_SERVER.LOG;1    LOGIN.COM;2         LOGIN.COM;1         LOGIN_COM.TPU$JOURNAL;1
+    MAIL.DIR;1          NOTES$NOTEBOOK.NOTE;1                   SSH.DIR;1
+    SSH2.DIR;1          THREE.DIR;1         VMSPORTS-AXPVMS-83-CURL-V0747--1.ZIP;1
+    WWW.DIR;1
+    
+
+Using the `SHOW DEV` command we can list all processes that have files open:
+
+    
+    
+    $ SHOW DEV /FILES DSA3:
+    Files accessed on device DSA3: on  6-MAY-2018 10:31:44.88
+    Process name      PID     File name
+                    00000000  insufficient privilege or object protection violation
+                    00000000  insufficient privilege or object protection violation
+    Rob Brooks      0000043B  insufficient privilege or object protection violation
+    HENKLE          0000F62B  insufficient privilege or object protection violation
+    HENKLE          0000F62B  insufficient privilege or object protection violation
+    HENKLE          0000F62B  insufficient privilege or object protection violation
+    HENKLE          0000F62B  insufficient privilege or object protection violation
+    [...]
+    HtHTNOTES_AN165 0000E541  insufficient privilege or object protection violation
+    <FTP_EXAMPLE>      00011591  [DECUSERVE_USER.EXAMPLE]FTP_SERVER.LOG;3
+    <FTP_EXAMPLE>      00011591  [DECUSERVE_USER.EXAMPLE]VMSPORTS-AXPVMS-83-CURL-V0747--1.ZIP;1
+    
+
+Except for the huge list of errors, it confirms that the FTP server has locked
+my file. One of the ways to release that lock is to stop the process. Another
+way is to reboot the system. The latter being a harsh solution if all else
+fails.
+
+### Search the output of one command for a string (pipe and grep) on OpenVMS
+
+A big list of open files is not really usefull, and I don't want to see all
+those other users, none of my business. I wanted to filter that list to only
+show my user. Let's see if I can use a pipe and grep:
+
+    
+    
+    $ SHOW DEV /FILES DSA3: | GREP EXAMPLE
+    %DCL-W-MAXPARM, too many parameters - reenter command with fewer parameters
+     \|\
+    
+
+Nope, but I do suspect OpenVMS having an excellent solution for this problem.
+The DCL shell is over 30 years old so someone had to have this problem.
+
+Browsing around the documentation I found [this][7]. It seems that if you want
+to pipe output of a command, you first need to preface the command with the word
+`PIPE`, then the command, then the `|` (pipe char), then another process.
+
+There is no `grep` on OpenVMS unless you install it. There however is `SEARCH`.
+A logical name, just like most of OpenVMS' workings.
+
+The `search` command requires a filename. You can't just pipe output into it
+directly, you need to tell it that it has to search the output. OpenVMS has the
+`SYS$OUTPUT` and `SYS$INPUT` files for that when using the `PIPE` command.
+
+Reading through the documentation:
+
+  * `|`: Key pipe separator. The pipe connects the `SYS$OUTPUT` of one pipeline-segment command to the `SYS$INPUT` of the next command. 
+
+A few tries later I conjured up this command sequence:
+
+    
+    
+    $ PIPE SHOW DEV /FILES DSA3: | SEARCH SYS$INPUT EXAMPLE
+    Files accessed on device DSA3: on  6-MAY-2018 12:48:11.51
+    Process name      PID     File name
+    [...]
+    <FTP_EXAMPLE>      000111AF  [DECUSERVE_USER.EXAMPLE]FTP_SERVER.LOG;4
+    
+
+To show all running processes including their PID's, use the `SHOW SYSTEM`
+command. Combine that with out `PIPE&SEARCH` shell trick to get all the
+processes of the current user. Searching the [docs][8] didn't gave me another
+way or flag to the `SHOW SYSTEM` or `SHOW PROCESS` command to filter out one
+specific user.
+
+    
+    
+    $ PIPE SHOW SYSTEM | SEARCH SYS$INPUT EXAMPLE
+    OpenVMS V8.4-2L2  on node EISNER    6-MAY-2018 12:49:45.02   Uptime  23 18:27:17
+      Pid    Process Name    State  Pri      I/O       CPU       Page flts  Pages
+    [...]
+    0001156B EXAMPLE            LEF      9      374   0 00:00:00.15       641     89
+    000111AF <FTP_EXAMPLE>      LEF      5    46299   0 00:00:06.01       705    346  N
+    000115B0 EXAMPLE_62273      LEF      6      129   0 00:00:00.01        84    105  S
+    000115BE EXAMPLE_27501      CUR   0  4      188   0 00:00:00.04       138    165  S
+    000115BF EXAMPLE_29010      COM      4      185   0 00:00:00.02       128    152  S
+    
+
+It seems that we can try to stop (kill) process `000111AF`. Use the `STOP`
+command with the `/ID` flag:
+
+    
+    
+    $ STOP /ID=000111AF
+    
+
+Now the file deletion was possible:
+
+    
+    
+    $ DEL VMSPO*.*;*
+    $
+    
+
+The actual cause of the upload failure? I don't have enough quota.
+
+### SHOW QUOTA
+
+The sFTP client showed me this error after failing a few times:
+
+    
+    
+    550 File Write Error: %%SYSTEM-F-EXDISKQUOTA, disk quota exceeded
+    
+
+This is where my adventure ends. Without looking up documentation, because of
+the logicalness of DCL, the following command showed me that I had exhausted my
+disk quota:
+
+    
+    
+    $ show quota
+      User [EXAMPLE] has 10000 blocks used, 0 available,
+      of 10000 authorized and permitted overdraft of 0 blocks on DISK_USER
+    
+
+What is a disk block you ask? Again the [documentation][9] has all the answers:
+
+    
+    
+    A disk block is the minimum unit of disk storage allocation in OpenVMS.
+    Under OpenVMS VAX and OpenVMS Alpha, the disk volume block size is consistent, with each block containing 512 bytes, or one-half kilobyte. Each byte is comprised of eight bits. A bit represents the smallest unit of information, typically refered to as a one or a zero.
+    [...]
+    The number of bytes in a file can be determined by multiplying the number of blocks allocated for the file times the number of bytes in a block. For example: to convert OpenVMS disk blocks to (base two) kilobytes (KB; 1024 bytes), simply divide by two. To convert blocks to (base two) megabytes, divide by 2048. Blocks to (base two) gigabytes (GB), divide by 2097152. 
+    
+
+In the case of the DECUS system, I have about 5 megabytes of quota and my zipped
+`curl` was around 7 MB, explaining the quota error.
+
+   [1]: https://raymii.org/s/inc/img/ovmsdec.png
+   [2]: https://raymii.org/s/tags/openvms.html
+   [3]: http://decus.org
+   [4]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [5]: https://sourceforge.net/projects/vms-ports/files/?source=raymii.org
+   [6]: https://raymii.org/s/blog/Delete_a_directory_in_OpenVMS.html
+   [7]: https://web.archive.org/web/20180506143839/http://h41379.www4.hpe.com/doc/83final/9996/9996pro_155.html
+   [8]: https://web.archive.org/web/20180506165527/http://h41379.www4.hpe.com/doc/83final/9996/9996pro_248.html
+   [9]: https://web.archive.org/web/20180506170308/http://h41379.www4.hpe.com/faq/vmsfaq_003.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,1481 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>That time when one of my HP-UX servers lost half of it's RAM (and how to connect to an HP iLO 2 with modern OpenSSH (7.6+)) - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>That time when one of my HP-UX servers lost half of it's RAM (and how to connect to an HP iLO 2 with modern OpenSSH (7.6+))</h2>
+<p><small>Published: <span data-pagefind-meta='date'>06-06-2018</span> | Author: Remy van Elst | <a href="That_time_one_of_my_HP-UX_machines_lost_half_its_ram_openssh_7.3_ilo_2.txt">Text only version of this article</a>
+</small></p>
+<br><div class='olderthanayear'><p><strong>&#10071; This post is over six years old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">DRAM failure on DIMM XX, deallocate rank</a>
+</li>
+<li>
+<a href="#toc_1">Memory Ranking</a>
+</li>
+<li>
+<a href="#toc_2">Support Tool Manager</a>
+</li>
+<li>
+<a href="#toc_3">SSH with modern OpenSSH (7.6) to an HP iLO2</a>
+</li>
+<li>
+<a href="#toc_4">iLO Management Processor hardware information</a>
+<ul>
+<li>
+<a href="#toc_5">Ext0</a>
+</li>
+<li>
+<a href="#toc_6">Ext1</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_7">iLO Event Log</a>
+</li>
+<li>
+<a href="#toc_8">HP Integrity rx3600 Server User Service Guide</a>
+</li>
+<li>
+<a href="#toc_9">Conclusion</a>
+</li>
+<li>
+<a href="#toc_10">Reference, complete output of MP:CM&gt; df -nc -a</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p><img src="https://raymii.org/s/inc/img/nocloud.png" alt=""></p>
+
+<p>One of my favorite sayings is: &#39;Hardware is stupid, move everything to the
+cloud!&#39;. The cloud is just someone elses computer, but at least I&#39;m not
+responsible for the hardware anymore, since hardware breaks. When a VM breaks,
+because you use configuration management and version control, just roll out a
+new one. We all know that&#39;s not true, but still, the thought of it is nice. A
+man can have hopes and dreams, even if the harsh reality shoots them down every
+time.</p>
+
+<p><a href="https://raymii.org/s/tutorials/Find_part_number_of_failed_disk_on_HP-UX_with_sasmgr.html">Last week one of the HP-UX machines had a failing disk</a> and this week it&#39;s
+back with a whole new issue. After it was rebooted (due to issues with the
+services running on it), the Event Monitoring Service (EMS) sent an email
+regarding RAM issues and after manual checking it seems the machine lost half of
+it&#39;s RAM.</p>
+
+<p>It should have 16 GB and now it only has 8 GB. You might imagine my suprise.
+This post goes into my troubleshooting, since I was not able to go to the
+machine, shut it down and check if the RAM was still there or note part numbers.
+I&#39;ll cover the use of cstm (Support Tool Manager), how to connect to the HP iLO
+(out of band access) with modern OpenSSH (7.2) and the steps I took to gather
+information on what might have happened.</p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+<p>This machine is not under monitoring yet, therefore it is regularly visited and
+checked manually. You could call that monitoring as well, but I rather have
+Icinga (or any other tool) doing work for me. An intern doing said things is not
+considered a tool, sadly (this is a joke). The machine furthermore is part of an
+older setup (10 years) and is being replaced, so there is not a lot of budget or
+time allocated. I like to learn new things, so I seize the oppertunity to expand
+my UNIX knowledge, thus allocating some of my own time to research (and
+hopefully fix) these issues. <a href="https://raymii.org/s/tags/hp-ux.html">Read my other HP-UX articles as well</a> if you
+like that kind of stuff.</p>
+
+<p>Now that you know some background, let&#39;s dive in.</p>
+
+<h3 id="toc_0">DRAM failure on DIMM XX, deallocate rank</h3>
+
+<p>It all started with this nice email from the HP-UX system:</p>
+
+<pre><code>Onderwerp: hpux09: Event Monitor Notification
+
+&gt;------------ Event Monitoring Service Event Notification ------------&lt;
+
+Notification Time: Fri Jun  1 10:59:36 2018
+
+hpux09 sent Event Monitor notification information:
+
+/system/events/ipmi_fpl/ipmi_fpl is &gt;= 3.
+Its current value is MAJORWARNING(3).
+
+
+Event data from monitor:
+
+Event Time..........: Fri Jun  1 10:59:36 2018
+Severity............: MAJORWARNING
+Monitor.............: fpl_em
+Event #.............: 890
+System..............: hpux09
+
+Summary:
+     DRAM failure on DIMM XX, deallocate rank
+
+Description of Error:
+
+SFW has detected that a DRAM is failing on the DIMM specified by the physical location. The rank the failing DIMM is part of will be deallocated.
+
+Probable Cause / Recommended Action:
+
+
+SFW detected a failing DIMM
+Replace the DIMM flagged by SFW
+
+
+Additional Event Data:
+     System IP Address...: 198.51.100.30
+     Event Id............: 0x5b110af800000000
+     Monitor Version.....: A.01.00
+     Event Class.........: System
+     Client Configuration File...........:
+     /var/stm/config/tools/monitor/default_fpl_em.clcfg
+     Client Configuration File Version...: A.01.00
+          Qualification criteria met.
+               Number of events..: 1
+     Associated OS error log entry id(s):
+          None
+     Additional System Data:
+          System Model Number.............: ia64 hp server rx3600
+          EMS Version.....................: A.04.20.31.02
+          STM Version.....................: D.04.00
+          System Serial Number............: DEH48456BK
+     Latest information on this event:
+          http://docs.hp.com/hpux/content/hardware/ems/fpl_em.htm#890
+
+v-v-v-v-v-v-v-v-v-v-v-v-v    D  E  T  A  I  L  S    v-v-v-v-v-v-v-v-v-v-v-v-v
+
+
+IPMI event hex: 0x7a800fa000e00250 0xffffffff010cff74 Time Stamp: Fri Jun  1 08:44:24 2018 Event keyword: MEM_CHIPSPARE_DEALLOC_RANK Alert level name: Warning Reporting vers: 1 Data field type: Reserved Decoded data field:
+Reporting entity ID: 0 ( Cab 0 Cell 0 CPU 0 ) Reporting entity Full Name: System Firmware IPMI Event ID : 4000 (0xfa0)
+
+
+&gt;---------- End Event Monitoring Service Event Notification ----------&lt;
+</code></pre>
+
+<p>The HP-UX error message is not very helpful, since no actual DIMM location is
+given:</p>
+
+<pre><code>DRAM failure on DIMM XX, deallocate rank
+SFW has detected that a DRAM is failing on the DIMM specified by the physical location. The rank the failing DIMM is part of will be deallocated.
+</code></pre>
+
+<p>The machine has no DIMM slot XX. The purchase order stated that the machine came
+with 16 GB of RAM installed. It now only reported 8 GB of memory.</p>
+
+<p>My first thought was to search the part number and purchase replacement modules
+(or search our own stash of &quot;old stuff&quot;), then doing my regular procedure with
+RAM issues, only executing the next step if the previous action did not resolve
+the issue. I&#39;ve had my fair share of Dell hardware issues (looking at you,
+noncritical raid controller error after upgrading OpenManage...) so my procedure
+has proven itself.</p>
+
+<ul>
+<li>Apply all available firmware updates for the hardware</li>
+<li>Do a DIMM swap (slot XX to slot YY) to see if the error is in the slot or in the DIMM</li>
+<li>Replace the DIMM</li>
+<li>Replace the motherboard and CPU</li>
+<li>Contact the manufacturer for warranty</li>
+</ul>
+
+<p>Since this machine is not under a support contract anymore, step 1 and 5 are off
+the table. HP requires an active support contract to get firmware updates. I do
+not have access to replacement DIMM&#39;s and I was not able to go to the machine to
+do a DIMM swap (or note part numbers).</p>
+
+<p>The only thing left to do was to dig into the issue and gather as much logging
+and information as possible, to prepare for a visit to the machine.</p>
+
+<p>However, first I ended up researching a term unfamiliar to me, Memory Ranks.</p>
+
+<h3 id="toc_1">Memory Ranking</h3>
+
+<p>I had never heard of the term Rank in RAM context, but <a href="https://en.wikipedia.org/wiki/DIMM#Ranking">Wikipedia</a> came to
+the rescue:</p>
+
+<blockquote>
+<p>Sometimes memory modules are designed with two or more independent sets of
+DRAM chips connected to the same address and data buses; each such set is called
+a rank.</p>
+</blockquote>
+
+<p>There is even an article on <a href="https://en.wikipedia.org/wiki/Memory_rank">Memory Ranking</a>:</p>
+
+<blockquote>
+<p>A memory rank is a set of DRAM chips connected to the same chip select, which
+are therefore accessed simultaneously.</p>
+</blockquote>
+
+<p>That still didn&#39;t tell me much, how correct it might be. <a href="https://web.archive.org/web/20180605191021/http://www.dataram.com/blog/?p=32">This site</a> had a
+very helpfull and practical explanation:</p>
+
+<blockquote>
+<p>The term &quot;rank&quot; simply refers to a 64-bit chunk of data. In its simplest form,
+a DIMM with DRAM chips on just one side would contain a single 64-bit chunk of
+data and would be called a single-rank (1R) module. DIMMs with chips on both
+sides often contain at least two 64-bit chunks of data and are referred to as
+dual-rank (2R) modules. Some DIMMs can have DRAM chips on both sides but are
+configured so that they contain two 64-bit data chunks on each sidefour in
+totaland are referred to as quad-rank (4R) modules. Quad-rank DIMMs run at a
+maximum PC3-8500 (DDR3-1066) speed in current architecture.</p>
+</blockquote>
+
+<p>Now that I had a better understanding of what a memory rank is, my suspicion is
+that there is one failed memory module and the rest of the modules (after that
+failed module) are not loaded anymore.</p>
+
+<h3 id="toc_2">Support Tool Manager</h3>
+
+<p>Using <code>cstm</code> I hope to find the part number of the DIMM&#39;s so I can at least
+order a few replacement modules. According to multiple <a href="https://web.archive.org/web/20180605193125/https://community.hpe.com/t5/General/How-to-find-Memory-DIMM-part-number/td-p/5265571">HPe forum</a> <a href="https://web.archive.org/web/20180605193526/https://community.hpe.com/t5/HPE-9000-and-HPE-e3000-Servers/checking-part-number-of-memory/m-p/4501569/highlight/true">posts</a>
+<code>ctsm</code> should report the part number with this command:</p>
+
+<pre><code>echo &quot;selclass qualifier memory;info;wait;infolog&quot; | /usr/sbin/cstm 
+
+In my case, the output did not contain the part number:
+
+Running Command File (/usr/sbin/stm/ui/config/.stmrc).
+
+-- Information --
+Support Tools Manager
+
+
+Version D.04.00
+
+Product Number B4708AA
+
+(C) Copyright Hewlett Packard Co. 1995-2008
+All Rights Reserved
+
+Use of this program is subject to the licensing restrictions described
+in &quot;Help--&gt;On Version&quot;.  HP shall not be liable for any damages resulting
+from misuse or unauthorized use of this program.
+
+cstm&gt;selclass qualifier memory;info;wait;infolog
+-- Updating Map --
+Updating Map...
+-- Converting a (4036) byte raw log file to text. --
+Preparing the Information Tool Log for IPF_MEMORY on path memory File ...
+
+.... hpux09  :  198.51.100.30 .... 
+
+-- Information Tool Log for IPF_MEMORY on path memory --
+
+Log creation time: Fri Jun  1 12:13:01 2018
+
+Hardware path: memory
+
+
+Basic Memory Description 
+
+   Module Type: MEMORY
+   Page Size: 4096 Bytes
+   Total Physical Memory: N/A 
+   Total Configured Memory: 8192 MB
+   Total Deconfigured Memory: N/A 
+
+Memory Board Inventory 
+
+   DIMM Location          Size(MB)     DIMM Location          Size(MB)
+   --------------------   --------     --------------------   --------
+   Ext 0 DIMM 0A          2048         Ext 0 DIMM 0B          2048    
+   Ext 0 DIMM 0C          2048         Ext 0 DIMM 0D          2048    
+   Ext 0 DIMM 1A          ----         Ext 0 DIMM 1B          ----    
+   Ext 0 DIMM 1C          ----         Ext 0 DIMM 1D          ----    
+   Ext 0 DIMM 2A          ----         Ext 0 DIMM 2B          ----    
+   Ext 0 DIMM 2C          ----         Ext 0 DIMM 2D          ----    
+
+   Ext 0 Total: 8192 (MB)
+
+   ===========================================================================
+
+   DIMM Location          Size(MB)     DIMM Location          Size(MB)
+   --------------------   --------     --------------------   --------
+   Ext 1 DIMM 0A          ----         Ext 1 DIMM 0B          ----    
+   Ext 1 DIMM 0C          ----         Ext 1 DIMM 0D          ----    
+   Ext 1 DIMM 1A          ----         Ext 1 DIMM 1B          ----    
+   Ext 1 DIMM 1C          ----         Ext 1 DIMM 1D          ----    
+   Ext 1 DIMM 2A          ----         Ext 1 DIMM 2B          ----    
+   Ext 1 DIMM 2C          ----         Ext 1 DIMM 2D          ----    
+
+   Ext 1 Total: 0 (MB)
+
+   ===========================================================================
+
+Memory Error Log Summary 
+
+   The memory error log is empty.
+
+Page Deallocation Table (PDT) 
+
+   The Page Deallocation Table is empty.
+
+   PDT Entries Used: 0
+   PDT Entries Free: 100
+   PDT Total Size: 100 
+
+-- Information Tool Log for IPF_MEMORY on path memory --
+View   - To View the file.
+Print  - To Print the file.
+SaveAs - To Save the file.
+Enter Done, Help, Print, SaveAs, or View: [Done] #.
+</code></pre>
+
+<p>It did gave me a better idea of the physical memory layout.</p>
+
+<p>According to <a href="https://web.archive.org/web/20180605193526/https://community.hpe.com/t5/HPE-9000-and-HPE-e3000-Servers/checking-part-number-of-memory/m-p/4501569/highlight/true">this post</a>, the output with part number should look like this:</p>
+
+<pre><code>DIMM  Location       Size(MB)  State   Serial Num       Part Num
+-------------------- --------  ------- ---------------- ------------------
+Cab 0 Cell 0 DIMM 0A 2048      Config  PRY07064US       A9846-60301
+Cab 0 Cell 0 DIMM 0B 2048      Config  PRY07063JF       A9846-60301
+Cab 0 Cell 0 DIMM 1A 2048      Config  PRY06372A2       A9846-60301
+-------------------- -------- ------- ---------------- ------------------
+</code></pre>
+
+<p>But, as can be seen, no part numbers in my output. I guess it&#39;s a version
+difference. I found another command to get ALL the hardware in the machine:</p>
+
+<pre><code>echo &quot;selall;infolog;wait&quot;|cstm
+</code></pre>
+
+<p>but except for a ton of output, it did not contain any part number. The post did
+reference the following:</p>
+
+<pre><code>You can get the memory dimm part number from cstm and also from GSP/MP
+
+Run the following command..
+
+GSP&gt;cm
+GSP:CM&gt;df ==&gt; Select A for selecting all and D to dump.
+
+From this out put you would get the exact part number for the dimm and also other HW connected to this box.
+</code></pre>
+
+<p>The <code>MP</code> referred here is the &quot;HP Integrated Lights Out Management Processor&quot;,
+shortly known as the iLO. Dell calls them iDrac (integrated Dell remote access
+controller) and on a SuperMicro server it&#39;s just called IPMI or OOB (out of band
+access). It provides a way to power on/off and troubleshoot the server when you
+cannot access it, often also a remote console.</p>
+
+<p>Since I was not able to go to the machine and reboot into some kind of BIOS or
+iLO console, I had to resort to connecting via the web or SSH. The web interface
+was useless on gathering RAM information, so SSH was my last resort.</p>
+
+<h3 id="toc_3">SSH with modern OpenSSH (7.6) to an HP iLO2</h3>
+
+<p>With good hope I connected to the iLO IP from my Ubuntu 18.04 box. Only to be
+greeted by a happy little error message:</p>
+
+<pre><code>$ ssh Admin@192.0.2.30
+Unable to negotiate with 192.0.2.30 port 22: no matching key exchange method found. Their offer: diffie-hellman-group1-sha1
+</code></pre>
+
+<p>Time to configure some old settings. In my <code>~/.ssh/config</code> file I started with
+the following:</p>
+
+<pre><code>Host hpux09-ilo
+  HostName 192.0.2.30
+  KexAlgorithms diffie-hellman-group1-sha1
+</code></pre>
+
+<p>But of course, just a KeyAlgorithm is not enough:</p>
+
+<pre><code>$ ssh Admin@hpux09-ilo
+Unable to negotiate with 192.0.2.30 port 22: no matching cipher found. Their offer: aes128-cbc,3des-cbc
+</code></pre>
+
+<p>Let&#39;s add that ciphersuite to my <code>~/.ssh/config</code>:</p>
+
+<pre><code>Host hpux09-ilo
+  HostName 192.0.2.30
+  KexAlgorithms diffie-hellman-group1-sha1
+  Ciphers aes128-cbc,3des-cbc
+</code></pre>
+
+<p>We know that the setting did something, because now it just fails with no
+helpful error:</p>
+
+<pre><code>$ ssh Admin@hpux09-ilo
+Received disconnect from 192.0.2.30 port 22:11:  Client Disconnect
+
+Disconnected from 192.0.2.30 port 22
+</code></pre>
+
+<p>Lucky for me, the iLO 2 was horribly old and insecure in 2013 already, as <a href="https://web.archive.org/web/20180605195032/https://community.hpe.com/t5/Server-Management-Remote-Server/Unable-to-SSH-to-iLO2-with-OpenSSH-6-2/td-p/6050925">this
+post</a> shows. With OpenSSH 6.2 there were problems connecting to the iLO,
+back then. I&#39;m on OpenSSH 7.6 so let&#39;s hope that their fix works for me as well.</p>
+
+<p>In a <a href="http://web.archive.org/web/20180601112113/https://community.hpe.com/t5/Server-Management-Remote-Server/iLO-2-Firmware-version-2-20-released/td-p/6067313">firmware update for the iLO2</a> some of these bugs are fixed, but not all of them, and quoting <a href="https://www.linkedin.com/in/oscar-perez-7a861549">Oscar A. Perez</a> (who lists &quot;Senior Embedded System Engineer, 100% committed to make Embedded Systems reliable, safe and secure&quot; on it&#39;s LinkedIn for 15 years, so I guess probably is legit), it will be hard to fix in the future due to the limited iLO 2 memory:</p>
+
+<blockquote>
+<p>I had to make lots of changes to the mpSSH server code to get it to work with
+the new OpenSSH 6.2p1. I hope this is the last time we have to make changes like
+this one. iLO2 memory is very limited and already full so, we won&#39;t be able to
+spin new firmware releases, every time the OpenSSH folks decide to increase the
+size of the payload during Key Exchange.</p>
+</blockquote>
+
+<p>Lower on in the post I do find the correct OpenSSH options to connect. I missed
+the <code>HostKeyAlgorithms</code> and the <code>MACs</code>. The complete, working configuration in
+my <code>~/.ssh/config</code> file looks like this:</p>
+
+<pre><code>Host hpux09-ilo
+  HostName 192.0.2.30
+  HostKeyAlgorithms ssh-rsa,ssh-dss
+  KexAlgorithms diffie-hellman-group1-sha1
+  Ciphers aes128-cbc,3des-cbc
+  MACs hmac-md5,hmac-sha1
+</code></pre>
+
+<p>A one-liner with these options:</p>
+
+<pre><code>ssh -o HostKeyAlgorithms=ssh-rsa,ssh-dss -o KexAlgorithms=diffie-hellman-group1-sha1 -o Ciphers=aes128-cbc,3des-cbc -o MACs=hmac-md5,hmac-sha1 Admin@hpux09-ilo
+</code></pre>
+
+<p>*Do note that a better solution here is to upgrade the hardware and get it under <em>a support contract.</em></p>
+
+<h3 id="toc_4">iLO Management Processor hardware information</h3>
+
+<p>Logging in gives me a few options to work with:</p>
+
+<pre><code>Admin@192.0.2.30&#39;s password: 
+
+              Hewlett-Packard Integrity Integrated Lights-Out 2
+
+    (c) Copyright Hewlett-Packard Company 1999-2008.  All Rights Reserved.
+
+                           MP Host Name: mphpux09
+
+                              Revision F.02.23
+
+   MP MAIN MENU:
+
+         CO: Console
+        VFP: Virtual Front Panel
+         CM: Command Menu
+      SMCLP: Server Management Command Line Protocol
+         CL: Console Log
+         SL: Show Event Logs
+         HE: Main Help Menu
+          X: Exit Connection
+
+[mphpux09] MP&gt; 
+</code></pre>
+
+<p>The forum post stated to go into the Command Menu:</p>
+
+<pre><code>[mphpux09] MP&gt; cm
+</code></pre>
+
+<p>(Use Ctrl-B to return to MP main menu.)</p>
+
+<p>Then to enter the following command:</p>
+
+<pre><code>[mphpux09] MP:CM&gt; df -nc -a
+</code></pre>
+
+<p>The output contains a long, long list of hardware. You can find it at the bottom
+of this article. We are interested in the RAM parts. To my pleasent suprise it
+did list the actual RAM in the machine, the 16 GB, including the part numbers.
+The Operating system does not see the Ext1 DIMM&#39;s, the iLO does:</p>
+
+<h4 id="toc_5">Ext0</h4>
+
+<p>The <code>cstm</code> output showed me that Ext0 is filled with 4 DIMM&#39;s of 2 GB each:</p>
+
+<pre><code>Memory Board Inventory 
+
+   DIMM Location          Size(MB)     DIMM Location          Size(MB)
+   --------------------   --------     --------------------   --------
+   Ext 0 DIMM 0A          2048         Ext 0 DIMM 0B          2048    
+   Ext 0 DIMM 0C          2048         Ext 0 DIMM 0D          2048    
+   Ext 0 DIMM 1A          ----         Ext 0 DIMM 1B          ----    
+   Ext 0 DIMM 1C          ----         Ext 0 DIMM 1D          ----    
+   Ext 0 DIMM 2A          ----         Ext 0 DIMM 2B          ----    
+   Ext 0 DIMM 2C          ----         Ext 0 DIMM 2D          ----    
+
+   Ext 0 Total: 8192 (MB)
+</code></pre>
+
+<p>The ILO confirms that:</p>
+
+<pre><code>PRODUCT INFO:
+
+FRU Entry #  16 :
+FRU NAME                : MemExt0 DIMM0A
+FRU ID                  : 0128
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0xCE00000000000000
+JEDEC Mfg Location      : 0x01
+JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+JEDEC Mfg Revision Code : 0x3343
+JEDEC Mfg Year          : 0x06
+JEDEC Mfg Week          : 0x40
+JEDEC Mfg Serial #      : 0x711D209E
+Mfg Unique Serial #     : 0x00CE010640711D209E
+
+FRU Entry #  17 :
+FRU NAME                : MemExt0 DIMM0B
+FRU ID                  : 0136
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0xCE00000000000000
+JEDEC Mfg Location      : 0x01
+JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+JEDEC Mfg Revision Code : 0x3343
+JEDEC Mfg Year          : 0x06
+JEDEC Mfg Week          : 0x40
+JEDEC Mfg Serial #      : 0x711D20AA
+Mfg Unique Serial #     : 0x00CE010640711D20AA
+
+FRU Entry #  18 :
+FRU NAME                : MemExt0 DIMM0C
+FRU ID                  : 0144
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0xCE00000000000000
+JEDEC Mfg Location      : 0x01
+JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+JEDEC Mfg Revision Code : 0x3343
+JEDEC Mfg Year          : 0x06
+JEDEC Mfg Week          : 0x40
+JEDEC Mfg Serial #      : 0x711D20A2
+Mfg Unique Serial #     : 0x00CE010640711D20A2
+
+FRU Entry #  19 :
+FRU NAME                : MemExt0 DIMM0D
+FRU ID                  : 0152
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0xCE00000000000000
+JEDEC Mfg Location      : 0x01
+JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+JEDEC Mfg Revision Code : 0x3343
+JEDEC Mfg Year          : 0x06
+JEDEC Mfg Week          : 0x40
+JEDEC Mfg Serial #      : 0x711D20A8
+Mfg Unique Serial #     : 0x00CE010640711D20A8
+</code></pre>
+
+<p>I cannot easily find a replacement for this part number, but it comes up in a HP
+<a href="https://web.archive.org/web/20180605200950/https://community.hpe.com/t5/Integrity-Servers/Hardware-Information-finding-How-in-HP-UX-Server/m-p/6697829/highlight/true">forum post</a> as a Samsung 2GB module.</p>
+
+<h4 id="toc_6">Ext1</h4>
+
+<p>Ext1 according to the operating system is empty:</p>
+
+<pre><code>   DIMM Location          Size(MB)     DIMM Location          Size(MB)
+   --------------------   --------     --------------------   --------
+   Ext 1 DIMM 0A          ----         Ext 1 DIMM 0B          ----    
+   Ext 1 DIMM 0C          ----         Ext 1 DIMM 0D          ----    
+   Ext 1 DIMM 1A          ----         Ext 1 DIMM 1B          ----    
+   Ext 1 DIMM 1C          ----         Ext 1 DIMM 1D          ----    
+   Ext 1 DIMM 2A          ----         Ext 1 DIMM 2B          ----    
+   Ext 1 DIMM 2C          ----         Ext 1 DIMM 2D          ----    
+
+   Ext 1 Total: 0 (MB)
+</code></pre>
+
+<p>The iLO thinks differently:</p>
+
+<pre><code>FRU Entry #  20 :
+FRU NAME                : MemExt1 DIMM0A
+FRU ID                  : 0160
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0x2C00000000000000
+JEDEC Mfg Location      : 0x0C
+JEDEC Mfg Part #        : 36HTF25672PY-667D1
+JEDEC Mfg Revision Code : 0x0100
+JEDEC Mfg Year          : 0x08
+JEDEC Mfg Week          : 0x36
+JEDEC Mfg Serial #      : 0xD925C4D3
+Mfg Unique Serial #     : 0x002C0C0836D925C4D3
+
+FRU Entry #  21 :
+FRU NAME                : MemExt1 DIMM0B
+FRU ID                  : 0168
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0x2C00000000000000
+JEDEC Mfg Location      : 0x0C
+JEDEC Mfg Part #        : 36HTF25672PY-667D1
+JEDEC Mfg Revision Code : 0x0100
+JEDEC Mfg Year          : 0x08
+JEDEC Mfg Week          : 0x36
+JEDEC Mfg Serial #      : 0xD72FB723
+Mfg Unique Serial #     : 0x002C0C0836D72FB723
+
+FRU Entry #  22 :
+FRU NAME                : MemExt1 DIMM0C
+FRU ID                  : 0176
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0x2C00000000000000
+JEDEC Mfg Location      : 0x0C
+JEDEC Mfg Part #        : 36HTF25672PY-667D1
+JEDEC Mfg Revision Code : 0x0100
+JEDEC Mfg Year          : 0x08
+JEDEC Mfg Week          : 0x36
+JEDEC Mfg Serial #      : 0xD925C4D9
+Mfg Unique Serial #     : 0x002C0C0836D925C4D9
+
+FRU Entry #  23 :
+FRU NAME                : MemExt1 DIMM0D
+FRU ID                  : 0184
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0x2C00000000000000
+JEDEC Mfg Location      : 0x0C
+JEDEC Mfg Part #        : 36HTF25672PY-667D1
+JEDEC Mfg Revision Code : 0x0100
+JEDEC Mfg Year          : 0x08
+JEDEC Mfg Week          : 0x36
+JEDEC Mfg Serial #      : 0xD925C4CB
+Mfg Unique Serial #     : 0x002C0C0836D925C4CB
+</code></pre>
+
+<p>So the DIMM&#39;s are still in the system, and of all places, <a href="https://web.archive.org/web/20180605200737/https://www.amazon.com/PC2-5300-667MHz-240pin-Registered-MT36HTF25672PY-667D1/dp/B0050JMQFS">Amazon</a> sells
+these DIMM&#39;s. The type is <code>2GB DDR2 PC2-5300 667MHz 240pin ECC</code>, which is
+exactly what I need to order a replacement or look into our hardware stash. It
+took me a good hour, but the part number and some more type information has been
+found.</p>
+
+<p>I still need to figure out which specific DIMM broke, but that is not in the
+above output.</p>
+
+<h3 id="toc_7">iLO Event Log</h3>
+
+<p>In the iLO menu, I also saw <code>SL: Show Event Logs</code>. Maybe that will tell me
+specifically which DIMM could be the culprit.</p>
+
+<pre><code> [mphpux09] MP&gt; sl
+
+
+Event Log Viewer Menu:
+
+       Log Name            Entries    % Full      Latest Timestamped Entry
+---------------------------------------------------------------------------
+   E - System Event           32         4 %      01 Jun 2018 08:47:06
+   F - Forward Progress     4000       100 % 
+   B - Current Boot          130        43 % 
+   P - Previous Boot         130        43 % 
+   I - iLO Event             316        63 %      01 Jun 2018 11:14:55
+   C - Clear All Logs
+   L - Live Events
+</code></pre>
+
+<p>Let&#39;s view the <code>System Event log</code>, using option <code>E</code>:</p>
+
+<pre><code>Enter menu item or [Ctrl-B] to Quit: E 
+
+
+       Log Name            Entries    % Full      Latest Timestamped Entry
+---------------------------------------------------------------------------
+   E - System Event           32         4 %      01 Jun 2018 08:47:06
+
+
+Event Log Navigation Help:
+
+   +       View next block     (forward in time,  e.g. from 3 to 4)
+   -       View previous block (backward in time, e.g. from 3 to 2)
+   &lt;CR&gt;    Continue to the next or previous block
+   D       Dump the entire log
+   F       First entry
+   L       Last entry
+   J       Jump to entry number
+   H       View mode configuration - Hex
+   K       View mode configuration - Keyword
+   T       View mode configuration - Text
+   A       Alert Level Filter options
+   U       Alert Level Unfiltered
+   ?       Display this Help menu
+   Q       Quit and return to the Event Log Viewer Menu
+   Ctrl-B  Exit command, and return to the MP Main Menu
+</code></pre>
+
+<p>Just give me everything, <code>D</code> it is:</p>
+
+<pre><code>MP:SL (+,-,&lt;CR&gt;,D, F, L, J, H, K, T, A, U, ? for Help, Q or Ctrl-B to Quit) &gt;d
+   Confirm? (Y/[N]): y
+
+
+#  Location|Alert| Encoded Field    |  Data Field    |   Keyword / Timestamp
+-------------------------------------------------------------------------------
+0     BMC      2  0x205A9918E5020010 FFFF0103FCC00300 TIME_SET
+                                                      02 Mar 2018 09:27:01
+1     BMC      2  0x205A991B79020020 FFFF0103FCC00300 TIME_SET
+                                                      02 Mar 2018 09:38:01
+2     BMC      2  0x205ABBA1FC020030 FFFF0103FCC00300 TIME_SET
+                                                      28 Mar 2018 14:09:00
+3     BMC      2  0x205ABBA490020040 FFFF0103FCC00300 TIME_SET
+                                                      28 Mar 2018 14:20:00
+4     BMC      2  0x205B0FEF26020050 FFFF006F04140300 POWER_BUTTON_PRESSED
+                                                      31 May 2018 12:48:38
+5     BMC      2  0x205B0FEF28020060 040EA37004120300 CHASSIS_CONTROL_REQUEST
+                                                      31 May 2018 12:48:40
+6     HPUX 2   2  0x54801C3002E00070 00000000001A100C HP-UX_OS_NORMAL_SHUTDOWN
+                                                      31 May 2018 12:48:54
+7     BMC      2  0x205B0FEF38020090 FFFF006F04140300 POWER_BUTTON_PRESSED
+                                                      31 May 2018 12:48:56
+8     BMC      2  0x205B0FEF3B0200A0 040EA37004120300 CHASSIS_CONTROL_REQUEST
+                                                      31 May 2018 12:48:59
+9     BMC      2  0x205B0FEF420200B0 FFFF056FFA220300 ACPI_SOFT_OFF
+                                                      31 May 2018 12:49:06
+10    BMC      2  0x205B0FEF430200C0 FA00A370FA120300 CHASSIS_CONTROL_REQUEST
+                                                      31 May 2018 12:49:07
+11    BMC      2  0x205B0FEF440200D0 FFFF000943090300 POWER_UNIT_DISABLED
+                                                      31 May 2018 12:49:08
+12    BMC      2  0x205B0FEF550200E0 FFFF006F04140300 POWER_BUTTON_PRESSED
+                                                      31 May 2018 12:49:25
+13    BMC      2  0x205B0FEF560200F0 FFFF027000120300 SOFT_RESET
+                                                      31 May 2018 12:49:26
+14    BMC      2  0x205B0FEF56020100 FFFF010943090300 POWER_UNIT_ENABLED
+                                                      31 May 2018 12:49:26
+15    BMC      2  0x205B0FEF57020110 FFFF006FFA220300 ACPI_ON
+                                                      31 May 2018 12:49:27
+16    BMC      2  0x205B0FEF57020120 0401A37004120300 CHASSIS_CONTROL_REQUEST
+                                                      31 May 2018 12:49:27
+17    BMC      2  0x205B0FEF64020130 FFFF027000120300 SOFT_RESET
+                                                      31 May 2018 12:49:40
+18    SFW      2  0xC15B0FEF71020140 FFFF000A001D0300 CPU_START_BOOT
+                                                      31 May 2018 12:49:53
+19    SFW  0   2  0x5480006300E00150 0000000000000000 BOOT_START
+                                                      31 May 2018 12:49:53
+20    SFW  0  *3  0x7A800FA000E00170 FFFFFFFF010CFF74 MEM_CHIPSPARE_DEALLOC_RANK
+                                                      31 May 2018 12:50:01
+21    SFW  0  *3  0x7A800FA000E00190 FFFFFFFF010BFF74 MEM_CHIPSPARE_DEALLOC_RANK
+                                                      31 May 2018 12:50:01
+22    SFW  0   2  0x40801CBB00E001B0 0000000000000000 BOOT_SWITCH_INSECURE_MODE
+                                                      31 May 2018 12:50:24
+23    HPUX 0   2  0x54801C2F00E001D0 0000000000001001 HP-UX_BOOT_COMPLETE
+                                                      31 May 2018 12:52:39
+24    HPUX 0   2  0x54801C3000E001F0 00000000001A100C HP-UX_OS_NORMAL_SHUTDOWN
+                                                      01 Jun 2018 08:44:01
+25    BMC      2  0x205B110757020210 FFFF027000120300 SOFT_RESET
+                                                      01 Jun 2018 08:44:07
+26    SFW      2  0xC15B110760020220 FFFF000A001D0300 CPU_START_BOOT
+                                                      01 Jun 2018 08:44:16
+27    SFW  0   2  0x5480006300E00230 0000000000000000 BOOT_START
+                                                      01 Jun 2018 08:44:16
+28    SFW  0  *3  0x7A800FA000E00250 FFFFFFFF010CFF74 MEM_CHIPSPARE_DEALLOC_RANK
+                                                      01 Jun 2018 08:44:24
+29    SFW  0  *3  0x7A800FA000E00270 FFFFFFFF010BFF74 MEM_CHIPSPARE_DEALLOC_RANK
+                                                      01 Jun 2018 08:44:24
+30    SFW  0   2  0x40801CBB00E00290 0000000000000000 BOOT_SWITCH_INSECURE_MODE
+                                                      01 Jun 2018 08:44:48
+31    HPUX 0   2  0x54801C2F00E002B0 0000000000001001 HP-UX_BOOT_COMPLETE
+                                                      01 Jun 2018 08:47:06
+
+   -&gt; This is the last entry in the selected log.
+
+MP:SL (+,-,&lt;CR&gt;,D, F, L, J, H, K, T, A, U, ? for Help, Q or Ctrl-B to Quit) &gt;
+</code></pre>
+
+<p>Filtering out all the logs (reboots were expected), focussing on the DIMM parts:</p>
+
+<pre><code>28    SFW  0  *3  0x7A800FA000E00250 FFFFFFFF010CFF74 MEM_CHIPSPARE_DEALLOC_RANK
+29    SFW  0  *3  0x7A800FA000E00270 FFFFFFFF010BFF74 MEM_CHIPSPARE_DEALLOC_RANK
+</code></pre>
+
+<p>Not much help, no clear DIMM location yet. But, I did search around and found
+<a href="https://web.archive.org/web/20180605204015/https://support.hpe.com/hpsc/doc/public/display?docId=c02454812">this HP support page</a> titled &quot;HP Integrity rx3600 Servers - BOOT <em>DECONFIG</em>
+CPU Can Be Caused by Memory Dimm Failure&quot;. In the log output there are these
+lines, looking a lot like the above output:</p>
+
+<pre><code>SFW  0   0  0x040000E500E00000 FFFFFFFF000AFF74 MEM_SPD_2G_DIMM_FOUND
+SFW  0   0  0x040000E500E00000 FFFFFFFF000BFF74 MEM_SPD_2G_DIMM_FOUND
+SFW  0   0  0x040000E500E00000 FFFFFFFF001AFF74 MEM_SPD_2G_DIMM_FOUND
+SFW  0   0  0x040000E500E00000 FFFFFFFF001BFF74 MEM_SPD_2G_DIMM_FOUND
+SFW  0   0  0x040000E500E00000 FFFFFFFF010AFF74 MEM_SPD_2G_DIMM_FOUND
+SFW  0   0  0x040000E500E00000 FFFFFFFF010BFF74 MEM_SPD_2G_DIMM_FOUND
+SFW  0   0  0x040000E500E00000 FFFFFFFF011AFF74 MEM_SPD_2G_DIMM_FOUND
+SFW  0   0  0x040000E500E00000 FFFFFFFF011BFF74 MEM_SPD_2G_DIMM_FOUND
+</code></pre>
+
+<p>In this part I do see a pattern in the Data Field column, the only thing
+changing looks an awfull lot like a memory location:</p>
+
+<ul>
+<li>00 0A</li>
+<li>00 0B</li>
+<li>00 1A</li>
+<li>00 1B</li>
+<li>01 0A</li>
+<li>01 0B</li>
+<li>01 1A</li>
+<li>01 AB</li>
+</ul>
+
+<p>Comparing that to the DIMM layout output from earlier:</p>
+
+<pre><code>  DIMM Location          Size(MB)     DIMM Location          Size(MB)
+   --------------------   --------     --------------------   --------
+   Ext 0 DIMM 0A          2048         Ext 0 DIMM 0B          2048    
+   Ext 0 DIMM 0C          2048         Ext 0 DIMM 0D          2048   
+
+   DIMM Location          Size(MB)     DIMM Location          Size(MB)
+   --------------------   --------     --------------------   --------
+   Ext 1 DIMM 0A          ----         Ext 1 DIMM 0B          ----    
+   Ext 1 DIMM 0C          ----         Ext 1 DIMM 0D          ---- 
+</code></pre>
+
+<p>Not exactly the same but good enough, since it&#39;s a different server (the above
+output seems to be for the 8 port memory carrier board). <a href="https://web.archive.org/web/20180605202816/https://community.hpe.com/t5/Integrity-Servers/RX2620-Memory-Errors/m-p/4794083/highlight/true#M7674">This post</a>
+confirms my suspicion on the HEX values corresponding to the DIMM Slots.</p>
+
+<h3 id="toc_8">HP Integrity rx3600 Server User Service Guide</h3>
+
+<p>The <a href="https://raymii.org/s/inc/downloads/emr_na-c01290179-9.pdf">HP Integrity rx3600 Server User Service Guide</a>, chapter 5
+Troubleshooting, subsection CPU, Memory and SBA, subsection Troubleshooting
+rx3600 memory has a picture of the 24 slot memory carrier board:</p>
+
+<p><img src="https://raymii.org/s/inc/img/rx3600-mem.png" alt=""></p>
+
+<p>I know this server has 2 24 slot memory carrier boards due to the full output of
+the hardware list, it states 4 <code>12 DIMM Memory Extender</code> components.</p>
+
+<p>The service guide also lists the error message:</p>
+
+<ul>
+<li>IPMI events: Type E0h, 4000d:26d MEM <em>CHIPSPARE</em> DEALLOC_RANK</li>
+<li>Cause: An SDRAM is failing on the DIMM.</li>
+<li>Notes: The failing DIMM quad will be deallocated.</li>
+</ul>
+
+<p>Furthermore, the service manual states this:</p>
+
+<pre><code>* Troubleshooting rx3600 Memory
+The memory controller logic in the zx2 chip supports three versions of memory expanders. An eight
+DIMM memory carrier provides two memory boards that hold two or four memory DIMMs in both
+memory cells 0 and 1. A 24 DIMM memory carrier provides two 12-DIMM memory boards that
+hold four, eight, or twelve DIMMs in both memory cells 0 and 1.
+All three versions of memory expanders must have their memory DIMMs installed in groups of four,
+known as a quad. DIMM quads of different sizes can be installed in any physical rank on all
+versions of memory expanders, but they must be grouped by their size.
+
+* Memory Subsystem Behaviors
+You must replace DIMMs or memory carriers when a threshold is reached for multiple double-byte
+errors from one or more DIMMs on the same board. When any uncorrectable memory error (more
+than 2 bytes) or when no quad of like memory DIMMs is loaded in rank 0 of side 0, you must
+replace the DIMMs. All other DIMM errors are corrected by zx2 and reported to the Page
+Deallocation Table (PDT) and the diagnostic LED panel.
+
+* Memory DIMM Load Order
+For a minimally loaded server, four equal-size memory DIMMs must be installed in slots 0A, 0B,
+0C, and 0D on the same side of the 24/48 slot memory expander; and in the 0A and 0B slots
+on both 0 and 1 sides of the 8 slot memory expander.
+The first quad of DIMMs are always loaded into rank 0s slots for side 0 then in the rank 0s slots
+for side 1. The next quad of DIMMs are loaded into rank 1s slots for side 0, then for side 1, and
+so on, until all ranks slots for both sides are full.
+Best memory subsystem performance result when both memory sides 0 and 1 have the same number
+of DIMM quads in them.
+</code></pre>
+
+<p>In chapter 6. &quot;Removing and replacing server components&quot;, there are 11 pages
+(185-196), with picutes and example configurations, on replacing the DIMM&#39;s. It
+also has Memory loading guidelines:</p>
+
+<p>Use the following rules and guidelines when installing memory:</p>
+
+<ul>
+<li>Install DIMMs in pairs in the 8-DIMM memory carrier and in quads in the 24-DIMM memory carrier.</li>
+<li>Ensure all DIMMs within a pair or quad are identical.</li>
+<li>Install quads in order of capacity from largest to smallest. For example, install all 2 GB quads before 1 GB or smaller quads, and install all 1 GB quads before 512 MB quads.</li>
+<li>Side 0 must have equal or greater memory capacity than side 1.</li>
+<li>Install DIMM pairs or quads based on the following rules: 
+
+<ul>
+<li>1. Load pairs or quads into the memory carrier in order, starting with slot 0 and ending with slot 2.</li>
+<li>2. Install the first pair or quad in side 0.</li>
+<li>3. Install the second pair or quad in side 1.</li>
+<li>4. For the remaining pairs or quads: 
+
+<ul>
+<li>a. If both sides of the memory carrier contain the same capacity of memory, install the next pair or quad in side 0.</li>
+<li>b. If side 0 contains more memory capacity than side 1, install the next quad in side 1.</li>
+<li>c. If side 1 is full, install the remaining quads in side 0.</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<p>(Nested lists in Markdown are fun)</p>
+
+<p>The guide even has a list of Customer Replacable parts including HP and
+replacement part numbers. For my 2GB memory module, it would be <code>AD328A</code>, for
+sale on <a href="https://web.archive.org/web/20180605205753/http://www.memory4less.com/hp-2gb-ddr2-pc4200-ad328a">lots of places</a>.</p>
+
+<h3 id="toc_9">Conclusion</h3>
+
+<p>Combining all the knowledge and logging, my best guess is that the following
+slots have issues:</p>
+
+<ul>
+<li>Side 1 Slot 0B</li>
+<li>Side 1 Slot 0C</li>
+</ul>
+
+<p>Replacement DIMM&#39;s are ordered and on their way, soon to be replaced in the
+correct order. Let&#39;s hope that the machine get&#39;s the other half of it&#39;s RAM back
+and the problem is fixed.</p>
+
+<h3 id="toc_10">Reference, complete output of MP:CM&gt; df -nc -a</h3>
+
+<pre><code>FRU Entry #   0 : 
+FRU NAME: Core I/O Board ID:0000
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 7462080
+ Manufacturer       : CELESTICA 
+ Product Name       : Core IO Board with VGA          
+ S/N                : MYL011Y014      
+ Part Number        : AB463-60003
+ Fru File ID        : 10
+ Custom Info        : A       
+ Custom Info        : 4848
+ Custom Info        : A5
+ Custom Info        : 0
+
+PRODUCT INFO:
+
+FRU Entry #   1 :
+FRU NAME: Mem Extender 0 ID:0001
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 6729120
+ Manufacturer       : CELESTICA 
+ Product Name       : 12 DIMM Memory Extender         
+ S/N                : TH9842X51H      
+ Part Number        : AB463-60112
+ Fru File ID        : 10
+ Custom Info        : A       
+ Custom Info        : 4721
+ Custom Info        : A2
+ Custom Info        : 0
+
+PRODUCT INFO:
+
+FRU Entry #   2 :
+FRU NAME: Mem Extender 1 ID:0002
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 6729120
+ Manufacturer       : CELESTICA 
+ Product Name       : 12 DIMM Memory Extender         
+ S/N                : TH9842X51J      
+ Part Number        : AB463-60112
+ Fru File ID        : 10
+ Custom Info        : A       
+ Custom Info        : 4721
+ Custom Info        : A2
+ Custom Info        : 0
+
+PRODUCT INFO:
+
+FRU Entry #   3 :
+FRU NAME: Power Supply 0 ID:0003
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 6662537
+ Manufacturer       : C&amp;D       
+ Product Name       : BULK POWER SUPPLY               
+ S/N                : A804070ET3      
+ Part Number        : 0957-2198  
+ Fru File ID        : 10
+ Custom Info        : 00000000
+ Custom Info        : 0804
+ Custom Info        : 07
+ Custom Info        : 0
+
+PRODUCT INFO:
+
+FRU Entry #   4 :
+FRU NAME: Power Supply 1 ID:0004
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 6675416
+ Manufacturer       : muRata-ps 
+ Product Name       : BULK POWER SUPPLY               
+ S/N                : A8371000F7      
+ Part Number        : 0957-2198  
+ Fru File ID        : 10
+ Custom Info        : 00000000
+ Custom Info        : 0837
+ Custom Info        : 10
+ Custom Info        : 0
+
+PRODUCT INFO:
+
+FRU Entry #   5 :
+FRU NAME: I/O Assembly ID:0005
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 6655680
+ Manufacturer       : CELESTICA 
+ Product Name       : 10 Slot PCI-E 1.1 IOBP          
+ S/N                : TH9834955H      
+ Part Number        : AB463-60028
+ Fru File ID        : 10
+ Custom Info        : A       
+ Custom Info        : 4832
+ Custom Info        : A2
+ Custom Info        : 0
+
+PRODUCT INFO:
+
+FRU Entry #   6 :
+FRU NAME: Display Board ID:0006
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 6703200
+ Manufacturer       : CELESTICA 
+ Product Name       : DVD/Display Board               
+ S/N                : TH983910DA      
+ Part Number        : AB463-60020
+ Fru File ID        : 10
+ Custom Info        : A       
+ Custom Info        : 4814
+ Custom Info        : A3
+ Custom Info        : 0
+
+PRODUCT INFO:
+
+FRU Entry #   7 :
+FRU NAME: Disk Backplane ID:0007
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 6668640
+ Manufacturer       : CELESTICA 
+ Product Name       : 8 Disk Drive SAS Backplane      
+ S/N                : TH9835V650      
+ Part Number        : AB463-60006
+ Fru File ID        : 10
+ Custom Info        : A       
+ Custom Info        : 4814
+ Custom Info        : A3
+ Custom Info        : 0
+
+PRODUCT INFO:
+
+FRU Entry #   8 :
+FRU NAME: ProcessorCarrier ID:0009
+
+CHASSIS INFO:
+ Type:Rack Mount Chassis
+ Part Number        :            
+ Serial Number      :             
+
+BOARD INFO:
+ Mfg Date/Time      : 6732745
+ Manufacturer       : JABIL     
+ Product Name       : 2 Socket CPU Carrier            
+ S/N                : MYJ84203PH      
+ Part Number        : AB463-60113
+ Fru File ID        : 10
+ Custom Info        : C       
+ Custom Info        : 4818
+ Custom Info        : A3
+ Custom Info        : 0
+
+PRODUCT INFO:
+ Manufacturer       : hp
+ Product Name       : server rx3600                   
+ Part/Model         :            
+ Version            :       
+ S/N                :                     
+ Asset Tag          :                                 
+ FRU File ID        : 11
+ Custom Info        : 411
+
+FRU Entry #   9 :
+FRU NAME: Interconnect Bd ID:0010
+
+CHASSIS INFO:
+ Type:Rack Mount Chassis
+ Part Number        :            
+ Serial Number      :             
+
+BOARD INFO:
+ Mfg Date/Time      : 6694560
+ Manufacturer       : CELESTICA 
+ Product Name       : SAS Interconnect Board          
+ S/N                : TH9838Z061      
+ Part Number        : AB463-60025
+ Fru File ID        : 10
+ Custom Info        : A       
+ Custom Info        : 4814
+ Custom Info        : A2
+ Custom Info        : 0
+
+PRODUCT INFO:
+ Manufacturer       : hp
+ Product Name       : server rx3600
+ Part/Model         : AB596A
+ Version            :       
+ S/N                : DEH48456BK
+ Asset Tag          :                                 
+ FRU File ID        : 11
+ Custom Info        : 411
+
+FRU Entry #  10 :
+FRU NAME: Hot-Plug Board ID:0011
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 6658560
+ Manufacturer       : CELESTICA 
+ Product Name       : PCI Hot Plug Control Board      
+ S/N                : TH983515H7      
+ Part Number        : AB463-60002
+ Fru File ID        : 10
+ Custom Info        : A       
+ Custom Info        : 4711
+ Custom Info        : A2
+ Custom Info        : 0
+
+PRODUCT INFO:
+
+FRU Entry #  11 :
+FRU NAME: I/O Power Module ID:0015
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 2105376
+ Manufacturer       : C&amp;D       
+ Product Name       : PCI POWER BOARD                 
+ S/N                : 9080708250F8    
+ Part Number        : 0950-4677  
+ Fru File ID        : 10
+ Custom Info        : X1      
+ Custom Info        : 0825
+ Custom Info        : A1
+ Custom Info        : 0
+
+PRODUCT INFO:
+
+FRU Entry #  12 :
+FRU NAME: Processor 0 ID:0032
+
+PROCESSOR DATA 
+ S-spec/QDF:  LAB5
+ Sample/Prod: 01
+
+CORE DATA 
+ Arch Revision                :  00
+ Core Family                  :  20
+ Core Model                   :  01
+ Core Stepping                :  01
+ Max Core Frequency           : 1666 MHZ
+ Max SysBus Frequency         :  333 MHZ
+ Core Voltage                 : 1150 mV
+ Core Voltage Tolerance,High  :   64 mV
+ Core Voltage Tolerance,Low   :   3F mV
+
+CACHE DATA 
+ Cache Size                   :   18 MB
+
+PACKAGE DATA 
+ Package Revision             : NE Substrate Revision: 01
+
+PROC PART NUMBER DATA 
+ Part Number                  : 80567KF
+ Electronic Signature         : 0003AB71B8C89784
+
+THERMAL REF DATA 
+ Upper Temp Ref               :  92 C
+ Calibr Offset                :  18 C
+
+FEATURES DATA 
+ IA-32 Proc Core Feature Flags:  FFFB8743
+ IA-64 Proc Core Feature Flags:  1B81806300000000
+ Package Feature Flags        :  3F010000
+ Devices on TAP Chain         :  2
+
+FRU Entry #  13 :
+FRU NAME: Processor 1 ID:0033
+
+PROCESSOR DATA 
+ S-spec/QDF:  LAB5
+ Sample/Prod: 01
+
+CORE DATA 
+ Arch Revision                :  00
+ Core Family                  :  20
+ Core Model                   :  01
+ Core Stepping                :  01
+ Max Core Frequency           : 1666 MHZ
+ Max SysBus Frequency         :  333 MHZ
+ Core Voltage                 : 1150 mV
+ Core Voltage Tolerance,High  :   64 mV
+ Core Voltage Tolerance,Low   :   3F mV
+
+CACHE DATA 
+ Cache Size                   :   18 MB
+
+PACKAGE DATA 
+ Package Revision             : NE Substrate Revision: 01
+
+PROC PART NUMBER DATA 
+ Part Number                  : 80567KF
+ Electronic Signature         : 0001E4BA8B93CDD5
+
+THERMAL REF DATA 
+ Upper Temp Ref               :  92 C
+ Calibr Offset                :  17 C
+
+FEATURES DATA 
+ IA-32 Proc Core Feature Flags:  FFFB8743
+ IA-64 Proc Core Feature Flags:  1B81806300000000
+ Package Feature Flags        :  3F010000
+ Devices on TAP Chain         :  2
+
+FRU Entry #  14 :
+FRU NAME: Processor 0 RAM ID:0036
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 0
+ Manufacturer       : 
+ Product Name       : MTV_A1_1618     
+ S/N                : PR1084441T  
+ Part Number        : AD391-2100C
+ Fru File ID        : B
+ Custom Info        : 
+ Custom Info        : 4733
+ Custom Info        :   
+ Custom Info        : 2H64014D2b82    
+ Custom Info        : 1
+
+PRODUCT INFO:
+
+FRU Entry #  15 :
+FRU NAME: Processor 1 RAM ID:0037
+
+CHASSIS INFO:
+
+BOARD INFO:
+ Mfg Date/Time      : 0
+ Manufacturer       : 
+ Product Name       : MTV_A1_1618     
+ S/N                : PR108443XV  
+ Part Number        : AD391-2100C
+ Fru File ID        : B
+ Custom Info        : 
+ Custom Info        : 4733
+ Custom Info        :   
+ Custom Info        : 2H64014D2b82    
+ Custom Info        : 1
+
+PRODUCT INFO:
+
+FRU Entry #  16 :
+FRU NAME                : MemExt0 DIMM0A
+FRU ID                  : 0128
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0xCE00000000000000
+JEDEC Mfg Location      : 0x01
+JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+JEDEC Mfg Revision Code : 0x3343
+JEDEC Mfg Year          : 0x06
+JEDEC Mfg Week          : 0x40
+JEDEC Mfg Serial #      : 0x711D209E
+Mfg Unique Serial #     : 0x00CE010640711D209E
+
+FRU Entry #  17 :
+FRU NAME                : MemExt0 DIMM0B
+FRU ID                  : 0136
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0xCE00000000000000
+JEDEC Mfg Location      : 0x01
+JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+JEDEC Mfg Revision Code : 0x3343
+JEDEC Mfg Year          : 0x06
+JEDEC Mfg Week          : 0x40
+JEDEC Mfg Serial #      : 0x711D20AA
+Mfg Unique Serial #     : 0x00CE010640711D20AA
+
+FRU Entry #  18 :
+FRU NAME                : MemExt0 DIMM0C
+FRU ID                  : 0144
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0xCE00000000000000
+JEDEC Mfg Location      : 0x01
+JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+JEDEC Mfg Revision Code : 0x3343
+JEDEC Mfg Year          : 0x06
+JEDEC Mfg Week          : 0x40
+JEDEC Mfg Serial #      : 0x711D20A2
+Mfg Unique Serial #     : 0x00CE010640711D20A2
+
+FRU Entry #  19 :
+FRU NAME                : MemExt0 DIMM0D
+FRU ID                  : 0152
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0xCE00000000000000
+JEDEC Mfg Location      : 0x01
+JEDEC Mfg Part #        : M3 93T5750CZ3-CD5 
+JEDEC Mfg Revision Code : 0x3343
+JEDEC Mfg Year          : 0x06
+JEDEC Mfg Week          : 0x40
+JEDEC Mfg Serial #      : 0x711D20A8
+Mfg Unique Serial #     : 0x00CE010640711D20A8
+
+FRU Entry #  20 :
+FRU NAME                : MemExt1 DIMM0A
+FRU ID                  : 0160
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0x2C00000000000000
+JEDEC Mfg Location      : 0x0C
+JEDEC Mfg Part #        : 36HTF25672PY-667D1
+JEDEC Mfg Revision Code : 0x0100
+JEDEC Mfg Year          : 0x08
+JEDEC Mfg Week          : 0x36
+JEDEC Mfg Serial #      : 0xD925C4D3
+Mfg Unique Serial #     : 0x002C0C0836D925C4D3
+
+FRU Entry #  21 :
+FRU NAME                : MemExt1 DIMM0B
+FRU ID                  : 0168
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0x2C00000000000000
+JEDEC Mfg Location      : 0x0C
+JEDEC Mfg Part #        : 36HTF25672PY-667D1
+JEDEC Mfg Revision Code : 0x0100
+JEDEC Mfg Year          : 0x08
+JEDEC Mfg Week          : 0x36
+JEDEC Mfg Serial #      : 0xD72FB723
+Mfg Unique Serial #     : 0x002C0C0836D72FB723
+
+FRU Entry #  22 :
+FRU NAME                : MemExt1 DIMM0C
+FRU ID                  : 0176
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0x2C00000000000000
+JEDEC Mfg Location      : 0x0C
+JEDEC Mfg Part #        : 36HTF25672PY-667D1
+JEDEC Mfg Revision Code : 0x0100
+JEDEC Mfg Year          : 0x08
+JEDEC Mfg Week          : 0x36
+JEDEC Mfg Serial #      : 0xD925C4D9
+Mfg Unique Serial #     : 0x002C0C0836D925C4D9
+
+FRU Entry #  23 :
+FRU NAME                : MemExt1 DIMM0D
+FRU ID                  : 0184
+JEDEC SPD Rev           : 0x12
+JEDEC Mfg ID            : 0x2C00000000000000
+JEDEC Mfg Location      : 0x0C
+JEDEC Mfg Part #        : 36HTF25672PY-667D1
+JEDEC Mfg Revision Code : 0x0100
+JEDEC Mfg Year          : 0x08
+JEDEC Mfg Week          : 0x36
+JEDEC Mfg Serial #      : 0xD925C4CB
+Mfg Unique Serial #     : 0x002C0C0836D925C4CB
+
+   -&gt; This is the last entry in the selected list.
+
+-&gt; Command successful.
+
+
+
+[mphpux09] MP:CM&gt; sysrev
+
+
+SYSREV
+
+Current firmware revisions
+
+ MP FW     : F.02.23
+ BMC FW    : 05.25
+ EFI FW    : ROM A 07.12, ROM B 07.12
+ System FW : ROM A 04.03, ROM B 04.03, Boot ROM A
+ PDH FW    : 50.07
+ DHPC FW   : 01.23
+ UCIO FW   : 03.0b
+ PRS FW    : 00.08 UpSeqRev: 0c, DownSeqRev: 08
+ HFC FW    : 00.04 SetRev: 00
+</code></pre>
+Tags: <a href="../tags/blog.html">blog</a>
+, <a href="../tags/cstm.html">cstm</a>
+, <a href="../tags/ems.html">ems</a>
+, <a href="../tags/hardware.html">hardware</a>
+, <a href="../tags/hp.html">hp</a>
+, <a href="../tags/hp-ux.html">hp-ux</a>
+, <a href="../tags/ilo.html">ilo</a>
+, <a href="../tags/itanium.html">itanium</a>
+, <a href="../tags/raid.html">raid</a>
+, <a href="../tags/ram.html">ram</a>
+, <a href="../tags/ssh.html">ssh</a>
+, <a href="../tags/unix.html">unix</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

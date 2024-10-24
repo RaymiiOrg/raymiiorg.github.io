@@ -1,0 +1,197 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Git-clean
+Author      : 	Remy van Elst
+Date        : 	08-11-2012
+URL         : 	https://raymii.org/s/software/Git-clean.html
+Format      : 	Markdown/HTML
+---
+
+
+
+The script below is a script to clean a git repository. Either to see big files,
+or to remove them, and remove them from history.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+#### Examples
+
+View the list of big files in the git repo and the git repo history (from the
+sourcecode repo of this website):
+
+    
+    
+    remy at sparcstation-20 in ~/repo/raymiiorg (master)
+    $ ~/bin/git-clean.sh df
+    All sizes are in kB's. The pack column is the size of the object, compressed, inside the pack file.
+    size     pack    SHA                                       location
+    2051757  655294  7e94729f780724d3b00803b018199f137959630e  includes/sec/dutch.txt
+    901683   901853  52e346e5ce9a2f4d9d531f93c082178684da4c72  images/smalldistro12.png
+    830998   827833  9afcd85c73a994ce1dc1e5daf1856113d6bf85f0  images/smalldistro10.png
+    799361   765804  a8e7d464fbb7e5159442b2644a4f60f6352bf238  content/downloads/packages/gource-0.38-2.x86_64.rpm
+    793898   763445  ea80fcf775a070e8d7c2b9375316f27cdac45bf6  content/downloads/packages/gource_0.38-1_amd64.deb
+    753400   746864  d9901f182cbd7090efe679847851027e1e05882c  content/downloads/packages/logstalgia-1.0.3-2.x86_64.rpm
+    747480   743285  e5aa2be4d510c14c1e67f2c07dbcf812a95a0798  content/downloads/packages/logstalgia_1.0.3-1_amd64.deb
+    635854   636023  6e5c39dff693b861f25ec96ba16c5fe9700ec9c9  images/smalldistro3.png
+    443121   439081  4461b7489dcb46911e14376e37e7abbe335668a7  images/smalldistro2.png
+    395247   393304  47a6ab134240e2433310cc40d8909bd11cf80935  images/smalldistro7.png
+    
+
+Remove the file images/smalldistro12.png from the repo and rewrite the history
+(note the backslash in the filename):
+
+    
+    
+    remy at sparcstation-20 in ~/repo/raymiiorg (master)
+    $ ~/bin/git-clean.sh rm imagessmalldistro12.png
+    Removing Biggest file imagessmalldistro12.png from git repo
+    Rewrite 2f65a614583053c57934b1b9ad378b77ac1ddbb9 (259/259)
+    WARNING: Ref 'refs/heads/master' is unchanged
+    WARNING: Ref 'refs/remotes/origin/master' is unchanged
+    WARNING: Ref 'refs/remotes/origin/master' is unchanged
+    WARNING: Ref 'refs/stash' is unchanged
+    Counting objects: 2159, done.
+    Delta compression using up to 4 threads.
+    Compressing objects: 100% (785/785), done.
+    Writing objects: 100% (2159/2159), done.
+    Total 2159 (delta 1366), reused 2152 (delta 1363)
+    Counting objects: 2159, done.
+    Delta compression using up to 4 threads.
+    Compressing objects: 100% (2148/2148), done.
+    Writing objects: 100% (2159/2159), done.
+    Total 2159 (delta 1368), reused 791 (delta 0)
+    
+
+#### Info
+
+##### Installation
+
+Copy the script into a text file, `chmod +x ./git-clean.sh` and run it. If you
+do not run it from inside a git repository you will get an error.
+
+##### License
+
+GPLv3.
+
+#### The script
+
+    
+    
+    #!/bin/bash
+    # Script to remove files from the git history.
+    # Execute this script in the git root directory
+    # For a size report: ./gitsize.sh df
+    # To remove the big files:
+    # use like: ./gitsize.sh rm $bigfilename
+    # Example: ./gitsize.sh rm includes/ubuntu-12.04.iso
+    # It will then search your git repo and remove all of it.
+    
+    # Copyright (C) 2012 Remy van Elst
+    
+    #     This program is free software: you can redistribute it and/or modify
+    #     it under the terms of the GNU General Public License as published by
+    #     the Free Software Foundation, either version 3 of the License, or
+    #     (at your option) any later version.
+    
+    #     This program is distributed in the hope that it will be useful,
+    #     but WITHOUT ANY WARRANTY; without even the implied warranty of
+    #     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    #     GNU General Public License for more details.
+    
+    #     You should have received a copy of the GNU General Public License
+    #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    if [ ! -e $1 ]; then
+        if [ -d .git ]; then
+            if [ $1 == "rm" ]; then
+                if [ ! -e $2 ]; then
+                    echo "Removing Biggest file $2 from git repo"
+                    DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &&&& pwd )"
+                    rm -rf .git/refs/original/
+                    git filter-branch --index-filter "git rm --cached --ignore-unmatch $2" --tag-name-filter cat -- --all
+                    rm -rf .git/refs/original/
+                    git reflog expire --all --expire-unreachable=0
+                    git repack -A -d
+                    git prune
+                    git gc --aggressive
+                else 
+                    echo "I need a file to remove..."
+                fi
+            elif [ $1 == "df" ]; then
+                IFS=$'n';
+                echo "All sizes are in kB's. The pack column is the size of the object, compressed, inside the pack file."
+                objects=`git verify-pack -v .git/objects/pack/pack-*.idx | grep -v chain | grep -v pack | sort -k3nr | head -n 10`
+                output="size,pack,SHA,location"
+                for y in $objects
+                do
+                    # extract the size in bytes
+                    size=$((`echo $y | cut -f 5 -d ' '`))
+                    # extract the compressed size in bytes
+                    compressedSize=$((`echo $y | cut -f 6 -d ' '`))
+                    # extract the SHA
+                    sha=`echo $y | cut -f 1 -d ' '`
+                    # find the objects location in the repository tree
+                    other=`git rev-list --all --objects | grep $sha`
+                    #lineBreak=`echo -e "n"`
+                    output="${output}n${size},${compressedSize},${other}"
+                done
+    
+                echo -e $output | column -t -s ', '
+            fi
+        else
+            echo "Cannot find .git directory, exitting. This script should be ran from a git working dir."
+            exit 1
+        fi
+    else
+        echo "Usage:"
+        echo "    For a size report:"
+        echo "    $0 df"
+        echo "    "
+        echo "    To remove a big file from git history:"
+        echo "    $0 rm <filename>"
+        echo "    Example, to remove the file "includes\ubuntu-12.04.iso":"
+        echo "    $0 rm includes\ubuntu-12.04.iso"
+        echo "    Made by Raymii.org. GPLv3 License"
+    
+    fi
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

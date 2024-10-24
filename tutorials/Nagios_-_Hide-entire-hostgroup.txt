@@ -1,0 +1,132 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Nagios - Hide all hosts in hostgroup
+Author      : 	Remy van Elst
+Date        : 	30-07-2013
+URL         : 	https://raymii.org/s/tutorials/Nagios_-_Hide-entire-hostgroup.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This tutorial shows you how to hide all hosts from a hostgroup in Nagios,
+including the webinterface and email/sms notifications. It does however monitors
+and checks all the hosts in the hostgroup, so when there are problems you can
+view the hosts in Nagios. This is usefull for example when you have a staging,
+preproduction and production environment monitored by the same Nagios host, or
+by a Nagios cluster, and want to hide all of staging, but do want to quickly
+view the status when developers complain about a node.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+First you needble all notifications for the hostgroup of choice, in my case
+"staging". Navigate in the Web interface to the Hostgroup Overview, Click on the
+second hostgroup link (like: staging _(staging)_ ) and then select "Disable
+notifications for all services in this hostgroup". On the next page, select the
+checkbox "Disable for hosts too" and click Commit. You could also go to the
+following url, replacing the values for your environment: `http(s)://&lt;nagios-
+url.tld&gt;/&lt;cgi-folder&gt;/cmd.cgi?cmd_type=64&amp;hostgroup=&lt;hostgroup-
+name&gt;`.
+
+Now navigate to the following page, again replacing the values for your
+environment: `http(s)://&lt;nagios-url.tld&gt;/&lt;cgi-
+folder&gt;/status.cgi?host=all&amp;type=detail&amp;servicestatustypes=28&amp;serviceprops=8202`.
+This will open the view for the Service Status, with the properties `Not In
+Scheduled Downtime &amp; Has Not Been Acknowledged &amp; Notifications Enabled`.
+There are all your notifications, but not from the "hidden" hostgroup.
+
+You can also change the HTML files (index.html or side.html) to either change
+the frame to go directly to this page, or add a link in the menu to this page.
+
+### URL Properties
+
+You can fiddle with the Nagios URL properties, below are the values you can use,
+which you can also find in the Nagios Source Code, in `include/cgiutils.h`.
+
+    
+    
+    /****************** HOST AND SERVICE FILTER PROPERTIES  *******************/
+    
+    #define HOST_SCHEDULED_DOWNTIME         1
+    #define HOST_NO_SCHEDULED_DOWNTIME      2
+    #define HOST_STATE_ACKNOWLEDGED         4
+    #define HOST_STATE_UNACKNOWLEDGED       8
+    #define HOST_CHECKS_DISABLED            16
+    #define HOST_CHECKS_ENABLED             32
+    #define HOST_EVENT_HANDLER_DISABLED     64
+    #define HOST_EVENT_HANDLER_ENABLED      128
+    #define HOST_FLAP_DETECTION_DISABLED    256
+    #define HOST_FLAP_DETECTION_ENABLED     512
+    #define HOST_IS_FLAPPING                1024
+    #define HOST_IS_NOT_FLAPPING            2048
+    #define HOST_NOTIFICATIONS_DISABLED     4096
+    #define HOST_NOTIFICATIONS_ENABLED      8192
+    #define HOST_PASSIVE_CHECKS_DISABLED    16384
+    #define HOST_PASSIVE_CHECKS_ENABLED     32768
+    #define HOST_PASSIVE_CHECK              65536
+    #define HOST_ACTIVE_CHECK               131072
+    
+    
+    #define SERVICE_SCHEDULED_DOWNTIME      1
+    #define SERVICE_NO_SCHEDULED_DOWNTIME   2
+    #define SERVICE_STATE_ACKNOWLEDGED      4
+    #define SERVICE_STATE_UNACKNOWLEDGED    8
+    #define SERVICE_CHECKS_DISABLED         16
+    #define SERVICE_CHECKS_ENABLED          32
+    #define SERVICE_EVENT_HANDLER_DISABLED  64
+    #define SERVICE_EVENT_HANDLER_ENABLED   128
+    #define SERVICE_FLAP_DETECTION_ENABLED  256
+    #define SERVICE_FLAP_DETECTION_DISABLED 512
+    #define SERVICE_IS_FLAPPING             1024
+    #define SERVICE_IS_NOT_FLAPPING         2048
+    #define SERVICE_NOTIFICATIONS_DISABLED  4096
+    #define SERVICE_NOTIFICATIONS_ENABLED   8192
+    #define SERVICE_PASSIVE_CHECKS_DISABLED 16384
+    #define SERVICE_PASSIVE_CHECKS_ENABLED  32768
+    #define SERVICE_PASSIVE_CHECK           65536
+    #define SERVICE_ACTIVE_CHECK            131072
+    
+
+In our example above we added the 8192 with 8 and 2 to get 8202, so we have
+selected `SERVICE_NOTIFICATIONS_ENABLED`, `SERVICE_STATE_UNACKNOWLEDGED` and
+`SERVICE_NO_SCHEDULED_DOWNTIME`.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

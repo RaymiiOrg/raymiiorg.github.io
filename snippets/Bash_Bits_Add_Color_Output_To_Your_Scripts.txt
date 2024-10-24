@@ -1,0 +1,125 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Bash Bits: Add colour output to your script
+Author      : 	Remy van Elst
+Date        : 	18-09-2013
+URL         : 	https://raymii.org/s/snippets/Bash_Bits_Add_Color_Output_To_Your_Scripts.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Bash Bits are small examples and tips for Bash Scripts. This bash bit shows you
+how to add coloured output to your scripts.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+[All Bash Bits can be found using this link][2]
+
+A little background first on how this all works. Coloured output has to be
+supported by your terminal emulator, but most modern ones support it. It works
+by sending specific control codes to your terminal.
+
+Terminal (control-)codes are needed to give specific commands to your terminal.
+A terminal control code is a special sequence of characters that is printed
+(like any other text). If the terminal understands the code, it won't display
+the character-sequence, but will perform some action. You can always print the
+codes with a simple echo command.
+
+Because there's a large number of different terminal control languages, usually
+a system has an intermediate-layer to talk to it. The real codes are looked up
+in a database for the currently detected terminal type and you give standardized
+requests to an API or (from the shell) to a command.
+
+One of these commands is tput - it accepts a set of acronymes and parameters for
+them, looks up the correct codes for the detected terminal in the terminfo
+database and prints the correct codes (the terminal hopefully understands).
+
+[You can read more about terminal control codes and tput in the terminfo(5)
+manual page, click this link for the online version][3]
+
+When I need to use colours in my scripts I often just use red and green. I have
+a set of functions which I use named after the colour:
+
+    
+    
+    black() { echo "$(tput setaf 0)$*$(tput setaf 9)"; }
+    red() { echo "$(tput setaf 1)$*$(tput setaf 9)"; }
+    green() { echo "$(tput setaf 2)$*$(tput setaf 9)"; }
+    yellow() { echo "$(tput setaf 3)$*$(tput setaf 9)"; }
+    blue() { echo "$(tput setaf 4)$*$(tput setaf 9)"; }
+    magenta() { echo "$(tput setaf 5)$*$(tput setaf 9)"; }
+    cyan() { echo "$(tput setaf 6)$*$(tput setaf 9)"; }
+    white() { echo "$(tput setaf 7)$*$(tput setaf 9)"; }
+    
+
+Then when I need to colourize some output I can just use the function like so:
+`red "Error: Something went horribly wrong..."`. Down below you can find sample
+code which should print text in all the above defined colours:
+
+    
+    
+    black "This is black text"
+    red "This is red text"
+    green "This is green text"
+    yellow "This is yellow text"
+    blue "This is blue text"
+    magenta "This is magenta text"
+    cyan "This is cyan text"
+    white "This is white text"
+    
+
+This image shows you how it looks on my terminal:  
+![Terminal Colours][4]
+
+And last but not least here is a bash command which prints out all colour that
+your terminal supports. Good to test if you have 256 colours enabled or not,
+plus it shows you the number to use with tput for that colour.
+
+    
+    
+    ( x=`tput op` y=`printf %$((${COLUMNS}-6))s`;for i in {0..256};do o=00$i;echo -e ${o:${#o}-3:3} `tput setaf $i;tput setab $i`${y// /=}$x;done; )
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://raymii.org/s/tags/bash-bits.html
+   [3]: http://linux.die.net/man/5/terminfo
+   [4]: https://raymii.org/s/inc/img/terminal-colors.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

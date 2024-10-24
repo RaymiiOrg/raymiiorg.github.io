@@ -1,0 +1,129 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Get the current or all Firefox tab urls in Bash
+Author      : 	Remy van Elst
+Date        : 	01-09-2014
+URL         : 	https://raymii.org/s/snippets/Get_the_current_or_all_Firefox_tab_urls_in_Bash.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This snippets gets the current firefox tab url or all the firefox tab url's. It
+uses the sessionstore.js file in your profile folder. That file is updated
+almost instantly, however it will not always be the correct url.
+
+I use this to track my time on different websites over the day together with
+some other shell scripts.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+Get all the open tabs:
+
+    
+    
+    python2 <<< $'import json\nf = open("/home/username/.mozilla/firefox/RANDOM.profile/sessionstore.js", "r")\njdata = json.loads(f.read())\nf.close()\nfor win in jdata.get("windows"):\n\tfor tab in win.get("tabs"):\n\t\ti = tab.get("index") - 1\n\t\tprint tab.get("entries")[i].get("url")'
+    
+
+Example output:
+
+http://wiki.bash-hackers.org/commands/classictest
+http://monitoring.raymii.nl/nagios/ http://www.brendangregg.com/blog/2014-07-16
+/iosnoop-for-linux.html http://duplicity.nongnu.org/duplicity.1.html
+http://www.routeralley.com/guides.html http://www.hactrn.net/sra/vaxen.html
+http://duplicity.nongnu.org/duplicity.1.html
+http://tweakers.net/nieuws/list/20140902
+
+Get the current active/open tab number:
+
+    
+    
+    python2 <<< $'import json\nf = open("/home/username/.mozilla/firefox/RANDOM.profile/sessionstore.js", "r")\njdata = json.loads(f.read())\nf.close()\nprint str(jdata["windows"][0]["selected"])'
+    
+
+Example output:
+
+    
+    
+    11
+    
+
+Printing that line number from all open tab url's gives you the current open
+tab. `sed -n "3p" file` prints line 3 from `file`. Combining the commands with
+bash expansion results in the following:
+
+    
+    
+    sed -n "$(python2 <<< $'import json\nf = open("/home/username/.mozilla/firefox/RANDOM.profile/sessionstore.js", "r")\njdata = json.loads(f.read())\nf.close()\nprint str(jdata["windows"][0]["selected"])')p" <(python2 <<< $'import json\nf = open("/home/username/.mozilla/firefox/RANDOM.profile/sessionstore.js", "r")\njdata = json.loads(f.read())\nf.close()\nfor win in jdata.get("windows"):\n\tfor tab in win.get("tabs"):\n\t\ti = tab.get("index") - 1\n\t\tprint tab.get("entries")[i].get("url")')
+    
+
+Output:
+
+    
+    
+    http://tweakers.net/nieuws/list/20140902
+    
+
+This can also be in your `.bashrc` file:
+
+    
+    
+    current_firefox_tab_number() {
+        python2 <<< $'import json\nf = open("/home/username/.mozilla/firefox/RANDOM.profile/sessionstore.js", "r")\njdata = json.loads(f.read())\nf.close()\nprint str(jdata["windows"][0]["selected"])'
+    }
+    
+    current_firefox_url() {
+        sed -n "$(current_firefox_tab_number)p" <(python2 <<< $'import json\nf = open("/home/username/.mozilla/firefox/RANDOM.profile/sessionstore.js", "r")\njdata = json.loads(f.read())\nf.close()\nfor win in jdata.get("windows"):\n\tfor tab in win.get("tabs"):\n\t\ti = tab.get("index") - 1\n\t\tprint tab.get("entries")[i].get("url")')
+    }
+    
+
+Example:
+
+    
+    
+    $ current_firefox_tab_number 
+    11
+    
+    $ current_firefox_url 
+    http://tweakers.net/nieuws/list/20140902
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

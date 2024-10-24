@@ -1,0 +1,180 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Raspberry Pi unattended upgrade Raspbian to Debian Testing
+Author      : 	Remy van Elst
+Date        : 	27-07-2016
+URL         : 	https://raymii.org/s/blog/Raspberry_Pi_Raspbian_Unattended_Upgrade_Jessie_to_Testing.html
+Format      : 	Markdown/HTML
+---
+
+
+
+I'm working on a Nitrokey/SmartCard-HSM cluster article and therefore I needed
+three identical computers. The current version of Raspbian (2016-05-27) is based
+on Debian Jessie and comes with a version of OpenSC that is too old (0.14) to
+work with the Nitrokey/SmartCard-HSM. Since there is no Ubuntu 16.04 official
+image yet I decided to upgrade Raspbian to Debian Testing. Since I don't want to
+answer yes to any config file changes or service restarts I figured out how to
+do an unattended dist-upgrade.
+
+![][1]
+
+> The 3-Pi HSM cluster to be used for the cluster articles
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+The [Nitrokey HSM][3] is an open hardware and open software device. It is a USB
+version of the [SmartCard-HSM][4]. Both the [SmartCard-HSM][5] as the [Nitrokey
+HSM][6] have sources available and are fully supported by the [OpenSC][7]
+project.
+
+I have multiple [articles on][8] the [Nitrokey HSM/SmartCard-HSM][9]. I also
+have a lot of professional experience with large expensive HSM hardware.
+
+### ARM repositories
+
+Since Raspbian is a fork of Debian I first checked if there were any testing
+repositories in [the mirrors][10] and as it turns out, [there are][11]. Since
+the current version ships with `OpenSC 0.14` and there is a `0.16` package in
+the repo [here][12] I suspected that that was the testing package. Installing it
+on Jessie failed however, so a `dist-upgrade` it was.
+
+### dist-upgrade
+
+A regular repository change in `sources.list` and a `dist-upgrade` are very
+interactive. It involves manual editing and the `apt` upgrade asks a lot of
+questions, for example, retain a config file, restart services, changelogs, etc.
+Since I tend to reinstall Pi SD cards often I don't want to do that manual
+process every time. So here are the commands to do an unattended upgrade to
+`testing`. Which in my case works the 7 times I tried now, without asking
+questions. Do note that in your case it might hose your Pi and destroy all data
+and projects on it, **so make sure you have a tested working backup**.
+
+Place this in a file named `upgrade.sh`:
+
+    
+    
+    # vim upgrade.sh
+    # Remove any third party sources
+    rm -rf /etc/apt/sources.list.d/*
+    
+    # Change te repo's
+    sed -i -e 's/jessie/testing/g' /etc/apt/sources.list
+    
+    # Update package lists
+    apt-get update
+    
+    ## UPGRADE ALL THE THINGS!!!
+    DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -q -y -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" dist-upgrade
+    
+    # Remove no longer needed packages
+    DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -q -y -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" autoremove --purge
+    
+    # FINISH HIM
+    reboot
+    
+
+Save it and then run it to start the upgrade:
+
+    
+    
+    bash ./upgrade.sh
+    
+
+### Debian upgrade, unattended explanation
+
+Debian packages can prompt a user during install to generate custom
+configuration, or in the case of MySQL, set a root password. It can also have
+messages with different priorities. The `critical` priority is (almost) never
+used so it won't prompt you. The `noninteractive` frontend tells the terminal
+that you're not able to answer any questions.
+
+The two `Dpkg::Options` mean the following:
+
+  * `--force-confdef`: upgrade the configuration file if there are no local changes
+  * `--force-confold`: otherwise, preserve the existing configuration file
+
+If you supply `--force-confnew` instead of `--force-confold` it will overwrite
+any changes by the new config file.
+
+If you want to install a package unattended you know will ask questions (like
+MySQL), then you can use `debconf` to set the answer to those questions
+beforehand (scriptable, yay). In the case of MySQL on 12.04:
+
+    
+    
+    echo mysql-server-5.5 mysql-server/root_password password P@ssw0rd | debconf-set-selections
+    echo mysql-server-5.5 mysql-server/root_password_again password P@ss0wrd | debconf-set-selections
+    
+
+You can view all possible selections (questions) with the `debconf-get-
+selections` command:
+
+    
+    
+    debconf-get-selections | grep mysql-server
+    
+
+Output:
+
+    
+    
+    mysql-server-5.5  mysql-server/root_password_again  password  
+    mysql-server-5.5  mysql-server/root_password  password  
+    mysql-server-5.5  mysql-server/error_setting_password error 
+    mysql-server-5.5  mysql-server-5.5/postrm_remove_databases  boolean false
+    mysql-server-5.5  mysql-server-5.5/start_on_boot  boolean true
+    
+
+If `debconf` is not installed, the package `debconf-utils` provides it.
+
+   [1]: https://raymii.org/s/inc/img/hsmcluster.jpg
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: http://nitrokey.com
+   [4]: http://www.smartcard-hsm.com/
+   [5]: http://www.smartcard-hsm.com/opensource.html
+   [6]: https://github.com/nitrokey
+   [7]: https://github.com/OpenSC/OpenSC/wiki/SmartCardHSM
+   [8]: https://raymii.org/s/articles/Get_Started_With_The_Nitrokey_HSM.html
+   [9]: https://raymii.org/s/articles/Nitrokey_HSM_in_Apache_with_mod_nss.html
+   [10]: http://mirrordirector.raspbian.org/raspbian/dists/
+   [11]: http://mirrordirector.raspbian.org/raspbian/dists/testing/
+   [12]: http://mirrordirector.raspbian.org/raspbian/pool/main/o/opensc/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

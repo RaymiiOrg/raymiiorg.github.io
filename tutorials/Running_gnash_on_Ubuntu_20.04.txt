@@ -1,0 +1,172 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Running gnash on Ubuntu 20.04 (in Docker with X11 forwarding)
+Author      : 	Remy van Elst
+Date        : 	05-07-2020
+URL         : 	https://raymii.org/s/tutorials/Running_gnash_on_Ubuntu_20.04.html
+Format      : 	Markdown/HTML
+---
+
+
+
+As you might have noticed, I'm slowly updating servers and workstations to 
+Ubuntu 20.04, and as always with major upgrades, things break or are removed.
+Earlier this week I [fixed up pygopherd][1] and today I'll get gnash running
+again. Gnash is not updated since 2011 and therefore, finally, [removed from
+the Ubuntu 20.04 repositories][3]. 
+
+Compiling gnash from source proved to be a lot of effort due to gstreamer
+dependencies and after a few hours I thought, why not just spin up a Ubuntu
+18.04 Docker container, install gnash and forward X11.  That took just about 10
+minutes and now I'm happily running gnash again. In this tutorial I'll show you
+how to setup gnash in a docker container  with x11 forwarding and host
+networking.
+
+### Why run gnash?
+
+Some of my $dayjob work depends on gnash, although it's actively being
+replaced with QT. Gnash is a linux flash player, in our case runs on the 
+framebuffer of an embedded device. 
+
+For  development I sometimes need to run gnash on my workstation with an SSH 
+port forward to a development board. I can then locally interact with the UI.
+Also, the development board does not require a screen, which saves time and 
+space in development setup. 
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+Here is a picture of gnash running on Ubuntu 20.04, via a local docker 
+container:
+
+![gnash in docker][2]
+
+Here is gnash running on my Ubuntu 18.04 workstation, as you can see the window
+manager theme and styling is missing in Docker, but I can live with that. I do
+miss my CDE window border though:
+
+![gnash][4]
+
+Both screenshots are showing the user interface for one of the coffee machines 
+we develop software for at $dayjob. One shows the user facing menu and one shows
+the service menu, where a machine operator in this case can view all sorts of
+counters (beverage, user defined, components). 
+
+
+### Gnash in Docker
+
+Lets get started. I assume you have docker installed already. Most of the 
+[X11 forwarding][5] is taken from the article by [Fabio Rehm][5]. 
+
+Create a folder for your new docker image:
+
+    mkdir gnash-docker
+    cd gnash-docker
+
+Create a Dockerfile:
+
+    vim Dockerfile
+
+Paste the following in it:
+
+    FROM ubuntu:18.04
+
+    RUN apt-get update && apt-get install -y sudo
+    RUN apt-get update && apt-get install -y gnash
+
+    RUN export uid=1000 gid=1000 && \
+        mkdir -p /home/developer && \
+        echo "developer:x:${uid}:${gid}:Developer,,,:/home/developer:/bin/bash" >> /etc/passwd && \
+        echo "developer:x:${uid}:" >> /etc/group && \
+        echo "developer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/developer && \
+        chmod 0440 /etc/sudoers.d/developer && \
+        chown ${uid}:${gid} -R /home/developer
+
+    COPY coffee.swf /home/developer/coffee.swf
+    USER developer
+    ENV HOME /home/developer
+    CMD /usr/bin/gnash /home/developer/coffee.swf
+
+You must replace `uid=1000/gid=1000` with your user / group id, which you can find
+via the `id` command, example output:
+
+    $ id
+    uid=1000(remy) gid=1000(remy) groups=1000(remy)
+
+In my case, I have a `.swf` file I need to run, which is included in the Docker
+image via the `COPY` step and provided to gnash with the `CMD` step.
+
+The base container image is the default Ubuntu 18.04 image, in which gnash is 
+installed, as well as sudo. Sudo and the user creation are required for x11 
+forwarding. 
+
+Build the docker container:
+
+    docker build -t gnash .
+
+When it's finished building, you can run it with the following command:
+
+    docker run -ti --rm -e DISPLAY=$DISPLAY --net=host -v /tmp/.X11-unix:/tmp/.X11-unix gnash
+
+`-e DISPLAY=$DISPLAY` and `-v /tmp/.X11-unix:/tmp/.X11-unix` share your local
+x11 socket and display with the container, required for x11 forwarding. 
+
+`--net=host` is required for me due to the software automatically connecting to 
+a port on `localhost` (which I forward via SSH to an actual development board). 
+You could omit that if your use case is different.
+
+If you need a specific `/etc/gnashrc` file in your container, you must add the
+file to this folder (with the `Dockerfile`) and add a copy step in the `Dockerfile`:
+    
+    COPY gnashrc /etc/gnashrc
+
+If you make changes to the `Dockerfile`, you must build the container again:
+
+    docker build -t gnash .
+
+That's all there is to it to run 9 year old software on a recent version of 
+Ubuntu.
+
+
+[1]: /s/tutorials/Installing_PyGopherd_on_Ubuntu_20.04.html
+[2]: /s/inc/img/gnash1.png
+[3]: http://web.archive.org/web/20200704121743/https://answers.launchpad.net/ubuntu/+source/gnash/+question/689469
+[4]: /s/inc/img/gnash2.png
+[5]: http://web.archive.org/web/20200704121710/http://fabiorehm.com/blog/2014/09/11/running-gui-apps-with-docker/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

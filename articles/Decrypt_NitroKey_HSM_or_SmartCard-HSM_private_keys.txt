@@ -1,0 +1,1036 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Decrypt/Extract Nitrokey HSM/SmartCard-HSM RSA private keys
+Author      : 	Remy van Elst
+Date        : 	13-07-2016
+URL         : 	https://raymii.org/s/articles/Decrypt_NitroKey_HSM_or_SmartCard-HSM_private_keys.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This is a guide which shows you how to extract private RSA key material from the
+Nitrokey HSM / SmartCard-HSM using the DKEK. This way you can get the private
+key out of the HSM in an unencrypted form. It does require access to the HSM
+device, all the DKEK share and their passwords. Do note that doing this defeats
+the entire purpose of a HSM, namely that you never have access to the keys. In
+the article I'll go over some explanation why this might be a feature you need
+and why it might be a case of security over convinience.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+**This is not a vulnerability, zero day or exploit. The HSM provides a way to do
+secure backups of private key material and we utilize that in this article. To
+decrypt the keys you need to have all the DKEK files used when the HSM was
+initialized, know all the DKEK passwords and have access to the HSM itself.**
+
+You can prevent decryption by not setting up a DKEK, thus using the random
+internal DKEK of the HSM.
+
+### Recap of a HSM
+
+![][2]
+
+> The Nitrokey HSM in a sealed package
+
+A Hardware Security Module, HSM, is a device where secure key material is
+stored. This private data only be accessed by the HSM, it can never leave the
+device. Most HSM devices are also tamper-resistant. This means that when opened,
+moved or otherwise (software) tampered with, they wipe the key material. HSM's
+come in a variety of formfactors, ranging from SmartCards and small USB devices,
+to full size PCI cards and even 19" rackmountable server-like devices. The
+difference between all those devices is speed and storage capacity. Most
+commercial HSM's are certified to the [FIPS-140-2][3] standard.
+
+I have multiple [articles on][4] the [Nitrokey HSM/SmartCard-HSM][5]. I also
+have a lot of professional experience with large expensive HSM hardware.
+
+If you want to know more on the Nitrokey HSM then please read the [getting
+started articles][4].
+
+The main purpose of the HSM is to protect key material. It allows you to make
+sure that the private key material can never be stolen or compromised. It does
+allow you to wrap a key for export/transport to another HSM, for example, to
+create redundancy or backup. We use this mechanism to decrypt the keys outside
+of the HSM.
+
+In the next section you can read the rationale, where I hope to explain why this
+is both a security issue as well as how to mitigate it.
+
+![][6]
+
+> The Nitrokey HSM and the SmartCard-HSM
+
+In this article I'll use the terms HSM, Nitrokey HSM and SmartCard-HSM, but when
+I do I mean the same device.
+
+The [Nitrokey HSM][7] is an open hardware and open software device. It is a USB
+version of the [SmartCard-HSM][8]. Both the [SmartCard-HSM][9] as the [Nitrokey
+HSM][10] have sources available and are fully supported by the [OpenSC][11]
+project.
+
+The Nitrokey is as far as I know one of the few fully open source devices. All
+the big HSM's I've used were either under NDA or completely closed source. In my
+opinion a device like this can only be secure when they are open source. The
+device supports up to 60 ECC GF(p) 256-bit keys and up to 48 RSA 2048-bit keys.
+
+![][12]
+
+> The SmartCard-HSM
+
+### Rationale
+
+As said above, having access to the unencrypted private keys defeats the entire
+purpose of an HSM, namely that you never have access to the private key. This
+decrypted key can be stolen or abused.
+
+However, to decrypt the wrapped key you need access to:
+
+  * All the DKEK shares
+  * All the DKEK passwords
+  * The HSM device
+  * SO pin
+  * User pin
+
+In a production environment you would not use the default pins. You change
+those. You also don't have one DKEK share with one password, you have multiple
+DKEK shares where each DKEK share has multiple passwords (n-of-m scheme). These
+DKEK shares are stored in a secure place (keepass, printed in a bank safe, etc).
+Then multiple people and multiple passwords are required to initialize the HSM
+(or to calculate the unencrypted DKEK share).
+
+This is a convinience because you might need to export the key out of the HSM
+when you are migrating to another HSM, from a different manufacturer. Or, you
+are decomissioning this HSM and the software attached to it, but want to archive
+the key because it might be needed later. You might even just want to use the
+same key in different software that does not support PKCS#11.
+
+Since it requires so many steps and so much access, I don't think this is a huge
+risk, but a rather nice convinience.
+
+I do am of the opinion that HSM's should not offer this option (getting access
+to the private key). But then you would also not be able to backup and transfer
+the wrapped keys, since that can be reverse engineered. I've seen multiple big-
+name HSM's where their support was able to decrypt the key and transfer it to
+another HSM model, but since I've signed an NDA I cannot tell which ones that
+were. You will have to take my word for it.
+
+That does pose the question, how will you make sure you have a backup? Since
+these devices can fail, just as any device, you would want to make sure you have
+a backup, since your business probably depends on the availability of a HSM. I
+find it a hard problem and I don't know an actual solution to both provide
+backup possibilities and disallow access of the private key.
+
+Some HSM manufacturers have the option to stream the transportkey over the
+network to another device, or to use a smartcard to transfer the key. I do
+suspect that they have a private key somewhere that protects the encrypted
+(wrapped) backup key and that it would be hard to reverse engineer their
+process. But, a nation-state level actor would surely have the resources to
+reverse engineer the backup process, just as we did here.
+
+I've also received feedback from Andreas, verbatim copy:
+
+  * The security relies on the cryptographic strength of the mechanisms employed, and of course by obtaining the DKEK key you could break the mechanism.
+
+  * The DKEK mechanism is optional, so you could choose not to use it if you want to protect your keys from disclosure. We strongly advise to use the DKEK scheme only for keys where the cost of recreating the key is unacceptable high (e.g. Root-CAs in schemes not support Cross-Certificates).
+
+  * You can generate a DKEK solely internally using the HSMs random number generator. That way the DKEK is never exposed, but you can still export keys to a secure backup and re-import into the same device.
+
+  * The DKEK mechanism shifts responsibility to a group of key custodians. If they don't take that responsibility (for whatever reason), then it would surely sacrifice security.
+
+### Access to the CardContact SDK
+
+The process requires access to the CardContact SDK. This is a collection of
+software you can use in your own projects (SDK, software development kit). It
+also includes examples to use the HSM, like a key manager or a .p12 importer.
+
+To get access to the SDK you need a SmartCardHSM/Nitrokey HSM. You need to
+generate a keypair in the device that will be used for accessing the content
+network and git repositories.
+
+Access to the SDK does not cost money, but it does require you to have a HSM
+device.
+
+Read [this page][13] to find out more about the CDN. First [create and activate
+your developer account][14] and then [clone all the repositories][15].
+
+You will need the [SmartCard Shell v3][16] which you can download [here][16].
+
+You will also need the [SmartCard Script collection][17]. If you have registered
+a developer account you will already have the scripts and smartcard shell.
+
+Do note that this is a Java tool, so make sure you have Java installed as well.
+
+Here is a screenshot of the SCSH (shell) running the key decryption:
+
+![][18]
+
+The primes `p` and `q` are used to derive the private exponent `d` with the
+public exponent `e`. I'll show some simple python code later on to construct the
+private key in a usable format.
+
+### DKEK (Device Key Encryption Key)
+
+The DKEK, device key encryption key, is used when initializing the HSM.
+Initializing a HSM means that you remove all the keys and other data stored in
+it, basically formatting it. Simply said, the DKEK encrypts the keys on the
+device and the keys you export out of the device (wrap).
+
+The Nitrokey HSM generates a DKEK when the device is initialized, but is also
+allows you go generate one or more DKEK's beforehand and import those in the
+device during the initialization process. You can have multiple DKEK's, spread
+over multiple persons. A DKEK can even have multiple passwords (using [an
+n-of-m][19] threshold scheme.)
+
+If you use the device in production you will (hopefully) have selected strong
+user and SO PIN's, as well as have multiple DKEK shares with strong passwords on
+them.
+
+You can import the DKEK in another HSM device and then restore backups of the
+exported keys to this new device. As said, this way you can have a backup or
+redundancy of the HSM device. To find out how to do that please read the
+[getting started article][4].
+
+We will use this DKEK to decrypt the secret key material on the HSM. Since it's
+open source, we can look at how the DKEK is made, how the DKEK wraps the keys
+and reverse that process. Do note that we still need all the DKEK shares, their
+passwords and access to the HSM device.
+
+### Decrypting a key with the example
+
+**THIS WILL REINITIALIZE YOU HSM**
+
+Make sure to backup important keys on your HSM first! (Test them as well).
+
+I'll first talk about the example included to decrypt a key. This example
+initializes the HSM with two DKEK shares, then generates a key and dumps those
+parameters.
+
+The example states that it requires an NDA. I contacted the main developer and
+got permission to publish, see the screenshot below. (Thank you for that
+Andreas).
+
+![][20]
+
+Fire up the SmartCard Shell and set up the workspace as the CDN documentation
+describes. Use the File menu -> Run Script and load the `sc-hsm-workspace/sc-
+hsm-sdk-scripts/key_import/decrypt_keyblob.js` script.
+
+**THIS WILL REINITIALIZE YOU HSM**
+
+This is the `decrypt_keyblob.js` script:
+
+    
+    
+    /*
+     * Decrypt Key Blob from SmartCard-HSM
+     *
+     * (c) 2014 CardContact Software & System Consulting, Andreas Schwier, Minden, Germany
+     *
+     * Information contained in this script is confidential and released under NDA
+     *
+     * This script initializes a SmartCard-HSM with two DKEK shares, generates and exports a RSA key
+     * From the DKEK share it generates the Kenc/Mmac for key wrap and decodes the exported key blob
+     *
+     * Please note, that the sc-hsm-tool will further wrap the key blob generated by the SmartCard-HSM
+     * with the private key description and the certificate read from an EF in the device. Please see
+     * the sc-hsm-tool.c source for details.
+     *
+     * Warning: The device will be re-initialized by this script.
+     */
+    
+    PublicKeyReference = require('scsh/eac/PublicKeyReference').PublicKeyReference;
+    SmartCardHSM = require("scsh/sc-hsm/SmartCardHSM").SmartCardHSM;
+    DKEK = require("scsh/sc-hsm/DKEK").DKEK;
+    
+    var pin = new ByteString("648219", ASCII);
+    var initializationCode = new ByteString("57621880", ASCII);
+    
+    var dkekshare1 = new ByteString("A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5", HEX);
+    var dkekshare2 = new ByteString("E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1", HEX);
+    
+    // Attach to SmartCard-HSM
+    
+    var card = new Card(_scsh3.reader);
+    var sc = new SmartCardHSM(card);
+    
+    if (sc.queryUserPINStatus() == 0x6984) {
+      var page = "<html><p><b>Warning:</b></p><br/>" +
+           "<p>This is a new device that has never been initialized before.</p><br/>" +
+           "<p>If you choose to continue this test, then the device initialization code will be set to " + initializationCode.toString(ASCII) + " </p><br/>" +
+           "<p>Please be advised, that this code can be changed later, however the same code must be used in subsequent re-initialization of the device.</p><br/>" +
+           "<p>Press OK to continue or Cancel to abort.</p>" +
+           "</html>";
+      var userAction = Dialog.prompt(page);
+      assert(userAction != null);
+    }
+    
+    
+    // Initialize Device with a double DKEK share
+    
+    sc.initDevice(new ByteString("0001", HEX), pin, initializationCode, 3, 2);
+    
+    sc.importKeyShare(dkekshare1);
+    var status = sc.importKeyShare(dkekshare2);
+    
+    print("Device initialized:");
+    print("-------------------");
+    print("SW          : " + status.sw.toString(HEX));
+    print("Shares      : " + status.shares);
+    print("Outstanding : " + status.outstanding); 
+    print("KVC         : " + status.kcv.toString(HEX));
+    print("");
+    
+    
+    // Determine keys for wrap/unwrap
+    
+    var crypto = new Crypto();
+    
+    var dkek = new DKEK(crypto);
+    dkek.importDKEKShare(dkekshare1);
+    dkek.importDKEKShare(dkekshare2);
+    var kenc = dkek.getKENC();
+    var kmac = dkek.getKMAC();
+    
+    print("Values derived from DKEK shared:");
+    print("--------------------------------");
+    print("DKEK        : " + dkek.dkek.toString(HEX));
+    print("KVC         : " + dkek.getKCV().toString(HEX));
+    print("Kenc        : " + kenc.getComponent(Key.AES).toString(HEX));
+    print("Kmac        : " + kmac.getComponent(Key.AES).toString(HEX));
+    print("");
+    
+    
+    // Generate a Test RSA Key with 1024 Bit
+    
+    sc.verifyUserPIN(pin);
+    
+    var chr = new PublicKeyReference("UT", "TESTKEY01", "00000");
+    var innerCAR = new PublicKeyReference("DECA00001" + "00001");
+    var algo = new ByteString("id-TA-RSA-v1-5-SHA-256", OID);
+    
+    var keydata = SmartCardHSM.buildGAKPwithRSA(innerCAR, algo, chr, 1024);
+    // SmartCardHSM.dumpKeyData(keydata);
+    
+    var rsp = this.sc.generateAsymmetricKeyPair(1, 0, keydata);
+    // print("Card generated certificate signing request");
+    // print(new ASN1(rsp));
+    
+    
+    // Wrap key
+    
+    var keyblob = sc.wrapKey(1);
+    
+    print("Key blob");
+    print("--------");
+    print(keyblob);
+    
+    dkek.dumpKeyBLOB(keyblob);
+    
+
+This is example output:
+
+    
+    
+    >load("/home/remy/git/sc-hsm-workspace/sc-hsm-sdk-scripts/key_import/decrypt_keyblob.js");
+    Device initialized:
+    -------------------
+    SW          : 9000
+    Shares      : 2
+    Outstanding : 0
+    KVC         : BB391415C05E39D7
+    
+    Values derived from DKEK shared:
+    --------------------------------
+    DKEK        : 4444444444444444444444444444444444444444444444444444444444444444
+    KVC         : BB391415C05E39D7
+    Kenc        : 34423C9AB36899BD772D73DA3E350709F009634946C288A7B5E8A248868AE9FF
+    Kmac        : 1392790984A79DA93E797C0FD1919E16C9FE90D652A147DF16186E6840E9F2EB
+    
+    Key blob
+    --------
+    0000  BB 39 14 15 C0 5E 39 D7 06 00 0A 04 00 7F 00 07  .9...^9.........
+    [...]
+    0200  89 41 86 5F 7A 07 EA 6C F2 72 53                 .A._z..l.rS
+    
+    Values from key blob:
+    ---------------------
+    Checking the MAC      : Passed
+    KCV                   : BB391415C05E39D7    [Must match the KCV of the DKEK for import]
+    Key type              : 6    [6=RSA, 12=ECC]
+    Default Algorithm ID  : 0.4.0.127.0.7.2.2.2.1.2 (10)     [Matches algo in buildGAKPwithRSA()]
+    Allowed Algorithm IDs :  (0)    [Not used]
+    Access Conditions     :  (0)    [Not used]
+    Key OID               :  (0)    [Not used]
+    0000  81 BD 22 DC 7A 59 9E AD 04 00 00 40 E6 11 4D E4  ..".zY.....@..M.
+    [...]
+    01D0  06 37 89 6A 04 A9 00 03 01 00 01 80 00 00 00 00  .7.j............
+    
+    Randomize             : 81BD22DC7A599EAD    [Random data prepended at export]
+    Key size              : 1024    [Key size in bits]
+    DP1 = d mod (p - 1)   : E6114DE413BB84118673B60947D04D1B95C8BA489467F86A050D3CEDC8654C2C7ED1A1340D1B87234B3C99AA434833025CA306FF3DEE36EDBDC6089CA10BF431 (64)
+    DQ1 = d mod (q - 1)   : ACCD4794CC41372263B859C1B9448C91E3082B9C96CBF6A19BFB8AB495B7EF83C29F87B58F79661D68395F0978CCFD91E0AE823594DF33043269270994CD45F9 (64)
+    Prime factor p        : FD6D83D3ABBB6527AA612008CD8B1F57579FAFA9DE8B30DAA4051A617043D4FAC7D94F29672990F2B04FBE59F79C8BCCFBFEEA038844858AB55A97D089DD531F (64)
+    PQ = q - 1 mod p      : BFE203FE566E0CCED58565C26B30D68D984EE42DC9B766C7598E264E6E558D41B24E72D04D96C394F4FF10728DF2895975A6BD5E605C75271DE28BEE6CED3548 (64)
+    Prime factor q        : D604513568BD59C9E83FECC653FA1168A198275859D4FD1ADA62EB0B0354B9FC2DC33F70727A5DE328890B103C2CED16931C84C5439436471F968AAF7F4EB737 (64)
+    Modulus               : D3DDD24D86EF89F0DA9EE2933517A1117AB0C9B75ACAF261B8699A8F8A76351468B641C9F51071EAA7C681E975D9AF7BB8F6E3B1BB234DD4A6A65B4E089A94BB7441F6FD8210D4B5CA0275B64921F081181AD3CD137B2EB9BEE9545B2919617B89C4A4634205342A1A989BB0491C0A20682646D2DCE7699371300637896A04A9 (128)
+    Exponent              : 010001 (3)
+    >
+    
+
+You now have a re-initialized HSM and all the data you need to reconstruct the
+private key. We will continue this article with adapting the script to decrypt
+an existing key (and not hose the HSM). Then we will use some simple Python code
+to transform those values we got (`p`, `q` etc) into a usable RSA keypair.
+
+### Reconstruct a DKEK and decrypt an existing key
+
+The above script reinitializes your HSM, which might not be what you want if you
+want to export an existing key. In the code it has two DKEK shares set:
+
+    
+    
+    var dkekshare1 = new ByteString("A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5", HEX);
+    var dkekshare2 = new ByteString("E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1", HEX);
+    
+
+The device is initialized and then the shares are loaded in the device:
+
+    
+    
+    sc.initDevice(new ByteString("0001", HEX), pin, initializationCode, 3, 2);
+    
+    sc.importKeyShare(dkekshare1);
+    var status = sc.importKeyShare(dkekshare2);
+    
+
+We can load our own DKEK in by converting it to a HEX string. It took me quite
+some time to figure out how to do that. I decided to look into how the DKEK is
+generated and reverse that.
+
+#### DKEK decryption
+
+[If you like this article, consider sponsoring me by trying out a Digital Ocean
+VPS. With this link you'll get a $5 VPS for 2 months free (as in, you get $10
+credit). (referral link)][1]
+
+I basically adapted the `load_dkek_in_device` function and stripped out the
+actual loading the DKEK in the device. Instead, I added a simple function that
+prints the `u8` char as HEX in the format that the `decrypt_keyblob.js`
+understands.
+
+    
+    
+    printf("DKEK Share HEX: \n\n");
+    
+      for (i = 0; i < sizeof(dkekinfo.dkek_share); i++)
+      {
+          printf("%02X", dkekinfo.dkek_share[i]);
+      }
+      printf("\n\n");
+    
+
+The rest of the function is almost the same, including the password entry and
+decryption part.
+
+See my fork [for the code][21]. I've included the code at the end of this
+article, if for whatever reason the pull request isn't accepted.
+
+To build it, clone the repo:
+
+    
+    
+    https://github.com/RaymiiOrg/OpenSC.git
+    
+
+Switch to the branch:
+
+    
+    
+    cd OpenSC
+    git checkout dkek_share_print
+    
+
+Bootstrap:
+
+    
+    
+    bash ./bootstrap
+    
+
+Build the tools:
+
+    
+    
+    make all tools
+    
+
+Now you have a binary in the `src/tools/` folder named `sc-hsm-tool`.
+
+Use this to deconstruct the DKEK. You of course need to have loaded a DKEK when
+you initialized your HSM. To find out how to do that please read the [getting
+started article][4].
+
+    
+    
+    $ ./src/tools/sc-hsm-tool --print-dkek-share ./dkek-share-1.pbe 
+    
+
+Example Output:
+
+    
+    
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    Enter password to decrypt DKEK share : 
+    
+    Deciphering DKEK share, please wait...
+    DKEK Share HEX: 
+    
+    20B3EE1CABA5ECA7ECEB6BE51F11BD9A04F5FE9A6B0A1E0A8BC13074D32CF830
+    
+
+If you have multiple DKEK shares you need to decrypt all of them.
+
+**Do note that this is the unencrypted DKEK share. Never share it.**
+
+#### Decrypting an existing key
+
+Now we have the DKEK we can change the script to use this DKEK. We also remove
+all the initializing code and change the KEY REF in the `wrapkey()` function to
+the correct key we want to export (find with: `pkcs15-tool -D`).
+
+This is the script, `decrypt_keyblob_2.js`:
+
+    
+    
+    PublicKeyReference = require('scsh/eac/PublicKeyReference').PublicKeyReference;
+    SmartCardHSM = require("scsh/sc-hsm/SmartCardHSM").SmartCardHSM;
+    DKEK = require("scsh/sc-hsm/DKEK").DKEK;
+    
+    var pin = new ByteString("648219", ASCII);
+    var initializationCode = new ByteString("57621880", ASCII);
+    
+    //var dkekshare1 = new ByteString("A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5", HEX);
+    //var dkekshare2 = new ByteString("E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1", HEX);
+    var dkekshare2 = new ByteString("20B3EE1CABA5ECA7ECEB6BE51F11BD9A04F5FE9A6B0A1E0A8BC13074D32CF830", HEX);
+    
+    // Attach to SmartCard-HSM
+    
+    var card = new Card(_scsh3.reader);
+    var sc = new SmartCardHSM(card);
+    
+    if (sc.queryUserPINStatus() == 0x6984) {
+      var page = "<html><p><b>Warning:</b></p><br/>" +
+           "<p>This is a new device that has never been initialized before.</p><br/>" +
+           "<p>If you choose to continue this test, then the device initialization code will be set to " + initializationCode.toString(ASCII) + " </p><br/>" +
+           "<p>Please be advised, that this code can be changed later, however the same code must be used in subsequent re-initialization of the device.</p><br/>" +
+           "<p>Press OK to continue or Cancel to abort.</p>" +
+           "</html>";
+      var userAction = Dialog.prompt(page);
+      assert(userAction != null);
+    }
+    
+    // Determine keys for wrap/unwrap
+    
+    var crypto = new Crypto();
+    
+    var dkek = new DKEK(crypto);
+    //dkek.importDKEKShare(dkekshare1);
+    dkek.importDKEKShare(dkekshare2);
+    var kenc = dkek.getKENC();
+    var kmac = dkek.getKMAC();
+    
+    print("Values derived from DKEK shared:");
+    print("--------------------------------");
+    print("DKEK        : " + dkek.dkek.toString(HEX));
+    print("KVC         : " + dkek.getKCV().toString(HEX));
+    print("Kenc        : " + kenc.getComponent(Key.AES).toString(HEX));
+    print("Kmac        : " + kmac.getComponent(Key.AES).toString(HEX));
+    print("");
+    
+    // Generate a Test RSA Key with 1024 Bit
+    
+    sc.verifyUserPIN(pin);
+    
+    // Wrap key (KEY REF 1)
+    
+    var keyblob = sc.wrapKey(1);
+    
+    print("Key blob");
+    print("--------");
+    print(keyblob);
+    
+    dkek.dumpKeyBLOB(keyblob);
+    
+
+This script will not reinitialize the HSM, it will use the existing DKEK we've
+calculated. Read on to see the full procedure.
+
+#### Testing with an existing key
+
+We will initialize the HSM with one DKEK and create a keypair. This keypair is
+used to encrypt a small file with OpenSSL. Then we retreive the private key to a
+file and use OpenSSL to decrypt the earlier encrypted file with the exported
+key.
+
+Generate a DKEK, example password 123456789:
+
+    
+    
+    sc-hsm-tool --create-dkek-share dkek-share-1.pbe
+    
+
+Output:
+
+    
+    
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    
+    The DKEK share will be enciphered using a key derived from a user supplied password.
+    The security of the DKEK share relies on a well chosen and sufficiently long password.
+    The recommended length is more than 10 characters, which are mixed letters, numbers and
+    symbols.
+    
+    Please keep the generated DKEK share file in a safe location. We also recommend to keep a
+    paper printout, in case the electronic version becomes unavailable. A printable version
+    of the file can be generated using "openssl base64 -in <filename>".
+    Enter password to encrypt DKEK share : <123456789>
+    
+    Please retype password to confirm : <123456789>
+    
+    Enciphering DKEK share, please wait...
+    DKEK share created and saved to dkek-share-1.pbe
+    
+
+(Re)initialize the HSM:
+
+**THIS WILL REINITIALIZE YOU HSM**
+
+Make sure to backup important keys on your HSM first! (Test them as well).
+
+    
+    
+    sc-hsm-tool --initialize --so-pin 3537363231383830 --pin 648219 --dkek-shares 1
+    
+
+Output:
+
+    
+    
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    
+
+The HSM is now waiting for the DKEK share:
+
+    
+    
+    $ sc-hsm-tool 
+    
+
+Output:
+
+    
+    
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    Version              : 2.0
+    Config options       :
+      User PIN reset with SO-PIN enabled
+    SO-PIN tries left    : 15
+    User PIN tries left  : 3
+    DKEK shares          : 1
+    DKEK import pending, 1 share(s) still missing
+    
+
+Load the DKEK share:
+
+    
+    
+    sc-hsm-tool --import-dkek-share dkek-share-1.pbe
+    
+
+Output:
+
+    
+    
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    Enter password to decrypt DKEK share : 
+    
+    Deciphering DKEK share, please wait...
+    DKEK share imported
+    DKEK shares          : 1
+    DKEK key check value : 0FB85F69F6EBF256
+    
+
+The DKEK is now loaded:
+
+    
+    
+    sc-hsm-tool 
+    
+
+Output:
+
+    
+    
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    Version              : 2.0
+    Config options       :
+      User PIN reset with SO-PIN enabled
+    SO-PIN tries left    : 15
+    User PIN tries left  : 3
+    DKEK shares          : 1
+    DKEK key check value : 0FB85F69F6EBF256
+    
+
+Generate a keypair in slot 2:
+
+    
+    
+    $ pkcs11-tool --module opensc-pkcs11.so --login --pin 648219 --keypairgen --key-type rsa:1024 --id 2 --label "HSM RSA Key Remy"
+    
+
+Output:
+
+    
+    
+    Using slot 0 with a present token (0x0)
+    Key pair generated:
+    Private Key Object; RSA 
+      label:      HSM RSA Key Remy
+      ID:         02
+      Usage:      decrypt, sign, unwrap
+    Public Key Object; RSA 1024 bits
+      label:      HSM RSA Key Remy
+      ID:         02
+      Usage:      encrypt, verify, wrap
+    
+
+You can, if you want, also import a wrapped key. See the getting started guide
+to find out how to do that.
+
+Find the correct keyref:
+
+    
+    
+    pkcs15-tool -D
+    
+
+Output:
+
+    
+    
+    Private RSA Key [HSM RSA Key Remy]
+      Object Flags   : [0x3], private, modifiable
+      Usage          : [0x2E], decrypt, sign, signRecover, unwrap
+      Access Flags   : [0x1D], sensitive, alwaysSensitive, neverExtract, local
+      ModLength      : 1024
+      Key ref        : 1 (0x1)
+      Native         : yes
+      Auth ID        : 01
+      ID             : 02
+      MD:guid        : 557bcb43-47a3-d83f-f863-ccb6b8432192
+    
+
+The keyref is `1` in this case.
+
+Get the public key from the HSM:
+
+    
+    
+    pkcs15-tool --read-public-key 2
+    
+
+Output:
+
+    
+    
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    -----BEGIN PUBLIC KEY-----
+    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC9DEoPbDQTZczSTOZsj83ZqJai
+    +3ZVqD5fFILqE92w3zlcG+0qntLhwxCnYQIRv0reAJIQT5EN4WC0RP+vH2j43onM
+    +o2oVxCPqlckc4wQ0SD3h3ncbFO40zSKLGr9kJd7IIxyvces6ZtVdcxO49Ucv74B
+    x4D/jWFARAirngU6LQIDAQAB
+    -----END PUBLIC KEY-----
+    
+
+Save it to a file, `hsm.pub`.
+
+Please read the [getting started article][4] to see what to put in the `openssl`
+`hsm.conf`. Read the guide on [encrypting with OpenSSL as well][22].
+
+Create a small file with text to encrypt:
+
+    
+    
+    echo 'Remy is awesome' > smallfile
+    
+
+Encrypt it with the HSM public key:
+
+    
+    
+    openssl rsautl -inkey publickey.pem -pubin -encrypt -pkcs -in smallfile -out encryptedsmallfile.pkcs1
+    
+
+It's encrypted:
+
+    
+    
+    cat encryptedsmallfile.pkcs1  |  base64
+    
+
+Output:
+
+    
+    
+    klI3DdYbMOW+WltGmSmCiEntXyI7NT/sFmGBjgXHpRDv8xS+CnUWc4hAKPC7cJERlg5Bl0E6me/Z
+    8J4Q77xorFHSvoeKx0plIhIMlE429cBlMcJGj1o/wnSyaL7sk5H6JU03JNm3KB6wTt3B0vDf5U4O
+    Z5pL4SVLXMwZk/utCms=
+    
+
+Opposed to the small file:
+
+    
+    
+    cat smallfile | base64
+    
+
+Output:
+
+    
+    
+    UmVteSBpcyBhd2Vzb21lCg==
+    
+
+Now we're going to use the DKEK to get the private key from the device. Use the
+earlier compiled `sc-hsm-tool` to get the HEX DKEK:
+
+    
+    
+    ./src/tools/sc-hsm-tool --print-dkek-share ~/tmp/hsm/dkek-share-1.pbe 
+    
+
+Output:
+
+    
+    
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    Enter password to decrypt DKEK share : 
+    
+    Deciphering DKEK share, please wait...
+    DKEK Share HEX: 
+    
+    20B3EE1CABA5ECA7ECEB6BE51F11BD9A04F5FE9A6B0A1E0A8BC13074D32CF830
+    
+
+Place this value in the `decrypt_keyblob_2.js` script:
+
+    
+    
+    var dkekshare2 = new ByteString("20B3EE1CABA5ECA7ECEB6BE51F11BD9A04F5FE9A6B0A1E0A8BC13074D32CF830", HEX);
+    
+
+Also change the keyref if needed:
+
+    
+    
+    var keyblob = sc.wrapKey(1);
+    
+
+Use the SmartCard Shell to run this `decrypt_keyblob_2.js` script. The output
+you need is listed below:
+
+    
+    
+    Prime factor p        : FBC979E63BC8034B6D36008FA9482816F36C513B9905ED3CD089E74576260CB4E50F457452C88AD10646DE115AD37923D0B88F1779EA67D11D6D8F8DBFA670D7 (64)
+    Prime factor q        : C0361270B921E5853077AE847B2EADB5C9E0285854F6E4AC27BEBE1D18BFF9DFF6DC5D5422B7AB560D351ACDCE15DAE81DB97FBB184A228480B427E3BE93589B (64)
+    Modulus               : BD0C4A0F6C341365CCD24CE66C8FCDD9A896A2FB7655A83E5F1482EA13DDB0DF395C1BED2A9ED2E1C310A7610211BF4ADE0092104F910DE160B444FFAF1F68F8DE89CCFA8DA857108FAA5724738C10D120F78779DC6C53B8D3348A2C6AFD90977B208C72BDC7ACE99B5575CC4EE3D51CBFBE01C780FF8D61404408AB9E053A2D (128)
+    Exponent              : 010001 (3)
+    
+
+You can see that the `KCV` is the same as the `sc-hsm-tool` DKEK key check
+value:
+
+    
+    
+    sc-hsm-tool 
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    Version              : 2.0
+    Config options       :
+      User PIN reset with SO-PIN enabled
+    SO-PIN tries left    : 15
+    User PIN tries left  : 3
+    DKEK shares          : 1
+    DKEK key check value : 0FB85F69F6EBF256
+    
+    
+    # scsh
+    Values derived from DKEK shared:
+    --------------------------------
+    DKEK        : 20B3EE1CABA5ECA7ECEB6BE51F11BD9A04F5FE9A6B0A1E0A8BC13074D32CF830
+    KVC         : 0FB85F69F6EBF256
+    Kenc        : 6890320D25D318530C3AB5988E29D8DF445E5F5ACE223364F41000394614B763
+    Kmac        : BE9BA334E3A89E75E7E8308AE2C28DF3CCC4FDA8B805112E03AD0C3FD452E9A0
+    
+
+Read on to see how to reconstruct the private key with some python.
+
+### Reconstructing the key
+
+[If you like this article, consider sponsoring me by trying out a Digital Ocean
+VPS. With this link you'll get a $5 VPS for 2 months free (as in, you get $10
+credit). (referral link)][1]
+
+Make sure you have `gmpy` and `PyCrypto` installed. I'm using the following
+python code to recontruct the private key:
+
+    
+    
+    #/usr/bin/python2
+    import gmpy
+    from Crypto.PublicKey import RSA
+    # pkcs15-tool --read-public-key
+    pub = RSA.importKey("""-----BEGIN PUBLIC KEY-----
+    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC9DEoPbDQTZczSTOZsj83ZqJai
+    +3ZVqD5fFILqE92w3zlcG+0qntLhwxCnYQIRv0reAJIQT5EN4WC0RP+vH2j43onM
+    +o2oVxCPqlckc4wQ0SD3h3ncbFO40zSKLGr9kJd7IIxyvces6ZtVdcxO49Ucv74B
+    x4D/jWFARAirngU6LQIDAQAB
+    -----END PUBLIC KEY-----"")
+    # Prime factor p
+    p = int("FBC979E63BC8034B6D36008FA9482816F36C513B9905ED3CD089E74576260CB4E50F457452C88AD10646DE115AD37923D0B88F1779EA67D11D6D8F8DBFA670D7", 16)
+    # Prime factor q
+    q = int("C0361270B921E5853077AE847B2EADB5C9E0285854F6E4AC27BEBE1D18BFF9DFF6DC5D5422B7AB560D351ACDCE15DAE81DB97FBB184A228480B427E3BE93589B", 16)
+    # Exponent
+    e = long(pub.e)
+    # Modulus
+    n = long(pub.n)
+    # private exponent
+    d = long(gmpy.invert(e,(p-1)*(q-1)))
+    
+    key = RSA.construct((n,e,d))
+    
+    print key.exportKey()
+    
+    print key.publickey().exportKey()
+    
+
+The output from this script:
+
+    
+    
+    # >>> print key.exportKey()
+    -----BEGIN RSA PRIVATE KEY-----
+    MIICXQIBAAKBgQC9DEoPbDQTZczSTOZsj83ZqJai+3ZVqD5fFILqE92w3zlcG+0q
+    ntLhwxCnYQIRv0reAJIQT5EN4WC0RP+vH2j43onM+o2oVxCPqlckc4wQ0SD3h3nc
+    bFO40zSKLGr9kJd7IIxyvces6ZtVdcxO49Ucv74Bx4D/jWFARAirngU6LQIDAQAB
+    AoGASAr54jy677V4w5/YpAB9UvgjR8MKioQOGM/JQAkID9JRmp9t1zMlbDGZFCAs
+    2LSMhGO1Rg/8WEzOPISa55LRvnRkOVPe7ps3NTGynlx028PFc7ddK2tFDgAAq3Sd
+    sj6+1wskDOd0jHZ/rMsl2LZJHy6TgegDZEwpz8TCLaNWNQUCQQDANhJwuSHlhTB3
+    roR7Lq21yeAoWFT25Kwnvr4dGL/53/bcXVQit6tWDTUazc4V2ugduX+7GEoihIC0
+    J+O+k1ibAkEA+8l55jvIA0ttNgCPqUgoFvNsUTuZBe080InnRXYmDLTlD0V0UsiK
+    0QZG3hFa03kj0LiPF3nqZ9EdbY+Nv6Zw1wJAB6efoGGfGfbt8TZADG/VdzHs/W5X
+    I+YDfSm5hIshyh/DQw9sdF2AM1MfVEvx8yjeqaBjl93lxe4k+gfEqChSFQJBAMv/
+    Xv5ErTbOI7u/FKZIygJeUwI10TNWFRG4yWIj6Ywd/AA1e5ue06mq9jvxv67a1UPE
+    ZFrW8i4O5VLhHi2Kwp0CQQCd6au8XXhtY64/Tei73LqqmJFXH+XLROB7Zmw6+OOY
+    fCz66jLobiDBbX5ubdAkLbzot9LXbAAEE1eChUjNfJQs
+    -----END RSA PRIVATE KEY-----
+    
+
+Place this private key in a file (`hsm.priv`).
+
+Use OpenSSL to decrypt the encrypted file with the keyfile:
+
+    
+    
+    openssl rsautl -decrypt -inkey hsm.priv -in encryptedsmallfile.pkcs1 
+    
+
+Output:
+
+    
+    
+    Remy is awesome
+    
+
+You can also use the HSM to decrypt:
+
+    
+    
+    pkcs15-crypt --decipher --key 2 --input encryptedsmallfile.pkcs1 --pkcs1 --raw 
+    
+
+Output:
+
+    
+    
+    Using reader with a card: Nitrokey Nitrokey HSM (010000000000000000000000) 00 00
+    Enter PIN [UserPIN]: 648219
+    Remy is awesome
+    
+
+### sc-hsm-tool.c code
+
+The full `sc-hsm-tool.c` file with the DKEK print option, is downloadable from
+[here][23].
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://raymii.org/s/inc/img/nitrokey1.jpg
+   [3]: https://en.wikipedia.org/wiki/FIPS_140-2
+   [4]: https://raymii.org/s/articles/Get_Started_With_The_Nitrokey_HSM.html
+   [5]: https://raymii.org/s/articles/Nitrokey_HSM_in_Apache_with_mod_nss.html
+   [6]: https://raymii.org/s/inc/img/sc-hsm-nitrokey.jpg
+   [7]: http://nitrokey.com
+   [8]: http://www.smartcard-hsm.com/
+   [9]: http://www.smartcard-hsm.com/opensource.html
+   [10]: https://github.com/nitrokey
+   [11]: https://github.com/OpenSC/OpenSC/wiki/SmartCardHSM
+   [12]: https://raymii.org/s/inc/img/sc-hsm.jpg
+   [13]: http://www.cardcontact.de/cdn/about.html
+   [14]: http://www.cardcontact.de/cdn/activation.html
+   [15]: http://www.cardcontact.de/cdn/gitaccess.html
+   [16]: http://www.openscdp.org/scsh3/index.html
+   [17]: http://www.openscdp.org/scripts/index.html
+   [18]: https://raymii.org/s/inc/img/hsm_scsh.png
+   [19]: https://www.nitrokey.com/ru/news/2015/new-nitrokey-hsm-supports-n-m-threshold-scheme-and-sophisticated-key-management
+   [20]: https://raymii.org/s/inc/img/hsm_nda.png
+   [21]: https://github.com/RaymiiOrg/OpenSC/tree/dkek_share_print
+   [22]: https://raymii.org/s/tutorials/Encrypt_and_decrypt_files_to_public_keys_via_the_OpenSSL_Command_Line.html
+   [23]: https://raymii.org/s/inc/downloads/sc-hsm-tool.c.txt
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

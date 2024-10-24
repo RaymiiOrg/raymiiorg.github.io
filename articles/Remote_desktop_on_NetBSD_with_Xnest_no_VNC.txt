@@ -1,0 +1,270 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Remote desktop on NetBSD with Xnest (no VNC)
+Author      : 	Remy van Elst
+Date        : 	22-08-2021
+URL         : 	https://raymii.org/s/articles/Remote_desktop_on_NetBSD_with_Xnest_no_VNC.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+After I recently wrote about [NetBSD on the DEC Alpha CPU in QEMU][1], I
+decided to play with NetBSD some more. One x86_64 virtual machine later, I'm
+starting to appreciate the beauty and simplicity. Great documentation, both
+online and via the manpages, low resource usage and boy oh boy does it feel
+fast. But, you're not here for my love letter, you want to have a remote
+desktop. In the [earlier][1] article, we set up VNC, both because it shows
+you how to install packages and because native X11 crashes. In this article,
+we are going to set up X11 forwarding via SSH, but with `Xnest` instead of
+VNC. `Xnest` allows you to have a full desktop / window manager inside a
+window. If you did a full install of NetBSD, then all you need is included on
+the system, no need to install any packages. This is an advantage if you are
+on an architecture that has no precompiled binary packages or if compiling
+from source takes too long.
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+Here is a screenshot of my native NetBSD X desktop, running the default `ctwm`
+window manager, the `Clion` IDE, a web browser and my favorite game, `OpenTTD`:
+
+![screenshot][2]
+
+If you have XFCE installed, you can run a full desktop session as well:
+
+![screenshot][3]
+
+Other nostalgic desktop environments are available as well, like CDE and WindowMaker:
+
+![screenshot][6]
+
+Note that performance is slightly worse than with VNC and you might have some
+artifacts when dragging windows around. I also have an issue where, once a 
+window manager is running, `xterm` will not start. If I start `xterm` before
+I start `ctwm` or `xfce` it runs fine. Here is a screenshot of the artifacts
+after dragging a window around. They're gone when you refresh that screen area, 
+for example, by dragging another window around over that affected area:
+
+![screenshot][8]
+
+In this article, the terms `server` and `NetBSD host` are used interchangeably,
+they both mean the NetBSD machine on which you want to run the GUI. The term
+`client` means the machine you forward the desktop to, the machine from which
+you SSH into the NetBSD server. On the `client`, the window is displayed, but 
+the actual X server / GUI is coming from the `server`.
+
+### Setup X11 forwarding via SSH
+
+This part assumes you installed NetBSD with X11 via the installer. That way,
+both `Xnest` and the default window manager, `ctwm` are installed.
+
+By default SSH does not allow X11 forwarding. Edit the following file on the
+NetBSDS server to allow X11 forwarding:
+
+    vi /etc/ssh/sshd_config
+
+Add the following line (or uncomment/change it) to allow X forwarding system
+wide for all users:
+
+    X11Forwarding yes
+
+You can also add a `Match` block to enable X11 for just one user:
+    
+    Match User remy
+        X11Forwarding yes
+
+Restart the ssh server to make this new setting active:
+
+    service sshd restart
+
+Test it out with the following SSH command on your client machine:
+
+    ssh -Y user@netbsd.host
+
+After logging in to your NetBSD machine, start a terminal:
+
+    xterm
+
+It should pop up on your client (the one you used to SSH into the NetBSD
+server). I'm using the `-Y` flag instead of the `-X` flag because it saves
+you fiddling with `xauth`. 
+
+Continue on to the next section to use an actual window manager inside a
+window (nested X, or, a better name, `Xnest`).
+
+
+### Xnest and ctwm
+
+The next section assumes you are logged in via SSH to the NetBSD server with the `-Y` flag.
+The manpage describes what `Xnest` is very well:
+
+> Xnest is both an X client and an X server. Xnest is a client of the real
+  server which manages windows and graphics requests on its behalf. Xnest is
+  a server to its own clients. Xnest manages windows and graphics requests on
+  their behalf. To these clients, Xnest appears to be a conventional
+  server. 
+
+Start Xnest with the following options on the NetBSD machine:
+
+    Xnest :1 -ac -once &
+
+- `:1`: The display which the new nested X server will use.
+- `-ac`: disable access control restrictions
+- `-once`: Terminate server after one session
+- ` &`: 
+
+Start the default window manager `ctwm`, with our new display as an option:
+
+    ctwm -display :1
+
+This is what you should see in the `Xnest` window on your client:
+
+![screenshot][2]
+
+I have an error when launching `xterm` (or `xcalc`) once `Xnest` is running: 
+
+    X Error of failed request:  BadAlloc (insufficient resources for operation)
+      Major opcode of failed request:  45 (X_OpenFont)
+      Serial number of failed request:  12
+      Current serial number in output stream:  13
+
+
+As stated before, when I launch `xterm` directly, it works, when in `Xnest`, it fails.
+Tried setting up the `xfs` (x font server) and all kinds of `xset +fp` variants to inform
+Xnest of fonts. The default font path has all files required and my client machine also
+has the same files in the same paths (the xnest manpage mentions this). Not being able to
+run xterm is annoying, but since I have xfce installed, I can run `xfce-terminal` or 
+execute commands right on the SSH session shell. 
+
+
+Do note that you do not have to use `$DISPLAY=:1`. Before starting Xnest you can
+query the current `DISPLAY` variable (that SSH X forwarding uses):
+
+    echo $DISPLAY
+
+Output:
+
+    localhost:10.0
+
+Since we've started SSH with `-Y`, we can use `:10` as the display variable 
+in `Xnest`, ignoring the `localhost` part:
+
+    Xnest -ac -once :10 &
+
+Now you do not need to specify `-display :1` or export a new display variable
+in your terminal. I'm used to explicitly specifying one, which is why I do it 
+that way in this guide.
+
+###  XFCE
+
+If you have a network connection and binary packages available, you can
+install XFCE, a modern desktop. It works quite well when forwarded via Xnest.
+This section contains a mini XFCE install guide as a bonus. Make sure you
+have `pkgin`, the binary package manager, installed and use `pkgin` to
+install `xfce` plus some dependencies:
+
+    pkgin install xfce fam dbus
+
+`xfce` is a group of packages. Once all of them are installed, copy the
+example dbus startup script to the required location:
+
+    cp /usr/pkg/share/examples/rc.d/dbus /etc/rc.d/dbus
+
+Edit `/etc/rc.conf` and add:
+
+    dbus=YES
+
+Start `dbus`:
+
+    service dbus start
+
+You only have to start dbus on this session, after a reboot it will be started
+automatically.
+
+Repeat the same for `fam` and `rpcbind`, also required for XFCE:
+
+    cp /usr/pkg/share/examples/rc.d/famd /etc/rc.d/
+    echo rpcbind=YES >> /etc/rc.conf
+    echo famd=YES >> /etc/rc.conf
+    service rpcbind start
+    service famd start
+
+
+Make sure you have an empty `Xnest` session started. Export the `DISPLAY` variable
+so XFCE knows in which X session it should run:
+
+    export DISPLAY=:1
+
+Start XFCE in that new `Xnest` session:
+
+    dbus-launch /usr/pkg/bin/xfce4-session
+
+It takes a few seconds to load. The background image took a bit longer for me
+than the rest of the session. Here is how it should look:
+
+![screenshot][3]
+
+Other window managers are available as well. I've tried `fluxbox` and
+`lumina-desktop`, the latter taking a while to compile. `windowmaker` is fun
+to play with as well. Here is a screenshot after installing the
+`windowmaker-desktop` meta-package and running `wmaker -display :1` to start:
+
+![screenshot][6]
+
+If you're feeling really nostalgic, `CDE`, the [Common Desktop Environment][4]
+is also [available for NetBSD][5]. Astr0baby has a [guide to run CDE on NetBSD][7] 
+on the Pinebook Pro.
+
+
+[1]: /s/articles/NetBSD_on_QEMU_Alpha.html
+[2]: /s/inc/img/netbsd-xnest-1.png
+[3]: /s/inc/img/netbsd-xnest-2.png
+[4]: /s/blog/The_Common_Desktop_Environment_CDE_is_still_developed_in_2021.html
+[5]: https://sourceforge.net/p/cdesktopenv/wiki/NetBSD/
+[6]: /s/inc/img/netbsd-xnest-3.png
+[7]: http://web.archive.org/web/20210821210536/https://astr0baby.wordpress.com/2020/05/03/cde-common-desktop-environment-on-netbsd-ebvarm-pinebook/
+[8]: /s/inc/img/netbsd-xnest-4.png
+
+
+
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

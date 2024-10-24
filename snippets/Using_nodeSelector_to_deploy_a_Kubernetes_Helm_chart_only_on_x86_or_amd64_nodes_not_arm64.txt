@@ -1,0 +1,85 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Using nodeSelector to deploy a Kubernetes Helm chart only on x86/amd64 nodes, not arm64
+Author      : 	Remy van Elst
+Date        : 	11-07-2024 23:39
+URL         : 	https://raymii.org/s/snippets/Using_nodeSelector_to_deploy_a_Kubernetes_Helm_chart_only_on_x86_or_amd64_nodes_not_arm64.html
+Format      : 	Markdown/HTML
+---
+
+
+
+My [k3s cluster](/s/tutorials/My_First_Kubernetes_k3s_cluster_on_3_Orange_Pi_Zero_3s_including_k8s_dashboard_hello-node_and_failover.html) runs on Orange Pi Zero 3 small board computers, with a 1.5 GHz Allwinner H618 Quad-Core Cortex-A53 ARM64 CPU. Nowadays most popular software has support for `aarch64` due to the popularity of boards like the Raspberry Pi and the Apple M1 series processors, but smaller projects or niche software often can only run on x86/amd64. If you write your own yaml files for deployment you can use a `nodeSelector` combined with the `kubernetes.io/arch=amd64`, but with a Helm Chart this is not that obvious. This small snippets shows you the correct syntax to force deploy a Helm Chart to only amd64 nodes in your cluster. This assumes you have a mixed cluster, I added a small virtual machine to it for testing. 
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+
+
+
+This is my cluster
+
+![orange pies](/s/inc/img/k8s-cluster-hardware.png)
+
+
+The version of [Kubernetes/k3s](https://docs.k3s.io/release-notes/v1.29.X) I use
+for this article is `v1.29.6+k3s1`.
+
+The [Kubernetes documentation on `nodeSelector`]
+(https://web.archive.org/web/20240711184149/https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/)
+is comprehensive and covers more than just forcing a node, also affinity and
+more.
+
+In my case I just want to deploy a Helm Chart, not fiddle with yaml. By default most Helm Charts 
+
+You can use the `--set` parameter to add a `nodeSelector` to your `helm install`:
+
+    --set nodeSelector."\.kubernetes\.io/arch"=amd64
+
+For example, to install [urunner](https://github.com/texano00/urunner), which currently does [not work on arm64](https://github.com/texano00/urunner/issues/14), use the following command:    
+
+
+    helm upgrade --install urunner oci://ghcr.io/texano00/urunner/helm/urunner --version 0.1.0 --values values.yaml -n urunner --create-namespace --set nodeSelector."\.kubernetes\.io/arch"=amd64
+
+One other project, [canary-checker, has added arm64 support on my request]
+(https://github.com/flanksource/canary-checker/issues/1938)! That now works
+on my Orange Pi Zero 3 nodes, I hope that `urunner` will add support soon.  
+
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

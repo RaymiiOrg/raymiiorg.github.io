@@ -1,0 +1,137 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Recursively find all [installed] package dependencies
+Author      : 	Remy van Elst
+Date        : 	31-12-2015
+URL         : 	https://raymii.org/s/software/Recursively_find_all_installed_package_dependencies.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This small script shows you all packages [installed] that are a dependency from
+a package, and the dependencies of those packages. I installed the build-
+essential package, but apt-get remove-ing that package doens't remove the
+development tools. So I was wondering what packages were installed, including
+those dependencies, to remove the ones I didn't want. This small script shows
+you all packages that are dependencies of a package, and repeats that for those
+packages.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+### The code
+
+Too small to create a github repo, so that's why you need to copy paste it.
+
+    
+    
+    #!/bin/bash
+    # Small script to recursively show dependencies of packages
+    # Author: Remy van Elst <raymii.org>
+    
+    pkgdep() {
+      apt-cache depends --installed $1 | awk -F\: '{print $2}' | grep -v -e '<' -e '>' | awk 'NF'
+    }
+    
+    for i in $(pkgdep $1); do
+      pkgdep $i
+    done | sort -u
+    
+
+Save and `chmod +x`. Execute with one package as parameter.
+
+If you also want non-installed packages shown, remove the `--installed`
+parameter.
+
+### Examples
+
+For the package `bash`:
+
+    
+    
+    # bash dep.sh bash
+     bash
+     debconf
+     debianutils
+     dpkg
+     initscripts
+     libc6
+     libc-bin
+     libgcc1
+     libncurses5
+     locales
+     multiarch-support
+     sensible-utils
+     tzdata
+    
+
+For the package `build-essential`:
+
+    
+    
+    # bash dep.sh build-essential
+     base-files
+     binutils
+     bzip2
+     cpp
+     debian-keyring
+     fakeroot
+     g++-4.7
+     gcc
+     gcc-4.7
+     gnupg
+     gpgv
+     libalgorithm-merge-perl
+     libc6
+     libc6-dev
+     libc-dev-bin
+     libdpkg-perl
+     linux-libc-dev
+     make
+     manpages-dev
+     patch
+     xz-utils
+    
+
+You can remove the ones you don't want with an `apt-get purge`, but be carefull
+to not break your system. Removing `libc6` will break stuff.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

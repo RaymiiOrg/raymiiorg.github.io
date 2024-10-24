@@ -1,0 +1,198 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	KVM convert qcow2 disk images to raw disk images for performance
+Author      : 	Remy van Elst
+Date        : 	16-02-2014
+URL         : 	https://raymii.org/s/tutorials/KVM_convert_qcow2_disk_images_to_raw_disk_images_for_performance.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This tutorial shows you how to convert KVM qcow2 disk images to raw disk images.
+The qcow2 disk format has some decent features like encryption, compression and
+copy to write support. However, the compression and the copy processes make it
+quite a bit slower than raw disk images. Sometimes you want to convert the disk
+images so that the VM will perform better.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+### Benchmark
+
+For me it has a performance boost. Using a RAID 1 setup with two 5900 RPM disks
+and the `deadline` on the host and the `noop` scheduler without caching on a raw
+image in the guest resulted in a boost over the default `deadline` scheduler on
+a qcow2 image on the guest:
+
+Test command:
+
+    
+    
+    dd if=/dev/zero of=test bs=64k count=16k conv=fdatasync
+    
+
+Default Ubuntu 12.04 vmbuilder created vm on a qcow2 image without caching and
+with the deadline scheduler in the VM:
+
+    
+    
+    1073741824 bytes (1.1 GB) copied, 658.396 s, 1.6 MB/s
+    
+
+The same VM, disk image converted to raw image without caching and using the
+noop scheduler in the VM:
+
+    
+    
+    1073741824 bytes (1.1 GB) copied, 13.646 s, 78.7 MB/s
+    
+
+That's quite a performance boost. The KVM host has the following result with the
+`dd` command:
+
+    
+    
+    1073741824 bytes (1.1 GB) copied, 10.4034 s, 103 MB/s
+    
+
+### Converting the image
+
+I'll convert the disk image for the example vm `vm1`. Change the name and disk
+paths for your setup.
+
+First shut down the VM:
+
+    
+    
+    virsh shutdown vm1
+    
+
+Then convert all the disk images using this command for each disk image:
+
+    
+    
+    qemu-img convert /var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.qcow2 /var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.raw
+    
+
+Edit the VM config:
+
+    
+    
+    virsh edit vm1
+    
+
+Change the `disk` section to point to the new raw image:
+
+Change the lines `<driver name='qemu' type='qcow2'/>` and `<source
+file='/var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.qcow2'/>` to `<driver
+name='qemu' type='raw'/>` and `<source file='/var/lib/libvirt/images/vm1/ubuntu-
+kvm/tmp20ePgc.raw'/>`. Like so:
+
+    
+    
+    &lt;disk type='file' device='disk'&gt;
+      &lt;driver name='qemu' type='raw' cache='none'/&gt;
+      &lt;source file='/var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.raw'/&gt;
+      &lt;target dev='hda' bus='ide'/&gt;
+      &lt;address type='drive' controller='0' bus='0' unit='0'/&gt;
+    &lt;/disk&gt; 
+    
+
+That's it. Start the VM:
+
+    
+    
+    virsh start vm1
+    
+
+If it all works, remove the qcow2 image:
+
+    
+    
+    rm /var/lib/libvirt/images/vm1/ubuntu-kvm/tmp20ePgc.qcow2
+    
+
+### Disk scheduler
+
+To change the default disk scheduler in your VM, you can use the following
+command:
+
+    
+    
+    echo $scheduler > /sys/block/$device/queue/scheduler
+    
+
+To check the current scheduler:
+
+    
+    
+    cat /sys/block/sda/queue/scheduler
+    
+
+Output:
+
+    
+    
+    noop [deadline] cfq
+    
+
+Here the `deadline` scheduler is being used. To change it:
+
+    
+    
+    echo noop > /sys/block/sda/queue/scheduler
+    
+
+Now the `noop` scheduler is being used:
+
+    
+    
+    cat /sys/block/sda/queue/scheduler
+    [noop] deadline cfq
+    
+
+Remember to add this command to `/etc/rc.local` to make it survive a reboot. On
+ubuntu you can also define it in `/etc/default/grub`. Change
+`GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"` to
+`GRUB_CMDLINE_LINUX_DEFAULT="quiet splash elevator=noop"` and run an `update-
+grub2` to make it permanent
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

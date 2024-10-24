@@ -1,0 +1,196 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Limit access to openssh features with the Match option
+Author      : 	Remy van Elst
+Date        : 	24-11-2012
+URL         : 	https://raymii.org/s/tutorials/Limit_access_to_openssh_features_with_the_Match_keyword.html
+Format      : 	Markdown/HTML
+---
+
+
+
+OpenSSH has a lot of nice features which let you control how it is used. For
+example, you can disallow the root account to login, set the port number,
+protocol version and a lot of other features. This tutorial will show you how to
+enable certain features for certain hosts, users, groups and addresses with the
+Match keyword in sshd_config. And as a bonus it also covers the iptables
+firewall.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+#### Securing sshd
+
+First a few general tips about securing ssh.
+
+  * Disable login with username/pasword and use key based authentication.
+  * Do not allow root to login, limit permissions with sudo or use su.
+  * Only allow protocol 2, not any of the earlier ones.
+  * Not a real security measure but makes your logs less dirty: set sshd to a higher port.
+
+#### Examples
+
+You of course have disabled password authentication and you use public/private
+key based authentication, right? Buy, you might have that one host which is for
+whatever reason is not able to use ssh keys. The below config line disables
+password authentication for everyone, and then it enables it for the IP address
+1.2.3.4:
+
+    
+    
+    PasswordAuthentication no
+    
+    ### this should be on the bottom of the config file
+    ### Enable password authentication for IP 1.2.3.4
+    Match Address 1.2.3.4
+        PasswordAuthentication yes
+    
+
+Or you might have a user which needs to use a graphical application on a server.
+But all the other users do not have to use that. For example, you might have
+Matlab for one user. You can install a desktop for them, but you can also let
+them use X forwarding. The below config allows X forwarding for the user John,
+but disallows it for everyone else.
+
+    
+    
+    X11Forwarding no
+    ### add this to the bottom of the sshd_config
+    Match User John
+        X11Forwarding yes
+    
+
+But lets say John can only use matlab (X-forwarding) from the internal network
+and you want to X forwarding for every other user, only allowing it from the
+local 172.16.1.* network, you might want to use this config lines:
+
+    
+    
+    X11Forwarding no
+    ### add this to the bottom of the sshd_config
+    Match User John Address 172.16.1.* 
+        X11Forwarding yes
+    
+
+And what if you want to allow a few IP addresses and one hostname to login with
+a password, as root? _Note that this is a bad thing to do, you should not allow
+root to login but use su or sudo, and preferably all users should login with ssh
+keys_.
+
+    
+    
+    PaswordAuthentication no
+    PermitRootLogin no
+    ### Add this to the end of the config file
+    Match Address 10.20.30.40,80.90.100.200 Host dispatch.raymii.org
+        PasswordAuthentication Yes
+        PermitRootLogin yes
+    
+
+#### Restrict access via the firewall
+
+Using iptables is also a good way to restrict access to a few IP addresses. The
+below example allows the IP addresses 2.3.4.5, 3.4.5.6 and 10.2.3.40 to talk to
+port 22, and discards all the other traffic.
+
+    
+    
+    iptables -I INPUT -s 2.3.4.5 -p tcp -m tcp --dport 22 -j ACCEPT
+    iptables -I INPUT -s 3.4.5.6 -p tcp -m tcp --dport 22 -j ACCEPT
+    iptables -I INPUT -s 10.2.3.40 -p tcp -m tcp --dport 22 -j ACCEPT
+    iptables -I INPUT -p tcp -m tcp --dport 22 -j REJECT
+    
+
+#### All the options
+
+The list below are all the options supported in an SSH Match pattern:
+
+  * AcceptEnv
+  * AllowTcpForwarding
+  * AuthorizedKeysFile
+  * AuthorizedKeysFile2
+  * Banner
+  * ChallengeResponseAuthentication
+  * ChallengeResponseAuthentication
+  * ClientAliveCountMax
+  * ClientAliveInterval
+  * GatewayPorts
+  * GssAuthentication
+  * GssCleanupCreds
+  * HostbasedAuthentication
+  * HostbasedUsesNameFromPacketOnly
+  * IgnoreRhosts
+  * IgnoreUserKnownHosts
+  * KbdInteractiveAuthentication
+  * KerberosAuthentication
+  * KerberosGetAFSToken
+  * KerberosOrLocalPasswd
+  * KerberosTicketCleanup
+  * LogFacility
+  * LogLevel
+  * LoginGraceTime
+  * MaxAuthTries
+  * PasswordAuthentication
+  * PermitEmptyPasswd
+  * PermitRootLogin
+  * PermitTunnel
+  * PermitUserEnvironment
+  * PrintLastLog
+  * PrintMotd
+  * PubkeyAuthentication
+  * PubkeyAuthentication
+  * RSAAuthentication
+  * RhostsRSAAuthentication
+  * StrictModes
+  * UseLogin
+  * UsePAM
+  * X11DisplayOffset
+  * X11Forwarding
+  * X11UseLocalhost
+  * XAuthLocation
+
+#### More information
+
+[Source link used for this article][2]  
+[Forum topic on the Arch Linux bbs][3]
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://bugzilla.mindrot.org/show_bug.cgi?id=match
+   [3]: https://bbs.archlinux.org/viewtopic.php?id=121945
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

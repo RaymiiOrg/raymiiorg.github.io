@@ -1,0 +1,853 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Nagios 4 + Nagiosgraph (latest) installation on Ubuntu 12.04 & 14.04 - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Nagios 4 + Nagiosgraph (latest) installation on Ubuntu 12.04 & 14.04</h2>
+<p><small>Published: <span data-pagefind-meta='date'>11-09-2016</span> | Author: Remy van Elst | <a href="Nagios_Core_4_Installation_on_Ubuntu_12.04.txt">Text only version of this article</a>
+</small></p>
+<br><div class='olderthanayear'><p><strong>&#10071; This post is over seven years old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Contents</a>
+</li>
+<li>
+<a href="#toc_1">Whats new in Nagios Core 4?</a>
+</li>
+<li>
+<a href="#toc_2">Note about currently installed Nagios versions</a>
+</li>
+<li>
+<a href="#toc_3">Note about the plugins and NRPE</a>
+</li>
+<li>
+<a href="#toc_4">Note about packages and checkinstall</a>
+</li>
+<li>
+<a href="#toc_5">Install required packages</a>
+</li>
+<li>
+<a href="#toc_6">Create the Nagios user</a>
+</li>
+<li>
+<a href="#toc_7">Download and Compile Nagios Core</a>
+</li>
+<li>
+<a href="#toc_8">Download and Compile the Nagios Plugins</a>
+</li>
+<li>
+<a href="#toc_9">Download and Compile NRPE</a>
+</li>
+<li>
+<a href="#toc_10">Setup the upstart script</a>
+</li>
+<li>
+<a href="#toc_11">Set up Apache</a>
+</li>
+<li>
+<a href="#toc_12">Tweaks</a>
+</li>
+<li>
+<a href="#toc_13">Nagios Graph</a>
+</li>
+<li>
+<a href="#toc_14">MRTG</a>
+</li>
+<li>
+<a href="#toc_15">Menu</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p><img src="https://raymii.org/s/inc/img/nagios4.0.8.png" alt="Nagios 4"></p>
+
+<p>This is a guide on installing the latest Nagios Core (4.2.1) on Ubuntu 12.04 and
+14.04. Nagios is an open source computer system monitoring, network monitoring
+and infrastructure monitoring software application. Nagios offers monitoring and
+alerting services for servers, switches, applications, and services. It alerts
+the users when things go wrong and alerts them a second time when the problem
+has been resolved. The version in the Ubuntu 12.04 repositories is quite old, it
+is still the in the 3 branch. This guide helps to fix that by using the latest
+Nagios version. We also install Nagiosgraph, a plugin for Nagios which gives you
+graps of the metrics.</p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+<p>You can find more information about Nagios on the official website: <a href="http://www.nagios.org/projects/nagioscore">http://ww
+w.nagios.org/projects/nagioscore</a>.</p>
+
+<p>The description of Nagios Core from their website:</p>
+
+<pre><code>Nagios Core is the monitoring and alerting engine that serves as the
+primary application around which hundreds of Nagios projects are built. It
+serves as the basic event scheduler, event processor, and alert manager
+for elements that are monitored. It features several APIs that are used to
+extend its capabilities to perform additional tasks, is implemented as a
+daemon written in C for performance reasons, and is designed to run native
+on Linux/*nix systems.
+</code></pre>
+
+<h3 id="toc_0">Contents</h3>
+
+<p>We are going to do the following:</p>
+
+<ul>
+<li>Install required packages</li>
+<li>Create the Nagios user</li>
+<li>Download and Compile Nagios Core</li>
+<li>Download and Compile the Nagios Plugins</li>
+<li>Download and Compile NRPE</li>
+<li>Setup the upstart script</li>
+<li>Set up Apache</li>
+<li>Install NagiosGraph</li>
+<li>Configure MRTG</li>
+</ul>
+
+<p>At the end of this tutorial you will have a fully up to date Nagios Core
+installation, with the latest plugins, the latest NRPE, the webinterface set up
+with authentication and ssl, Nagios Graph integrated and MRTG installed to
+monitor the health of Nagios.</p>
+
+<p>This was written and tested on Ubuntu 12.04 and 14.04, both 32 and 64 bit.</p>
+
+<h3 id="toc_1">Whats new in Nagios Core 4?</h3>
+
+<p><strong>Major performance increases</strong> :</p>
+
+<ul>
+<li><p>Core Workers - Core workers are lightweight processes whose only job is to perform checks. Because they are smaller they spawn much more quickly than the the old process which forked the full Nagios Core. In addition, they communicate with the main Nagios Core process using in-memory techniques, eliminating the disk I/O latencies that could previously slow things down, especially in large installations.</p></li>
+<li><p>Configuration Verification - Configuration verification has been improved so that each configuration item is verified only once. Previously configuration verification was an O(n2) operation.</p></li>
+<li><p>Event Queue - The event queue now uses a data structure that has O(log n) insertion times versus the O(n) insertion time previously. This means that inserting events into the queue uses much less CPU than in Nagios Core 3.</p></li>
+</ul>
+
+<p><strong>Other nice changes</strong> :</p>
+
+<ul>
+<li><p>The host address attribute is now optional. The address attribute is set to the host name when it is absent. Most configurations set the host name attribute to the DNS host name making the address attribute redundant.</p></li>
+<li><p>Both hosts and services now support an hourly value attribute. The hourly value attribute is intended to represent the value of a host or service to an organization and is used by the new minimum value contact attribute.</p></li>
+<li><p>Services now support a parents attribute. A service parent performs a function similar to host parents and can be used in place of service dependencies in simple circumstances.</p></li>
+</ul>
+
+<p><strong>No more embedded perl</strong> :</p>
+
+<ul>
+<li>Embedded Perl - Embedded Perl has historically been the least tested and the most problem prone part of Nagios Core. A significant part of the issue is that there are so many versions of Perl available. The performance enhancements provided by the new worker process architecture make up for any performance loss due to the removal of embeddd Perl. In addition, the worker process architecture makes possible the implementation of a special purpose worker to persistently load and run Perl plugins. The following configuration variables that were related to embedded Perl have been obsoleted: use <em>embedded</em> perl <em>implicitly, enable</em> embedded <em>perl, p1</em> file.</li>
+</ul>
+
+<p><a href="http://nagios.sourceforge.n%0Aet/docs/nagioscore/4/en/whatsnew.html">See this page for the full listing of new stuff in Nagios 4</a></p>
+
+<h3 id="toc_2">Note about currently installed Nagios versions</h3>
+
+<p>Make sure you remove all currently installed Nagios versions and packages.
+Better yet, start on a new empty server/vm.</p>
+
+<h3 id="toc_3">Note about the plugins and NRPE</h3>
+
+<p>We are compiling the latest version of the plugins and NRPE on the Nagios
+Server. On the Nagios clients, you <strong>do not have to do this</strong>. The version of
+NRPE in the Ubuntu repositories works with this newer Nagios version. The same
+goes for the plugins.</p>
+
+<h3 id="toc_4">Note about packages and checkinstall</h3>
+
+<p>We are using checkinstall here to create a debian package of the source we
+compile. I do this because it gives more flexibility in managing the software
+afterwards. Upgrading or uninstalling the packages is easier than removing all
+the things make install placed. Furthermore, it makes it more clear for other
+administrators which software is installed.</p>
+
+<p>If you for example want to upgrade Nagios when it was installed via this
+tutorial with checkinstall, repeat the tutorial with only the version number
+changed.</p>
+
+<h3 id="toc_5">Install required packages</h3>
+
+<p>Install the packages required for compilation, apache and mail functionality:</p>
+
+<pre><code>apt-get install apache2 libapache2-mod-php5 build-essential libgd2-xpm-dev
+libssl-dev sendmail-bin sendmail heirloom-mailx wget apache2-utils curl
+daemon apt-file libnet-snmp-perl libperl5.14 libpq5 libradius1 libsensors4
+libsnmp-base libtalloc2 libtdb1 libwbclient0 samba-common samba-common-bin
+smbclient snmp whois mrtg libmysqlclient15-dev libcgi-pm-perl librrds-perl
+libgd-gd2-perl
+</code></pre>
+
+<h3 id="toc_6">Create the Nagios user</h3>
+
+<p>Nagios runs as its own user and has its own groups. We need to create this user
+and groups. We also make sure the user Apache runs as can access the Nagios
+files by adding the www-data user to the nagios groups.</p>
+
+<pre><code>groupadd -g 3000 nagios
+groupadd -g 3001 nagcmd
+useradd -u 3000 -g nagios -G nagcmd -d /usr/local/nagios -c &#39;Nagios Admin&#39; nagios
+adduser www-data nagcmd
+</code></pre>
+
+<h3 id="toc_7">Download and Compile Nagios Core</h3>
+
+<p>If necessary, create <code>/usr/local/src/nagios4</code>:</p>
+
+<pre><code>mkdir -p /usr/local/src/nagios4
+</code></pre>
+
+<p>cd into <code>/usr/local/src/nagios4</code>:</p>
+
+<pre><code>cd /usr/local/src/nagios4
+</code></pre>
+
+<p>(I like to keep my source code and compilation files in one place).</p>
+
+<p>Use wget to download the latest Nagios Core from sourceforge:</p>
+
+<pre><code>wget http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-4.2.1.tar.gz
+</code></pre>
+
+<p>Extract it:</p>
+
+<pre><code>tar xf nagios-4.2.1.tar.gz
+cd nagios-4.2.1
+</code></pre>
+
+<p>Create a few folders:</p>
+
+<pre><code>mkdir -p /usr/local/nagios/share/{stylesheets,images}
+</code></pre>
+
+<p>Now start the compilation process. First configure:</p>
+
+<pre><code>./configure --prefix=/usr/local/nagios --with-nagios-user=nagios --with-
+./nagios-group=nagios --with-command-user=nagios --with-command-
+./group=nagcmd
+</code></pre>
+
+<p>Output should look like this:</p>
+
+<pre><code> General Options:
+ -------------------------
+        Nagios executable:  nagios
+        Nagios user/group:  nagios,nagios
+       Command user/group:  nagios,nagcmd
+             Event Broker:  yes
+        Install ${prefix}:  /usr/local/nagios
+    Install ${includedir}:  /usr/local/nagios/include/nagios
+                Lock file:  ${prefix}/var/nagios.lock
+   Check result directory:  ${prefix}/var/spool/checkresults
+           Init directory:  /etc/init.d
+  Apache conf.d directory:  /etc/apache2/conf.d
+             Mail program:  /usr/bin/mail
+                  Host OS:  linux-gnu
+
+ Web Interface Options:
+ ------------------------
+                 HTML URL:  http://localhost/nagios/
+                  CGI URL:  http://localhost/nagios/cgi-bin/
+ Traceroute (used by WAP):  /usr/sbin/traceroute
+
+
+Review the options above for accuracy.  If they look okay,
+type &#39;make all&#39; to compile the main program and CGIs.
+</code></pre>
+
+<p>Then the make process:</p>
+
+<pre><code>make all
+</code></pre>
+
+<p>Then the use checkinstall, for all the parts:</p>
+
+<pre><code># This installs the main program, CGIs, and HTML files
+checkinstall
+</code></pre>
+
+<p>In the depends section of the package, make sure to add <code>libc6, perl</code>. Name the
+package <code>nagios4</code> and give it the correct version, namely <code>4.2.1</code>. Repeat for
+all following packages created.</p>
+
+<pre><code># This installs the init script in /etc/init.d
+checkinstall --pkgname=nagios-init make install-init
+
+# This installs *SAMPLE* config files in /usr/local/nagios/etc
+checkinstall --pkgname=nagios-config make install-config
+
+#This installs and configures permissions on the directory for holding the external command file
+checkinstall --pkgname=nagios-commandmode make install-commandmode
+
+# This installs the Apache config file for the Nagios web interface
+checkinstall --pkgname=nagios-webconf make install-webconf
+</code></pre>
+
+<p>The above command fails on Ubuntu 14.04:</p>
+
+<pre><code>/usr/bin/install -c -m 644 sample-config/httpd.conf /etc/httpd/conf.d/nagios.conf
+/usr/bin/install: cannot create regular file &#39;/etc/httpd/conf.d/nagios.conf&#39;: No such file or directory
+make: *** [install-webconf] Error 1
+</code></pre>
+
+<p>Execute it manually with the correct paths:</p>
+
+<pre><code>/usr/bin/install -c -m 644 sample-config/httpd.conf /etc/apache2/conf-available/nagios.conf
+ln -s /etc/apache2/conf-available/nagios.conf /etc/apache2/conf-enabled/nagios.conf
+</code></pre>
+
+<p>Continue on:</p>
+
+<pre><code># This installs the Exfoliation theme for the Nagios web interface
+checkinstall --install=no --pkgname=nagios-exfoliation make install-exfoliation
+dpkg --force-overwrite -i nagios-exfoliation*.deb
+</code></pre>
+
+<p>If this all goes well, we can continue to the next part.</p>
+
+<h3 id="toc_8">Download and Compile the Nagios Plugins</h3>
+
+<p>Same as above. First create the right folders:</p>
+
+<pre><code>mkdir -p /usr/local/src/nagios-plugins
+cd /usr/local/src/nagios-plugins
+</code></pre>
+
+<p>Download the files and untar them:</p>
+
+<pre><code>wget https://www.nagios-plugins.org/download/nagios-plugins-2.1.2.tar.gz
+tar -xf nagios-plugins-2.1.2.tar.gz
+cd nagios-plugins-2.1.2
+</code></pre>
+
+<p>Start the compile process:</p>
+
+<pre><code>./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl=/usr/bin/openssl --enable-perl-modules --enable-libtap
+</code></pre>
+
+<p>Then the make and make install:</p>
+
+<pre><code>make
+checkinstall
+</code></pre>
+
+<p>Here again, make sure to set <code>libc6, perl</code> as dependencies, name it <code>nagios-
+plugins</code> and give it the correct version (<code>2.1.2)</code>.</p>
+
+<p>This should also go fine. Continue on to NRPE.</p>
+
+<h3 id="toc_9">Download and Compile NRPE</h3>
+
+<pre><code>NRPE allows you to remotely execute Nagios plugins on other Linux/Unix machines. This allows you to monitor remote machine metrics (disk usage, CPU load, etc.). NRPE can also communicate with some of the Windows agent addons, so you can execute scripts and check metrics on remote Windows machines as well.
+</code></pre>
+
+<p>Same steps as above. First create the right folders:</p>
+
+<pre><code>mkdir -p /usr/local/src/nrpe
+cd /usr/local/src/nrpe
+</code></pre>
+
+<p>Download the files and extract:</p>
+
+<pre><code>wget http://kent.dl.sourceforge.net/project/nagios/nrpe-2.x/nrpe-2.15/nrpe-2.15.tar.gz
+tar -xf nrpe-2.15.tar.gz
+cd nrpe-2.15
+</code></pre>
+
+<p>Because of <a href="http://askubuntu.com/questions/133184/nagios-nrpe-installation-errorconfigure-error-cannot-find-ssl-libraries">an issue with the openssl library folder</a> we need to use another
+path than <code>/usr/lib</code>:</p>
+
+<pre><code>./configure --with-ssl=/usr/bin/openssl --with-ssl-lib=/usr/lib/x86_64-linux-gnu
+</code></pre>
+
+<p>(If you run a 32 bit installation of Ubuntu you can find the right path using
+(this command: <code>apt-file search libssl | grep libssl-dev</code>. You might need to
+(install <code>apt-file</code>.)</p>
+
+<p>Now make and make install:</p>
+
+<pre><code>make all
+checkinstall
+</code></pre>
+
+<p>Same thing as above, require <code>libc6, perl</code> in the dependencies, name it
+correctly (<code>nrpe</code>) and give it the right version in checkinstall (<code>2.15</code>).</p>
+
+<p>That part also finished. Continue on.</p>
+
+<h3 id="toc_10">Setup the upstart script</h3>
+
+<p>The current init script which comes with Nagios Core 4.2.1 does not work with
+Ubuntu 12.1.24. See this stackoverflow topic:
+<a href="http://stackoverflow.com/questions/19606049/nagios-4%0A-cant-open-etc-rc-d-init-d-functions">http://stackoverflow.com/questions/19606049/nagios-4-cant-open-etc-
+rc-d-init-d-functions</a>.</p>
+
+<p>The fixes in that topic and on the Nagios forum did not work for me, so I wrote
+a very simple upstart script.</p>
+
+<p>Place it in <code>/etc/init/nagios.conf</code>:</p>
+
+<pre><code># nagios - monitoriong system
+# by https://raymii.org
+
+description     &quot;nagios monitoring system&quot;
+
+start on virtual-filesystems
+stop on runlevel [06]
+
+respawn
+respawn limit 5 30
+limit nofile 65550 65550
+
+chdir /usr/local/nagios/
+setuid nagios
+setgid nagios
+console log
+
+script
+        exec bin/nagios etc/nagios.cfg
+end script
+</code></pre>
+
+<p>Don&#39;t forget to remove the init script:</p>
+
+<pre><code>mv /etc/init.d/nagios /var/backups/nagios.init
+</code></pre>
+
+<h3 id="toc_11">Set up Apache</h3>
+
+<p>First we set up a user account for the new nagios user:</p>
+
+<pre><code>htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+chown nagios:nagcmd /usr/local/nagios/etc/htpasswd.users
+</code></pre>
+
+<p>Then we create a certificate. This is a self signed one, you can also request a
+certificate at a provider such as Digicert or Verisign.</p>
+
+<pre><code>mkdir /etc/apache2/ssl
+cd /etc/apache2/ssl
+a2enmod ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:4096 -out nagios.pem -keyout nagios.key
+</code></pre>
+
+<p>We also create a folder for nagios under <code>/var/www</code>:</p>
+
+<pre><code>mkdir -p /var/www/nagios4/
+chown www-data:www-data /var/www/nagios4
+</code></pre>
+
+<p>Create some symlinks:</p>
+
+<pre><code>ln -s /usr/local/src/nagios4/nagios-4.2.1/contrib/exfoliation/images/favicon.ico /var/www/favicon.ico
+</code></pre>
+
+<p>Set up a vhost for Nagios. The below file can be used on Ubuntu 12.04. Place it
+in <code>/etc/apache2/sites-available/nagios.conf</code>:</p>
+
+<pre><code>&lt;VirtualHost *:443&gt;
+    ServerAdmin webmaster@example.org
+    ServerName nagios.example.org
+    DocumentRoot /var/www/nagios
+
+    &lt;Directory /&gt;
+        Options FollowSymLinks
+        AllowOverride None
+    &lt;/Directory&gt;
+
+    &lt;Directory /var/www/nagios&gt;
+        Options -Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Order allow,deny
+        allow from all
+    &lt;/Directory&gt;
+
+     SSLEngine On
+     SSLCertificateFile /etc/apache2/ssl/nagios.pem
+     SSLCertificateKeyFile /etc/apache2/ssl/nagios.key
+&lt;/VirtualHost&gt;
+</code></pre>
+
+<p>On Ubuntu 14.04 the apache version was changed from 2.2 to 2.4 so we need a
+different config file:</p>
+
+<pre><code>&lt;VirtualHost *:443&gt;
+    ServerAdmin webmaster@example.org
+    ServerName nagios.example.org
+    DocumentRoot /var/www/nagios
+
+    &lt;Directory /&gt;
+        Options +FollowSymLinks
+        AllowOverride None
+    &lt;/Directory&gt;
+
+    &lt;Directory /var/www/nagios&gt;
+        Options -Indexes +FollowSymLinks +MultiViews
+        AllowOverride All
+        Require all granted
+    &lt;/Directory&gt;
+
+     SSLEngine On
+     SSLCertificateFile /etc/apache2/ssl/nagios.pem
+     SSLCertificateKeyFile /etc/apache2/ssl/nagios.key
+&lt;/VirtualHost&gt;
+</code></pre>
+
+<p>Remember to replace <code>example.org</code> with your domain.</p>
+
+<p>On Ubuntu 14.04 we also need to enable the cgi module, otherwise Nagios will say
+the process is not running, and viewing cgi files results in downloading them:</p>
+
+<pre><code>a2enmod cgi
+</code></pre>
+
+<p>Disable the default vhost:</p>
+
+<pre><code>a2dissite default
+</code></pre>
+
+<p>It might be named <code>000-default</code> instead of <code>default</code>.</p>
+
+<p>Enable the vhost:</p>
+
+<pre><code>a2ensite nagios # or nagios.conf
+</code></pre>
+
+<p>Restart apache:</p>
+
+<pre><code>/etc/init.d/apache2 restart
+</code></pre>
+
+<p>Now we are finished with the installation. Read on for some tweaks I like to
+make.</p>
+
+<h3 id="toc_12">Tweaks</h3>
+
+<p>I like to have my config files in <code>/etc/nagios4/conf.d</code>. To do that, we create a
+symlink first:</p>
+
+<pre><code>ln -s /usr/local/nagios/etc/ /etc/nagios4
+</code></pre>
+
+<p>Then the <code>conf.d</code> folder:</p>
+
+<pre><code>mkdir /etc/nagios4/conf.d
+</code></pre>
+
+<p>Then add this to <code>/etc/nagios4/nagios.cfg</code></p>
+
+<pre><code>cfg_dir=/etc/nagios4/conf.d/
+</code></pre>
+
+<p>I also like to separate my config in directories like so:</p>
+
+<p><a href="http://gnuworldorder.info/shownotes/lstree.txt">lstree</a></p>
+
+<pre><code>/etc/nagios4/conf.d
+   .
+   |-contacts
+   |-hostgroups
+   |-hosts
+   |-servicegroups
+   |-services
+   |-templates
+   |-timeperiods
+</code></pre>
+
+<p>Create it like this:</p>
+
+<pre><code>mkdir -p /etc/nagios4/conf.d/{hosts,services,timeperiods,templates,hostgroups,servicegroups,contacts}
+</code></pre>
+
+<p>Remember to restart Nagios when you are finished:</p>
+
+<pre><code>service nagios restart
+</code></pre>
+
+<p>And the nagios is accessible at https://example.org/nagios, with username
+<code>nagiosadmin</code> and your chosen password.</p>
+
+<h3 id="toc_13">Nagios Graph</h3>
+
+<p>Create a folder for the source:</p>
+
+<pre><code>mkdir -p /usr/local/src/nagiosgraph/
+cd /usr/local/src/nagiosgraph/
+</code></pre>
+
+<p>Download the latest version:</p>
+
+<pre><code>wget http://downloads.sourceforge.net/project/nagiosgraph/nagiosgraph/1.5.2/nagiosgraph-1.5.2.tar.gz
+</code></pre>
+
+<p>Extract it:</p>
+
+<pre><code>tar -xf nagiosgraph-1.5.2.tar.gz
+</code></pre>
+
+<p>Move in to the folder:</p>
+
+<pre><code>cd nagiosgraph-1.5.2
+</code></pre>
+
+<p>Check that we have all the dependencies installed:</p>
+
+<pre><code>./install.pl --check-prereq
+</code></pre>
+
+<p>Example output:</p>
+
+<pre><code>checking required PERL modules
+  Carp...1.29
+  CGI...3.64
+  Data::Dumper...2.145
+  Digest::MD5...2.52
+  File::Basename...2.84
+  File::Find...1.23
+  MIME::Base64...3.13
+  POSIX...1.32
+  RRDs...1.4007
+  Time::HiRes...1.9725
+checking optional PERL modules
+  GD...2.46
+checking nagios installation
+  found nagios exectuable at /usr/local/nagios/bin/nagios
+checking web server installation
+  found apache executable at /usr/sbin/apache2
+  found apache init script at /etc/init.d/apache2
+</code></pre>
+
+<p>Start the installation:</p>
+
+<pre><code>./install.pl --layout standalone --prefix /usr/local/nagiosgraph
+</code></pre>
+
+<p>Give the default answer to all the questions except the below one:</p>
+
+<pre><code>Modify the Nagios configuration? [n] y
+Path of Nagios commands file? /usr/local/nagios/etc/objects/commands.cfg
+Modify the Apache configuration? [n] y
+</code></pre>
+
+<p>If you are on Ubuntu 14.04, change the Apache configuration because the default
+is for Apache 2.2:</p>
+
+<p>Edit the following file:</p>
+
+<pre><code>vim /usr/local/nagiosgraph/etc/nagiosgraph-apache.conf
+</code></pre>
+
+<p>Change it to:</p>
+
+<pre><code># enable nagiosgraph CGI scripts
+ScriptAlias /nagiosgraph/cgi-bin &quot;/usr/local/nagiosgraph/cgi&quot;
+&lt;Directory &quot;/usr/local/nagiosgraph/cgi&quot;&gt;
+   Options ExecCGI
+   AllowOverride None
+   Require all granted
+&lt;/Directory&gt;
+# enable nagiosgraph CSS and JavaScript
+Alias /nagiosgraph &quot;/usr/local/nagiosgraph/share&quot;
+&lt;Directory &quot;/usr/local/nagiosgraph/share&quot;&gt;
+   Options None
+   AllowOverride None
+   Require all granted
+&lt;/Directory&gt;
+</code></pre>
+
+<p>Restart Nagios and Apache:</p>
+
+<pre><code>service nagios restart
+service apache2 restart
+</code></pre>
+
+<p>You can now view the graphs at <code>https://example.org/nagiosgraph/cgi-
+bin/show.cgi</code>.</p>
+
+<p>We can integrate these graphs into Nagios with a little hack. Nagios supports
+<code>notes_url</code> and <code>action_url</code>. These can be put per host/service in the Nagios
+config and allow for a link to a internal knowledge base article or a procedure
+page or whatever for that host.</p>
+
+<p>We can also place a javascript url to the graphs there. Place this inside a
+service check:</p>
+
+<pre><code>action_url      /nagiosgraph/cgi-bin/show.cgi?host=$HOSTNAME$&amp;service=$SERVICEDESC$&amp;geom=1000x200&#39; onMouseOver=&#39;showGraphPopup(this)&#39; onMouseOut=&#39;hideGraphPopup()&#39; rel=&#39;/nagiosgraph/cgi-bin/showgraph.cgi?host=$HOSTNAME$&amp;service=$SERVICEDESC$
+</code></pre>
+
+<p>For example, the Load of the system:</p>
+
+<pre><code>define service {
+        use                     local-service
+        host_name               localhost
+        service_description     Load
+        check_command           check_local_load!5.0,4.0,3.0!10.0,6.0,4.0
+        action_url              /nagiosgraph/cgi-bin/show.cgi?host=$HOSTNAME$&amp;service=$SERVICEDESC$&amp;geom=1000x200&#39; onMouseOver=&#39;showGraphPopup(this)&#39; onMouseOut=&#39;hideGraphPopup()&#39; rel=&#39;/nagiosgraph/cgi-bin/showgraph.cgi?host=$HOSTNAME$&amp;service=$SERVICEDESC$
+}
+</code></pre>
+
+<p>For the ping check you can show both RTA and packet loss:</p>
+
+<pre><code>define service {
+        use                     local-service
+        host_name               localhost
+        service_description     PING
+        check_command           check_ping!100.0,20%!500.0,60%
+        action_url              /nagiosgraph/cgi-bin/show.cgi?host=$HOSTNAME$&amp;service=$SERVICEDESC$&amp;db=pl,data&amp;db=pl,warn&amp;db=pl,crit&amp;geom=1000x200&#39; onMouseOver=&#39;showGraphPopup(this)&#39; onMouseOut=&#39;hideGraphPopup()&#39; rel=&#39;/nagiosgraph/cgi-bin/showgraph.cgi?host=$HOSTNAME$&amp;service=$SERVICEDESC$&amp;db=pl,data&amp;db=pl,warn&amp;db=pl,crit
+        notes_url               /nagiosgraph/cgi-bin/show.cgi?host=$HOSTNAME$&amp;service=$SERVICEDESC$&amp;db=rta,data&amp;db=rta,warn&amp;db=rta,crit&amp;geom=1000x200&#39; onMouseOver=&#39;showGraphPopup(this)&#39; onMouseOut=&#39;hideGraphPopup()&#39; rel=&#39;/nagiosgraph/cgi-bin/showgraph.cgi?host=$HOSTNAME$&amp;service=$SERVICEDESC$&amp;db=rta,data&amp;db=rta,warn&amp;db=rta,crit
+}
+</code></pre>
+
+<p>We need to include the Nagios Graph Javascript in Nagios to make sure the
+mouseover works. Edit or create the following file:</p>
+
+<pre><code>vim /usr/local/nagios/share/ssi/common-header.ssi
+</code></pre>
+
+<p>Place the following in there:</p>
+
+<pre><code>script type=&quot;text/javascript&quot; src=&quot;/nagiosgraph/nagiosgraph.js&quot;&gt;&lt;/script
+</code></pre>
+
+<p>Now save and reload Nagios:</p>
+
+<pre><code>service nagios restart
+</code></pre>
+
+<p>We are going to add a link to here to the menu, but first we&#39;ll configure MRTG.</p>
+
+<h3 id="toc_14">MRTG</h3>
+
+<p>We are going to use MRTG to create some information about how Nagios is running.
+It shows you stats about how many check run and how long they take. This gives
+you insight in your monitoring system.</p>
+
+<p>Copy the included configuration from Nagios:</p>
+
+<pre><code>cp /usr/local/src/nagios4/nagios-4.2.1/sample-config/mrtg.cfg /usr/local/nagios/etc/
+</code></pre>
+
+<p>Create a folder for the graphs and files:</p>
+
+<pre><code>mkdir -p /usr/local/nagios/share/stats
+</code></pre>
+
+<p>Configure MRTG to use this folder:</p>
+
+<pre><code>vim /usr/local/nagios/etc/mrtg.cfg
+</code></pre>
+
+<p>Add the following at the top of the file:</p>
+
+<pre><code>WorkDir: /usr/local/nagios/share/stats
+</code></pre>
+
+<p>Do the initial run:</p>
+
+<pre><code>env LANG=C /usr/bin/mrtg /usr/local/nagios/etc/mrtg.cfg
+</code></pre>
+
+<p>Create the HTML pages:</p>
+
+<pre><code>/usr/bin/indexmaker /usr/local/nagios/etc/mrtg.cfg --output=/usr/local/nagios/share/stats/index.html
+</code></pre>
+
+<p>Finally create a cron job to run MRTG every 5 minutes:</p>
+
+<pre><code>vim /etc/cron.d/mrtg-nagios
+</code></pre>
+
+<p>Add the following:</p>
+
+<pre><code>*/5 * * * *  root  env LANG=C /usr/bin/mrtg /usr/local/nagios/etc/mrtg.cfg
+</code></pre>
+
+<p>You can now navigate to <code>https://example.org/nagios/stats/</code> to see the graphs.</p>
+
+<h3 id="toc_15">Menu</h3>
+
+<p>Last but not least we&#39;ll add two links to the Nagios menu to these new tools.</p>
+
+<p>Edit the sidebar file:</p>
+
+<pre><code>vim /usr/local/nagios/share/side.php
+</code></pre>
+
+<p>And add the following somewhere in the menu:</p>
+
+<pre><code>&lt;div class=&quot;navsection&quot;&gt;
+    &lt;div class=&quot;navsectiontitle&quot;&gt;Extra Tools&lt;/div&gt;
+        &lt;div class=&quot;navsectionlinks&quot;&gt;
+            &lt;ul class=&quot;navsectionlinks&quot;&gt;
+                &lt;li&gt;&lt;a href=&quot;/nagios/stats&quot; target=&quot;&lt;?php echo $link_target;?&gt;&quot;&gt;MRTG stats&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;/nagiosgraph/cgi-bin/show.cgi&quot; target=&quot;&lt;?php echo $link_target;?&gt;&quot;&gt;Nagios Graph&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>Save and reload Nagios. You can now start to configure the clients and enjoy
+your awesome Nagios.</p>
+Tags: <a href="../tags/apache.html">apache</a>
+, <a href="../tags/monitoring.html">monitoring</a>
+, <a href="../tags/nagios.html">nagios</a>
+, <a href="../tags/nagios-core.html">nagios-core</a>
+, <a href="../tags/nrpe.html">nrpe</a>
+, <a href="../tags/tutorials.html">tutorials</a>
+, <a href="../tags/ubuntu.html">ubuntu</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

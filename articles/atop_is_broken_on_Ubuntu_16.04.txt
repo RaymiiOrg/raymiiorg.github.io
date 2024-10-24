@@ -1,0 +1,156 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	atop is broken on Ubuntu 16.04 (version 1.26): trap divide error
+Author      : 	Remy van Elst
+Date        : 	18-09-2017
+URL         : 	https://raymii.org/s/articles/atop_is_broken_on_Ubuntu_16.04.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Recently a few of my Ubuntu 16.04 machines had issues and I was troubleshooting
+them, noticing `atop` logs missing. atop is a very handy tool which can be setup
+to record system state every X minutes, and we set it up to run every 5 minutes.
+You can then at a later moment see what the server was doing, even sorting by
+disk, memory, cpu or network usage.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+![atop][2]
+
+Atop logs in `/var/log/atop` by date:
+
+    
+    
+    root@server:~# ls -la /var/log/atop/
+    total 29916
+    drwxr-xr-x  2 root root      4096 Sep 18 00:00 .
+    drwxrwxr-x 10 root syslog    4096 Sep 18 06:25 ..
+    -rw-r--r--  1 root root   3051661 Aug 22 00:00 atop_20170821
+    -rw-r--r--  1 root root   1553161 Aug 25 00:00 atop_20170824
+    -rw-r--r--  1 root root   1593178 Aug 26 00:00 atop_20170825
+    
+
+Using the commandline:
+
+    
+    
+    atop -r /var/log/atop/atop_20170821 # -b time_to_start
+    
+
+will open up atop with that log. Using `t` and `T` you can go back and forward
+in time.
+
+### The issue
+
+Checking the system log this message showed up on the dates that the log was
+missing:
+
+    
+    
+    Sep 18 00:00:01 server kernel: [82125.706464] traps: atop[517] trap divide error ip:4073c2 sp:7ffebe903810 error:0 in atop[400000+26000]
+    
+
+There is a [debian bug report][3] where they state this bug is solved in the 2.x
+release (debian experimental). Ubuntu 16.04 sadly still ships 1.x, and due to
+policy will never update to 2.x. The bug is solved in December 2016, but the
+[ubuntu changelog][4] still shows that the last update was in January 2016:
+
+    
+    
+    atop (2.2.6-4) unstable; urgency=medium
+    
+      * remove versioned dependency on initscripts. See also #852314.
+        Thanks to Stephen Kitt (Closes: 852239)
+    
+     -- Marc Haber <mh+debian-packages@zugschlus.de>  Wed, 25 Jan 2017 20:45:37 +0100
+    
+
+You can check the version you're running by opening `atop` and pressing `V`:
+
+    
+    
+    Version: 1.26 - 2010/11/17 13:42:37
+    
+
+### Workaround
+
+The atop version in Ubuntu 16.10 or 17.04 is the 2.x release, which you can download [on the ubuntu packages site][5]:
+    
+    
+    wget http://mirrors.kernel.org/ubuntu/pool/universe/a/atop/atop_2.2.6-4_amd64.deb
+    dpkg -i atop_2.2.6-4_amd64.deb
+    service atop reload
+    
+
+Afterwards you will notice that the log format is not compatible along versions:
+
+    
+    
+    -rw-r--r--  1 root root   1004276 Sep 18 14:54 atop_20170918
+    -rw-r--r--  1 root root     18101 Sep 18 09:44 atop_20170918_pre_2_0
+    
+
+If you try to open a previous format logfile that will fail:
+
+    
+    
+    root@server:~# atop -r /var/log/atop/atop_20170917 -b 23:00
+    raw file /var/log/atop/atop_20170917 has incompatible format
+    (created by version 1.26 - current version 2.2)
+    trying to activate atop-1.26....
+    activation of atop-1.26 failed!
+    
+
+If you want to replay those logs, replay them on a machine with an older version
+of atop.
+
+Do note that using packages from another major version is not recommended. This
+method of installing a .deb file is also quick and dirty, a better way is to use
+[apt pinning][6].
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://raymii.org/s/inc/img/atop.png
+   [3]: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=823135
+   [4]: https://web.archive.org/web/20170918125630/http://changelogs.ubuntu.com/changelogs/pool/universe/a/atop/atop_2.2.6-4/changelog
+   [5]: https://packages.ubuntu.com/zesty/amd64/atop/download
+   [6]: https://wiki.debian.org/AptPreferences
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

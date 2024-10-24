@@ -1,0 +1,438 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Execute a command and get both output and exit status in C++ (Windows & Linux)
+Author      : 	Remy van Elst
+Date        : 	07-06-2021
+URL         : 	https://raymii.org/s/articles/Execute_a_command_and_get_both_output_and_exit_code.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Recently I had to parse some command line output inside a C++ program. Executing a command and getting just the exit status is easy using `std::system`, but  also getting output is a bit harder and OS specific. By using `popen`, a POSIX `C` function we can get both the exit status as well as the output of a given command. On Windows I'm using `_popen`, so the code should be cross platform, except for the exit status on Windows is alway 0, that concept does not exist there. This article starts off with a stack overflow example to  get just the output of a command and builds on that to a safer version (null-byte handling) that returns both the exit status as well as the command output. It also involves a lot of detail on `fread` vs `fgets` and how to handle binary data.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+The complete code example with usage examples can be found on [github here][2]
+or at the bottom of this page. A working example is compiled [on github actions][11]
+for different platforms (windows & linux).
+
+Normally I would advise against parsing command line output. It is error-prone,
+you're dependent on the language selected by the user, different versions might
+have different flags (`OS X` vs `Linux`) and much more. If you have the option 
+to use a native library, you should use that. An example could be parsing `curl` 
+output to get some data from an API. There are probably a metric ton of `http` 
+libraries available for your favorite programming language to use instead of 
+parsing the `curl` or `wget` or `fetch` output. 
+
+In my case I have to use an old program to parse a closed-source file to get
+some binary output. This is a temporary situation, a native parsing library
+is also under development. The binary is under my control as well as the system 
+settings, language, other tools and such, so for this specific use case the 
+solution to parse command line output was acceptable for the time being.
+
+Do note that in this post I'll interchange the term nullbyte, null character,
+null termination  and null-terminated. They all mean the same, [the null-byte
+character][6] used to end a C string (`\0`, or `^@`, `U+0000` or `0x00`, you
+get the gist).
+
+If you need more features, more cross-platform or async execution, [boost.Process][12]
+is a great alternative. I however can't use boost on the environment this code
+is going to run due to compiler and size constraints.
+
+### The stackoverflow example using fgets
+
+On [stackoverflow][1] the example given is a good base to build on, however,
+to get the exit code and the output, it must be modified. Because we want to
+also grab the exit code, we cannot use the example which uses the 
+`std::unique_ptr`. Which in itself is a great example of using a `unique_ptr` with
+a custom deleter (`cmd` is a `const char*` with the command to execute:
+
+	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+
+The code is copied below:
+
+	std::string exec(const char* cmd) {
+	    char buffer[128];
+	    std::string result = "";
+	    FILE* pipe = popen(cmd, "r");
+	    if (!pipe) throw std::runtime_error("popen() failed!");
+	    try {
+	        while (fgets(buffer, sizeof buffer, pipe) != NULL) 
+	            result += buffer;
+	        }
+	    } catch (...) {
+	        pclose(pipe);
+	        throw;
+	    }
+	    pclose(pipe);
+	    return result;
+	}
+
+This example does what it states, but with a few gotchas. It uses a `FILE*`
+(pointer), `char` buffer allocation and manually closing the `FILE*` when
+something goes wrong (`catch`). The `unique_ptr` example is more modern, due
+to not having to handle the exception and using a `std::array<char, 128>`
+instead of a C-style `char*` buffer. Exception throwing is a whole other 
+issue, but let's not get into that today. What we are going to get into 
+today is C style code to read from `FILE*` and how binary data is handled.
+
+The stackoverflow example is probably just fine if you only need textual output
+into a `std::string`. My usecase however was a bit more complex, as you'll
+find out while reading the rest of this artice.
+
+### fread vs fgets
+
+Code style aside, my biggest issue was that using `fgets` in this way combined
+with adding a `const char*` to a `std::string` stops when it encounters a
+`nullyte` (`\0`). For regular string output that often is not an issue, most
+commands just output a few strings and call it a day. My output returns a
+binary blob, which might include nullbytes. `fread` reads an amount of bytes
+and returns how much it has read successfully, which we can use when
+adding the output to our `std::string` including the nullbytes.
+
+The example above does `result += buffer`, adding a `const char*` to a `std::string`,
+in this case according to [cppreference on operator+= on std::string][4]:
+`Appends the null-terminated character string pointed to by s.`
+
+The problem therein lies that the characters after the nullbyte should be
+added as well in my case. `fgets` does not give back the amount of data it
+read. Using `fgets` and a buffer of 128, if I have a nullbyte at 10 and a
+newline at 40, then the first 10 bytes plus what is after 40 bytes will be
+returned. Effectively we're loosing everything in between the nullbyte and the
+newline, or until the end of the buffer (128) if there is no newline in
+between.
+
+`fread` does return the amount of bytes it has read. Combining that with a
+constructor of `std::string` that takes a `const char*` and a `size_t` we can
+force the entire contents inside the string. This is safe, since a
+`std::string` knows its size, it does not rely on a null-termination
+character. However, other code that uses `const char*` will not be able
+to work with these nullbytes, keep that in mind.
+
+[This stackoverflow post][5] was very helpful for me to understand `fread`, 
+as well as help from a co-worker that dreams in `C`, he explained a lot
+of the inner workings.
+
+And if, after all of this, you're wondering why I'm shoehorning binary data
+inside a `std::string`, great question. I'll probably go into that another
+time since that would require a longer post than this entire article.
+
+
+### Command execution including output and exit code
+
+My code checks the exit status of the executed binary (for error handling) and 
+uses the data returned for further processing. To keep this all in one handy
+dandy place, lets start with defining a struct to hold that data. It will hold
+the result of a `command`, so the name `CommandResult` sounds descriptive enough.
+
+Below you'll find the struct code, including an equality operator as well as a 
+stream output operator.
+
+	struct CommandResult {
+        std::string output;
+        int exitstatus;
+
+        friend std::ostream &operator<<(std::ostream &os, const CommandResult &result) {
+            os << "command exitstatus: " << result.exitstatus << " output: " << result.output;
+            return os;
+        }
+        bool operator==(const CommandResult &rhs) const {
+            return output == rhs.output &&
+                   exitstatus == rhs.exitstatus;
+        }
+        bool operator!=(const CommandResult &rhs) const {
+            return !(rhs == *this);
+        }
+    };
+
+The meat and potatoes of the struct are of course the `output` and `exitstatus`. I'm
+using an `int` for the exit status [because of reasons][7]. 
+
+The next part is the `Command` class itself, here is that code:
+
+	class Command {
+
+    public:
+        /**
+         * Execute system command and get STDOUT result.
+         * Like system() but gives back exit status and stdout.
+         * @param command system command to execute
+         * @return CommandResult containing STDOUT (not stderr) output & exitstatus
+         * of command. Empty if command failed (or has no output). If you want stderr,
+         * use shell redirection (2&>1).
+         */
+        static CommandResult exec(const std::string &command) {
+            int exitcode = 255;
+            std::array<char, 1048576> buffer {};
+            std::string result;
+	#ifdef _WIN32
+	#define popen _popen
+	#define pclose _pclose
+	#define WEXITSTATUS
+	#endif
+            FILE *pipe = popen(command.c_str(), "r");
+            if (pipe == nullptr) {
+                throw std::runtime_error("popen() failed!");
+            }
+            try {
+                std::size_t bytesread;
+                while ((bytesread = fread(buffer.data(), sizeof(buffer.at(0)), sizeof(buffer), pipe)) != 0) {
+                    result += std::string(buffer.data(), bytesread);
+                }
+            } catch (...) {
+                pclose(pipe);
+                throw;
+            }
+            exitcode = WEXITSTATUS(pclose(pipe));
+            return CommandResult{result, exitcode};
+        }
+    }
+
+
+The `fread` command will run until there are no more bytes returned from the
+command output. I know the kind of output I'm working with so my buffer is 1
+MiB, which is probably too large for your data. In my case I benchmarked it
+and between 10KiB and 1 MiB was the fastest on the target architecture. 128 or
+8192 is just fine as well probably, but you should benchmark that for
+yourself. A rather simple test is to output some enormous file with `cat` and
+take the execution time plus cpu and memory usage. Don't print the result,
+just look at those three things and choose what ratio is acceptable for you.
+
+Why not also initialize the `std::string` with 1 MiB of characters? `std::strings`
+cannot be allocated for a given size at construction, other than by filling them or
+afterwards calling `.reserve()`, my benchmarks did not show any meaningful speed
+or performance boost by doing either.
+
+Using the above code is easy. Since it's a static function, you don't need a 
+class instance to use it. Here is an example:
+
+	std::cout << Command::exec("echo 'Hello you absolute legends!'") << std::endl;
+
+Which results in:
+
+	command exitstatus: 0 output: Hello you absolute legends!
+
+Since we're going through a shell, redirection works as well. Redirecting `stdout` 
+to `stderr` results in no output, just an exit status:
+
+    std::cout << Command::exec("echo 'Hello you absolute legends!' 1>&2") << std::endl;
+
+The output is on `stderr` in my shell however, which is expected: 
+
+![stderr][8]
+
+If you do need to capture `stderr` then you redirect output the other way around, like
+so:
+
+    std::cout << Command::exec("/bin/bash --invalid  2>&1") << std::endl;
+
+Pipes work as well as in your shell, but do note that this is all using `sh` and you
+have no control over environment variables or the default shell. Read more on the 
+[POSIX page on `popen`][10] to find out why that is.
+
+#### A note on Windows
+
+Here is an example for Windows, where we [must use `_popen` and `_pclose`][9]:
+
+ 	std::cout << "Windows example:" << std::endl;
+    std::cout << Command::exec("dir * /on /p") << std::endl;
+
+The exit code will always be zero since that concept does not translate to
+windows. There is `%ErrorLevel%`, but that is only an environment variable 
+for console applications, not the actual exit status.
+
+The microsoft page also notes that `_popen` will not work with GUI applications,
+just console programs. If you need that, use [Boost.process][12] or `system`.
+
+### Nullbytes in output example:
+
+In the example code on github you'll also see a `execFgets` function, I've left that
+in there to show the difference in nullbyte handling. For reference I'll show an
+example here as well. The relevant part of command using `fgets`:
+
+	while (std::fgets(buffer.data(), buffer.size(), pipe) != nullptr)
+        result += buffer.data();
+
+The part using `fread`:
+
+	std::size_t bytesread;
+    while ((bytesread = fread(buffer.data(), sizeof(buffer.at(0)), sizeof(buffer), pipe)) != 0) 		
+        result += std::string(buffer.data(), bytesread);
+
+The test command, including a clang-tidy warning exclusion (`// NOLINT`):
+
+	int main() {
+	    using namespace raymii;
+
+	    std::string expectedOutput("test\000abc\n", 9); //NOLINT
+	    commandResult nullbyteCommand = command::exec("/usr/bin/printf 'test\\000abc\\n'"); // NOLINT(bugprone-string-literal-with-embedded-nul)
+	    commandResult fgetsNullbyteCommand = command::execFgets("/usr/bin/printf 'test\\000abc\\n'"); // NOLINT(bugprone-string-literal-with-embedded-nul)
+
+	    std::cout << "Expected output: " << expectedOutput << std::endl;
+	    std::cout << "Output using fread: " << nullbyteCommand << std::endl;
+	    std::cout << "Output using fgets: " << fgetsNullbyteCommand << std::endl;
+	    return 0;
+	}
+
+
+Output:
+
+	Expected output: test\0abc
+	A command with nullbytes using fread: exitstatus: 0 output: test\0abc
+	A command with nullbytes using fgets: exitstatus: 0 output: test
+
+The nullbyte character is substituted with `\0` in the above output. Here is a screenshot showing
+how it looks in my terminal:
+
+![screenshot][3]
+
+Once again do note that this is safe to use with `std::strings`, methods that take a `string_view` or
+a `const char*` probably will not react very well to nullbytes. For my use case this is safe, your
+milage may vary.
+
+Try playing with the `buffer` size and then looking at the output. If you set it to 4, the output
+with `fgets` is `testbc`. Funny right? I like such things.
+
+### Complete code 
+
+Below you can find the header file `command.h`. It is also on [my github][2]. If you want
+usage examples you can find them in the github project `main.cpp` file.
+
+	#command.h
+	#ifndef COMMAND_H
+	#define COMMAND_H
+	// Copyright (C) 2021 Remy van Elst
+	//
+	//     This program is free software: you can redistribute it and/or modify
+	//     it under the terms of the GNU General Public License as published by
+	//     the Free Software Foundation, either version 3 of the License, or
+	//     (at your option) any later version.
+	//
+	//     This program is distributed in the hope that it will be useful,
+	//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+	//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	//     GNU General Public License for more details.
+	//
+	//     You should have received a copy of the GNU General Public License
+	//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	#include <array>
+	#include <ostream>
+	#include <string>
+	#ifdef _WIN32
+	#include <stdio.h>
+	#endif
+
+	namespace raymii {
+
+	    struct CommandResult {
+	        std::string output;
+	        int exitstatus;
+	        friend std::ostream &operator<<(std::ostream &os, const CommandResult &result) {
+	            os << "command exitstatus: " << result.exitstatus << " output: " << result.output;
+	            return os;
+	        }
+	        bool operator==(const CommandResult &rhs) const {
+	            return output == rhs.output &&
+	                   exitstatus == rhs.exitstatus;
+	        }
+	        bool operator!=(const CommandResult &rhs) const {
+	            return !(rhs == *this);
+	        }
+	    };
+
+	    class Command {
+	    public:
+	        /**
+	             * Execute system command and get STDOUT result.
+	             * Regular system() only gives back exit status, this gives back output as well.
+	             * @param command system command to execute
+	             * @return commandResult containing STDOUT (not stderr) output & exitstatus
+	             * of command. Empty if command failed (or has no output). If you want stderr,
+	             * use shell redirection (2&>1).
+	             */
+	        static CommandResult exec(const std::string &command) {
+	            int exitcode = 0;
+	            std::array<char, 1048576> buffer {};
+	            std::string result;
+	#ifdef _WIN32
+	#define popen _popen
+	#define pclose _pclose
+	#define WEXITSTATUS
+	#endif
+	            FILE *pipe = popen(command.c_str(), "r");
+	            if (pipe == nullptr) {
+	                throw std::runtime_error("popen() failed!");
+	            }
+	            try {
+	                std::size_t bytesread;
+	                while ((bytesread = std::fread(buffer.data(), sizeof(buffer.at(0)), sizeof(buffer), pipe)) != 0) {
+	                    result += std::string(buffer.data(), bytesread);
+	                }
+	            } catch (...) {
+	                pclose(pipe);
+	                throw;
+	            }
+	            exitcode = WEXITSTATUS(pclose(pipe));
+	            return CommandResult{result, exitcode};
+	        }
+
+	    };
+
+	}// namespace raymii
+	#endif//COMMAND_H
+
+
+
+
+
+[1]: http://web.archive.org/web/20210607112805/https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po/478960
+[2]: https://github.com/RaymiiOrg/cpp-command-output
+[3]: /s/inc/img/nullbytes.png
+[4]: https://en.cppreference.com/w/cpp/string/basic_string
+[5]: http://web.archive.org/web/20210607145050/https://cs50.stackexchange.com/questions/21350/does-fread-really-read-from-the-disc-the-size-and-the-number-of-times-as-it-is
+[6]: https://en.wikipedia.org/wiki/Null_character
+[7]: http://web.archive.org/web/20210607185349/https://unix.stackexchange.com/questions/418784/what-is-the-min-and-max-values-of-exit-codes-in-linux
+[8]: /s/inc/img/stderr.png
+[9]: http://web.archive.org/web/20210607191758/https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/popen-wpopen?view=msvc-160
+[10]: http://web.archive.org/web/20210607193329/https://pubs.opengroup.org/onlinepubs/9699919799/functions/popen.html
+[11]: https://github.com/RaymiiOrg/cpp-command-output/actions
+[12]: https://www.boost.org/doc/libs/1_76_0/doc/html/process.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,412 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Running Adventure on the DEC PDP-8 with SIMH
+Author      : 	Remy van Elst
+Date        : 	23-07-2015
+URL         : 	https://raymii.org/s/articles/Running_ADVENT-on-the-PDP-8-with-SIMH.html
+Format      : 	Markdown/HTML
+---
+
+
+
+[![pdp-8][1]][1]
+
+  * An original PDP-8/i.
+
+In this guide I'll show you how run the classic Colossal Cave Adventure game on
+a PDP-8, emulated by the SIMH emulator. The PDP-8 was an 12 bit minicomputer
+made in 1964 by DEC, the Digital Equipment Corporation. We will install and set
+up SIMH, the emulator with a RK05 diskimage running OS/8. We will use FORTRAN on
+OS/8 to load ADVENTURE, then we use our brain to play the game. As a bonus, I
+also show you how to edit files using EDIT, and show you a bit of the OS/8
+system.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+### Introduction
+
+I've recently accuired a PDP-8 remake, the [PiDP-8/i by Oscar Vermeulen][3].
+This beautiful piece of hand made hardware uses a Raspberry Pi to emulate a
+PDP-8 with SIMH. The front panel actually works, you can use the switched to
+load paper tapes, the RIM and BIN loader and all the other legacy goodness. It
+is a bit smaller than a real PDP-8, it is scale 2:3. The real PDP-8 has 1.5 cm
+switched, the PiDP-8 has 1.0 cm switches.
+
+I have an interest in legacy systems like the PDP-11, VAX/VMS and other
+mainframes and minicomputers. The PiDP-8/i allows me to have a small piece of
+this legacy myself. It also motivated me to learn more about the PDP-8 and it's
+hard and software. It also inspired me to write this article about it. Since
+these systems are way older than me, emulation and recreation are the only way
+for me to use them, sadly.
+
+I really encourage you to check out the PiDP-8. Order one as well, you can
+either get a kit to construct yourself, or order an assembled version. Support
+this beautiful piece of work!
+
+[![pidp-8][4]][4]
+
+  * The [PiDP-8/i remake by Oscar Vermeulen][3].
+
+SIMH is an emulator which not only emulates a PDP-8, but a lot more older
+mainframes and minicomputers. See the [website][5] for more information about
+SIMH.
+
+This guide shows you how to run the classic Colossal Cave ADVENTURE game on an
+emulated PDP-8 with SIMH. We will use Ubuntu 14.04 as our host operating system,
+but any OS that runs SIMH will do.
+
+[If you like this article, consider sponsoring me by trying out a Digital Ocean
+VPS. With this link you'll get a $5 VPS for 2 months free (as in, you get $10
+credit). (referral link)][2]
+
+Colossal Cave was written by Willie Crowther and quickly became one of the most
+popular games of that time. Because it was written in FORTRAN it was ported to
+various machines, even to the IBM-PC and the Apple II.
+
+The PDP-8 can run plain paper tapes with software, but later in it's lifetime it
+got access to magnetic disks and therefore is able to run actual operating
+systems. The ADVENTURE game runs, via FORTRAN, on the OS/8 operating system for
+the PDP-8. Wikipedia has more information on [OS/8][6], that is a very
+interesting read.
+
+[![pdp-11][7]][7]
+
+  * An original PDP-8/i with attached periferals.
+
+We will use a disk image graciously provided by Rick Murphy with both OS/8 and
+the adventure program already compiled in it. You can download it from [Rick
+Murphy's website][8] [(direct link to the rk5)][9] or from [here][10]. This is a
+disk image in the [RK05 DECpak][11] disk format. The RK05 is a moving head
+magnetic disk drive approximately 2.5 MB on a 14", single-platter IBM-2315-style
+front-loading removable disk cartridge.
+
+[![RK05][12]][12]
+
+  * An original RK05 drive with a mounted RT-11 disk pack.
+
+### Installing and configuring SIMH
+
+First create a folder where you will store the disk image and the configuration
+files, and go in that folder:
+
+    
+    
+    mkdir pdp8
+    cd pdp8
+    
+
+Ubuntu, and many other operating systems, have packages available for SIMH. We
+can use the built in package manager to install simh:
+
+    
+    
+    apt-get install simh
+    
+
+If your distro doesn't have simh, see their website for installation
+instructions.
+
+Download the prepared disk image:
+
+    
+    
+    wget https://raymii.org/s/inc/downloads/pdp/advent.rk05
+    
+
+To make the start up proces easier you can set up an 'pdp8.ini' file with a few
+commands in it. SIMH will load and run these commands at startup if you execute
+the `pdp8` command.
+
+Our `pdp8.ini` file has the following in it:
+
+    
+    
+    set cpu 32K
+    set cpu idle
+    attach rk0 advent.rk05
+    boot rk0
+    exit
+    
+
+First it sets up the CPU. Then it attached the `advent.rk05` file as the first
+disk and finally it boots up from that attached disk.
+
+Do note that you don't need to create this file, you can also enter these
+commands manually at the simh prompt.
+
+### Running the PDP-8
+
+In the current folder, execute the following command to start up simh with our
+configuration file:
+
+    
+    
+    pdp8
+    
+
+If all goes well, you should see something like below:
+
+    
+    
+    $ pdp8
+    
+    PDP-8 simulator V3.8-1
+    
+    .
+    
+
+Some distributions, like Arch name the command `simh-pdp8`. It does the same
+thing.
+
+Congratiulations, you are now in a 1960's era operating system. Look around a
+bit, for example, execute the `DIR` command:
+
+    
+    
+    .DIR
+    
+    DIRECT.SV   7            FRTS  .SV  26            BASIC .WS  11
+    PIP   .SV  11            PASS2 .SV  20            SET   .SV  20
+    FOTP  .SV   8            PASS2O.SV   5            RTFLOP.SV  15
+    [...]
+    BRTS  .SV  15            LCSYS .BI   3            ADVENT.LD 145
+    F4    .SV  20            UCSYS .BI   3            LOAD  .LS   8
+    
+     162 FILES IN 2648 BLOCKS -  544 FREE BLOCKS
+    
+
+You can get help at any moment using the `HELP` command:
+
+    
+    
+    .HELP
+    <[?3L[?4L[?5L[?5LHJ\
+    OS/8 MONITOR COMMANDS
+    
+    CMD     PROG    EXPL
+    
+    ASSIGN  KBM     ASSIGNS LOGICAL NAME
+    BACKSP  CAMP    BACKSPACES DEV
+    BASIC   BASIC   ENTERS BASIC SYSTEM
+    BOOT    BOOT    BOOTSTRAPS TO DEV
+    CCL     CCL     DISABLES CCL
+    COMPARE SRCCOM  COMPARES FILES
+    COMPILE PAL8    COMPILES PROG
+        F4/FORT
+        BASIC
+        RALF
+        SABR
+    COPY    FOTP     COPIES FILES
+    CREATE  EDIT     OPENS FILE FOR EDITING
+    [...]
+    #NNN    TAKE INTERNAL OCTAL FORM OF FILENAME
+    @FILE   REPLACE IN CMD LINE BY FILE'S CONTENTS
+    $       COMPLEMENT DEFAULT ALTMODE SWITCH
+    
+
+### Editing files on OS/8 with EDIT
+
+If you just want to run adventure, skip this section.
+
+You can edit a file for example, using a LINE EDITOR. First create the file, in
+this example, `A.PA`.
+
+    
+    
+    .CREATE A.PA
+    
+    #
+    
+
+You can edit files with the `EDIT` command later on.
+
+Your prompt changes from a `.` to a `#`. If this is an existing file, you must
+read the first page into the buffer by typing
+
+    
+    
+    #R
+    
+
+To insert text at the top of the buffer, use `I`. To append to the end, use `A`.
+
+    
+    
+    #I
+    THIS IS A TEST
+    
+
+Press `CTRL+L` to exit the edit prompt.
+
+You can start inserting before any line by typing `$nI` where `$n` is the line
+number (which is never displayed). For example, to insert a line before line 20,
+use `20I`.
+
+The `L` command lists the current buffer:
+
+    
+    
+    #L
+    THIS IS A TEST
+    
+
+`5L` displays line 5 and `1,5L` displays lines 1 through 5. `.` indicates the
+current line. If you type `.L` the current line is displayed.
+
+To delete a line, use `$nD` where `$n` is `.` or a line number. To change a line
+use `$nC` where `$n` is `.` or a line number. It deletes the line indicated by
+`$n`, then waits for you to type in a replacement.
+
+As said, EDIT reads a page from disk into the buffer. When you are done with
+that page and ready to move to the next type `N`. This writes the existing page
+to the output file (`P` command), clears the buffer (`K` command), and reads the
+next page from the input file (`R` command). You can use the `P`, `K`, and `R`
+commands individually, but be careful. Doing these commands out of sequence can
+mess up your file.
+
+When you are done editing, use the `E` command to exit. This will write the
+current buffer to the output file, then copy all remaining pages from the input
+to the output file if you aren't already on the last page.
+
+    
+    
+    #E
+    
+
+You can use the `TYPE` command to see the contents of a file:
+
+    
+    
+    .TYPE A.PA
+    THIS IS A TEST
+    
+
+See [this page][13] for a detailed guide on using PDP-8 EDIT.
+
+### Running Adventure
+
+To run Adventure we first need to run the FORTRAN environment. Start it up with
+the following command `R FRTS`:
+
+    
+    
+    .R FRTS
+    *
+    
+
+Your prompt changes to a `*`. The `HELP` command explains what the `R` command
+does:
+
+    
+    
+    R   KBM   RUNS PROGRAM FROM SYS:
+    
+
+Tell the FORTRAN system we want to load Adventure with the following command,
+`ADVENT.LD`:
+
+    
+    
+    *ADVENT.LD
+    
+
+Press the ESCAPE key on your keyboard to start the execution. Below you'll find
+the full sequence of commands plus some ADVENTURE output:
+
+    
+    
+    $ pdp8
+    
+    PDP-8 simulator V3.8-1
+    
+    .R FRTS
+    *ADVENT
+    *$
+    WELCOME TO ADVENTURE!!  WOULD YOU LIKE INSTRUCTIONS? 
+    
+    > NO
+    YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK BUILDING. 
+    AROUND YOU IS A FOREST.  A SMALL STREAM FLOWS OUT OF THE BUILDING AND
+    DOWN A GULLY.
+    
+    > ENTER 
+    YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
+    
+    THERE ARE SOME KEYS ON THE GROUND HERE.
+    
+    THERE IS A SHINY BRASS LAMP NEARBY.
+    
+    THERE IS FOOD HERE.
+    
+    THERE IS A BOTTLE OF WATER HERE. 
+    
+    > TAKE LAMP
+    TAKEN. 
+    
+    > 
+    
+
+To exit SIMH and the PDP-8, press `CTRL+E`. SIMH will stop and you will be back
+at your command prompt.
+
+You can view some more help on the PDP-8 SIMH version by executing (in OS/8) the
+following command:
+
+    
+    
+    .TYPE ADVENT.DC
+    
+
+Enjoy!
+
+   [1]: https://raymii.org/s/inc/img/pdp-8-i.jpg
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: http://obsolescence.wix.com/obsolescence#!pidp-8/cbie
+   [4]: https://raymii.org/s/inc/img/pidp-8-i.jpg
+   [5]: http://simh.trailing-edge.com/
+   [6]: https://en.wikipedia.org/wiki/OS/8
+   [7]: https://raymii.org/s/inc/img/pdp-8-i-big.jpg
+   [8]: http://www.rickmurphy.net/adventure.html
+   [9]: http://www.rickmurphy.net/advent/advent.rk05
+   [10]: https://raymii.org/s/inc/downloads/pdp/advent.rk05
+   [11]: https://en.wikipedia.org/wiki/RK05
+   [12]: https://raymii.org/s/inc/img/RK05.jpg
+   [13]: https://bigdanzblog.wordpress.com/2014/05/23/editing-files-on-a-pdp-8-using-os8-edit/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

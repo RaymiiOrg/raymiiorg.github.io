@@ -1,0 +1,195 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	haproxy: restrict specific URLs to specific IP addresses
+Author      : 	Remy van Elst
+Date        : 	04-03-2018
+URL         : 	https://raymii.org/s/snippets/haproxy_restrict_specific_urls_to_specific_ip_addresses.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This snippet shows you how to use haproxy to restrict certain URLs to certain IP
+addresses. For example, to make sure your admin interface can only be accessed
+from your company IP address.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+This example restricts access to the `/admin/` and `/helpdesk` URL's. It only
+allows access from the IP addresses `20.30.40.50` and `20.30.40.40`. Any other
+IP addresses will get the standard haproxy 403 forbidden error.
+
+### ACL for URL's
+
+It uses the acl option. If the requested path begins with either `/admin` or
+`/helpdesk` haproxy sets the `restricted_page` acl. haproxy also looks at the
+requesting source IP address. If that matches any of the two IP addresses, it
+sets the `network_allowed` acl. If the `allowed_network` acl is set and the
+`restricted_page` is also set, it allows a visitor to go to the page. If the
+`restricted_page` acl is set but the `allowed_network` is not, haproxy will
+serve a 403 error, thus, disallowing access to that specific URL.
+
+Note that you can use IP addresses but also networks in the `src` acl. Both
+`192.168.20.0/24` and `192.168.10.3` work.
+
+    
+    
+    frontend example-frontend
+      [...]
+      acl network_allowed src 20.30.40.50 20.30.40.40
+      acl restricted_page path_beg /admin
+      acl restricted_page path_beg /helpdesk
+      block if restricted_page !network_allowed
+      [...]
+    
+
+To use a specific file as error page, use the following config in the defaults
+section:
+
+    
+    
+    defaults
+      [...]
+      errorfile 400 /etc/haproxy/errors/400.http
+      errorfile 403 /etc/haproxy/errors/403.http
+      errorfile 408 /etc/haproxy/errors/408.http
+      errorfile 500 /etc/haproxy/errors/500.http
+      errorfile 502 /etc/haproxy/errors/502.http
+      errorfile 503 /etc/haproxy/errors/503.http
+      errorfile 504 /etc/haproxy/errors/504.http
+    
+
+The `http` files are regular HTML files with a HTTP response on top, like so:
+
+    
+    
+      HTTP/1.0 403 Forbidden
+      Cache-Control: no-cache
+      Connection: close
+      Content-Type: text/html
+      <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+      <html><head>
+      <title>403 Forbidden</title>
+      </head><body>
+      <h1>Forbidden</h1>
+      <p>You don't have permission to access this area
+      on this server.</p>
+      <hr>
+      <address>Apache/2.4.12 (Ubuntu) Server at example.org Port 443</address>
+      </body></html>
+    
+
+This is the default apache error page.
+
+### ACL for TCP backends
+
+** update 2017-01-09 **
+
+If you have a non-http service you want to restrict to a few IP's you can use an
+ACL together with the `tcp-request connection reject` optio. Here below is a
+simple example for a MySQL service. Do note that this also works in a `frontend`
+block:
+
+    
+    
+    listen mysql
+          bind            1.2.3.4:3306
+          mode            tcp
+          acl             network_allowed src 20.30.40.50 8.9.9.0/27
+          tcp-request     connection reject if !network_allowed
+          server          mysqlvip 10.0.0.30:3306
+    
+
+[More info on acl: http://cbonte.github.io/haproxy-
+dconv/configuration-1.5.html#acl][2] [More info on errorfile:
+http://cbonte.github.io/haproxy-dconv/configuration-1.5.html#errorfile][3]
+
+### Password if not from whitelisted network
+
+If you want access to the resource, but are not on the whitelisted network, the
+recommended way is to setup a VPN. But, if that is not feasable, the below trick
+allows you to prompt for a password if you're from a different network.
+
+First setup a `userlist`:
+
+    
+    
+    userlist UsersFor_Example
+      user user1 insecure-password password1
+      user user2 insecure-password password2
+    
+
+This is comparable with your `.htpasswd` file.
+
+In your frontend, where you have the ACL:
+
+    
+    
+    frontend example-frontend
+      [...]
+      acl network_allowed src 20.30.40.50 20.30.40.40
+      acl restricted_page path_beg /admin
+      acl restricted_page path_beg /helpdesk
+      block if restricted_page !network_allowed
+      [...]
+    
+
+Remove the last line (`block if`) and make the section look like below:
+
+    
+    
+    frontend example-frontend
+      [...]
+      acl network_allowed src 20.30.40.50 20.30.40.40
+      acl restricted_page path_beg /admin
+      acl restricted_page path_beg /helpdesk
+      acl auth_ok http_auth(UsersFor_Example)
+      http-request auth if restricted_page !network_allowed !auth_ok
+      [...]
+    
+
+If you're on the whitelisted network, you are given access. If you're on a
+different network, you will be prompted for a password. Make sure you're only
+using this over an HTTPS protected frontend.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: http://cbonte.github.io/haproxy-dconv/configuration-1.5.html#acl
+   [3]: http://cbonte.github.io/haproxy-dconv/configuration-1.5.html#errorfile
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

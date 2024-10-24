@@ -1,0 +1,94 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	OpenVZ/Proxmox - pre-backup all container dump script
+Author      : 	Remy van Elst
+Date        : 	18-01-2015
+URL         : 	https://raymii.org/s/software/OpenVZ_Proxmox_-_pre-backup_all_container_dump_script.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This simple script creates a vzdump of all the OpenVZ containers on a machine.
+It can be used before an actual backup, in my case the actual backup excludes
+the container path `/var/lib/vz/private`. This because a dump is easier to
+backup because it has much less files in it.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+If I include the container path my backups take about 40% longer to run then
+with only the dumps enabled.
+
+Do note that the VM's by default are stopped a very short while. The `mode` is
+`suspend`, which means that first an online copy of all the files is performed,
+then the VM is stopped and the remaining changed files are synced. Afterwards
+the VM is booted again.
+
+The `mode` can also be `snapshot`, then it will take an LVM snapshot without any
+downtime. You do need to have enough free space on your LVM volume.
+
+The last mode is `stop`, which will shut down the VM before the dump and boot it
+up afterwards. Long downtime includes.
+
+### Script
+
+    
+    
+    #!/bin/bash
+    # Author: Remy van Elst, https://raymii.org
+    # Small script to dump OpenVZ VM's before a backup. (pre-backup scripts)
+    # License: GNU GPLv3
+    
+    BACKUPDIR="/var/backups/vz/$(date +%Y%m%d)"
+    MODE=suspend
+    if [[ ! -d "$BACKUDIRP" ]]; then
+        mkdir -p "$BACKUPDIR"
+    fi
+    
+    vzdump "${vmid}" --stdexcludes --mode=${MODE} --dumpdir=${BACKUPDIR} --compress=gzip --all
+    
+
+My backup software allows me to run scripts before and after a backup, so called
+pre and post backup scripts. This is a pre-backup script. You can also have a
+post backup script which cleans up these temp dump files after the backup has
+succeeded.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

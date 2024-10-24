@@ -1,0 +1,798 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Compiling TETRIS from 1992 on OpenVMS x86 in 2024! - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Compiling TETRIS from 1992 on OpenVMS x86 in 2024!</h2>
+<p><small>Published: <span data-pagefind-meta='date'>18-08-2024 14:33</span> | Author: Remy van Elst | <a href="Tetris_from_1992_on_OpenVMS_x86_in_2024.txt">Text only version of this article</a>
+</small></p>
+<br><div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Follow along and have some compile fun!</a>
+</li>
+<li>
+<a href="#toc_1">Create ISO for file transfer</a>
+</li>
+<li>
+<a href="#toc_2">Mount ISO in OpenVMS</a>
+</li>
+<li>
+<a href="#toc_3">Copy files</a>
+</li>
+<li>
+<a href="#toc_4">Install C compiler and curl on OpenVMS</a>
+</li>
+<li>
+<a href="#toc_5">Configure curl on OpenVMS</a>
+</li>
+<li>
+<a href="#toc_6">Unzip the source code</a>
+</li>
+<li>
+<a href="#toc_7">Compile Tetris</a>
+</li>
+<li>
+<a href="#toc_8">Fixing the compile errors</a>
+</li>
+<li>
+<a href="#toc_9">Linking tetris on OpenVMS x86</a>
+</li>
+<li>
+<a href="#toc_10">Playing Tetris on x86 OpenVMS</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p>Since <a href="/s/blog/OpenVMS_x86_E9.2-3_fixes_CDE_and_adds_Guest_Console.html">DECWindows / CDE</a> now works on OpenVMS x86 (from 9.2-3 onwards) there is much fun stuff to do. Back in 2021 I wrote an article on the <a href="/s/blog/OpenVMS_CDE_Desktop_remote_x_axpbox.html">CDE desktop on Alpha / AXPbox</a> and also an article on how to run <a href="/s/blog/The_Common_Desktop_Environment_CDE_is_still_developed_in_2021.html#toc_6">CDE on modern linux, since it&#39;s still developed</a>. Both articles included a game, <strong>GENERIC-TETRIS</strong> from 1992, <a href="https://web.archive.org/web/20240815073318/https://sites.cc.gatech.edu/gvu/people/qiang.a.zhao/Games.html">written by Qiang Alex Zhao</a>.
+After getting the (remote) desktop working I wanted to compile and run Tetris to continue this lineage, from VAX, to Alpha, to Linux/CDE, to x86 VMS. I haven&#39;t got an Itanium to run it on, but if anyone has one left willing to send this way, feel free to contact me. This article includes the precompiled tetris binary for OpenVMS x86 and instructions to compile the source. The code required some minor modifications which I&#39;ll also cover, but that&#39;s not surprising for code that hasn&#39;t changed much since 1992 to be compiled in 2024. This article also shows you how to install curl on OpenVMS.</p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+<p>You can <a href="/s/tags/openvms.html">read all my OpenVMS articles here</a>.</p>
+
+<p><img src="/s/inc/img/8443ae6737384b76938c6b0597d1c08f.png" alt="tetris on x86 openvms"></p>
+
+<p>Here is Tetris running on OpenVMS 9.2-3 for x86!</p>
+
+<p>You do need to find a way to download OpenVMS E9.2-3. You can either apply to
+the <a href="https://vmssoftware.com/products/licenses/">Ambassador Program</a> or wait
+until the <a href="https://vmssoftware.com/community/community-license/">Hobbyist License Virtual Machine</a> is updated, or, be a
+paying customer. The Hobbyist virtual machine includes the C and C++ compiler
+and the precompiled binary might work. Give it a try and let me know!</p>
+
+<h3 id="toc_0">Follow along and have some compile fun!</h3>
+
+<p>You can <a href="/s/inc/downloads/tetris_openvms_x86.exe">download my compiled tetris for OpenVMS x86 binary here</a>.  </p>
+
+<p>Make sure to <a href="/s/blog/OpenVMS_x86_E9.2-3_fixes_CDE_and_adds_Guest_Console.html">have the desktop up and running</a>. 
+Open the file manager, navigate to the folder where you&#39;ve placed the binary and click
+it. Have fun playing!</p>
+
+<p>If you want to follow along with compiling, <a href="https://raymii.org/s/inc/downloads/tetris-312.zip">download the sources for Tetris
+here</a>. </p>
+
+<p>I assume that you have a (virtual) machine setup with OpenVMS for the rest of
+this article. I&#39;m using the <code>SYSTEM</code> user. SSH access is available by default
+on these new releases of OpenVMS so you can login with Putty or your favorite
+SSH client of choice without any setup hassle.</p>
+
+<h3 id="toc_1">Create ISO for file transfer</h3>
+
+<p>I had some issues with my friendly local FTP server so I choose to use a
+VirtualBox feature to transfer the installation files and sources over to my
+OpenVMS Virtual Machine via an ISO. Virtualbox lets you select files and then
+automatically makes a (sort of transient) ISO image and couples that. You can
+also use FTP or if you have it installed, <code>curl</code>. </p>
+
+<p><img src="/s/inc/img/4897586cb5974a3086ce13359d95f22a.png" alt="virtualbox iso"></p>
+
+<p>I also added the C and C++ compiler installers and curl. The pre-built
+hobbyist VM comes with the C compiler included, but if you don&#39;t have that
+yet, I used <code>X86VMS-C-X0706-004-1</code> (VSI NATIVE C Compiler X7.6-004-1 for
+OpenVMS X86 Version V9.2-1 and later). </p>
+
+<p>Finish the ISO wizard and make sure it is attached in Virtualbox to your
+OpenVMS VM.</p>
+
+<h3 id="toc_2">Mount ISO in OpenVMS</h3>
+
+<p>This is a brief summary, if you want to find out more about the 
+<a href="/s/blog/OpenVMS_Mount_ISO_and_execute_scripts.html">quirks on mounting an ISO on OpenVMS, check out my earlier article</a>.</p>
+
+<p>If needed, change your device name (<code>show devices</code> for more info) from <code>DKA0</code>
+to your CD-ROM drive. Mount the disk:</p>
+
+<pre><code>mount /override=ident dka0
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>%MOUNT-I-WRITELOCK, volume is write locked
+%MOUNT-I-CDROM_ISO, OpenVMS-E9.2-3: (1 of 1) , mounted on  _REMY1$DKA0:
+</code></pre>
+
+<p>Navigate to the CDROM mount folder:</p>
+
+<pre><code>SET DEF REMY1$DKA0:[000000]
+</code></pre>
+
+<p>Check the files in there. My output has the source ZIP, but in earlier
+attempts the other files were there as well:</p>
+
+<pre><code>DIR
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Directory REMY1$DKA0:[000000]
+
+TETRIS312.ZIP;1     TRANS.TBL;1
+
+Total of 2 files.
+</code></pre>
+
+<h3 id="toc_3">Copy files</h3>
+
+<p>The CD-ROM ISO is read only, so extracting the ZIP files will not work. Copy
+over the source file to your login folder:</p>
+
+<pre><code>copy TETRIS312.ZIP;1 SYS$LOGIN
+</code></pre>
+
+<p>Repeat the process for the product installers, copy those as well. Feel free
+to create a different folder to put the files in.</p>
+
+<h3 id="toc_4">Install C compiler and curl on OpenVMS</h3>
+
+<p>This step is optional if you are using the pre-built hobbyist virtual machine.
+My installation did not have the compilers installed so I had to do that.
+The curl installer can be <a href="https://vmssoftware.com/products/curl/">downloaded here</a>.</p>
+
+<p>Change directory to <code>SYS$LOGIN</code> (or the folder you copied the files from the ISO):</p>
+
+<pre><code>SET DEF SYS$LOGIN
+</code></pre>
+
+<p>Execute the following command to install the C compiler (and in my case, curl):</p>
+
+<pre><code>product install
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>_Product name (* to show list): *
+</code></pre>
+
+<p>Enter <code>*</code> to list all installers in this folder. Output:</p>
+
+<pre><code>   1 - VSI X86VMS C X7.6-4                 Layered Product
+   2 - VSI X86VMS CURL V8.0-1A             Layered Product
+   3 - All products listed above
+   ? - Help
+   E - Exit
+
+Choose one or more items from the menu: 3
+</code></pre>
+
+<p>Enter the number that matches <code>All products listed above</code>. In my case <code>3</code>. Installation takes a few minutes, output:</p>
+
+<pre><code>Performing product kit validation of signed kits ...
+%PCSI-I-VSIVALPASSED, validation of REMY1$DKA100:[SYS0.][SYSMGR]VSI-X86VMS-C-X07
+06-004-1.PCSI$COMPRESSED;1 succeeded
+%PCSI-I-VSIVALPASSED, validation of REMY1$DKA100:[SYS0.][SYSMGR]VSI-X86VMS-CURL-
+V0800-1A-1.PCSI$COMPRESSED;1 succeeded
+
+The following products have been selected:
+  VSI X86VMS C X7.6-4                    Layered Product
+  VSI X86VMS CURL V8.0-1A                Layered Product
+
+Do you want to continue? [YES]
+
+
+Configuration phase starting ...
+
+You will be asked to choose options, if any, for each selected product and for
+any products that may be installed to satisfy software dependency requirements.
+
+Configuring VSI X86VMS C X7.6-4: VSI C for OpenVMS
+
+  Copyright 2023 VMS Software, Inc.
+
+  This software is sold by VMS Software, Inc.
+
+  PAKs used: C or C-USER
+
+* This product does not have any configuration options.
+
+  Copyright 2023 VMS Software, Inc.
+
+   VMS SOFTWARE, INC. CONFIDENTIAL. This software is confidential
+   proprietary software licensed by VMS Software, Inc., and is not
+   authorized to be used, duplicated or disclosed to anyone without
+   the prior written permission of VMS Software, Inc.
+   Copyright 2023 VMS Software, Inc.
+
+   HPE CONFIDENTIAL. This software is confidential proprietary software
+   licensed by Hewlett Packard Enterprise Development, LP, and is not
+   authorized to be used, duplicated or disclosed to anyone without the
+   prior written permission of HPE.
+   Copyright 2023 Hewlett Packard Enterprise Development, LP
+
+
+Configuring VSI X86VMS CURL V8.0-1A
+
+  VMS Software Inc.
+
+* This product does not have any configuration options.
+
+Execution phase starting ...
+
+The following products will be installed to destinations:
+  VSI X86VMS C X7.6-4                    DISK$X86SYS:[VMS$COMMON.]
+  VSI X86VMS CURL V8.0-1A                DISK$X86SYS:[VMS$COMMON.]
+
+  Portion done: 0%...40%....
+</code></pre>
+
+<p>This takes a few minutes. Output continues after 100%:</p>
+
+<pre><code>  The following products have been installed:
+    VSI X86VMS C X7.6-4                    Layered Product
+    VSI X86VMS CURL V8.0-1A                Layered Product
+
+  %PCSI-I-IVPEXECUTE, executing test procedure for VSI X86VMS C X7.6-4 ...
+  %PCSI-I-IVPSUCCESS, test procedure completed successfully
+
+  VSI X86VMS C X7.6-4: VSI C for OpenVMS
+
+    The release notes are located in the file SYS$HELP:CC.RELEASE_NOTES.
+
+    A startup file SYS$STARTUP:DECC$STARTUP.COM has been provided.
+
+      It contains commands which can be executed after the product install
+      procedure has been run and at startup to allow for the best compilation
+      performance.  You may want to invoke this command file from your
+      system&#39;s site-specific start up file.  This command file does not
+      have to be invoked for correct operation of VSI C.
+
+  VSI X86VMS CURL V8.0-1A
+
+    Post-installation tasks are required.
+
+
+    To start cURL at system boot time, add the following lines to
+    SYS$MANAGER:SYSTARTUP_VMS.COM:
+
+      $ file := SYS$STARTUP:CURL$STARTUP.COM
+      $ if f$search(&quot;&#39;&#39;file&#39;&quot;) .nes. &quot;&quot; then @&#39;file&#39;
+
+    To stop cURL at system shutdown, add the following lines to
+    SYS$MANAGER:SYSHUTDWN.COM:
+
+      $ file := SYS$STARTUP:CURL$SHUTDOWN.COM
+      $ if f$search(&quot;&#39;&#39;file&#39;&quot;) .nes. &quot;&quot; then @&#39;file&#39;
+</code></pre>
+
+<h3 id="toc_5">Configure curl on OpenVMS</h3>
+
+<p>As indicated by the output of the installer, <code>curl</code> requires some
+configuration before it can be used. We have to add some commands to the
+startup sequence. First make sure the editor knows about your terminal:</p>
+
+<pre><code>SET TERM/INQUIRE
+</code></pre>
+
+<p>If you don&#39;t execute that command, <code>EDIT</code> will error and not work:</p>
+
+<pre><code>%TPU-E-NONANSICRT, SYS$INPUT must be supported CRT
+</code></pre>
+
+<p>To read more on editting via SSH, <a href="/s/blog/OpenVMS_9.2_for_x86_Getting_Started_part_3.html#toc_0">check out my other article</a>. That article shows you how to edit some other files to make that <code>INQUIRE</code> command no longer needed.</p>
+
+<p>Edit the following file:</p>
+
+<pre><code>EDIT SYS$MANAGER:SYSTARTUP_VMS.COM
+</code></pre>
+
+<p>Near the bottom, before the exit lines, add the following:</p>
+
+<pre><code>$ file := SYS$STARTUP:CURL$STARTUP.COM
+$ if f$search(&quot;&#39;&#39;file&#39;&quot;) .nes. &quot;&quot; then @&#39;file&#39;
+</code></pre>
+
+<p>Save and exit with <code>CTRL+Z</code>. For convenience, execute these lines in your
+current terminal as well by pasting them. </p>
+
+<p>To use <code>curl</code>, we must define it as a &quot;foreign command&quot;, just 
+<a href="/s/blog/OpenVMS_9.2_for_x86_Getting_Started_part_3.html#toc_1">as we did for zip/unzip</a>:</p>
+
+<pre><code>CURL :== $CURL$ROOT:[BIN]CURL.EXE
+</code></pre>
+
+<p>You can add the <code>CURL :==...</code> line at the bottom of your <code>SYLOGIN.COM</code> file in
+the <code>SYS$LOGIN</code> folder to make this permanent.</p>
+
+<p>Test the command to make sure all of the above was done correctly:</p>
+
+<pre><code>curl --version
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>curl 8.0.1 (OpenVMS IA64) libcurl/8.0.1 OpenSSL/1.1.1s zlib/1.2.8 libssh2/1.9.0_
+DEV nghttp2/1.40.90
+Release-Date: May  7 2023
+Protocols: dict file ftp ftps gopher gophers http https imap imaps ldap ldaps mq
+tt pop3 pop3s rtsp scp sftp smb smbs smtp smtps telnet tftp
+Features: alt-svc HSTS HTTP2 HTTPS-proxy IPv6 libz NTLM SSL TLS-SRP UnixSockets
+</code></pre>
+
+<p>Funny how it still says <code>OpenVMS IA64</code>. I suspect that is a remnant of the
+cross compilation via Itaniums that VSI did to bootstrap OpenVMS on x86.</p>
+
+<p>If you haven&#39;t transferred the source code via an ISO, download it with Curl:</p>
+
+<pre><code>curl -O tetris-312.zip http://raymii.org/s/inc/downloads/tetris-312.zip
+</code></pre>
+
+<h3 id="toc_6">Unzip the source code</h3>
+
+<p>With everything installed and configured we can start with the actual fun of trying to compile TETRIS. </p>
+
+<p>Make sure you have <a href="/s/blog/OpenVMS_9.2_for_x86_Getting_Started_part_3.html#toc_1">defined a &quot;foreign command&quot;, for unzip</a>:</p>
+
+<pre><code>unzip :== $SYS$COMMON:[SYSHLP.UNSUPPORTED.UNZIP]UNZIP.EXE
+</code></pre>
+
+<p>Start by unzipping the source archive:</p>
+
+<pre><code>unzip tetris312.zip;1
+</code></pre>
+
+<p>Output: </p>
+
+<pre><code>Archive:  SYS$SYSROOT:[SYSMGR]TETRIS312.ZIP;1
+  inflating: [.tetris_3_1_2]axpobjs.zip
+   creating: [.tetris_3_1_2.bm-3d]
+  inflating: [.tetris_3_1_2.bm-3d]rot00.xbm
+  [...]
+</code></pre>
+
+<p>Change directory to the unzipped folder:</p>
+
+<pre><code>set def [.tetris_3_1_2]
+</code></pre>
+
+<p>Check the files:    </p>
+
+<pre><code> DIR
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Directory SYS$SYSROOT:[SYSMGR.tetris_3_1_2]
+
+axpobjs.zip;1       bm-3d.DIR;1         bm-plain.DIR;1      compile.com;1
+compile_axp.com;1   compile_decc.com;1  copyright.;1        imakefile.;1
+link.com;1          link_axp.com;1      link_decc.com;1     makefile.;1
+makefile.std;1      patchlevel.h;1      playing.c;1         pwd.h;1
+readme.;1           revisions.;1        tetris.c;1          tetris.exe_axp;1
+tetris.exe_vax;1    tetris.h;1          tetris.hlp;1        tetris.man;1
+ticon.xbm;1         unix_time.h;1       unix_types.h;1      utils.c;1
+vaxobjs.zip;1       vms.opt;1           vms_axp.opt;1       vms_decc.opt;1
+x11.DIR;1           xvmsutils.olb;1     xvmsutils.olb_axp;1
+xvmsutils.olb_decc;1
+
+Total of 36 files.
+</code></pre>
+
+<h3 id="toc_7">Compile Tetris</h3>
+
+<p>Without any changes, compilation fails. Try it out:</p>
+
+<pre><code>CC/define=(VMS) tetris.c
+</code></pre>
+
+<p>This command comes from the included <code>compile.com</code> file. Output:</p>
+
+<pre><code>#endif !_UNIX_TIME_
+.......^
+%CC-I-IGNOREEXTRA, Spurious token(s) ignored on preprocessor directive line.
+at line number 74 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_time.h;1
+
+#define NULL            (void *) 0
+.........................^
+%CC-W-MACROREDEF, The redefinition of the macro &quot;NULL&quot; conflicts with a current definition because the replacement lists differ.  The redefinition is now in effect.
+at line number 67 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_types.h;1
+
+#endif _FD_MASK_
+.......^
+%CC-I-IGNOREEXTRA, Spurious token(s) ignored on preprocessor directive line.
+at line number 93 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_types.h;1
+
+#define FD_SET(n, p)    ((p)-&gt;fds_bits[(n)/NFDBITS] |= (1 &lt;&lt; ((n) % NFDBITS)))
+...............^
+%CC-W-MACROREDEF, The redefinition of the macro &quot;FD_SET&quot; conflicts with a current definition because the spelling of one or more parameters is different.  The redefinition is now i
+n effect.
+at line number 106 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_types.h;1
+
+#define FD_CLR(n, p)    ((p)-&gt;fds_bits[(n)/NFDBITS] &amp;= ~(1 &lt;&lt; ((n) % NFDBITS)))
+...............^
+%CC-W-MACROREDEF, The redefinition of the macro &quot;FD_CLR&quot; conflicts with a current definition because the spelling of one or more parameters is different.  The redefinition is now i
+n effect.
+at line number 107 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_types.h;1
+
+#define FD_ISSET(n, p)  ((p)-&gt;fds_bits[(n)/NFDBITS] &amp; (1 &lt;&lt; ((n) % NFDBITS)))
+.................^
+%CC-W-MACROREDEF, The redefinition of the macro &quot;FD_ISSET&quot; conflicts with a current definition because the spelling of one or more parameters is different.  The redefinition is now
+ in effect.
+at line number 108 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_types.h;1
+
+#define FD_ZERO(p)      bzero((char *)(p), sizeof(*(p)))
+................^
+%CC-W-MACROREDEF, The redefinition of the macro &quot;FD_ZERO&quot; conflicts with a current definition because the spelling of one or more parameters is different.  The redefinition is now
+in effect.
+at line number 109 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_types.h;1
+
+#endif  _UNIX_TYPES_
+........^
+%CC-I-IGNOREEXTRA, Spurious token(s) ignored on preprocessor directive line.
+at line number 119 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_types.h;1
+
+typedef long            off_t;
+........................^
+%CC-E-NOLINKAGE, In this declaration, &quot;off_t&quot; has no linkage and has a prior declaration in this scope at line number 109 in file SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1 (text module
+STDIO).
+at line number 51 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]pwd.h;1
+
+        struct timeval {
+........^
+%CC-E-REDEFSTRUCT, In this declaration, the struct &quot;timeval&quot; is redefined.
+at line number 672 in module TIME of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+    struct itimerval {
+....^
+%CC-E-REDEFSTRUCT, In this declaration, the struct &quot;itimerval&quot; is redefined.
+at line number 682 in module TIME of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+typedef int size_t;
+............^
+%CC-E-NOLINKAGE, In this declaration, &quot;size_t&quot; has no linkage and has a prior declaration in this scope at line number 99 in file SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1 (text module
+STDIO).
+at line number 66 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_types.h;1
+
+typedef struct fd_set {
+........^
+%CC-E-REDEFSTRUCT, In this declaration, the struct &quot;fd_set&quot; is redefined.
+at line number 100 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_types.h;1
+
+    typedef __dev_t dev_t;
+....................^
+%CC-E-NOLINKAGE, In this declaration, &quot;dev_t&quot; has no linkage and has a prior declaration in this scope at line number 55 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]pwd.h;1.
+at line number 46 in module TYPES of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+    typedef __gid_t gid_t;
+....................^
+%CC-E-NOLINKAGE, In this declaration, &quot;gid_t&quot; has no linkage and has a prior declaration in this scope at line number 54 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]pwd.h;1.
+at line number 54 in module TYPES of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+    typedef __ino_t ino_t;
+....................^
+%CC-E-NOLINKAGE, In this declaration, &quot;ino_t&quot; has no linkage and has a prior declaration in this scope at line number 56 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]pwd.h;1.
+at line number 62 in module TYPES of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+    typedef __mode_t mode_t;
+.....................^
+%CC-E-NOLINKAGE, In this declaration, &quot;mode_t&quot; has no linkage and has a prior declaration in this scope at line number 57 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]pwd.h;1.
+at line number 70 in module TYPES of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+    typedef __nlink_t nlink_t;
+......................^
+%CC-E-NOLINKAGE, In this declaration, &quot;nlink_t&quot; has no linkage and has a prior declaration in this scope at line number 58 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]pwd.h;1.
+at line number 78 in module TYPES of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+    typedef __pid_t pid_t;
+....................^
+%CC-E-NOLINKAGE, In this declaration, &quot;pid_t&quot; has no linkage and has a prior declaration in this scope at line number 50 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]pwd.h;1.
+at line number 94 in module TYPES of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+    typedef __ssize_t ssize_t;
+......................^
+%CC-E-NOLINKAGE, In this declaration, &quot;ssize_t&quot; has no linkage and has a prior declaration in this scope at line number 52 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]pwd.h;1.
+at line number 117 in module TYPES of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+    typedef __uid_t uid_t;
+....................^
+%CC-E-NOLINKAGE, In this declaration, &quot;uid_t&quot; has no linkage and has a prior declaration in this scope at line number 53 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]pwd.h;1.
+at line number 125 in module TYPES of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+        typedef __key_t  key_t;
+.........................^
+%CC-E-NOLINKAGE, In this declaration, &quot;key_t&quot; has no linkage and has a prior declaration in this scope at line number 59 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]pwd.h;1.
+at line number 181 in module TYPES of text library SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1
+
+    strncpy(myscore.myname, (const) vmsusername,vmsuserlen);
+............................^
+%CC-W-CVTDIFTYPES, In this statement, &quot;(const )vmsusername&quot; of type &quot;int&quot;, is being converted to &quot;pointer to const char&quot;.
+at line number 193 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]tetris.c;1
+
+        myscore.myname[19] = &#39;\0&#39;;
+.......................^
+%CC-I-SUBSCRBOUNDS, In this statement, an array is being accessed outside the bounds specified for the array type.
+at line number 437 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]tetris.c;1
+</code></pre>
+
+<p>You can see that this is old code due to the following lines:</p>
+
+<pre><code>typedef int size_t;
+............^
+%CC-E-NOLINKAGE, In this declaration, &quot;size_t&quot; has no linkage and has a prior declaration in this scope at line number 99 in file SYS$COMMON:[SYSLIB]DECC$RTLDEF.TLB;1 (text module
+STDIO).
+at line number 66 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]unix_types.h;1
+</code></pre>
+
+<h3 id="toc_8">Fixing the compile errors</h3>
+
+<p>If you want to use <code>vim</code> for editing instead, <a href="https://www.polarhome.com/vim/">download it from here</a>, extract the ZIP file and define a foreign command:</p>
+
+<pre><code>vim :== $SYS$LOGIN:VIM.EXE
+</code></pre>
+
+<p>After some investigation, I found a few small fixes. The old code defined a lot of its own types
+which are now done by the newer compiler by default. We can easily work around that by not including
+those custom headers. In the <code>tetris.h</code> file comment the following 3 lines:</p>
+
+<pre><code>/* #include        &quot;pwd.h&quot;
+#include        &quot;unix_time.h&quot;
+#include        &quot;unix_types.h&quot; */
+</code></pre>
+
+<p>Make sure to use <code>/* ... */</code> and not <code>//</code> to comment. Reason why will become
+important later on. Try recompiling now, the errors have greatly reduced:</p>
+
+<pre><code>        strncpy(myscore.myname, (const) vmsusername,vmsuserlen);
+    ............................^
+    %CC-W-CVTDIFTYPES, In this statement, &quot;(const )vmsusername&quot; of type &quot;int&quot;, is being converted to &quot;pointer to const char&quot;.
+    at line number 193 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]tetris.c;2
+
+            myscore.myname[19] = &#39;\0&#39;;
+    .......................^
+    %CC-I-SUBSCRBOUNDS, In this statement, an array is being accessed outside the bounds specified for the array type.
+    at line number 437 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]tetris.c;2
+</code></pre>
+
+<p>Those pesky conversion and array bounds checks. If we wanted to write memory-safe
+<a href="https://web.archive.org/web/20230701173548/https://enet4.github.io/rust-tropes/rust-evangelism-strike-force/">software we</a>
+<a href="https://web.archive.org/web/20220815110335/https://kasma1990.gitlab.io/2017/06/25/nobody-expects-the-rust-evangelism-strike-force/">would have used</a>
+<a href="https://web.archive.org/web/20230701173833/http://n-gate.com/hackernews/2017/02/21/0/">Rust</a>.
+But who worried about that in 1992 when writing a simple Tetris game?</p>
+
+<p>We have a trick up our sleeve. Try compiling with the old <code>vaxc</code> standard:</p>
+
+<pre><code>    CC /STANDARD=vaxc tetris.c
+</code></pre>
+
+<p>No output errors now! I first tried <code>/STANDARD=relaxed</code>, but that gave the same errors. If we would have commented with <code>//</code> instead of <code>/*</code>, that would give a compilation error with this old standard:</p>
+
+<pre><code>//include        &quot;pwd.h&quot;
+^
+%CC-E-DECLARATOR, Invalid declarator.
+at line number 35 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]tetris.h;11
+</code></pre>
+
+<p>Continue on with the next source file, that will compile without errors:</p>
+
+<pre><code>CC /STANDARD=vaxc utils.c
+</code></pre>
+
+<p>The last file will error out:</p>
+
+<pre><code>CC /STANDARD=vaxc playing.c
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>static struct timezone tzone = {0, 0};
+...............................^
+%CC-E-NOINIT, The type of tzone does not permit initialization.
+at line number 46 in file SYS$SYSROOT:[SYSMGR.tetris_3_1_2]playing.c;4
+</code></pre>
+
+<p>In the file <code>unix_time.h</code> there is the following code:</p>
+
+<pre><code>struct timezone
+{
+        int     tz_minuteswest; /* minutes west of Greenwich */
+        int     tz_dsttime;     /* type of dst correction */
+};
+</code></pre>
+
+<p>However, we commented out that header inclusion in <code>tetris.h</code>. Edit <code>tetris.h</code>
+again and paste the above <code>struct</code> somewhere on top, below the <code>X11</code> includes. Try
+compilation again, this time, no errors! </p>
+
+<p>We&#39;re almost finished. You should have 3 <code>.OBJ</code> files now.</p>
+
+<h3 id="toc_9">Linking tetris on OpenVMS x86</h3>
+
+<p>Now that we have <code>.OBJ</code> files we must link them. However, that will fail as
+well:</p>
+
+<pre><code>LINK tetris,utils,playing
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>%ILINK-W-COMPWARN, compilation warnings
+        module: TETRIS
+        file: SYS$SYSROOT:[SYSMGR.tetris_3_1_2]tetris.OBJ;8
+%ILINK-W-NUDFSYMS, 44 undefined symbols:
+%ILINK-I-UDFSYM,        XALLOCCOLOR
+%ILINK-I-UDFSYM,        XBELL[...]
+%ILINK-I-UDFSYM,        XVISUALIDFROMVISUAL
+%ILINK-W-USEUNDEF, undefined symbol XRMGETFILEDATABASE referenced
+        section: $CODE$
+        offset: %X0000000000000188
+        module: TETRIS
+        file: SYS$SYSROOT:[SYSMGR.tetris_3_1_2]tetris.OBJ;8
+%ILINK-W-USEUNDEF, undefined symbol XRMMERGEDATABASES referenced
+        section: $CODE$
+        offset: %X000000000000019B
+        module: TETRIS
+        file: SYS$SYSROOT:[SYSMGR.tetris_3_1_2]tetris.OBJ;8
+%ILINK-W-USEUNDEF, undefined symbol XRESOURCEMANAGERSTRING referenced
+        section: $CODE$
+        offset: %X00000000000001AE
+        module: TETRIS
+        file: SYS$SYSROOT:[SYSMGR.tetris_3_1_2]tetris.OBJ;8
+</code></pre>
+
+<p>Just as on Linux  (<code>-lX11 -lXaw</code>), we must tell the linker where it can find
+the X11 includes. Create the following file:</p>
+
+<pre><code>EDIT x86.opt
+</code></pre>
+
+<p>Paste in the following:</p>
+
+<pre><code>SYS$SHARE:DECW$XTSHR/SHARE
+SYS$SHARE:DECW$XLIBSHR/SHARE
+</code></pre>
+
+<p>Save with <code>CTRL+Z</code>.  Link again, with this file included:</p>
+
+<pre><code>  link tetris,utils,playing,x86.opt/opt
+</code></pre>
+
+<p>You might receive a warning:</p>
+
+<pre><code>%ILINK-W-COMPWARN, compilation warnings
+    module: TETRIS
+    file: SYS$SYSROOT:[SYSMGR.tetris_3_1_2]tetris.OBJ;8
+</code></pre>
+
+<p>Retry compiling all files and link again. No more errors then!</p>
+
+<h3 id="toc_10">Playing Tetris on x86 OpenVMS</h3>
+
+<p>After all the hard work, you should now have an <code>TETRIS.EXE</code> file:</p>
+
+<pre><code>dir *.exe
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Directory SYS$SYSROOT:[SYSMGR.tetris_3_1_2]
+
+tetris.EXE;7        tetris.EXE;6        tetris.EXE;5        tetris.EXE;4
+tetris.EXE;3        tetris.EXE;2        tetris.EXE;1
+
+Total of 7 files.
+</code></pre>
+
+<p>I have multiple due to playing around with the code and compiling.</p>
+
+<p>To run tetris, the easiest way is to <a href="/s/blog/OpenVMS_x86_E9.2-3_fixes_CDE_and_adds_Guest_Console.html">use the CDE desktop</a>. Open the
+file manager, navigate to the Tetris folder and double click the EXE file. </p>
+
+<p>If you don&#39;t want to run CDE, you can also use bare X11 to run just
+tetris. Make sure you have an X11 server set up. Execute the following
+command:</p>
+
+<pre><code>SET DISPLAY/CREATE/NODE=&lt;IP of your X11 host&gt;/TRANSPORT=TCPIP/EXEC
+</code></pre>
+
+<p>Then run TETRIS:</p>
+
+<pre><code>RUN TETRIS.EXE
+</code></pre>
+
+<p>Output:        </p>
+
+<pre><code>GENERIC TETRIS V3.1.2
+Copyright (C) 1992-93      Q. Alex Zhao, azhao@cc.gatech.edu
+     GENERIC TETRIS comes with ABSOLUTELY NO WARRANTY.
+</code></pre>
+
+<p>The X11 window should now contain just Tetris, no window borders or anything:</p>
+
+<p><img src="/s/inc/img/cd325e17d8bd4218bf8c70cfda467168.png" alt="tetris x11"></p>
+
+<p>Have fun beating your highscore!</p>
+Tags: <a href="../tags/alpha.html">alpha</a>
+, <a href="../tags/blog.html">blog</a>
+, <a href="../tags/cde.html">cde</a>
+, <a href="../tags/dec.html">dec</a>
+, <a href="../tags/decwindows.html">decwindows</a>
+, <a href="../tags/games.html">games</a>
+, <a href="../tags/itanium.html">itanium</a>
+, <a href="../tags/openvms.html">openvms</a>
+, <a href="../tags/pdp.html">pdp</a>
+, <a href="../tags/rust.html">rust</a>
+, <a href="../tags/tetris.html">tetris</a>
+, <a href="../tags/vax.html">vax</a>
+, <a href="../tags/virtualbox.html">virtualbox</a>
+, <a href="../tags/vms.html">vms</a>
+, <a href="../tags/vsi.html">vsi</a>
+, <a href="../tags/x86.html">x86</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

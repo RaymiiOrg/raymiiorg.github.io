@@ -1,0 +1,284 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Disable motd news or (parts of) the dynamic motd on Ubuntu
+Author      : 	Remy van Elst
+Date        : 	18-03-2019
+Last update : 	19-03-2019
+URL         : 	https://raymii.org/s/tutorials/Disable_dynamic_motd_and_motd_news_spam_on_Ubuntu_18.04.html
+Format      : 	Markdown/HTML
+---
+
+
+
+On Ubuntu 18.04 and up, when you login via SSH you are greeted with some news
+via `motd` (message of the day) that includes advertisements and messages from
+Canonical (via `motd.ubuntu.com`). This small guide shows you how to disable
+news, (parts of) the dynamic motd or just revert back to a plain old `/etc/motd`
+file.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+### (Dynamic) motd
+
+Since 2009 Ubuntu has had a dynamic `motd`. It uses a bunch of files and scripts
+in `/etc/update-motd/` to construct a message. I think since Ubuntu 17.04, but
+I'm not sure, the online service was introduced. It's just a webpage that your
+server [checks every 12 hours and puts in a file][2] that ends up in your
+`motd`. [You can visist motd.ubuntu.com in your browser][3] to check the current
+news. (But why would you when it's in your face when you login)
+
+![][4]
+
+> The dynamic motd page in a browser
+
+Here's what it currently looks like:
+
+    
+    
+    Welcome to Ubuntu 18.04.2 LTS (GNU/Linux 4.15.0-43-generic x86_64)
+    
+     * Documentation:  https://help.ubuntu.com
+     * Management:     https://landscape.canonical.com
+     * Support:        https://ubuntu.com/advantage
+    
+      System information as of Mon Mar 18 05:58:11 UTC 2019
+    
+      System load:  0.11               Processes:           100
+      Usage of /:   40.1% of 24.06GB   Users logged in:     0
+      Memory usage: 45%                IP address for eth0: 10.184.24.87
+      Swap usage:   0%                 
+    
+      => There is 1 zombie process.
+    
+     * Ubuntu's Kubernetes 1.14 distributions can bypass Docker and use containerd
+       directly, see https://bit.ly/ubuntu-containerd or try it now with
+    
+         snap install microk8s --channel=1.14/beta --classic
+    
+      Get cloud support with Ubuntu Advantage Cloud Guest:
+        http://www.ubuntu.com/business/services/cloud
+    
+     * Canonical Livepatch is available for installation.
+       - Reduce system reboots and improve kernel security. Activate at:
+         https://ubuntu.com/livepatch
+    
+    0 packages can be updated.
+    0 updates are security updates.
+    
+
+Lot's of useful information (load, zombie processes, reboot required, updates),
+but also stuff I'm not interested in (Canonical live patching, support
+kubernetes).
+
+It's also a way for canonical to measure how many ubuntu servers there are
+active. If every server connects at least every 12 hours back to the mothership,
+they will be able to get measurements on when and where Ubuntu is used. Nothing
+wrong with that, but I don't like the fact that they shoved it in via the
+`motd`. Yes it could be useful for a `heartbleed` scale problem but my guess is
+that this was aimed at metrics for Canonical first and they sought an excuse why
+users might want it later. But again, nothing wrong with that. They let you
+disable it and are open about it.
+
+### Disabling motd news
+
+Disabling the news part (the pingback to canonical) is simple. Edit the
+following file:
+
+    
+    
+    vim /etc/default/motd-news
+    
+
+Change `ENABLED=1` to `ENABLED=0`.
+
+That's it for the small news part. If you dont want to see the other messages
+you need to disable those as well.
+
+### Disabling parts of the dynamic motd
+
+In `/etc/update-motd.d` there are a bunch of scripts:
+
+    
+    
+    ls /etc/update-motd.d/
+    00-header             50-motd-news   80-livepatch          95-hwe-eol         98-reboot-required
+    10-help-text          51-cloudguest  90-updates-available  97-overlayroot
+    50-landscape-sysinfo  80-esm         91-release-upgrade    98-fsck-at-reboot
+    
+
+Some of them are useful for system information or to see if your ubuntu version
+is still supported, but a few are, if you're not using canonical services, IMHO
+not useful. These scripts must be executable [according to the manpage][5]. By
+removing the execute bit you can have some scripts not shown in your dynamic
+motd:
+
+    
+    
+    chmod -x /etc/update-motd.d/80-livepatch
+    chmod -x /etc/update-motd.d/51-cloudguest
+    chmod -x /etc/update-motd.d/10-help-text
+    
+
+I do find it usefull to have some information in my motd, so with these three
+disabled, the canonical spam is gone and actual information remains:
+
+    
+    
+    Welcome to Ubuntu 18.04.2 LTS (GNU/Linux 4.15.0-43-generic x86_64)
+    
+      System information as of Mon Mar 18 06:27:15 UTC 2019
+    
+      System load:  0.12               Processes:           101
+      Usage of /:   40.0% of 24.06GB   Users logged in:     0
+      Memory usage: 42%                IP address for eth0: 10.184.24.87
+      Swap usage:   0%                 
+    
+      => There is 1 zombie process.
+    
+    0 packages can be updated.
+    0 updates are security updates.
+    
+    
+    *** System restart required ***
+    Last login: Mon Mar 18 06:27:00 2019 from 192.10.20.30
+    
+
+### Disabling dynamic motd entirely
+
+I'm unsure how to actually do this since the documentation is not that clear
+about it. The manpage for [dynamic motd][5] refers to the manpage for
+[pam_motd][6] and both are unclear.
+
+There seems to be not dynamic motd systemd service:
+
+    
+    
+    systemctl list-unit-files | grep motd
+    motd-news.service                      static
+    motd.service                           masked
+    motd-news.timer                        enabled
+    
+
+and on my system there was no actual `/etc/motd` file, just the dynamic scripts.
+
+But the manpage states that `pam` is responsible for the motd so let's check
+there:
+
+    
+    
+    grep motd /etc/pam.d/*
+    /etc/pam.d/login:session    optional   pam_motd.so motd=/run/motd.dynamic
+    /etc/pam.d/login:session    optional   pam_motd.so noupdate
+    [...]
+    /etc/pam.d/sshd:session    optional     pam_motd.so  motd=/run/motd.dynamic
+    /etc/pam.d/sshd:session    optional     pam_motd.so noupdate
+    
+
+The manpage says the following:
+
+    
+    
+    pam_motd is a PAM module that can be used to display arbitrary motd (message of the day)
+       files after a successful login. By default the /etc/motd file is shown
+    [...]
+     The suggested usage for /etc/pam.d/login is:
+           session  optional  pam_motd.so  motd=/etc/motd
+    [...]
+    noupdate
+               Don't run the scripts in /etc/update-motd.d to refresh the motd file.
+    
+
+Comment out the first line from the two `pam.d` files:
+
+    
+    
+    #session    optional     pam_motd.so  motd=/run/motd.dynamic
+    
+
+Place something in the `/etc/motd` file to test:
+
+    
+    
+    echo "Can't touch this!" > /etc/motd
+    
+
+Try logging in now. On my system, I got the message twice on my terminal. Why?
+Because `OpenSSH`, by default sets the `PrintMotd` option to `yes`:
+
+    
+    
+    PrintMotd
+       Specifies whether sshd(8) should print /etc/motd when a user logs in interactively.
+       (On some systems it is also printed by the shell, /etc/profile, or equivalent.)  The
+       default is "yes".
+    
+
+Change that to `no` to have `pam` do the motd printing.
+
+### Conclusion
+
+Disabling the entire `dynamic-motd` can be done by commenting out two lines in
+`/etc/pam.d/sshd`:
+
+    
+    
+    session    optional     pam_motd.so  motd=/run/motd.dynamic
+    session    optional     pam_motd.so noupdate
+    
+
+and letting `OpenSSH` handle the `motd`. You need to put stuff in `/etc/motd`
+yourself for that to work. `OpenSSH` does this by default if that file exists.
+
+Disabling specific parts of the dynamic motd can be done by removing scripts (or
+making them not executable) in `/etc/update-motd.d/`.
+
+Disabling the pingback to the canonical mothership, the `motd-news` part can be
+done by changing `ENABLED=1` to `ENABLED=0` in `/etc/default/motd-news`.
+
+Never thought that a simple message on your console could be so complex and used
+for statistics and spam.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://bugs.launchpad.net/ubuntu/+source/base-files/+bug/1701068/comments/11
+   [3]: https://motd.ubuntu.com
+   [4]: https://raymii.org/s/inc/img/motd-ubuntu.png
+   [5]: http://manpages.ubuntu.com/manpages/bionic/man5/update-motd.5.html
+   [6]: http://manpages.ubuntu.com/manpages/bionic/man8/pam_motd.8.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,264 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Which Root Certificates should you trust? Find out with CertInfo
+Author      : 	Remy van Elst
+Date        : 	01-01-2024 09:00
+Last update : 	15-01-2024 22:03
+URL         : 	https://raymii.org/s/software/Which_Root_Certificates_Should_You_Trust_CertInfo.html
+Format      : 	Markdown/HTML
+---
+
+
+
+ Which Root Certificates should you trust? Did you know that any certificate authority can issue a certificate for any website? There are protocols in place so that should not happen, but when (not if, when) they get hacked or coerced by their government, they can issue a certificate to intercept secure communication for any website.
+I've made an open source program, [CertInfo](https://github.com/raymiiOrg/certinfo) that analyzes your browser history and queries all visited domains for their certificates. It presents a list of used root certificates (meaning, a website you visited was ultimately signed by that root CA) and a list of unused root certificates (meaning, no website in your analyzed history was signed by that root CA). 
+
+
+![CertInfo](/s/inc/img/certinfo-1.png)
+
+
+This allows you to remove all Root Certificates that you will probably never
+encounter. Meaning you will receive a scary browser warning if such a CA issues
+a certificate for a website you visit. Cleaning up your root store could reduce
+the risk of a successful MITM attack.
+
+### Download CertInfo
+
+I've provided an [installer download]
+(https://github.com/RaymiiOrg/CertInfo/releases/download/2024.02/CertInfoSetup.exe)
+here via [Github Releases]
+(https://github.com/RaymiiOrg/CertInfo/releases), compiled as a
+32-bit Qt C++ application, so it **will run on Windows 7 and up (to 11)**. If
+you use Linux, go and install Qt Creator and compile the program yourself.
+Deploying my [other app](https://leafnode.nl) cross-platform is such a chore,
+I'd rather not do it for 2 apps.
+
+
+**Update 15-01-2024**: I've released a new version which supports loading the 
+history from Microsoft's Edge browser.
+
+**Update 04-01-2024**: I've released a new version which notifies you that you
+need to close the browser before opening a history file and a few more bugfixes.
+
+Per Root Certificate you can see which domains in your history were signed by
+this CA:
+
+![domains per root ca](/s/inc/img/certinfo-5.png)
+
+In my case quite a bit of unused root certificates, even the Dutch Government
+CA (`Staat der Nederlanden Root CA`):
+
+![Unused root ca 1](/s/inc/img/certinfo-4.png)
+
+![Unused root ca 2](/s/inc/img/certinfo-3.png)
+
+
+The largest CA for my browsing history is Let's Encrypt (`DST Root CA X3`),
+followed by `Globalcert` and `Digicert`:
+
+![Root CA Usage](/s/inc/img/certinfo-2.png)
+
+You can export the result to a text file which includes
+all certificate information as shown on screen plus their
+`PEM` export.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+
+
+#### Where is my Firefox history?
+
+The path to your Firefox profile folder which contains the history file
+named `places.sqlite` is: 
+
+    %APPDATA%\Mozilla\Firefox\Profiles\
+
+Via Firefox you can click the `menu` button, click `Help` and select `More
+Troubleshooting Information`. Under the `Application Basics` section next to
+`Profile Folder`, click `Open Folder`, that should also open the folder
+containing the `.sqlite` database.
+
+
+#### Where is my Chrome history?
+
+The path to your Chrome profile folder which contains the history file
+named `history` (no extension) is: 
+
+    %LOCALAPPDATA%\Google\Chrome\User Data
+
+In some cases the file is in a subfolder named `Default`.
+
+Via Chrome you can navigate to `chrome://version`, then look for the `Profile
+Path`
+
+
+#### A list of domains
+
+If you don't want to analyze your browsing history or use an unsupported browser
+you can provide a text file with one domain per line. No `https://` in front,
+no path or whatsoever at the back, just the domain.
+
+This file will be sorted and the domains in it queried just as the browser
+history would.
+
+
+### Root Certificates
+
+What is a root certificate? The root certificate is the starting point of a
+chain of trust upon which an SSL certificate is issued. The root certificate
+belongs to a Certificate Authority. 
+
+The root certificate is used to issue intermediate certificates, that in term
+make it possible to register SSL certificates for end users. These certificates
+inherit the trust level from the root certificate.
+
+Each browser or operating system contains a list of approved root certificates.
+Whenever a website is visited over a TLS connection, the validity of the
+certificate is checked by verifying the fingerprints of the certificate and the
+accompanying intermediate certificate, until the fingerprint of the root has
+been reached. This is then checked against the root certificate in the browser.
+If these do not match, the certificate will not be valid.
+
+### Should you implicitly trust all certificate authorities?
+
+TL;DR: You, as a technical competent person, no, probably not. Should you go and
+remove root certificates from your aunt's iPad? No, probably also not.
+
+In the Twit.tv podcast Security Now, [episode #951]
+(https://twit.tv/shows/security-now/episodes/951?autostart=false) ([show notes
+here]
+(https://web.archive.org/web/20240101114338/https://www.grc.com/sn/SN-951-Notes.pdf))
+it was stated that just 7 certificate authorities in total (of around 85)
+account for 99% of all currently (late 2023) unexpired web certificates. Let's
+Encrypt is at almost half of that (47%) followed up by DigiCert (22%) then
+Sectigo (former Comodo, 11%).
+
+
+The Dutch government has the `Staat der Nederlanden Root CA` (See [PKIOverheid]
+(https://cert.pkioverheid.nl/)). (I used to work for a CA operating under that
+root, Digidentity). Another sub-CA, [DigiNotar]
+(https://en.wikipedia.org/wiki/DigiNotar) was hacked, issuing over 500 fake
+certificates.  
+
+
+China has at least 2, `CNNIC` and `WoSign CA Limited`, both of then being caught
+issuing [fake certificates](https://en.wikipedia.org/wiki/Root_certificate). In
+the past [China has even done BGP hijacking to, allegedly, issue valid
+certificates]
+(https://web.archive.org/web/20240101123751/https://www.securityweek.com/should-you-be-worried-about-bgp-hijacking-your-https/).
+
+[Here is a list]
+(https://web.archive.org/web/20240101112719/https://ssl-tools.net/certificates)
+of Root Certificate Authorities. If you never visit anything related to
+Venezuela, you might not need to trust ` Sistema Nacional de Certificacion
+Electronica `. If you never do any business related to China, or even if you
+do, you probably want to remove Chinese and Taiwanese root certificates.
+
+
+### How to remove (untrust) certificate authorities?
+
+I'm not giving instructions on how to remove certificates. I expect you to be
+technical and competent enough to figure that out yourself. **Make a backup
+before you start**.
+
+You could break stuff and re-adding them might be hard, so do a bit of research
+beforehand. 
+
+I also do not want random people breaking their computer. Analyzing your browser
+history is fine, ask your local computer expert for help on any further steps.
+
+
+
+### What more can you do?
+
+In theory you could add a CAA DNS record that states which Certificate
+Authorities can issue a certificate for your domain. 
+
+The CAA record is a DNS record type that allows domain name owners extra control
+over SSL certificates that can be issued for their domains. You define which CA
+is allowed to issue what type of certificates, if any, for your domain. The CAA
+record type has been defined in 2013. Although the usage of CAA was quite
+common, it wasn't required until recently. Starting from September 2017,
+Certificate Authorities are required to check the CAA-record as part of the
+issuing process. More info on [CAA records here]
+(https://web.archive.org/web/20230925222416/https://www.xolphin.com/support/Terminology/CAA_DNS_Records).
+
+
+But in practice, a rogue (hacked) CA will of course not check that record and
+just issue the certificate. It will also not protect you from trust issues,
+since that hacked CA is still trusted by your browser.
+
+You can also set up Certificate Transparency (CT) log monitoring. Each CA must
+announce every certificate they are (going to or have ) issued in a public log,
+allowing to spot misuse quickly. [Cloudflare offers monitoring]
+(https://web.archive.org/web/20240101123809/https://blog.cloudflare.com/introducing-certificate-transparency-monitoring/)
+and Google Chrome checks all certificates against [CT logs]
+(https://web.archive.org/web/20240101124200/https://googlechrome.github.io/CertificateTransparency/ct_policy.html).
+
+
+
+
+### Future improvements
+
+I'd like to hear from you what you think of this new tool and if it's
+helpful. I'm also not really happy with the name, `CertInfo` seems like
+way too generic. If you know of any better name, let me know.
+
+
+In the future I want to add some sort of more exploratory mode,
+where you click a (root) certificate and are able to click trough to all
+other certs that were signed by it, or its parent. More a graph like structure,
+but that was a bit hard to do with Qt/QML.
+
+But please, send me an email with comments!
+
+
+
+
+### License and more information
+
+- License: GNU GPLv3
+- Author: Remy van Elst 
+- [Source on Github](https://github.com/RaymiiOrg/CertInfo)
+
+
+The app icon is from the KDE Breeze Icon Theme and is licensed under the 
+GNU Lesser General Public License v2.1
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

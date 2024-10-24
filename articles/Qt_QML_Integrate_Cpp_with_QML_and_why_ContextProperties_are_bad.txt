@@ -1,0 +1,574 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Qt/QML: Expose C++ classes to QML and why setContextProperty is not the best idea
+Author      : 	Remy van Elst
+Date        : 	03-10-2021
+URL         : 	https://raymii.org/s/articles/Qt_QML_Integrate_Cpp_with_QML_and_why_ContextProperties_are_bad.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![traffic light example][4]
+
+> Qt/Qml traffic light example using different C++ integrations methods
+
+In this article I'm going to discuss the different ways to expose a C++ class to QML. QML is a markup language (part of the QT framework) like HTML/CSS, with inline JavaScript that can interact with the C++ code of your (QT) application. There are multiple ways to expose a C++ class to QML, each with their own benefits and quirks. This guide will cover three integration methods, `qmlRegisterSingletonType<>`, `rootContext->setContextProperty()` and `qmlRegisterType<>`. We'll end off with a simple benchmark showing the difference in startup times between the first two. 
+
+The executive summary is that `setContextProperty` is [deprecated][11], has a
+performance impact (and you should use `qmlRegisterSingletonType<>`. In my
+benchmarks the `qmlRegisterSingletonType` one is faster than
+`setContextProperty`. If you need more than one instance of your class, use
+`qmlRegisterType<>` and instantiate your objects in QML directly.
+`qmlRegisterType` is also faster than a context property in my benchmarks.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+
+The singleton method is in my humble opinion the best method if you need one
+specific instance (like a model or a viewmodel) and the registerType method
+is the best method if you need to instantiate many things in QML. Setting a
+root context property has multiple issues, performance being one of them, as
+well as possible name clashes, no static analysis and it is available to
+anyone anywhere in QML. According to a Qt bug report ([QTBUG-73064][11]) it
+will be removed from QML in the future. 
+
+
+### Introduction
+
+Having clear boundaries in your application instead of an intertwined
+mess where everything is tightly coupled to everything else is, in my
+opinion, preferable. With a singleton or a type that separation is possible,
+with a root context property that isn't possible. For small projects, the
+`setContextProperty` method is okay, but the singleton method is not more
+effort, so even in that case I would prefer using singletons.
+
+The Qt/QML documentation is comprehensive, but one flaw I find is that the
+framework has no one (recommended) way of doing stuff. You can find all method
+parameters and possible options, but if you want to know how to change the
+colour of the text on a `Button{}`, good luck searching on StackOverflow.
+Same goes for integrating C++ with QML. The [Qt documentation][1] provides an
+overview of different integration methods but does not tell you which one is
+best. It just tells you what is possible and leaves it up to you to decide.
+There is a flowcharts to help you which method to use, but almost all guides
+and examples online just use `rootContext->setContextProperty()`. Even my own
+article on [signals and slots][3] uses that, due to the simplicity for small projects.
+
+
+QML should not have any knowledge of the domain, it is just a UI markup
+language, so any actual work or logic should be done on the C++ side, not via
+QML/JavaScript. Using JavaScript gets messy very fast and is not testable via
+unit tests, therefore using it is a big no no for me. Just as with `WPF` and
+`XAML` on the Microsoft side, your user interface should have just a few
+bindings to the `viewModel` and no code or logic of its own. I've seen entire
+state machines and complex JavaScript methods in QML that were so complex, I
+still have nightmares from them. All of those functions could just be done in
+C++, where they would be testable using unit tests. I bet you they would also
+be faster.
+
+The reason for writing this article is that I was diving in to the different
+options on C++ integration in QML. At work we recently refactored a whole
+bunch of QML code for performance reasons, dropping one global context
+property helped immensely. I also namespaced much of our code and assets and
+ran into more than one issue with missing or wrong Qt documentation. Our code
+is compiled as a static application and as `staticlib` in the case of
+libraries, including all assets in a `qrc` file. That static compilation and
+filesystem paths that almost matched my `qmldir` names (capital letter
+mismatch) combined with wrong documentation gave many headaches, but in the
+end I fixed it all up, showing a noticeable user-facing increase in response
+times. 
+
+
+The example source code for this project [can be found on my github here][12].
+
+### Traffic Light QML Example
+
+![single traffic light][6]
+
+> The first iteration of my Qml Traffic Light
+
+I've built a simple QML example with a traffic light and some buttons to
+control said traffic light. The `TrafficLightQml` object is a rectangle with
+3 circles in it, each a different colour. Three properties are exposed to
+turn the different lamps on or off. This is an `opacity` controlled by a
+`bool`, to keep things simple. Not the best example, a statemachine would be
+ideal for this, but to keep it simple for this article I decided that this
+was just fine. 
+
+The `TrafficLightQmlControlButtons` houses two buttons and exposes one property
+and one signal. Actually two signals, since properties have an implicitly generated
+`onXXXChanged` signal. One button turn the light on or off and one button cycles
+through the different lamps in the pattern the Dutch traffic lights use:
+
+    Red (stop) -> Green (go) -> Orange (caution, almost Red)
+
+Why expose properties and signals instead of calling the relevant functions
+inside of the TrafficLight QML itself? That would tightly couple the QML
+control to the C++ counterpart and exposure method. By making the QML control
+generic enough, I can swap the implementation whenever I feel like. The user
+interface just needs to know how it looks and what do do, not how or when to
+do it. This makes unit testing the behaviour much easier, because there is no
+intelligence in the QML control, you don't have to test that. We should be
+able to trust that the framework works in passing signals and methods. The
+core logic, like what lamp pattern or when to turn on or off, should be unit
+tested, which is easy to do with for example Qt Test or GoogleTest. Testing
+a QML control / javascript function is much harder.
+
+The `main.qml` file has 4 instances of those two controls, but with each
+one the properties and signals are bound to different C++ objects. That way 
+you can clearly see how to use each one including how they are created
+and passed along in `main.cpp`.
+
+The file and class names are very verbose to show you what is used when 
+and where. If everything (qml, c++, id's) was named `trafficlight`, that 
+visibility and insight is lost. Now it's very clear which line relates 
+to which component, both in QML as in C++.
+
+### setContextProperty
+
+Lets start off with the most popular example, almost every tutorial you find
+uses it. Even in the Qt official documentation on [best practices][9], section
+`Pushing References to QML`, they use a `setContextProperty`. 
+
+When using `setContextProperty`, the property is available to every component
+loaded by the QML engine. Context properties are useful for objects that must be
+available as soon as the QML is loaded and cannot be instantiated in QML.
+
+In my traffic light example it looks like this in `main.cpp`
+
+    TrafficLightClass trafficLightContext;
+    qmlRegisterUncreatableType<TrafficLightClass>("org.raymii.RoadObjectUncreatableType", 1, 0, "TrafficLightUncreatableType", "Only for enum access");
+    engine.rootContext()->setContextProperty("trafficLightContextProperty", &trafficLightContext);
+
+In (every) QML I can use it like so:
+
+    Component.onCompleted: { trafficLightContextProperty.nextLamp(); // call a method } 
+    redActive: trafficLightContextProperty.lamp === TrafficLightUncreatableType.Red // use a property
+
+No import statement required. There is a paragraph regarding enums later on
+in the article, which explains the `UncreatebleType` you see above. You can skip
+that part if you don't plan to use enums from your class on the QML side.
+
+There is nothing inherently wrong for now with using this approach to get a
+C++ class in QML. For small projects or projects where performance is not an
+issue, the context property is just fine. In the grand scheme of things we're
+talking about the -ilities, like maintainability, but for a small project
+that probably does not matter as much as in a project with a larger codebase
+or multiple teams working on it. 
+
+#### Why is a context property bad then?
+
+There are a few downsides compared to the singleton or registerType approach.
+There is a [Qt Bug][11] tracking the future removal of context properties, 
+a [StackOverflow post][8] and a [QML Coding Guide][10] give a great summary.
+The QML documentation also notes these points, but in a less obvious way, so
+the summary is nice.
+
+Quoting the Qt bug ([QTBUG-73064][11]):
+
+The problem with context properties is that they "magically" inject state into
+your QML program. Your QML documents do not declare that they need this
+state, but they usually won't work without. Once the context properties are
+present, you can use them, but any tooling cannot properly track where they
+are added and where they are (or should be) removed. Context properties are
+invisible to QML tooling and the documents using them are impossible to
+validate statically.
+
+---
+
+Quoting the [QML Coding guide][10]:
+
+Context properties always takes in a `QVariant` or `QObject`, which means that
+whenever you access the property it is re-evaluated because in between each
+access the property may be changed as `setContextProperty()` can be used at
+any moment in time.
+
+Context properties are expensive to access, and hard to reason with. When you
+are writing QML code, you should strive to reduce the use of contextual
+variables (A variable that doesn't exist in the immediate scope, but the one
+above it.) and global state. Each QML document should be able to run with QML
+scene provided that the required properties are set.
+
+---
+
+Quoting this answer from [StackOverflow][8] regarding issues with `setContextProperty`:
+
+`setContextProperty` sets the object as value of a property in the very root
+node of your QML tree, so it basically looks like this:
+
+    property var myContextProperty: MySetContextObject {}
+    ApplicationWindow { ... }
+
+This has various implications:
+
+- You need to have cross-file references possible to files that are
+  not "local" to each other (`main.cpp` and wherever you try to use it)
+- Names are easily shadowed. If the name of the context property is used
+  somewhere else, you will fail to resolve it.
+- For name resolution, you crawl through a possible deep object tree, always
+  looking for the property with your name, until it finally finds the context
+  property in the very root. This might be a bit inefficient - but probably
+  no big difference.
+
+`qmlRegisterSingletonType` on the other hand enables you to import the data at
+the location where you need it. So you might benefit from faster name
+resolution, shadowing of the names is basically impossible and you don't have
+intransparent cross-file references.
+
+---
+
+
+Now that you've seen a bunch of reasons why you should almost never use a context
+property, let's continue on to how you should be exposing a single instance 
+of a class to QML.
+
+### qmlRegisterSingletonType<>
+
+A singleton type enables properties, signals and methods to be exposed in a
+namespace without requiring the client to manually instantiate an object
+instance. `QObject` singleton types are an efficient and convenient way to
+provide functionality or global property values. Once registered, a `QObject`
+singleton type should be imported and used like any other `QObject` instance
+exposed to QML. 
+
+So, basically the same as the context property, except that you **have to
+import it** in QML. That, for me, is the most important reason to use singletons
+over context properties. In the earlier paragraphs I already stated differences
+and disadvantages of context properties, so I won't repeat myself here. 
+
+In the example traffic light code, this is the relevant code in `main.cpp`:
+
+    TrafficLightClass trafficLightSingleton;
+    qmlRegisterSingletonType<TrafficLightClass>("org.raymii.RoadObjects", 1, 0, "TrafficLightSingleton",
+                                         [&](QQmlEngine *, QJSEngine *) -> QObject * {
+        return &trafficLightSingleton;
+        // the QML engine takes ownership of the singleton so you can also do:
+        // return new trafficLightClass;
+    });
+
+On the QML side, you have to import the module before you can use it:
+
+    import org.raymii.RoadObjects 1.0
+
+Usage example:
+
+    Component.onCompleted: { TrafficLightSingleton.nextLamp() // call a method }
+    redActive: TrafficLightSingleton.lamp === TrafficLightSingleton.Red; // use a property
+
+No enum weirdness with `UncreatableTypes` in this case. 
+
+
+### qmlRegisterType
+
+All previous paragraphs have exposed a single existing C++ object to QML. That
+is fine most of the time, we at work expose our `models` and `viewmodels`
+this way to QML. But, what if you need to create and use more than one
+instance of a C++ object in QML? In that case, you can expose the entire
+class to QML via `qmlRegisterType<>`, in our example in `main.cpp`:
+
+    qmlRegisterType<TrafficLight>("org.raymii.RoadObjectType", 1, 0, "TrafficLightType");
+
+On the QML side you again need to import it:
+
+    import org.raymii.RoadObjectType 1.0
+
+Usage is like the other examples, with the addition of creating an instance of your
+object:
+
+    TrafficLightType {
+        id: trafficLightTypeInstance1
+    }
+
+    TrafficLightType {
+        id: trafficLightTypeInstance2
+    }
+    
+In the above example I've made 2 instances of that C++ type, in QML, without manually
+creating one and exposing that instance in `main.cpp`. Usage is almost the same as the
+singleton:    
+
+    redActive: trafficLightTypeInstance1.lamp === TrafficLightType.Red; // use a property
+    Component.onCompleted: { trafficLightTypeInstance1.nextLamp() // call a method }
+
+And for our second instance:
+
+    redActive: trafficLightTypeInstance2.lamp === TrafficLightType.Red; // use a property
+    Component.onCompleted: { trafficLightTypeInstance2.nextLamp() // call a method }
+
+The only difference is the ID, `trafficLightTypeInstance1` vs `trafficLightTypeInstance2`.
+
+If you're going to have many things, exposing the entire class via `qmlRegisterType` is 
+way more convenient than manually creating all of those things in C++, then exposing
+them as singletons and finally importing them in QML.
+
+### Oddities with setContextProperty and enums
+
+In the example traffic light class we have an `enum class` for the
+`LampState`. The lamp can be `Off` or any of the three colors. When
+registering the type as a singleton, the following QML property assignment
+via a boolean evaluation works:
+
+    redActive: TrafficLightSingleton.lamp === TrafficLightSingleton.Red
+
+`lamp` is an exposed `Q_PROPERTY` with a signal attached on change. `Red` is part of the `enum class`.
+
+However, when using the same property statement with the instance registered
+via `setContextProperty`, the following does not work:
+    
+    redActive: trafficLightContextProperty.lamp === trafficLightContextProperty.Red
+
+Results in a vague error like `qrc:/main.qml:92: TypeError: Cannot read
+property 'lamp' of null` and the property is never set to true. I've tried
+many different solutions, like calling the getter function the QML signal
+used (`.getLamp()`) and debugging in `Component.onCompleted()`. A
+`Q_INVOKABLE` debug method on the class does work fine, but the enum value
+return `undefined`. Other calls to slots, like `.nextLamp()` work just fine,
+only the enum values are not accessible.
+
+This is listed on the [flowchart][1] and in [the docs][5], but I bet you are
+frustrated before you've found that out.
+
+Qt Creator is aware of the values, it even tries to auto-fill them, and the
+error messages are not helpful at all. Don't try to auto-fill them if I can
+use them or give a helpful error message, would be my suggestion to whomever
+develops Qt Creator.
+
+![qt creator auto fill screenshot][2]
+
+The solution for this is, as listed in [the docs][5], that is to register the
+entire class as an `UncreatableType`:
+
+    Sometimes a QObject-derived class may need to be registered with the QML
+    type system but not as an instantiable type. For example, this is the
+    case if a C++ class:
+
+        is an interface type that should not be instantiable
+        is a base class type that does not need to be exposed to QML
+        **declares some enum that should be accessible from QML, but otherwise should not be instantiable**
+        is a type that should be provided to QML through a singleton instance, and should not be instantiable from QML
+
+
+Registering an uncreatable type allows you to use the enum values but you
+cannot instantiate a `TrafficLightType {}` QML Object. That also allows you
+to provide a reason why the class is uncreatable, very handy for future
+reference:
+
+    qmlRegisterUncreatableType<TrafficLight("org.raymii.RoadObjectType", 1, 0, "TrafficLightType", "Only for enum access");
+
+In your QML file you now have to import the type:
+
+    import org.raymii.RoadObjectType 1.0
+
+After which you can use the enum values in a comparison:
+
+    redActive: trafficLightContextProperty.lamp === TrafficLightType.Red
+
+If you're putting in all that extra work to register the type, why not just
+use the singleton implementation. If you're not using `enums` you can get
+away with `setContextProperty()`, but still. Importing something only when
+you need it instead of having it available everywhere anytime feels much
+better to me. 
+
+### Why not `QML_ELEMENT` / `QML_UNCREATABLE`/ `QML_INTERFACE` / `QML_SINGLETON`?
+
+In Qt 5.15 a few [new methods][13] were made available to integrate C++ with QML. These
+work with a macro in your header file and an extra definition in your `.pro` file. 
+
+    QML_ELEMENT / QML_UNCREATABLE / QML_INTERFACE / QML_SINGLETON / QML_ANONYMOUS
+
+In [the latest 5.15 doc snapshot][14] and the [blogpost][13] these methods are 
+explained, they should solve an issue that could arise, namely that you must
+keep your C++ code in sync with your QML registrations. Quoting the blogpost:
+
+> You always need to keep your type registrations in sync with the actual
+  types. This is especially bothersome if you use revisions to make
+  properties available in different versions of an import. Even if not, the
+  fact that you need to specify the registration separately from the type is
+  a burden as you can easily lose track of how you registered which types
+  into which modules.
+
+Then they go into some more (valid) technical details. 
+
+The reason I'm not including these in this comparison is because they are 
+new, only available in Qt 5.15 and later and because they depend on `.pro`
+files and thus on `qmake`. [cmake support is not available][15], not even
+in Qt 6.0. 
+
+If youre codebase is new enough to run on this latest Qt 5.15 version, or you're 
+running 6+, then these new methods are better than the ones listed above, 
+please refer to the technical part of [the blogpost][13] why. If you can, 
+thus if your Qt version and build system (`qmake`) allows it, it's best 
+to use `QML_SINGLETON` and friends.
+
+
+I've written a small example to achieve the same as `qmlRegisterType<>` below
+for reference. In your `.pro` file you add an extra `CONFIG+=` parameter
+(`qmptypes`) and two other new parameters:
+
+    CONFIG += qmltypes
+    QML_IMPORT_NAME = org.raymii.RoadObjects
+    QML_IMPORT_MAJOR_VERSION = 1    
+
+In your `.cpp` class, in our case, `TrafficLightClass.h`, you add the following:
+
+    #include <QtQml>
+    [...]
+    // below Q_OBJECT
+    QML_ELEMENT
+
+If you want the same effect as a `qmlRegisterSingleton`, add `QML_SINGLETON`
+below the `QML_ELEMENT` line. It creates a default constructed singleton.
+
+In your QML file, import the registered type:
+
+    import org.raymii.RoadObjects 1.0
+
+You can then use them in QML, by their class name (not a seperate name as we did above):
+
+    TrafficLightClass {
+        [...]
+    }
+
+
+### Bechmarking startup time
+
+To be sure if what we're doing actually makes any difference I've made up a
+simple benchmark. The only way to make sure that something is faster is to
+profile it. The Qt Profiler is in a whole league of its own, so I'm going to
+use a simpler test. 
+
+Even if the singleton variant turns out to be slower, I would still prefer it
+over the global property for the same reasons as stated earlier. (If you're wondering,
+I've written this section before doing the benchmarks.)
+
+The first line in `main.cpp` prints out the current epoch in milliseconds and
+on the QML side in the root window I've added an `Component.onCompleted`
+handler that also prints out the current epoch in milliseconds, then calls
+`Qt.Quit` to exit the application. Subtracting those two epoch timestamps
+gives me startup runtime, do that a few times and take the average, for the
+version with only a `qmlRegisterSingleton` and the version with only a
+`rootContext->setProperty()`.
+
+The build has the Qt Quick compiler enabled and is a release build. No other
+QML components were loaded, no exit button, no help text, just a window with 
+a `TrafficLightQML` and the buttons. The traffic light QML has an onCompleted
+that turns the C++ light on.
+
+Do note that this benchmark is just an indication. If you have application
+performance issues I recommend you to use the Qt Profiler to figure out
+what is going on. Qt has [an article on performance][7] that can also help you.
+
+Printing the epoch timestamp in `main.cpp`:
+
+    #include <iostream>
+    #include <QDateTime>
+    [...]
+    std::cout << QDateTime::currentMSecsSinceEpoch() << std::endl;
+
+Printing it in `main.qml`:
+
+    Window {
+        [...]
+        Component.onCompleted: {
+            console.log(Date.now())
+        }
+    }
+
+Using `grep` and a regex to only get the timestamp, then reversing it with
+`tac` (reverse `cat`), then using `awk` to subtract the two numbers. Repeat
+that five times and use `awk` again to get the average time in milliseconds:
+
+    for i in $(seq 1 5); do 
+        /home/remy/tmp/build-exposeExample-Desktop-Release/exposeExample 2>&1 | \
+        grep -oE "[0-9]{13}" | \
+        tac | \
+        awk 'NR==1 { s = $1; next } { s -= $1 } END { print s }'; 
+    done | \
+    awk '{ total += $1; count++ } END { print total/count }'
+
+
+- The average for the `qmlRegisterSingleton<>` example: 420 ms
+
+- The average for the `qmlRegisterType<>` example: 492.6 ms
+
+- The average for the `rootContext->setContextProperty` example: 582.8 ms
+
+
+Looping the above benchmark 5 times and averaging out those averages results
+in 439.88 ms for the singleton, 471.68 ms for the registerType and 572.28 ms
+for the rootContext property.
+
+This simple example already shows a difference of 130 to 160 ms for a singleton
+variable. Even registering a type and instantiating it in QML is faster than
+a context property. (Didn't expect such a difference actually)
+
+This benchmark was done on a Raspberry Pi 4, Qt 5.15 and while this was
+running no other applications except for IceWM (window manager) and xterm
+(terminal emulator) were running. 
+
+I repeated this process with our work application, which has quite a large and
+complex object with about a megazillion property bindings (actual number,
+counted them myself when refactoring) and there the difference was more than
+2 seconds.
+
+**Please though, do a few benchmarks yourself on your own machine with your
+  own code before you take the above measurements as absolute source of
+  truth.** 
+
+And if you know an easy way to measure startup time with the Qt Profiler a few
+times and averaging it out, easier than manually digging through the entire
+list, send me an email.
+
+[1]: https://web.archive.org/web/20201129141029/https://doc.qt.io/qt-5/qtqml-cppintegration-overview.html
+[2]: /s/inc/img/qt-expose-1.png
+[3]: /s/snippets/Cpp_QT_QML_Signals_and_Slots.html
+[4]: /s/inc/img/qt-expose-2.png
+[5]: https://web.archive.org/web/20210507003519/https://doc.qt.io/qt-5/qtqml-cppintegration-definetypes.html
+[6]: /s/inc/img/qt-expose-3.png
+[7]: https://web.archive.org/web/20210827152437/https://doc.qt.io/qt-5/qtquick-performance.html
+[8]: http://web.archive.org/web/20210930184114/https://stackoverflow.com/questions/51077096/whats-the-difference-between-qmlregistersingletontype-setcontextproperty-in-q/51081073
+[9]: http://web.archive.org/web/20210930184426/https://doc.qt.io/qt-5/qtquick-bestpractices.html
+[10]: http://web.archive.org/web/20210930190141/https://github.com/Furkanzmc/QML-Coding-Guide
+[11]: http://web.archive.org/web/20210930190807/https://bugreports.qt.io/browse/QTBUG-73064
+[12]: https://github.com/RaymiiOrg/qml-cpp-integration-example
+[13]: https://web.archive.org/web/20211003125109/https://www.qt.io/blog/qml-type-registration-in-qt-5.15
+[14]: https://web.archive.org/web/20211003125258/https://doc-snapshots.qt.io/qt5-5.15/qtqml-cppintegration-definetypes.html
+[15]: https://web.archive.org/web/20211003125302/https://stackoverflow.com/questions/63509161/how-to-use-qml-element-with-cmake
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

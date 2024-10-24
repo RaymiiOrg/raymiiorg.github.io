@@ -1,0 +1,155 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Ruby script to upload or convert a Maildir Inbox to an IMAP server
+Author      : 	Thibaut Colar
+Date        : 	01-01-2013
+URL         : 	https://raymii.org/s/software/Ruby_script_to_upload_or_convert_a_Maildir_Inbox_to_an_IMAP_Server.html
+Format      : 	Markdown/HTML
+---
+
+
+
+**Note: The original page is often offline, so therefore the script is mirrored
+here. Credits to the original author: wiki.colar.net/ruby _script_ to _upload_
+convert _a_ maildir _inbox_ to _an_ imap_server**
+
+I decided to change email server for several reasons, anyway, long story short I
+was using postfix(qmail before that) and decided to switch to citadel, which is
+much easier to deal with (simple config).
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+Anyway, Citadel use it's own format for emails (Berkeley DB), so you can't just
+copy over the existing emails stored in Maildir format (8 years worth !), but
+since Citadel provides an IMAP server, all I need is a tool that can copy/upload
+The IMAP folder(s) content to an IMAP server.
+
+I thought that would already exist, easy to find, but did not seem to find one.
+I found one made in PERL, but as usual Perl / CPAN failed me completely :(
+
+I found another one that was really bare bone but usable here:
+http://www.robsayers.com/computing/MaildirToImap.html
+
+It's quite compact and easy to use, tanks to ruby, but it was kinda hard coded
+to copy just the Inbox folder ... in my case I had many subfolders (Sent,
+archives and so on) that I wanted to copy as well, so I modified it a little to
+make it "parameterizable", so i could run it against other sub folders of my
+choice.
+
+Usage
+
+  * Prerequisite: You need a ruby install (`apt-get install ruby`)
+  * Save the script (scroll down) to your machine (MaildirToImap.rb)
+  * Edit the script ans set the variables IMAP _HOST, IMAP_ USER, and IMAP_PASS to correct values.
+  * Use the script with 2 params(absolute directory of a Maildir Inbox, IMAP box name), see examples:
+
+Example: Copy the Inbox
+
+    
+    
+    ruby MaildirToImap.rb /home/tcolar/Maildir/cur/ INBOX
+    
+
+Example: Copy an Inbox sub-folder (ex: 'Sent')
+
+    
+    
+    ruby MaildirToImap.rb /home/tcolar/Maildir/.Sent/cur/ INBOX/Sent
+    
+
+Repeat for all the sub-folders you want to copy.
+
+It takes about 0.5 seconds per email (on a local server), so if you have many
+emails it can take a while.
+
+The script:
+
+    
+    
+    # Thibaut Colar
+    # http://wiki.colar.net/
+    # &quot;Upload&quot; a local Maildir folder onto an IMAP server
+    # Inspired by: http://www.robsayers.com/computing/MaildirToImap.html
+    # WARNING: Come with no warranties of any kind whatsoever, use at your own risk !
+    #
+    # Use, Example: ruby MaildirToImap.rb /home/tcolar/Maildir/cur INBOX
+    # Example(sub-box): ruby MaildirToImap.rb /home/tcolar/Maildir/.Sent/cur/ INBOX/Sent
+    
+    #vars - set accordingly
+    IMAP_HOST = 'localhost'
+    IMAP_USER = 'me'
+    IMAP_PASS = 'my_password'
+    TEST_MODE = 0 # Set to 0 to actually do it
+    
+    # program
+    require 'net/imap'
+    
+    def upload_dir(imap, mail_dir, imap_dir)
+            imap.examine(imap_dir)
+            msgs = Dir.entries(mail_dir).each do |f|
+            if !File.directory?(f) then
+                    print &quot;Will add &quot;, mail_dir, f, &quot;t to: &quot;, imap_dir, &quot;n&quot;
+                    if TEST_MODE == 0 then
+                            imap.append(imap_dir,File.open(mail_dir+f).read,[:Seen])
+                    end
+            end
+            end
+    end
+    
+    # Main
+    if ARGV.length &lt; 2 then
+            print &quot;Expecting 2 params: - maildir directory (usually ends with /cur) - IMAP dirn&quot;
+            exit
+    end
+    
+    mail_dir=ARGV[0]
+    imap_dir=ARGV[1]
+    imap = Net::IMAP.new(IMAP_HOST)
+    imap.authenticate('LOGIN', IMAP_USER, IMAP_PASS)
+    begin
+            imap.create(imap_dir)
+    rescue
+            print &quot;Failed creating: &quot;, imap_dir, &quot;, that's probably OKn&quot;
+    end
+    upload_dir(imap, mail_dir, imap_dir)
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

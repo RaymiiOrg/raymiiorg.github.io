@@ -1,0 +1,111 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	tping - ping with a timestamp
+Author      : 	Remy van Elst
+Date        : 	03-09-2018
+URL         : 	https://raymii.org/s/snippets/tping_ping_with_a_timestamp.html
+Format      : 	Markdown/HTML
+---
+
+
+
+tping is a bash alias I once got from an old co-worker. It's ping, but with a
+timestamp. Instead of looking at the increased icmp_seq number you now have a
+timestamp. Here's how it looks like:
+
+    
+    
+    $ tping 192.0.2.10
+    09:31:55: PING 192.0.2.10 (192.0.2.10) 56(84) bytes of data.
+    09:31:55: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=30 ttl=63 time=0.399 ms
+    09:31:56: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=31 ttl=63 time=0.530 ms
+    09:31:57: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=32 ttl=63 time=0.412 ms
+    09:31:58: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=33 ttl=63 time=0.469 ms
+    09:31:59: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=34 ttl=63 time=0.383 ms
+    09:32:00: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=35 ttl=63 time=0.402 ms
+    09:32:01: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=36 ttl=63 time=0.483 ms
+    09:32:02: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=37 ttl=63 time=0.409 ms
+    09:32:03: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=38 ttl=63 time=0.346 ms
+    
+    
+    09:36:20: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=289 ttl=63 time=1.51 ms
+    09:36:21: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=290 ttl=63 time=0.474 ms
+    09:36:22: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=291 ttl=63 time=0.698 ms
+    09:36:23: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=292 ttl=63 time=0.483 ms
+    09:36:24: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=293 ttl=63 time=0.482 ms
+    09:36:25: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=294 ttl=63 time=0.619 ms
+    09:36:26: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=295 ttl=63 time=0.498 ms
+    09:36:27: 64 bytes from 192.0.2.10 (192.0.2.10): icmp_seq=296 ttl=63 time=0.491 ms
+    
+
+The host went down on 09:32 and was back up on 09:36. This was a scheduled
+reboot.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+### .bashrc function
+
+The shell code for in your `.bashrc` file:
+
+    
+    
+    tping() {
+        ping $@ | while read pong; do 
+            echo "$(date +"%T"): $pong"; 
+        done
+    }
+    alias tping=tping
+    
+
+Start a new shell our `source .bashrc` after you added this function.
+
+### Prettyping
+
+Another tool to get more visual information from ping is `prettyping`. It's
+[open source on github][2] and looks like this:
+
+![][3]
+
+The red exclamation marks in the image represent a reboot of that server.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://github.com/denilsonsa/prettyping
+   [3]: https://raymii.org/s/inc/img/prettyping.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

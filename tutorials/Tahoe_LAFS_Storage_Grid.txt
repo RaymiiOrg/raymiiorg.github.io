@@ -1,0 +1,404 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Set up your own distributed, redundant, and encrypted storage grid with Tahoe-LAFS
+Author      : 	Sven Slootweg
+Date        : 	08-11-2012
+URL         : 	https://raymii.org/s/tutorials/Tahoe_LAFS_Storage_Grid.html
+Format      : 	Markdown/HTML
+---
+
+
+
+> Note: this guide was written by Sven Slootweg, AKA joepie91, and is released
+by him under the [WTFPL][1]
+
+If you have a few different VPSes, you'll most likely have a significant amount
+of unused storage space across all of them. This guide will be a quick
+introduction to setting up and using [Tahoe-LAFS][2], a distributed, redundant,
+and encrypted storage system - some may call it 'cloud storage'.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+[If you need VPS to set up your own Tahoe-LAFS storage grid, try
+InceptionHosting][4]
+
+  * At least 2 VPSes required, at least 3 VPSes recommended. More is better.
+  * Each VPS should have at least 256MB RAM (for OpenVZ burstable), or 128MB RAM (for OpenVZ vSwap and other virtualization technologies with proper memory accounting).
+  * Reading comprehension and an hour of your time or so :)
+
+From the [Tahoe-LAFS website][2]:
+
+> Tahoe-LAFS is a Free and Open cloud storage system. It distributes your data
+across multiple servers. Even if some of the servers fail or are taken over by
+an attacker, the entire filesystem continues to function correctly, including
+preservation of your privacy and security.
+
+The short version: Tahoe-LAFS uses a RAID-like mechanism to store 'shares'
+(parts of a file) across the storage grid, according to the settings you
+specified. When a file is retrieved, all storage servers will be asked for
+shares of this file, and those that responded fastest will be used to retrieve
+the data from. The shares are reconstructed by the requesting client into the
+original file.
+
+All shares are encrypted and checksummed; storage servers cannot possibly know
+or modify the contents of a share, or the file it derives from.
+
+There are (roughly) two types of files: immutable (these cannot be changed
+afterwards) and mutable (these can be changed). Immutable files will result in a
+"read capability" (an encoded string that tells Tahoe-LAFS how to find it and
+how to decrypt it) and a "verify capability" (that can be used for verifying or
+repairing the file). A mutable file will also yield a "write capability" that
+can be used to modify the file. This way, it is possible to have a mutable file,
+but restrict the write capability to yourself, while sharing the read capability
+with others.
+
+There is also a pseudo-filesystem with directories; while it isn't required to
+use this, it makes it possible to for example mount part of a Tahoe-LAFS
+filesystem via FUSE.
+
+For more specifics, [read this documentation entry][5].
+
+#### 1\. Install dependencies
+
+Follow the below instructions for all VPSes.
+
+To install and run Tahoe-LAFS, you will need Python (with development files),
+setuptools, and the usual tools for compiling software. On Debian, this can be
+installed by running `apt-get install python python-dev python-setuptools build-
+essential`. If you use a different distro, your package manager or package names
+may differ.
+
+Python setuptools comes with a Python package manager (or installer, rather)
+named easy_install. We'd rather have pip as our Python package manager, so we'll
+install that instead: `easy_install pip`.
+
+After installing pip, we'll install the last dependency we need to install
+manually (`pip install twisted`), and then we can install Tahoe-LAFS itself:
+`pip install allmydata-tahoe`.
+
+When you're done installing all of the above, you'll have to make a new user
+(`adduser tahoe`) that you're going to use to run Tahoe-LAFS under. From this
+point on, run all commands as the `tahoe` user.
+
+#### 2\. Setting up an introducer
+
+First of all, you'll need an 'introducer' - this is basically the central server
+that all other nodes connect to, to be made aware of other nodes in the storage
+grid. While the storage grid will continue to function if the introducer goes
+down, no new nodes will be discovered, and there will be no reconnections to
+nodes that went down until the introducer is back up.
+
+Preferably, this introducer should be installed on a server that is not a
+storage node, but it's possible to run an introducer and a storage node
+alongside each other.
+
+Run the following on the VPS you wish to use as an introducer, as the `tahoe`
+user:
+
+    
+    
+    tahoe create-introducer ~/.tahoe-introducer
+    tahoe start ~/.tahoe-introducer
+    
+
+Your introducer should now be started successfully. Read out the file `~/.tahoe-
+introducer/introducer.furl` and note the entire contents down somewhere. You
+will need this later to connect the other nodes.
+
+#### 3\. Setting up storage nodes
+
+Now it's time to set up the actual storage nodes. This will involve a little
+more configuration than the introducer node. On each storage node, run the
+following command: `tahoe create-node`.
+
+If all went well, a storage node should now be created. Now edit
+~/.tahoe/tahoe.cfg in your editor of choice. I will explain all the important
+configuration values - you can leave the rest of the values unchanged. Note that
+the 'shares' settings all apply to uploads from that particular server - each
+machine connected to the network can pick their own encoding settings.
+
+  * **nickname** : The name for this particular storage node, as it will appear in the web panel.
+  * **introducer.furl** : The FURL for the introducer node - this is the address that you noted down before.
+  * **shares.needed** : This is the amount of shares that will be needed to reconstruct a file.
+  * **shares.happy** : This is the amount of different servers that have to be available for storing shares, for an upload to succeed.
+  * **shares.total** : The total amount of shares that should be created on upload. One storage node may hold more than one share, as long as it doesn't violate the shares.happy setting.
+  * **reserved_space** : The amount of space that should be reserved for _other applications_ on this server.
+
+##### Reserved space
+
+Tahoe-LAFS has a somewhat interesting way of counting space - instead of keeping
+track of how much space it can use for itself, it will try to make sure that a
+certain amount of space is available for other applications. What this means in
+practice is, that if another application fills up 1GB of disk space, this 1GB
+will be subtracted from the amount of space that Tahoe-LAFS _can_ use, not from
+the amount of space that it _can't_ use. The end result is Tahoe-LAFS being very
+conservative in the way it uses disk space. This means that you can typically
+set the amount of reserved space to a very low value like 1GB to 5GB, because by
+the time you hit that amount of free space, you will still have plenty of time
+to clean up your VPS, before the last gigabytes are used up by other
+applications.
+
+##### Share settings
+
+At first, share settings may seem very tricky to configure correctly. My advice
+would be to set it as the following:
+
+  * **shares.total** : about 80% of the amount of servers you have available.
+  * **shares.happy** : 2 lower than shares.total
+  * **shares.needed** : half of shares.total
+
+This means that if you have for example 10 storage servers, shares.total = 8,
+shares.happy = 6, shares.needed = 4.
+
+Now you can't just set any arbitrary values here - your share settings will
+influence the 'expansion factor' - how many times more space you use than the
+file would take up on its own. You can calculate the expansion factor by doing
+`shares.total / shares.needed` \- for example, with the above suggested setup
+the expansion factor would be 2, meaning that a 100MB file would take up 200MB
+of space.
+
+The level of redundancy can be calculated quite easily as well: the amount of
+servers you can lose while being guaranteed to still have access to your data,
+is `shares.happy - shares.needed` (this assumes worst case scenario). In most
+cases, the amount of servers you can lose will be `shares.total -
+shares.needed`.
+
+#### 4\. Starting your storage nodes
+
+On each node, simply run the command `tahoe start` as the `tahoe` user, and you
+should be in business!
+
+#### 5\. (optional) Install a local client
+
+To more easily use Tahoe-LAFS, you may want to install a Tahoe-LAFS client on
+your local machine. To do this, you should basically follow the instructions in
+step 3 - however, instead of running `tahoe create-node`, you should run `tahoe
+create-client`. Configuring and starting works the same, but you don't need to
+fill in the `reserved_space` option (as you're not storing files).
+
+##### Using your new storage grid
+
+There are several ways to use your storage grid:
+
+###### Via the web interface
+
+Simply make sure you have a client (or storage node) installed, and point your
+browser at - you will see the web interface for Tahoe-LAFS, which will allow you
+to use it. The "More info" link on a directory page (or for a file) will give
+you the read, write, and verify capability URIs that you need to work with them
+using other methods.
+
+##### Using Python
+
+I recently started working on a Python module named `pytahoe`, that you can use
+to easily interface with Tahoe-LAFS from a Python application or shell. To
+install it, simply run `pip install pytahoe` as root - you'll need to make sure
+that you have libfuse/libfuse2 installed. There is no real documentation for now
+other than in the code itself, but the below code gives you an idea of how it
+works:
+
+    
+    
+    >>> import pytahoe
+    >>> fs = pytahoe.Filesystem()
+    >>> d = fs.Directory("URI:DIR2:hnncfsbzsxv5fhdymxhycm3xc4:qjipiqg3bozb5evb6krdwfmsgks6j4ymivopgx7eoxcjb3avslqq")
+    >>> d.upload("devilskitchen.tar.gz")
+    
+
+The result of this is [something like this][6].
+
+#### Mounting a directory
+
+You can also mount a directory as a local filesystem using FUSE (on OpenVZ, make
+sure your host supports FUSE). Right now, the easiest way appears to be using
+pytahoe (this can be done from a Python shell as well). Example:
+
+    
+    
+    >>> import pytahoe
+    >>> fs = pytahoe.Filesystem()
+    >>> d = fs.Directory("URI:DIR2:hnncfsbzsxv5fhdymxhycm3xc4:qjipiqg3bozb5evb6krdwfmsgks6j4ymivopgx7eoxcjb3avslqq")
+    >>> d.mount("http://www.lowendtalk.com/mnt/something")
+    
+
+##### Via the web API
+
+If you're using something that is not Python, or want a bit more control over
+what you do, you may want to use the Tahoe-LAFS WebAPI directly - documentation
+for this can be found [here][7].
+
+### Extra info
+
+HalfEatenPie November 8:
+
+    
+    
+    Out of curiosity @joepie91, what if one of the servers suddenly just "disappear" from the network? What happens to the files?
+    
+
+joepie91 November 8:
+
+    
+    
+    This doesn't really matter; if you have set up your share settings as I advised above, for example, you can usually lose half the servers before it becomes a problem. It's usually worth repairing (via a deep check) now and then if you often lose nodes, because this will redistribute shares over new nodes to meet the original settings again.
+    
+    From a practical viewpoint, I've had many (and I mean MANY) nodes disappear from my storage grid over time, and barely ever had an issue with it. If you get to the point where you have 20 shares spread over 20 nodes and you only need 10 to reconstruct the file... your storage grid is pretty much practically invincible. Just be sure to do a deep check now and then :)
+    
+
+* * *
+
+rm_ November 8:
+
+    
+    
+    okay assuming I have 10 nodes with 10 GB of space each, with your recommended settings:  
+    - how many of those 10 can disappear with data still intact?  
+    - what is the amount of usable space out of the raw 10x10GB capacity?
+    
+
+joepie91 November 8:
+
+    
+    
+    - how many of those 10 can disappear with data still intact?
+    
+        Total shares would be 8, happy would be 6, and needed would be 4 - this means you can lose 6 - 4 = 2 servers (worst case scenario) without losing access to your data. It's likely possible to lose 3 or 4 servers (this depends on whether the servers you are losing hold 1 or more shares). In this, with "losing" servers I only mean the (max.) 8 servers that you uploaded a share to, to start with. Since your total amount of servers is 10, you could lose 2 more servers without any issues if those servers happen to not hold any shares for this file.
+    
+        Summary: worst case scenario, you can lose any 2 servers. Best case scenario, you can lose 6 servers. It'll usually be somewhere in the middle.
+    
+    - what is the amount of usable space out of the raw 10x10GB capacity?
+        Since your expansion factor is 8 / 4 = 2, and every storage server has an equal amount of space available, you should be able to use 100 / 2 = 50GB of practical space.
+    
+
+pubcrawler November 8:
+
+    
+    
+    how much space are you combing in nodes and doing so all over internet?
+    
+
+joepie91 November 8:
+
+    
+    
+        iqj5wkzuo2x3tdcjhauzsafpe5gwcojq    [name removed] CA       13.41GB
+        a2bjjtujmabiwfqungzlywzyjszm2gyp    [name removed]      265.96GB
+        fzu6dmqq23u2km6ywtlym4tvmtefn25b    Box     3.35GB
+        oywsltqtxm6su6gu54j6bxmgh5qf6o5r    Git     4.29GB
+        mbbs6staiw56f7dtyxxnzecixjoz2m2r    Haless      44.04GB
+        n3fhesvxzg5mpq3gsov76lf2sdwfwo45    Konjassiem      9.16GB
+        z3hc2nw2g2jjhb7vntt5z3mtdcebiho6    Arvel       7.14GB
+        cqq4hmk7flrfwmlt6mldulfrc4swdrhl    Eris        26.86GB
+        akd5kzq4bsmdr6yeyltaro3t2rtap5xo    [name removed]      600.95GB
+        u5ygxnwa25ztku4qpubsjjahlp2pl5bp    Discordia       11.01GB
+        sxbcue26orebknqpzchx5yl63ywep66n    Alba        69.10GB
+        s72mw7cw3ojzki5wz7qxhxs2eex4ethf    CVM-VZ      54.00GB
+        6ck5rd7g46o6kx2wxcym3ku3obwv645d    [name removed]      26.60GB
+        hepqdbu7mohz6jg4uzozouotapfm74pk    [name removed] US       11.37GB
+        qenkbcotohq4c4vhsfmzjmixqhj7ohww    Shi     4.45GB
+        mhelfzivcdzjisxrlwkxo3rnmp5bef3m    Basket      43.67GB
+        jxba3idp4epcvfughxsni5c7pprgrxkw    Aarnist     33.83GB
+        5yunndzcq7a2bqvlyqjj6kxedgiymhtt    [name removed] ZNC      13.46GB
+        y3hgi5fi3qdnoamemuj5qpfrnmopy5ra    equinox     5.03GB
+        jyq6lzjwff3a7ijae54y3zfg2mcv2ykr    Nijaxor     48.43GB
+        pu5m53joaxfdc5zwbcvzu3gv65v3wab3    Sabit       17.66GB
+    
+        Total free storage space: 1313.78GB
+    
+    
+    The nodes are distributed geographically fairly evenly.
+    
+    The 600.95GB node is a bit lost, because it's connected to the old introducer address (which no longer exists), so I can't use that space right now. I'm having some issues tracking down the owner :) 
+    
+
+pubcrawler November 8:
+
+    
+    
+    Fascinating post with the storage amounts. So Tahoe doesn't care that nodes have different storage amounts available? No sort of disclaimer or worry or best case against such?
+    
+
+joepie91 November 8:
+
+    
+    
+    No, the actual amount of storage space that you have available doesn't really matter. The only caveat is that you won't be able to use up all of it in all situations - say that you, for example, have total/happy shares set to 10, but only 2 servers offer more than 30GB of space, then your ceiling for storing files will be at about 30GB - after all, at some point, you simply only have 2 servers left that have more space to store files, and that wouldn't satisfy shares.happy.
+    
+
+craigb November 8:
+
+    
+    
+    also, isn't it the case that by default, nodes closest in latency terms get filled up faster on average?
+    
+
+joepie91 November 8:
+
+    
+    
+    No. Nodes are, as far as I am aware, only chosen by latency when downloading. Uploading will happen with deterministic randomness - as it should, because if the storage servers were picked on basis of latency, it would create a single (geographical) point of failure.
+    That being said, if you're planning on for example building a CDN with Tahoe-LAFS as backend, you'll probably want to make sure that you either have an expansion factor of at least 3, or heavy caching, so that it's likely that data can be retrieved entirely from the same geographical area as the request originates from :)
+    
+
+### Need more help?
+
+There's plenty more (very clear) documentation on the [Tahoe-LAFS website][2]!
+:)
+
+EDIT: For those interested in copying this guide - it's released under the
+[WTFPL][1], meaning you can basically do with it whatever you want, including
+copying it elsewhere. Credits or a donation are both appreciated, but neither is
+required :)
+
+### Joepie91
+
+[Original Thread][8]  
+[Donate to joepie91, the author of this guide][9]
+
+   [1]: http://sam.zoy.org/wtfpl/
+   [2]: http://tahoe-lafs.org/
+   [3]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [4]: http://clients.inceptionhosting.com/aff.php?aff=083
+   [5]: https://tahoe-lafs.org/trac/tahoe-lafs/browser/git/docs/architecture.rst
+   [6]: http://owely.com/04swmf
+   [7]: https://tahoe-lafs.org/trac/tahoe-lafs/browser/docs/frontends/webapi.rst
+   [8]: http://www.lowendtalk.com/discussion/5813/how-to-set-up-your-own-distributed-redundant-and-encrypted-storage-grid-in-a-few-easy-steps
+   [9]: http://cryto.net/%7Ejoepie91/donate.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

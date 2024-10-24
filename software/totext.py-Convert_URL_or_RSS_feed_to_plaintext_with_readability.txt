@@ -1,0 +1,134 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	totext.py - Convert URL or RSS feed to text with readability
+Author      : 	Remy van Elst
+Date        : 	18-04-2019
+URL         : 	https://raymii.org/s/software/totext.py-Convert_URL_or_RSS_feed_to_plaintext_with_readability.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Love plaintext? This script downloads an URL, parses it with readability and
+returns the plaintext (as markdown). It supports RSS feeds (will convert every
+article in the feed) and saves every article.
+
+My usecase is twofold. One is to convert RSS feeds to a [Gopher site][1], the
+second is to get full text in my RSS reader.
+
+The script contains a few workarounds for so-called cookiewalls. It also pauses
+between RSS feed articles to not do excessive requests.
+
+The readability part is handled by Python, no external services are used.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+Here's an example of a news article. On the left, the text-only parsed version,
+on the right, the webpage:
+
+![][3]
+
+[Github repo with source code][4]
+
+## Installation
+
+First install the required libraries.
+
+On Ubuntu:
+
+    
+    
+    apt-get install python python-pip #python2
+    pip install html2text requests readability-lxml feedparser
+    
+
+Other distro's, use the `pip` command above.
+
+Clone the repository:
+
+    
+    
+    git clone https://github.com/RaymiiOrg/to-text.py
+    
+
+## Usage
+
+    
+    
+    usage: totext.py [-h] -u URL [-s SLEEP] [-r] [-n]
+    
+    Convert HTML page to text using readability and html2text.
+    
+    arguments:
+      -h, --help            show this help message and exit
+      -u URL, --url URL     URL to convert (Required)
+      -s SLEEP, --sleep SLEEP
+                            Sleep X seconds between URLs (only in rss)
+      -r, --rss             URL is RSS feed. Parse every item in feed
+      -n, --noprint         Dont print converted contents
+    
+
+If you want to run the script via a cronjob, use the `-n` option to not have
+output.
+
+If the parsing failed, the article will contain the text: `parsing failed`.
+
+## Examples
+
+    
+    
+    python totext.py --rss --url https://raymii.org/s/feed.xml
+    python totext.py --url https://www.rd.nl/vandaag/binnenland/grootste-stijging-verkeersdoden-in-jaren-1.1562067
+    
+
+## Saved text
+
+Every file converted will also be saved to the folder `saved/$hostname`. The
+filenames are sorted by date.
+
+## License
+
+GNU GPLv2.
+
+   [1]: https://raymii.org/s/blog/Site_updates_raymii.org_now_on_gopher.html
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://raymii.org/s/inc/img/txtnws.png
+   [4]: https://github.com/RaymiiOrg/to-text.py
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

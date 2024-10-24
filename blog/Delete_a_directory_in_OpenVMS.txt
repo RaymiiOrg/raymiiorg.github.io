@@ -1,0 +1,341 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Delete a directory on OpenVMS
+Author      : 	Remy van Elst
+Date        : 	03-04-2018
+URL         : 	https://raymii.org/s/blog/Delete_a_directory_in_OpenVMS.html
+Format      : 	Markdown/HTML
+---
+
+
+
+[![openvms][1]][2]
+
+(You can read all my OpenVMS articles by [clicking the picture above][2])
+
+My OpenVMS adventure continues, in this small item I talk about the removal of
+folders on OpenVMS. As you might expect, different than on linux.
+
+I tried to set up SSH public key authentication so that I can use my regular SSH
+key instead of typing my password on the DECUServe system. I found [a guide][3]
+for that in the HPe documentation. That however required the creation of some
+files and folders and I made a typo in the creation of a folder. Of course I
+noticed that way too late so there were files in there as well.
+
+As you might have guessed, I went down a different rabbit hole to remove this
+folder, SSH public key authentication does not work yet. The [DECUServe][4]
+system allows SSH login with a password initially.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+### DIR [.SSH]
+
+The folder I created is named `SSH`, but it should be named `SSH2`. This is
+what's in the folder:
+
+    
+    
+     $ dir [.SSH]
+    
+    Directory EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.SSH]
+    
+    AUTHORIZATION.;3    REMY-GATEWAY.PUB;1
+    
+    Total of 2 files.
+    
+
+OpenVMS seperates folders with the period (`.`) and they must be enclosed in
+square brackets. The first period expands to the current folder.
+
+After creating the correct folder (`CREATE /DIRECTORY [.SSH2]`) and copying the
+files over:
+
+    
+    
+     $ copy [.SSH]*.*;* [.SSH2]
+     $ 
+    
+
+It was time to remove the folder.
+
+### rm -rf [.SSH]?
+
+Let's try to apply some logic here. `CREATE` is the command to create files and
+folders. So would `REMOVE` then remove a folder?
+
+    
+    
+     $ REMOVE [.SSH]
+    %DCL-W-IVVERB, unrecognized command verb - check validity and spelling
+     \REMOVE\
+    
+
+Nope, it doesn't. Let's try what we know from *NIX:
+
+    
+    
+     $ RM
+    _Remote host:
+     Interrupt
+    
+
+No clue what that does, but it's not removing my folder. ^C gets me out.
+
+But, OpenVMS has a very extensive `HELP` system, lets find out what `RM` does:
+
+    
+    
+    RMS
+    
+         OpenVMS Record Management Services (RMS) are generalized routines
+         that assist user programs in processing and managing files and
+         records. 
+         [...]
+    
+
+Okay, nice, but not what I was looking for. `RMDIR` maybe?
+
+    
+    
+     $ RMDIR [.SSH]
+    %DCL-W-IVVERB, unrecognized command verb - check validity and spelling
+     \RMDIR\
+    
+
+Last resort, the Windows BATCH DEL command:
+
+    
+    
+     $ del
+    _File:
+    Interrupt
+    
+
+That at least asks for a filename. Let's see if we can get the directory syntax
+right:
+
+This all failed, syntax wise not the correct format to specify a folder:
+
+    
+    
+    $ DEL [.SSH]
+    %DELETE-E-DELVER, explicit version number or wild card required
+    
+
+A version number you say? This excellent filesystem has versioning built in.
+
+    
+    
+     $ DEL [.SSH];1
+    %DELETE-W-SEARCHFAIL, error searching for EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.SSH].;1
+    -RMS-E-FNF, file not found
+    
+
+The version number inside the brackets?
+
+    
+    
+     $ DEL [.SSH;1]
+    %DCL-W-DIRECT, invalid directory syntax - check brackets and other delimiters
+    
+
+The `DIR` command shows me that the folder is named `[.SSH.DIR]`. Lets try that:
+
+    
+    
+     $ del [.SSH.DIR];1
+     %DELETE-W-SEARCHFAIL, error searching for EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.SSH.DIR].;1
+     -RMS-E-DNF, directory not found
+     -SYSTEM-W-NOSUCHFILE, no such file
+    
+
+At this point in time I thought that maybe I had to remove all the files first
+inside the folder. One by one I tried:
+
+    
+    
+     $ DIR [.SSH]
+    
+    Directory EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.SSH]
+    
+    AUTHORIZATION.;3    REMY-GATEWAY.PUB;1
+    
+    Total of 2 files.
+    
+    
+     $ DEL [.SSH]AUTHORIZATION.;3
+     $ DEL [.SSH]REMY-GATEWAY.PUB;1
+     $
+    
+
+Folder is empty now:
+
+    
+    
+     $ DIR [.SSH]
+    %DIRECT-W-NOFILES, no files found
+    
+
+Now I surely must be able to remove the folder, right?
+
+    
+    
+    $ DEL [.SSH]
+    %DELETE-E-DELVER, explicit version number or wild card required
+    
+
+Sadly not. Reading through the [docs][6] I figured out the correct command to
+recursively delete all files in a folder:
+
+    
+    
+       $ DEL [.SSH]*.*;*
+       $
+    
+
+The command fails the second time since there are no more files:
+
+    
+    
+     $ DEL [.SSH]*.*;*
+    %DELETE-W-SEARCHFAIL, error searching for EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.SSH]*.*;*
+    -RMS-E-FNF, file not found
+    
+
+If you happen to have subfolders, add the `/ERASE` flag to recursively delete
+everything:
+
+    
+    
+    $ DEL /ERASE [.SSH]*.*;*
+    
+
+### Finally the correct DEL syntax, permission error!
+
+Reading the documentation page some more I figured out the correct syntax, no
+brackets and no leading perion:
+
+    
+    
+     $ DEL SSH.DIR;1
+    %DELETE-W-FILNOTDEL, error deleting EISNER$DRA3:[DECUSERVE_USER.EXAMPLE]SSH.DIR;1
+    -RMS-E-PRV, insufficient privilege or file protection violation
+    
+
+Different error message, so we're getting there. The manual states:
+
+> This command requires delete (D) access to the file and write (W) access to
+the parent directory.
+
+Reading, again, the excellent [documentation][7] shows me that there is an `ACL`
+system and a permission system. For now I tried the permission system first.
+
+I figured out that `SHOW SECURITY` is the command to see the permissions.
+Permissions on OpenVMS are very different as well from your standard *NIX
+permissions.
+
+    
+    
+     $ SHOW SECURITY SSH.DIR;1
+    
+    EISNER$DRA3:[DECUSERVE_USER.EXAMPLE]SSH.DIR;1 object of class FILE
+         Owner: [EXAMPLE]
+         Protection: (System: RWE, Owner: RWE, Group, World)
+         Access Control List: <empty>
+    
+
+Using the `SET FILE` command we can explicitly add the `D` permission for the
+`O` (Owner) , which is for deletion:
+
+    
+    
+    $ SET FILE/PROTECTION=O:RWED SSH.DIR;1
+    $
+    
+
+It did update the permissions:
+
+    
+    
+    EISNER$DRA3:[DECUSERVE_USER.EXAMPLE]SSH.DIR;1 object of class FILE
+         Owner: [EXAMPLE]
+         Protection: (System: RWE, Owner: RWED, Group, World)
+         Access Control List: <empty>
+    
+
+Would I now finally be able to remove this directory?
+
+    
+    
+       $ DEL SSH.DIR;1
+       $
+    
+
+Yay! No error message! And no more folder:
+
+    
+    
+     $ dir [.SSH]
+    %DIRECT-E-OPENIN, error opening EISNER$DRA3:[DECUSERVE_USER.EXAMPLE.SSH]*.*;* as input
+    -RMS-E-DNF, directory not found
+    -SYSTEM-W-NOSUCHFILE, no such file
+    
+
+### Conclusion
+
+What have we learned today?
+
+  * Syntax of the `DIR` command is not the same as for the `DEL` command, the latter does not require brackets and a leading period.
+  * Directories must be empty before they can be removed
+  * Removing all files in a folder is possible
+  * Removing all directories and files recursively is also possible with the `/ERASE` flag
+  * Deleting a directory requires the explicit `D` (DELETE) permission to be set on that folder
+
+And still no OpenSSH Public key authentication. Enough OpenVMS for this evening,
+SSH will be next.
+
+   [1]: https://raymii.org/s/inc/img/ovmsdec.png
+   [2]: https://raymii.org/s/tags/openvms.html
+   [3]: https://web.archive.org/web/20180403184752/http://h41379.www4.hpe.com/doc/83final/ba548_90007/ch03s08.html
+   [4]: http://decus.org
+   [5]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [6]: https://web.archive.org/web/20180403191730/http://h41379.www4.hpe.com/doc/84final/9996/9996pro_50.html
+   [7]: https://web.archive.org/web/20180403192635/http://h41379.www4.hpe.com/doc/84final/ba554_90015/ch04s09.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

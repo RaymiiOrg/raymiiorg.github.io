@@ -1,0 +1,190 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>The Adventure of the Missing Syscall: Error 38 - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>The Adventure of the Missing Syscall: Error 38</h2>
+<p><small>Published: <span data-pagefind-meta='date'>24-10-2024 21:33</span> | Author: Dr. John Watson | <a href="The_Adventure_of_the_Missing_Syscall_Error_38.txt">Text only version of this article</a>
+</small></p>
+<br><div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">The Adventure of the Missing Syscall: Error 38</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p>Sherlock Holmes tackles a modern computing dilemma involving a missing system call. In this case, a frustrated developer attempts to port an embedded device running Yocto to a newer version, only to be met with <code>Error 38</code> due to a missing syscall. Holmes and Watson delve into the intricacies of kernel versions, glibc, and system calls to uncover the truth behind the missing <code>syscall_397</code> and provide a logical solution.</p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+<p>Disclaimer: This story was written by AI, inspired by a real-world technical issue encountered 
+in the process of upgrading an embedded system. </p>
+
+<p>I recently listened to the Sherlock Holmes novels on a populair audiobook platform, 
+I thought this would be entertaining. I did actually encounter this issue while upgrading
+an older Yocto system. Resolved it by upgrading more parts of yocto and the application.</p>
+
+<p>Please send me a message on how you feel about this content. It&#39;s an experiment, if you 
+dislike it, or like it, just <a href="/s/static/About.html#toc_1">send me an email</a>. Most articles
+I write result in at least 20 messages so don&#39;t let me down on this one.</p>
+
+<p><img src="/s/inc/img/chatgpt-sherlock.jpg" alt="sherlock"></p>
+
+<h3 id="toc_0">The Adventure of the Missing Syscall: Error 38</h3>
+
+<p>It was a foggy evening in London when I, Dr. John Watson, found myself once
+again in the company of my esteemed friend, Mr. Sherlock Holmes. The fire
+crackled in the hearth of our Baker Street lodgings, casting flickering
+shadows on the walls. Holmes was deep in thought, his sharp eyes fixed on a
+peculiar set of logs displayed on his laptop screen.</p>
+
+<p>&quot;Watson,&quot; he began, without looking up, &quot;we have a most intriguing case on our
+ hands. It appears that a system call, <code>syscall_397</code>, has gone missing,
+ leading to a rather perplexing error: Error 38.&quot;</p>
+
+<p>I leaned over to examine the output of <code>strace</code> that Holmes had been
+scrutinizing. The sequence of events was clear:</p>
+
+<pre><code>openat(AT_FDCWD, &quot;/lib/libm.so.6&quot;, O_RDONLY|O_LARGEFILE|O_CLOEXEC) = 3
+read(3, &quot;\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0\0\0\0\0004\0\0\0&quot;..., 512) = 512
+syscall_397(0x3, 0xb6f1ca0c, 0x1800, 0x7ff, 0xbece2e08, 0xbece3008) = -1 (errno 38)
+close(3) = 0
+writev(2, [{&quot;./busybox.nosuid&quot;, 16}, {&quot;: &quot;, 2}, {&quot;error while loading shared libra&quot;..., 36}, {&quot;: &quot;, 2}, {&quot;libm.so.6&quot;, 9}, {&quot;: &quot;, 2}, {&quot;cannot stat shared object&quot;, 25}, {&quot;: &quot;, 2}, {&quot;Error 38&quot;, 8}, {&quot;\n&quot;, 1}], 10) = 103
+</code></pre>
+
+<p>Holmes tapped the screen. &quot;Notice, Watson, the <code>syscall_397</code> returns <code>-1</code> with
+<code>errno 38</code>. This indicates that the function is not implemented.&quot;</p>
+
+<p>He continued, &quot;But Watson, there&#39;s more to this tale. The case arose because a
+software developer was attempting to port an embedded device running Yocto to
+a newer version. He endeavored to run the device&#39;s current kernel, version
+3.17, with a new root filesystem, built using <code>glibc 2.39</code> on Yocto 5. The
+<code>error 38</code> emerged when the system was booted with the old kernel and new
+rootfs, and when executing a binary compiled by Yocto on the current
+machine&#39;s rootfs.&quot;</p>
+
+<p>Despite Holmes&#39; logical deductions, the developer&#39;s frustration had boiled
+over. The once marvelously engineered device had become a stubborn relic. On
+a stormy night, with rain battering the windows, the developer&#39;s patience
+snapped. Seizing the device, he stormed out into the tempest in a fit of
+rage.</p>
+
+<p>Holmes and I followed, our coats flapping violently in the wind. We watched
+from a distance as the developer, standing at the edge of a cliff, hurled the
+device into the churning sea below. The dramatic scene, the device
+disappearing into the dark waters, echoed the developer&#39;s despair.</p>
+
+<p>Back at Baker Street, drenched but undeterred, Holmes resumed his analysis. He
+leaned back in his chair, eyes twinkling with satisfaction as he lit his
+pipe, the familiar scent of tobacco filling the room. &quot;Watson, despite the
+theatrics, the solution is clear. The kernel and glibc must be updated. The
+storm may rage, but logic and reason will prevail.&quot;</p>
+
+<p>I poured us both a cup of tea, the steam rising gently as I handed Holmes his
+cup. &quot;Holmes, this is all quite fascinating, but I must confess, I am still
+somewhat bewildered. What exactly does all this mean?&quot;</p>
+
+<p>Holmes took a thoughtful puff from his pipe, the smoke curling lazily towards
+the ceiling. &quot;Ah, Watson, the intricacies of modern computing can indeed be
+perplexing. Allow me to elucidate.&quot;</p>
+
+<p>As I pondered the situation, Holmes delved deeper into the system&#39;s
+architecture. He pulled up the syscall tables and kernel headers,
+meticulously searching for any discrepancies.</p>
+
+<p>&quot;Look here, Watson,&quot; he said, pointing to the syscall table. &quot;The
+ <code>syscall_397</code> is indeed listed as <code>statx</code>. However, in our current kernel
+ version, this entry is absent.&quot;</p>
+
+<p>He navigated to the kernel headers, examining the definitions and
+structures. &quot;The headers confirm our suspicion. The necessary definitions for
+<code>statx</code> are missing in this version.&quot;</p>
+
+<p>Holmes continued, &quot;The syscall table, found in <code>arch/arm/tools/syscall.tbl</code>,
+maps system call numbers to their corresponding functions. This table ensures
+that when a program makes a system call, the kernel knows which function to
+execute. In our case, the absence of <code>syscall_397</code> means the kernel does not
+recognize the <code>statx</code> call.&quot;</p>
+
+<p>Finally, Holmes turned to the <code>errno.h</code> file. &quot;The error code <code>38, ENOSYS</code>, is
+defined as &#39;Function not implemented.&#39; This aligns perfectly with our
+findings.&quot;</p>
+
+<p>With a final flourish, Holmes closed his laptop. &quot;Watson, our investigation
+into the syscall tables, kernel headers, and <code>errno.h</code> has confirmed the root
+cause. The missing <code>syscall_397</code> is due to outdated kernel and glibc
+versions. Updating them will restore the missing functionality.&quot;</p>
+
+<p>As the fog lifted outside, I couldn&#39;t help but marvel at Holmes&#39; unparalleled
+deductive skills. Once again, he had turned a seemingly insurmountable
+problem into a simple matter of logic and observation.</p>
+Tags: <a href="../tags/ai.html">ai</a>
+, <a href="../tags/chatgpt.html">chatgpt</a>
+, <a href="../tags/fiction.html">fiction</a>
+, <a href="../tags/glibc.html">glibc</a>
+, <a href="../tags/kernel.html">kernel</a>
+, <a href="../tags/linux.html">linux</a>
+, <a href="../tags/sherlockholmes.html">sherlockholmes</a>
+, <a href="../tags/syscall.html">syscall</a>
+, <a href="../tags/yocto.html">yocto</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

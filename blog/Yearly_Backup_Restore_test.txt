@@ -1,0 +1,249 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	The yearly backup restore test
+Author      : 	Remy van Elst
+Date        : 	05-11-2021
+URL         : 	https://raymii.org/s/blog/Yearly_Backup_Restore_test.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+In my calendar there is a yearly recurring item named 'backup restore test'. This is an article on my backup scheme and the yearly restore test, covering all aspects, such as data validation, backup scheme, time and cost involved.
+I started doing personal restore tests each year around 2012, when I did them for my first job. At work back then, the restore test was monthly, for my own backups I decided that yearly was okay enough, since the backup scheme, software and provider do not change. I'm using Azure cold storage for my (locally encrypted) personal backups, since it's both cheap and supported by my local NAS.
+
+Have you done your backup restore test recently?
+
+
+
+An untested / unverified backup is the same as no backup, so doing a restore
+test is a major part in your backup scheme.
+
+
+I started doing personal restore tests each year around 2012, when I did them
+for my first job. At work back then, the restore test was monthly, for my own
+backups I decided that yearly was okay enough, since the backup scheme,
+software and provider do not change. I'm using Azure cold storage for my
+(locally encrypted) personal backups, since it's both cheap and supported by
+my local NAS.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+The backup restore test involves a NAS device, Azure Blob storage and 
+[md5deep][7] to verify file integrity afterwards and compare it with
+a known list of hashes I made before restoring.
+
+I recommend you do a restore test at least once a year. If your restore
+test happens when you actually need a restore, it's probably too late.
+
+### An untested backup is worthless
+
+There is an older sysadmin wisdom regarding backups, called the 
+[3-2-1 backups scheme][1]:
+
+- There should be 3 copies of data
+- On 2 different media
+- With 1 copy being off site
+
+I'm not saying that is a perfect scheme, but I do prefer
+offline long-term backups, like on tape drives or external
+disks, not connected to the network. 
+
+All backup schemes and procedures do have one thing in common,
+**an untested backup is the same as no backup.**
+
+I'm probably never going to get hit by ransomware, but if you're responsible
+for a corporate IT environment, you better know how to restore data and how
+long it takes to get up and running when all data is gone. 
+
+My yearly restore test involves a full restore, assuming all data was lost
+locally. In this fictional scenario I go to the store, buy a NAS device and
+enter the credentials of the storage, then restore the entire data set.
+Skipping the NAS-buying part, that would be costly each year.
+
+Keep in mind that this article covers a home setup, not a corporate one. 
+
+### Backup procedures
+
+All local devices are configured to backup their data to the NAS. The exact
+method differs per device, some use rsync, some use ssh, some use a bunch of
+scripts and some even only have an NFS share. The data backed up also
+differs, from full copies of my daily drivers (laptop/workstation) with
+Duplicity, a Time Machine storage backend, a Veeam storage repository to a
+sync of all my photo's and calendars. All important data is backed up or synced
+at least once every 24 hours.
+
+The NAS uses a vendor provided program to backup to a cloud provider, a whole 
+bunch are supported but I went with Azure as their pricing is the cheapest 
+for my use case. I tried a few different providers, S3 was way to expensive
+and a few local (Dutch) providers also could not match up with Azure's pricing.
+
+The NAS backups are encrypted (with GPG) and it keeps historical versions of
+data. I also plug in a USB disk once a month, sync it up (also encrypted) and
+store that in a different location, offline. If the whole city burns down
+or is hit by (insert favorite disaster here) and Azure is offline, I should still
+be able to restore my data, hopefully. 
+
+### Restore process and data validation
+
+The restore test uses the NAS vendor restore application to restore the entire 
+most recent data set of the backup to a different folder. I can do that because 
+I have enough free space. Once this NAS is up for renewal I can try to do a 
+restore to a new device, that would be fun. At work we have a separate spare
+storage chassis and controller to do restores if the main units ever were to 
+fail and we cannot buy the same model or newer in the model series again.
+
+After the data download and restore completed I verified file integrity using
+a simple but fast tool named [md5deep][7]. It hashes all files recursively, 
+here's some example output:
+
+    $ md5deep -r qt*
+    b35e0aabb4916f55638d0870737c3006  /home/remy/Downloads/qt-license.txt
+    df3357a2043c6a03e8cb43f8f630c5a0  /home/remy/Downloads/qt-vnc-1.png
+    0c8449193fcfe45f7ccbd9877597b2a0  /home/remy/Downloads/qt-license-creator.txt
+    d967941393d3eee140bac618c4f5a9e3  /home/remy/Downloads/qtdd13_practical_qml.pdf
+    59b2ba8cb810bab4b762efaf61b73cf2  /home/remy/Downloads/qt-creator-enterprise-linux-x86_64-5.0.2.run
+    6e593290035170c3b2a37782e1b4e525  /home/remy/Downloads/qt-creator-enterprise-windows-x86_64-5.0.2.exe
+    9cf75d81ef30d3eebb463cf19dfb5893  /home/remy/Downloads/qt-everywhere-src-5.15.6.tar.xz
+    4d6dcb1a7acb32a885e761d85e3cc7f8  /home/remy/Downloads/qt-enterprise-linux-x64-5.15.6.run
+    c06d944dd270952aa11218fcd0a4d9ae  /home/remy/Downloads/qt-enterprise-windows-x86-5.15.6.exe
+
+Before doing the restore I made the same list, after a simple `diff` I know
+that there were no (obvious) errors. A cron job runs on the NAS to make this
+list every week, a diff is emailed to me so I know whenever files get 
+corrupted. Has that happen twice in all those years, so this detection does work,
+even though it uses MD5. I choose to use MD5 because the NAS device is slow, 
+other algorithms are available (via `hashdeep`) but they do take way longer 
+for the amount of files I have.
+
+If the NAS device would be more powerful, I would use ZFS, since that has
+very well data corruption prevention. All of my workstations use ZFS, so
+there the data is protected against corruption. For this low-spec NAS device
+this is a simple solution which has proven to be reliable enough. 
+
+### Restore duration
+
+My home internet is a fiber to the home (FTTH) connection with 50 Mbps up and
+50 Mbps down, I'm using a modified version of [Jeff Geerlings remote
+connection monitoring dashboard][5] which shows that I most often not get the
+full speed, the average is about 40 Mbps up and 34 Mbps down. Not much of a
+problem, fast enough for a reasonable price (EUR 26/month).
+
+The restore on the NAS took **5 days, 18 hours and 16 minutes.** The amount of
+data transferred according to [Azure][3] was **1.7 TB**, so that gives an average
+of 29 Mbps or 3.62 MBps. When using a [speed test download][6] from the West
+Europe Azure region, on the device (which is directly plugged in to the managed
+switch to the router), I also average around 3 to 3.5 MBps. On another, more
+powerful device, same cable, I average up to 4.21 MBps, so it all evens out
+around 30 Mbps. The North Europe region averages out the same in speed tests.
+
+The NAS device is not that powerful (ARM cpu and 512 MB of RAM) but has low
+energy usage, which for me was a more important factor than speed, since all
+it does is handle local backups and serve some files out over NFS or SMB. 
+
+The average speed monitored and the backup restore speed are about the same,
+so I did expect it to take a while when I started. Last years restore test 
+involved the USB drive and the year before that the data usage was way less
+than this year, so those numbers were not really representative.
+
+
+### Cost?
+
+I'm using an Azure Blob Storage account, like Amazon S3 or OpenStack Swift for
+storing the backups. I'm using the [Cool tier][2], that is optimized for
+storing data that is infrequently accessed or modified. Data in the Cool tier
+should be stored for a minimum of 30 days. The cool tier has lower storage
+costs and higher access costs compared to the hot tier.
+
+The cost of object storage is always hard to calculate up front. You can get
+an educated guess, but usage patterns always change or are different and the
+operations you do are not always the same among cloud providers. This
+paragraph serves as an indication.
+
+The total backup size varies between 2 and 3 TB, but most of the time it's
+about 2.5 TB, at the time of the restore test it was 2.68 TB. I'm keeping a
+bit of history, the NAS manages that for me. The actual used storage on disk
+is about 1.8 TB, and I can go back 30 file versions or about 5 weeks. The
+usual change in data is [about 20 GB][4].
+
+The actual restore amount traffic in [Azure was 1.7 TB][3], which matches the
+current used traffic.
+
+Azure offers quite an extensive log of what usage cost you've made, also an
+overview of invoices.
+
+The average regular backup cost for the past year is EUR 24. Lasts month
+invoice was EUR 25.93. This restore action made this months invoice increase
+to EUR 37.88. 
+
+Looking into [the detailed usage CSV][8] for last month and this month, I can see
+exactly where this increase comes from. Meter `Cool Data Retrieval` last
+month was at max EUR 0.015691, this month I have 5 rows with a price around
+EUR 2.50, which totals to EUR 10.97. Last month's total `Cool Data Retrieval`
+was EUR 0.10, this month it's EUR 11.06. The other meters did not increase
+significantly.
+
+### Summary
+
+Summarizing, the restore test cost on Azure Cool Blob Storage were about EUR
+11 for about 1.7 TB of data. The time it took for the full restore was 5 days
+and 18 hours and all files were checked for corruption. 
+
+I'm deliberately vague on the specific NAS device because I don't want to
+endorse one specific device or brand. I want an energy-efficient device
+with low usage because it's on 24/7. You might want a big powerful device
+to stream and re-encode your entire media library, or you want to fiddle around
+with some BSD based NAS software. If you read this site, you're probably enough
+of a nerd to figure out what is a great fit for you in terms of NAS devices.
+
+Now go plan your backup restore test! 
+
+
+
+[1]: https://web.archive.org/web/20210831004934/https://www.veeam.com/blog/321-backup-rule.html
+[2]: https://web.archive.org/web/20211020075333/https://docs.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview
+[3]: /s/inc/img/azure-egress.png
+[4]: /s/inc/img/azure-ingress.png
+[5]: https://web.archive.org/web/20211102151602/https://www.jeffgeerling.com/blog/2021/setting-pi-remote-internet-connection-monitoring
+[6]: https://www.azurespeed.com/Azure/Download
+[7]: http://md5deep.sourceforge.net/
+[8]: /s/inc/img/azure-cost.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

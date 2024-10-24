@@ -1,0 +1,602 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Fixing the hiss on my Atgames Legends Pinball Micro including root access
+Author      : 	Remy van Elst
+Date        : 	23-01-2024 22:00
+URL         : 	https://raymii.org/s/software/Fixing_the_buzz_hiss_on_my_atgames_legends_pinball_micro.html
+Format      : 	Markdown/HTML
+---
+
+
+
+The [Atgames Legends Pinball Micro](https://web.archive.org/web/20240123213954/https://www.atgames.us/products/legends-pinball-micro) is a small virtual pinball cabinet for around USD 350. I imported one to the Netherlands, Atgames does not ship here. The built in tables are okay and more are for sale via Atgames' webshop. Overall for the price it is a nice device. Build quality is okay, software lacks a bit of quality. One really annoying issue which severely impacts gameplay is a buzz / hiss sound. This post goes over my attempts to fix this hiss and the one that worked was a ground loop isolator.
+
+
+This is a picture of my pinball machine next to a testing setup I use for 
+work:
+
+
+
+![ALP Micro](/s/inc/img/alp/my-alp.jpg)
+
+It is a ~~small Linux computer~~, I mean, it is a bartop model virtual pinball
+machine. Real arcade buttons, a back glass screen with scores, 50 built in
+pinball tables and more available for sale. Did I mention it's a Linux
+computer? Here's a screenshot of me having root access on firmware 5.69:
+
+
+![root access](/s/inc/img/alp/root-access.png)
+
+
+### The hiss / buzz
+
+One of my favorite tables is Firefighter by Zaccaria (Also available on Steam).
+It's an older table, not much frills but enough to keep you busy like multi ball
+and some trick shots. I'm not sure if this is a recreation of an actual table.
+This is a screenshot of the play field:
+
+
+![firefighter](/s/inc/img/alp/firefighter.png)
+
+However, **this table has no background music**. Once you load up the table, the
+hiss starts. It sort of a buzz / hiss. Most other tables this buzz but when
+there is no music in the table, it is way more annoying.
+
+Atgames acknowledged this issue in their [FAQ](http://web.archive.org/web/20240120180631/https://www.atgames.net/arcades/faq/):
+
+
+![faq](/s/inc/img/alp/atgames-faq.png)
+
+
+
+There are multiple complaints on Reddit like [this one]
+(https://www.reddit.com/r/LegendsUltimate/comments/1158bmv/was_the_micro_made_by_deaf_people/).
+
+It seems this problem is absent on the larger Legends Pinball HD device. There
+were sound issues there as well but those were fixed in software or via double
+sided tape under a plastic panel.
+
+I've contacted Atgames support but they have no fix except for turning up the
+music volume. Which is impossible on a table like Firefighter which has no
+music. 
+
+In the main menu there is no buzz sound. Some Gottlieb tables also have it less.
+I suspect it has to do with improper shielding on the wires or other electronic
+interference. Possibly related to `i2c` since that is what the controller buttons
+are using. 
+
+
+# Software fix
+
+The Atgames Legends pinball micro is a Linux machine running Qt software
+(main menu) and the pinball tables are native Linux executables. The entire
+system is built with buildroot and you can get root access. HA8819 is the
+internal model name for the big ALP and HA8818 is the model name for the ALP 
+Micro. 
+
+My first attempt was a software fix using `alsamixer` which you can [find here](https://archive.org/details/add-on-alp-micro-fix-hiss-v-1).
+
+It is a retroarch core which executes a shell command to mute an alsa output:
+
+    /usr/bin/amixer -c 2 set 'OUT MIXR DAC R1',0 mute
+
+
+Why is it packed in a retroarch core? Please read the last paragraph of this
+article. It allows me to launch this command via the main menu as a custom
+game. 
+
+This works to a certain extent for most pinball tables made by magic pixel. For
+the older tables (by Farsight) it does not work. The hiss sound is not gone
+completely but a bit less loud. Still very annoying.
+
+I did try multiple things in software, all without any significant result. I
+just put up with it, playing tables without background music less due to the
+annoyance.
+
+
+While testing software fixes for the sound buzz issue I tried to disconnect the sound card from the `i2c` bus with the following command:
+
+    echo 1-001a >  /sys/bus/i2c/drivers/rt5651/unbind
+
+
+After which the machine prompty had a kernel panic.
+
+
+# Ground Loop Isolator
+
+A few months later a friend of mine came over for a visit and played the pinball
+machine. I showed him the buzzing tables and he immediately recognized the
+hiss / buzz / humm. His day job is being a sound technician. Without hesitation
+he suggested I try a ground loop isolator. This is such a device:
+
+
+![ground loop isolator](/s/inc/img/alp/ground-loop-isolator.jpg)
+
+> A ground loop isolator is a type of noise filter used to prevent electrical
+  noise or hum, picked up by audio signal cables along the ground conductor
+  path, from being amplified. ([via]
+  (http://web.archive.org/web/20240120155220/https://soundcertified.com/what-is-a-ground-loop-isolator/))
+
+
+The speakers on the Legends Pinball Micro are in the back box and connected via
+a JST SM 4 connector:
+
+
+![speakers](/s/inc/img/alp/speakers1.jpg)
+
+This is the specific connector:
+
+![jst sm 4](/s/inc/img/alp/jst-sm4.jpg)
+
+
+A ground loop isolator often has RCA plugs or a 3.5mm jack, I ordered one with
+RCA plugs. Those plugs don't go in to JST SM 4 plugs so those had to go and the
+correct connector had to be crimped on.
+
+
+At work I often have to make my own cables so I was familiar with the
+process. 
+
+First I snipped the RCA plugs from the ground loop isolator. Stripping the wires
+and soldering them up to new wires to make them all even in length and to
+separate the (stranded) ground wire.
+
+I crimped the new wires into a male and a female JST SM connector and added some
+heat shrink tube before soldering them to the stripped isolator wires.
+
+At home I had the right tools so with half an hour I had replaced the RCA plugs
+with a JST SM connector. 
+
+
+If you want to try this fix for yourself there is an easier way. 
+
+### Easy conversion cable
+
+
+[Adafruit sells JST SM 4 connectors](https://www.adafruit.com/product/578) 
+with wires already attached:
+
+![adafruit 578](/s/inc/img/alp/adafruit-jst-sm4.jpg)
+
+That is much easier, you only need to solder an RCA connector instead of
+stripping and crimping the wires yourself.
+
+
+![RCA plug](/s/inc/img/alp/rcaplug.jpg)
+
+
+You can then plug in the RCA plugs from the ground loop isolator into the
+homemade conversion cable and vice versa. Saves you having to buy a crimping
+tool and the ground loop isolator is not modified so you could use it again for
+something else.
+
+### Fixed!
+
+This is the end result. I used double sided tape to attach the ground loop
+isolator to the backbox:
+
+
+![fixed](/s/inc/img/alp/final-result.jpg)
+
+
+With the ground loop isolator attached in between the speakers 
+**the buzz / hiss is gone!** 
+
+Atgames should be able to fix this with better isolation and shielding, however I
+suspect it could also be done via a software update since the hiss is only
+there when specific tables are played, not in the main menu.
+
+Playing the tables without background music is much more pleasant without that
+annoying buzz. 
+
+### More software information
+
+Quoting [dudemo]
+(https://www.reddit.com/r/LegendsUltimate/comments/p3zz6o/would_a_web_browser_port_be_possible/)
+from Reddit where a question was asked if a web browser would be possible on
+the Atgames devices. It goes in to a bit of history on running custom software
+on the Atgames Legends series of devices. 
+
+> In previous firmwares (pre 4.2X), this was possible. Now, not so much. Or at
+  least not easily.
+>
+> Some people figured out that the system was basically wide open and you could
+  basically run anything from a UCE file. You could even pack UCE files in a
+  damn UCE file and do some really cool things. Then AtGames ruined the fun by
+  restricting what could be ran from a UCE file. At first they did this by
+  restricting the UCE files ability to run as root. That wasn't good enough
+  because sure enough, people like me found workarounds.
+>
+> So now both the emulator used by AddOn and CoinOPS X now are coded so that
+  they look for Retroarch cores specifically. If one does not exist, it will
+  kick you back to the menu. But that wasn't enough, because people like me
+  figured out you can just put a core in there and still run whatever the hell
+  you want in the run script for the UCE file. Well, that just won't do. So
+  AtGames coded their menu system to load UCE files to a temporary partition
+  with the "noexec" flag set, so you can't run anything but the emulators.
+  Period.
+>
+> What you would need to do is find a way to pack a web browser into a Retroarch
+  core. Not impossible, but definitely not easy either. One with advanced
+  features such as you require? Never. No way.
+> 
+> You'd be better off rooting your device, and I'll explain why below.
+>
+> Remember how I said that UCE files do not run as root? Well, that's the first
+  roadblock. Without root, you have no access to any libraries except the
+  shared libraries. Likewise, you have no ability to load external libraries
+  and preload them in the run script. Doesn't work without root.
+>
+> Second, the whole root filesystem is SquashFS. It is unwritable. So even if
+  you had root, you cannot write to the /usr/lib folder or anywhere else that
+  might be helpful. It is solely for this reason that FlashDrive X was created.
+  As a way to add files to the root filesystem without being able to modify.
+  FlashDrive X has all the capabilities of the root filesystem. It's also
+  encrypted. So that negates using that.
+>
+> If you've made it this far, I assume your in for the long haul and hoping
+  there's some kind of payout at the end. Sure. But I won't give you all of my
+  secrets. Just a hint for all of you potential exploit hunters out there.
+  AtGames gave us a way to run things as root. As I explained, FlashDrive X has
+  the ability to run things as root. We know for certain that several things
+  are stored on FlashDrive X: Pixelcade, Pinball, CoinOPS X. Ahh. There we go.
+>
+> CoinOPS X has the ability to run UCE files. It runs from FlashDrive X. Add two
+  and two, you'll get four. Now you just need a way to pack a network listener
+  in a Retroarch core. Bam. Root shell. (Yes, it's doable. I've already done it
+  and shown it to be possible.) Remember, the OS is coded to look for a
+  Retroarch core. Whatever you run needs to be packed into a Retroarch core to
+  run. Luckily there's a "blank" core we can use for this called
+  libretro-skeletor.
+>
+> Now you can do whatever you want. Including brick your machine.
+> 
+> Resources:
+>   https://github.com/libretro/skeletor
+>
+>  https://github.com/vfedoroff/go-netcat
+> 
+>  https://medium.com/@yanzay/implementing-simple-netcat-using-go-bbab37507635
+> 
+> Have fun.
+
+
+It turns out all of the above is not needed for the Legends Pinball Micro since
+root access is available on firmware 5.69 and the Factory default firmware. I
+have not tested if this works on 5.70 or above.
+
+### Root access on your Pinball Machine
+
+The Atgames Legends pinball micro running [firmware 5.69]
+(https://archive.org/details/atgames-legends-pinball-micro-firmware-5.69) or
+the factory default has root access available, so none of the trickery from the
+reddit post is needed.
+
+
+If you set up a `buildroot` environment yourself you can cross-compile any
+software you want to run. 
+
+I've tried a few command line apps for `aarch64` from
+[here: https://github.com/alex-sector/static-binaries]
+(https://github.com/alex-sector/static-binaries). 
+
+
+For all you `hashcat` and `john` users, with a bit of compute power this will
+allow you to elevate privileges from the `guest` account to `root` in a `UCE`
+file. If you figure out the password please let me know.
+
+
+    [root@HA8819-090D5E:/]# cat /etc/shadow
+    root:$1$ev2jI02T$7GoaYCiepZDYkkrGZ0yLO.:10933:0:99999:7:::
+    daemon:*:10933:0:99999:7:::
+    bin:*:10933:0:99999:7:::
+    sys:*:10933:0:99999:7:::
+    sync:*:10933:0:99999:7:::
+    mail:*:10933:0:99999:7:::
+    www-data:*:10933:0:99999:7:::
+    operator:*:10933:0:99999:7:::
+    nobody:*:10933:0:99999:7:::
+    dbus:*:::::::
+    pulse:*:::::::
+
+    [root@HA8819-090D5E:/]# cat /etc/passwd
+    root:x:0:0:root:/root:/bin/sh
+    daemon:x:1:1:daemon:/usr/sbin:/bin/false
+    bin:x:2:2:bin:/bin:/bin/false
+    sys:x:3:3:sys:/dev:/bin/false
+    sync:x:4:100:sync:/bin:/bin/sync
+    mail:x:8:8:mail:/var/spool/mail:/bin/false
+    www-data:x:33:33:www-data:/var/www:/bin/false
+    operator:x:37:37:Operator:/var:/bin/false
+    nobody:x:65534:65534:nobody:/home:/bin/false
+    guest:x:12:12:Linux User,,,:/media/usb0:/bin/sh
+    dbus:x:1000:1000:DBus messagebus user:/var/run/dbus:/bin/false
+    pulse:x:1001:1002::/var/run/pulse:/bin/false
+
+
+
+
+I've also copied over all pinball tables to a Raspberry Pi 4, which is the same
+arm architecture. After copying over some more libraries and making sure a few
+files are in the right places you can run those pinball tables on any `aarch64`
+Linux machine like the Pi 4!
+
+
+    [root@HA8819-090D5E:/]# file /Zaccaria_Pinball_NEW
+    Zaccaria_Pinball_NEW: ELF 64-bit LSB executable, ARM aarch64, version 1 (GNU/Linux), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 4.4.0, stripped
+
+Here is what it looks like in `ps aux` when playing a table:
+
+
+     1831 root      4740 S    bluetoothctl scan on
+     1858 root      2916 S    sh -c cd /upgrade/opt/app_store/zaccaria_pinball_pac
+     1859 root      2916 S    {run_game.sh} /bin/sh ./run_game.sh locomotion
+     1903 root     2909m S    ./Zaccaria_Pinball_NEW -game locomotion
+
+### Weird stuff in the firmware 
+
+There is a huge amount of logging being done, for each button press a few lines
+are logged to the flash file system. I hope it does not wear out due to all the
+unneeded writes:
+
+    [root@HA8819-090D5E:/]# tail -f /userdata/error_log/20230924_0410.txt.00001
+    [20230924 6:16:13.726 CEST I] lib/atgamesevdevgamepad/atgamesevdevgamepadbackend.cpp:857 - processInputEvent line= 857
+    [20230924 6:16:13.728 CEST I] lib/atgamesevdevgamepad/atgamesgamepadmonitor.cpp:409 - hanson: generatedKeyEvent key: "Down" , pressed: true
+    [20230924 6:16:13.729 CEST I] util/screensaver.cpp:484 - hanson: clearScreenSaverWatchDog
+    [20230924 6:16:13.729 CEST I] util/screensaver.cpp:484 - hanson: clearScreenSaverWatchDog
+    [20230924 6:16:13.732 CEST I] lib/atgamesevdevgamepad/atgamesgamepad.cpp:302 - hanson:  _q_handleGamepadButtonPressEvent emit buttonDownChanged
+    [20230924 6:16:13.767 CEST I] util/Lcd_Manager.cpp:175 - "" ,  "" ,  "Taito Pinball Pack 1" ,  "" ,  4
+    [20230924 6:16:13.768 CEST I] util/Lcd_Manager.cpp:176 - "" ,  "" ,  "AppStoreX?" ,  "" ,  5
+    [20230924 6:16:13.792 CEST I] lib/atgamesevdevgamepad/atgamesevdevgamepadbackend.cpp:857 - processInputEvent line= 857
+    [20230924 6:16:13.794 CEST I] lib/atgamesevdevgamepad/atgamesgamepadmonitor.cpp:409 - hanson: generatedKeyEvent key: "Down" , pressed: false
+    [20230924 6:16:13.795 CEST I] util/GridWidget.cpp:113 - QEvent::KeyRelease, value: 16777237
+    [20230924 6:16:13.795 CEST I] util/GridWidget.cpp:113 - QEvent::KeyRelease, value: 16777237
+    [20230924 6:16:13.796 CEST I] util/GridWidget.cpp:113 - QEvent::KeyRelease, value: 16777237
+    [20230924 6:16:13.797 CEST I] util/GridWidget.cpp:113 - QEvent::KeyRelease, value: 16777237
+    [20230924 6:16:13.797 CEST I] util/GridWidget.cpp:113 - QEvent::KeyRelease, value: 16777237
+    [20230924 6:16:14.352 CEST I] lib/atgamesevdevgamepad/atgamesevdevgamepadbackend.cpp:857 - processInputEvent line= 857
+    [20230924 6:16:14.354 CEST I] lib/atgamesevdevgamepad/atgamesgamepadmonitor.cpp:409 - hanson: generatedKeyEvent key: "Down" , pressed: true
+    [20230924 6:16:14.355 CEST I] util/screensaver.cpp:484 - hanson: clearScreenSaverWatchDog
+    [20230924 6:16:14.355 CEST I] util/screensaver.cpp:484 - hanson: clearScreenSaverWatchDog
+    [20230924 6:16:14.357 CEST I] lib/atgamesevdevgamepad/atgamesgamepad.cpp:302 - hanson:  _q_handleGamepadButtonPressEvent emit buttonDownChanged
+    [20230924 6:16:14.369 CEST I] util/Lcd_Manager.cpp:175 - "" ,  "" ,  "Zaccaria Pinball Pack 1" ,  "" ,  4
+    [20230924 6:16:14.370 CEST I] util/Lcd_Manager.cpp:176 - "" ,  "" ,  "Taito Pinball Pack 1" ,  "" ,  4
+    [20230924 6:16:14.422 CEST I] lib/atgamesevdevgamepad/atgamesevdevgamepadbackend.cpp:857 - processInputEvent line= 857
+    [20230924 6:16:14.423 CEST I] lib/atgamesevdevgamepad/atgamesgamepadmonitor.cpp:409 - hanson: generatedKeyEvent key: "Down" , pressed: false
+    [20230924 6:16:14.424 CEST I] util/GridWidget.cpp:113 - QEvent::KeyRelease, value: 16777237
+    [20230924 6:16:14.425 CEST I] util/GridWidget.cpp:113 - QEvent::KeyRelease, value: 16777237
+    [20230924 6:16:14.425 CEST I] util/GridWidget.cpp:113 - QEvent::KeyRelease, value: 16777237
+    [20230924 6:16:14.426 CEST I] util/GridWidget.cpp:113 - QEvent::KeyRelease, value: 16777237
+    [20230924 6:16:14.427 CEST I] util/GridWidget.cpp:113 - QEvent::KeyRelease, value: 16777237
+    [20230924 6:16:15.964 CEST I] lib/atgamesevdevgamepad/atgamesevdevgamepadbackend.cpp:617 - hanson: "ATG game console"  << btn:  9
+    
+
+The main menu executable contains debug symbols:
+
+
+    [root@HA8819-090D5E:/]#  file hd_menu
+    hd_menu: ELF 64-bit LSB executable, ARM aarch64, version 1 (GNU/Linux), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 4.4.0, not stripped
+
+
+### GPL Violations?
+
+
+AtGames has [this page]
+(https://web.archive.org/web/20230806203104/https://www.atgames.us/pages/credits)
+where they acknowledge the GPL in their other products, but the Legends Arcade
+or Legends Pinball are not mentioned. The Micro (and probably Legends Arcade
+and all their other devices) is full of GPL software, including Qt. 
+
+
+The machine is using Qt 5.12.2 and BusyBox v1.27.2:
+
+    [root@HA8819-090D5E:/]# qtdiag -platform eglfs
+    Setting framebuffer size is only available with DRM atomic API
+    Failed to move cursor on screen eDP1: -14
+    Setting framebuffer size is only available with DRM atomic API
+    Unable to query physical screen size, defaulting to 100 dpi.
+    To override, set QT_QPA_EGLFS_PHYSICAL_WIDTH and QT_QPA_EGLFS_PHYSICAL_HEIGHT (in millimeters).
+    Qt 5.12.2 (arm64-little_endian-lp64 shared (dynamic) release build; by GCC 8.4.0) on "eglfs"
+    OS: Buildroot 2018.02-rc3 [linux version 4.4.194-00078-gd44d95d]
+
+    Architecture: arm64; features: Neon
+
+    Environment:
+      QT_GSTREAMER_WIDGET_VIDEOSINK="waylandsink"
+      QT_GSTREAMER_WINDOW_VIDEOSINK="waylandsink"
+      QT_QPA_PLATFORM="wayland"
+
+    Features: QT_NO_EXCEPTIONS
+
+    Library info:
+      PrefixPath: /usr
+      DocumentationPath: /usr/doc
+      HeadersPath: /usr/include/qt5
+      LibrariesPath: /usr/lib
+      LibraryExecutablesPath: /usr/libexec
+      BinariesPath: /usr/bin
+      PluginsPath: /usr/lib/qt/plugins
+      ImportsPath: /usr/imports
+      Qml2ImportsPath: /usr/qml
+      ArchDataPath: /usr
+      DataPath: /usr
+      TranslationsPath: /usr/translations
+      ExamplesPath: /usr/lib/qt/examples
+      TestsPath: /usr/tests
+      SettingsPath: /usr/etc/xdg
+
+    Standard paths [*...* denote writable entry]:
+      DesktopLocation: "Desktop" *//Desktop*
+      DocumentsLocation: "Documents" *//Documents*
+      FontsLocation: "Fonts" *//.local/share/fonts* //.fonts
+      ApplicationsLocation: "Applications" *//.local/share/applications* /usr/local/share/applications /usr/share/applications
+      MusicLocation: "Music" *//Music*
+      MoviesLocation: "Movies" *//Videos*
+      PicturesLocation: "Pictures" *//Pictures*
+      TempLocation: "Temporary Directory" */tmp*
+      HomeLocation: "Home" */*
+      AppLocalDataLocation: "Application Data" *//.local/share/QtProject/qtdiag* /usr/local/share/QtProject/qtdiag /usr/share/QtProject/qtdiag
+      CacheLocation: "Cache" *//.cache/QtProject/qtdiag*
+      GenericDataLocation: "Shared Data" *//.local/share* /usr/local/share /usr/share
+      RuntimeLocation: "Runtime" */tmp/.xdg*
+      ConfigLocation: "Configuration" *//.config* /etc/xdg
+      DownloadLocation: "Download" *//Downloads*
+      GenericCacheLocation: "Shared Cache" *//.cache*
+      GenericConfigLocation: "Shared Configuration" *//.config* /etc/xdg
+      AppDataLocation: "Application Data" *//.local/share/QtProject/qtdiag* /usr/local/share/QtProject/qtdiag /usr/share/QtProject/qtdiag
+      AppConfigLocation: "Application Configuration" *//.config/QtProject/qtdiag* /etc/xdg/QtProject/qtdiag
+
+    File selectors (increasing order of precedence):
+      C unix linux buildroot
+
+    Network:
+      Using "OpenSSL 1.0.2n  7 Dec 2017", version: 0x100020ef
+
+    Platform capabilities: ThreadedPixmaps OpenGL ThreadedOpenGL NonFullScreenWindows NativeWidgets RasterGLSurface
+
+    Style hints:
+      mouseDoubleClickInterval: 400
+      mousePressAndHoldInterval: 800
+      startDragDistance: 10
+      startDragTime: 500
+      startDragVelocity: 0
+      keyboardInputInterval: 400
+      keyboardAutoRepeatRate: 30
+      cursorFlashTime: 1000
+      showIsFullScreen: 0
+      showIsMaximized: 0
+      passwordMaskDelay: 0
+      passwordMaskCharacter: U+25CF
+      fontSmoothingGamma: 1.7
+      useRtlExtensions: 0
+      setFocusOnTouchRelease: 0
+      tabFocusBehavior: Qt::TabFocusAllControls
+      singleClickActivation: 0
+
+    Additional style hints (QPlatformIntegration):
+      ReplayMousePressOutsidePopup: 1
+
+    Theme:
+      Platforms requested :
+                available : snap,flatpak,xdgdesktopportal
+      Styles requested    :
+             available    : Windows,Fusion
+    Fonts:
+      General font : "Bitstream Vera Sans" 12
+      Fixed font   : "Bitstream Vera Sans" 12
+      Title font   : "Bitstream Vera Sans" 12
+      Smallest font: "Bitstream Vera Sans" 12
+
+    Palette:
+      QPalette::WindowText: #ff000000
+      QPalette::Button: #ffefefef
+      QPalette::Light: #ffffffff
+      QPalette::Midlight: #ffcbcbcb
+      QPalette::Dark: #ff9f9f9f
+      QPalette::Mid: #ffb8b8b8
+      QPalette::Text: #ff000000
+      QPalette::BrightText: #ffffffff
+      QPalette::ButtonText: #ff000000
+      QPalette::Base: #ffffffff
+      QPalette::Window: #ffefefef
+      QPalette::Shadow: #ff767676
+      QPalette::Highlight: #ff308cc6
+      QPalette::HighlightedText: #ffffffff
+      QPalette::Link: #ff0000ff
+      QPalette::LinkVisited: #ffff00ff
+      QPalette::AlternateBase: #fff7f7f7
+      QPalette::NoRole: #ff000000
+      QPalette::ToolTipBase: #ffffffdc
+      QPalette::ToolTipText: #ff000000
+      QPalette::PlaceholderText: #80000000
+
+    Screens: 2, High DPI scaling: inactive
+    # 0 "eDP1" Depth: 32 Primary: yes
+      Manufacturer:
+      Model:
+      Serial number:
+      Geometry: 1920x1080+0+0 Available: 1920x1080+0+0
+      Virtual geometry: 3120x1920+0+0 Available: 3120x1920+0+0
+      2 virtual siblings
+      Physical size: 487.68x274.32 mm  Refresh: 60 Hz Power state: 0
+      Physical DPI: 100,100 Logical DPI: 100,100 Subpixel_None
+      DevicePixelRatio: 1 Pixel density: 1
+      Primary orientation: 2 Orientation: 2 Native orientation: 0 OrientationUpdateMask: 0
+
+    # 1 "DSI1" Depth: 32 Primary: no
+      Manufacturer:
+      Model:
+      Serial number:
+      Geometry: 1200x1920+1920+0 Available: 1200x1920+1920+0
+      Virtual geometry: 3120x1920+0+0 Available: 3120x1920+0+0
+      2 virtual siblings
+      Physical size: 304.8x487.68 mm  Refresh: 60 Hz Power state: 0
+      Physical DPI: 100,100 Logical DPI: 100,100 Subpixel_None
+      DevicePixelRatio: 1 Pixel density: 1
+      Primary orientation: 1 Orientation: 1 Native orientation: 0 OrientationUpdateMask: 0
+
+    LibGLES Vendor: ARM
+    Renderer: Mali-T860
+    Version: OpenGL ES 3.2 v1.r14p0-01rel0-git(a79caef).e1315d65458474a7b7d3598c7bfdc17e
+    Shading language: OpenGL ES GLSL ES 3.20
+    Format: Version: 3.2 Profile: 0 Swap behavior: 0 Buffer size (RGB): 8,8,8
+
+
+The boot log shows the Busybox version:
+
+
+    Jul 30 18:19:37 rk3399 syslog.info syslogd started: BusyBox v1.27.2
+    Jul 30 18:19:37 rk3399 user.notice kernel: klogd started: BusyBox v1.27.2 (2021-06-22 10:41:33 CST)
+    Jul 30 18:19:37 rk3399 user.info kernel: [    0.000000] Booting Linux on physical CPU 0x0
+    Jul 30 18:19:37 rk3399 user.info kernel: [    0.000000] Initializing cgroup subsys cpuset
+    Jul 30 18:19:37 rk3399 user.info kernel: [    0.000000] Initializing cgroup subsys cpu
+    Jul 30 18:19:37 rk3399 user.info kernel: [    0.000000] Initializing cgroup subsys cpuacct
+    Jul 30 18:19:37 rk3399 user.notice kernel: [    0.000000] Linux version 4.4.194-00078-gd44d95d (dmc001@ubuntu) (gcc version 6.3.1 20170404 (Linaro
+    GCC 6.3-2017.05) ) #64 SMP Sat Oct 15 00:36:19 CST 2022
+    Jul 30 18:19:37 rk3399 user.info kernel: [    0.000000] Boot CPU: AArch64 Processor [410fd034]
+
+
+
+Looking around more in the filesystem and firmware shows a bunch of shell
+scripts, debug binaries and all kinds of leftovers from development. All kinds
+of things I would remove from a production image. I often make such images at
+work for embedded devices and those never contain any debug symbols or
+debug-code. The hardware is okay, but the software side lacks quality and
+polish.
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

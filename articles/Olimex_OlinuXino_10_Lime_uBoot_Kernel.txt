@@ -1,0 +1,517 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Olimex OlinuXino a10 Lime uBoot, Kernel and root image guide
+Author      : 	Remy van Elst
+Date        : 	20-12-2014
+URL         : 	https://raymii.org/s/articles/Olimex_OlinuXino_10_Lime_uBoot_Kernel.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![olimex][1]
+
+The Olimex OlinuXino A10 LIME is an amazing, powerfull and cheap open source ARM
+development board. It costs EUR 30, and has 160 GPIO. This guide is a cleaned up
+version of theirs with instructions to build your own kernel and u-boot image on
+Ubuntu 14.04
+
+Buy the board here: and see my other tutorials and a small image here:
+<https://raymii.org/s/tags/olimex.html>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+The original guide can be found here:
+
+This guide has been adapted to work on Ubuntu 14.04, some package names,
+instructions and commands were incorrect. Also, all the files are not on Google
+drive anymore, but on my servers. The original bad english has been cleaned up
+to be less bad. The guide however is of less quality than you normally get from
+me.
+
+For Allwinner Kernel related questions please ask on Linux Sunxi Mailing List in
+Google Groups: <https://groups.google.com/forum/#!forum/linux-sunxi>
+
+For Uboot related questions please ask on Linux Sunxi Mailing List in Google
+Groups: <https://groups.google.com/forum/#!forum/linux-sunxi>
+
+* * *
+
+### Contents
+
+  * Building u-boot (boat loader)
+  * Building the kernel
+  * Partitioning the SD card
+  * Placing the bootloader, kernel and kernel modules
+  * Placing the root filesystem
+
+### Install required packages
+
+Install the toolchain and other required development packages:
+
+    
+    
+    apt-get update
+    apt-get install gcc-4.7-arm-linux-gnueabihf ncurses-dev build-essential git u-boot-tools gcc-arm-linux-gnueabihf
+    
+
+If you want to cross compile on Debian instead of Ubuntu, you need the following
+set of packages:
+
+    
+    
+    apt-get install binutils-arm-linux-gnueabihf ncurses-dev build-essential git u-boot-tools gcc-arm-linux-gnueabihf
+    
+
+Create a working directory and go in to it:
+
+    
+    
+    mkdir A10_kernel_3.4/
+    cd A10_kernel_3.4/
+    
+
+### Building Uboot
+
+u-boot is the bootloader, it is a GRUB alternative for small/embedded systems.
+
+Download u-boot sources:
+
+    
+    
+    git clone -b sunxi https://github.com/linux-sunxi/u-boot-sunxi.git
+    cd u-boot-sunxi/
+    
+
+Note that this guide was written with the revision below:
+
+    
+    
+    git rev-parse --verify HEAD
+    44b53fd3928f15c34993ec8c6b8c2efcb79769ee
+    
+
+Start the uboot build:
+
+    
+    
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- A10-OLinuXino-Lime_config
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
+    
+
+At the end of the process you should have at least the following files:
+
+    
+    
+    # ls u-boot.bin u-boot-sunxi-with-spl.bin spl/sunxi-spl.bin
+    spl/sunxi-spl.bin  u-boot.bin  u-boot-sunxi-with-spl.bin
+    
+
+Go back into the working directory:
+
+    
+    
+    cd ..
+    
+
+### Building the kernel
+
+Kernel sources for A10 are available on GitHub. Use git to download the kernel
+sources for the board:
+
+    
+    
+    git clone https://github.com/linux-sunxi/linux-sunxi
+    cd linux-sunxi/
+    
+
+Note that this guide was written with the revision below:
+
+    
+    
+    git rev-parse --verify HEAD
+    e37d760b363888f3a65cd6455c99a75cac70a7b8
+    
+
+The following file contains all the kernel config settings. If you've ever built
+your own kernel you can use `make menuconfig` etc to change the settings. For
+now, download it:
+
+    
+    
+    wget https://raymii.org/s/inc/downloads/olinux/a10/a10lime_defconfig
+    
+
+Their kernel contains weird choices, for example iptables is not available, but
+wireless drivers are. You can save space on the kernel by removing things like
+that. If you want to run it as a server, you need to compile most of the network
+settings back in. I use the following config, with network stuff included so
+that I can use `lxc` containers on the board (`veth`, `bridge` and `vlan`
+support etc.):
+
+    
+    
+    wget https://raymii.org/s/inc/downloads/olinux/a10/kernel_config_raymii
+    
+
+Copy a10lime_defconfig file to config directory:
+
+    
+    
+    cp a10lime_defconfig linux-sunxi/arch/arm/configs/
+    # or my config:
+    cp kernel_config_raymii linux-sunxi/arch/arm/configs/
+    
+
+Prepare the config file:
+
+    
+    
+    make ARCH=arm a10lime_defconfig
+    
+
+The result should be:
+
+    
+    
+    configuration written to .config
+    
+
+If you wish to make your changes in the kernel configuration do:
+
+    
+    
+    make ARCH=arm menuconfig
+    
+
+You can add or remove different modules for the different peripherials in the
+kernel with `menuconfig`. Be careful with this as it may cause the kernel to not
+work properly.
+
+Compile the kernel:
+
+    
+    
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 uImage
+    
+
+The result after a while should be like this:
+
+    
+    
+    Image Name:   Linux-3.4.90+
+    Created:      Fri Jun 13 16:28:39 2014
+    Image Type:   ARM Linux Kernel Image (uncompressed)
+    Data Size:    4447440 Bytes = 4343.20 kB = 4.24 MB
+    Load Address: 40008000
+    Entry Point:  40008000
+    Image arch/arm/boot/uImage is ready
+    
+
+Compile the kernel modules:
+
+    
+    
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 uImage
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 INSTALL_MOD_PATH=out modules
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 INSTALL_MOD_PATH=out modules_install
+    
+
+After the compilations are finished the uImage file is located in:
+
+    
+    
+    linux-sunxi/arch/arm/boot/
+    
+
+The kernel modules are located in:
+
+    
+    
+    linux-sunxi/out/lib/modules/3.x.xx
+    
+
+where 3.x.xx is kernel version
+
+in our case the directory with modules is:
+
+    
+    
+    linux-sunxi/out/lib/modules/3.4.90+
+    
+
+### Format and setup the SD-card
+
+First we have to partition the SD card with fdisk. Plug SD card into your SD
+card reader. Use a command like `dmesg` to get the correct device. If you select
+the wrong device you might overwrite your own hard drive, so make sure you have
+the correct one.
+
+Start fdisk on the correct device:
+
+    
+    
+    fdisk /dev/sdX
+    
+
+List the partitions:
+
+    
+    
+    p
+    
+
+If there are already partitions on the card you should delete them. This will
+erase the data on the SD card:
+
+    
+    
+    d 
+    1
+    
+
+If you have more than one partitition press d again and provide the number, like
+2, 3 etc.
+
+Create the first partition, starting from 2048
+
+    
+    
+    n
+    p
+    1
+    # enter twice
+    +16M
+    
+
+Create the second partition
+
+    
+    
+    n
+    p
+    2 
+    # enter three times
+    
+
+List the created partitions:
+
+    
+    
+    p 
+    
+
+if you did everything correctly on 4GB card you should see something like:
+
+    
+    
+    Disk /dev/sdX: 3980 MB, 3980394496 bytes
+    123 heads, 62 sectors/track, 1019 cylinders, total 7774208 sectors
+    Units = sectors of 1 * 512 = 512 bytes
+    Sector size (logical/physical): 512 bytes / 512 bytes
+    I/O size (minimum/optimal): 512 bytes / 512 bytes
+    Disk identifier: 0x00000000
+    
+       Device Boot      Start         End      Blocks   Id  System
+    /dev/sdX1            2048       34815       16384   83  Linux
+    /dev/sdX2           34816     7774207     3869696   83  Linux
+    
+
+Write it to the SD card:
+
+    
+    
+    w
+    
+
+Create the file system on the first partition. This should be vfat as this is
+filesystem which the Allwinner bootloader understands:
+
+    
+    
+    mkfs.vfat /dev/sdX1
+    
+
+The second should be a Linux ext4 partition:
+
+    
+    
+    mkfs.ext4 /dev/sdX2
+    
+
+### Writing the bootloader and related files
+
+You should be in the ~/A10 _kernel_ 3.4/ folder.
+
+The image `u-boot-sunxi-with-spl.bin` should be written to the device `/dev/sdX`
+(not a partition like `sdX1` or `sdX2`).
+
+Use `dd` to write the image we built earlier to the sd card:
+
+    
+    
+    dd if=u-boot-sunxi/u-boot-sunxi-with-spl.bin of=/dev/sdX bs=1024 seek=8
+    
+
+Mount the first partition:
+
+    
+    
+    # mkdir /mnt/sd
+    mount /dev/sdX1 /mnt/sd
+    
+
+Copy the kernel uImage to root directory of partition 1:
+
+    
+    
+    cp linux-sunxi/arch/arm/boot/uImage /mnt/sd
+    
+
+script.bin is a file with configuration parameters like port GPIO assignments,
+DDR memory parameters, video resolution etc,
+
+Download the file and place it on the SD card:
+
+    
+    
+    wget -O /mnt/sd/script.bin https://raymii.org/s/inc/downloads/olinux/a10/script.bin
+    
+
+boot.scr has the uboot commands to load script.bin, kernel, initrd, set kernel
+parameters and booting the device.
+
+If you want to change it you can read this guide:
+
+Download boot.scr and place it on the SD card:
+
+    
+    
+    wget -O /mnt/sd/boot.scr https://raymii.org/s/inc/downloads/olinux/a10/boot.scr
+    
+
+Unmount the partition:
+
+    
+    
+    sync
+    umount /dev/sdX1
+    
+
+### Debian rootfs
+
+You can download my own image from here: [https://raymii.org/s/articles/Olimex
+_A10-OLinuXino-LIME_ minimal _debian_ 7_image.html][3]. It is smaller than the
+Olimex image, but has no GUI etc. The standard olimex Debian image is quite
+large and has weird software choices.
+
+The image provided by Olimex is mirrored here. Download it:
+
+    
+    
+    wget https://2162bb74000a471eb2839a7f1648771a.objectstore.eu/olimex/a10_lime_debian_3_4_90_rel_3.tgz
+    
+
+Mount the second partition on the SD card:
+
+    
+    
+    mount /dev/sdX2 /mnt/sd
+    
+
+Unpack the rootfs to the SD card:
+
+    
+    
+    tar xzvf a10_lime_debian_3_4_90_rel_3.tgz -C /mnt/sd
+    
+
+The unpacked filesystem looks like below:
+
+    
+    
+    # ls /mnt/sd
+    bin   dev  home  lost+found  mnt  proc  run   selinux  sys  usr
+    boot  etc  lib   media       opt  root  sbin  srv      tmp  var
+    
+
+You have to replace the new generated kernel modules from `~/A10_kernel_3.4
+/linux-sunxi/out/lib/modules/` to the debian file system we've just unpacked:
+
+    
+    
+    rm -rf /mnt/sd/lib/modules/*
+    cp -rfv linux-sunxi/out/lib/modules/3.x.xx+/ /mnt/sd/lib/modules/
+    
+
+where x.xx is the kernel version, in our case:
+
+    
+    
+    cp -rfv linux-sunxi/out/lib/modules/3.4.90+/ /mnt/sd/lib/modules/
+    
+
+Replace /lib/firmware folder with the generated /linux-sunxi/out/firmware
+
+    
+    
+    rm -rf /mnt/sd/lib/firmware/
+    cp -rfv linux-sunxi/out/lib/firmware/ /mnt/sd/lib/
+    
+
+Unmount the SD card:
+
+    
+    
+    sync
+    umount /mnt/sdX2
+    
+
+Connect USB-SERIAL-CABLE-F to UEXT Tx.Rx and GND, or connect a HDMI screen. Put
+the SD-card in A10-OLinuXino-Lime and apply 5V power, you should see Uboot and
+then Kernel messages on the console.
+
+The default username/password is : root / olimex
+
+   [1]: https://raymii.org/s/inc/img/A10-OLinuXino-LIME.jpeg
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://raymii.org/s/articles/Olimex_A10-OLinuXino-LIME_minimal_debian_7_image.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

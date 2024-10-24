@@ -1,0 +1,155 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Run software on the tty1 console instead of getty login on Ubuntu 14.04 and 16.04
+Author      : 	Remy van Elst
+Date        : 	10-04-2017
+URL         : 	https://raymii.org/s/tutorials/Run_software_on_tty1_console_instead_of_login_getty.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Recently I wanted to change the default login prompt on the `tty1` console on an
+OpenStack instance to automatically run `htop`. Instead of logging in via the
+console, I wanted it to start up `htop` right away and nothing else. Ubuntu
+14.04 uses `init` and Ubuntu 16.04 uses systemd. Both ways are shown in this
+tutorial.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+Here's what the default login prompt on the console looks:
+
+![][2]
+
+And here is the result, `htop` running without ever logging in:
+
+![][3]
+
+Do note that you loose the ability to login via the regular console this way.
+`ssh` is your only means of access. Do note that the software is run as root. If
+you for example want to run `vim` you also can escape to a shell. `htop` as far
+as I know doesn't allow command execution.
+
+On Ubuntu 14.04, edit the following file:
+
+    
+    
+    vim /etc/init/tty1.conf
+    
+
+Replace:
+
+    
+    
+    exec /sbin/getty -8 38400 tty1
+    
+
+with:
+
+    
+    
+    exec /usr/bin/htop </dev/tty1 >/dev/tty1 2>&1
+    
+
+Use full paths and make sure output and input are redirected (`</dev/tty1
+
+> /dev/tty1 2>&1`).
+
+On Ubuntu 16.04 stuff changes due to `systemd`. No longer can you use output
+redirection, this is now all handled via `systemd`. Create an override folder
+for the `getty@tty1` service first:
+
+    
+    
+    mkdir /etc/systemd/system/getty@tty1.service.d/
+    
+
+Edit the override file:
+
+    
+    
+    vim /etc/systemd/system/getty@tty1.service.d/override.conf
+    
+
+Place the following:
+
+    
+    
+    [Service]
+    ExecStart=
+    ExecStart=-/usr/bin/htop
+    StandardInput=tty
+    StandardOutput=tty
+    
+
+Now reload the unit files and restart the service. `htop` should appear on your
+prompt:
+
+    
+    
+    systemctl daemon-reload; systemctl restart getty@tty1.service
+    
+
+Or just do a `reboot`.
+
+As a bonus, you can also install `hollywood`:
+
+    
+    
+    apt-get install tmux hollywood # fill your console with Hollywood melodrama technobabble
+    
+
+and set that up to autorun on the console. Use the following in the `systemd`
+file otherwise `byobu` will complain about wrong permissions on your homefolder:
+
+    
+    
+    /usr/bin/sudo -H /usr/bin/hollywood
+    
+
+Much fun:
+
+![][4]
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://raymii.org/s/inc/img/console1.png
+   [3]: https://raymii.org/s/inc/img/console2.png
+   [4]: https://raymii.org/s/inc/img/console3.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

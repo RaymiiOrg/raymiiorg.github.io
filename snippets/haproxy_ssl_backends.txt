@@ -1,0 +1,86 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	haproxy: ssl backends
+Author      : 	Remy van Elst
+Date        : 	10-12-2013
+URL         : 	https://raymii.org/s/snippets/haproxy_ssl_backends.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This snippets shows you how to add an ssl backend to HAPROXY. You need haproxy
+1.5 or higher, 1.4 does not support ssl backends.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+Note: this is not about adding ssl to a frontend. this allows you to use an ssl
+enabled website as backend for haproxy.
+
+The following config is required in a `backend` section:
+
+    
+    
+    backend example-backend
+      balance roundrobin
+      option httpchk GET /health_check
+      server srv01 10.20.30.40:443 weight 1 maxconn 100 check ssl verify none
+      server srv02 10.20.30.41:443 weight 1 maxconn 100 check ssl verify none
+    
+
+The important parts are:
+
+    
+    
+    10.20.30.41:443 
+    ssl verify none
+    
+
+You can also specify verify all. As expected, this will verify all certificates,
+however this will generate extra load. For this example setup the `verify none`
+is good enough.
+
+[More Info: http://cbonte.github.io/haproxy-
+dconv/configuration-1.5.html#ssl%20%28Server%20and%20default-
+server%20options%29][2]
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: http://cbonte.github.io/haproxy-dconv/configuration-1.5.html#ssl%20%28Server%20and%20default-server%20options%29
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

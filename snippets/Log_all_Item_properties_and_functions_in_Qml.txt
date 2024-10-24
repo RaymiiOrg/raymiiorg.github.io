@@ -1,0 +1,203 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Log all Item properties and functions in Qml
+Author      : 	Remy van Elst
+Date        : 	09-02-2022
+URL         : 	https://raymii.org/s/snippets/Log_all_Item_properties_and_functions_in_Qml.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+
+This small snippet of Javascript logs all properties and functions of a Qml Item. This is useful when you're knees-deep in a dynamic control that has a model and you're wondering why your code does not work. Probably because you're not using the correct property name. Or at least, that is something I often have. Logging all properties or functions helps to figure out that issue.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+ 
+
+
+![demo program][1]
+
+> A demo program that logs functions and properties to the command line and a `TextArea`
+
+The code to log all properties is actually very simple:
+
+    function listProperties(item) {
+        var properties = ""
+        for (var p in item)
+            if (typeof item[p] != "function")
+                properties += (p + ": " + item[p] + "\n")
+        return properties
+    }
+
+Same goes for logging all functions:
+
+    function listFunctions(item) {
+        var functions = ""
+        for (var f in item)
+            if (typeof item[f] == "function")
+                functions += (f + ": " + item[f] + "\n")
+        return functions
+    }
+
+
+If you remove the `if(typeof...` then you get both in the output. 
+
+Usage is simple, just pass the `id:` of an item you want to log:
+
+    Button {
+        id: logButton
+        [...]
+        text: "Log Properties"
+        onClicked: {
+            console.log(listProperties(logButton))
+        }
+    }
+
+You could also use `JSON.stringify()` but I have seen recursive loops that 
+crashed when using that, so this is my small goto snippet.    
+
+
+### Demo Qml Program
+
+Here's a small Qml demo program that logs either functions 
+or properties to the command line and a `TextArea`.
+
+**main.qml**
+
+    import QtQuick 2.15
+    import QtQuick.Controls 2.12
+    import QtQuick.Window 2.15
+    
+    Window {
+        width: 640
+        height: 480
+        visible: true
+        title: qsTr("Log Properties Example")
+    
+        function listProperties(item) {
+            var properties = ""
+            for (var p in item)
+                if (typeof item[p] != "function")
+                    properties += (p + ": " + item[p] + "\n")
+            return properties
+        }
+    
+        function listFunctions(item) {
+            var functions = ""
+            for (var f in item)
+                if (typeof item[f] == "function")
+                    functions += (f + ": " + item[f] + "\n")
+            return functions
+        }
+    
+        Button {
+            id: logButton
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.margins: 50
+            objectName: "Raymii.org Example"
+            text: "Log Properties"
+            onClicked: {
+                console.log(listProperties(logButton))
+                logTextarea.text = listProperties(logButton)
+            }
+        }
+    
+        Button {
+            id: logFunctionsButton
+            anchors.top: parent.top
+            anchors.left: logButton.right
+            anchors.margins: 50
+            text: "Log Functions"
+            onClicked: {
+                console.log(listFunctions(logFunctionsButton))
+                logTextarea.text = listFunctions(logFunctionsButton)
+            }
+        }
+    
+        ScrollView {
+            id: propertyview
+            anchors.top: logButton.bottom
+            anchors.left: parent.left
+            anchors.margins: 50
+            width: 500
+            height: 300
+    
+            TextArea {
+                id: logTextarea
+                anchors.fill: parent
+                placeholderText: "click the buttons"
+            }
+        }
+    }
+
+
+
+**main.cpp**
+
+    #include <QGuiApplication>
+    #include <QQmlApplicationEngine>
+    
+    
+    int main(int argc, char *argv[])
+    {
+    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    #endif
+    
+        QGuiApplication app(argc, argv);
+    
+        QQmlApplicationEngine engine;
+        const QUrl url(QStringLiteral("qrc:/main.qml"));
+        QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                         &app, [url](QObject *obj, const QUrl &objUrl) {
+            if (!obj && url == objUrl)
+                QCoreApplication::exit(-1);
+        }, Qt::QueuedConnection);
+        engine.load(url);
+    
+        return app.exec();
+    }
+
+
+
+[1]: /s/inc/img/qml_log_properties.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

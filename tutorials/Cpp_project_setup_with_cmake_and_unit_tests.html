@@ -1,0 +1,525 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>C++ project setup with CMake & unit tests (google test) - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>C++ project setup with CMake & unit tests (google test)</h2>
+<p><small>Published: <span data-pagefind-meta='date'>01-10-2019</span> | Last update: 06-11-2019 | Author: Remy van Elst | <a href="Cpp_project_setup_with_cmake_and_unit_tests.txt">Text only version of this article</a>
+</small></p>
+<br><div class='olderthanayear'><p><strong>&#10071; This post is over five years old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Install cmake &amp; googletest</a>
+</li>
+<li>
+<a href="#toc_1">Folder structure</a>
+</li>
+<li>
+<a href="#toc_2">CMakeLists.txt</a>
+<ul>
+<li>
+<a href="#toc_3">Main folder CMakeLists.txt</a>
+</li>
+<li>
+<a href="#toc_4">src folder CMakeLists.txt:</a>
+</li>
+<li>
+<a href="#toc_5">tst folder CMakeLists.txt:</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_6">Add some (example) source code and tests</a>
+<ul>
+<li>
+<a href="#toc_7">Source Code</a>
+</li>
+<li>
+<a href="#toc_8">Test code</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_9">Compile all the things</a>
+</li>
+<li>
+<a href="#toc_10">Run all the things</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p>This guide will show you how to setup a new C++ project with CMake and unit tests
+via Google&#39;s test framework. With this setup you can get started right away 
+with test-driven-development in C++. It is also simple enough to look and figure
+out how to add gtest to your existing project and start doing TDD on your legacy 
+(existing) codebase. </p>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+<p>The picture below shows the end result, a running unit test:</p>
+
+<p><img src="/s/inc/img/unit-test.png" alt="a unit test"></p>
+
+<p>There are a million different ways to &quot;do&quot; C++ projects, but using <code>CMake</code> and
+the google testing framework has my preference. That&#39;s not to say that using a 
+<code>Makefile</code> or Boost Unit Test is bad, use whatever suits your needs. This guide 
+however will focus on just <code>CMake</code> and <code>gtest</code>.</p>
+
+<p>It assumes a system running Ubuntu (18.04). It also works on Windows with <code>mingw</code>,
+but I haven&#39;t tested in with MSVC. </p>
+
+<p>My preferred code editor is CLion from Jetbrains, which has most of this built 
+in. This guide however focusses on the manual / command line way since CLion is
+nonfree (and paid) software.</p>
+
+<p>The process is not that complicated:</p>
+
+<ul>
+<li>Install software (cmake and googletest)</li>
+<li>Create folder structure</li>
+<li>Create the <code>CMakeLists.txt</code> files</li>
+<li>Create some sample code and sample tests</li>
+<li>Compile everything</li>
+<li>Run the tests</li>
+</ul>
+
+<h3 id="toc_0">Install cmake &amp; googletest</h3>
+
+<p>I assume you already have your compiler installed and working. Installing cmake
+can be done with the package manager on Ubuntu:</p>
+
+<pre><code>apt-get install cmake
+</code></pre>
+
+<p>On Windows, you can use MinGW or <code>cygwin</code> to install your development tools 
+including CMake. Clion offers a nice GUI for that.</p>
+
+<p>Googletest is available as a git repository which you can clone and then copy
+into your project. You could go all fancy with CMake scripts to download it
+if it&#39;s not already in your project, but since you can clone once and copy 
+later on I choose not to automate it. Clone the repository:</p>
+
+<pre><code>git clone https://github.com/google/googletest/
+</code></pre>
+
+<p>gtest comes with a <code>CMakeLists.txt</code> so integrating it in your project is easy.</p>
+
+<h3 id="toc_1">Folder structure</h3>
+
+<p>Create your C++ project folder. I like to keep the following structure for simple
+projects:</p>
+
+<pre><code>$ tree -L 2 ExampleProject/
+ExampleProject/
+|-- build/
+|-- CMakeLists.txt
+|-- lib/
+|   `-- googletest 
+|-- src/
+|   |-- CMakeLists.txt
+|   |-- Formula.cpp
+|   |-- Formula.h
+|   `-- main.cpp
+`-- tst/
+    |-- CMakeLists.txt
+    |-- Formula-test.cpp
+    `-- main.cpp
+</code></pre>
+
+<p>Here is a oneliner to create the folders:</p>
+
+<pre><code>mkdir -p ExampleProject/{build,lib,src,tst}
+</code></pre>
+
+<p>Copy the <code>googletest</code> repository folder your cloned earlier into the <code>lib/</code> folder.</p>
+
+<p>If you have multiple components you can create extra sub folders, but that does
+require tweaking the <code>CMakeLists.txt</code> files to work with multiple libraries. </p>
+
+<p>Most of my personal projects are simple enough to fit into one folder as above.</p>
+
+<p>In the <code>tst</code> folder the unit tests reside. I try to keep the tests limited to 
+the same function in seperate files. In the above example I have <code>Formula.h</code> and 
+<code>Formula.cpp</code>, which house the example <code>Formula</code> class. All unit tests related
+to this class thus should reside in <code>Formula-test.cpp</code>. </p>
+
+<h3 id="toc_2">CMakeLists.txt</h3>
+
+<p>The file <code>CMakeLists.txt</code> contains a set of directives and instructions
+describing the project&#39;s source files and targets (executable, library, or
+both). This can get quite complex quite fast, CMake has many options. I try to
+keep it simple in this guide.</p>
+
+<p>I&#39;m using a non-recommended way to include files. For simple projects with a 
+few files you should use the following:</p>
+
+<pre><code>add_executable(ExampleProject main.cpp file1.cpp file1.h)
+</code></pre>
+
+<p>I&#39;m using this:</p>
+
+<pre><code>file(GLOB_RECURSE SOURCES LIST_DIRECTORIES true *.h *.cpp)
+</code></pre>
+
+<p>That is a recursive search to include all <code>*.cpp</code> and <code>*.h</code> in the folder. In
+my IDE I have <a href="https://www.jetbrains.com/help/clion/reloading-project.html">auto-reload</a> enabled, that way I can&#39;t forget to add a file
+to <code>CMakeLists.txt</code> every time. For proper administration you should not use this
+since it just includes everything, could have unwanted side-effects.</p>
+
+<p><strong>Update 2019-11-07:</strong> If you want Boost in this setup, <a href="/s/snippets/std_string_to_lowercase_or_uppercase_in_cpp.html#toc_4">read this article from me</a>.</p>
+
+<p>Each subdirectory in our case also needs a <code>CMakeLists.txt</code> file.</p>
+
+<h4 id="toc_3">Main folder CMakeLists.txt</h4>
+
+<pre><code>cmake_minimum_required(VERSION 3.10)
+project(ExampleProject)
+
+set(CMAKE_CXX_STANDARD 14)
+
+include_directories(src)
+
+add_subdirectory(src)
+add_subdirectory(tst)
+add_subdirectory(lib/googletest)
+</code></pre>
+
+<p>The name of the project is <code>ExampleProject</code>, that variable is used in other files.
+The rest of the file just includes the different subfolders. If you omit the 
+<code>include_directories(src)</code>, your tests will not be able to find the header files.</p>
+
+<h4 id="toc_4">src folder CMakeLists.txt:</h4>
+
+<pre><code>set(BINARY ${CMAKE_PROJECT_NAME})
+
+file(GLOB_RECURSE SOURCES LIST_DIRECTORIES true *.h *.cpp)
+
+set(SOURCES ${SOURCES})
+
+add_executable(${BINARY}_run ${SOURCES})
+
+add_library(${BINARY}_lib STATIC ${SOURCES})
+</code></pre>
+
+<p>The name of the compiled program will be <code>ExampleProject_run</code>, which is what
+we defined in <code>add_executable</code>. The <code>add_library</code> is used to include the code
+in the unit tests.</p>
+
+<h4 id="toc_5">tst folder CMakeLists.txt:</h4>
+
+<pre><code>set(BINARY ${CMAKE_PROJECT_NAME}_tst)
+
+file(GLOB_RECURSE TEST_SOURCES LIST_DIRECTORIES false *.h *.cpp)
+
+set(SOURCES ${TEST_SOURCES})
+
+add_executable(${BINARY} ${TEST_SOURCES})
+
+add_test(NAME ${BINARY} COMMAND ${BINARY})
+
+target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME}_lib gtest)
+</code></pre>
+
+<p>This list used the <code>src</code> defined library and adds the tests as a target. The 
+compiled executable file is named <code>ExampleProject_tst</code>. </p>
+
+<h3 id="toc_6">Add some (example) source code and tests</h3>
+
+<p>At this point you start developing. But since this is a example setup, I&#39;ll add
+a simple class file to show you how to do the unit tests.</p>
+
+<h4 id="toc_7">Source Code</h4>
+
+<p>Copy the below code into your project:</p>
+
+<p><code>src/main.cpp</code>:</p>
+
+<pre><code>#include &lt;iostream&gt;
+#include &quot;Formula.h&quot;
+
+int main() {
+    std::cout &lt;&lt; &quot;Bla: &quot; &lt;&lt; Formula::bla(2) &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+
+<p><code>src/Formula.h</code>: </p>
+
+<pre><code>#ifndef EXAMPLEPROJECT_FORMULA_H
+#define EXAMPLEPROJECT_FORMULA_H
+
+class Formula {
+public:
+    static int bla(int arg1);
+};
+
+#endif //EXAMPLEPROJECT_FORMULA_H
+</code></pre>
+
+<p><code>src/Formula.cpp</code>: </p>
+
+<pre><code>#include &quot;Formula.h&quot;
+
+int Formula::bla(int arg1) {
+    return arg1 * 2;
+}
+</code></pre>
+
+<p>This function returns the given <code>int</code> multiplied by 2. </p>
+
+<h4 id="toc_8">Test code</h4>
+
+<p>The following code is to setup the unit tests. </p>
+
+<p><code>tst/main.cpp</code>:</p>
+
+<pre><code>#include &quot;gtest/gtest.h&quot;
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&amp;argc, argv);
+    return RUN_ALL_TESTS();
+}
+</code></pre>
+
+<p>This file will run all the tests and since we recursively included everything
+with CMake, it will effectively run all tests in all files in this folder.</p>
+
+<p><code>tst/Formula-test.cpp</code>:</p>
+
+<pre><code>#include &quot;gtest/gtest.h&quot;
+#include &quot;Formula.h&quot;
+
+TEST(blaTest, test1) {
+    //arrange
+    //act
+    //assert
+    EXPECT_EQ (Formula::bla (0),  0);
+    EXPECT_EQ (Formula::bla (10), 20);
+    EXPECT_EQ (Formula::bla (50), 100);
+}
+</code></pre>
+
+<p>The <a href="https://github.com/google/googletest/blob/master/googletest/docs/primer.md">Google Test Primer</a> is a great starting point to learn more on the specifics
+of the testing framework.</p>
+
+<h3 id="toc_9">Compile all the things</h3>
+
+<p>Now that we have sourcecode and testcode in place we can compile everything 
+(both the binary and the tests). </p>
+
+<p>Do note that you should do this in the <code>build</code> folder. If you do it in the 
+main folder it will work, but it will litter up the directory.</p>
+
+<pre><code>cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug -G &quot;Unix Makefiles&quot; 
+</code></pre>
+
+<p>Output: </p>
+
+<pre><code>-- The C compiler identification is GNU 7.4.0
+-- The CXX compiler identification is GNU 7.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PythonInterp: /usr/bin/python (found version &quot;2.7.15&quot;) 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/remy/Repo/ExampleProject/build
+</code></pre>
+
+<p>There are now a bunch of files and folders in the <code>build</code> folder, most important,
+the <code>Makefile</code>. You can now compile the project:</p>
+
+<pre><code>make all
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Scanning dependencies of target ExampleProject_run
+[  8%] Building CXX object src/CMakeFiles/ExampleProject_run.dir/Formula.cpp.o
+[ 16%] Building CXX object src/CMakeFiles/ExampleProject_run.dir/main.cpp.o
+[ 25%] Linking CXX executable ExampleProject_run
+[ 25%] Built target ExampleProject_run
+Scanning dependencies of target ExampleProject_lib
+[ 33%] Building CXX object src/CMakeFiles/ExampleProject_lib.dir/Formula.cpp.o
+[ 41%] Building CXX object src/CMakeFiles/ExampleProject_lib.dir/main.cpp.o
+[ 50%] Linking CXX static library libExampleProject_lib.a
+[ 50%] Built target ExampleProject_lib
+Scanning dependencies of target gtest
+[ 58%] Building CXX object lib/googletest/CMakeFiles/gtest.dir/src/gtest-all.cc.o
+[ 66%] Linking CXX static library ../libgtestd.a
+[ 66%] Built target gtest
+Scanning dependencies of target ExampleProject_tst
+[ 75%] Building CXX object tst/CMakeFiles/ExampleProject_tst.dir/Formula-test.cpp.o
+[ 83%] Linking CXX executable ExampleProject_tst
+[ 83%] Built target ExampleProject_tst
+Scanning dependencies of target gtest_main
+[ 91%] Building CXX object lib/googletest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o
+[100%] Linking CXX static library ../libgtest_maind.a
+[100%] Built target gtest_main
+</code></pre>
+
+<p>You now have two executable files, as defined in the <code>CMakeLists.txt</code>:</p>
+
+<pre><code>$ find . -executable -type f
+./tst/ExampleProject_tst
+./src/ExampleProject_run
+</code></pre>
+
+<h3 id="toc_10">Run all the things</h3>
+
+<p>If all went well, the code should run:</p>
+
+<pre><code>./src/ExampleProject_run
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Bla: 4
+</code></pre>
+
+<p>The tests as well:</p>
+
+<pre><code>./tst/ExampleProject_tst 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from blaTest
+[ RUN      ] blaTest.test1
+[       OK ] blaTest.test1 (0 ms)
+[----------] 1 test from blaTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+</code></pre>
+
+<p>A quick one-liner to compile and run the tests. You can run this whenever
+you want to re-run the tests (after changing code for example):</p>
+
+<pre><code>make ExampleProject_tst; tst/ExampleProject_tst 
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>[ 37%] Built target ExampleProject_lib
+[ 62%] Built target gtest
+Scanning dependencies of target ExampleProject_tst
+[ 75%] Building CXX object tst/CMakeFiles/ExampleProject_tst.dir/Formula-test.cpp.o
+[ 87%] Linking CXX executable ExampleProject_tst
+[100%] Built target ExampleProject_tst
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from blaTest
+[ RUN      ] blaTest.test1
+/home/remy/Repo/ExampleProject/tst/Formula-test.cpp:8: Failure
+Expected equality of these values:
+  Formula::bla (1)
+    Which is: 2
+  0
+[  FAILED  ] blaTest.test1 (0 ms)
+[----------] 1 test from blaTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] blaTest.test1
+
+ 1 FAILED TEST
+</code></pre>
+
+<p>As you can see I changed a unit test so that it failed. </p>
+Tags: <a href="../tags/boost.html">boost</a>
+, <a href="../tags/c++.html">c++</a>
+, <a href="../tags/cmake.html">cmake</a>
+, <a href="../tags/cpp.html">cpp</a>
+, <a href="../tags/development.html">development</a>
+, <a href="../tags/googletest.html">googletest</a>
+, <a href="../tags/linux.html">linux</a>
+, <a href="../tags/software.html">software</a>
+, <a href="../tags/testing.html">testing</a>
+, <a href="../tags/ttd.html">ttd</a>
+, <a href="../tags/tutorials.html">tutorials</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

@@ -1,0 +1,399 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	FST-01 gnuk firmware update via USB
+Author      : 	Remy van Elst
+Date        : 	09-09-2016
+URL         : 	https://raymii.org/s/tutorials/FST-01_firmware_upgrade_via_usb.html
+Format      : 	Markdown/HTML
+---
+
+
+
+The FST-01 (Flying Stone 1) ([wiki link][1]), [niibe link][2] is a small
+STM32F103TB based USB device designed to run `gnuk` and `neug` (gpg usb token or
+true random number generator). ([order here][3], no affiliate link). This guide
+shows you how to upgrade the firmware on the FST-01 so that you can enjoy newer
+gnuk features like 4096 bit RSA keys.
+
+I'm a huge fan of [the Nitrokey][4] line of devices. The [Nitrokey Start][5] is
+a software-only USB token for gnupg. The other Nitrokey devices all use a
+smartcard (SmartCard-HSM for the Nitrokey HSM and OpenGPG Card for the Nitrokey
+Pro) for their key storage, but the Nitrokey Start does that all in the
+microcontroller. The Nitrokey Start is based on the FST-01 device, as are the
+other Nitrokeys, since the Nitrokey Start runs the same firmware, gnuk 1.0.4.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+![][7]
+
+> The FST-01 device
+
+This guide will show you how to compile and upgrade the latest firmware onto the
+device via USB. The recommended way is to upgrade via the ST-Link protocol, but
+that requires opening the device, soldering wires and a special adapter. The USB
+upgrade works most of the time.
+
+### Why upgrade?
+
+If your device is working as intended, then don't upgrade. But, a lot has changes since the 1.0.1 firmware that came on my FST-01. A small list from the [git commit log][8] and the [website][9]:
+
+  * Support for 4096 bit RSA keys 
+  * ECDSA, ECDH, Curve25519, secp256k1 and Ed25519 support (experimental)
+  * More boards supported (STM32 Nucleo, Maple Mini and ST Dongle)
+  * Replaced thread library from ChibiOS/RT to ChopSTX 
+  * OpenPGPcard specification v3.0 compatibility
+  * Upgrade of the NeuG routine to the one of NeuG 1.0 (TRNG)
+  * an incompatible change to support overriding key
+  * Improvements in the RSA code (Prime number generation is done by Fouque-Tibouchi method, changes from upstream PolarSSL 1.2.10
+
+You could also flash the NeuG firmware onto the device so that you get a True
+random number generator instead of a crypto token.
+
+### A word of caution
+
+![][10]
+
+**Do not try to upgrade the Nitrokey.** It [fails at the moment][11].
+
+If you want to upgrade the Nitrokey Start, [you need to use DFU, see my guide
+here][12]
+
+Also, **do not try to upgrade if you don't have a backup of the key material**.
+The upgrade will WIPE the entire device.
+
+Last, **you will probably brick the device**. Make sure you have another way to
+access and recover the device, like an ST-Link V2 adapter [link][13].
+
+So to wrap up, if you're not comfortable with a few bricked devices and all key
+material wiped, then don't try to upgrade.
+
+### Build dependencies
+
+You need to install the entire arm cross compilation toolchain. On Arch Linux
+this requires installing the entire `base-dev` group and the following packages:
+
+    
+    
+    pacman -Sy arm-none-eabi-gcc arm-none-eabi-newlib arm-none-eabi-binutils python2-pyusb
+    
+
+You also need `git` installed. On Ubuntu the package names are the same, so you
+can install those as well:
+
+    
+    
+    apt-get install git build-essential arm-none-eabi-gcc arm-none-eabi-newlib arm-none-eabi-binutils python-usb
+    
+
+To make sure we can update the token as a regular user, we need to add some
+`udev` rules:
+
+    
+    
+    vim /etc/udev/rules.d/69-gnuk.rules
+    
+
+Contents:
+
+    
+    
+    # Gnuk Token by FSIJ
+    
+    SUBSYSTEMS=="usb", ACTION=="add", \
+      ATTRS{idVendor}=="234b", ATTRS{idProduct}=="0000", \
+      ENV{ID_SMARTCARD_READER}="1", ENV{ID_SMARTCARD_READER_DRIVER}="gnupg"
+    
+
+Reboot the machine, or on Arch do a `systemctl restart systemd-udevd.service`.
+
+### Compile gnuk
+
+The first thing we need to do is get the source code. Clone the repositories:
+
+    
+    
+    git clone https://anonscm.debian.org/cgit/gnuk/gnuk/gnuk.git gnuk
+    cd gnuk
+    rm -rf chopstx
+    git clone https://anonscm.debian.org/cgit/gnuk/chopstx/chopstx.git chopstx
+    
+
+They use git submodules upstream but that fails for me, therefore the chopstx
+folder is removed and the repository is cloned over.
+
+This guide uses commit `452c15c908b1d10fe14d71c3314c6550c3e3a471`, (`* 452c15c -
+(HEAD -> master, tag: release/1.2.1, origin/master, origin/HEAD) Version 1.2.1
+(8 weeks ago) <NIIBE Yutaka>`).
+
+Go in the `src` folder and start the compile:
+
+    
+    
+    cd src
+    ./configure --target=FST_01 --vidpid="234b:0000"
+    
+
+Output:
+
+    
+    
+    Header file is: board-fst-01.h
+    Debug option disabled
+    Configured for bare system (no-DFU)
+    PIN pad option disabled
+    CERT.3 Data Object is NOT supported
+    Card insert/removal by HID device is NOT supported
+    
+
+If you want to see the other target options you can do a `./configure -h`:
+
+    
+    
+    $ ./configure -h
+    Usage: ./configure [OPTION]...
+    
+    Defaults for the options are specified in brackets.
+    
+    Configuration:
+      -h, --help    display this help and exit  [no]
+      --vidpid=VID:PID  specify vendor/product ID [<NONE>]
+      --target=TARGET specify target      [FST_01]
+          supported targets are:
+             FST_01
+             OLIMEX_STM32_H103
+             STM32_PRIMER2
+             STBEE
+             STBEE_MINI
+             MAPLE_MINI
+             ST_DONGLE
+             ST_NUCLEO_F103
+             NITROKEY_START
+             CQ_STARM
+             FST_01_00 (unreleased version with 8MHz XTAL)
+    
+
+Start the make, this might take some time. It will end with output like below:
+
+    
+    
+    arm-none-eabi-objcopy -O binary build/gnuk.elf build/gnuk.bin
+    
+
+`ReGNUal` is the firmware update tool, we need to compile that as well:
+
+    
+    
+    cd ../regnual/
+    make
+    
+
+The make ends with:
+
+    
+    
+    arm-none-eabi-objcopy -Obinary regnual.elf regnual.bin
+    arm-none-eabi-objcopy -Oihex regnual.elf regnual.hex
+    
+
+All the required compilations are done now. The next step is testing the token
+before we use it.
+
+### Test the token
+
+It is important to test if the scripts and GPG recognize the token before we
+upgrade, so that we know that it worked.
+
+In the `gnuk/tools` folder is a script called `usb_strings.py`:
+
+    
+    
+    $ python2 usb_strings.py 
+    Device: 
+        Vendor: Free Software Initiative of Japan
+       Product: FSIJ USB Token
+        Serial: FSIJ-1.0.1-87022326
+      Revision: release/1.0.1
+        Config: FST_01:dfu=no:debug=no:pinpad=no:certdo=yes:keygen=yes
+           Sys: 1.0
+    
+
+And you can use GnuPG:
+
+    
+    
+    $ gpg --card-status
+    Reader ...........: 234B:0000:FSIJ-1.0.1-87022326:0
+    Application ID ...: D276000124010200FFFE870223260000
+    Version ..........: 2.0
+    Manufacturer .....: unmanaged S/N range
+    Serial number ....: 87022326
+    Name of cardholder: [not set]
+    Language prefs ...: [not set]
+    Sex ..............: unspecified
+    URL of public key : [not set]
+    Login data .......: [not set]
+    Signature PIN ....: forced
+    Key attributes ...: rsa2048 rsa2048 rsa2048
+    Max. PIN lengths .: 127 127 127
+    PIN retry counter : 3 3 3
+    Signature counter : 0
+    Signature key ....: [none]
+    Encryption key....: [none]
+    Authentication key: [none]
+    General key info..: [none]
+    
+
+### The upgrade
+
+Go in the `gnuk/tools` folder. Execute the actual upgrade:
+
+    
+    
+    $ python2 ./upgrade_by_passwd.py ../regnual/regnual.bin ../src/build/gnuk.bin 
+    
+
+It will ask you for the admin password. The output afterwars is like below, if
+the upgrade goes correct:
+
+    
+    
+    ../regnual/regnual.bin: 4412
+    ../src/build/gnuk.bin: 110592
+    CRC32: 303d2f62
+    
+    Device: 
+    Configuration: 1
+    Interface: 0
+    20001400:20004a00
+    Downloading flash upgrade program...
+    start 20001400
+    end   20002500
+    Run flash upgrade program...
+    Wait 1 seconds...
+    Device: 
+    08001000:08020000
+    Downloading the program
+    start 08001000
+    end   0801b000
+    
+
+After the upgrade you can check if it succeeded:
+
+    
+    
+    $ python2 usb_strings.py 
+    Device: 
+        Vendor: Free Software Initiative of Japan
+       Product: Gnuk Token
+        Serial: FSIJ-1.2.1-87022326
+      Revision: release/1.2.1-1-g2b784cb-modified
+        Config: FST_01:dfu=no:debug=no:pinpad=no:certdo=no
+           Sys: 1.0
+    
+
+The version went from 1.0.1 to 1.2.1. For reference, here is my `dmesg`:
+
+    
+    
+      [  294.977933] thinkpad_acpi: EC reports that Thermal Table has changed
+      [  726.481249] usb 1-1.1: new full-speed USB device number 3 using ehci-pci
+      [ 1408.628722] usb 1-1.1: USB disconnect, device number 3
+      [ 1412.817498] usb 2-1.2: new full-speed USB device number 4 using ehci-pci
+      [ 1461.011520] usb 2-1.2: USB disconnect, device number 4
+      [ 1464.014677] usb 2-1.2: new full-speed USB device number 5 using ehci-pci
+      [ 1469.705384] usb 2-1.2: USB disconnect, device number 5
+      [ 1469.893972] usb 2-1.2: new full-speed USB device number 6 using ehci-pci
+    
+
+You can also use GPG to check the new firmware:
+
+    
+    
+    [20:20:18] [remy@gateway] [ ~ ]
+    $ gpg --card-status
+    Reader ...........: 234B:0000:FSIJ-1.2.1-87022326:0
+    Application ID ...: D276000124010200FFFE870223260000
+    Version ..........: 2.0
+    Manufacturer .....: unmanaged S/N range
+    Serial number ....: 87022326
+    Name of cardholder: [not set]
+    Language prefs ...: [not set]
+    Sex ..............: unspecified
+    URL of public key : [not set]
+    Login data .......: [not set]
+    Signature PIN ....: forced
+    Key attributes ...: rsa2048 rsa2048 rsa2048
+    Max. PIN lengths .: 127 127 127
+    PIN retry counter : 3 3 3
+    Signature counter : 0
+    Signature key ....: [none]
+    Encryption key....: [none]
+    Authentication key: [none]
+    General key info..: [none]
+    
+
+### If it goes wrong?
+
+You need to use the ST Link v2 adapter to reflash the firmware. [See this
+tutorial][14] for a guide.
+
+### Now what?
+
+You can put 4096 bit keys on the card, or use any of the new algorithms. See my
+[Nitrokey Start Getting Started][5] guide for how to put keys on the card.
+
+You can also reflash the device to NeuG firmware, then it will become a True
+Random Number Generator. But that is for another tutorial.
+
+   [1]: http://wiki.seeedstudio.com/wiki/FST-01
+   [2]: http://www.gniibe.org/FST-01/fst-01.html
+   [3]: https://www.seeedstudio.com/FST-01-with-White-Enclosure-p-1279.html
+   [4]: https://raymii.org/s/tags/nitrokey.html
+   [5]: https://raymii.org/s/articles/Nitrokey_Start_Getting_started_guide.html
+   [6]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [7]: https://raymii.org/s/inc/img/FST-01_board.jpg
+   [8]: https://anonscm.debian.org/cgit/gnuk/gnuk/gnuk.git/tree/ChangeLog
+   [9]: http://www.fsij.org/gnuk/version1_2_1.html
+   [10]: https://raymii.org/s/inc/img/caution.png
+   [11]: https://lists.alioth.debian.org/pipermail/gnuk-users/2016q3/000369.html
+   [12]: https://raymii.org/s/tutorials/Nitrokey_gnuk_firmware_update_via_DFU.html
+   [13]: https://www.aliexpress.com/item/FREE-SHIPPING-1PCS-ST-Link-V2-stlink-mini-STM8STM32-STLINK-simulator-download-programming-With-Cover/32329418477.html
+   [14]: http://blog.nodonogard.net/2015/11/compiling-and-flashing-gnuk-binaries-to.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

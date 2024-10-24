@@ -1,0 +1,567 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Backup OpenStack object store or S3 with rclone
+Author      : 	Remy van Elst
+Date        : 	17-08-2017
+URL         : 	https://raymii.org/s/tutorials/Backup_or_Sync_OpenStack_object_store_or_other_cloud_storage_with_rclone.html
+Format      : 	Markdown/HTML
+---
+
+
+
+### Introduction
+
+![rclone_logo][1]
+
+This is a guide that sho ws you how to make backups of an object storage service
+like OpenStack swift or S3. Most object store services save data on multiple
+servers, but deleting a file also deletes it from all servers. Tools like rsync
+or scp are not compatible most of the time with these services, unless there is
+a proxy that translates the object store protocol to something like SFTP. rclone
+is an rsync-like, command line tool that syncs files and directories from cloud
+storage services like OpenStack swift, Amazon S3, Google cloud/drive, dropbox
+and more. By having a local backup of the contents of your cloud object store
+you can restore from accidental deletion or easily migrate between cloud
+providers. Syncing between cloud providers is also possible. It can also help to
+lower the RTO (recovery time objective) and backups are just always a good thing
+to have and test.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+In this guide we'll do the following:
+
+  * Install rclone
+  * Configure rclone backends
+  * Copy a remote object store locally
+  * Syncing an object store to a different cloud provider
+  * Problems with swift and rclone
+
+### Installation
+
+rclone is written in the Go programming language, so installation is quite easy,
+it's a single binary. They only provide Snap packages, no regular .deb or .rpm
+packages. I personally rather have just a repository or have it packages
+upstream, but snap works as well.
+
+This guide uses an Ubuntu 16.04 server. By default snapd (the snap package
+manager) should be installed, but if that's not the case, install it:
+
+    
+    
+    apt-get install snapd
+    
+
+Use snap to install rclone:
+
+    
+    
+    snap install --classic rclone
+    
+
+The `--classic` argument is required because it disables the security
+confinement otherwise it won't be able to access some user files.
+
+On the test machine I used the snap binary was not in the `$PATH`, I had to
+logout and log back in. rclone's binary is in `/snap/bin/rclone`.
+
+If you are on another distro or want to do manual installation, you can do so:
+
+    
+    
+    curl "https://downloads.rclone.org/rclone-current-linux-amd64.zip"
+    unzip "rclone-current-linux-amd64.zip"
+    cd rclone-*-linux-amd64
+    
+    cp rclone /usr/bin/
+    chown root:root /usr/bin/rclone
+    chmod 755 /usr/bin/rclone
+    
+    mkdir -p /usr/local/share/man/man1
+    cp rclone.1 /usr/local/share/man/man1/
+    mandb 
+    
+
+Updating this manual installation can be done by repeating the above steps
+
+### Configure cloud storage
+
+rclone has an interactive config menu. The default config file is in
+`$HOME/.rclone.conf`, and after you did the initial configuration setup you can
+edit that or copy it to other computers.
+
+The first cloud storage I'm going to setup is an OpenStack Swift object store.
+Execute the interactive config wizard:
+
+    
+    
+    rclone config
+    
+
+Create a new remote with `n`:
+
+    
+    
+        2017/08/17 14:22:05 NOTICE: Config file "/root/.config/rclone/rclone.conf" not found - using defaults
+        No remotes found - make a new one
+        n) New remote  
+        r) Rename remote
+        c) Copy remote 
+        s) Set configuration password
+        q) Quit config 
+        n/r/c/s/q> n  
+    
+
+Type `swift` to select the OpenStack Swift storage type:
+
+    
+    
+    Type of storage to configure.
+    Choose a number from below, or type in your own value
+     1 / Amazon Drive
+       \ "amazon cloud drive"
+     2 / Amazon S3 (also Dreamhost, Ceph, Minio)
+       \ "s3"
+     3 / Backblaze B2
+       \ "b2"
+     4 / Dropbox   
+       \ "dropbox" 
+     5 / Encrypt/Decrypt a remote
+       \ "crypt"   
+     6 / Google Cloud Storage (this is not Google Drive)
+       \ "google cloud storage"
+     7 / Google Drive
+       \ "drive"   
+     8 / Hubic
+       \ "hubic"   
+     9 / Local Disk
+       \ "local"   
+    10 / Microsoft OneDrive
+       \ "onedrive"
+    11 / Openstack Swift (Rackspace Cloud Files, Memset Memstore, OVH)
+       \ "swift"   
+    12 / SSH/SFTP Connection
+       \ "sftp"
+    13 / Yandex Disk
+       \ "yandex"  
+    Storage> swift 
+    
+
+Enter your username and password (without any project/tenant ID's):
+
+    
+    
+    User name to log in.
+    user> example@example.org 
+    API key or password.
+    key> hunter2
+    
+
+Enter the authentication URL (keystone auth_url), in my example for CloudVPS it
+is: `https://identity.stack.cloudvps.com/v2.0`:
+
+    
+    
+    Authentication URL for server.
+    Choose a number from below, or type in your own value
+     1 / Rackspace US
+       \ "https://auth.api.rackspacecloud.com/v1.0"
+     2 / Rackspace UK
+       \ "https://lon.auth.api.rackspacecloud.com/v1.0"
+     3 / Rackspace v2
+       \ "https://identity.api.rackspacecloud.com/v2.0"
+     4 / Memset Memstore UK
+       \ "https://auth.storage.memset.com/v1.0"
+     5 / Memset Memstore UK v2
+       \ "https://auth.storage.memset.com/v2.0"
+     6 / OVH
+       \ "https://auth.cloud.ovh.net/v2.0"
+    auth> https://identity.stack.cloudvps.com/v2.0
+    
+
+Depending on the data you received from your cloud provider, some of the
+following options are required. The tenant name in my case is and I use the
+tenant_id in this field. When ever someone renames the tenant the config won't
+break:
+
+    
+    
+    User domain - optional (v3 auth)
+    domain>
+    Tenant name - optional for v1 auth, required otherwise
+    tenant> 2a1[...]662
+    Tenant domain - optional (v3 auth)
+    tenant_domain> 
+    Region name - optional
+    region>
+    Storage URL - optional
+    storage_url>   
+    AuthVersion - optional - set to (1,2,3) if your auth URL has no version
+    auth_version>  
+    
+
+The configuration is summarized, press `y` to confirm:
+
+    
+    
+    Remote config
+    --------------------
+    [swift1]
+    user = example@example.org
+    key = hunter2
+    auth = https://identity.stack.cloudvps.com/v2.0
+    domain =
+    tenant = 2a1[...]662
+    tenant_domain =
+    region =
+    storage_url =  
+    auth_version = 
+    --------------------
+    y) Yes this is OK
+    e) Edit this remote
+    d) Delete this remote
+    y/e/d> y
+    
+
+We can quit the configuration:
+
+    
+    
+    Current remotes:
+    
+    Name                 Type
+    ====                 ====
+    swift1               swift
+    
+    e) Edit existing remote
+    n) New remote  
+    d) Delete remote
+    r) Rename remote
+    c) Copy remote 
+    s) Set configuration password
+    q) Quit config 
+    e/n/d/r/c/s/q> q
+    
+
+You can find the location of the current configuration file by grepping the help
+(seriously?):
+
+    
+    
+        rclone help | grep 'config'
+        and configuration walkthroughs.
+          config          Enter an interactive configuration session.
+          listremotes     List all the remotes in the config file.
+              --ask-password                      Allow prompt for password for encrypted configuration. (default true)
+              --config string                     Config file. (default "/root/.config/rclone/rclone.conf")
+    
+
+In my case after doing the initial config wizard the location changed from
+`/root/.rclone.conf` to `/root/.config/rclone/rclone.conf`. No idea why.
+
+Test the configuration by listing the containers in the object store:
+
+rclone lsd swift1:
+
+    
+    
+         4383157 0001-01-01 00:00:00       183 loadtest
+       764180481 0001-01-01 00:00:00         6 olimex
+      3219384585 0001-01-01 00:00:00     14458 pics
+        22099726 0001-01-01 00:00:00      9145 smallpics
+    
+
+If you have no folders or objects, then create one:
+
+    
+    
+    rclone mkdir swift1:rclone_test
+    
+
+And do the `lsd`.
+
+If you have problems with a Swift backend, please see the last part of this
+guide. Most likely your credentials or other data like project ID or region will
+be wrong.
+
+For this example I have also setup another swift backend at a different
+OpenStack provider (fuga by CYSO). You can setup any cloud provider you like, or
+just use SFTP (via SSH) to some location remote. rclone abstracts this away for
+you.
+
+One important point with rclone is that by default it does not follow symlinks.
+This is because the software works on Windows as well and there is no support
+for symlinks there. If you do have symlinks then you must give the `-L` /
+`--copy-links` command line option.
+
+### Local backup of an Object Store
+
+After you've set up the rclone remotes we can configure a backup to the local
+machine. This can be a server somewhere or you workstation. To keep the example
+simple, there is no automated cleanup in this guide, but you can easily set this
+up. The command syncs the backend to the local filesystem, based on the day, so
+if you schedule this cron once a day you have a full backup every day.
+
+    
+    
+    rclone sync swift1:loadtest /root/backup/$(date +%Y%m%d)/
+    
+
+There is no output. Listing the directory does show a full backup locally:
+
+    
+    
+    ls -la /root/backup/20170817/20170412-1138/
+    total 1208
+    drwxr-xr-x 7 root root    4096 Aug 17 16:21 .
+    drwxr-xr-x 4 root root    4096 Aug 17 16:21 ..
+    drwxr-xr-x 2 root root    4096 Aug 17 16:21 csv_data
+    drwxr-xr-x 2 root root    4096 Aug 17 16:21 data
+    
+
+Remote via rclone:
+
+    
+    
+    rclone lsd swift1:loadtest/20170412-1138
+               0 0001-01-01 00:00:00         0 csv_data
+               0 0001-01-01 00:00:00         0 data
+    
+
+Using the swift command line:
+
+    
+    
+    $ swift list loadtest
+    20170412-1138/data/...
+    20170412-1138/csv_data/...
+    
+
+Running this as a cron script every day allows you to have a backup of the
+object store at a different location, plus versioned. rclone does not support
+incremental or differential backups, ([see documentation][3]),
+
+### Sync two object stores
+
+Syncing two object stores with rclone is usefull when you need the contents to
+always be online, even if one service provider has a large outage. If your
+application supports it, the best thing is to let the application do dual
+uploads to multiple object stores. It could then also load from different object
+stores if one is down.
+
+If dual upload is not available, you can use rclone to do a sync between object
+stores. rclone does have to download every file locally before uploading it to
+the other side, so the machine you use to sync object stores must have enough
+free disk and lots of bandwidth.
+
+Using the above commands, you could also implement a backup of one object store
+to another. This example just syncs the stores, so that in case of a disruption
+you can change the configuration in your application and not have downtime or
+loss of data for a long period.
+
+This example uses two swift object stores, since just changing configuration for
+swift is applicable in more cases. If you sync Amazon to swift you need to have
+swift and s3 compatibility in your software. (or any other two different
+protocols). Most swift object stores do offer S3 emulation, but compatibility
+differs between software versions so test that beforehand.
+
+In this example I have setup another object store with Cyso (fuga.io) to do the
+syncing. CloudVPS object store is named `swift1` and fuga is named `swift2` in
+the rclone config. The data in container `loadtest` goes from CloudVPS to fuga.
+Files added, changed or removed at CloudVPS are added, changed and removed over
+at fuga as well, there is no versioning.
+
+This is the rclone command:
+
+    
+    
+    rclone sync swift1:loadtest swift2:loadtest
+    
+
+This can be put in cron just fine.
+
+Check and verify that the contents is on the other side:
+
+    
+    
+    rclone lsd swift1:loadtest/20170412-1138
+               0 0001-01-01 00:00:00         0 csv_data
+               0 0001-01-01 00:00:00         0 data
+               0 0001-01-01 00:00:00         0 gnuplot_scripts
+               0 0001-01-01 00:00:00         0 images
+               0 0001-01-01 00:00:00         0 style
+    rclone sync swift1:loadtest swift2:loadtest
+    rclone lsd swift2:loadtest/20170412-1138
+               0 0001-01-01 00:00:00         0 csv_data
+               0 0001-01-01 00:00:00         0 data
+               0 0001-01-01 00:00:00         0 gnuplot_scripts
+               0 0001-01-01 00:00:00         0 images
+               0 0001-01-01 00:00:00         0 style
+    
+
+To script the check if the sync is correct, for example for use with a
+monitoring system, you can use the `rclone check` command:
+
+    
+    
+    rclone check swift1:loadtest swift2:loadtest
+    2017/08/18 08:44:14 NOTICE: Swift container loadtest: 0 files not in Swift container loadtest
+    2017/08/18 08:44:14 NOTICE: Swift container loadtest: 0 files not in Swift container loadtest
+    2017/08/18 08:44:16 NOTICE: Swift container loadtest: 0 differences found
+    echo $?
+    0
+    
+
+If there are differences, the exit code will be 1 and the command outputs the
+difference. Perfect for monitoring:
+
+    
+    
+    rclone delete swift2:loadtest/20170412-1138/csv_data/
+    rclone check swift1:loadtest swift2:loadtest
+    2017/08/18 08:46:49 NOTICE: Swift container loadtest: 0 files not in Swift container loadtest
+    2017/08/18 08:46:49 NOTICE: Swift container loadtest: 42 files not in Swift container loadtest
+    2017/08/18 08:46:49 ERROR : 20170412-1138/csv_data/graphes-Transactions-mean.csv: File not in Swift container loadtest
+    [...]
+    2017/08/18 08:46:49 ERROR : 20170412-1138/csv_data/graphes-Users_Arrival-total.csv: File not in Swift container loadtest
+    2017/08/18 08:46:49 ERROR : 20170412-1138/csv_data/graphes-freemem-stddev.csv: File not in Swift container loadtest
+    2017/08/18 08:46:49 ERROR : 20170412-1138/csv_data/graphes-Users_Arrival-rate.csv: File not in Swift container loadtest
+    2017/08/18 08:46:51 NOTICE: Swift container loadtest: 42 differences found
+    2017/08/18 08:46:51 Failed to check: 42 differences found
+    echo $?
+    1
+    
+
+By having a second live version of your data, you are able to meet a lower RTO
+(recovery time objective). If one service provider has a major outage, you don't
+have to wait hours, or even days until it is fixed. You just restore the backup
+or change your configuration and are up and running again.
+
+Do note that as with every backup, it's important to test this regularly. Do a
+failover once in a while or try to do a restore and see what works and what not.
+Document it so that your team can do it as well, saves you another call in the
+middle of the night.
+
+### Errors with Swift
+
+I tried to setup a backend at another cloud provider (OpenStack over at CYSO,
+fuga.io). After setting up the configuration with the correct username,
+password, auth_url and such (since the nova and swift CLI worked), rclone kept
+giving a non-descriptive error:
+
+    
+    
+    rclone mkdir swift2:rclone_test
+    2017/08/17 15:51:18 Failed to create file system for "swift2:rclone_test": Bad Request
+    
+
+Setting the loglevel to DEBUG or specifying verbose mode did not help. The
+[documentation][4] states the following:
+
+    
+    
+    Due to an oddity of the underlying swift library, it gives a "`" error rather than a more sensible error when the authentication fails for Swift.
+    
+    So this most likely means your username / password is wrong. You can investigate further with the `--dump-bodies` flag.
+    
+
+Using this `--dump-bodies` flag gave me more information:
+
+    
+    
+    rclone -vvvvvvvv --dump-bodies  mkdir swift2:rclone_test
+    2017/08/17 15:53:29 DEBUG : rclone: Version "v1.36" starting with parameters ["/snap/rclone/466/bin/rclone" "-vvvvvvvv" "--dump-bodies" "mkdir" "swift2:rclone_test"]
+    2017/08/17 15:53:29 DEBUG : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    2017/08/17 15:53:29 DEBUG : HTTP REQUEST (req 0xc82012e620)
+    2017/08/17 15:53:29 DEBUG : POST /v2.0/tokens HTTP/1.1
+    Host: identity.api.fuga.io:5000
+    User-Agent: rclone/v1.36
+    Content-Length: 131
+    Content-Type: application/json
+    Accept-Encoding: gzip
+    
+    {"auth":{"passwordCredentials":{"username":"example@example.org","password":"hunter2"},"tenantName":"$TENANT_ID"}}
+    2017/08/17 15:53:29 DEBUG : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    2017/08/17 15:53:29 DEBUG : <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    2017/08/17 15:53:29 DEBUG : HTTP RESPONSE (req 0xc82012e620)
+    2017/08/17 15:53:29 DEBUG : HTTP/1.1 401 Unauthorized
+    
+
+The error here was my fault, Fuga doesn't accept the tenand _id as the tenant_
+name. After specifying the correct tenant_name it did work.
+
+For reference, here are the two configuration files. The first is for CloudVPS:
+
+    
+    
+    [swift1]
+    type = swift
+    user = example@example.org
+    key = hunter2
+    auth = https://identity.stack.cloudvps.com/v2.0
+    domain = 
+    tenant = 2a1[...]662
+    tenant_domain = 
+    region = 
+    storage_url = 
+    auth_version = 
+    
+
+Fuga:
+
+    
+    
+    [swift2]
+    type = swift
+    user = example2@example2.org
+    key = hunter2
+    auth = https://identity.api.fuga.io:5000/v2.0
+    domain = 
+    tenant = my_tenant_name
+    tenant_domain = 
+    region = 
+    storage_url = http://object.api.fuga.io/swift/v1
+    auth_version = 
+    
+
+   [1]: https://raymii.org/s/inc/img/rclone.png
+   [2]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [3]: https://rclone.org/faq/
+   [4]: https://rclone.org/swift/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,91 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Munin plugin to show Logstash/Kibana messages per hour
+Author      : 	Remy van Elst
+Date        : 	12-04-2013
+URL         : 	https://raymii.org/s/software/Munin_plugin_Logstash_Kibana_messages_per_hour.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This is a simple munin plugin which shows you the amount of log messages your
+logstash/kibana server receives per hour. It should run on the Logstash host, it
+gets the data from out the Elasticsearch database.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+![Munin plugin example][2]
+
+## Setup instructions
+
+You need CURL, so you might need to install that via your package manager.
+
+Clone the git repository:
+
+    
+    
+    git clone git://github.com/RaymiiOrg/munin-plugins.git
+    
+
+Place the plugin file in `/usr/share/munin/plugins/`, make it executable and
+create a symlink in `/etc/munin/plugins/`
+
+    
+    
+    cd munin-plugins
+    cp logstash-messages-per-hour.sh /usr/share/munin/plugins
+    chmod +x /usr/share/munin/plugins/logstash-messages-per-hour.sh
+    ln -s /usr/share/munin/plugins/logstash-messages-per-hour.sh /etc/munin/plugins/logstash
+    
+
+Edit the plugin if your elasticsearch database URL is on another host:
+
+    
+    
+    # Edit the following line, and change localhost to what it should be
+    TOTAL_EVENTS=$(curl -s -k -XGET http://localhost:9200/logstash
+    
+
+Then wait until your munin server has updated, and enjoy.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: /s/inc/img/munin-logstash.png
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

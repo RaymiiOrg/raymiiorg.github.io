@@ -1,0 +1,189 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Openstack Affinity Groups, make sure instances are on the same or different compute hypervisor hosts
+Author      : 	Remy van Elst
+Date        : 	29-11-2014
+URL         : 	https://raymii.org/s/articles/Openstack_Affinity_Groups-make-sure-instances-are-on-the-same-or-a-different-hypervisor-host.html
+Format      : 	Markdown/HTML
+---
+
+
+
+This guide shows you how to use Openstack Affinity groups. Affinity or Anti-
+Affinity groups allow you to make sure instances (VM/VPS) are on the same
+hypervisor host or on a different one. There are cases when you want two
+instances on different compute nodes, for example, when they are clustered
+servers like a load balancer or a database master-master setup. All VM's in each
+Affinity group are hosted in the same hypervisor, while no two VM's of a same
+Anti-Affinity group are hosted in the same hypervisor.
+
+Affinity is supported since Openstack IceHouse. You can only add an instance to
+an affinity group when you create the instance with `nova boot`. You can not add
+existing instances. You can however create an image of an instance and boot a
+new server from that image, in the new affinity group.
+
+You can see all my [Openstack related articles here][1]. For example, how to
+build a [High Available cluster with Ansible and Openstack][2].
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+### Create an Affinity Group
+
+Make sure you have the Openstack Command Line Tools installed. Also make sure
+you have a `computerc` file. See the first part of [this page][4] to find out
+how to do that.
+
+The command syntax to create an affinity group with the novaclient:
+
+    
+    
+    nova server-group-create $group-name $policy
+    
+
+  * `$group-name` is a name you choose
+  * `$policy` is either `affinity` or `anti-affinity`.
+
+If you want all servers to run on the same hypervisor host, create a group with
+an `affinity` policy.
+
+If you want all servers to run on different hypervisor host, create a group with
+an `anti-affinity` policy. This means that if you have 5 servers in this group,
+they will be on 5 different hypervisor (compute) nodes, never will a VM be on a
+host node where another VM from this affinity policy is.
+
+You can see all available affinity groups with `server-group-list`:
+
+    
+    
+    $ nova server-group-list
+    +--------------------------------------+------+--------------------+---------+----------+
+    | Id                                   | Name | Policies           | Members | Metadata |
+    +--------------------------------------+------+--------------------+---------+----------+
+    | 415eea22-4e37-44e0-a4c9-59c395688fc8 | Anti | [u'anti-affinity'] | []      | {}       |
+    +--------------------------------------+------+--------------------+---------+----------+
+    
+
+You can delete a server group with `server-group-delete`. Deleting a server
+group does not delete all the vm's in that group. The policy is removed from the
+vm's, so they can be on the same node, or on different ones. Exclusivity is not
+guaranteed anymore.
+
+### Add instance to affinity group
+
+You can only add a server to an affinity group when you create the instance. Not
+afterwards. To add an instance to an affinity group, use the following extra
+option when executing `nova boot`:
+
+    
+    
+    --hint group=$affinity-group-uuid
+    
+
+Example commands:
+
+    
+    
+    nova boot --image "CloudVPS Ubuntu 14.04" --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor "Standard 1" "Anti-Affinity 1-1"
+    
+    nova boot --image "CloudVPS Ubuntu 14.04" --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor "Standard 1" "Anti-Affinity 1-2"
+    
+    nova boot --image "CloudVPS Ubuntu 14.04" --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor "Standard 1" "Anti-Affinity 1-3"
+    
+    nova boot --image "CloudVPS Ubuntu 14.04" --hint group=415eea22-4e37-44e0-a4c9-59c395688fc8 --key-name $ssh_key --flavor "Standard 1" "Anti-Affinity 1-4"
+    
+
+These 4 servers will be on different hypervisor hosts. You can check this with
+the `nova show` command:
+
+    
+    
+    nova show $instance_uuid
+    
+
+Look for the `hostId` value:
+
+    
+    
+    | hostId     | 4b499ffc320810e06891d15fca10a4ac76a50eae788d2f28a990fbbf     |
+    
+
+This is the hostId of the hosting compute hypervisor node. With an Anti-Affinity
+policy, these are different. With an Affinity Policy, these are the same.
+
+### No valid host was found
+
+If you reveive the `No valid host was found` error during the `nova boot`
+command, that means that there are no hosts that have the capacity to host that
+VM and guarantee there will not be another VM from that anti-affinity group on
+it (in the case of an anti affinity group). It can also mean that the hypervisor
+has not enoigh free capacity (in the case of an affinity group).
+
+This might mean that your Openstack provider has put restrictions on the filters
+or is low on free capacity. Affinity policies are limited by the available
+resources of the current hypervisor that hosts the group, while Anti-Affinity
+policies are limited by the number of available hypervisors in the datacenter
+(after filtering).
+
+If you want your load balancers, app servers and database servers on different
+compute nodes from each other (with the same role) then you can create 3 anti-
+affinity groups, one for the load balancers, one for the app servers and one for
+the database servers. Your app server might be on a host node with a load
+balancer, but not with another app server.
+
+### How to enable Affinity/Anti-Affinity (Admin Only)
+
+Enabling Affinity and Anti-Afiinity is simply done by adding
+`ServerGroupAffinityFilter` and `ServerGroupAntiAffinityFilter` into
+`scheduler_default_filters`. By default these filters are already enabled:
+
+    
+    
+    # nova.conf
+    scheduler_default_filters = ServerGroupAffinityFilter,ServerGroupAntiAffinityFilter
+    
+
+To read more about the Openstack filtering options, see the official
+documentation: .
+
+   [1]: https://raymii.org/s/tags/openstack.html
+   [2]: https://raymii.org/s/articles/Building_HA_Clusters_With_Ansible_and_Openstack.html
+   [3]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [4]: https://raymii.org/s/tutorials/FreeBSD_10.1-release_Openstack_Image.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

@@ -1,0 +1,201 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	MySQL restore after a crash and disk issues
+Author      : 	Remy van Elst
+Date        : 	10-10-2016
+URL         : 	https://raymii.org/s/blog/MySQL_restore_after_a_crash_and_disk_issues.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Recently I had to restore a MySQL server. The hardware had issues with the
+storage and required some FSCK's, disk replacements and a lot of RAID and LVM
+love to get working again. Which was the easy part. MySQL was a bit harder to
+fix. This post describes the proces I used to get MySQL working again with a
+recent backup. In this case it was a replicated setup so the client had no
+actual downtime.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+The proces requires a backup, preferably a recent one. What I did was remove
+everything and start fresh, restoring the backups.
+
+MySQL was not starting and the `hostname.err` log file had stack trace errors
+like [in this post][2]. The server uses InnoDB, so no MyISAM recovery. Although
+my experience with that is not very good as well. But still, error messages
+like:
+
+    
+    
+    Attempting backtrace. You can use the following information to find out
+    where mysqld died. If you see no messages after this, something went
+    terribly wrong...
+    
+
+Are extra funny.
+
+First move the current MySQL folder away somewhere safe:
+
+    
+    
+    mv /var/lib/mysql{,.bak-$(date +%s)}
+    
+
+Recreate the folder and make sure the correct permissions are set up:
+
+    
+    
+    mkdir -p /var/lib/mysql
+    chown mysql:mysql /var/lib/mysql
+    
+
+Now restore your backup so that you have the dumps available somewhere. In my
+case that's in `/var/restore.10219/` and the files are compressed with `gzip`.
+They all have an `.sql.gz` extension and their filename is the name of the
+database. The below steps do require that format.
+
+Start up MySQL and make sure we can login without a password:
+
+    
+    
+    mysqld_safe --skip-grant-tables &
+    
+
+Restore the MySQL [system database][3] first. This database contains data MySQL
+requires to function. For example, the grants (users and permisions), stored
+procedures, logging, time zone information, replication information and other
+miscellaneous system tables.
+
+    
+    
+    gunzip /var/restore.10219/mysql.sql.gz
+    cd /var/restore.10219/
+    # Note that I always chuckle when typing this command. 
+    mysql mysql < mysql.sql
+    
+
+Since the grants are now reset, you need to (re)set a root password. Or, any
+other administrative user (`da_admin` for DirectAdmin):
+
+    
+    
+    mysql -e 'use mysql; update user set password=PASSWORD("password") where User="root";'
+    
+
+Stop the MySQL server:
+
+    
+    
+    killall mysqld # SIGTERM, not SIGKILL
+    
+
+Start it up via the system init script:
+
+    
+    
+    service mysqld restart # (or systemctl if that floats your boat)
+    
+
+Check if the service starts up normally now. It should, if not then your backup
+probably is corrupt as well. You might need to recreate all users by hand.
+
+Move the `mysql` database backup out of the restore folder:
+
+    
+    
+    mv /var/restore.10219/mysql.sql /root/mysql.sql.bak.$(date +%s)
+    
+
+Unpack all the databases in the restore folder:
+
+    
+    
+    gunzip /var/restore.10219/*.gz
+    
+
+The below script takes all `.sql` files from the restore folder and does the
+following:
+
+  * Creates a database with the name of the file (without the `.sql` extension)
+  * Restores the dump to that database
+
+It doesn't take into account stuff like existing datbases, they are just
+overwritten. You can copy and paste it in the shell, but saving it to a `.sh`
+file and running that is better:
+
+    
+    
+    for backupfile in /var/restore.10219/*.sql; do 
+      FULLFILE="$(basename $backupfile)";
+      DBNAME="${FULLFILE%.*}"; 
+      echo "Started restoring ${DBNAME} from ${backupfile}"; 
+      mysql -e "create database ${DBNAME}"; 
+      mysql "${DBNAME}" < "${backupfile}"; 
+      sleep 5; 
+      echo "Finished restoring ${DBNAME} from ${backupfile}";
+    done
+    
+
+Depending on the size of the database it could take a while to restore all the
+backups.
+
+Afterwards, you might also want to check the replication if you had any setup.
+The master/slave settings should be restored via the `mysql` database, but the
+log position might be off or there might be duplicates or other errors.
+
+Just to be sure, check, repair and optimize all databases. If you had any errors
+with the above script, you will get those here as well.
+
+    
+    
+    mysqlcheck -uroot -ppassword --auto-repair  --optimize --all-databases
+    
+
+In my case there were no databases that were corrupt in the backup and couldn't
+be restored in this case. I did have cases were I had one or more databases fail
+because of corrupt backups. So make sure you do not only set up and monitor your
+backup process, also set a recurring event every month or so to do a test
+restore, just to be sure.
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: https://dba.stackexchange.com/questions/46657/mysql-died-with-stack-trace
+   [3]: https://dev.mysql.com/doc/refman/5.7/en/system-database.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

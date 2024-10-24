@@ -1,0 +1,168 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	ClamAV installation and daily scan + report on Ubuntu
+Author      : 	Remy van Elst
+Date        : 	01-12-2012
+URL         : 	https://raymii.org/s/tutorials/ClamAV.html
+Format      : 	Markdown/HTML
+---
+
+
+
+ClamAV is a virus scanner for Linux/Unix like systems. This tutorial will show
+you how to install it and how to set it up to auto-update and do a daily scan.
+It will only report if threats are found. It is tested on Ubuntu 10.04 and up.
+It also covers if, and why you might need a virus scanner for Linux/Unix. As an
+extra, it also covers scans for specific folders which remove infected files
+automatically.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+#### Do you need a virus scanner on Linux/Unix?
+
+Short answer, it depends on your situation.
+
+Long answer: You might want to run a virus scanner on a server where files are
+uploaded, or where users login and manipulate files. Lets say you host a file
+upload site, you want to run a scan on the upload folder which auto removes
+infected files. It can also be that your mailserver runs Linux, but people
+sometimes mail executables or infected pdf files. Then you also want a scanner.
+Or you might run a source control server (gitolite, mercurial) where sometimes
+binary files are checked in. (although ClamAV might not find things in bare-git
+repositories, only in working directories.)
+
+If you however only run a static HTML website, or an rsync backup server, or a
+Rougelike via telnet, where there are no uploads or like, you might be wasting
+resources.
+
+My advice is to look at your situation and then decide if you need ClamAV, and
+if you only need to scan a few folders, the entire system and if you want to
+auto-remove the virusses or not.
+
+#### Install ClamAV
+
+First we update the package repository:
+
+    
+    
+    sudo apt-get update
+    
+
+Now we install the clamav scanner, the daemon and the database updater.
+
+    
+    
+    sudo apt-get install clamav clamav-daemon clamav-freshclam
+    
+
+You can also install the clamav-data package, but the clamav-freshclam package
+is another (easier) way to update your virus definitions.
+
+On RHEL, CentOS or Scientific Linux, you only need to install the `clamav`
+package:
+
+    
+    
+    yum install clamav
+    
+
+#### Update the database
+
+The below two commands will restart the freshclam daemon (which auto updates the
+database) and then does a manual update of the definitions.
+
+    
+    
+    sudo /etc/init.d/clamav-freshclam restart
+    sudo /usr/bin/freshclam
+    
+
+#### The daily scan
+
+The below cronjob will run a virus database definition update (so that the scan
+always has the most recent definitions) and afterwards run a full scan which
+will only report when there are infected files on the system. It also does not
+remove the infected files automatically, you have to do this manually. This way
+you make sure that it does not delete /bin/bash by accident.
+
+    
+    
+    ## This should be a root cronjob. 30 01 * * * /
+    usr/bin/freshclam --quiet; /usr/bin/clamscan --recursive --no-summary --infected / 2>/dev/null
+    
+
+The `2>/dev/null` options keeps the /proc and such access denied errors out of
+the report. The infected files however are still found and reported.
+
+Also make sure that your cron is configured so that it mails you the output of
+the cronjobs. The manual page will help you with that.
+
+This is how a sample email looks if you have an infection:
+
+    
+    
+    /home/remy/eicar.zip: Eicar-Test-Signature FOUND
+    /home/remy/eicar.com: Eicar-Test-Signature FOUND
+    
+
+#### Extra: the targeted scan
+
+The below cronjob is an example and you should adapt it. It updates the virus
+definitions and scans the folder `/var/www/sites/uploader.com/public-
+html/uploads/` two times per hour, and if it found any files it removes them.
+
+    
+    
+        ## This should be a root cronjob.
+        */29 * * * * /usr/bin/freshclam --quiet; /usr/bin/clamscan --recursive --no-summary --infected --remove /var/www/sites/uploader.com/public-html/uploads 2>/dev/null
+    
+
+This is how a sample email might look like:
+
+    
+    
+    /var/www/sites/uploader.com/public-html/uploads/eicar.zip: Eicar-Test-Signature FOUND
+    /var/www/sites/uploader.com/public-html/uploads/eicar.zip: Removed.
+    /var/www/sites/uploader.com/public-html/uploads/eicar.com: Eicar-Test-Signature FOUND
+    /var/www/sites/uploader.com/public-html/uploads/eicar.com: Removed.
+    
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

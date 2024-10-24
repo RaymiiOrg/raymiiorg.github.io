@@ -1,0 +1,552 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Netboot (PXE) Armbian on an Orange Pi Zero 3 from SPI with NFS root filesystem
+Author      : 	Remy van Elst
+Date        : 	25-06-2024 22:30
+URL         : 	https://raymii.org/s/tutorials/Netboot_PXE_Armbian_on_an_Orange_Pi_Zero_3_from_SPI_with_NFS_root_filesystem.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Because I wanted to experiment with Kubernetes I bought a few cheap SBC's and a Power over Ethernet switch to run `k3s`. Since Kubernetes is very resource intensive I wanted to try to boot the boards via the network without causing wear on the Micro SD card. The boards have built-in SPI flash from which it can boot `u-boot` and Armbian works quite well with a root filesystem over NFS. This guide will help you with netbooting an Orange Pi Zero 3 running Armbian.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+
+`k3s` is a lightweight version of Kubernetes. Production ready, easy to
+install, half the memory, all in a binary less than 100 MB and suitable for
+ARM. A follow up article will be available soon to document my first adventure
+with Kubernetes on this cluster.
+
+The SBC's are the [Orange Pi Zero 3]
+(https://web.archive.org/web/20240623200133/http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/details/Orange-Pi-Zero-3.html)
+with an Allwinner H618 Quad-Core Cortex-A53, gigabit Ethernet and 4GB of RAM,
+the latter being required for Kubernetes.
+
+
+Meet "The Cluster" and notice there are no Micro SD cards inserted:
+
+![orange pies](/s/inc/img/k8s-cluster-hardware.png)
+
+The PoE switch provides power and the splitters turn it in to USB-C and
+Ethernet. It's the cheapest PoE switch I could find on AliExpress.
+
+You need console access via UART once to set a `u-boot` environment variable.
+This can be either an [FTDI TTL-232R-3V3]
+(https://web.archive.org/web/20240625181226/https://nl.farnell.com/ftdi/ttl-232r-3v3/cable-usb-to-ttl-level-serial/dp/1329311)
+cable or you can plug in a screen via (micro) HDMI and a keyboard.
+
+You need to have an NFS and TFTP server to serve the files and root
+filesystem. This guide will help you set that up.
+
+You need to be able to configure your DHCP server to provide certain options
+for TFTP. Most home routers cannot do that, but OpenWRT, Pi-Hole (`dnsmasq`) and
+Synology DHCP server can do it.
+
+
+### Setup Orange Pi 3 SPI and u-boot
+
+I'm using
+`Armbian_community_24.8.0-trunk.139_Orangepizero3_bookworm_current_6.6.31_minimal.img.xz`
+but you can get the latest Debian 12 image [from the Armbian website]
+(https://www.armbian.com/orange-pi-zero-3/).
+
+Install Armbian to your Micro SD card and boot up your Orange Pi. The first
+part of the setup must be done from within Armbian booted via an SD card. 
+
+ Add the following lines to `/boot/armbianEnv.txt` to enable SPI:
+  
+    param_spidev_spi_bus=0
+    overlays=spidev0_0
+  
+Reboot and check for the SPI device:
+
+    ls -l /dev/spi*
+    crw------- 1 root root 153, 0 Jun 22 17:56 /dev/spidev0.0
+
+The next step is to flash `u-boot` to the SPI flash. First we'll create an
+image that matches the exact size of the SPI-NOR flash, write `u-boot` to
+that file and then write that file to the flash chip. The size must match
+exactly, therefore  we're using such a convoluted method. 
+
+Create working directory:
+
+    mkdir spiflash && cd spiflash
+  
+Create an empty image which matches the SPI flash size:
+
+    dd if=/dev/zero count=16777216 bs=1 | tr '\000' '\377' > spi.img
+  
+Output:
+
+    16777216+0 records in
+    16777216+0 records out
+    16777216 bytes (17 MB, 16 MiB) copied, 42.8787 s, 391 kB/s  
+
+Find the  `u-boot` binary on the local filesystem:
+
+    ls -al /usr/lib/linux-u-boot-*/*.bin 
+
+Output:
+
+    -rw-rw-r-- 1 root root 844437 May 20 00:47 /usr/lib/linux-u-boot-current-orangepizero3/u-boot-sunxi-with-spl.bin
+  
+Write `u-boot` to SPI file: 
+  
+    dd if=/usr/lib/linux-u-boot-current-orangepizero3/u-boot-sunxi-with-spl.bin of=spi.img bs=1k conv=notrunc 
+  
+Output:
+
+    824+1 records in
+    824+1 records out
+    844437 bytes (844 kB, 825 KiB) copied, 0.0421872 s, 20.0 MB/s
+  
+If needed, install `flashrom`:
+
+    apt install flashrom
+
+Write flash file with `u-boot` to SPI:
+
+    flashrom -p linux_spi:dev=/dev/spidev0.0 -w spi.img   
+  
+Output:
+
+
+      flashrom unknown on Linux 6.6.31-current-sunxi64 (aarch64)
+      flashrom is free software, get the source code at https://flashrom.org
+
+      Using clock_gettime for delay loops (clk_id: 1, resolution: 1ns).
+      Using default 2000kHz clock. Use 'spispeed' parameter to override.
+      ===
+      SFDP has autodetected a flash chip which is not natively supported by flashrom yet.
+      All standard operations (read, verify, erase and write) should work, but to support all possible features we need to add them manually.
+      You can help us by mailing us the output of the following command to flashrom@flashrom.org:
+      'flashrom -VV [plus the -p/--programmer parameter]'
+      Thanks for your help!
+      ===
+      Found Unknown flash chip "SFDP-capable chip" (16384 kB, SPI) on linux_spi.
+      ===
+      This flash part has status UNTESTED for operations: WP
+      The test status of this chip may have been updated in the latest development
+      version of flashrom. If you are running the latest development version,
+      please email a report to flashrom@flashrom.org if any of the above operations
+      work correctly for you with this flash chip. Please include the flashrom log
+      file for all operations you tested (see the man page for details), and mention
+      which mainboard or programmer you tested in the subject line.
+      Thanks for your help!
+      Reading old flash chip contents...
+  
+This takes a while, in my case about 5 minutes. Output continues:
+
+
+      Reading old flash chip contents... done.
+      Erasing and writing flash chip... Erase/write done.
+      Verifying flash... VERIFIED.
+  
+
+You can now `poweroff` the board and remove the Micro SD card. The bootloader
+will not boot from SPI if a Micro-SD card is inserted.
+
+
+### Update u-boot environment
+
+I had to enable `netretry` otherwise my boards would be to fast trying PXE before DHCP
+was finished, and not retry again. 
+
+**You must have flashed u-boot to the SPI and reboot without Micro SD card**
+
+Either use a UART serial cable or plug in a monitor and keyboard. 
+
+Power up the board and stop autoboot:
+
+    Autoboot in 1 seconds, press <Space> to stop
+
+On the u-boot prompt, enter the following commands (without `=>`):
+
+      => setenv netretry yes
+      => saveenv
+
+Output:
+
+      Saving Environment to SPIFlash... Erasing SPI flash...Writing to SPI flash...done
+      OK
+
+
+Now try booting with the `boot` command, or `reset`, whatever you prefer.
+
+I haven' t figured out how to update this before flashing u-boot to the SPI
+flash, if you know how please contact me! Installing `libubootenv-tool` to
+use `fw_printenv` fails, no matter what offsets I provide in the
+configuration file.
+
+Without the `netretry` option turned on, PXE would try to load the config
+files without having an IP address:
+
+
+      Device 0: unknown device
+      ethernet@5020000 Waiting for PHY auto negotiation to complete......... TIMEOUT !
+      The remote end did not respond in time.missing environment variable: pxeuuid
+      Retrieving file: pxelinux.cfg/01-02-00-2e-12-34-56
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/00000000
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/0000000
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/000000
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/00000
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/0000
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/000
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/00
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/0
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/default-arm-sunxi-sunxi
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/default-arm-sunxi
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/default-arm
+      *** ERROR: `serverip' not set
+      Retrieving file: pxelinux.cfg/default
+      *** ERROR: `serverip' not set
+      Config file not found
+
+After that the following lines would show up:
+
+      BOOTP broadcast 1
+      DHCP client bound to address 192.0.2.60 (68 ms)
+
+It then would not retry PXE boot but just hang with these lines:
+
+      No EFI system partition
+      No EFI system partition
+      Failed to persist EFI variables
+      No UEFI binary known at 0x40080000
+
+With `netretry` turned on it still does the above, but after it has got an IP
+via DHCP, it tries again and succeeds.
+
+### Install TFTP & NFS server
+
+If you have a Synology NAS you can use that for the NFS and TFTP part. Or you
+can create new Debian 12 VM / container on your network and install a TFTP
+and NFS server:
+
+    apt install nfs-kernel-server tftpd-hpa
+
+Note down the MAC address of the Orange Pi Zero 3. Look in your router's DHCP
+server or execute the following shell command in Armbian:
+
+    ip link
+  
+Output:
+
+      [...]
+      2: end0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
+        link/ether 02:00:2e:12:34:56 brd ff:ff:ff:ff:ff:ff
+
+In our case the MAC is:
+
+      02-00-2e-12-34-56
+  
+
+**Make sure the Orange Pi 3 has a static IP address (I assign mine via DHCP
+  but they are always the same)**
+  
+Create a folder for the kernel and files which will be shared over NFS:
+
+    mkdir -p /srv/exports/02-00-2e-12-34-56
+  
+  
+(Use the MAC address of your Orange Pi board as the last part of the folder name.)  
+  
+Edit the following file: 
+
+    vim /etc/exports
+  
+Add the folder we just made:
+
+    /srv/exports/02-00-2e-12-34-56 192.0.2.60/32(rw,no_root_squash,async,insecure,no_subtree_check,crossmnt)
+  
+Replace `192.0.2.60/32` by the IP of the Orange Pi and also update the MAC
+address. If you have multiple boards, create a folder and line in this file
+for each board.
+
+After each change, make the exports active with the following command:
+
+    exportfs -arv
+
+Create a config file for TFTP:
+
+      mkdir /srv/tftp/pxelinux.cfg
+      vim /srv/tftp/pxelinux.cfg/01-02-00-2e-12-34-56
+
+**Note that the MAC address is prefixed with 01-**. 
+
+This is because `u-boot` in my case tried that file, not one without `01-`:
+
+    Retrieving file: pxelinux.cfg/01-02-00-2e-12-34-56 # u-boot output
+
+Not sure why, but without the prefix it would not work.
+
+Add the following to that file:
+
+      LABEL linux
+      KERNEL vmlinuz-6.6.31-current-sunxi64
+      FDTDIR dtb-6.6.31-current-sunxi64
+      APPEND root=/dev/nfs initrd=uInitrd-6.6.31-current-sunxi64 nfsroot=192.168.1.60:/srv/exports/02-00-2e-12-34-56 ip=dhcp rw rootwait
+      DEFAULT linux
+
+
+If your Armbian is newer, make sure to update the kernel version and also do
+not forget to set the `nfsroot` IP to your NFS server. You can find your
+kernel version by checking the `/boot` folder on your Orange Pi.
+
+For each board you have you must create a file based on the MAC address.
+Remember to update the NFS root path as well.
+
+Download `syslinux` for the `pxeboot.0` file:
+
+    wget  https://www.kernel.org/pub/linux/utils/boot/syslinux/syslinux-6.03.tar.gz
+
+Extract the archive:
+
+    tar -xf syslinux-6.03.tar.gz
+   
+Copy the file:
+
+    cp syslinux-6.03/bios/core/pxelinux.0 /srv/tftp/
+
+This might not be needed for other board, my `u-boot` version failed to boot
+without it.
+
+### Preparing the rootfs over NFS
+
+Download the Armbian image you used to flash your Micro-SD card to the server
+that will host your NFS.
+
+Copy all files from the Armbian image to the NFS folder. First find the
+correct offset to mount the IMG file using `fdisk -lu`:
+
+    fdisk -lu Armbian_community_24.8.0-trunk.6_Orangepizero3_bookworm_current_6.6.31_minimal.img
+
+Output:
+
+      Disk Armbian_community_24.8.0-trunk.6_Orangepizero3_bookworm_current_6.6.31_minimal.img: 1.32 GiB, 1417674752 bytes, 2768896 sectors
+      Units: sectors of 1 * 512 = 512 bytes
+      Sector size (logical/physical): 512 bytes / 512 bytes
+      I/O size (minimum/optimal): 512 bytes / 512 bytes
+      Disklabel type: dos
+      Disk identifier: 0xe1f58a1d
+
+      Device                                                                              Boot Start     End Sectors  Size Id Type
+      Armbian_community_24.8.0-trunk.6_Orangepizero3_bookworm_current_6.6.31_minimal.img1       8192 2768895 2760704  1.3G 83 Linu
+
+You must multiply the `Start` sector by the `Sector Size` to get the correct
+byte offset, in our case:
+
+    8192*512 = 4194304
+  
+Mount the IMG file with that offset:
+
+      mkdir /mnt/armbian
+      mount -o offset=4194304 Armbian_community_24.8.0-trunk.6_Orangepizero3_bookworm_current_6.6.31_minimal.img /mnt/armbian
+      
+Copy over all the files, preserving ownership (via the `-rp` flag):
+
+    cp -rp /mnt/armbian/* /srv/exports/02-00-2e-12-34-56/
+  
+  
+Update `fstab` to make sure the Orange Pi does not try to mount the SD card (which is missing):
+
+    vim /srv/exports/02-00-2e-12-34-56/etc/fstab
+  
+Comment out the topmost line since that is now available via NFS:
+
+      #UUID=a117-[...]-51 / ext4 defaults,noatime,commit=600,errors=remount-ro 0 1
+      tmpfs /tmp tmpfs defaults,nosuid 0 0
+      
+  
+You need to repeat the above steps for every board you have, make sure
+to update the MAC address in `/etc/exports` and folder names.
+  
+Last but not least, copy the kernel and initrd files from the NFS folder to the TFTP folder:
+
+    cp -rp /srv/exports/02-00-2e-12-34-56/boot/* /srv/tftp/
+   
+   
+You need to update those files only once or when they change. Not for every
+different board like you had to do with the NFS root folder / exports.   
+   
+###  DHCP server setup
+
+You must setup your local DHCP server to include
+the PXE server IP and the filename (`pxelinux.0`). 
+
+You can use `dnsmasq` or `OpenWRT` but configuring those
+is out of scope for this article. For testing I setup a separate network
+with a Synology NAS acting as the DHCP server, this is the configuration there:
+
+![synology DHCP](/s/inc/img/k8s-dhcp.png)
+
+In OpenWRT you can edit this file:
+
+    vi /etc/config/dhcp
+
+Add below config to the bottom
+
+      config boot 'linux'
+        option filename '/pxelinux.0'
+        option serveraddress '192.0.2.100'
+    
+
+
+### Test
+
+Hook up your console cable or monitor and reboot the Orange Pi board without a Micro-SD card inserted. It should start to download the kernel via TFTP:
+
+      Using ethernet@5020000 device  
+      TFTP from server 192.0.2.100; our IP address is 192.0.2.60
+      Filename 'pxelinux.cfg/01-02-00-2e-12-34-56'.
+      Load address: 0x4fd00000
+      Loading: #
+           19.5 KiB/s
+      done
+      Bytes transferred = 220 (dc hex)
+      Config file 'pxelinux.0' found 
+      1:      linux
+      Retrieving file: vmlinuz-6.6.31-current-sunxi64
+      Using ethernet@5020000 device  
+      TFTP from server 192.0.2.100; our IP address is 192.0.2.60
+      Filename 'vmlinuz-6.6.31-current-sunxi64'.
+      Load address: 0x40080000
+      Loading: #################################################################
+      [...]
+      ######################################
+           122.1 KiB/s
+      done
+      Bytes transferred = 23445512 (165c008 hex)
+      Retrieving file: uInitrd-6.6.31-current-sunxi64
+      Using ethernet@5020000 device
+      TFTP from server 192.0.2.100; our IP address is 192.0.2.60
+      Filename 'uInitrd-6.6.31-current-sunxi64'.
+      Load address: 0x4ff00000
+      Loading: #################################################################
+           #################################################################
+           #############################
+           117.2 KiB/s
+      done 
+      Bytes transferred = 10910324 (a67a74 hex)
+      append: root=/dev/nfs initrd=uInitrd-6.6.31-current-sunxi64 nfsroot=192.0.2.100:/srv/exports/02-00-2e-12-34-56 ip=dhcp rw   
+      Retrieving file: dtb-6.6.31-current-sunxi64/allwinner/sun50i-h618-orangepi-zero3.dtb
+      Using ethernet@5020000 device
+      TFTP from server 192.0.2.100; our IP address is 192.0.2.60
+      Filename 'dtb-6.6.31-current-sunxi64/allwinner/sun50i-h618-orangepi-zero3.dtb'.
+      Load address: 0x4fa00000
+      Loading: ###
+           109.4 KiB/s
+      done 
+      Bytes transferred = 32981 (80d5 hex)
+      Moving Image from 0x40080000 to 0x40200000, end=418f0000
+      ## Loading init Ramdisk from Legacy Image at 4ff00000 ...
+         Image Name:   uInitrd
+         Image Type:   AArch64 Linux RAMDisk Image (gzip compressed)
+         Data Size:    10910260 Bytes = 10.4 MiB
+         Load Address: 00000000
+         Entry Point:  00000000
+         Verifying Checksum ... OK
+      ## Flattened Device Tree blob at 4fa00000
+         Booting using the fdt blob at 0x4fa00000
+      Working FDT set to 4fa00000
+         Loading Ramdisk to 49598000, end 49fffa34 ... OK
+
+Then it should boot up the kernel:
+
+
+    Starting kernel ...
+
+      [    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd034]
+      [    0.000000] Linux version 6.6.31-current-sunxi64 (armbian@next) (aarch64-linux-gnu-gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #1 SMP Fri May 17 10:02:40 UTC 2024
+      [    0.000000] KASLR disabled due to lack of seed
+      [    0.000000] Machine model: OrangePi Zero3
+      [...]
+      [    0.000000] Kernel command line: root=/dev/nfs initrd=uInitrd-6.6.31-current-sunxi64 nfsroot=192.0.2.100:/srv/exports/02-00-2e-12-34-56 ip=dhcp rw rootwait
+      [    0.000000] Unknown kernel command line parameters "nfsroot=192.0.2.100:/srv/exports/02-00-2e-12-34-56", will be passed to user space.
+
+
+When booting is finished you can see that your root file system is now via NFS
+by executing the `mount` command and looking for the `/` filesystem:
+
+      192.0.2.100:/srv/exports/02-00-2e-12-34-56 on / type nfs
+      (rw,relatime,vers=3,rsize=1048576,wsize=1048576,namlen=255,hard,nolock,proto=tcp,port=2049,timeo=600,retrans=10,sec=sys,local_lock=all,addr=192.0.2.100)
+
+
+### NFS Benchmark vs Micro SD Card
+
+The following simple quick benchmark was done with the NFS server on a
+Raspberry Pi 4 booted from an SSD, plugged in the other gigabit port in the
+same PoE switch:
+
+      dd if=/dev/zero of=./test1.img bs=20M count=1 oflag=dsync
+      1+0 records in
+      1+0 records out
+      20971520 bytes (21 MB, 20 MiB) copied, 1.86941 s, 11.2 MB/s
+      root@opz3-2-midden-nfs:~# 
+
+
+The same command when booted via a Micro SD card:
+
+      root@opz3-1-onder:~# dd if=/dev/zero of=./test1.img bs=20M count=1 oflag=dsync
+      1+0 records in
+      1+0 records out
+      20971520 bytes (21 MB, 20 MiB) copied, 1.37473 s, 15.3 MB/s
+  
+NFS could be faster if the NFS server is faster but I have not yet noticed any
+slowness or other issues when running this setup.  
+  
+  
+The follow up article on my kubernetes adventure does note some problems with NFS as root filesystem
+but that mostly has to do with `overlayfs`.
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

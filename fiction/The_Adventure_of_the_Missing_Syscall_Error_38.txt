@@ -1,0 +1,155 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	The Adventure of the Missing Syscall: Error 38
+Author      : 	Dr. John Watson
+Date        : 	24-10-2024 21:33
+URL         : 	https://raymii.org/s/fiction/The_Adventure_of_the_Missing_Syscall_Error_38.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Sherlock Holmes tackles a modern computing dilemma involving a missing system call. In this case, a frustrated developer attempts to port an embedded device running Yocto to a newer version, only to be met with `Error 38` due to a missing syscall. Holmes and Watson delve into the intricacies of kernel versions, glibc, and system calls to uncover the truth behind the missing `syscall_397` and provide a logical solution.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+
+Disclaimer: This story was written by AI, inspired by a real-world technical issue encountered 
+in the process of upgrading an embedded system. 
+
+I recently listened to the Sherlock Holmes novels on a populair audiobook platform, 
+I thought this would be entertaining. I did actually encounter this issue while upgrading
+an older Yocto system. Resolved it by upgrading more parts of yocto and the application.
+
+Please send me a message on how you feel about this content. It's an experiment, if you 
+dislike it, or like it, just [send me an email](/s/static/About.html#toc_1). Most articles
+I write result in at least 20 messages so don't let me down on this one.
+
+
+![sherlock](/s/inc/img/chatgpt-sherlock.jpg)
+
+### The Adventure of the Missing Syscall: Error 38
+
+It was a foggy evening in London when I, Dr. John Watson, found myself once
+again in the company of my esteemed friend, Mr. Sherlock Holmes. The fire
+crackled in the hearth of our Baker Street lodgings, casting flickering
+shadows on the walls. Holmes was deep in thought, his sharp eyes fixed on a
+peculiar set of logs displayed on his laptop screen.
+
+"Watson," he began, without looking up, "we have a most intriguing case on our
+ hands. It appears that a system call, `syscall_397`, has gone missing,
+ leading to a rather perplexing error: Error 38."
+
+I leaned over to examine the output of `strace` that Holmes had been
+scrutinizing. The sequence of events was clear:
+
+    openat(AT_FDCWD, "/lib/libm.so.6", O_RDONLY|O_LARGEFILE|O_CLOEXEC) = 3
+    read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\0\3\0(\0\1\0\0\0\0\0\0\0004\0\0\0"..., 512) = 512
+    syscall_397(0x3, 0xb6f1ca0c, 0x1800, 0x7ff, 0xbece2e08, 0xbece3008) = -1 (errno 38)
+    close(3) = 0
+    writev(2, [{"./busybox.nosuid", 16}, {": ", 2}, {"error while loading shared libra"..., 36}, {": ", 2}, {"libm.so.6", 9}, {": ", 2}, {"cannot stat shared object", 25}, {": ", 2}, {"Error 38", 8}, {"\n", 1}], 10) = 103
+
+Holmes tapped the screen. "Notice, Watson, the `syscall_397` returns `-1` with
+`errno 38`. This indicates that the function is not implemented."
+
+He continued, "But Watson, there's more to this tale. The case arose because a
+software developer was attempting to port an embedded device running Yocto to
+a newer version. He endeavored to run the device's current kernel, version
+3.17, with a new root filesystem, built using `glibc 2.39` on Yocto 5. The
+`error 38` emerged when the system was booted with the old kernel and new
+rootfs, and when executing a binary compiled by Yocto on the current
+machine's rootfs."
+
+Despite Holmes' logical deductions, the developer's frustration had boiled
+over. The once marvelously engineered device had become a stubborn relic. On
+a stormy night, with rain battering the windows, the developer's patience
+snapped. Seizing the device, he stormed out into the tempest in a fit of
+rage.
+
+Holmes and I followed, our coats flapping violently in the wind. We watched
+from a distance as the developer, standing at the edge of a cliff, hurled the
+device into the churning sea below. The dramatic scene, the device
+disappearing into the dark waters, echoed the developer's despair.
+
+Back at Baker Street, drenched but undeterred, Holmes resumed his analysis. He
+leaned back in his chair, eyes twinkling with satisfaction as he lit his
+pipe, the familiar scent of tobacco filling the room. "Watson, despite the
+theatrics, the solution is clear. The kernel and glibc must be updated. The
+storm may rage, but logic and reason will prevail."
+
+I poured us both a cup of tea, the steam rising gently as I handed Holmes his
+cup. "Holmes, this is all quite fascinating, but I must confess, I am still
+somewhat bewildered. What exactly does all this mean?"
+
+Holmes took a thoughtful puff from his pipe, the smoke curling lazily towards
+the ceiling. "Ah, Watson, the intricacies of modern computing can indeed be
+perplexing. Allow me to elucidate."
+
+As I pondered the situation, Holmes delved deeper into the system's
+architecture. He pulled up the syscall tables and kernel headers,
+meticulously searching for any discrepancies.
+
+"Look here, Watson," he said, pointing to the syscall table. "The
+ `syscall_397` is indeed listed as `statx`. However, in our current kernel
+ version, this entry is absent."
+
+He navigated to the kernel headers, examining the definitions and
+structures. "The headers confirm our suspicion. The necessary definitions for
+`statx` are missing in this version."
+
+Holmes continued, "The syscall table, found in `arch/arm/tools/syscall.tbl`,
+maps system call numbers to their corresponding functions. This table ensures
+that when a program makes a system call, the kernel knows which function to
+execute. In our case, the absence of `syscall_397` means the kernel does not
+recognize the `statx` call."
+
+Finally, Holmes turned to the `errno.h` file. "The error code `38, ENOSYS`, is
+defined as 'Function not implemented.' This aligns perfectly with our
+findings."
+
+With a final flourish, Holmes closed his laptop. "Watson, our investigation
+into the syscall tables, kernel headers, and `errno.h` has confirmed the root
+cause. The missing `syscall_397` is due to outdated kernel and glibc
+versions. Updating them will restore the missing functionality."
+
+As the fog lifted outside, I couldn't help but marvel at Holmes' unparalleled
+deductive skills. Once again, he had turned a seemingly insurmountable
+problem into a simple matter of logic and observation.
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

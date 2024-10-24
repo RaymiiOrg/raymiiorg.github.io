@@ -1,0 +1,298 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Build a FreeBSD 10.0-release Openstack Image with bsd-cloudinit
+Author      : 	Remy van Elst
+Date        : 	11-06-2014
+URL         : 	https://raymii.org/s/tutorials/FreeBSD_10.0-release_Openstack_Image.html
+Format      : 	Markdown/HTML
+---
+
+
+
+We are going to prepare a FreeBSD image for Openstack deployment. We do this by
+creating a FreeBSD 10.0-RELEASE instance, installing it and converting it using
+[bsd-cloudinit][1]. We'll use the [CloudVPS][2] public Openstack cloud for this.
+Create an account there and install the Openstack command line tools, like
+`nova`, `cinder` and `glance`. This tutorial is more a collection of notes than
+what you are used of me, it has less explanation and such, just right on steps
+to get started.
+
+You can see all my [Openstack related articles here][3]. For example, how to use
+[Duplicity to create Encrypted backups to the Openstack Swift Object Store][4]
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+This tutorial is available for:
+
+  * [FreeBSD 10.0-RELEASE.][6]
+  * [FreeBSD 10.1-RELEASE.][7]
+  * [FreeBSD 10.3-RELEASE.][8]
+  * [FreeBSD 11.0-RELEASE.][9]
+
+Set the correct environment variables:
+
+    
+    
+    export OS_AUTH_URL="https://identity.stack.cloudvps.com/v2.0"
+    export OS_TENANT_NAME="<tenant name>"
+    export OS_USERNAME="<username>"
+    export OS_PASSWORD="<password>"
+    export OS_TENANT_ID="<tenant id>"
+    
+
+Start by downloading the 10.0-RELEASE iso:
+
+    
+    
+    wget http://ftp.freebsd.org/pub/FreeBSD/releases/amd64/amd64/ISO-IMAGES/10.0/FreeBSD-10.0-RELEASE-amd64-disc1.iso
+    
+
+Upload it to Openstack:
+
+    
+    
+    glance image-create --file Downloads/FreeBSD-10.0-RELEASE-amd64-disc1.iso --name "FreeBSD-10.0-RELEASE-amd64-disc1.iso" --disk-format iso --container-format bare --progress
+    
+
+Create the root volume for our FreeBSD preparation install:
+
+    
+    
+    cinder create --display-name "freebsd-10-root" 8
+    
+
+Boot a new instance from the ISO, attaching the volume we just created ad well:
+
+    
+    
+    nova boot --image <freebsd iso image id> --flavor "Standard 1" --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000 --block-device-mapping hdb=<volume freebsd-10-root id>:::0 FreeBSD-10.0-RELEASE-install
+    
+
+Do a standard install of FreeBSD 10:
+
+  * default keymap
+  * hostname: freebsd.public.cloudvps.com
+  * Just lib32 and ports, no doc, games or src
+  * Partition Layout: 
+    * ada0 GPT
+    * ada0p1 64kb freebsd-boot
+    * ada0p2 512MB freebsd-swap
+    * ada0p3 7GB freebsd-root mountpoint /
+  * Root password P@ssw0rd
+  * Network: 
+    * adapter: vtnet0
+    * ipv4: dhcp
+    * ipv6: slaac
+    * search: public.cloudvps.com
+  * UTC: no, timezone 8 EUROPE 34 NETHERLANDS
+  * Services at boot: sshd, ntpd, moused, dumpd
+  * Extra user: 
+    * Username: freebsd
+    * Full name: freebsd
+    * uid: default
+    * Login group: default
+    * Other groups: wheel
+    * Login class: default
+    * Shell: tcsh
+    * Home: default
+    * Home permissions: default
+    * Password auth: yes
+    * Empty password: no
+    * Random password: no
+    * Password: P@ssw0rd
+    * Lock out: no
+    * OK: yes
+    * Another user: no
+  * Exit
+
+After install, edit `/etc/fstab`, changing `ada0` to `vtbd0`. This is for VirtIO
+support.
+
+Shut the instance from FreeBSD using `shutdown -p now` and after that via nova:
+
+    
+    
+    nova stop <install vm id>
+    
+
+Detach the volume:
+
+    
+    
+    nova volume-detach <install vm id> <install root volume id>
+    
+
+Boot a new instance with the installed freebsd volume as the root volume:
+
+    
+    
+    nova boot --block-device source=volume,id=<root volume id>,dest=volume,shutdown=preserve,bootindex=0 --flavor "Standard 1" --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000  FreeBSD-10.0-RELEASE-configure
+    
+
+If you get a mountroot error, enter the following: ufs:/dev/vtbd0p3.
+
+Change `/etc/fstab` after the fact, change `ada0` to `vtbd0` for VirtIO support.
+
+Set the default route:
+
+    
+    
+    route add default `ifconfig vtnet0 | grep "inet " | cut -d" " -f 2 | awk -F. '{print $1"."$2"."$3".1" }'`
+    
+
+Also put it in `/etc/rc.local` to make sure it works on bootup.
+
+Bootstrap pkg:
+
+    
+    
+    pkg
+    
+
+Enter y.
+
+Install vim and py27-setuptools (for bsd-cloudinit):
+
+    
+    
+    pkg install vim-lite py27-setuptools
+    
+
+Add your SSH key:
+
+    
+    
+    mkdir /root/.ssh
+    chmod 700 /root/.ssh
+    echo "ssh-rsa AAAA[...] user@example.com" > /root/.ssh/authorized_keys
+    chmod 600 /root/.ssh/authorized_keys
+    
+
+Install python modules for bsd-cloudinit:
+
+    
+    
+    rehash
+    easy_install eventlet
+    easy_install iso8601
+    
+
+Add the following to `/boot/loader.conf` to make sure the console works:
+
+    
+    
+    console="comconsole,vidconsole"
+    autoboot_delay="5"
+    
+
+Now do any other customizations you want to have in your image.
+
+Do the bsd-cloudinit install:
+
+    
+    
+    fetch --no-verify-peer https://raw.github.com/pellaeon/bsd-cloudinit-installer/master/installer.sh
+    chmod +x installer.sh
+    ./installer.sh
+    set history = 0
+    history -c
+    
+
+Turn the machine off:
+
+    
+    
+    shutdown -p now
+    
+
+Terminate the machine, otherwise you cannot detach the volume (ERROR: Can't
+detach root device volume (HTTP 403)):
+
+    
+    
+    nova delete <id of freebsd-configure vm)
+    
+
+Convert the volume to an image:
+
+    
+    
+    cinder upload-to-image <freebsd-10-root volume id> FreeBSD-10.0-RELEASE-cloudinit
+    
+
+This might take a while.
+
+Set the min-disk and min-ram requirements, plus some more properties for the
+image:
+
+    
+    
+    glance image-update --min-disk 8 --min-ram 1024 --property architecture=x86_64 --property image_supports_keypair=true --property image_supports_password=true --property supported=false <id from the converted volume image>
+    
+
+If needed, make it public:
+
+    
+    
+    glance --name "UNSUPPORTED: FreeBSD-10.0-RELEASE" --is-public True <id from the converted volume image>
+    
+
+That's it. You are done and have a good workable freebsd image.
+
+Boot a new instance from your newly created image:
+
+    
+    
+    nova boot --image <id from the converted volume image> --flavor "Standard 4" --availability-zone NL1 --nic net-id=00000000-0000-0000-0000-000000000000 --key-name <your ssh key> FreeBSD-10.0-RELEASE-cloudinit
+    
+
+When the instance has spawned you can login as the freebsd user,
+freebsd@ipaddress.
+
+   [1]: http://pellaeon.github.io/bsd-cloudinit/
+   [2]: https://cloudvps.com
+   [3]: https://raymii.org/s/tags/openstack.html
+   [4]: https://raymii.org/s/tutorials/Encrypted_Duplicity_Backups_to_Openstack_Swift_Objectstore.html
+   [5]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [6]: https://raymii.org/s/tutorials/FreeBSD_10.0-release_Openstack_Image.html
+   [7]: https://raymii.org/s/tutorials/FreeBSD_10.1-release_Openstack_Image.html
+   [8]: https://raymii.org/s/tutorials/FreeBSD_10.3-release_Openstack_Image.html
+   [9]: https://raymii.org/s/tutorials/FreeBSD_11.0-release_Openstack_Image.html
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

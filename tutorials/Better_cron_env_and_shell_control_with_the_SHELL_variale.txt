@@ -1,0 +1,159 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Better Cron env and shell control with the SHELL variable
+Author      : 	shtylman
+Date        : 	08-03-2013
+URL         : 	https://raymii.org/s/tutorials/Better_cron_env_and_shell_control_with_the_SHELL_variale.html
+Format      : 	Markdown/HTML
+---
+
+
+
+> original article from: <http://shtylman.com/post/cron-shell-power/> \-
+archived for importance.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+If you don't know what [cron][2] is this post is not for you.
+
+Using the `SHELL` variable in cron is more powerful than you may realize.
+
+## typical crontab
+
+Most people will have this type of setup in their crontab.
+
+    
+    
+    NODE_ENV=production
+    OTHER_VAR=foo
+    
+    */10 * * * * /path/to/node /path/to/my/script.js
+    
+
+If you don't want to repeat `/path/to/node` (or your runtime) over and over, you
+will add a `PATH` variable to go with the other variables.
+
+But what happens if you want to use something like [nvm][3] or [rvm][4] or
+[virtualenv][5], etc? It is not uncommon to have the above change to something
+like the following
+
+    
+    
+    */10 * * * * /path/to/my/launcher.sh
+    */10 * * * * /path/to/my/launcher_another.sh
+    
+
+Now you have several shell scripts which invoke the required commands to setup
+the environment and then run whatever program.
+
+## enter SHELL
+
+There is a little known special env variable for cron: `SHELL`. Most people know
+this variable can be used to change the shell your scripts run run (i.e.
+`SHELL=/bin/bash`), but it can actually run any file!
+
+So lets say I use nvm and want to setup my environment. Instead of making custom
+launchers for each command, I can simply do the following:
+
+    
+    
+    SHELL=/path/to/setup/cron.bash
+    
+    */10 * * * * node $HOME/foo.js
+    
+
+Now lets look at what `cron.bash` might look like:
+
+    
+    
+    #!/bin/bash
+    set -e
+    
+    source /etc/environment
+    source /etc/profile
+    
+    # setup any env variables you want here
+    export NODE_ENV=production
+    
+    # I use node so I want to add node path stuff via npm
+    # $HOME is available, but not many other env vars are by default
+    source $HOME/nvm/nvm.sh
+    
+    # restore SHELL env var for cron
+    SHELL=/bin/bash
+    # execute the cron command in an actual shell
+    exec /bin/bash --norc "$@"
+    
+
+For the most part it looks just like any other shell script. The important
+magical parts are the last 4 lines. These lines put back the SHELL variable to
+`/bin/bash` and then execute a bash shell to run the cronline command (the stuff
+for the specific cronjob).
+
+    
+    
+    SHELL=/full/path/to/cron.bash
+    MAILTO=cron@example.com
+    
+    # For more information see the manual pages of crontab(5) and cron(8)
+    #
+    # m h  dom mon dow   command
+    
+    # dummy cron command to print the environment variables ever minute
+    * * * * * env
+    
+    # node scripts can simply be run using `node` now
+    * * * * * node /path/to/script/.js
+    
+
+Now our cron files have a consistent environment setup and we can simply run
+whatever commands we need without further PATH tricks or nonsense.
+
+Go forth and update your dirty crontabs!
+
+_[\- home -][6]_
+
+   [1]: https://www.digitalocean.com/?refcode=7435ae6b8212
+   [2]: http://en.wikipedia.org/wiki/Cron
+   [3]: https://github.com/creationix/nvm
+   [4]: https://rvm.io/
+   [5]: https://pypi.python.org/pypi/virtualenv
+   [6]: http://shtylman.com/
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

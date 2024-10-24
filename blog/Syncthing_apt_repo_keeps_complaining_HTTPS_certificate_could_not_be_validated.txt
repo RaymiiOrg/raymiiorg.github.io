@@ -1,0 +1,512 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	APT keeps complaining that the HTTPS certificate cannot be validated?
+Author      : 	Remy van Elst
+Date        : 	11-01-2023 05:31
+URL         : 	https://raymii.org/s/blog/Syncthing_apt_repo_keeps_complaining_HTTPS_certificate_could_not_be_validated.html
+Format      : 	Markdown/HTML
+---
+
+
+
+![gnutls logo][15]
+
+> The [GnuTLS][16] logo, the TLS library that apt uses.
+
+Recently a few of my Ubuntu 20.04 and Debian 11 servers failed to run an `apt update` because it insisted that the HTTPS certificate for a repository could not be validated, while `curl` on the same system had no issues connecting. Join me on a deep dive into certificate validation and troubleshooting `apt`, digging into the C++ source code for `apt` and `GnuTLS` and in the end, it turned out to be my own fault due to permission on a folder. However, the error messages were totally unhelpful resolving the mysterious validation problem. This article was written over the period of a few days, chronologically during troubleshooting.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below:</b><br><br> <a href="https://leafnode.nl">I'm developing an open source monitoring app called  Leaf Node Monitoring, for windows, linux & android. Go check it out!</a><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">Consider sponsoring me on Github. It means the world to me if you show your appreciation and you'll help pay the server costs.</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">You can also sponsor me by getting a Digital Ocean VPS. With this referral link you'll get $200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!</a><br><br> </p>
+
+
+Syncthing is a wonderful peace of software which syncs files to multiple
+servers / computers. I use it to keep a subset of my files synced among
+multiple computers and even on my servers sometimes to sync images.
+
+The version in the debian repositories is old and Syncthing provide an
+`apt` repository with clear copy and paste-able instructions, so I often
+use that and have it as an Ansible playbook so I can roll it out and
+add the peers automatically (the configuration is a simple XML file).
+
+The current process to add the syncthing apt repository, as [documented 
+on their site][1] is the following, first get the GPG key, then add the apt
+repository marking it explicitly signed by the GPG key. Afterwards `update`
+and `install`:
+
+    sudo curl -o /usr/share/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg
+
+    echo "deb [signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | sudo tee /etc/apt/sources.list.d/syncthing.list
+
+    sudo apt-get update
+    sudo apt-get install syncthing
+
+
+However, the `apt update` step fails on my Ubuntu 20.04 and Debian 11 servers with the 
+following error:
+
+    Err:6 https://apt.syncthing.net syncthing Release Certificate verification failed: The certificate is NOT trusted. The certificate issuer is unknown.  Could not handshake: Error in the certificate verification. [IP: 143.244.196.6 443]
+
+The [guide][1] had a section on that specific error message:
+
+    Server Certificate Verification Failed
+
+    Especially for older distributions, your system TLS certificate store might be outdated. Since October 2021, a newer Let's Encrypt root certificate must be installed, or you may see an error similar to the following when running apt-get:
+
+    E: Failed to fetch https://apt.syncthing.net/dists/syncthing/stable/binary-armhf/Packages
+    server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile: none
+    E: Some index files failed to download. They have been ignored, or old ones used instead.
+
+    Please make sure you have the latest version of the ca-certificates package and try again:
+
+    sudo apt-get update
+    sudo apt-get install ca-certificates
+
+That suggestion was not helping, the `ca-certificates` package is up to date.
+
+Join me into a deep-dive on troubleshooting certificate validation paths for
+OpenSSL, curl, apt and GnuTLS on Debian and Ubuntu!
+
+
+### Comparing the installed certificates
+
+As of writing this article, the certificate is signed by Comodo ZeroSSL, not Lets Encrypt:
+
+    echo | openssl s_client -showcerts -connect apt.syncthing.net:443 2>&1 | grep -E "s:|i:"
+     0 s:CN = apt.syncthing.net
+       i:C = AT, O = ZeroSSL, CN = ZeroSSL ECC Domain Secure Site CA
+     1 s:C = AT, O = ZeroSSL, CN = ZeroSSL ECC Domain Secure Site CA
+       i:C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust ECC Certification Authority
+     2 s:C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust ECC Certification Authority
+       i:C = GB, ST = Greater Manchester, L = Salford, O = Comodo CA Limited, CN = AAA Certificate Services
+
+
+The strange thing is that `curl` on the same systems has no issues with the certificate:
+
+     curl -vI https://apt.syncthing.net
+
+Output:
+
+    [...]
+    * successfully set certificate verify locations:
+    *   CAfile: /etc/ssl/certs/ca-certificates.crt
+      CApath: /etc/ssl/certs
+    [...]
+    *  subject: CN=apt.syncthing.net
+    *  start date: Dec  1 00:00:00 2022 GMT
+    *  expire date: Mar  1 23:59:59 2023 GMT
+    *  subjectAltName: host "apt.syncthing.net" matched cert's "apt.syncthing.net"
+    *  issuer: C=AT; O=ZeroSSL; CN=ZeroSSL ECC Domain Secure Site CA
+    *  SSL certificate verify ok.
+
+Maybe `apt` uses a different root store? In [the apt changelog][6] I find some mentions on
+adding HTTPS support to the HTTP backend via GnuTLS and you used to have to install `apt-transport-https` but that is no longer needed since `apt` 1.5 as [the package states][7]:
+
+    This is a dummy transitional package - https support has been moved into the apt package in 1.5. It can be safely removed.
+
+Looking through [the apt source code][8] I can see `GnuTLS` being used as the SSL
+backend. Installing `gnutls-bin` for the `certtool` command and using that to
+check the certificate using not OpenSSL but GnuTLS, shows it as valid:
+
+    certtool --verify --infile chain.pem 
+
+Output:
+
+    Note that no verification profile was selected. In the future the medium profile will be enabled by default.
+    Use --verify-profile low to apply the default verification of NORMAL priority string.
+    Loaded system trust (125 CAs available)
+            Subject: CN=apt.syncthing.net
+            Issuer: CN=ZeroSSL ECC Domain Secure Site CA,O=ZeroSSL,C=AT
+            Checked against: CN=ZeroSSL ECC Domain Secure Site CA,O=ZeroSSL,C=AT
+            Signature algorithm: ECDSA-SHA384
+            Output: Verified. The certificate is trusted. 
+
+    Chain verification output: Verified. The certificate is trusted. 
+
+Using `gnutls-cli apt.syncthing.net --print-cert` to get that cert also shows it being
+valid:
+
+    Processed 125 CA certificate(s).
+    Resolving 'apt.syncthing.net:443'...
+    Connecting to '143.244.196.6:443'...
+    - Certificate type: X.509
+    - Got a certificate list of 3 certificates.
+    - Certificate[0] info:
+    [...]
+    - Status: The certificate is trusted. 
+
+
+Just to be sure, let's also test with OpenSSL.
+
+Using [the openssl commands from here][2] I can also print the exact serial number and signatures/key id's of the certificates presented:
+
+    OLDIFS=$IFS; IFS=':' certificates=$(openssl s_client -connect apt.syncthing.net:443 -showcerts -tlsextdebug 2>&1 </dev/null | sed -n '/-----BEGIN/,/-----END/ {/-----BEGIN/ s/^/:/; p}'); for certificate in ${certificates#:}; do echo $certificate | openssl x509 -noout -subject -fingerprint -issuer -ext subjectKeyIdentifier,authorityKeyIdentifier; echo; done; IFS=$OLDIFS
+
+Output:
+
+    subject=CN = apt.syncthing.net
+    SHA1 Fingerprint=29:CA:71:94:D0:96:9E:F0:B0:41:A3:B6:12:9A:2C:D9:81:68:9C:06
+    issuer=C = AT, O = ZeroSSL, CN = ZeroSSL ECC Domain Secure Site CA
+    X509v3 Authority Key Identifier: 
+        keyid:0F:6B:E6:4B:CE:39:47:AE:F6:7E:90:1E:79:F0:30:91:92:C8:5F:A3
+
+    X509v3 Subject Key Identifier: 
+        E6:56:EC:BD:0E:6F:0C:1E:0E:87:FD:55:18:20:94:21:EE:2B:DB:6E
+
+    subject=C = AT, O = ZeroSSL, CN = ZeroSSL ECC Domain Secure Site CA
+    SHA1 Fingerprint=7F:95:27:6D:49:51:49:9F:D7:56:DF:34:4A:A2:4F:B3:8C:EA:F6:78
+    issuer=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust ECC Certification Authority
+    X509v3 Authority Key Identifier: 
+        keyid:3A:E1:09:86:D4:CF:19:C2:96:76:74:49:76:DC:E0:35:C6:63:63:9A
+
+    X509v3 Subject Key Identifier: 
+        0F:6B:E6:4B:CE:39:47:AE:F6:7E:90:1E:79:F0:30:91:92:C8:5F:A3
+
+    subject=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust ECC Certification Authority
+    SHA1 Fingerprint=CA:77:88:C3:2D:A1:E4:B7:86:3A:4F:B5:7D:00:B5:5D:DA:CB:C7:F9
+    issuer=C = GB, ST = Greater Manchester, L = Salford, O = Comodo CA Limited, CN = AAA Certificate Services
+    X509v3 Authority Key Identifier: 
+        keyid:A0:11:0A:23:3E:96:F1:07:EC:E2:AF:29:EF:82:A5:7F:D0:30:A4:B4
+
+    X509v3 Subject Key Identifier: 
+        3A:E1:09:86:D4:CF:19:C2:96:76:74:49:76:DC:E0:35:C6:63:63:9A
+
+
+If the  `Subject Key Identifier` of the issuer matches the `Authority Key Identifier` of the 
+subject, you can easily identify the certificate validation path (via RFC 4158 (Internet X.509 Public Key Infrastructure: Certification Path Building), summarized [here][3]).
+
+
+On Debian and Ubuntu the certificates are built and combined, but the sources are
+stored in `/usr/share/ca-certificates`. Using `/etc/ca-certificates.conf` or 
+`dpkg-reconfigure ca-certificates` one can include or exclude root certificates,
+and in there I found the certificate for `USERTrust_ECC_Certification_Authority`. 
+The same command as above gives different output for this certificate:
+
+    openssl x509 -noout -subject -fingerprint -issuer -ext subjectKeyIdentifier,authorityKeyIdentifier -in /usr/share/ca-certificates/mozilla/USERTrust_ECC_Certification_Authority.crt
+
+Output:
+
+    subject=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust ECC Certification Authority
+    SHA1 Fingerprint=D1:CB:CA:5D:B2:D5:2A:7F:69:3B:67:4D:E5:F0:5A:1D:0C:95:7D:F0
+    issuer=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust ECC Certification Authority
+    X509v3 Subject Key Identifier: 
+        3A:E1:09:86:D4:CF:19:C2:96:76:74:49:76:DC:E0:35:C6:63:63:9A
+
+The Subject Key Identifier and the subject are the same so depending on the validation implementation, this should be good enough. The first `curl` command to get the GPG key
+worked without issues, so `curl` has no issues with the certificate. 
+
+### Adding the ZeroSSL intermediate certificate
+
+My first guess was to try and add the ZeroSSL intermediate certificate. Should
+not be needed since the chain of trust is complete because the system already
+knows about the `USERTrust ECC Certification Authority` certificate, but
+still worth a try. 
+
+Place the PEM file in `/usr/share/ca-certificates/ZeroSSL.crt`, add that file
+to `/etc/ca-certificates.conf` and execute the command
+`update-ca-certificates`. 
+
+The command `update-ca-certificates` will compile all certificates into one file,
+`/etc/ssl/certs/ca-certificates.crt` which is used by the system.
+
+We can then use the following `awk` command to check all installed certificates and print
+their subject (or fingerprint):
+
+    awk -v cmd='openssl x509 -noout -subject -fingerprint -issuer -ext subjectKeyIdentifier,authorityKeyIdentifier; echo' '/BEGIN/{close(cmd)};{print | cmd}' < /etc/ssl/certs/ca-certificates.crt 
+
+This output, at the bottom, includes the new ZeroSSL intermediate issuer:
+
+    subject=C = AT, O = ZeroSSL, CN = ZeroSSL ECC Domain Secure Site CA
+    SHA1 Fingerprint=7F:95:27:6D:49:51:49:9F:D7:56:DF:34:4A:A2:4F:B3:8C:EA:F6:78
+    issuer=C = US, ST = New Jersey, L = Jersey City, O = The USERTRUST Network, CN = USERTrust ECC Certification Authority
+    X509v3 Authority Key Identifier: 
+        keyid:3A:E1:09:86:D4:CF:19:C2:96:76:74:49:76:DC:E0:35:C6:63:63:9A
+
+    X509v3 Subject Key Identifier: 
+        0F:6B:E6:4B:CE:39:47:AE:F6:7E:90:1E:79:F0:30:91:92:C8:5F:A3
+
+However, `apt update` was still giving the same error.
+
+### Going into the source code
+
+Since my manual attempts to add the certificate failed and the debug information
+is lacking, let's look deeper, starting in the apt source code. Grepping
+for `GnuTLS` and the error message `Certificate verification failed` 
+brought me to [line 850 of][9] `methods/connect.cc`:
+
+     if (err == GNUTLS_E_CERTIFICATE_VERIFICATION_ERROR) {
+        gnutls_datum_t txt;
+        auto type = gnutls_certificate_type_get(session);
+        auto status = gnutls_session_get_verify_cert_status(session);
+        if (gnutls_certificate_verification_status_print(status, type, &txt, 0) == 0) {
+           _error->Error("Certificate verification failed: %s", txt.data);
+        }
+
+That [error code][10] says little:
+
+    -348    GNUTLS_E_CERTIFICATE_VERIFICATION_ERROR Error in the certificate verification.
+
+But looking further in the apt source code, in `UnwrapTLS`, I can see another error
+message, `No system certificates available. Try installing ca-certificates`:
+
+   
+    // No CaInfo specified, use system trust store.
+    err = gnutls_certificate_set_x509_system_trust(tlsFd->credentials);
+    if (err == 0)
+    Owner->Warning("No system certificates available. Try installing ca-certificates.");
+
+Maybe GnuTLS has trouble finding our system certificates. Lets figure out
+which file is used by default as a root trust store.
+
+The method `gnutls_certificate_set_x509_system_trust`, returns the number of
+certificates processed or a negative error code on error. Since we get
+exactly zero (0), it seems to be that GnuTLS is unable to load the system
+certificate store. I wonder where it tries to load them from. 
+
+This method [seems to call][10] `gnutls_x509_trust_list_add_system_trust`,
+which in turn calls `add_system_trust`. The latter one is conditional
+`#ifdef`, but the implementation I'm looking at checks for
+`DEFAULT_TRUST_STORE_FILE`. That is not defined in code but is a
+`./configure` option, wonderful syntax but at least it has default
+filenames:
+
+    dnl auto detect https://lists.gnu.org/archive/html/help-gnutls/2012-05/msg00004.html
+    AC_ARG_WITH([default-trust-store-file],
+      [AS_HELP_STRING([--with-default-trust-store-file=FILE],
+        [use the given file default trust store])], with_default_trust_store_file="$withval",
+      [if test "$build" = "$host" && test x$with_default_trust_store_pkcs11 = x && test x$with_default_trust_store_dir = x && test x$have_macosx = x;then
+      for i in \
+        /etc/ssl/ca-bundle.pem \
+        /etc/ssl/certs/ca-certificates.crt \
+        /etc/pki/tls/cert.pem \
+        /usr/local/share/certs/ca-root-nss.crt \
+        /etc/ssl/cert.pem
+        do
+        if test -e "$i"; then
+          with_default_trust_store_file="$i"
+          break
+        fi
+      done
+      fi]
+    )
+
+
+I'm not sure which compile option was used for the Debian packages, but I only
+have the file `/etc/ssl/certs/ca-certificates.crt` on my servers. Downloading
+the [source package][14] and looking at the `rules` file I can see that that
+is also the file used during compilation:
+
+    CONFIGUREARGS = \
+        [...]
+        --with-default-trust-store-file=/etc/ssl/certs/ca-certificates.crt \
+        [...]
+
+After all that searching through code we're still not any further. The files
+exist, another GnuTLS using-program can validate the certificate, so now
+what?
+
+### My trusty old friend, strace
+
+As a last resort I tried `strace`. It shows you all the syscalls that are
+made. Lots of noise, but with a bit of filtering we can get useful
+information:
+
+    strace -f -e stat,read,write,execve,openat -s 2048 apt update 2>&1 | less
+
+In that massive list of output I see this which seems relevant:
+
+    [pid 2522130] execve("/usr/lib/apt/methods/https", ["/usr/lib/apt/methods/https"], 0x7fff668e0300 /* 23 vars */) = 0
+
+This seems to be a URI handler for getting files from repositories. APT supports multiple schemes, methods as APT calls it, for repositories, such as http, ftp and cd-rom. It turns out that
+it did not have any options to tweak. Other strace output didn't have much to go on either.
+
+
+### Disabling SSL, bad idea!
+
+Just disabling SSL certificate validation for this specific hostname is an
+option, since the packages are signed by a specific GPG key (mentioned in
+`sources.list`) and the `curl` command gave no certificate warning, and all
+manual troubleshooting shows me that, at this moment, the repository is
+signed by a trusted issuer.
+
+I don't like disabling verification, but since I was out of options, I added
+the [following options][5] to the specific `apt.conf.d` file:
+
+    cat /etc/apt/apt.conf.d/80-ssl-exceptions 
+
+File contents:
+
+    Acquire::https::apt.syncthing.net::Verify-Peer "false";
+    Acquire::https::apt.syncthing.net::Verify-Host "false";
+
+This results in no more errors during an `apt update`. But that was simply not
+an option for the long run. One more attempt, starting over a few days later.
+Sometimes it helps to take a step back and let it rest when you're knee-deep
+in a problem.
+
+### Manually adding the entire chain for Apt
+
+Reading the manual page again for this config file I saw the `CaInfo` option.
+Earlier I tried that, by adding just the intermediate ZeroSSL CA file:
+
+    # file: /etc/apt/apt.conf.d/80-ssl-exceptions
+    Acquire::https::apt.syncthing.net::CaInfo "/etc/ssl/certs/apt.syncthing.net.chain.pem";
+
+This failed with the following error:
+
+      Could not load certificates from /etc/ssl/certs/apt.syncthing.net.chain.pem (CaInfo option): Error while reading file. [IP: 143.244.196.6 443]
+
+Trying the default system certificate store (`/etc/ssl/certs/ca-certificates.crt`) explicitly
+configured as `CaInfo` gave the same error. **Then it dawned on me**, another ansible playbook
+recently, a few weeks earlier, did stuff with the `/etc/ssl/` folder regarding certificate synchronization. 
+
+Look at the permissions from a working server:
+
+    remy@workingserver:~$ ls -lah /etc/ssl/
+    total 40K
+    drwxr-xr-x  4 root root     4.0K Oct 26  2021 .
+    drwxr-xr-x 94 root root     4.0K Jan 10 06:51 ..
+    drwxr-xr-x  2 root root      16K Feb 15  2022 certs
+    -rw-r--r--  1 root root      11K Aug 24  2021 openssl.cnf
+    drwx--x---  2 root ssl-cert 4.0K Nov 26  2021 private
+
+Now compare that to all the non-working servers:
+
+    root@non-working-server:~# ls -lah /etc/ssl/
+    total 48K
+    drw-r--r--  5 root root     4.0K Jan  8 13:00 .
+    drwxr-xr-x 90 root root     4.0K Jan  8 12:25 ..
+    drwxr-xr-x  2 root root      20K Jan  8 12:25 certs
+    -rw-r--r--  1 root root      11K May 30  2019 openssl.cnf
+    drwx--x---  2 root ssl-cert 4.0K Mar 19  2021 private
+
+Do you see it?
+
+    # /etc/ssl/
+    drw-r--r--  5 root root     4.0K Jan  8 13:00 .
+    drwxr-xr-x  4 root root     4.0K Oct 26  2021 .
+
+
+Dropping to the user that `apt` uses shows me the error in more detail:
+
+    su - _apt -s /bin/bash
+    _apt@server:/$ ls -lah /etc/ssl/
+    ls: cannot access '/etc/ssl/certs': Permission denied
+    ls: cannot access '/etc/ssl/.': Permission denied
+        
+    total 0
+    d????????? ? ? ? ?            ? .
+    d????????? ? ? ? ?            ? certs
+
+    _apt@server:/$ ls -lah /etc/ssl/certs
+    ls: cannot access '/etc/ssl/certs': Permission denied
+
+The execute (`x`) bit for the folder `/etc/ssl/` was missing. Since you can't
+`execute` a directory, the execute bit has been put to better use. The
+execute bit on a directory allows you to access items that are inside the
+directory, even if you cannot list the directories contents. From the manpage:
+
+    The letters rwxXst select file mode bits for the affected users: read (r), write (w), execute (or search for directories) (x), 
+
+
+The folder on the broken servers has permission `644` and the working server has 
+`755`. (The command `stat -c %a /path` shows you the permissions in octal form). 
+The playbook I talked about earlier from a few weeks ago had given the `/etc/ssl`
+folder the wrong permissions.
+
+Lets try what happens with the correct permissions:
+
+    chmod 755 /etc/ssl/
+    apt update
+
+Output:
+
+    Hit:1 https://apt.syncthing.net syncthing InRelease
+    Reading package lists... Done
+    Building dependency tree       
+    Reading state information... Done
+    All packages are up to date.
+
+No more errors!
+
+Re-doing the `strace` part and grepping for `Permission Denied` also showed the error:
+
+    [pid 2526028] openat(AT_FDCWD, "/etc/ssl/certs/ca-certificates.crt", O_RDONLY) = -1 EACCES (Permission denied)
+
+I missed it due to there being so much other output. Knowing what to look for
+makes troubleshooting so much easier.
+
+### Conclusion
+
+The error message `The certificate issuer is unknown` put me on the wrong track,
+going down a rabbit hole of SSL certificate validation and SSL library code,
+even into which SSL backend `apt` uses and how they validate certificates. 
+
+Only after a few days and re-reading the man page, trying out a different option,
+I got a more clear error message: `Error while reading file`. After that it was 
+an easy fix. 
+
+
+Since I was running as `root` and was unaware `apt` drops privileges
+(to `_apt:nogroup`), I didn't look into the permissions right away. If the
+error message had been `permission denied while reading ca issuer file /etc/ssl/certs/ca-certificates.crt`, it would have been way more clear and easier to fix.
+
+But hey, I learned a bit more about how recent versions of `apt` handle 
+SSL, took a look at the `apt` `c++` code and in the end banged my head
+against my desk since the issue was my fault all along. But that doesn't
+really matter since the journey towards the solution was valuable.
+
+
+
+[1]: https://web.archive.org/web/20221231011933/https://apt.syncthing.net/ 
+[2]: /s/articles/OpenSSL_-_Get_all_certificates_from_a_website_in_plain_text.html
+[3]: https://web.archive.org/web/20230108204354/https://stackoverflow.com/questions/38899286/how-to-get-the-root-ca-certificate-fingerprint-using-openssl
+[4]: https://web.archive.org/web/20230108203241/https://manpages.ubuntu.com/manpages/focal/man5/apt.conf.5.html
+[5]: https://web.archive.org/web/20220516183420/https://manpages.ubuntu.com/manpages/focal/man1/apt-transport-https.1.html
+[6]: https://raw.githubusercontent.com/Debian/apt/main/debian/changelog
+[7]: https://web.archive.org/web/20230110062913/https://packages.debian.org/bullseye/apt-transport-https
+[8]: https://github.com/Debian/apt/blob/5919d2d18eac6e445a59da23246df94258e103eb/methods/connect.cc#L808
+[9]: https://salsa.debian.org/apt-team/apt/-/blob/main/methods/connect.cc#L850
+[10]: https://github.com/gnutls/gnutls/blob/4e5afffcba3e5f898eca7c450408605969135d48/lib/cert-cred-x509.c#L1281
+[11]: https://gnutls.org/reference/gnutls-gnutls.html#gnutls-certificate-set-x509-system-trust
+[12]: https://github.com/gnutls/gnutls/blob/4e5afffcba3e5f898eca7c450408605969135d48/lib/system/certs.c#L372
+[13]: https://github.com/gnutls/gnutls/blob/4e5afffcba3e5f898eca7c450408605969135d48/configure.ac#L1097
+[14]: https://packages.ubuntu.com/source/focal/gnutls28
+[15]: /s/inc/img/gnutls-logo-nobackground.png
+[16]: https://gnutls.org/gnutls-logo.html
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
