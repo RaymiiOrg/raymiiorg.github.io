@@ -105,8 +105,7 @@ work items one by one. It first <code>pop&#39;s</code> an item from the queue, t
 <code>mutex</code> is temporarily released during processing of the item to allow others
 to add more items to the queue. Processing of work items can be time
 consuming and we don&#39;t want others to wait before adding items. Once the work
-is completed, the worker thread has a small sleep to reduce CPU usage when
-there is no work to do, helping prevent busy waiting.</p>
+is completed, the worker thread starts again, waiting on the <code>condition_variable</code>.</p>
 
 <p>Note that a <code>std::queue</code> itself is not thread safe. But due to my use of mutex
 locks in this class there are no race conditions. Reading or writing via
@@ -236,9 +235,6 @@ private:
                 lock.lock();
             }
             // End processing work item.
-
-            // Preventive sleep to reduce busy waiting
-            std::this_thread::sleep_for(50ms);
         }
     }
 
