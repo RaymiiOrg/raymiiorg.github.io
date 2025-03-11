@@ -1,0 +1,350 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Safely expose the Kubernetes Dashboard in Traefik k3s via a ServersTransport
+Author      : 	Remy van Elst
+Date        : 	11-03-2025 22:11
+URL         : 	https://raymii.org/s/tutorials/Safely_expose_the_Kubernetes_Dashboard_in_Traefik_k3s_via_a_ServersTransport.html
+Format      : 	Markdown/HTML
+---
+
+
+
+I'm using the Headlamp dashboard for my [high-available local kubernetes cluster](/s/tutorials/High_Available_k3s_kubernetes_cluster_with_keepalived_galera_and_longhorn.html) because I find that to be faster, more clear and useful than the full blown Kubernetes Dashboard. In [my first article](/s/tutorials/My_First_Kubernetes_k3s_cluster_on_3_Orange_Pi_Zero_3s_including_k8s_dashboard_hello-node_and_failover.html#toc_4) I accessed the dashboard via a local port forward.
+This article documents how to expose the dashboard via an `Ingress` and some `Traefik` specific `annotations`. The dashboard helm chart sets up HTTPS internally, `Traefik` does not like that by default. Most of the time, all internal cluster communication is insecure (I'm not sure why, seems to be a bad idea).
+A few of the guides online suggest disabling HTTPS for the dashboard internally or, for the k3s specific case, disabling HTTPS validation entirely. Both of those are too broad for my use case, so I decided to figure out how to make `Traefik` talk to the `kubernetes-dashboard-kong-proxy` via `https`, without disabling certificate validation.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below. It means the world to me if you  show your appreciation and you'll help pay the server costs:</b><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">GitHub Sponsorship</a><br><br> <a href="https://pcbway.com/g/e7yQRg">PCBWay referral link (You get $5, I get $20 after you've placed an order)</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocea referral link  ($200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!)</a><br><br> </p>
+
+
+
+This guide assumes you have a working Kubernetes setup using Traefik. In my
+case the version of [Kubernetes/k3s](https://docs.k3s.io/release-notes/v1.30.X) 
+I use for this article is `v1.30.2+k3s1`.`
+
+If you haven't got such a cluster, maybe checkout [all my other kubernetes posts](/s/tags/k8s.html).
+
+
+### Installing kubernetes-dashboard via Helm
+
+In my [my first guide](/s/tutorials/My_First_Kubernetes_k3s_cluster_on_3_Orange_Pi_Zero_3s_including_k8s_dashboard_hello-node_and_failover.html#toc_4)
+I installed the dashboard using the `helm` package manager for kubernetes:
+
+    helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+    helm upgrade --install kubernetes-dashboard \
+        kubernetes-dashboard/kubernetes-dashboard \
+        --create-namespace \
+        --namespace kubernetes-dashboard \
+        --values values.yaml
+
+You need to download the [values.yaml](https://github.com/kubernetes/dashboard/blob/03b43ad0744bc45fafba0fce3ea8471a3f8b9f04/charts/kubernetes-dashboard/values.yaml) 
+file and place it in the folder where you are running the `helm` command from.
+
+Test the dashboard by exposing a local port forward:
+
+    kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+
+Go to [https://localhost:8443/#/login](https://localhost:8443/#/login) in your browser. If you
+see the page asking for a Bearer Token, you're good to continue on.    
+
+### Ingress Setup
+
+The Helm chart creates a service, to which the previous command instructs you
+to make a port forward to:
+
+     kubectl -n kubernetes-dashboard get services 
+
+Output:
+
+    NAME                                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+    [...]
+    kubernetes-dashboard-kong-proxy        ClusterIP   10.43.168.46    <none>        443/TCP   22h
+
+You can use the following command to get even more info on the service, for example the `EndPoint`:
+
+     kubectl -n kubernetes-dashboard describe svc/kubernetes-dashboard-kong-proxy
+
+You can also use the dedicated section in the Helm chart to configure an Ingress, but
+in my case I wanted to do some more stuff, outside of the scope of this article, so I
+manually made an `Ingress`.
+
+I have a local self signed CA setup, [see this post for more info](/s/tutorials/Self_signed_Root_CA_in_Kubernetes_with_k3s_cert-manager_and_traefik.html). 
+This guide assumes you also have such a setup, for `cert-manager` and Lets Encrypt
+you might need to change some values regarding those parts to match your
+setup.
+
+
+Create a file `dashboard-ingress.yaml` with the following contents:
+
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: dashboard-ingress
+      namespace: kubernetes-dashboard  
+      annotations:
+        cert-manager.io/cluster-issuer: spnw-intermediate-ca1-issuer
+        cert-manager.io/common-name: "dashboard.k3s.homelab.mydomain.org"
+        kubernetes.io/ingress.class: traefik       
+    spec:
+      ingressClassName: traefik
+      rules:
+        - host: dashboard.k3s.homelab.mydomain.org
+          http:
+            paths:
+              - path: "/"
+                pathType: Prefix
+                backend:
+                  service:
+                    name: kubernetes-dashboard-kong-proxy
+                    port:
+                      number: 443
+      tls:
+        - hosts:
+          - dashboard.k3s.homelab.mydomain.org
+          secretName: "dashboard-cert-secret"
+
+
+This is a fairly simple ingress that sends traffic to the `kubernetes-dashboard-kong-proxy`
+service over port 443.
+
+Apply the YAML file:
+
+    kubectl apply -f dashboard-ingress.yaml
+
+If you navigate to the configured hostname in your browser, you should see
+`Internal Server Error`. There is nothing wrong with the dashboard however.
+
+Time to dive in to debugging this issue.
+
+### Enable Traefik access logs in k3s
+
+k3s uses the official Traefik Helm chart thus any required config changes must be
+done there. 
+
+You must create or edit the following file **on each k3s server node**:
+
+    vim /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+  
+Add the following:
+
+    apiVersion: helm.cattle.io/v1
+    kind: HelmChartConfig
+    metadata:
+      name: traefik
+      namespace: kube-system
+    spec:
+      valuesContent: |-
+        logs:
+          general:
+            level: "DEBUG"
+          access:
+            enabled: true
+
+Restart the `k3s` service to make this active. You can then use the following 
+command to view the logs:
+
+    kubectl logs -n kube-system -l app.kubernetes.io/name=traefik -f
+
+You can confirm that a `500 Internal Server Error` is being sent by visiting the 
+dashboard page, then checking the logs:
+
+    
+    10.42.0.58 - - [10/Mar/2025:19:49:33 +0000] "GET / HTTP/2.0" 500 21 "-" "-" 261 "websecure-kubernetes-dashboard-dashboard-ingress-dashboard-k3s-homelab-mydomain-org@kubernetes" "https://10.42.5.42:8443" 45ms
+
+When I tried to bypass the `kong-proxy` service, by sending the Ingress directly
+to the `kubernetes-dashboard-web` Service, I got the following error when trying
+to login:
+
+    Unknown error (200): Http failure during parsing for https://dashboard.k3s.homelab.mydomain.org/api/v1/csrftoken/login 
+
+This same error appeared when I tried to enable `http` and sending the Ingress
+to port 80 of the `kong-proxy`.    
+
+### Adding a ServersTransport
+
+This is a `Traefik` specific configuration. If you use the `nginx` Ingress provider,
+this will not apply. Traefik can be configured with a `ServersTransport`, where
+you can, among other things, instruct Traefik to use a specific root certificate
+as a trusted one.
+
+In you `dashboard-ingress.yaml` file, add a section to describe the `ServersTransport`:
+
+    ---
+    apiVersion: traefik.io/v1alpha1
+    kind: ServersTransport
+    metadata:
+      name: custom-tls-verify
+      namespace: kubernetes-dashboard
+    spec:  
+      rootCAsSecrets:
+      - kubernetes-dashboard-kong-proxy-cert
+      serverName: kubernetes-dashboard-kong-proxy.kubernetes-dashboard
+      insecureSkipVerify: false 
+
+In the `values.yaml` file for the [Helm chart](https://github.com/Kong/charts/blob/main/charts/kong/values.yaml), add the following configuration to use the local CA Issuer under the `kong:` section:
+
+    kong:
+      [...]
+      certificates:
+        enabled: true
+        clusterIssuer: spnw-intermediate-ca1-issuer
+        proxy:
+          enabled: true
+          commonName: kubernetes-dashboard-kong-proxy
+          dnsNames: 
+          - kubernetes-dashboard-kong-proxy
+          - kubernetes-dashboard-kong-proxy.svc.cluster.local
+          - kubernetes-dashboard-kong-proxy.kubernetes-dashboard
+
+Update the `clusterIssuer` to match your one.
+
+Also add or update the following configuration for the `ServersTransport` annotation,
+under the `kong.proxy` section.
+
+    kong:
+      [...]
+      proxy:
+        type: ClusterIP
+        http:
+          enabled: false
+        annotations: 
+          traefik.ingress.kubernetes.io/service.serversscheme: https 
+          traefik.ingress.kubernetes.io/service.serverstransport: kubernetes-dashboard-custom-tls-verify@kubernetescrd
+
+
+**In Traefik, these annotations must be on the Service, not the Ingress**.
+
+The format is `namespace-serverstransportname@kubernetescrd`. 
+
+Install the Helm chart again, then check for the new certificate being created:
+
+    kubectl get certificates -n kubernetes-dashboard
+
+Output:
+
+    NAME                                READY   SECRET                                   AGE
+    kubernetes-dashboard-kong-admin     True    kubernetes-dashboard-kong-admin-cert     10m
+    kubernetes-dashboard-kong-cluster   True    kubernetes-dashboard-kong-cluster-cert   10m
+    kubernetes-dashboard-kong-proxy     True    kubernetes-dashboard-kong-proxy-cert     10m
+
+Next, check the new secret being created:
+
+    kubectl get secrets --namespace kubernetes-dashboard
+
+Output:
+
+    NAME                                         TYPE                 DATA   AGE
+    kubernetes-dashboard-kong-admin-cert         kubernetes.io/tls    3      36s
+    kubernetes-dashboard-kong-cluster-cert       kubernetes.io/tls    3      36s
+    kubernetes-dashboard-kong-proxy-cert         kubernetes.io/tls    3      36s
+
+
+You can inspect the certificate using OpenSSL:
+
+    kubectl get secret kubernetes-dashboard-kong-proxy-cert -n kubernetes-dashboard -o json |  jq -r '.data["tls.crt"]' |  base64 --decode | openssl x509 -noout -text
+
+Output:
+
+    Certificate:
+        Data:
+            [...]
+            Issuer: CN = spnw-intermediate-ca1
+            Validity
+                Not Before: Mar 10 21:40:13 2025 GMT
+                Not After : Jun  8 21:40:13 2025 GMT
+            Subject: CN = kubernetes-dashboard-kong-proxy
+            [...]
+                X509v3 Subject Alternative Name:
+                DNS:kubernetes-dashboard-kong-proxy, DNS:kubernetes-dashboard-kong-proxy.svc.cluster.local, DNS:kubernetes-dashboard-kong-proxy.kubernetes-dashboard
+       
+
+You can run the official `curl` pod inside the namespace to check the certificate:
+
+     kubectl run curl --image=curlimages/curl -i --tty --rm -n kubernetes-dashboard -- /bin/sh
+
+Inside that shell, execute the following command:
+
+    /usr/bin/curl -k  -w '\n%{certs}\n' https://kubernetes-dashboard-kong-proxy:443
+
+The output contains the certificate subject and issuer:
+
+    Subject:CN = kubernetes-dashboard-kong-proxy
+    Issuer:CN = spnw-intermediate-ca1
+    [...]    
+    Subject:CN = spnw-intermediate-ca1
+    Issuer:CN = spnw-root-ca
+
+
+Apply the `yaml` file:
+
+    kubectl apply -f dashboard-ingress.yaml    
+
+In the normal situation you would now be finished and the dashboard will pop up. In my case
+I had another error in the Traefik debug log.
+
+####  root or intermediate certificate is not authorized to sign for this name: DNS name 
+
+My self signed root CA [has a nameConstraint](/s/tutorials/nameConstraints_on_your_Self_Signed_Root_CA_in_Kubernetes_with_cert_manager.html).
+This means that if it leaks out, it can only be used to sign certificates
+under `k3s.homelab.domain.org`. I've trusted it in my browser to not get 
+certificate issues, but that is way too broad for a certificate I'll only
+be using in this test setup. 
+
+The debug log of Traefik showed this line:
+
+    time="2025-03-10T22:21:40Z" level=debug msg="'500 Internal Server Error' caused by: tls: failed to verify certificate: x509: a root or intermediate certificate is not authorized to sign for this name: DNS name \"kubernetes-dashboard-kong-proxy\" is not permitted by any constraint"    
+
+This is good, this means that the certificate validation between Traefik and the dashboard
+is doing its thing.     
+
+
+In my case I created a new Root CA and Intermediate CA without these nameConstraints in
+`cert-manager` and used those for the dashboard internal configuration.
+
+
+### Verifying that it works
+
+Try to visit the dashboard in your browser, you will not get an `Internal Server Error` anymore.
+
+The Traefik logs also show a HTTP 200 going to the backend (notice the `https://10.42.5.119:8443`) 
+part.
+
+    10.42.0.58 - - [11/Mar/2025:20:21:53 +0000] "GET /config HTTP/2.0" 200 80 "-" "-" 105366 "websecure-kubernetes-dashboard-dashboard-ingress-dashboard-k3s-home-spnw-nl@kubernetes" "https://10.42.5.119:8443" 4ms
+
+![dashboard secure](/s/inc/img/kubernetes-dashboard.png)    
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
