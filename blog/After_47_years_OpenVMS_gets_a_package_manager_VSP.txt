@@ -1,0 +1,781 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	After 47 years, OpenVMS gets a package manager (VSP)!
+Author      : 	Remy van Elst
+Date        : 	17-03-2025 20:33
+URL         : 	https://raymii.org/s/blog/After_47_years_OpenVMS_gets_a_package_manager_VSP.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+As of the 18th of February, OpenVMS, known for its stability and high-availability, 47 years old and ported to 4 different CPU architecture, has a package manager!
+This article shows you how to use the package manager and talks about a few of its quirks. It's an early beta version, and you do notice that when using it.
+A small list of things I noticed, coming from a Linux (apt/yum/dnf) background:
+There seems to be no automatic dependency resolution and the dependencies it does list are incomplete. No update management yet and no support for your own package repository, only the VSI official one. Service startup or login script changes are not done automatically. Packages with multiple installer files fail and require manual intervention.
+It does correctly identify the architectures, has search support and makes it way easier to install software.
+The time saved by downloading, manually copying and starting installation is huge, so even this early beta is a very welcome addition to OpenVMS.
+
+
+VSI describes it in their early version manual like this:
+
+> VSP is a package management tool for OpenVMS which uses VMS Service Platform
+  REST API to manage and install PCSI packages.
+
+
+![VSP list](/s/inc/img/5b58347c733240c9b4b5fe295b25a396.png)
+
+> OpenVMS VSP Package manager
+
+For example, installing the latest C++ compiler is now as easy as executing
+this command:
+
+    VSP> DOWNLOAD /INSTALL VSI-X86VMS-CXX-A1001-3_250204-1
+
+(Or it would be if the package manager supported packages with multiple
+installers inside it, in this case the main installer and a patch. But
+more on that later on.)
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below. It means the world to me if you  show your appreciation and you'll help pay the server costs:</b><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">GitHub Sponsorship</a><br><br> <a href="https://pcbway.com/g/e7yQRg">PCBWay referral link (You get $5, I get $20 after you've placed an order)</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocea referral link  ($200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!)</a><br><br> </p>
+
+
+You can [read all my OpenVMS articles here](/s/tags/openvms.html).
+
+I've done all my testing on OpenVMS x86 since I have no Itanium hardware to
+test on. To follow along with this article, you do need to  OpenVMS E9.2-3.
+You can either apply to the [Ambassador Program](https://vmssoftware.com/products/licenses/),
+use the 
+[Hobbyist License Virtual Machine](https://vmssoftware.com/community/community-license/), 
+or become a paying customer of VSI. 
+
+### Summary
+
+If you don't want to read any technical details, here's a summary.
+
+VSP simplifies package management on OpenVMS, allowing you to search,
+download, and install software with simple commands, replacing manual
+downloading, extracting and installing software.
+
+Current Features:
+
+- Package search for available software.
+- One-command installations.
+- Centralized repository access.
+
+Current Limitations:
+
+- No automatic dependency resolution.
+- Packages with multiple installers fail (e.g., main+patch)
+- Lacks update management.
+- No support for private repositories.
+
+Future improvements, to match modern package managers (APT, YUM, DNF), VSP
+needs:
+
+- Automated dependency handling.
+- Update and upgrade capabilities.
+- Private repository support.
+
+Though in early beta, VSP is an amazing step forward for efficient OpenVMS
+software management.
+
+
+Lets continue on diving into the fun part.
+
+### Installing the OpenVMS Package Manager (VSP)
+
+You need to download this file from the VSI Service Portal:
+
+    VSI-X86VMS-VSP-E0100-0-1
+    File Size:17.24 MB (18 080 118 bytes)
+    MD5 Checksum:28b1dfc0ee1426981a5f44fc1dd61633
+
+Copy it over to your OpenVMS installation. I've got a specific folder for my random stuff:
+
+  
+    $ show def
+      REMY1$DKA100:[REMY]
+    
+    $ dir
+    Directory REMY1$DKA100:[REMY]
+    
+    VSI-X86VMS-VSP-E0100-0-1^(1^).zip;1     VSI-X86VMS-VSP-E0100-0-1.PCSI$COMPRESSED;1
+    VSI-X86VMS-VSP-E0100-0-1.PCSI$COMPRESSED_VNC;1
+
+Don't forget to install `SSL 111`, SSL3 does not work.
+
+
+Start the Product Installation:
+
+     PRODUCT INSTALL VSP
+
+The installation failed when I tried it the first with a validation error:
+
+
+    Performing product kit validation of signed kits ...
+    
+    %PCSI-E-VALFAILED, validation of REMY1$DKA100:[REMY]VSI-X86VMS-VSP-E0100-0-1.PCSI$COMPRESSED;1 failed
+    -PCSI-E-VSI_TEXT, Verification of signed file failed
+    error no <33554536>, text: <error:02000068:rsa routines::bad signature>
+    error no <478674948>, text: <error:1C880004:Provider routines::RSA lib>
+    Failed
+    
+    %PCSIUI-E-ABORT, operation terminated due to an unrecoverable error condition
+    
+
+After removing all files in the folder and `unzip`-ing them once more, the
+install continued on:
+
+    
+    $ PRODUCT INSTALL VSP
+    
+    Performing product kit validation of signed kits ...
+    %PCSI-I-VSIVALPASSED, validation of REMY1$DKA100:[REMY]VSI-X86VMS-VSP-E0100-0-1.PCSI$COMPRESSED;2 succeeded
+    
+    The following product has been selected:
+        VSI X86VMS VSP E1.0-0                  Layered Product
+    
+    Do you want to continue? [YES] y
+    
+    Configuration phase starting ...
+    
+    You will be asked to choose options, if any, for each selected product and for
+    any products that may be installed to satisfy software dependency requirements.
+    
+    Configuring VSI X86VMS VSP E1.0-0
+    
+        VMS Software Inc.
+    
+    * This product does not have any configuration options.
+    
+    Execution phase starting ...
+    
+    The following product will be installed to destination:
+        VSI X86VMS VSP E1.0-0   
+            
+    Portion done: 0%...90%...100%
+    
+    The following product has been installed:
+        VSI X86VMS VSP E1.0-0                  Layered Product
+    
+    VSI X86VMS VSP E1.0-0
+    
+        Post-installation tasks are required.
+    
+    
+        To allow all users to use the VSP utility, add the following foreign
+        command definition to SYS$MANAGER:SYLOGIN.COM:
+    
+            $ VSP :== $SYS$COMMON:[VSP]VSP.EXE
+
+
+Don't forget to add `VSP` to your `SYLOGIN.COM` file. For now, we can continue
+on by manually defining the foreign command:
+
+     VSP :== $SYS$COMMON:[VSP]VSP.EXE
+
+
+### Using the package manager (VSP)
+
+The package manager only works with the `VSI` service portal, no possibility
+for your own repositories (yet?). Therefore you must login with your Service
+Portal Credentials. Start `VSP`, then enter the `LOGIN` command:
+
+    
+    $ VSP
+
+Output:
+
+    Most functionality is unavailable without a valid login.
+    OS version of current system is: E9.2-3.
+    vsp> 
+
+On the new `vsp>` prompt, login with your VSI credentials:
+
+    vsp> LOGIN
+
+Output:
+
+    _USERNAME: VSI_SP_username
+    _PASSWORD: NOT_SHOWN
+    Save user credentials (encrypted)? (Y/N): y
+
+
+The login cookie is saved to a text file if you choose YES. It shows that the
+`VSP` tool uses `libcurl`:
+
+    $ type cookies.txt
+    # Netscape HTTP Cookie File
+    # https://curl.se/docs/http-cookies.html
+    # This file was generated by libcurl! Edit at your own risk.
+    
+    #HttpOnly_sp.vmssoftware.com    FALSE   /       FALSE   0       session a[bcd].e
+    sp.vmssoftware.com              FALSE   /       TRUE    191....789      csrf_access_token       a[...]a
+    #HttpOnly_sp.vmssoftware.com    FALSE   /       TRUE    191....789      access_token_cookie     b[...]b
+    
+
+
+After logging in, check to make sure the correct account is used:
+
+    vsp> whoami
+    Username:      Your Name
+    Email:         Your Email
+    Organization:  VMS Ambassadors Programme
+
+The cookie is only valid for a certain amount of time, the manual stated 30 minutes.
+
+### Listing all available packages
+
+Use the `LIST PRODUCTS` command to get a list of all available packages: 
+    
+
+    vsp>    list
+    _WHAT: products
+    _PATTERN:
+    VSI$SUPPORT                              V2.18-0          [ "I64", "X86", "AXP" ]  V8.4-1H1
+    VSI-X86VMS-REDIS-V0602-1-1               V6.2-1           [ "X86" ]                V9.1
+    VSI-X86VMS-PAHO_C-V0103-0B-1             V1.3-0B          [ "X86" ]                V9.1
+    VSI-X86VMS-DCPS-V0208-2-1                V2.8-2           [ "X86" ]                V9.2-1
+    VSI-X86VMS-SSMGR-V1.9-4                  V1.9-4           [ "X86" ]                V9.1-A
+    VSI-X86VMS-RTR-V0504-3-1                 V5.4-3           [ "X86" ]                V9.2
+    VSI-X86VMS-DQS-V0104-3-1                 V1.4-3           [ "X86" ]                V9.2
+    VSI-X86VMS-HAPROXY-V0107-9A-1            V1.7-9A          [ "X86" ]                E9.2
+    VSI-X86VMS-STUNNEL-V0556-0BA-1           V5.56-0BA        [ "X86" ]                E9.2
+    VSI-X86VMS-DECFORMS-V0402-2-1            V4.2-2           [ "X86" ]                V9.2
+    VSI-X86VMS-PHP-A0800-0BUILD001-1         V8.0-1A          [ "X86" ]                E9.2
+    X86VMS-CIVETWEB-V0114-0D-1               V1.14-0D         [ "X86" ]                V9.2
+    VSI-X86VMS-VMSI18N-V0902--1              V9.2-0           [ "X86" ]                V9.2
+    X86VMS-VGIT-V0104-1A-1                   V1.4-1A          [ "X86" ]                V9.2
+    X86EVALPAK                               V1.1-0           [ "X86" ]                V9.2-1
+    X86VMS-SWIG-V0401-0-1                    V4.1-0           [ "X86" ]                V9.2
+    X86VMS-PAHO_C-V0103-10-1                 V1.3-10          [ "X86" ]                E9.2-1
+    X86VMS-MOSQUITTO-V0200-14-1              V2.0-14          [ "X86" ]                E9.2-1
+    X86VMS-LIBPQ-V1304-0B-1                  V13.4-0B         [ "X86" ]                E9.2-1
+    VSI-X86VMS-X86ASM-V1000-0001-1           V10.0-0001       [ "X86" ]                V9.2
+    [...]
+
+Basically all packages you can see in the software portal are 
+here as well.
+
+### List all installed packages
+
+You can list all installed packages with the following command:
+  
+    vsp> list products /installed
+
+Output:
+
+    AVAIL_MAN_BASE          E9.2-3                  X86             VSI
+    C                       X7.6-4                  X86             VSI
+    CIVETWEB                V1.17-0                 X86             VSI
+    CURL                    V8.0-1A                 X86             VSI
+    CXX                     A10.1-2_240805          X86             VSI
+    DECNET_PLUS             V9.2-G                  X86             VSI
+    DWMOTIF                 V1.8-1                  X86             VSI
+    DWMOTIF_SUPPORT         E9.2-3                  X86             VSI
+    KERBEROS                V3.3-3                  X86             VSI
+    LUA                     V5.3-5H                 X86             VSI
+    OPENSSH                 V8.9-1H01               X86             VSI
+    SSL111                  V1.1-1W                 X86             VSI
+    SSL3                    V3.0-13                 X86             VSI
+    T4                      V4.4-E                  X86             VSI
+    TCPIP                   V6.0-25                 X86             VSI
+    VSP                     E1.0-0                  X86             VSI
+    WEBUI                   V4.1-3                  X86             VSI
+  
+I'm not sure why they include the architecture in this output. 
+How would you install Itanium packages on X86?
+
+### Downloading packages
+
+The packages must first be downloaded before they can be installed. Later on
+in this guide I'll show you a command to do both at once.
+
+Let's try [the WebUI](/s/blog/OpenVMS_9.2_for_x86_Getting_Started_part_3.html) 
+using the `DOWNLOAD` command:
+
+    vsp> DOWNLOAD X86VMS-WEBUI-V0401-3-1
+
+Output:
+
+    ------------------------------------------
+    The package has following dependencies:
+    1: X86VMS-LUA-V0503-5H-1
+    ------------------------------------------
+    
+    Downloading file "VSI-X86VMS-WEBUI-V0401-3-1.zip"
+    Progress     3%   Time remaining   1:34
+    Verifying checksum... OK
+
+
+### Installing packages
+
+When the download is complete, you can install the package using the `INSTALL`
+command:
+  
+  
+    vsp> INSTALL X86VMS-WEBUI-V0401-3-1
+
+Output:
+
+    ------------------------------------------
+    The package has following dependencies:
+    1: X86VMS-LUA-V0503-5H-1
+    ------------------------------------------
+    
+    Unpacking...
+    
+    Archive:  REMY1$DKA100:[REMY]VSI-X86VMS-WEBUI-V0401-3-1.ZIP;1
+      inflating: VSI-X86VMS-WEBUI-V0401-3-1.PCSI$COMPRESSED
+     extracting: VSI-X86VMS-WEBUI-V0401-3-1.PCSI$COMPRESSED_VNC
+    
+    Commencing installation...
+    
+    
+    Performing product kit validation of signed kits ...
+    %PCSI-I-VSIVALPASSED, validation of REMY1$DKA100:[REMY]VSI-X86VMS-WEBUI-V0401-3-1.PCSI$COMPRESSED;1 succeeded
+    
+    The following product has been selected:
+        VSI X86VMS WEBUI V4.1-3                Layered Product
+    
+    Do you want to continue? [YES]
+    Configuration phase starting ...
+    
+    You will be asked to choose options, if any, for each selected product and for
+    any products that may be installed to satisfy software dependency requirements.
+    
+    Configuring VSI X86VMS WEBUI V4.1-3
+    
+        VMS Software Inc. &
+    
+    * This product does not have any configuration options.
+    
+    Execution phase starting ...
+    
+    The following product will be installed to destination:
+        VSI X86VMS WEBUI V4.1-3                DISK$X86SYS:[VMS$COMMON.]
+    
+    Minimum Lua software version not found on this system, abort instalation
+    
+    This kit requires a minimum Lua software version of V5.3-5F.
+    
+    Terminating is strongly recommended.  Do you want to terminate? [YES]
+  
+
+That's a bummer. The package manager detected that a Lua dependency was
+required, but did not automatically download nor installed it.
+
+### Dependency Management?
+
+I didn't find any reference to dependency management in the README, so lets
+try to download and install the dependency ourselves. 
+
+You can use the `/INSTALL` flag in the download command to do both at the same
+time.
+
+
+    vsp> DOWNLOAD /INSTALL X86VMS-LUA-V0503-5H-1 
+
+Output, even more dependencies:
+
+    ------------------------------------------
+    The package has following dependencies:
+    1: VMS921X_UPDATE-V0200
+    2: X86VMS-OPENVMS-V0902-2
+    3: VMS922X_UPDATE-V0200
+    4: X86VMS-OPENVMS-V0902-3
+    ------------------------------------------
+    
+    Downloading file "X86VMS-LUA-V0503-5H-1.ZIP"
+    Progress     8%   Time remaining   0:24
+        
+    Verifying checksum... OK
+    
+    Unpacking...
+    
+    Archive:  REMY1$DKA100:[REMY]X86VMS-LUA-V0503-5H-1.ZIP;1
+      ************************************************
+      * ||| VMS Software Inc. (x86_64)    11/28/2024 *
+      ************************************************
+      * 6 Liberty Sq.                                *
+      * PMB#: 294                                    *
+      * Boston, MA. 02109-5800                       *
+      * Main Phone#: +1 (978) 451-0921               *
+      * Support Phone#: +1 (978) 451-0110            *
+      * Support Email: support@vmssoftware.com       *
+      * Website: https://www.vmssoftware.com/        *
+    ****************************************************
+    *  VSI Lua V5.3.5H for VSI OpenVMS X86 V9.2-1 and  *
+    *   later versions. Included in this ZIP package   *
+    *     are the release notes for your reference.    *
+    ****************************************************
+      inflating: VSI-X86VMS-LUA-V0503-5H-1.PCSI$COMPRESSED
+     extracting: VSI-X86VMS-LUA-V0503-5H-1.PCSI$COMPRESSED_VNC
+      inflating: X86VMS-LUA-V0503-5H-1-RNOTES.PDF
+      inflating: MANIFEST.TXT
+    
+    Commencing installation...
+    
+    
+    Performing product kit validation of signed kits ...
+    %PCSI-I-VSIVALPASSED, validation of REMY1$DKA100:[REMY]VSI-X86VMS-LUA-V0503-5H-1.PCSI$COMPRESSED;1 succeeded
+    
+    The following product has been selected:
+        VSI X86VMS LUA V5.3-5H                 Layered Product
+    
+        Do you want to continue? [YES]
+
+    Configuration phase starting ...
+    
+    You will be asked to choose options, if any, for each selected product and for
+    any products that may be installed to satisfy software dependency requirements.
+    
+    Configuring VSI X86VMS LUA V5.3-5H: Lua for OpenVMS is based on Lua Version 5.3.5
+    
+         Copyright 2024 VMS Software Inc.
+    
+        VSI Software Inc.
+    
+    * This product does not have any configuration options.
+    
+    Execution phase starting ...
+    
+    The following product will be installed to destination:
+        VSI X86VMS LUA V5.3-5H                 DISK$X86SYS:[VMS$COMMON.]
+    
+    Portion done: 0%...40%...50%...90%...100%
+    
+    The following product has been installed:
+        VSI X86VMS LUA V5.3-5H                 Layered Product
+    
+    VSI X86VMS LUA V5.3-5H: Lua for OpenVMS is based on Lua Version 5.3.5
+    
+        Post-installation tasks are required.
+    
+        To start the Lua runtime at system boot time, add the following
+        lines to SYS$MANAGER:SYSTARTUP_VMS.COM:
+    
+            $ file := SYS$STARTUP:LUA$STARTUP.COM
+            $ if f$search("''file'") .nes. "" then @'file'
+    
+        To stop Lua at system shutdown, add the following lines to
+        SYS$MANAGER:SYSHUTDWN.COM:
+    
+            $ file := SYS$STARTUP:LUA$SHUTDOWN.COM
+            $ if f$search("''file'") .nes. "" then @'file'
+    
+
+
+As always, the output of software installation is very verbose
+and tells you everything you need to do to get stuff running.
+Very helpful.
+
+#### Unlisted dependencies?
+  
+The next attempt at installing the WebUI gave the following error:
+
+    
+    Minimum Civetweb software version not found on this system, abort instalation
+    
+    This kit requires a minimum Civetweb software version of V1.17-0.
+    
+    Terminating is strongly recommended.  Do you want to terminate? [YES]
+
+This was not listed as a dependency in the package manager output.
+
+There is search support in the package manager though, I can just
+enter **civetweb** and it prompts me for a list of options:
+  
+  
+    vsp> DOWNLOAD /install civetweb
+
+Output:
+
+    Choose the correct package from list below:
+    X86VMS-CIVETWEB-V0114-0D-1               V1.14-0D         [ "X86" ]                V9.2
+    X86VMS-CIVETWEB-V0117-0-1                V1.17-0          [ "X86" ]                V9.2-1
+
+I want the version that the WebUI installer tells me, using a wildcard:    
+
+    vsp> DOWNLOAD /INSTALL civetweb*117
+  
+Output:
+
+    Downloading file "X86VMS-CIVETWEB-V0117-0-1.ZIP"
+        
+    Progress    99%   Time remaining   0:00
+    Verifying checksum... OK
+    
+    Downloading file "X86VMS-CIVETWEB-V0117-0-1-RNOTES.pdf"
+    Progress     6%   Time remaining   0:00
+    Verifying checksum... OK
+    
+    Unpacking...
+    
+    Archive:  SYS$SYSROOT:[SYSMGR]X86VMS-CIVETWEB-V0117-0-1.ZIP;1
+      ************************************************
+      * VMS Software Inc.  (x86_64)     10/20/2023   *
+      ************************************************
+      * 6 Liberty Sq.                                *
+      * PMB#: 294                                    *
+      * Boston, MA. 02109-5800                       *
+      * Main Phone#: +1 (978) 451-0921               *
+      * Support Phone#: +1 (978) 451-0110            *
+      * Support Email: support@vmssoftware.com       *
+      * Website: https://www.vmssoftware.com/        *
+    ****************************************************
+    *   VSI CIVETWEB V1.17-0 for VSI OpenVMS Versions  *
+    *   V9.2-1 x86 or higher. Installation on ODS-5    *
+    * enabled file system recommended. Lua V5.3-5D or  *
+    * later is highly recommended as well.A copy of the*
+    *   Release Notes is included in this ZIP file.    *
+    ****************************************************
+      inflating: VSI-X86VMS-CIVETWEB-V0117-0-1.PCSI$COMPRESSED
+     extracting: VSI-X86VMS-CIVETWEB-V0117-0-1.PCSI$COMPRESSED_VNC
+      inflating: X86VMS-CIVETWEB-V0117-0-1-RNOTES.PDF
+      inflating: MANIFEST.TXT
+    
+    Commencing installation...
+    
+    
+    Performing product kit validation of signed kits ...
+    %PCSI-I-VSIVALPASSED, validation of REMY1$DKA100:[SYS0.][SYSMGR]VSI-X86VMS-CIVETWEB-V0117-0-1.PCSI$COMPRESSED;1 succeeded
+    
+    The following product has been selected:
+        VSI X86VMS CIVETWEB V1.17-0            Layered Product
+    
+    Do you want to continue? [YES]
+        
+    Configuration phase starting ...
+    
+    You will be asked to choose options, if any, for each selected product and for
+    any products that may be installed to satisfy software dependency requirements.
+    
+    Configuring VSI X86VMS CIVETWEB V1.17-0: CivetWeb for OpenVMS is based on CivetWeb Version 1.17
+    
+        # Copyright 2023 VMS Software Inc.
+    
+        VSI Software Inc.
+    
+    * This product does not have any configuration options.
+    
+    Execution phase starting ...
+    
+    The following product will be installed to destination:
+        VSI X86VMS CIVETWEB V1.17-0            DISK$X86SYS:[VMS$COMMON.]
+    
+    Portion done: 0%...90%...100%
+    
+    The following product has been installed:
+        VSI X86VMS CIVETWEB V1.17-0            Layered Product
+    
+    VSI X86VMS CIVETWEB V1.17-0: CivetWeb for OpenVMS is based on CivetWeb Version 1.17
+    
+        Post-installation tasks are required.
+    
+        To start the web server at system boot time, add the following
+        lines to SYS$MANAGER:SYSTARTUP_VMS.COM:
+    
+            $ file := SYS$STARTUP:CIVETWEB$STARTUP.COM
+            $ if f$search("''file'") .nes. "" then @'file'
+    
+        To stop Civetweb at system shutdown, add the following lines to
+        SYS$MANAGER:SYSHUTDWN.COM:
+    
+            $ file := SYS$STARTUP:CIVETWEB$SHUTDOWN.COM
+            $ if f$search("''file'") .nes. "" then @'file'
+    
+        Note that default installation uses the SYSTEM account to run the
+        web server process. It is generally recommended that you run the
+        web server as using a less privileged account. This may be done
+        by supplying the account name as a parameter to
+        civetweb$startup.com or by defining the logical name
+        civetweb$user as the desired account name. It is also recommended
+        that you change the ownership of the civetweb$root:[000000...]
+        directory tree to this account.
+    Cleaning up...
+    
+
+Third time is correct, the WebUI now installs without issues:
+
+
+    [...]
+    Configuration phase starting ...
+    
+    You will be asked to choose options, if any, for each selected product and for
+    any products that may be installed to satisfy software dependency requirements.
+    
+    Configuring VSI X86VMS WEBUI V4.1-3
+    
+        VMS Software Inc. &
+    
+    * This product does not have any configuration options.    
+    
+    Execution phase starting ...
+    
+    The following product will be installed to destination:
+        VSI X86VMS WEBUI V4.1-3                DISK$X86SYS:[VMS$COMMON.]
+    
+    Portion done: 0%...10%...20%...50%...60%...90%...100%
+
+    The following product has been installed:
+        VSI X86VMS WEBUI V4.1-3                Layered Product
+    
+    VSI X86VMS WEBUI V4.1-3
+    
+        Post-installation tasks are required.
+    
+        After installation you need to update civetweb$root:[conf]civetweb.conf and
+        civetweb$root:[conf]services.conf as described in the release notes. After
+        making the necessary changes you can restart the web server using the following
+        command:
+    
+        $ @SYS$STARTUP:WEBUI$RESTART.COM
+    Cleaning up...
+
+
+The suggestions provided by the installers, editing the login or startup
+files, must still be done manually. 
+
+If you're used to Debian for example, where services are started right away
+after `apt-get install`-ing them, that does not happen here. Much safer,
+since otherwise services might be exposed when they're not properly 
+configured or secured yet.
+
+### Installing the C++ compiler
+
+I hoped that the C++ compiler could be installed with the following command:
+
+    vsp> download /install VSI-X86VMS-CXX-A1001-3_250204-1
+
+That sadly fails, because the archive contained multiple PCSI files
+(multiple installation files):
+
+    Downloading file "VSI-X86VMS-CXX-A1001-3_250204-1.ZIP"
+    Progress    99%   Time remaining   0:00
+    Verifying checksum... OK
+    
+    [...]
+    
+
+    %VSP-E-ERROR, Archive "VSI-X86VMS-CXX-A1001-3_250204-1.ZIP" contain multiple PCSI files. Inspect it manually
+
+
+The files are downloaded in the current folder, so inspecting or installing
+them manually is not hard. Im in a test folder for the compiler, after trying
+the above command, I can see the  `VSI-X86VMS-CXX-V1001-2U1-1.ZIP` file:
+
+
+    $ dir
+    
+    Directory REMY1$DKA100:[CTEST]
+    
+    COOKIES.TXT;8       OPENVMS_ECO_KIT_RNOTES.PDF;1            VSI-X86VMS-CXX-V1001-2U1-1.ZIP;1
+    X86VMS-CXX-V1001-2U1-1-RNOTES.PDF;1
+    
+    Total of 4 files.
+
+This package contains both an installer and a patch:
+
+    
+    $ unzip VSI-X86VMS-CXX-V1001-2U1-1.ZIP
+    Archive:  REMY1$DKA100:[CTEST]VSI-X86VMS-CXX-V1001-2U1-1.ZIP;1
+      inflating: VSI-X86VMS-CXX-V1001-2U1-1.PCSI$COMPRESSED
+      inflating: VSI-X86VMS-VMS923X_CXXFIXUP-V0100--4.PCSI$COMPRESSED
+
+`PRODUCT INSTALL` also shows both:
+
+    $ product install
+    _Product name (* to show list): *
+    
+       1 - VSI X86VMS CXX V10.1-2U1            Layered Product
+       2 - VSI X86VMS VMS923X_CXXFIXUP V1.0    Patch (remedial update)
+       ? - Help
+       E - Exit
+
+The package manager could ask the user the same thing as `product install`
+does. Version checking is done there as well:
+
+    
+    %PCSI-W-VERLOW, you have selected a lower version of an installed product
+    -PCSI-W-VERINS, the installation of product VSI X86VMS CXX V10.1-2U1
+    -PCSI-W-VERREM, will remove current product VSI X86VMS CXX A10.1-2_240805
+    Do you want to continue? [YES] n
+    
+
+If you install an "update", the `product install` process notices that as
+well:
+
+    
+    The following product will be installed to destination:
+        VSI X86VMS CXX A10.1-3_250204          DISK$X86SYS:[VMS$COMMON.]
+    The following product will be removed from destination:
+        VSI X86VMS CXX A10.1-2_240805          DISK$X86SYS:[VMS$COMMON.]
+            
+    Portion done: 0%...40%...90%...100%
+    
+    The following product has been installed:
+        VSI X86VMS CXX A10.1-3_250204          Layered Product
+    The following product has been removed:
+        VSI X86VMS CXX A10.1-2_240805          Layered Product
+    
+
+In this case I upgraded the C++ compiler from version `A10.1-2_240805` to `A10.1-3_250204`.
+
+I think that the Software Portal repository / REST API needs some sort of 
+extra manifest file describing package dependencies and versions.
+
+### Conclusion
+
+The package manager is still in early beta, but credit where credit is due,
+VSI stated that in their documentation. The VSP package manager streamlines
+software installation significantly compared to the traditional manual
+process on OpenVMS.
+
+The lack of automatic dependency resolution, update management, and support
+for private repositories makes it feel a bit primitive compared to modern
+package managers. However, its ability to search for, download, and install
+software with a single command is a huge time-saver.
+
+Hopefully, future versions will improve dependency handling and automation,
+bringing OpenVMS package management closer to what Linux users are accustomed
+to.
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
