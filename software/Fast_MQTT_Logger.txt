@@ -1,0 +1,273 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Fast MQTT logger (to syslog)
+Author      : 	Remy van Elst
+Date        : 	25-03-2025 21:33
+URL         : 	https://raymii.org/s/software/Fast_MQTT_Logger.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+For almost 5 years I've been using the `mqtt-data-logger` [python script](https://github.com/RaymiiOrg/mqtt-data-logger) to log all MQTT communication. This script works, but is a bit limited in how it stores logs (files per time it's started) and it often can't keep up with the message rate (tens of thousands per second) of my mqtt brokers.
+So I've written a new tool in C++ to log all MQTT messages to syslog and optionally to the terminal. Then, via syslog, you can send it to where ever you like, be it a file or an ELK (Logstash/Elasticsearch/Kibana) stack. It even compiles without syslog support, if you only want to log to a file or the terminal.
+There's a docker image and a docker compose file, so you can easily deploy it wherever you have an MQTT broker running. 
+
+
+
+
+![437691783735a93bbabe60ebcdc5f646.png](/s/inc/img/ea7625ba0dcd4a6ea8ffb5bf731a6e65.png)
+
+> Kibana showing the tool logging via rsyslog to logstash, the test.mosquitto.org broker
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below. It means the world to me if you  show your appreciation and you'll help pay the server costs:</b><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">GitHub Sponsorship</a><br><br> <a href="https://pcbway.com/g/e7yQRg">PCBWay referral link (You get $5, I get $20 after you've placed an order)</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocea referral link  ($200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!)</a><br><br> </p>
+
+
+
+Every message is logged on a separate thread in a thread pool, which is what
+makes is fast and able to process thousands of messages per second as long as
+your system has enough resources. Using Pipe Viewer to measure lines per
+second from a test broker:
+
+    $ ./remys_fast_mqtt_logger -b test.mosquitto.org:1883 | pv --line-mode --rate --average-rate >/dev/null
+    [4.79k/s] (3.35k/s)
+
+This is similar to `mosquitto_sub`:
+
+    $ mosquitto_sub -h test.mosquitto.org -p 1883 -t "#"  | pv --line-mode --rate --average-rate >/dev/null
+    [3.39k/s] (3.37k/s)
+
+Connection failures are logged and handled with an automatic reconnect.
+
+It is cross-platform, meaning that if you don't have `syslog.h`, it will also
+compile and run, but it only prints to the terminal.
+
+### Source Code and Downloads
+
+The source code can be found 
+[on github](https://github.com/RaymiiOrg/remys_fast_mqtt_logger). 
+
+A ready made docker image 
+[is here](https://hub.docker.com/r/raymii/remys_fast_mqtt_logger).
+
+
+This project is licensed under the GNU AGPLv3 License. 
+See the [LICENSE](https://github.com/RaymiiOrg/remys_fast_mqtt_logger/blob/master/LICENSE) file for more details.
+
+
+### Building
+
+The program is written using C++ 17 and uses CMake as the build system.
+
+**Install dependencies**
+
+The following libraries are required to build and 
+run the application:
+
+1. [Paho MQTT C++ library](https://www.eclipse.org/paho/). 
+2. `syslog.h`
+
+
+- On **Ubuntu/Debian**:
+
+
+    apt install libpaho-mqttpp-dev libpaho-mqtt-dev build-essential git
+
+
+**Clone or download the repository**:
+
+-  Clone the git repository or download the source code:
+
+        git clone https://github.com/RaymiiOrg/remys_fast_mqtt_logger
+
+**Compiling**:
+
+ Use CMake:
+
+    cd remys_fast_mqtt_logger
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release  ..
+
+
+### Usage
+
+
+The logger can be configured with command line options or `$ENVIRONMENT`
+variables. The latter don't end up in your shell history and are used in the
+`docker-compose` file.
+
+**Command line arguments**
+
+- `-b BROKER, --broker=BROKER`
+    - The MQTT broker URL (including the port) to connect to. 
+    - Example: `test.mosquitto.org:1883`.
+
+- `-t TOPIC, --topic=TOPIC`
+    - The MQTT topic to subscribe to. 
+    - Default is `#` (subscribe to all topics).
+
+- `-u USERNAME, --username=USERNAME`
+    - Username for authenticating with the MQTT broker.
+
+- `-p PASSWORD, --password=PASSWORD`
+    - Password for authenticating with the MQTT broker.
+
+- `-f FACILITY, --facility=FACILITY`
+    - The syslog facility to log to. Must prefix with `LOG_`. 
+    - Default is `LOG_LOCAL6`.
+
+- `-s, --no-log-to-stderr`
+    - Disable logging to STDERR 
+    - Default is **disabled**, meaning messages will be logged to both **stderr** and **syslog** unless specified.
+
+
+**Environment Variables**
+
+You can configure the application using the following 
+environment variables:
+
+- `BROKER`: MQTT broker URL (e.g., `mqtt.example.com:1883`).
+- `USERNAME`: MQTT broker username.
+- `PASSWORD`: MQTT broker password.
+- `TOPIC`: MQTT topic to subscribe to (default: `#`).
+- `FACILITY`: Syslog facility (default: `LOG_LOCAL6`).
+- `NO_LOG_TO_STDERR`: Disable logging to `STDERR` (default: on)
+
+**Example Commands**
+
+**Basic usage**:
+
+    ./remys_fast_mqtt_logger -b "mqtt.example.com:1883" \
+    -t "home/livingroom/temperature" \
+    -u "user" \
+    -p "password"
+
+
+**Viewing Logs in Syslog**
+
+To view logs for `LOG_LOCAL6` in **journalctl**:
+
+    journalctl SYSLOG_FACILITY=22
+
+Or to view logs directly in log file:
+
+    tail -f /var/log/syslog
+
+### rsyslog and logrotate config
+
+You can save logs to `/var/log/mqtt_msgs.log` if you have
+configured **rsyslog** accordingly:
+
+    vim /etc/rsyslog.d/30-local6.conf
+
+Add:
+
+    local6.*    /var/log/mqtt_msgs.log
+
+Then:
+
+    touch /var/log/mqtt_msgs.log
+    chmod 644 /var/log/mqtt_msgs.log
+    chown syslog:adm /var/log/mqtt_msgs.log
+
+Configure `logrotate` to not delete these logs:
+
+    vim /etc/logrotate.d/remys_fast_mqtt_logger
+
+Contents:
+
+    /var/log/mqtt_msgs.log {
+        missingok
+        notifempty
+        size 100M
+        rotate 9999
+        compress
+        delaycompress
+        create 0644 root root
+        sharedscripts
+        postrotate
+            systemctl reload rsyslog > /dev/null 2>&1 || true
+        endscript
+    }
+
+
+### Docker
+
+To build and run the application with docker, use the following commands
+inside the git checkout.
+
+Build and run the Docker image:
+
+    docker build -t mqtt-logger .
+    docker run --env BROKER=test.mosquitto.org mqtt_logger 
+
+Or, use my image and run the Docker container:
+
+    docker run --name remys_fast_mqtt_logger --env BROKER=test.mosquitto.org raymii/remys_fast_mqtt_logger:latest 
+
+There is also a `docker-compose.yml` file included
+which you can edit and use:
+
+    docker compose up -d
+    docker compose logs -f
+
+
+    [+] Running 1/1
+     Container mqtt_logger-remys-fast-mqtt-logger-1  Created0.0s
+    Attaching to remys-fast-mqtt-logger-1
+    remys-fast-mqtt-logger-1  | topic='/116484256345/0/current', qos='0', retained='true', msg='1.87'
+    remys-fast-mqtt-logger-1  | topic='/116484256345/0/efficiency', qos='0', retained='true', msg='95.015'
+    remys-fast-mqtt-logger-1  | topic='/116484256345/0/frequency', qos='0', retained='true', msg='49.96'
+    remys-fast-mqtt-logger-1  | topic='/116484256345/0/power', qos='0', retained='true', msg='442.2'
+    remys-fast-mqtt-logger-1  | topic='/116484256345/0/powerfactor', qos='0', retained='true', msg='0.999'
+    remys-fast-mqtt-logger-1  | topic='/116484256345/0/temperature', qos='0', retained='true', msg='28.6'
+    remys-fast-mqtt-logger-1  | topic='/116484256345/0/voltage', qos='0', retained='true', msg='236.3'
+    remys-fast-mqtt-logger-1  | topic='/116484256345/0/yieldday', qos='0', retained='true', msg='5547'
+    remys-fast-mqtt-logger-1  | topic='/116484256345/0/reactivepower', qos='0', retained='true', msg='0.3'
+    remys-fast-mqtt-logger-1  | topic='SHRDZM/483FDA46C2EE/483FDA46C2EE/sensor', qos='0', retained='false', msg='{
+    remys-fast-mqtt-logger-1  | "lasterror":"cipherkey not set!",
+    Gracefully stopping... (press Ctrl+C again to force)
+    [+] Stopping 1/1
+
+
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
