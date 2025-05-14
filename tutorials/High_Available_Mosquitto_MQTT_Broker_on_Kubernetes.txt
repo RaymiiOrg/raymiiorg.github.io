@@ -1,0 +1,619 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	High Available Mosquitto MQTT on Kubernetes
+Author      : 	Remy van Elst
+Date        : 	14-05-2025 22:11
+URL         : 	https://raymii.org/s/tutorials/High_Available_Mosquitto_MQTT_Broker_on_Kubernetes.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+In this post, we'll walk through a fully declarative, Kubernetes-native setup for running a highly available MQTT broker using Eclipse Mosquitto. This configuration leverages core Kubernetes primitives (`Deployments`, `Services`, `ConfigMaps`, and `RBAC`), alongside Traefik `IngressRouteTCP` to expose MQTT traffic externally. It introduces a lightweight, self-healing failover mechanism that automatically reroutes traffic to a secondary broker if the primary becomes unhealthy. The setup also demonstrates internal MQTT bridging, allowing seamless message propagation between brokers. The big advantage over a single Pod deployment (which, in case of node failure, k8s will restart after 5 minutes) is that this setup has a downtime of only 5 seconds and shared state, so all messages will be available on a failover.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below. It means the world to me if you  show your appreciation and you'll help pay the server costs:</b><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">GitHub Sponsorship</a><br><br> <a href="https://pcbway.com/g/e7yQRg">PCBWay referral link (You get $5, I get $20 after you've placed an order)</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocea referral link  ($200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!)</a><br><br> </p>
+
+
+
+![diagram](/s/inc/img/ha-mosquitto-k8s-diagram.png)
+> Diagram of the setup
+
+
+This guide assumes you have a working Kubernetes setup using Traefik. In my
+case the version of [Kubernetes/k3s](https://docs.k3s.io/release-notes/v1.32.X) 
+I use for this article is `v1.32.2+k3s1`.
+
+If you haven't got such a cluster, maybe checkout 
+[all my other kubernetes posts](/s/tags/k8s.html).
+
+
+In a typical Kubernetes deployment with a single Mosquitto pod, resilience is
+limited. If the node running the pod fails, Kubernetes can take up to 5
+minutes to detect the failure and recover. This delay stems from the default
+`node-monitor-grace-period`, which is often set to 5 minutes (300s). During
+this window, MQTT clients lose connectivity, messages are dropped, and
+systems depending on real-time messaging may suffer degraded performance or
+enter fault modes.
+
+The configuration presented here avoids that downtime by deploying both a
+`primary` and `secondary` Mosquitto broker, each in its own pod, scheduled on
+different nodes and using a custom failover controller to handle traffic
+redirection. A lightweight controller monitors the readiness of the `primary`
+pod and, if it becomes unavailable, patches the Kubernetes `Service` to reroute
+traffic to the `secondary` broker within 5 seconds. This dramatically reduces
+recovery time and improves system responsiveness during failures. 
+
+Because the `secondary` broker is always running and bridged to the `primary`, it
+maintains near-real-time message state. Clients continue connecting to the
+same `LoadBalancer` endpoint (`mosquitto-svc`), with no need to update client
+configurations or manage DNS changes. The failover is transparent and fast,
+ensuring message flow continues even when the primary is offline.
+
+This article is targeted to using `k3s` and `traefik`. Adapting it for
+`nginx` shouldn't be hard.
+
+### Summary 
+
+This is a summary of what the YAML file does. The two mosquitto instances are
+both accessible on their own ports (`2883` for the `primary`, `3883` for the
+`secondary`) as well as port 1883 (which has automatic failover). Clients
+should connect to port 1883 and the other ports are avilable for monitoring.
+
+The mosquitto instances are configured to bridge all messages. Anything that
+gets published to the `primary`, is published to the `secondary` and vice
+versa. When a failover happens, clients loose connection and must reconnect,
+but the `secondary` broker has all messages(including retained ones). When
+the `primary` is back online, one other reconnect is required by clients. You
+can tweak the `failover` controller to keep the secondary act as the primary,
+until the secondary fails, but that is out of scope for this article. 
+
+The Pod that runs the `failover` monitoring is scheduled on a different `Node`
+due to `Affinity`. That `failover` Pod only restarts every 5 minutes or so in 
+case of failure. If the `Node` that runs the `failover` pod fails AND the
+`Node` running the `primary` pod fails, failover **won't happen** until
+the `failover` Pod is back up again. So in some rare cases failover might 
+still take 5 minutes. Even then, due to the bridge config, less messages would 
+be lost.ZX
+
+In my intented use case, clients reconnect whenever there is a failure and
+publish retained messages when connecting, so failover back is not a
+problem.    
+
+Any retained messages that were published to the `secondary`, during an outage,
+are published back to the `primary` due to the bridge configuration.    
+
+
+#### 1. Namespace & ConfigMaps
+
+- Creates a `mosquitto-dev` namespace.
+- Two ConfigMaps:
+  - **Primary Broker ConfigMap**: Configures the primary broker to listen on
+      ports 1883 (external) and 2883 (for bridge to connect to).
+  - **Secondary Broker ConfigMap**: Configures the secondary broker to bridge
+      to the primary on port 2883, and listens on ports 1883 (external) and
+      3883.
+
+#### 2. Deployments
+
+- `mosquitto-primary`: 
+  - Listens on ports 1883 (external) and 2883 (for the bridge to connect to).
+- `mosquitto-secondary`: 
+  - Bridges to the primary on port 2883.
+  - Listens on ports 1883 (external) and 3883.
+- `mosquitto-failover`:
+  - Pod with a shell loop checking the readiness of the primary broker.
+  - If the primary is not ready, it patches the selector of `mosquitto-svc` to
+    point to the secondary broker, redirecting traffic to it.
+
+#### 3. Services
+
+- `mosquitto-svc`: 
+  - Main `LoadBalancer` service, dynamically routing traffic to either the
+    primary or secondary broker.
+- `mosquitto-primary-svc`: 
+  - Directs traffic to the `primary` broker's second listener (2883).
+- `mosquitto-secondary-svc`:
+  - Directs traffic to the `secondary` broker's second listener (3883).
+
+#### 4. RBAC
+
+- Role and binding allowing the `failover` pod to:
+  - `Get`, `list`, and `patch` pods and services.
+  - Used by the `failover` pod to check status every 5 seconds and,
+    if needed, failover.
+
+#### 5. Traefik IngressRouteTCP
+
+- `mosquitto-dev-mqtt`:
+  - Routes external MQTT traffic to `mosquitto-svc`.
+- Direct routes for `primary` and `secondary` brokers as well.
+
+
+### Why the Mosquitto Failover Pod Needs a Service Account
+
+In Kubernetes, no pod can access cluster resources by default, not even to
+check the status of other pods or patch services. That's a problem when the
+Mosquitto `failover` pod needs to monitor the broker health and switch traffic
+between `primary` and `secondary`. Without the right permissions, the failover
+logic silently fails.
+
+Therefore we must create a `ServiceAccount`, bind it to a `Role` with `get`,
+`list`, and `patch` permissions for `pods` and `services`, and assign it to the
+`failover` pod. This RBAC setup is the only way to let the pod query health and
+dynamically reroute traffic via `kubectl`.
+
+### How the Mosquitto Failover Pod Keeps the MQTT Service Alive
+
+The `mosquitto-failover` pod is a lightweight control loop designed for one
+purpose: keep MQTT traffic flowing even when the `primary` broker goes down.
+It continuously checks the readiness of the `primary` Mosquitto pod. If the
+`primary` fails, it patches the `mosquitto-svc` service to route traffic to the
+secondary broker. When the `primary` recovers, traffic is restored
+automatically. to the `primary`.
+
+This pod runs `kubectl` inside a shell loop, using Kubernetes API calls to
+detect health and redirect traffic. It's deliberately simple, no operators, no
+sidecars, no custom resources. 
+
+I could build a custom controller, but that's overkill. Controllers bring
+overhead, extra code, CRDs, lifecycle management, and more complexity for
+something this specific. The failover pod trades abstraction for control:
+it's readable, auditable, debuggable, and deploys instantly. For one job done
+right, less is more.
+
+Now for the summary of the YAML file.
+
+### What happens when the primary node is down?
+
+The setup ran, on three nodes. One for the `primary`, one for the `secondary`
+and one for the `failover` monitoring.
+
+I pulled the network cable of the k3s server running the  `primary` node.
+Clients disconnected, but reconnected after a few seconds to the
+`mosquitto-svc` `Service`, landing on the `secondary` node. 
+
+After a few minutes, more than 5, I plugged the network cable back
+in to the k3s server that was hosting the `primary` pod. The `failover`
+Pod noticed and patched the service and back again:
+
+    kubectl logs -n mosquitto-dev -l app=mosquitto-failover
+
+Output:
+
+    service/mosquitto-svc patched (no change)
+    Wed May 14 18:58:30 UTC 2025 - Primary healthy, routing to primary.
+    service/mosquitto-svc patched
+    Wed May 14 19:11:54 UTC 2025 - Primary down, routing to secondary.
+    service/mosquitto-svc patched
+    Wed May 14 19:13:41 UTC 2025 - Primary healthy, routing to primary.
+
+
+### K8S Deployment YAML file
+
+
+This is the YAML file, including the k3s 1.32 `HelmChartConfig`
+to expose ports other than 443 and 80. If you use NGINX
+you must adapt that part to your setup.
+
+The namespace is `mosquitto-dev`. Search and replace if you want a different
+namespace. Maybe attach a persistent volume if you use certificates or a
+custom CA for authentication, or where you save the mosquitto persistent DB.
+For my usecase, where clients publish retained on every `connect`, there is
+no need to save the `mosquitto.db` file. You might want to use `Longhorn` or
+to save that state. For simplicity, I'm using a `ConfigMap` for the broker
+configuration.
+
+
+    ---
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: raymii-mosquitto-dev
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: raymii-mosquitto-primary-config
+      namespace: raymii-mosquitto-dev
+    data:
+      raymii-mosquitto.conf: |
+        listener 1883
+        allow_anonymous true  
+        listener 2883
+        allow_anonymous true  
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: raymii-mosquitto-bridge-config
+      namespace: raymii-mosquitto-dev
+    data:
+      raymii-mosquitto.conf: |
+        listener 1883
+        allow_anonymous true
+        listener 3883
+        allow_anonymous true
+        connection bridge-to-primary
+        address raymii-mosquitto-primary-svc.raymii-mosquitto-dev.svc.cluster.local:2883
+        clientid raymii-mosquitto-bridge
+        topic # both 0
+        start_type automatic
+        try_private true
+        notifications true
+        restart_timeout 5
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: raymii-mosquitto-primary
+      namespace: raymii-mosquitto-dev
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: raymii-mosquitto
+          role: primary
+      template:
+        metadata:
+          labels:
+            app: raymii-mosquitto
+            role: primary
+        spec:
+          containers:
+          - name: raymii-mosquitto
+            image: eclipse-raymii-mosquitto:2.0.21
+            command: ["raymii-mosquitto"]
+            args: ["-c", "/raymii-mosquitto/config/raymii-mosquitto.conf"]
+            ports:
+            - containerPort: 1883
+            - containerPort: 2883
+            livenessProbe:
+              tcpSocket:
+                port: 1883
+              initialDelaySeconds: 5
+              periodSeconds: 10
+            readinessProbe:
+              tcpSocket:
+                port: 1883
+              initialDelaySeconds: 5
+              periodSeconds: 10
+            volumeMounts:
+            - name: primary-config
+              mountPath: /raymii-mosquitto/config/
+          volumes:
+          - name: primary-config
+            configMap:
+              name: raymii-mosquitto-primary-config     
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - raymii-mosquitto
+                  topologyKey: kubernetes.io/hostname
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: raymii-mosquitto-secondary
+      namespace: raymii-mosquitto-dev
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: raymii-mosquitto
+          role: secondary
+      template:
+        metadata:
+          labels:
+            app: raymii-mosquitto
+            role: secondary
+        spec:
+          containers:
+          - name: raymii-mosquitto
+            image: eclipse-raymii-mosquitto
+            command: ["raymii-mosquitto"]
+            args: ["-c", "/raymii-mosquitto/config/raymii-mosquitto.conf"]
+            ports:
+            - containerPort: 1883
+            - containerPort: 3883
+            livenessProbe:
+              tcpSocket:
+                port: 1883
+              initialDelaySeconds: 5
+              periodSeconds: 10
+            readinessProbe:
+              tcpSocket:
+                port: 1883
+              initialDelaySeconds: 5
+              periodSeconds: 10        
+            volumeMounts:
+            - name: bridge-config
+              mountPath: /raymii-mosquitto/config/          
+          volumes:
+          - name: bridge-config
+            configMap:
+              name: raymii-mosquitto-bridge-config
+          restartPolicy: Always
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - raymii-mosquitto
+                  topologyKey: kubernetes.io/hostname
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: raymii-mosquitto-svc
+      namespace: raymii-mosquitto-dev
+    spec:
+      type: LoadBalancer
+      selector:
+        app: raymii-mosquitto
+        role: primary
+      ports:    
+      - port: 1883
+        targetPort: 1883
+        protocol: TCP
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: raymii-mosquitto-primary-svc
+      namespace: raymii-mosquitto-dev
+    spec:
+      type: LoadBalancer
+      selector:
+        app: raymii-mosquitto
+        role: primary
+      ports:    
+      - port: 2883
+        targetPort: 2883
+        protocol: TCP
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: raymii-mosquitto-secondary-svc
+      namespace: raymii-mosquitto-dev
+    spec:
+      type: LoadBalancer
+      selector:
+        app: raymii-mosquitto
+        role: secondary
+      ports:
+      - port: 3883
+        targetPort: 3883
+        protocol: TCP
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: raymii-mosquitto-failover
+      namespace: raymii-mosquitto-dev
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: raymii-mosquitto-failover
+      template:
+        metadata:
+          labels:
+            app: raymii-mosquitto-failover
+        spec:
+          serviceAccountName: raymii-mosquitto-failover-sa
+          containers:
+          - name: failover
+            image: bitnami/kubectl
+            command:
+            - /bin/sh
+            - -c
+            - |
+              PREV_STATUS=""
+              while true; do
+                STATUS=$(kubectl get pod -l app=raymii-mosquitto,role=primary -n raymii-mosquitto-dev -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}')
+                if [ "$STATUS" != "$PREV_STATUS" ]; then
+                  if [ "$STATUS" != "True" ]; then
+                    kubectl patch service raymii-mosquitto-svc -n raymii-mosquitto-dev -p '{"spec":{"selector":{"app":"raymii-mosquitto","role":"secondary"}}}'
+                    echo "$(date) - Primary down, routing to secondary."
+                  else
+                    kubectl patch service raymii-mosquitto-svc -n raymii-mosquitto-dev -p '{"spec":{"selector":{"app":"raymii-mosquitto","role":"primary"}}}'
+                    echo "$(date) - Primary healthy, routing to primary."
+                  fi
+                  PREV_STATUS="$STATUS"
+                fi
+                sleep 5
+              done
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - raymii-mosquitto
+                  topologyKey: kubernetes.io/hostname
+    ---
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: raymii-mosquitto-failover-sa
+      namespace: raymii-mosquitto-dev
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: raymii-mosquitto-failover-role
+      namespace: raymii-mosquitto-dev
+    rules:
+    - apiGroups: [""]
+      resources: ["pods", "services"]
+      verbs: ["get", "patch", "list"]
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: raymii-mosquitto-failover-rb
+      namespace: raymii-mosquitto-dev
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: raymii-mosquitto-failover-role
+    subjects:
+    - kind: ServiceAccount
+      name: raymii-mosquitto-failover-sa
+      namespace: raymii-mosquitto-dev
+    ---
+    apiVersion: traefik.io/v1alpha1
+    kind: IngressRouteTCP
+    metadata:
+      name: raymii-mosquitto-dev-mqtt
+      namespace: raymii-mosquitto-dev
+    spec:
+      entryPoints:
+        - raymii-mosquitto-dev-mqtt
+      routes:
+        - match: HostSNI(`*`)
+          services:
+            - name: raymii-mosquitto-svc
+              port: 1883
+    ---
+    apiVersion: traefik.io/v1alpha1
+    kind: IngressRouteTCP
+    metadata:
+      name: raymii-mosquitto-dev-mqtt-primary
+      namespace: raymii-mosquitto-dev
+    spec:
+      entryPoints:
+        - raymii-mosquitto-dev-mqtt-primary
+      routes:
+        - match: HostSNI(`*`)
+          services:
+            - name: raymii-mosquitto-primary-svc
+              port: 2883
+    ---
+    apiVersion: traefik.io/v1alpha1
+    kind: IngressRouteTCP
+    metadata:
+      name: raymii-mosquitto-dev-mqtt-secondary
+      namespace: raymii-mosquitto-dev
+    spec:
+      entryPoints:
+        - raymii-mosquitto-dev-mqtt-secondary
+      routes:
+        - match: HostSNI(`*`)
+          services:
+            - name: raymii-mosquitto-secondary-svc
+              port: 3883
+
+
+### Traefik Helm Chart Config for k3s
+
+In k3s 1.32, Traefik is the default ingress controller, but by default, it's
+wired only for HTTP(S) routing. The moment you need to route TCP services
+like MQTT (ports 1883, 2883, 3883), you hit a hard wall unless you explicitly
+configure Traefik to expose those ports. That's where the `HelmChartConfig`
+CRD becomes essential.
+
+By creating a `HelmChartConfig` with the correct `valuesContent`, you're
+injecting custom values into the Traefik Helm chart managed by k3s itself.
+Without this, Traefik won't bind to additional TCP ports, won't route traffic
+to the MQTT services and won't even start listeners, because k3s uses its
+own embedded Helm controller and you can't patch the deployment directly.
+This configuration is the only supported way to modify the Traefik deployment
+in-place when using the bundled k3s setup.
+
+K3s watches this `HelmChartConfig`, applies the changes during Traefik chart
+reconciliation, and ensures that ports like 1883, 2883, 3883 are properly
+exposed at the node level and routed to the right `IngressRouteTCP` rules.
+
+
+This is the YAML file:
+
+    apiVersion: helm.cattle.io/v1
+    kind: HelmChartConfig
+    metadata:
+      name: traefik
+      namespace: kube-system
+    spec:
+      valuesContent: |-
+        logs:
+          general:
+            level: "DEBUG"
+          access:
+            enabled: false
+        ports:
+          web:
+            port: 80
+            expose:
+              default: true
+          websecure:
+            port: 443
+            expose:
+              default: true
+          raymii-mosquitto-dev-mqtt:
+            port: 1883
+            expose:
+              default: true
+            exposedPort: 1883
+          raymii-mosquitto-dev-mqtt-primary:
+            port: 2883
+            expose:
+              default: true
+            exposedPort: 2883
+          raymii-mosquitto-dev-mqtt-secondary:
+            port: 3883
+            expose:
+              default: true
+            exposedPort: 3883
+
+
+
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
