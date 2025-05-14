@@ -46,7 +46,7 @@ recovery time and improves system responsiveness during failures.
 
 Because the `secondary` broker is always running and bridged to the `primary`, it
 maintains near-real-time message state. Clients continue connecting to the
-same `LoadBalancer` endpoint (`mosquitto-svc`), with no need to update client
+same `LoadBalancer` endpoint (`raymii-mosquitto-svc`), with no need to update client
 configurations or manage DNS changes. The failover is transparent and fast,
 ensuring message flow continues even when the primary is offline.
 
@@ -86,7 +86,7 @@ are published back to the `primary` due to the bridge configuration.
 
 #### 1. Namespace & ConfigMaps
 
-- Creates a `mosquitto-dev` namespace.
+- Creates a `raymii-mosquitto-dev` namespace.
 - Two ConfigMaps:
   - **Primary Broker ConfigMap**: Configures the primary broker to listen on
       ports 1883 (external) and 2883 (for bridge to connect to).
@@ -96,24 +96,24 @@ are published back to the `primary` due to the bridge configuration.
 
 #### 2. Deployments
 
-- `mosquitto-primary`: 
+- `raymii-mosquitto-primary`: 
   - Listens on ports 1883 (external) and 2883 (for the bridge to connect to).
-- `mosquitto-secondary`: 
+- `raymii-mosquitto-secondary`: 
   - Bridges to the primary on port 2883.
   - Listens on ports 1883 (external) and 3883.
-- `mosquitto-failover`:
+- `raymii-mosquitto-failover`:
   - Pod with a shell loop checking the readiness of the primary broker.
-  - If the primary is not ready, it patches the selector of `mosquitto-svc` to
+  - If the primary is not ready, it patches the selector of `raymii-mosquitto-svc` to
     point to the secondary broker, redirecting traffic to it.
 
 #### 3. Services
 
-- `mosquitto-svc`: 
+- `raymii-mosquitto-svc`: 
   - Main `LoadBalancer` service, dynamically routing traffic to either the
     primary or secondary broker.
-- `mosquitto-primary-svc`: 
+- `raymii-mosquitto-primary-svc`: 
   - Directs traffic to the `primary` broker's second listener (2883).
-- `mosquitto-secondary-svc`:
+- `raymii-mosquitto-secondary-svc`:
   - Directs traffic to the `secondary` broker's second listener (3883).
 
 #### 4. RBAC
@@ -125,8 +125,8 @@ are published back to the `primary` due to the bridge configuration.
 
 #### 5. Traefik IngressRouteTCP
 
-- `mosquitto-dev-mqtt`:
-  - Routes external MQTT traffic to `mosquitto-svc`.
+- `raymii-mosquitto-dev-mqtt`:
+  - Routes external MQTT traffic to `raymii-mosquitto-svc`.
 - Direct routes for `primary` and `secondary` brokers as well.
 
 
@@ -145,10 +145,10 @@ dynamically reroute traffic via `kubectl`.
 
 ### How the Mosquitto Failover Pod Keeps the MQTT Service Alive
 
-The `mosquitto-failover` pod is a lightweight control loop designed for one
+The `raymii-mosquitto-failover` pod is a lightweight control loop designed for one
 purpose: keep MQTT traffic flowing even when the `primary` broker goes down.
 It continuously checks the readiness of the `primary` Mosquitto pod. If the
-`primary` fails, it patches the `mosquitto-svc` service to route traffic to the
+`primary` fails, it patches the `raymii-mosquitto-svc` service to route traffic to the
 secondary broker. When the `primary` recovers, traffic is restored
 automatically. to the `primary`.
 
@@ -171,21 +171,21 @@ and one for the `failover` monitoring.
 
 I pulled the network cable of the k3s server running the  `primary` node.
 Clients disconnected, but reconnected after a few seconds to the
-`mosquitto-svc` `Service`, landing on the `secondary` node. 
+`raymii-mosquitto-svc` `Service`, landing on the `secondary` node. 
 
 After a few minutes, more than 5, I plugged the network cable back
 in to the k3s server that was hosting the `primary` pod. The `failover`
 Pod noticed and patched the service and back again:
 
-    kubectl logs -n mosquitto-dev -l app=mosquitto-failover
+    kubectl logs -n raymii-mosquitto-dev -l app=mosquitto-failover
 
 Output:
 
-    service/mosquitto-svc patched (no change)
+    service/raymii-mosquitto-svc patched (no change)
     Wed May 14 18:58:30 UTC 2025 - Primary healthy, routing to primary.
-    service/mosquitto-svc patched
+    service/raymii-mosquitto-svc patched
     Wed May 14 19:11:54 UTC 2025 - Primary down, routing to secondary.
-    service/mosquitto-svc patched
+    service/raymii-mosquitto-svc patched
     Wed May 14 19:13:41 UTC 2025 - Primary healthy, routing to primary.
 
 
@@ -196,11 +196,11 @@ This is the YAML file, including the k3s 1.32 `HelmChartConfig`
 to expose ports other than 443 and 80. If you use NGINX
 you must adapt that part to your setup.
 
-The namespace is `mosquitto-dev`. Search and replace if you want a different
+The namespace is `raymii-mosquitto-dev`. Search and replace if you want a different
 namespace. Maybe attach a persistent volume if you use certificates or a
 custom CA for authentication, or where you save the mosquitto persistent DB.
 For my usecase, where clients publish retained on every `connect`, there is
-no need to save the `mosquitto.db` file. You might want to use `Longhorn` or
+no need to save the `raymii-mosquitto.db` file. You might want to use `Longhorn` or
 to save that state. For simplicity, I'm using a `ConfigMap` for the broker
 configuration.
 
@@ -262,8 +262,8 @@ configuration.
         spec:
           containers:
           - name: raymii-mosquitto
-            image: eclipse-raymii-mosquitto:2.0.21
-            command: ["raymii-mosquitto"]
+            image: eclipse-mosquitto:2.0.21
+            command: ["mosquitto"]
             args: ["-c", "/raymii-mosquitto/config/raymii-mosquitto.conf"]
             ports:
             - containerPort: 1883
@@ -315,8 +315,8 @@ configuration.
         spec:
           containers:
           - name: raymii-mosquitto
-            image: eclipse-raymii-mosquitto
-            command: ["raymii-mosquitto"]
+            image: eclipse-mosquitto:2.0.21
+            command: ["mosquitto"]
             args: ["-c", "/raymii-mosquitto/config/raymii-mosquitto.conf"]
             ports:
             - containerPort: 1883

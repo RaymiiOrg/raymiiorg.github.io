@@ -118,7 +118,7 @@ recovery time and improves system responsiveness during failures. </p>
 
 <p>Because the <code>secondary</code> broker is always running and bridged to the <code>primary</code>, it
 maintains near-real-time message state. Clients continue connecting to the
-same <code>LoadBalancer</code> endpoint (<code>mosquitto-svc</code>), with no need to update client
+same <code>LoadBalancer</code> endpoint (<code>raymii-mosquitto-svc</code>), with no need to update client
 configurations or manage DNS changes. The failover is transparent and fast,
 ensuring message flow continues even when the primary is offline.</p>
 
@@ -158,7 +158,7 @@ are published back to the <code>primary</code> due to the bridge configuration. 
 <h4 id="toc_1">1. Namespace &amp; ConfigMaps</h4>
 
 <ul>
-<li>Creates a <code>mosquitto-dev</code> namespace.</li>
+<li>Creates a <code>raymii-mosquitto-dev</code> namespace.</li>
 <li>Two ConfigMaps:
 
 <ul>
@@ -173,22 +173,22 @@ to the primary on port 2883, and listens on ports 1883 (external) and
 <h4 id="toc_2">2. Deployments</h4>
 
 <ul>
-<li><code>mosquitto-primary</code>: 
+<li><code>raymii-mosquitto-primary</code>: 
 
 <ul>
 <li>Listens on ports 1883 (external) and 2883 (for the bridge to connect to).</li>
 </ul></li>
-<li><code>mosquitto-secondary</code>: 
+<li><code>raymii-mosquitto-secondary</code>: 
 
 <ul>
 <li>Bridges to the primary on port 2883.</li>
 <li>Listens on ports 1883 (external) and 3883.</li>
 </ul></li>
-<li><code>mosquitto-failover</code>:
+<li><code>raymii-mosquitto-failover</code>:
 
 <ul>
 <li>Pod with a shell loop checking the readiness of the primary broker.</li>
-<li>If the primary is not ready, it patches the selector of <code>mosquitto-svc</code> to
+<li>If the primary is not ready, it patches the selector of <code>raymii-mosquitto-svc</code> to
 point to the secondary broker, redirecting traffic to it.</li>
 </ul></li>
 </ul>
@@ -196,18 +196,18 @@ point to the secondary broker, redirecting traffic to it.</li>
 <h4 id="toc_3">3. Services</h4>
 
 <ul>
-<li><code>mosquitto-svc</code>: 
+<li><code>raymii-mosquitto-svc</code>: 
 
 <ul>
 <li>Main <code>LoadBalancer</code> service, dynamically routing traffic to either the
 primary or secondary broker.</li>
 </ul></li>
-<li><code>mosquitto-primary-svc</code>: 
+<li><code>raymii-mosquitto-primary-svc</code>: 
 
 <ul>
 <li>Directs traffic to the <code>primary</code> broker&#39;s second listener (2883).</li>
 </ul></li>
-<li><code>mosquitto-secondary-svc</code>:
+<li><code>raymii-mosquitto-secondary-svc</code>:
 
 <ul>
 <li>Directs traffic to the <code>secondary</code> broker&#39;s second listener (3883).</li>
@@ -229,10 +229,10 @@ if needed, failover.</li>
 <h4 id="toc_5">5. Traefik IngressRouteTCP</h4>
 
 <ul>
-<li><code>mosquitto-dev-mqtt</code>:
+<li><code>raymii-mosquitto-dev-mqtt</code>:
 
 <ul>
-<li>Routes external MQTT traffic to <code>mosquitto-svc</code>.</li>
+<li>Routes external MQTT traffic to <code>raymii-mosquitto-svc</code>.</li>
 </ul></li>
 <li>Direct routes for <code>primary</code> and <code>secondary</code> brokers as well.</li>
 </ul>
@@ -252,10 +252,10 @@ dynamically reroute traffic via <code>kubectl</code>.</p>
 
 <h3 id="toc_7">How the Mosquitto Failover Pod Keeps the MQTT Service Alive</h3>
 
-<p>The <code>mosquitto-failover</code> pod is a lightweight control loop designed for one
+<p>The <code>raymii-mosquitto-failover</code> pod is a lightweight control loop designed for one
 purpose: keep MQTT traffic flowing even when the <code>primary</code> broker goes down.
 It continuously checks the readiness of the <code>primary</code> Mosquitto pod. If the
-<code>primary</code> fails, it patches the <code>mosquitto-svc</code> service to route traffic to the
+<code>primary</code> fails, it patches the <code>raymii-mosquitto-svc</code> service to route traffic to the
 secondary broker. When the <code>primary</code> recovers, traffic is restored
 automatically. to the <code>primary</code>.</p>
 
@@ -278,22 +278,22 @@ and one for the <code>failover</code> monitoring.</p>
 
 <p>I pulled the network cable of the k3s server running the  <code>primary</code> node.
 Clients disconnected, but reconnected after a few seconds to the
-<code>mosquitto-svc</code> <code>Service</code>, landing on the <code>secondary</code> node. </p>
+<code>raymii-mosquitto-svc</code> <code>Service</code>, landing on the <code>secondary</code> node. </p>
 
 <p>After a few minutes, more than 5, I plugged the network cable back
 in to the k3s server that was hosting the <code>primary</code> pod. The <code>failover</code>
 Pod noticed and patched the service and back again:</p>
 
-<pre><code>kubectl logs -n mosquitto-dev -l app=mosquitto-failover
+<pre><code>kubectl logs -n raymii-mosquitto-dev -l app=mosquitto-failover
 </code></pre>
 
 <p>Output:</p>
 
-<pre><code>service/mosquitto-svc patched (no change)
+<pre><code>service/raymii-mosquitto-svc patched (no change)
 Wed May 14 18:58:30 UTC 2025 - Primary healthy, routing to primary.
-service/mosquitto-svc patched
+service/raymii-mosquitto-svc patched
 Wed May 14 19:11:54 UTC 2025 - Primary down, routing to secondary.
-service/mosquitto-svc patched
+service/raymii-mosquitto-svc patched
 Wed May 14 19:13:41 UTC 2025 - Primary healthy, routing to primary.
 </code></pre>
 
@@ -303,11 +303,11 @@ Wed May 14 19:13:41 UTC 2025 - Primary healthy, routing to primary.
 to expose ports other than 443 and 80. If you use NGINX
 you must adapt that part to your setup.</p>
 
-<p>The namespace is <code>mosquitto-dev</code>. Search and replace if you want a different
+<p>The namespace is <code>raymii-mosquitto-dev</code>. Search and replace if you want a different
 namespace. Maybe attach a persistent volume if you use certificates or a
 custom CA for authentication, or where you save the mosquitto persistent DB.
 For my usecase, where clients publish retained on every <code>connect</code>, there is
-no need to save the <code>mosquitto.db</code> file. You might want to use <code>Longhorn</code> or
+no need to save the <code>raymii-mosquitto.db</code> file. You might want to use <code>Longhorn</code> or
 to save that state. For simplicity, I&#39;m using a <code>ConfigMap</code> for the broker
 configuration.</p>
 
@@ -368,8 +368,8 @@ spec:
     spec:
       containers:
       - name: raymii-mosquitto
-        image: eclipse-raymii-mosquitto:2.0.21
-        command: [&quot;raymii-mosquitto&quot;]
+        image: eclipse-mosquitto:2.0.21
+        command: [&quot;mosquitto&quot;]
         args: [&quot;-c&quot;, &quot;/raymii-mosquitto/config/raymii-mosquitto.conf&quot;]
         ports:
         - containerPort: 1883
@@ -421,8 +421,8 @@ spec:
     spec:
       containers:
       - name: raymii-mosquitto
-        image: eclipse-raymii-mosquitto
-        command: [&quot;raymii-mosquitto&quot;]
+        image: eclipse-mosquitto:2.0.21
+        command: [&quot;mosquitto&quot;]
         args: [&quot;-c&quot;, &quot;/raymii-mosquitto/config/raymii-mosquitto.conf&quot;]
         ports:
         - containerPort: 1883
