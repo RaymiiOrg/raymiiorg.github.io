@@ -74,7 +74,13 @@ case of failure. If the `Node` that runs the `failover` pod fails AND the
 `Node` running the `primary` pod fails, failover **won't happen** until
 the `failover` Pod is back up again. So in some rare cases failover might 
 still take 5 minutes. Even then, due to the bridge config, less messages would 
-be lost.ZX
+be lost.
+
+The `failover` controller can be scaled up to make sure a Node failure
+that runs the `failover` pod doesn't impact service availability.
+A Kubernetes `Service` only routes traffic to `Ready` services,
+but to make sure failover is fast and traffic is always 
+routed to the `primary` node, this `pseudo-controller` is required.
 
 In my intented use case, clients reconnect whenever there is a failure and
 publish retained messages when connecting, so failover back is not a
@@ -147,10 +153,17 @@ dynamically reroute traffic via `kubectl`.
 
 The `raymii-mosquitto-failover` pod is a lightweight control loop designed for one
 purpose: keep MQTT traffic flowing even when the `primary` broker goes down.
-It continuously checks the readiness of the `primary` Mosquitto pod. If the
+It continuously checks the `liveness` of the `primary` Mosquitto pod. If the
 `primary` fails, it patches the `raymii-mosquitto-svc` service to route traffic to the
 secondary broker. When the `primary` recovers, traffic is restored
-automatically. to the `primary`.
+automatically. to the `primary`. 
+
+The `livenessProbe` publishes an actual MQTT message on the `healthcheck`
+topic, not just a TCP port check. This way you always know that MQTT
+is working. You do need to update the command, if you for example use
+certifcate authentication.
+
+![liveness probe](/s/inc/img/ha-mosquitto-k8s-liveness.png) 
 
 This pod runs `kubectl` inside a shell loop, using Kubernetes API calls to
 detect health and redirect traffic. It's deliberately simple, no operators, no
@@ -161,6 +174,11 @@ overhead, extra code, CRDs, lifecycle management, and more complexity for
 something this specific. The failover pod trades abstraction for control:
 it's readable, auditable, debuggable, and deploys instantly. For one job done
 right, less is more.
+
+You can adjust the deployment to have as many replica's of the failover
+pod, that service itself is stateless. You might even go so far 
+as to edit the script to check the status of the secondary
+before failing over.
 
 Now for the summary of the YAML file.
 
@@ -269,15 +287,23 @@ configuration.
             - containerPort: 1883
             - containerPort: 2883
             livenessProbe:
-              tcpSocket:
-                port: 1883
-              initialDelaySeconds: 5
-              periodSeconds: 10
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - /usr/bin/mosquitto_pub -h raymii-mosquitto-primary-svc.raymii-mosquitto-dev.svc.cluster.local -p 2883 -t healthcheck/primary/liveness -m "$(hostname) ok $(date)" -r -q 0
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            # livenessProbe:
+            # tcpSocket:
+            #   port: 1883
+            # initialDelaySeconds: 5
+            # periodSeconds: 5
             readinessProbe:
               tcpSocket:
                 port: 1883
               initialDelaySeconds: 5
-              periodSeconds: 10
+              periodSeconds: 5
             volumeMounts:
             - name: primary-config
               mountPath: /raymii-mosquitto/config/
@@ -322,15 +348,23 @@ configuration.
             - containerPort: 1883
             - containerPort: 3883
             livenessProbe:
-              tcpSocket:
-                port: 1883
-              initialDelaySeconds: 5
-              periodSeconds: 10
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - /usr/bin/mosquitto_pub -h raymii-mosquitto-secondary-svc.raymii-mosquitto-dev.svc.cluster.local -p 3883 -t healthcheck/secondary/liveness -m "$(hostname) ok $(date)" -r -q 0
+              initialDelaySeconds: 30
+              periodSeconds: 5
+            # livenessProbe:
+            #  tcpSocket:
+            #     port: 1883
+            #  initialDelaySeconds: 5
+            #  periodSeconds: 5
             readinessProbe:
               tcpSocket:
                 port: 1883
               initialDelaySeconds: 5
-              periodSeconds: 10        
+              periodSeconds: 5        
             volumeMounts:
             - name: bridge-config
               mountPath: /raymii-mosquitto/config/          
