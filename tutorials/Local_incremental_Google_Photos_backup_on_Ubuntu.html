@@ -40,24 +40,53 @@
             </header>
           
     <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Local incremental backups of Google Photos on Ubuntu with gphotos-sync</h2>
-<p><small>Published: <span data-pagefind-meta='date'>24-08-2020</span> | Author: Remy van Elst | <a href="Local_incremental_Google_Photos_backup_on_Ubuntu.txt">Text only version of this article</a>
+<p><small>Published: <span data-pagefind-meta='date'>24-08-2020</span> | Last update: 31-05-2025 21:30 | Author: Remy van Elst | <a href="Local_incremental_Google_Photos_backup_on_Ubuntu.txt">Text only version of this article</a>
 </small></p>
-<br><div class='olderthanayear'><p><strong>&#10071; This post is over four years old. It may no longer be up to date. Opinions may have changed.</strong></p></div>
-<div id="toc">
+<br><div id="toc">
 <h3>Table of Contents</h3>
 <ul>
 <li>
-<a href="#toc_0">gphotos-sync installation</a>
+<a href="#toc_0">Update on 2025-05-31: this method no longer works!</a>
 </li>
 <li>
-<a href="#toc_1">Google API authentication setup</a>
+<a href="#toc_1">Introdution</a>
 </li>
 <li>
-<a href="#toc_2">gphotos-sync usage</a>
+<a href="#toc_2">gphotos-sync installation</a>
+</li>
+<li>
+<a href="#toc_3">Google API authentication setup</a>
+</li>
+<li>
+<a href="#toc_4">gphotos-sync usage</a>
 </li>
 </ul>
 
 </div><hr><div id="contents">
+<h3 id="toc_0">Update on 2025-05-31: this method no longer works!</h3>
+
+<p>Due to [google disabling a specific API], this method no longer works.
+You will receive an error, <code>403 Client Error: Forbidden for url: 
+https://photoslibrary.googleapis.com/v1/mediaItems:search</code>.
+On October 24, 2024, <code>gilesknap</code> archived the repository
+for <code>gphotos-sync</code> with the following message:</p>
+
+<blockquote>
+<p>Google will be changing the authorization scopes for Google Photos 
+on March 15th 2025 as described <a href="https://developers.google.com/photos/support/updates#affected-scopes-methods">here</a>. There is no way that a backup 
+tool like gphotos-sync can operate under the new scopes.</p>
+</blockquote>
+
+<p>The <a href="https://issuetracker.google.com/issues/368779600">google issue tracker</a>
+has an issue regarding this. Please overwhelm that tracker with your 
+feedback, +1&#39;s and angry comments. This is a case of Google deliberately
+crippling their API. </p>
+
+<p>The only way to backup your photos now is using Google Takeout, but that
+is neither incremental nor useful. </p>
+
+<h3 id="toc_1">Introdution</h3>
+
 <p>&#39;Google Photos&#39; no longer syncs with <code>Google Drive</code> or with their <code>Backup and Sync</code>
 desktop software. There used to be a checkbox to get your <code>Google Photos</code> pictures
 in <code>Google Drive</code> but <a href="http://web.archive.org/web/20200823113853/https://blog.google/products/photos/simplifying-google-photos-and-google-drive/">that has been disabled</a>. I used that feature together
@@ -82,7 +111,7 @@ panoramas, movies, effects and collages). It is only for Google Photos download
 / backup purposes. It cannot upload photos to Google Photos.</p>
 </blockquote>
 
-<h3 id="toc_0">gphotos-sync installation</h3>
+<h3 id="toc_2">gphotos-sync installation</h3>
 
 <p><a href="https://github.com/gilesknap/gphotos-sync/">gphotos-sync</a> is a command line python application that uses the Google Photos
 API. Installation is not very complex since there is a <code>pip</code> package. First make 
@@ -99,7 +128,7 @@ sure you have <code>pip</code> installed:</p>
 <p>Now follows a complex part on getting credentials. It&#39;s not as simple as just 
 logging in with a username and password.</p>
 
-<h3 id="toc_1">Google API authentication setup</h3>
+<h3 id="toc_3">Google API authentication setup</h3>
 
 <p>The <a href="https://github.com/gilesknap/gphotos-sync/">gphotos-sync manual</a> has an up to date version of these instructions.
 At the time of writing this article they were working, but with Google you
@@ -139,7 +168,7 @@ case, is fine.</p>
 
 <p>After this, rather complex process, you can start using the software.</p>
 
-<h3 id="toc_2">gphotos-sync usage</h3>
+<h3 id="toc_4">gphotos-sync usage</h3>
 
 <p>Create a folder where your pictures are going to be synced to:</p>
 
