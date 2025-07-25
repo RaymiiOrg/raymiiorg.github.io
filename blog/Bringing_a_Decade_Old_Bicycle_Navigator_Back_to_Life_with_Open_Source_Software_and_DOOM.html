@@ -1,0 +1,533 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>Bringing a Decade Old Bicycle Navigator Back to Life with Open Source Software (and DOOM) - Raymii.org</title>
+        <style> *, ::before, ::after {background-repeat: no-repeat;-webkit-box-sizing: border-box;box-sizing: border-box;}::before, ::after {text-decoration: inherit;vertical-align: inherit;}html {cursor: default;font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";line-height: 1.15;-moz-tab-size: 4;-o-tab-size: 4;tab-size: 4;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;word-break: break-word;}body {background-color: white;margin: 0;}h1 {font-size: 2em;margin: 0.67em 0;}hr {height: 0;overflow: visible;}main {display: block;}nav ol, nav ul {list-style: none;}pre {font-family: Roboto Mono, Menlo, Consolas, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}a {background-color: transparent;}abbr[title] {text-decoration: underline;-webkit-text-decoration: underline dotted;text-decoration: underline dotted;}b, strong {font-weight: bolder;}code, kbd, samp {font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono, Oxygen Mono, Liberation Mono, monospace;font-size: 1em;}small {font-size: 80%;}::-moz-selection {background-color: #b3d4fc;color: #000;text-shadow: none;}::selection {background-color: #b3d4fc;color: #000;text-shadow: none;}audio, canvas, iframe, img, svg, video {vertical-align: middle;}audio, video {display: inline-block;}audio:not([controls]) {display: none;height: 0;}img {border-style: none;}svg:not([fill]) {fill: currentColor;}svg:not(:root) {overflow: hidden;}table {border-collapse: collapse;}button, input, select, textarea {font-family: inherit;font-size: inherit;line-height: inherit;}button, input, select {margin: 0;}button {overflow: visible;text-transform: none;}button, [type="button"], [type="reset"], [type="submit"] {-webkit-appearance: button;}fieldset {padding: 0.35em 0.75em 0.625em;}input {overflow: visible;}legend {color: inherit;display: table;max-width: 100%;white-space: normal;}progress {display: inline-block;vertical-align: baseline;}select {text-transform: none;}textarea {margin: 0;overflow: auto;resize: vertical;}[type="checkbox"], [type="radio"] {padding: 0;}[type="search"] {-webkit-appearance: textfield;outline-offset: -2px;}::-webkit-inner-spin-button, ::-webkit-outer-spin-button {height: auto;}::-webkit-input-placeholder {color: inherit;opacity: 0.54;}::-webkit-search-decoration {-webkit-appearance: none;}::-webkit-file-upload-button {-webkit-appearance: button;font: inherit;}::-moz-focus-inner {border-style: none;padding: 0;}:-moz-focusring {outline: 1px dotted ButtonText;}details {display: block;}dialog {background-color: white;border: solid;color: black;display: block;height: -moz-fit-content;height: -webkit-fit-content;height: fit-content;left: 0;margin: auto;padding: 1em;position: absolute;right: 0;width: -moz-fit-content;width: -webkit-fit-content;width: fit-content;}dialog:not([open]) {display: none;}summary {display: list-item;}canvas {display: inline-block;}template {display: none;}a, area, button, input, label, select, summary, textarea, [tabindex] {-ms-touch-action: manipulation;touch-action: manipulation;}[hidden] {display: none;}[aria-busy="true"] {cursor: progress;}[aria-controls] {cursor: pointer;}[aria-disabled="true"], [disabled] {cursor: not-allowed;}[aria-hidden="false"][hidden]:not(:focus) {clip: rect(0, 0, 0, 0);display: inherit;position: absolute;}main, header, footer, article, section, aside, details, summary {margin: 0 auto;margin-bottom: 16px;width: 100%;}main {display: block;margin: 0 auto;max-width: 1000px;padding: 0 16px 16px;}footer {border-top: 1px solid rgba(0, 0, 0, 0.12);padding: 16px 0;text-align: left;}footer p {margin-bottom: 0;}hr {border: 0;border-top: 1px solid rgba(0, 0, 0, 0.12);display: block;margin-top: 16px;margin-bottom: 16px;width: 100%;-webkit-box-sizing: content-box;box-sizing: content-box;height: 0;overflow: visible;}img {height: auto;max-width: 100%;vertical-align: baseline;}@media screen and (max-width: 400px) {article, section, aside {clear: both;display: block;max-width: 100%;}img {margin-right: 16px;}}embed, iframe, video {border: 0;}body {color: rgba(0, 0, 0, 0.8);font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.5;}p {margin: 0;margin-bottom: 16px;}h1, h2, h3, h4, h5, h6 {color: inherit;font-family: inherit;line-height: 1.2;font-weight: 500;}h1 {font-size: 40px;margin: 20px 0 16px;}h2 {font-size: 32px;margin: 20px 0 16px;}h3 {color: #75cc00;font-size: 28px;margin: 16px 0 4px;}h4 {color: #75cc00;font-size: 24px;margin: 16px 0 4px;}h5 {color: #75cc00;font-size: 20px;margin: 16px 0 4px;}h6 {color: #75cc00;font-size: 16px;margin: 16px 0 4px;}small {color: rgba(0, 0, 0, 0.54);vertical-align: bottom;}pre {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);display: block;font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;margin: 16px 0;padding: 16px;white-space: pre-wrap;overflow-wrap: break-word;}code {background: #f7f7f9;color: rgba(0, 0, 0, 0.8);font-family: "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;font-size: 16px;line-height: inherit;margin: 0;vertical-align: baseline;word-break: break-all;word-wrap: break-word;}a {color: #75cc00;text-decoration: none;background-color: transparent;}a:hover, a:focus {color: #0062cc;font-weight: bolder;text-decoration: underline;}dl {margin-bottom: 16px;}dd {margin-left: 40px;}ul, ol {margin-bottom: 8px;padding-left: 40px;vertical-align: baseline;}blockquote {border-left: 2px solid rgba(0, 0, 0, 0.8);font-family: Georgia, Times, "Times New Roman", serif;font-style: italic;margin: 16px 0;padding-left: 16px;}figcaption {font-family: Georgia, Times, "Times New Roman", serif;}u {text-decoration: underline;}s {text-decoration: line-through;}sup {font-size: 14px;vertical-align: super;}sub {font-size: 14px;vertical-align: sub;}mark {background: #ffeb3b;}input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], select, textarea {background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}input[type="color"] {background: #fff;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;display: inline-block;vertical-align: middle;}input:not([type]) {-webkit-appearance: none;background: #fff;background-clip: padding-box;border: 1px solid rgba(0, 0, 0, 0.12);border-radius: 4px;color: rgba(0, 0, 0, 0.8);display: block;width: 100%;padding: 8px 16px;line-height: 1.5;-webkit-transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;text-align: left;}input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, select:focus, textarea:focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input:not([type]):focus {background-color: #fff;border-color: #80bdff;outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);}input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {outline: 1px thin rgba(0, 0, 0, 0.12);}input[type="text"][disabled], input[type="password"][disabled], input[type="email"][disabled], input[type="url"][disabled], input[type="date"][disabled], input[type="month"][disabled], input[type="time"][disabled], input[type="datetime"][disabled], input[type="datetime-local"][disabled], input[type="week"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="color"][disabled], select[disabled], textarea[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input:not([type])[disabled] {background-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);cursor: not-allowed;opacity: 1;}input[readonly], select[readonly], textarea[readonly] {border-color: rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.54);}input:focus:invalid, textarea:focus:invalid, select:focus:invalid {border-color: #ea1c0d;color: #f44336;}input[type="file"]:focus:invalid:focus, input[type="radio"]:focus:invalid:focus, input[type="checkbox"]:focus:invalid:focus {outline-color: #f44336;}select {border: 1px solid rgba(0, 0, 0, 0.12);vertical-align: sub;}select:not([size]):not([multiple]) {height: -webkit-calc(2.25rem + 2px);height: calc(2.25rem + 2px);}select[multiple] {height: auto;}label {display: inline-block;line-height: 2;}fieldset {border: 0;margin: 0;padding: 8px 0;}legend {border-bottom: 1px solid rgba(0, 0, 0, 0.12);color: rgba(0, 0, 0, 0.8);display: block;margin-bottom: 8px;padding: 8px 0;width: 100%;}textarea {overflow: auto;resize: vertical;}input[type=checkbox], input[type=radio] {-webkit-box-sizing: border-box;box-sizing: border-box;padding: 0;display: inline;}input[type=submit], input[type=reset], input[type=button], button {background-color: #75cc00;border: #75cc00;border-radius: 4px;color: #fff;padding: 8px 16px;display: inline-block;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;font-size: 1rem;line-height: 1.5;-webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;}input[type=submit]::-moz-focus-inner, input[type=reset]::-moz-focus-inner, input[type=button]::-moz-focus-inner, button::-moz-focus-inner {padding: 0;}input[type=submit]:hover, input[type=reset]:hover, input[type=button]:hover, button:hover {background-color: #0069d9;border-color: #0062cc;color: #fff;}input[type=submit]:not(:disabled):active, input[type=reset]:not(:disabled):active, input[type=button]:not(:disabled):active, button:not(:disabled):active {background-color: #0062cc;border-color: #005cbf;color: #fff;}input[type=submit]:focus, input[type=reset]:focus, input[type=button]:focus, button:focus {outline: 0;-webkit-box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);}input[type=submit]:disabled, input[type=reset]:disabled, input[type=button]:disabled, button:disabled {opacity: .65;cursor: not-allowed;background-color: #75cc00;border-color: #75cc00;color: #fff;}table {border-top: 1px solid rgba(0, 0, 0, 0.12);margin-bottom: 16px;}caption {padding: 8px 0;}thead th {border: 0;border-bottom: 2px solid rgba(0, 0, 0, 0.12);text-align: left;}tr {margin-bottom: 8px;}th, td {border-bottom: 1px solid rgba(0, 0, 0, 0.12);padding: 16px;white-space: nowrap;vertical-align: inherit;}tfoot tr {text-align: left;}tfoot td {color: rgba(0, 0, 0, 0.54);font-size: 8px;font-style: italic;padding: 16px 4px;}a.skip-main {left:-999px;position:absolute;top:auto;width:1px;height:1px;overflow:hidden;z-index:-999;}a.skip-main:focus, a.skip-main:active {color: #fff;background-color:#000;left: auto;top: auto;width: 30%;height: auto;overflow:auto;margin: 10px 35%;padding:5px;border-radius: 15px;border:4px solid yellow;text-align:center;font-size:1.2em;z-index:999;}@font-face {font-family: 'Raleway';font-style: normal;font-weight: 600;src: url('/s/inc/css/raleway-v18-latin-600.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-600.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-600.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-600.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-600.svg#Raleway') format('svg');}@font-face {font-family: 'Raleway';font-style: italic;font-weight: 400;src: url('/s/inc/css/raleway-v18-latin-italic.eot');src: local(''), url('/s/inc/css/raleway-v18-latin-italic.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/raleway-v18-latin-italic.woff2') format('woff2'), url('/s/inc/css/raleway-v18-latin-italic.woff') format('woff'), url('/s/inc/css/raleway-v18-latin-italic.ttf') format('truetype'), url('/s/inc/css/raleway-v18-latin-italic.svg#Raleway') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 400;src: url('/s/inc/css/roboto-mono-v12-latin-regular.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-regular.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-regular.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-regular.svg#RobotoMono') format('svg');}@font-face {font-family: 'Roboto Mono';font-style: normal;font-weight: 600;src: url('/s/inc/css/roboto-mono-v12-latin-600.eot');src: local(''), url('/s/inc/css/roboto-mono-v12-latin-600.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/roboto-mono-v12-latin-600.woff2') format('woff2'), url('/s/inc/css/roboto-mono-v12-latin-600.woff') format('woff'), url('/s/inc/css/roboto-mono-v12-latin-600.ttf') format('truetype'), url('/s/inc/css/roboto-mono-v12-latin-600.svg#RobotoMono') format('svg');}@font-face {font-family: 'Ubuntu';font-style: normal;font-weight: 400;src: url('/s/inc/css/ubuntu-v15-latin-regular.eot');src: local(''), url('/s/inc/css/ubuntu-v15-latin-regular.eot?#iefix') format('embedded-opentype'), url('/s/inc/css/ubuntu-v15-latin-regular.woff2') format('woff2'), url('/s/inc/css/ubuntu-v15-latin-regular.woff') format('woff'), url('/s/inc/css/ubuntu-v15-latin-regular.ttf') format('truetype'), url('/s/inc/css/ubuntu-v15-latin-regular.svg#Ubuntu') format('svg');}@font-face {font-family:'Raleway2';font-style:normal;font-weight:normal;src:url('/s/inc/css/raleway.eot');src:local('Raleway2'),local('Raleway2'),url('/s/inc/css/raleway.ttf') }.headheader {font-family:"Raleway2"!important }.headheader a {color:#000;text-decoration:none }.headheader a:hover {color:#000;text-decoration:none!important }#toc ul {list-style: none;margin: 0;padding: 0;}#toc h3 {color:black;}</style>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="application/opensearchdescription+xml" rel="search" href="/s/inc/opensearch.xml"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for Raymii.org" href="https://raymii.org/s/feed.xml" />         
+    </head>
+    <body>
+        
+        <a id="top-of-page"></a>
+        <main>
+        <a class="skip-main" href="#main">Skip to main content</a>
+            <header>
+                <h1 class="headheader">
+                    <a href="https://raymii.org/s/">Raymii.org 
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAKCAYAAAD2Fg1xAAABgElEQVQ4jb3VP0iVYRTH8c9waXBokog7OYhTXChuF3GIi4hoiJA4REQIOTgGtoWTg6ODs0SYComIXCJEMhpKtD9guUU0ujRFS0PQ8DzC24v3Pq+3S9/pnMOP8/7Ocx6el/OziRN0JXTD+I2xhK4WdeNteGmbu8IgC3jQQlfCZ0zgINHzJabwoQP+ClHGV1zGJXwRDJ/FDJZi3MBQE10dL2K8gZFOGE3REDZyyjLunKG7KAzZHfMaXjXp+QbXYlzBfrvmSuhBNaHrxQU8zdQW8RhrOe0snuB7zA/jd6p4n9HV8QMfY/4JPzGAt7meFfS18LdXEk7uemIQuJ/Lj6PZQezFWhm3cTWnXcAj3MrU5oWh5WpzGM3UurGNZy28HSa8J7mB3Uy+4u/rl+UdrsT4Jraa6F6jP5M3MP0PHguzL9zzqmC2GRNYjXF2qDzDwgbgHp53wGMhJrEunGQ9oT3CQ+GFasWBsLVvwiv5XygJz/JOAe208POrJHST+CVspBB/AFY9Q3+QJqLxAAAAAElFTkSuQmCC" alt="Raymii.org Logo">
+                    </a>
+                </h1>
+                <small>
+                  Quis custodiet ipsos custodes?<br>
+                  <a href="/s/">Home</a> | 
+                  <a href="/s/static/About.html">About</a> | 
+                  <a href="/s/tags/all.html">All pages</a> | 
+                  <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                  <a href="https://raymii.org/s/feed.xml">RSS Feed</a> 
+                </small><br/><p>
+                <link href="/s/_pagefind/pagefind-ui.css" rel="stylesheet">
+                <script src="/s/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+                <div id="search" style="min-width:400px;max-width:1080px;"></div>
+                <script>
+                    window.addEventListener('DOMContentLoaded', (event) => {
+                        new PagefindUI({ element: "#search" });
+                    });
+                </script>
+                </p>
+            </header>
+          
+    <main data-pagefind-body><h2 class='headheader' data-pagefind-meta='title' id='main'>Bringing a Decade Old Bicycle Navigator Back to Life with Open Source Software (and DOOM)</h2>
+<p><small>Published: <span data-pagefind-meta='date'>25-07-2025 23:37</span> | Author: Remy van Elst | <a href="Bringing_a_Decade_Old_Bicycle_Navigator_Back_to_Life_with_Open_Source_Software_and_DOOM.txt">Text only version of this article</a>
+</small></p>
+<br><div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li>
+<a href="#toc_0">Planned Obsolescence</a>
+</li>
+<li>
+<a href="#toc_1">Navman Bike 1000 / Mio Cyclo 200</a>
+</li>
+<li>
+<a href="#toc_2">First Impressions</a>
+</li>
+<li>
+<a href="#toc_3">mitmproxy &amp; WireShark</a>
+</li>
+<li>
+<a href="#toc_4">Researching the firmware and DODGE.exe</a>
+</li>
+<li>
+<a href="#toc_5">Replacing DODGE.exe</a>
+</li>
+<li>
+<a href="#toc_6">NAVeGIS</a>
+</li>
+<li>
+<a href="#toc_7">Conclusion</a>
+</li>
+</ul>
+
+</div><hr><div id="contents">
+<p>I recently found a Navman Bike 1000 in a thrift store for EUR 10. This is a
+bike computer, a navigation device for cyclists, made by MiTaC, the same
+company that makes the Mio bike computers. This Navman Bike 1000 is a
+rebadged <code>Mio Cyclo 200</code>. It&#39;s from 2015 and as you might have guessed, no more
+map updates. There seem to be newer maps from 2020, but the official download
+tool fails. <strong>Planned Obsolescence at its best</strong>. The device is still in very
+good condition, the battery runs for 5 hours, the screen has great visibility
+outside and the software is extensive. </p>
+
+<p><img src="/s/inc/img/ad0efab676d24d749b26752ed6e62617.png" alt="navegis"></p>
+
+<blockquote>
+<p>NAVeGIS Open Source navigation with up to date maps</p>
+</blockquote>
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below. It means the world to me if you  show your appreciation and you'll help pay the server costs:</b><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">GitHub Sponsorship</a><br><br> <a href="https://pcbway.com/g/e7yQRg">PCBWay referral link (You get $5, I get $20 after you've placed an order)</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocea referral link  ($200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!)</a><br><br> </p>
+
+<p>This article shows how I dabbled a bit in reverse engineering, figuring out
+the device runs Windows CE 6.0 and using Total Commander and <a href="https://sourceforge.net/projects/navegis/">NaVeGIS</a> together with Open Street Map to
+get up to date maps from the OpenFietsMap project, allowing me to use this
+device for navigation with the most up to date maps. Since it is all open
+source, even if the current map provider would stop, I can always make my own
+maps.</p>
+
+<p>Oh and it runs DOOM:</p>
+
+<p><img src="/s/inc/img//c1bf3407921f4c99bf9e6b2bdd80b589.png" alt="doom"></p>
+
+<p>There is no other input than the touch screen, so I can shoot and nothing
+more, but hey, it runs DOOM!</p>
+
+<h3 id="toc_0">Planned Obsolescence</h3>
+
+<p>Mio <a href="https://www.mio.com/nl_nl/products/outdoors/cycling-navigation/cyclo-discover-pal">still makes newer devices like this one</a>,
+which probably only last 2 years and then the maps are out of date with no
+updates. </p>
+
+<p><strong>I&#39;d even be willing to pay Mio for updated maps for this older model.</strong></p>
+
+<p><img src="/s/inc/img/3c0263032b9c4c56b65e0ab2d7a18c95.png" alt="original maps"></p>
+
+<blockquote>
+<p>The original maps (kaarten, Dutch) are from 2015.</p>
+</blockquote>
+
+<p>I wonder why a company would assign its engineers the task of providing maps
+for old devices when newer gizmos consistently generate hundreds of dollars
+every two years. The high prices of new Garmin units, for instance, make it
+clear where their development priorities lie.</p>
+
+<p>Why are there no laws requiring device manufacturers to
+open source all software and hardware for consumer devices no longer sold? 
+This would not directly impact their revenue and would help reduce the
+growing volume of e-waste. However, I believe such a measure would likely
+shrink their profit margins, as consumers might no longer purchase new
+devices annually if existing models remained functional for ten years.</p>
+
+<p>You could turn this thought around. There is no information on the box nor in
+the manual regarding (free) map updates, so you could expect nothing, no
+updates at all. That they provided 5 years (2015 - 2020) of free map updates
+is nice, but since it was never promised, we should not complain. The promise
+was NO map updates, but you still got 5 years worth. </p>
+
+<h3 id="toc_1">Navman Bike 1000 / Mio Cyclo 200</h3>
+
+<p>To start this post off here are some pictures of the device and a global
+overview. </p>
+
+<p>This is the unit with box:</p>
+
+<p><img src="/s/inc/img/d48cf9ef28814c589b01e7c6ac3baa03.png" alt="unit with box"></p>
+
+<p>Here is the Mio counterpart, mounted on a bike.</p>
+
+<p><img src="/s/inc/img/e47f8f96a8144e78be714f987dd5aed7.png" alt="mio cyclo 200"></p>
+
+<p><img src="/s/inc/img/889a1dcbfd834498a0ad94ffaabd0f10.png" alt="mio cyclo 200 "></p>
+
+<p>Both units are almost exactly the same except for housing colour and
+background, software wise this article will work on both the Navman Bike 1000
+and the Mio Cyclo 200.</p>
+
+<p>Here is an excerpt from <a href="https://velomotion.net/2015/09/eurobike-2015-mio-praesentiert-neuen-navigationscomputer/">its introduction in 2015</a>:</p>
+
+<blockquote>
+<p>The Mio Cyclo 200 is an entry level bike navigation device with a 3.5-inch
+  color touchscreen and a very simple interface. It offers address
+  navigation, GPX track import, and a special &quot;Surprise Me&quot; feature that
+  creates random routes based on time or distance. It is loaded with
+  OpenStreetMap data for 23 Western European countries and includes
+  cycling-specific points of interest like repair shops and restaurants.</p>
+
+<p>It is waterproof, designed for outdoor use, and has a battery life of around
+  10 hours. There&#39;s also a &quot;Where am I&quot; function to quickly check your
+  location. Mounting options include a handlebar mount, and a stem mount
+  (Garmin mount). Updates are handled via a desktop application. The device
+  focuses on basic navigation without training features, making it ideal for
+  leisure riders and e-bike users, with a price of EUR 179.99.</p>
+</blockquote>
+
+<h3 id="toc_2">First Impressions</h3>
+
+<p>Mounting on the bike was very easy and the battery still holds charge up to 8
+hours. It gets a GPS fix quite fast when you are outside. The software is
+basic, but for its intended use case it&#39;s fine. You can enter an address or
+postal code and it will navigate to there using full colour maps. When you
+need to do something, like take a turn, it beeps a few times. I could see
+myself using this for longer bicycle trips or on holiday. </p>
+
+<p>But! Problems start arising when it sends you along roads that no longer exist
+or when you want to navigate to addresses that the device does not know
+about. It&#39;s showing its age and since you can no longer download new maps,
+that will never be fixed.</p>
+
+<p>The desktop software says there are maps available for download:</p>
+
+<p><img src="/s/inc/img/7057e898108d4373b2927c33bd43a6d1.png" alt="update available"></p>
+
+<p>But when trying to download them, it fails:</p>
+
+<p><img src="/s/inc/img/3c53a89a18c54936af0b06a9507066f1.png" alt="fail"></p>
+
+<p>A bit of searching around on the web does turn up a lot of info regarding
+Garmin custom maps but nothing for Mio devices. </p>
+
+<h3 id="toc_3">mitmproxy &amp; WireShark</h3>
+
+<p>I was wondering what this application was doing so I set up <a href="https://mitmproxy.org/">mitmproxy</a> and let it only monitor <code>navman.exe</code>. </p>
+
+<p><code>mitmproxy</code> is software that intercepts app network (https) requests and since
+the navigation desktop software was from 2018, I didn&#39;t suspect that it does
+any certificate pinning. That means that it uses the system certificate store
+and accepts the <code>mitmproxy</code> certificate. If it did certificate pinning,
+<code>mitmproxy</code> wouldn&#39;t work. But as I suspected, no pinning and I could snoop
+in to the network traffic of the desktop software.</p>
+
+<p>There were two requests that stood out.</p>
+
+<p>Request 1 seems to be a software update check:</p>
+
+<pre><code>POST: http://update.mio-tech.com.tw/Dodge/IaaCheckUpdateServlet
+
+&lt;device&gt;
+  &lt;skuid&gt;8613&lt;/skuid&gt;
+  &lt;checkType&gt;Prod&lt;/checkType&gt;
+  &lt;os&gt;WIN32&lt;/os&gt;
+  &lt;uuid&gt;000...B1&lt;/uuid&gt;
+  &lt;model&gt;NAVMAN BIKE 1000&lt;/model&gt;
+  &lt;acc&gt;&lt;/acc&gt;
+  &lt;type name=&quot;IMAGE&quot; version=&quot;31.03.1218&quot;/&gt;
+  &lt;type name=&quot;APPLICATION&quot; version=&quot;4361&quot;/&gt;
+  &lt;type name=&quot;AGENT&quot; version=&quot;2.2.27.1&quot;/&gt;
+&lt;/device&gt;
+</code></pre>
+
+<p>Response:</p>
+
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;updates&gt;
+  &lt;update type=&quot;11&quot;&gt;
+    &lt;package&gt;IMAGE&lt;/package&gt;
+    &lt;date&gt;2017-08-31&lt;/date&gt;
+    &lt;version&gt;33.03.0807&lt;/version&gt;
+    &lt;filesize&gt;11700606&lt;/filesize&gt;
+    &lt;url&gt;http://download.mio.com/MioCyclo/GPST/Agent/8613/R33.zip&lt;/url&gt;
+    &lt;releaseNote&gt;http://service.navman.com/&lt;/releaseNote&gt;
+    &lt;dependency/&gt;
+  &lt;/update&gt;
+  &lt;update type=&quot;2&quot;&gt;
+    &lt;package&gt;APPLICATION&lt;/package&gt;
+    &lt;date&gt;2018-02-02&lt;/date&gt;
+    &lt;version&gt;5091&lt;/version&gt;
+    &lt;filesize&gt;28599221&lt;/filesize&gt;
+    &lt;url&gt;http://download.mio.com/MioCyclo/GPST/Agent/Application/App 5.0.9.1 only.zip&lt;/url&gt;
+    &lt;releaseNote&gt;http://service.navman.com/M0100/FileReader_111306_UK%20Ireland%20NAVMAN_English%20Navman.html&lt;/releaseNote&gt;
+    &lt;dependency/&gt;
+  &lt;/update&gt;
+&lt;/updates&gt;
+</code></pre>
+
+<p>Request two contains the map updates:</p>
+
+<pre><code>POST: http://update.mio-tech.com.tw/DodgeAgentMapUpdate/MiomoreMapUpdate.action
+
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;MioMoreUpdate&gt;
+  &lt;request&gt;
+    &lt;param name=&quot;type&quot; value=&quot;MioMoreDeviceDownloadHistory&quot;/&gt;
+    &lt;param name=&quot;model&quot; value=&quot;NAVMAN BIKE 1000&quot;/&gt;
+    &lt;param name=&quot;sku&quot; value=&quot;8613&quot;/&gt;
+    &lt;param name=&quot;UUID&quot; value=&quot;000...B1&quot;/&gt;
+  &lt;/request&gt;
+&lt;/MioMoreUpdate&gt;
+</code></pre>
+
+<p>Response:</p>
+
+<pre><code>    &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;response type=&quot;MioMoreDeviceDownloadHistory&quot;&gt;
+  &lt;updatelist&gt;
+    &lt;update&gt;
+      &lt;version&gt;1909.02&lt;/version&gt;
+      &lt;size&gt;129030470&lt;/size&gt;
+      &lt;release_date&gt;2016-02-16 02:49:50.115686&lt;/release_date&gt;
+      &lt;notes&gt;WEU-BM-cyclo2&lt;/notes&gt;
+      &lt;regionid&gt;173&lt;/regionid&gt;
+&lt;downloadurl&gt;http://download.mio.com/MioCyclo/GPST/MapData_v3/Basemap/WEU_BaseMap_150602.zip&lt;/downloadurl&gt;
+&lt;checksum&gt;9fb4549793498cf1a1024ae825c7f88c&lt;/checksum&gt;
+&lt;releasenote_url&gt;http://v5.test.mioshare.com/en/news/detail?newsid=44&lt;/releasenote_url&gt;
+    &lt;/update&gt;
+    &lt;update&gt;
+      &lt;version&gt;1201.01&lt;/version&gt;
+      &lt;size&gt;3018402&lt;/size&gt;
+      &lt;release_date&gt;2015-06-12 10:04:51.191228&lt;/release_date&gt;
+      &lt;notes&gt;WEU-CountryID-V4&lt;/notes&gt;
+      &lt;regionid&gt;49&lt;/regionid&gt;
+&lt;downloadurl&gt;http://download.mio.com/MioCyclo/GPST/MapData_v3/CountryMap/WEU_Countries_23.zip&lt;/downloadurl&gt;
+&lt;checksum&gt;FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF&lt;/checksum&gt;
+&lt;releasenote_url&gt;http://www.mioshare.com/news/detail?newsid=6&lt;/releasenote_url&gt;
+    &lt;/update&gt;
+    &lt;update&gt;
+      &lt;version&gt;1910.02&lt;/version&gt;
+      &lt;size&gt;1899741519&lt;/size&gt;
+      &lt;release_date&gt;2016-02-16 02:48:57.010793&lt;/release_date&gt;
+      &lt;notes&gt;WEU-OSM-cyclo2&lt;/notes&gt;
+      &lt;regionid&gt;172&lt;/regionid&gt;
+&lt;downloadurl&gt;http://download.mio.com/MioCyclo/GPST/MapData_v3/OSM/WEU_OSM_150902.zip&lt;/downloadurl&gt;
+&lt;checksum&gt;1d349e6be7657d828c4d287b812522c5&lt;/checksum&gt;
+&lt;releasenote_url&gt;http://v5.test.mioshare.com/en/news/detail?newsid=44&lt;/releasenote_url&gt;
+    &lt;/update&gt;
+    &lt;update&gt;
+      &lt;version&gt;1909.02&lt;/version&gt;
+      &lt;size&gt;1242676960&lt;/size&gt;
+      &lt;release_date&gt;2016-02-16 02:49:31.575609&lt;/release_date&gt;
+      &lt;notes&gt;WEU-TA-cyclo2&lt;/notes&gt;
+      &lt;regionid&gt;171&lt;/regionid&gt;
+      &lt;downloadurl&gt;http://download.mio.com/MioCyclo/GPST/MapData_v3/TA/WEU_TeleAtlas_150602.zip&lt;/downloadurl&gt;
+      &lt;checksum&gt;512ba03cd982ed6b4cf80f9e85c23161&lt;/checksum&gt;
+      &lt;releasenote_url&gt;http://v5.test.mioshare.com/en/news/detail?newsid=44&lt;/releasenote_url&gt;
+    &lt;/update&gt;
+  &lt;/updatelist&gt;
+&lt;/response&gt;
+</code></pre>
+
+<p>You can see that the download URL&#39;s are from Mio, not Navman, they&#39;re made by
+the same OEM. What&#39;s up with the weird checksum? But sadly, all map urls
+give a <code>Not Found</code> error. I&#39;ve contacted Mio support but haven&#39;t yet received a
+response. If I ever get any I&#39;ll update this post.</p>
+
+<p>The software update download responses do work. <code>App 5.0.9.1 only.zip</code>
+contains a program named <code>dodge.exe</code>.</p>
+
+<p>I even tried to monitor the USB communication but I didn&#39;t get very far with that:</p>
+
+<p><img src="/s/inc/img/47de571e3d4f4d64aa02f16f9d234c86.png" alt="wireshark"></p>
+
+<h3 id="toc_4">Researching the firmware and DODGE.exe</h3>
+
+<p>The app only download included a program called <code>dodge.exe</code>. Uploading it to
+VirusTotal told me that it was an ARMv4 Tumb application for Windows Mobile.
+Binwalk said the same:</p>
+
+<pre><code>$ docker run -t -v &quot;$PWD&quot;:/analysis refirmlabs/binwalk:branch-master -Me dodge.exe
+
+                                             /analysis/extractions/dodge.exe
+------------------------------------------------------------------------------------------------------------------------
+  DECIMAL                            HEXADECIMAL                        DESCRIPTION
+------------------------------------------------------------------------------------------------------------------------
+0                                  0x0                                Windows PE binary, machine type: Thumb
+4066336                            0x3E0C20                           CRC32 polynomial table, little endian
+4067375                            0x3E102F                           Copyright text: &quot;Copyright 1995-2002 Jean-loup
+                                                                      Gailly &quot;
+4070255                            0x3E1B6F                           Copyright text: &quot;Copyright 1995-2002 Mark Adler &quot;
+4186952                            0x3FE348                           CRC32 polynomial table, little endian
+4193320                            0x3FFC28                           Copyright text: &quot;Copyright (C) 1994-2008 Lua.org,
+                                                                      PUC-Rio $ $Authors: R. Ierusalimschy, L. H. de
+                                                                      Figueiredo &amp; W. Cele&quot;
+4241612                            0x40B8CC                           Copyright text: &quot;Copyright 1998-2004 Gilles
+                                                                      Vollant - http://www.winimage.com/zLibDll&quot;
+4241698                            0x40B922                           Copyright text: &quot;Copyright 1998-2004 Gilles
+                                                                      Vollant - http://www.winimage.com/zLibDll&quot;
+4298913                            0x4198A1                           Copyright text: &quot;copyright_navman.&quot;
+4298941                            0x4198BD                           Copyright text: &quot;copyright.&quot;
+4298953                            0x4198C9                           Copyright text: &quot;copyright.eng.txt&quot;
+4298972                            0x4198DC                           Copyright text: &quot;CopyrightText&quot;
+4298992                            0x4198F0                           Copyright text: &quot;CopyrightText&quot;
+4521372                            0x44FD9C                           Copyright text: &quot;Copyright (C) 2009, Thomas G.
+                                                                      Lane, Guido Vollbeding&quot;
+4577656                            0x45D978                           CRC32 polynomial table, little endian
+------------------------------------------------------------------------------------------------------------------------
+</code></pre>
+
+<p>The firmware update image included a large file named <code>xip.bin</code>:</p>
+
+<pre><code>$ docker run -t -v &quot;$PWD&quot;:/analysis refirmlabs/binwalk:branch-master xip.bin
+
+                                                    /analysis/xip.bin
+------------------------------------------------------------------------------------------------------------------------
+DECIMAL                            HEXADECIMAL                        DESCRIPTION
+------------------------------------------------------------------------------------------------------------------------
+0                                  0x0                                Windows CE binary image, base address:
+                                                                      0x80420000, image size: 23814492 bytes, file
+                                                                      size: 19793959 bytes
+------------------------------------------------------------------------------------------------------------------------
+</code></pre>
+
+<p>This seems to be the entire firmware image (with Windows CE). I used the
+desktop program to flash this new firmware. The device showed a black screen
+with a few lines of update information:</p>
+
+<p><img src="/s/inc/img/36b5fb90944a488dbbf2263cba073cfe.png" alt="bootloader flash"></p>
+
+<p>Afterwards it rebooted. Extracting this <code>xip.bin</code> image didn&#39;t work with
+<code>binwalk</code>, only a few picture (image) files were extracted and a file named
+<code>EBOOT.NB0</code> which <code>binwalk</code> identified as an <code>AES S-BOX</code>. I might pursue that
+later with some help of the <a href="https://web.archive.org/web/20250722185456/https://xdaforums.com/t/tut-manual-full-xip-porting-many-more-tutorials-online.438676/">XDA Developers forum</a>,
+<code>xip</code> images seemed to be popular back in the Windows Mobile days. But I have
+a way easier method, read on for that.</p>
+
+<h3 id="toc_5">Replacing DODGE.exe</h3>
+
+<p>When connecting the device via USB to the PC, two new drives show up.
+<code>Nav_data</code> and <code>Nav_system</code>. The first is where you can load <code>.gpx</code> tracks
+and where routes are saved. The second seems to be <strong>the entire Windows CE
+system partition</strong>!</p>
+
+<p>Because the earlier app only download had a file named <code>DODGE.exe</code> I went
+looking for that file. Found it in the, surprisingly named, <code>DODGE\PROGRAM</code>
+folder. Renamed it to <code>DODGE2.exe</code> and put <a href="https://web.archive.org/web/20250429090214/http://www.ghisler.com/ce2.htm">Total Commander for ARMv4 for
+Windows CE</a>
+there as <code>DODGE.exe</code> and behold:</p>
+
+<p><img src="/s/inc/img/edc9cc88f227487da280a9aa6a13f053.png" alt="total commander"></p>
+
+<p>Using Total Commander I can browse the filesystem, there are lots of leftovers
+and test programs. For example, here is Windows Explorer running on top of
+the original <code>DODGE.exe</code> program:</p>
+
+<p><img src="/s/inc/img/56774a870a2c4fb1a906454bef5d969a.png" alt="explorer"></p>
+
+<p>The original Windows CE desktop:</p>
+
+<p><img src="/s/inc/img/d04473dcc3944f7f858b5efd1fb6ac36.png" alt="windows ce desktop"></p>
+
+<p>A GPS Test program:</p>
+
+<p><img src="/s/inc/img/b5a7b7098bc74cfebff032949d5c3f8d.png" alt="godspeed"></p>
+
+<p>Calculating Pi, including a third party on screen keyboard since this ROM does
+not ship with one:</p>
+
+<p><img src="/s/inc/img/a3f40101667b4eb28b524c38fb86d256.png" alt="pi calc"></p>
+
+<p>This is way too much fun. I <a href="/s/blog/My_24_year_old_HP_Jornada_can_do_things_your_modern_iPhone_still_cant_do.html">love me some Windows CE</a>
+as with the HP Jornada, trying out all kinds of Windows CE Applications,
+games like DOOM and much more. But we&#39;re here for the navigation part, I only
+wanted up to date maps.</p>
+
+<h3 id="toc_6">NAVeGIS</h3>
+
+<p><a href="https://sourceforge.net/projects/navegis/">NAVeGIS</a> is a Windows Mobile and
+WinCE navigation application, last updated in March of 2025. NAVeGIS can use
+the OpenStreetMap maps and in my case, the open Bicycle maps from
+<a href="https://www.openfietsmap.nl/">OpenFietsMap</a>. NAVeGIS is provided under the
+GNU GPLv3. </p>
+
+<p>After downloading the OpenFietsMap map file and placing it on a Micro SD card
+I selected the <code>img</code> file as map source in NAVeGIS.</p>
+
+<p>You select a destination by either selecting it via the menu, or by dragging
+the map to where you want to go and pressing the screen, then setting that as
+destination. It saves a list of recent destinations.</p>
+
+<p>Route hints are given by a big yellow arrow, the route itself is purple:</p>
+
+<p><img src="/s/inc/img/ad0efab676d24d749b26752ed6e62617.png" alt="navegis"></p>
+
+<p>Here is a route it planned, about 25 KM,zoomed out a bit:</p>
+
+<p><img src="/s/inc/img/ec83b5db05d5458dab1c6b748f81b8de.png" alt="navegis 2"></p>
+
+<p>There is no way to record GPS tracks or to change the screen layout. It does
+not support the beeper on this Mio device, so no audio hints as well. But,
+the maps are updatable and the navigation itself is just as good as the Mio
+application&#39;s routing engine. It also supports Points of Interests (POI).</p>
+
+<p>I find myself using the regular Mio (<code>DODGE.exe</code>) to record GPX tracks and for
+navigation I&#39;m using <code>NAVeGIS</code>. The Mio maps are so out of date that the
+instructions more often than not are incorrect.</p>
+
+<p>Without this piece of open source software I would probably have to throw this
+device back in the bin (or the second-hand store). But with it, I have the
+most recent up to date maps and navigation on a 10 year old Windows CE
+device.</p>
+
+<p>I hope current Mio or Garmin or comparable devices are this open to allow for
+continued usage. Locked down devices, signed bootloaders and such shenanigans
+are nice if you&#39;re a manufacturer, but not if you&#39;re and end user.</p>
+
+<h3 id="toc_7">Conclusion</h3>
+
+<p>Thanks to open source software and a bit of reverse engineering, a 10 year old
+GPS device is now fully functional. Proprietary abandonment was bypassed
+entirely. With NAVeGIS, Total Commander, and OpenStreetMap, I have modern
+mapping on legacy hardware. Obsolescence is a choice. Reverse engineering is
+resistance.</p>
+
+<p>For fun I installed Windows XP in a VM with Visual Studio 2008 and compiled
+NAVeGIS myself. <a href="https://github.com/raymiiOrg/navegis">Git source and build instructions here</a></p>
+
+<p><img src="/s/inc/img/3a8540e885ca4c34b916dbc4ff502fbb.png" alt="winxp"></p>
+
+<blockquote>
+<p>NAVeGIS compiled and running in the Windows CE emulator</p>
+</blockquote>
+Tags: <a href="../tags/binwalk.html">binwalk</a>
+, <a href="../tags/blog.html">blog</a>
+, <a href="../tags/c++.html">c++</a>
+, <a href="../tags/cpp.html">cpp</a>
+, <a href="../tags/cycling.html">cycling</a>
+, <a href="../tags/development.html">development</a>
+, <a href="../tags/doom.html">doom</a>
+, <a href="../tags/garmin.html">garmin</a>
+, <a href="../tags/historical.html">historical</a>
+, <a href="../tags/mio.html">mio</a>
+, <a href="../tags/mitac.html">mitac</a>
+, <a href="../tags/mitmproxy.html">mitmproxy</a>
+, <a href="../tags/mobile.html">mobile</a>
+, <a href="../tags/navman.html">navman</a>
+, <a href="../tags/openstreetmap.html">openstreetmap</a>
+, <a href="../tags/pda.html">pda</a>
+, <a href="../tags/planned-obsolescence.html">planned-obsolescence</a>
+, <a href="../tags/pocket-pc.html">pocket-pc</a>
+, <a href="../tags/windows-ce.html">windows-ce</a>
+, <a href="../tags/windows-mobile.html">windows-mobile</a>
+, <a href="../tags/wireshark.html">wireshark</a>
+</div></main>
+<br/>
+<footer>
+<br>
+                <p><small>
+                <a href="/s/">Home</a> | 
+                <a href="/s/static/About.html">About</a> | 
+                <a href="/s/tags/all.html">All pages</a> | 
+                <a href="/s/software/Sparkling_Network.html">Cluster Status</a> | 
+                Generated by <a href="/s/software/ingsoc.html">ingsoc</a>.</small>
+                </p>
+    
+    </footer>
+    <script data-goatcounter="https://raymii.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <script defer src="/s/inc/js/instant.5.2.0.js"  type="module" ></script>
+
+     
+    </main>
+    </body>
+    </html>
+    

@@ -1,0 +1,490 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Bringing a Decade Old Bicycle Navigator Back to Life with Open Source Software (and DOOM)
+Author      : 	Remy van Elst
+Date        : 	25-07-2025 23:37
+URL         : 	https://raymii.org/s/blog/Bringing_a_Decade_Old_Bicycle_Navigator_Back_to_Life_with_Open_Source_Software_and_DOOM.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+
+
+I recently found a Navman Bike 1000 in a thrift store for EUR 10. This is a
+bike computer, a navigation device for cyclists, made by MiTaC, the same
+company that makes the Mio bike computers. This Navman Bike 1000 is a
+rebadged `Mio Cyclo 200`. It's from 2015 and as you might have guessed, no more
+map updates. There seem to be newer maps from 2020, but the official download
+tool fails. **Planned Obsolescence at its best**. The device is still in very
+good condition, the battery runs for 5 hours, the screen has great visibility
+outside and the software is extensive. 
+
+![navegis](/s/inc/img/ad0efab676d24d749b26752ed6e62617.png)
+
+> NAVeGIS Open Source navigation with up to date maps
+
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below. It means the world to me if you  show your appreciation and you'll help pay the server costs:</b><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">GitHub Sponsorship</a><br><br> <a href="https://pcbway.com/g/e7yQRg">PCBWay referral link (You get $5, I get $20 after you've placed an order)</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocea referral link  ($200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!)</a><br><br> </p>
+
+
+
+This article shows how I dabbled a bit in reverse engineering, figuring out
+the device runs Windows CE 6.0 and using Total Commander and [NaVeGIS]
+(https://sourceforge.net/projects/navegis/) together with Open Street Map to
+get up to date maps from the OpenFietsMap project, allowing me to use this
+device for navigation with the most up to date maps. Since it is all open
+source, even if the current map provider would stop, I can always make my own
+maps.
+
+Oh and it runs DOOM:
+
+![doom](/s/inc/img//c1bf3407921f4c99bf9e6b2bdd80b589.png)
+
+There is no other input than the touch screen, so I can shoot and nothing
+more, but hey, it runs DOOM!
+
+### Planned Obsolescence
+
+Mio [still makes newer devices like this one]
+(https://www.mio.com/nl_nl/products/outdoors/cycling-navigation/cyclo-discover-pal),
+which probably only last 2 years and then the maps are out of date with no
+updates. 
+
+**I'd even be willing to pay Mio for updated maps for this older model.**
+
+![original maps](/s/inc/img/3c0263032b9c4c56b65e0ab2d7a18c95.png)
+
+> The original maps (kaarten, Dutch) are from 2015.
+
+I wonder why a company would assign its engineers the task of providing maps
+for old devices when newer gizmos consistently generate hundreds of dollars
+every two years. The high prices of new Garmin units, for instance, make it
+clear where their development priorities lie.
+
+Why are there no laws requiring device manufacturers to
+open source all software and hardware for consumer devices no longer sold? 
+This would not directly impact their revenue and would help reduce the
+growing volume of e-waste. However, I believe such a measure would likely
+shrink their profit margins, as consumers might no longer purchase new
+devices annually if existing models remained functional for ten years.
+
+You could turn this thought around. There is no information on the box nor in
+the manual regarding (free) map updates, so you could expect nothing, no
+updates at all. That they provided 5 years (2015 - 2020) of free map updates
+is nice, but since it was never promised, we should not complain. The promise
+was NO map updates, but you still got 5 years worth. 
+
+### Navman Bike 1000 / Mio Cyclo 200
+
+To start this post off here are some pictures of the device and a global
+overview. 
+
+This is the unit with box:
+
+![unit with box](/s/inc/img/d48cf9ef28814c589b01e7c6ac3baa03.png)
+
+Here is the Mio counterpart, mounted on a bike.
+
+![mio cyclo 200](/s/inc/img/e47f8f96a8144e78be714f987dd5aed7.png)
+
+![mio cyclo 200 ](/s/inc/img/889a1dcbfd834498a0ad94ffaabd0f10.png)
+
+Both units are almost exactly the same except for housing colour and
+background, software wise this article will work on both the Navman Bike 1000
+and the Mio Cyclo 200.
+
+Here is an excerpt from [its introduction in 2015]
+(https://velomotion.net/2015/09/eurobike-2015-mio-praesentiert-neuen-navigationscomputer/):
+
+> The Mio Cyclo 200 is an entry level bike navigation device with a 3.5-inch
+  color touchscreen and a very simple interface. It offers address
+  navigation, GPX track import, and a special "Surprise Me" feature that
+  creates random routes based on time or distance. It is loaded with
+  OpenStreetMap data for 23 Western European countries and includes
+  cycling-specific points of interest like repair shops and restaurants.
+> 
+> It is waterproof, designed for outdoor use, and has a battery life of around
+  10 hours. There's also a "Where am I" function to quickly check your
+  location. Mounting options include a handlebar mount, and a stem mount
+  (Garmin mount). Updates are handled via a desktop application. The device
+  focuses on basic navigation without training features, making it ideal for
+  leisure riders and e-bike users, with a price of EUR 179.99.
+
+
+
+### First Impressions 
+
+Mounting on the bike was very easy and the battery still holds charge up to 8
+hours. It gets a GPS fix quite fast when you are outside. The software is
+basic, but for its intended use case it's fine. You can enter an address or
+postal code and it will navigate to there using full colour maps. When you
+need to do something, like take a turn, it beeps a few times. I could see
+myself using this for longer bicycle trips or on holiday. 
+
+But! Problems start arising when it sends you along roads that no longer exist
+or when you want to navigate to addresses that the device does not know
+about. It's showing its age and since you can no longer download new maps,
+that will never be fixed.
+
+The desktop software says there are maps available for download:
+
+![update available](/s/inc/img/7057e898108d4373b2927c33bd43a6d1.png)
+
+But when trying to download them, it fails:
+
+![fail](/s/inc/img/3c53a89a18c54936af0b06a9507066f1.png)
+
+A bit of searching around on the web does turn up a lot of info regarding
+Garmin custom maps but nothing for Mio devices. 
+
+### mitmproxy & WireShark
+
+I was wondering what this application was doing so I set up [mitmproxy]
+(https://mitmproxy.org/) and let it only monitor `navman.exe`. 
+
+`mitmproxy` is software that intercepts app network (https) requests and since
+the navigation desktop software was from 2018, I didn't suspect that it does
+any certificate pinning. That means that it uses the system certificate store
+and accepts the `mitmproxy` certificate. If it did certificate pinning,
+`mitmproxy` wouldn't work. But as I suspected, no pinning and I could snoop
+in to the network traffic of the desktop software.
+
+There were two requests that stood out.
+
+Request 1 seems to be a software update check:
+
+    POST: http://update.mio-tech.com.tw/Dodge/IaaCheckUpdateServlet
+
+    <device>
+      <skuid>8613</skuid>
+      <checkType>Prod</checkType>
+      <os>WIN32</os>
+      <uuid>000...B1</uuid>
+      <model>NAVMAN BIKE 1000</model>
+      <acc></acc>
+      <type name="IMAGE" version="31.03.1218"/>
+      <type name="APPLICATION" version="4361"/>
+      <type name="AGENT" version="2.2.27.1"/>
+    </device>
+
+
+Response:
+
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <updates>
+      <update type="11">
+        <package>IMAGE</package>
+        <date>2017-08-31</date>
+        <version>33.03.0807</version>
+        <filesize>11700606</filesize>
+        <url>http://download.mio.com/MioCyclo/GPST/Agent/8613/R33.zip</url>
+        <releaseNote>http://service.navman.com/</releaseNote>
+        <dependency/>
+      </update>
+      <update type="2">
+        <package>APPLICATION</package>
+        <date>2018-02-02</date>
+        <version>5091</version>
+        <filesize>28599221</filesize>
+        <url>http://download.mio.com/MioCyclo/GPST/Agent/Application/App 5.0.9.1 only.zip</url>
+        <releaseNote>http://service.navman.com/M0100/FileReader_111306_UK%20Ireland%20NAVMAN_English%20Navman.html</releaseNote>
+        <dependency/>
+      </update>
+    </updates>
+
+
+
+Request two contains the map updates:
+
+
+    POST: http://update.mio-tech.com.tw/DodgeAgentMapUpdate/MiomoreMapUpdate.action
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <MioMoreUpdate>
+      <request>
+        <param name="type" value="MioMoreDeviceDownloadHistory"/>
+        <param name="model" value="NAVMAN BIKE 1000"/>
+        <param name="sku" value="8613"/>
+        <param name="UUID" value="000...B1"/>
+      </request>
+    </MioMoreUpdate>
+
+
+Response:
+
+        <?xml version="1.0" encoding="UTF-8"?>
+    <response type="MioMoreDeviceDownloadHistory">
+      <updatelist>
+        <update>
+          <version>1909.02</version>
+          <size>129030470</size>
+          <release_date>2016-02-16 02:49:50.115686</release_date>
+          <notes>WEU-BM-cyclo2</notes>
+          <regionid>173</regionid>
+    <downloadurl>http://download.mio.com/MioCyclo/GPST/MapData_v3/Basemap/WEU_BaseMap_150602.zip</downloadurl>
+    <checksum>9fb4549793498cf1a1024ae825c7f88c</checksum>
+    <releasenote_url>http://v5.test.mioshare.com/en/news/detail?newsid=44</releasenote_url>
+        </update>
+        <update>
+          <version>1201.01</version>
+          <size>3018402</size>
+          <release_date>2015-06-12 10:04:51.191228</release_date>
+          <notes>WEU-CountryID-V4</notes>
+          <regionid>49</regionid>
+    <downloadurl>http://download.mio.com/MioCyclo/GPST/MapData_v3/CountryMap/WEU_Countries_23.zip</downloadurl>
+    <checksum>FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</checksum>
+    <releasenote_url>http://www.mioshare.com/news/detail?newsid=6</releasenote_url>
+        </update>
+        <update>
+          <version>1910.02</version>
+          <size>1899741519</size>
+          <release_date>2016-02-16 02:48:57.010793</release_date>
+          <notes>WEU-OSM-cyclo2</notes>
+          <regionid>172</regionid>
+    <downloadurl>http://download.mio.com/MioCyclo/GPST/MapData_v3/OSM/WEU_OSM_150902.zip</downloadurl>
+    <checksum>1d349e6be7657d828c4d287b812522c5</checksum>
+    <releasenote_url>http://v5.test.mioshare.com/en/news/detail?newsid=44</releasenote_url>
+        </update>
+        <update>
+          <version>1909.02</version>
+          <size>1242676960</size>
+          <release_date>2016-02-16 02:49:31.575609</release_date>
+          <notes>WEU-TA-cyclo2</notes>
+          <regionid>171</regionid>
+          <downloadurl>http://download.mio.com/MioCyclo/GPST/MapData_v3/TA/WEU_TeleAtlas_150602.zip</downloadurl>
+          <checksum>512ba03cd982ed6b4cf80f9e85c23161</checksum>
+          <releasenote_url>http://v5.test.mioshare.com/en/news/detail?newsid=44</releasenote_url>
+        </update>
+      </updatelist>
+    </response>
+
+
+You can see that the download URL's are from Mio, not Navman, they're made by
+the same OEM. What's up with the weird checksum? But sadly, all map urls
+give a `Not Found` error. I've contacted Mio support but haven't yet received a
+response. If I ever get any I'll update this post.
+
+The software update download responses do work. `App 5.0.9.1 only.zip`
+contains a program named `dodge.exe`.
+
+
+I even tried to monitor the USB communication but I didn't get very far with that:
+
+
+![wireshark](/s/inc/img/47de571e3d4f4d64aa02f16f9d234c86.png)
+
+
+
+### Researching the firmware and DODGE.exe
+
+The app only download included a program called `dodge.exe`. Uploading it to
+VirusTotal told me that it was an ARMv4 Tumb application for Windows Mobile.
+Binwalk said the same:
+
+
+    $ docker run -t -v "$PWD":/analysis refirmlabs/binwalk:branch-master -Me dodge.exe
+
+                                                 /analysis/extractions/dodge.exe
+    ------------------------------------------------------------------------------------------------------------------------
+      DECIMAL                            HEXADECIMAL                        DESCRIPTION
+    ------------------------------------------------------------------------------------------------------------------------
+    0                                  0x0                                Windows PE binary, machine type: Thumb
+    4066336                            0x3E0C20                           CRC32 polynomial table, little endian
+    4067375                            0x3E102F                           Copyright text: "Copyright 1995-2002 Jean-loup
+                                                                          Gailly "
+    4070255                            0x3E1B6F                           Copyright text: "Copyright 1995-2002 Mark Adler "
+    4186952                            0x3FE348                           CRC32 polynomial table, little endian
+    4193320                            0x3FFC28                           Copyright text: "Copyright (C) 1994-2008 Lua.org,
+                                                                          PUC-Rio $ $Authors: R. Ierusalimschy, L. H. de
+                                                                          Figueiredo & W. Cele"
+    4241612                            0x40B8CC                           Copyright text: "Copyright 1998-2004 Gilles
+                                                                          Vollant - http://www.winimage.com/zLibDll"
+    4241698                            0x40B922                           Copyright text: "Copyright 1998-2004 Gilles
+                                                                          Vollant - http://www.winimage.com/zLibDll"
+    4298913                            0x4198A1                           Copyright text: "copyright_navman."
+    4298941                            0x4198BD                           Copyright text: "copyright."
+    4298953                            0x4198C9                           Copyright text: "copyright.eng.txt"
+    4298972                            0x4198DC                           Copyright text: "CopyrightText"
+    4298992                            0x4198F0                           Copyright text: "CopyrightText"
+    4521372                            0x44FD9C                           Copyright text: "Copyright (C) 2009, Thomas G.
+                                                                          Lane, Guido Vollbeding"
+    4577656                            0x45D978                           CRC32 polynomial table, little endian
+    ------------------------------------------------------------------------------------------------------------------------
+
+
+The firmware update image included a large file named `xip.bin`:
+
+
+    $ docker run -t -v "$PWD":/analysis refirmlabs/binwalk:branch-master xip.bin
+
+                                                        /analysis/xip.bin
+    ------------------------------------------------------------------------------------------------------------------------
+    DECIMAL                            HEXADECIMAL                        DESCRIPTION
+    ------------------------------------------------------------------------------------------------------------------------
+    0                                  0x0                                Windows CE binary image, base address:
+                                                                          0x80420000, image size: 23814492 bytes, file
+                                                                          size: 19793959 bytes
+    ------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+This seems to be the entire firmware image (with Windows CE). I used the
+desktop program to flash this new firmware. The device showed a black screen
+with a few lines of update information:
+
+![bootloader flash](/s/inc/img/36b5fb90944a488dbbf2263cba073cfe.png)
+
+Afterwards it rebooted. Extracting this `xip.bin` image didn't work with
+`binwalk`, only a few picture (image) files were extracted and a file named
+`EBOOT.NB0` which `binwalk` identified as an `AES S-BOX`. I might pursue that
+later with some help of the [XDA Developers forum]
+(https://web.archive.org/web/20250722185456/https://xdaforums.com/t/tut-manual-full-xip-porting-many-more-tutorials-online.438676/),
+`xip` images seemed to be popular back in the Windows Mobile days. But I have
+a way easier method, read on for that.
+
+
+
+### Replacing DODGE.exe
+
+When connecting the device via USB to the PC, two new drives show up.
+`Nav_data` and `Nav_system`. The first is where you can load `.gpx` tracks
+and where routes are saved. The second seems to be **the entire Windows CE
+system partition**!
+
+
+Because the earlier app only download had a file named `DODGE.exe` I went
+looking for that file. Found it in the, surprisingly named, `DODGE\PROGRAM`
+folder. Renamed it to `DODGE2.exe` and put [Total Commander for ARMv4 for
+Windows CE]
+(https://web.archive.org/web/20250429090214/http://www.ghisler.com/ce2.htm)
+there as `DODGE.exe` and behold:
+
+![total commander](/s/inc/img/edc9cc88f227487da280a9aa6a13f053.png)
+
+Using Total Commander I can browse the filesystem, there are lots of leftovers
+and test programs. For example, here is Windows Explorer running on top of
+the original `DODGE.exe` program:
+
+![explorer](/s/inc/img/56774a870a2c4fb1a906454bef5d969a.png)
+
+
+The original Windows CE desktop:
+
+![windows ce desktop](/s/inc/img/d04473dcc3944f7f858b5efd1fb6ac36.png)
+
+A GPS Test program:
+
+![godspeed](/s/inc/img/b5a7b7098bc74cfebff032949d5c3f8d.png)
+
+
+Calculating Pi, including a third party on screen keyboard since this ROM does
+not ship with one:
+
+![pi calc](/s/inc/img/a3f40101667b4eb28b524c38fb86d256.png)
+
+This is way too much fun. I [love me some Windows CE](/s/blog/My_24_year_old_HP_Jornada_can_do_things_your_modern_iPhone_still_cant_do.html)
+as with the HP Jornada, trying out all kinds of Windows CE Applications,
+games like DOOM and much more. But we're here for the navigation part, I only
+wanted up to date maps.
+
+
+### NAVeGIS
+
+[NAVeGIS](https://sourceforge.net/projects/navegis/) is a Windows Mobile and
+WinCE navigation application, last updated in March of 2025. NAVeGIS can use
+the OpenStreetMap maps and in my case, the open Bicycle maps from
+[OpenFietsMap](https://www.openfietsmap.nl/). NAVeGIS is provided under the
+GNU GPLv3. 
+
+
+After downloading the OpenFietsMap map file and placing it on a Micro SD card
+I selected the `img` file as map source in NAVeGIS.
+
+You select a destination by either selecting it via the menu, or by dragging
+the map to where you want to go and pressing the screen, then setting that as
+destination. It saves a list of recent destinations.
+
+Route hints are given by a big yellow arrow, the route itself is purple:
+
+![navegis](/s/inc/img/ad0efab676d24d749b26752ed6e62617.png)
+
+Here is a route it planned, about 25 KM,zoomed out a bit:
+
+![navegis 2](/s/inc/img/ec83b5db05d5458dab1c6b748f81b8de.png)
+
+
+There is no way to record GPS tracks or to change the screen layout. It does
+not support the beeper on this Mio device, so no audio hints as well. But,
+the maps are updatable and the navigation itself is just as good as the Mio
+application's routing engine. It also supports Points of Interests (POI).
+
+I find myself using the regular Mio (`DODGE.exe`) to record GPX tracks and for
+navigation I'm using `NAVeGIS`. The Mio maps are so out of date that the
+instructions more often than not are incorrect.
+
+Without this piece of open source software I would probably have to throw this
+device back in the bin (or the second-hand store). But with it, I have the
+most recent up to date maps and navigation on a 10 year old Windows CE
+device.
+
+I hope current Mio or Garmin or comparable devices are this open to allow for
+continued usage. Locked down devices, signed bootloaders and such shenanigans
+are nice if you're a manufacturer, but not if you're and end user.
+
+
+### Conclusion
+
+Thanks to open source software and a bit of reverse engineering, a 10 year old
+GPS device is now fully functional. Proprietary abandonment was bypassed
+entirely. With NAVeGIS, Total Commander, and OpenStreetMap, I have modern
+mapping on legacy hardware. Obsolescence is a choice. Reverse engineering is
+resistance.
+
+For fun I installed Windows XP in a VM with Visual Studio 2008 and compiled
+NAVeGIS myself. [Git source and build instructions here]
+(https://github.com/raymiiOrg/navegis)
+
+![winxp](/s/inc/img/3a8540e885ca4c34b916dbc4ff502fbb.png)
+
+> NAVeGIS compiled and running in the Windows CE emulator
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
