@@ -45,6 +45,10 @@ Oh and it runs DOOM:
 There is no other input than the touch screen, so I can shoot and nothing
 more, but hey, it runs DOOM!
 
+
+**Update 01-08-2025**: Jonathan Morris emailed me with a new URL to download
+maps from, see the bottom of the article for more info.
+
 ### Planned Obsolescence
 
 Mio [still makes newer devices like this one]
@@ -435,6 +439,33 @@ I hope current Mio or Garmin or comparable devices are this open to allow for
 continued usage. Locked down devices, signed bootloaders and such shenanigans
 are nice if you're a manufacturer, but not if you're and end user.
 
+### Update: mitmproxy replacement URL that does download the maps!
+
+I got an email from Jonathan Morris on the first of August, he has a Mio 315,
+and he gave me the tip that all downloads from Mio are mirrored on their CDN,
+`dl-mio.akamaized.net` (instead of `download.mio.com`). 
+
+Using the following `mitmproxy` script, I managed to download all
+maps and software updates for my device using the official software:
+
+![replacement URL works](/s/inc/img/2025-08-02_21_12_36-Updates.png)
+
+Save this as `rewrite.py`:
+
+    from mitmproxy import http
+
+    def response(flow: http.HTTPFlow) -> None:
+        if "download.mio.com" in flow.request.pretty_host and b"<response" in flow.response.content[:100]:
+            body = flow.response.content.decode("utf-8", errors="ignore")
+            body = body.replace("http://download.mio.com/", "https://dl-mio.akamaized.net/")
+            flow.response.content = body.encode("utf-8")
+
+Then launch `mitmproxy.exe` via Powershell:
+
+    cd 'C:\Program Files\mitmproxy\bin\'
+    .\mitmproxy.exe -s rewrite.py
+
+Next use `NavMan` to update the device.    
 
 ### Conclusion
 

@@ -67,7 +67,10 @@
 <a href="#toc_6">NAVeGIS</a>
 </li>
 <li>
-<a href="#toc_7">Conclusion</a>
+<a href="#toc_7">Update: mitmproxy replacement URL that does download the maps!</a>
+</li>
+<li>
+<a href="#toc_8">Conclusion</a>
 </li>
 </ul>
 
@@ -102,6 +105,9 @@ maps.</p>
 
 <p>There is no other input than the touch screen, so I can shoot and nothing
 more, but hey, it runs DOOM!</p>
+
+<p><strong>Update 01-08-2025</strong>: Jonathan Morris emailed me with a new URL to download
+maps from, see the bottom of the article for more info.</p>
 
 <h3 id="toc_0">Planned Obsolescence</h3>
 
@@ -471,7 +477,37 @@ device.</p>
 continued usage. Locked down devices, signed bootloaders and such shenanigans
 are nice if you&#39;re a manufacturer, but not if you&#39;re and end user.</p>
 
-<h3 id="toc_7">Conclusion</h3>
+<h3 id="toc_7">Update: mitmproxy replacement URL that does download the maps!</h3>
+
+<p>I got an email from Jonathan Morris on the first of August, he has a Mio 315,
+and he gave me the tip that all downloads from Mio are mirrored on their CDN,
+<code>dl-mio.akamaized.net</code> (instead of <code>download.mio.com</code>). </p>
+
+<p>Using the following <code>mitmproxy</code> script, I managed to download all
+maps and software updates for my device using the official software:</p>
+
+<p><img src="/s/inc/img/2025-08-02_21_12_36-Updates.png" alt="replacement URL works"></p>
+
+<p>Save this as <code>rewrite.py</code>:</p>
+
+<pre><code>from mitmproxy import http
+
+def response(flow: http.HTTPFlow) -&gt; None:
+    if &quot;download.mio.com&quot; in flow.request.pretty_host and b&quot;&lt;response&quot; in flow.response.content[:100]:
+        body = flow.response.content.decode(&quot;utf-8&quot;, errors=&quot;ignore&quot;)
+        body = body.replace(&quot;http://download.mio.com/&quot;, &quot;https://dl-mio.akamaized.net/&quot;)
+        flow.response.content = body.encode(&quot;utf-8&quot;)
+</code></pre>
+
+<p>Then launch <code>mitmproxy.exe</code> via Powershell:</p>
+
+<pre><code>cd &#39;C:\Program Files\mitmproxy\bin\&#39;
+.\mitmproxy.exe -s rewrite.py
+</code></pre>
+
+<p>Next use <code>NavMan</code> to update the device.    </p>
+
+<h3 id="toc_8">Conclusion</h3>
 
 <p>Thanks to open source software and a bit of reverse engineering, a 10 year old
 GPS device is now fully functional. Proprietary abandonment was bypassed
