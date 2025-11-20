@@ -1,0 +1,199 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Finally, run Docker containers natively in Proxmox 9.1 (OCI images)
+Author      : 	Remy van Elst
+Date        : 	20-11-2025 22:34
+URL         : 	https://raymii.org/s/tutorials/Finally_run_Docker_containers_natively_in_Proxmox_9.1.html
+Format      : 	Markdown/HTML
+---
+
+
+
+Proxmox VE is a virtualization platform, like VMWare, but open source, based on Debian. It can run KVM virtual machines and Linux Containers (LXC). I've been using it for over 10 years, the [first article I wrote mentioning it was in 2012](/s/tags/proxmox.html). At home I have a 2 node Proxmox VE cluster consisting of 2 HP EliteDesk Mini machines, both running with 16 GB RAM and both an NVMe and SATA SSD with ZFS on root (256 GB). It's small enough (physically) and is just enough for my homelab needs specs wise. Proxmox VE 9.1 was released [recently](https://www.proxmox.com/en/about/company-details/press-releases/proxmox-virtual-environment-9-1) and this new version is able to run Docker containers / OCI images natively, no more hacks or VM's required to run docker. This post shows you how to run a simple container from a docker image.
+
+<p class="ad"> <b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below. It means the world to me if you  show your appreciation and you'll help pay the server costs:</b><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">GitHub Sponsorship</a><br><br> <a href="https://pcbway.com/g/e7yQRg">PCBWay referral link (You get $5, I get $20 after you've placed an order)</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocea referral link  ($200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!)</a><br><br> </p>
+
+
+### Introduction and info on Proxmox VE 9.1's OCI image feature
+
+Linux Containers (LXC) in Proxmox VE behave more like a virtual machine than
+Docker containers, most of the time. A Docker container runs one application,
+an LXC container runs a whole slew (init system, ssh, an entire
+distribution). For as long as I can remember, Proxmox VE has no official way of
+running Docker containers natively. They 
+[recommend](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#chapter_pct) 
+to run docker inside a Proxmox QEMU virtual machine. Sometimes (recently),
+Docker-inside-LXC [actually breaks](https://bugzilla.proxmox.com/show_bug.cgi?id=7006).
+
+But nobody wants to manage an entire VM just to play around with some
+containers and running Docker directly on your Proxmox VE host is a bad idea as
+well. 
+
+They did something quite clever. They 
+[sort of convert the container image](https://git.proxmox.com/?p=pve-container.git;a=blob;f=src/PVE/LXC/Create.pm;h=2f6de0f5513c2cd49eefa75f6b1ee323227413c8;hb=ca41aa3edeaa0c69b8336be91b6626e8f3d8ce0a#l667) to a full fledged LXC image. 
+In some place it seems that [skopeo](https://github.com/containers/skopeo) is used. 
+
+Quoting [a forum post with more info](https://forum.proxmox.com/threads/docker-integration.175870/post-817576):
+
+> May I ask why docker LXC's are a no-no?
+
+> Generally this causes issues between our use of Apparmor and other parts of
+  our code base over and over again. So we heavily discourage it. However,
+  with the release of Proxmox VE 9.1 you can use OCI templates for
+  application containers on Proxmox VE.
+
+> This means that you can run Docker containers as application containers on
+  Proxmox VE like you would any other LXC container. It works by translating
+  the Docker images (which are OCI images) to LXC containers on Proxmox VE.
+
+
+Not everything works yet, this is still a tech preview as of writing:
+
+> While it can be convenient to run "Application Containers" directly as
+  Proxmox Containers, doing so is currently a tech preview. For use cases
+  requiring container orchestration or live migration, it is still
+  recommended to run them inside a Proxmox QEMU virtual machine.
+
+> In the current technology preview state of our OCI image support, all layers
+  are squashed into one rootfs upon container creation. Because of this, you
+  currently cannot update a container simply by swapping in a newer image
+
+So technically the title of this article is wrong, you aren't running 
+Docker containers natively, they're converted. But for what it's worth,
+it saves so much time already. Now only if Proxmox VE supported `docker-compose` 
+files, that would be even more amazing.
+
+
+Upgrading containers (a `docker pull`) isn't straightforward (
+[yet](https://forum.proxmox.com/threads/proxmox-virtual-environment-9-1-available.176255/post-817678)),
+it requires fiddling with data volumes and re-creating a container. The console also does not provide a
+shell in most containers, it 
+[just shows the stdout/in of the main init process](https://forum.proxmox.com/threads/proxmox-virtual-environment-9-1-available.176255/post-817680). 
+
+Running `pct enter xxx` did drop me inside a working shell in the converted
+container. 
+
+### Starting an OCI image in Proxmox VE 9.1.1
+
+Make sure you've updated Proxmox VE to at least 9.1.1.
+
+Starting a docker container (OCI image, I'll use these terms interchangeably in
+this article) consists of two steps, first you must download the image to
+template storage, then you can create a container from that image.
+
+Navigate to your storage and click the `Pull from OCI Registry` button:
+
+
+![storage step 1](/s/inc/img/413f4dd9c97a4b6e89c6442648aa3403.png)
+
+Enter the full URL to a container image. For example,
+[docker.io/eclipse-mosquitto](https://hub.docker.com/_/eclipse-mosquitto):
+
+![storage step 2](/s/inc/img/ba15257713cc47c8b2980e99f7ad0001.png)
+
+(If you spell the URL wrong you'll get weird errors, I got a few errors
+mentioning "Unauthorized", while I just had a typo in the reference, nothing
+to do with authorization).
+
+Click the Download button and watch the image being pulled:
+
+![storage step 3](/s/inc/img/dfa55c8b9892420b9f054ee051c4c08b.png)
+
+That was the storage part. Now the container part. Click the `Create CT`
+button, fill in the first tab and on the second (`Template`) tab, select the
+OCI image we've just downloaded:
+
+
+![ct step 1](/s/inc/img/ced4cffa605e4dcf89fee8aa61cbd838.png)
+
+On the `Disks` tab, you can add extra volumes under a mount point, in this
+case for the mosquitto configuration:
+
+![ct step 2](/s/inc/img/de6cac9bd7ef4f3aabc48caf3e5a9438.png)
+
+This is comparable with the `-v` option when running docker containers to
+mount a local directory inside a container
+
+Fill in the other tabs as you would normally do. This is the summary page:
+
+![ct step 3](/s/inc/img/8a4fbac841264719b6d0380193d95bf3.png)
+
+In the `Create` task output you can see that Proxmox VE detected that the
+image is an OCI container / Docker image. It will do some extra stuff
+to "convert" it to an LXC container:
+
+![ct step 4](/s/inc/img/57565aceae2f468dba948d11c3db436f.png)
+
+That's all there is to it. You can now start your container and enjoy 
+all the features you would normally get from an LXC container managed
+by Proxmox VE.
+
+The console shows an extra notification regarding
+this being an OCI image based container:
+
+![ct console](/s/inc/img/df7d9aae38464403ac6566f75c72df5f.png)
+
+In my case the console did not work, as mentioned earlier, but I was able to
+enter the container just fine:
+
+![ct enter](/s/inc/img/503e000924064abb910807d2ca25d481.png)
+
+After editing the mosquitto config (on the `/mosquitto/config` volume) and
+restarting the container I was able to connect just fine:
+
+![mosquitto](/s/inc/img/ef412ac626654ad4b9e5c328138274d6.png)
+
+    # example config:
+    listener 1883
+    allow_anonymous true
+
+Environment variables are available in the Options tab once the container is
+created:
+
+![env vars](/s/inc/img/873b9279731a487fa5051e589873ee90.png)
+
+(but currently not during initialization)
+
+
+I also tried the official `nginx` docker container image, that worked just
+fine as well. This will be a major time saver when running containers.  
+
+
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.
