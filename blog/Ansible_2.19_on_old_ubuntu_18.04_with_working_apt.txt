@@ -1,0 +1,350 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	A way to run Ansible 2.19 on old operating systems like Ubuntu 18.04 with working Apt
+Author      : 	Remy van Elst
+Date        : 	31-01-2026 23:08
+URL         : 	https://raymii.org/s/blog/Ansible_2.19_on_old_ubuntu_18.04_with_working_apt.html
+Format      : 	Markdown/HTML
+---
+
+
+
+
+Ansible recently stopped working on one of my older servers. The playbooks wouldn't execute anymore, with a cryptic python error. With Ansible 2.14 this server worked, after upgrading to 2.19 the playbooks failed.
+It turned out that the Python version on the server was too old. This server runs Ubuntu 18.04, that ships with Python 3.6. That server still gets updates via Canonicals Ubuntu Pro program, but no more major python version upgrades.
+I manually installed Python 3.12, after which the Ansible playbook started working again, only failing to do stuff via `apt`. For example the `package`, `apt_key` and `apt_repository` modules. I've found a workaround for package installation by using ansible's `raw` commands.
+This post shows how to manually install newer Python and the trick I'm using to (idompotently) get package installation working again with a few `when` rules.
+
+
+![ansible ubuntu rusted logo](/s/inc/img/64d59ffca50443e1bf5b6c50dc9415bb.png)
+
+> Stylized combination of Ansible and Ubuntu logo's, to represent old and
+  rusty linux.
+
+<p class="ad"> <!--<b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below. It means the world to me if you  show your appreciation and you'll help pay the server costs:</b><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">GitHub Sponsorship</a><br><br> <a href="https://pcbway.com/g/e7yQRg">PCBWay referral link (You get $5, I get $20 after you've placed an order)</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocea referral link  ($200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!)</a><br><br>--> </p>
+
+
+Despite all the complaining, especially regarding execution environments, I
+still love Ansible and use it daily for automation in my devops role. I've been
+using and writing about [Ansible since 2013](/s/tags/ansible.html).
+
+
+Ansible [dropped support]
+(https://github.com/ansible-collections/news-for-maintainers/issues/54) for
+[Python 2.7 and 3.6](https://github.com/ansible/ansible/pull/81866) on the
+target node (where the playbook executes) in Ansible version 2.17.  Ubuntu
+18.04 still receives [updates until April 2028]
+(https://web.archive.org/web/20260131133227/https://ubuntu.com/blog/18-04-end-of-standard-supportt)
+via Canonical's Ubuntu Pro program. It would be nice to manage such servers
+via (an up to date) Ansible. 
+
+The versions needed on the control node and the target node are
+[documented clearly]
+(https://web.archive.org/web/20260131133711/https://docs.ansible.com/projects/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix)
+for each Ansible version. 
+
+#### Execution Environments
+
+Ansible has the concept of [Execution Environments]
+(https://docs.ansible.com/projects/ansible/latest/getting_started_ee/index.html)
+that should make versioning and management easier, but those are way to
+complex for regular users of Ansible. Imagine a sysadmin department with a
+few Windows guys and one networking/linux guy that are up to their shoulders
+in work. You can't explain EE's to them, there is little time to keep
+playbooks updated and all they see is a lot of extra work for little benefit.
+They'll just execute the commands by hand then, that's faster and always
+works, no matter the python version.
+
+Don't even get me started on building an execution environment first before
+being able to run it. How to scare people off your project 101. Make it an
+option to build it yourself but provide supported first class container
+images for ease of use.
+
+And there is the issue on versioning your playbooks. The whole boatload of
+overhead for administration, tagging and versioning is just too much to
+recommend execution environments to "regular" sysadmins.
+
+To run an older Ansible version, for example, 2.15, must install another tool, `ansible-navigator` first on your host:
+
+    pip install ansible-navigator
+
+Then you can run different versions using an unsupported community example image, like 2.15:
+
+    ansible-navigator run playbooks/test.yaml -l mygroup --execution-environment-image ghcr.io/ansible-community/community-ee-minimal:2.15.7-1 --mode stdout
+
+This downloads a bunch of docker images to use:
+
+    ------------------------------------------------------------------------------------------
+    Execution environment image and pull policy overview
+    ------------------------------------------------------------------------------------------
+    Execution environment image name:     ghcr.io/ansible-community/community-ee-minimal:2.15.7-1
+    Execution environment image tag:      2.15.7-1
+    Execution environment pull arguments: None
+    Execution environment pull policy:    tag
+    Execution environment pull needed:    True
+    ------------------------------------------------------------------------------------------
+    Updating the execution environment
+    ------------------------------------------------------------------------------------------
+    Running the command: docker pull ghcr.io/ansible-community/community-ee-minimal:2.15.7-1
+    2.15.7-1: Pulling from ansible-community/community-ee-minimal
+    718a00fe3212: Downloading [=========================================>         ]  57.24MB/68.67MB
+    6a1312ec0a97: Download complete
+    ee32887d0d2d: Download complete
+    887877a1e3de: Download complete
+    dcc41420f792: Waiting
+    41a21e730f5a: Waiting
+
+
+The first time I tried it, with version 2.15.4, I was hit with another cryptic
+error:
+
+    fatal: [myhost.domain.ext]: FAILED! => {"msg": "Unable to execute ssh
+    command line on a controller due to: [Errno 2] No such file or directory:
+    b'ssh'"}
+
+Resolved by trying a later version of the image, 2.15.7. But try explaining
+that to a colleague. 
+
+A list of [community images to use is here]
+(https://web.archive.org/web/20260131135448/https://github.com/ansible-community/images/pkgs/container/community-ee-base/versions?filters%5Bversion_type%5D=tagged).
+
+
+
+### The errors with Ansible 2.19 on Ubuntu 18.04
+
+For the longest time, I was using Ansible 2.14 because that's the one that
+ships with [Debian 12]
+(https://web.archive.org/web/20260131135021/https://packages.debian.org/bookworm/ansible-core).
+However, I recently upgraded Ansible to the following version:
+
+
+    $ ansible --version
+    ansible [core 2.19.6]
+    
+
+Executing the playbook gave the following, rather cryptic, error:
+
+
+    [ERROR]: Task failed: Action failed: The following modules failed to execute: ansible.legacy.setup.
+    
+    Task failed: Action failed.
+    
+    <<< caused by >>>
+    
+    The following modules failed to execute: ansible.legacy.setup.
+    
+    +--[ Sub-Event 1 of 1 ]---
+    |
+    | Module result deserialization failed: No start of json char found See stdout/stderr for the returned output.
+    |
+    +--[ End Sub-Event ]---
+    
+    fatal: [myhost.domain.ext]: FAILED! => {"ansible_facts": {}, "changed": false, "failed_modules": {"ansible.legacy.setup": {"exception": "(traceback unavailable)", "failed": true, "module_stderr": "  File \"<stdin>\", line 3\nSyntaxError: future feature annotations is not defined\n", "module_stdout": "", "msg": "Module result deserialization failed: No start of json char found", "rc": 1}}, "msg": "The following modules failed to execute: ansible.legacy.setup."}
+    
+
+No hint anywhere that the Python version on the server is too old. In my
+humble opinion that error message could be improved a lot.
+
+I was previously running the following Ansible version, which had no problems
+whatsoever:
+
+    $ ansible --version
+    ansible [core 2.14.18]
+    
+
+### Manually installing a Python 3.12 on Ubuntu 18.04
+
+Installing a newer Python version isn't that hard using `pyenv`. First install
+the required dependencies:
+
+    apt-get install -y build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev git
+    
+
+Then grab `pyenv` from Github:
+
+    git clone https://github.com/pyenv/pyenv.git
+    cd pyenv
+
+Use the following command to install Python 3.12:
+
+    export PYENV_ROOT=/home/admin/pyenv/
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+    pyenv install 3.12
+
+Test: 
+
+    /home/admin/pyenv/versions/3.12.12/bin/python -V
+    Python 3.12.12
+
+You can very easily throw those steps into an Ansible playbook using just
+`raw` commands, so you can automate this part as well. I'll leave that as an
+exercise up to the readers.
+
+Add the new location to the `ansible_python_interpreter` inventory variable
+for your host:
+
+    mygroup:
+      hosts:
+        myhost.domain.ext:
+          ansible_host: 192.168.123.45
+      vars:
+        ansible_user: admin
+        ansible_python_interpreter: /home/admin/pyenv/versions/3.12.12/bin/python3
+    
+
+
+### Installing Apt packages 
+
+Now comes the fun part. Ansible runs on the target node, but fails to install
+any packages with the following error:
+
+     Could not import the python3-apt module
+     using /home/admin/pyenv/versions/3.12.12/bin/python3 (3.12.12 (main, Jan
+     30 2026, 09:41:52) [GCC 7.5.0]). Ensure python3-apt package is
+     installed (either manually or via the auto_install_module_deps option)
+     or that you have specified the correct ansible_python_interpreter.
+
+This is just a plain simple package install:
+
+    - name: Install logwatch packages
+      ansible.builtin.package:
+        name: [logwatch, rsyslog]
+        state: present
+        update_cache: true
+
+
+I fiddled around but couldn't get the `python3-apt` module in this new
+environment, it seems to be coupled to the system python version. Oh well,
+then it's time to be idempotent ourselves. 
+
+Do note that this is a workaround specifically for package installations.
+Other Ansible modules, like `apt_key` or `apt_repository` will still fail and
+you must work around those yourself. 
+
+Update the playbook to run the package install step only on more recent Debian
+or Ubuntu versions:
+
+    - name: Install logwatch packages
+      ansible.builtin.package:
+        name: [logwatch, rsyslog]
+        state: present
+        update_cache: true
+      when: >
+        (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] | int >= 11)
+        or
+        (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_major_version'] | int >= 20)    
+   
+I defined a step that uses the `dpkg-query` command to query installation
+status of a package. We will use the output of that command to determine if
+we need to install it manually in the next step.
+
+The output of `dpkg-query` looks like this for an installed package:
+
+    dpkg-query -W -f='${Status}' ncdu
+    install ok installed
+
+For a package that is not installed:
+
+    dpkg-query -W -f='${Status}' nonexisting-pkg
+    dpkg-query: no packages found matching nonexisting-pkg
+
+This is the step:
+
+    - name: Check if packages are installed raw
+      ansible.builtin.raw: "dpkg-query -W -f='${Status}' {{ item }}"
+      loop:
+        - logwatch
+        - rsyslog
+      register: pkg_check
+      ignore_errors: true
+      when: >
+        (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] | int < 11)
+        or
+        (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_major_version'] | int < 20)
+
+Note the `when` line that makes sure this only runs on old versions. I could
+have checked Python version, but this is just as clear and easy.
+
+Based on the output of the command, we will manually execute `apt-get install`
+for each package in the next step:
+
+    - name: Install packages if not installed raw
+      ansible.builtin.raw: "apt-get update && apt-get install -qyy {{ item.item }}"
+      loop: "{{ pkg_check.results }}"
+      when: >
+        (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] | int < 11)
+        or
+        (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_major_version'] | int < 20)
+        and
+        ( item.stdout is not defined or 'install ok installed' not in item.stdout )
+
+The `when` part both checks for the correct old Debian / Ubuntu version as
+well as, the most important part, checks the command output. If it doesn't
+exist or contains the exact line `install ok installed`, Ansible will execute
+the raw command to `apt-get install` the package itself.
+
+This results in the following playbook output. Notice the first task is
+skipped, and our custom raw tasks run. It only installed `logwatch`, for the
+test I removed that as you can see in the  `deinstall ok config-files` output
+line. 
+
+    $ ansible-playbook playbooks/test.yaml -l mygroup
+    
+    PLAY [all] *****************************************************************************************************************************************
+    
+    TASK [Gathering Facts] *****************************************************************************************************************************
+    ok: [myhost.domain.ext]
+    
+    TASK [logwatch : Install logwatch packages] ********************************************************************************************************
+    skipping: [myhost.domain.ext]
+    
+    TASK [logwatch : Check if packages are installed raw] **********************************************************************************************
+    changed: [myhost.domain.ext] => (item=logwatch)
+    changed: [myhost.domain.ext] => (item=rsyslog)
+    
+    TASK [logwatch : Install packages if not installed raw] ********************************************************************************************
+    changed: [myhost.domain.ext] => (item={'rc': 0, 'stdout': 'deinstall ok config-files', 'stdout_lines': ['deinstall ok config-files'], 'stderr': '', 'stderr_lines': [], 'changed': True, 'failed': False, 'item': 'logwatch', 'ansible_loop_var': 'item'})
+    skipping: [myhost.domain.ext] => (item={'rc': 0, 'stdout': 'install ok installed', 'stdout_lines': ['install ok installed'], 'stderr': '', 'stderr_lines': [], 'changed': True, 'failed': False, 'item': 'rsyslog', 'ansible_loop_var': 'item'})
+    
+    
+    PLAY RECAP *****************************************************************************************************************************************
+    myhost.domain.ext           : ok=5    changed=2    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

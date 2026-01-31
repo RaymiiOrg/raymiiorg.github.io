@@ -41,6 +41,15 @@
           
     <h2>Hi there!</h2>   <p>I'm Remy, a developer from The Netherlands with a focus on C++,  C, some C#, Linux and embedded systems. </p> <p>I currently work on a C++ and Qt stack running on Yocto Linux. It controls hardware,  runs the UI and has a few utilities for IoT connectivity and configuration.  Technologies I'm fluid in include C, C# & C++, Windows (MFC/Win32), .NET (Core, Xaml, Framework and C++/CLI),  Flash, Qt, Ansible, Bash & PowerShell. I was Linux and UNIX sysadmin for over  10 years before I got into development.</p> <p>To read more or get in touch,  <a href="https://raymii.org/s/static/About.html"> click here</a>. This is my personal website, these articles do not reflect or are based on work, opinions or policies of any of my (previous) employers. <b>Any resemblance to reality is pure coincidence.</b></p>
 <h2>Latest Items</h2>
+<h4><a href="blog/Ansible_2.19_on_old_ubuntu_18.04_with_working_apt.html">A way to run Ansible 2.19 on old operating systems like Ubuntu 18.04 with working Apt</a></h4>
+<small>31-01-2026 23:08 | Remy van Elst</small><br />
+<p><p>Ansible recently stopped working on one of my older servers. The playbooks wouldn&#39;t execute anymore, with a cryptic python error. With Ansible 2.14 this server worked, after upgrading to 2.19 the playbooks failed.
+It turned out that the Python version on the server was too old. This server runs Ubuntu 18.04, that ships with Python 3.6. That server still gets updates via Canonicals Ubuntu Pro program, but no more major python version upgrades.
+I manually installed Python 3.12, after which the Ansible playbook started working again, only failing to do stuff via <code>apt</code>. For example the <code>package</code>, <code>apt_key</code> and <code>apt_repository</code> modules. I&#39;ve found a workaround for package installation by using ansible&#39;s <code>raw</code> commands.
+This post shows how to manually install newer Python and the trick I&#39;m using to (idompotently) get package installation working again with a few <code>when</code> rules.</p>
+</p>
+<a href="blog/Ansible_2.19_on_old_ubuntu_18.04_with_working_apt.html">Read more...</a><br />
+<p></p>
 <h4><a href="tutorials/Finally_run_Docker_containers_natively_in_Proxmox_9.1.html">Finally, run Docker containers natively in Proxmox 9.1 (OCI images)</a></h4>
 <small>20-11-2025 22:34 | Remy van Elst</small><br />
 <p><p>Proxmox VE is a virtualization platform, like VMWare, but open source, based on Debian. It can run KVM virtual machines and Linux Containers (LXC). I&#39;ve been using it for over 10 years, the <a href="/s/tags/proxmox.html">first article I wrote mentioning it was in 2012</a>. At home I have a 2 node Proxmox VE cluster consisting of 2 HP EliteDesk Mini machines, both running with 16 GB RAM and both an NVMe and SATA SSD with ZFS on root (256 GB). It&#39;s small enough (physically) and is just enough for my homelab needs specs wise. Proxmox VE 9.1 was released <a href="https://www.proxmox.com/en/about/company-details/press-releases/proxmox-virtual-environment-9-1">recently</a> and this new version is able to run Docker containers / OCI images natively, no more hacks or VM&#39;s required to run docker. This post shows you how to run a simple container from a docker image.</p>
@@ -111,12 +120,6 @@ A few of the guides online suggest disabling HTTPS for the dashboard internally 
 In this article, I&#39;ll show you how you can implement asynchronous work processing in C++ using a worker thread. This example class is my go-to for this situation and is easily adapted to handle more complex use cases. It has a queue of work items and uses a <code>std::thread</code>, a <code>std::mutex</code> combined with a <code>std::condition_variable</code> to manage work asynchronously, processing items one by one.</p>
 </p>
 <a href="software/My_go-to_Cpp_code_for_asynchronous_work_processing_on_a_separate_thread.html">Read more...</a><br />
-<p></p>
-<h4><a href="fiction/The_Adventure_of_the_Missing_Syscall_Error_38.html">The Adventure of the Missing Syscall: Error 38</a></h4>
-<small>24-10-2024 21:33 | Dr. John Watson</small><br />
-<p><p>Sherlock Holmes tackles a modern computing dilemma involving a missing system call. In this case, a frustrated developer attempts to port an embedded device running Yocto to a newer version, only to be met with <code>Error 38</code> due to a missing syscall. Holmes and Watson delve into the intricacies of kernel versions, glibc, and system calls to uncover the truth behind the missing <code>syscall_397</code> and provide a logical solution.</p>
-</p>
-<a href="fiction/The_Adventure_of_the_Missing_Syscall_Error_38.html">Read more...</a><br />
 <p></p>
 <h4><a href="tags/all.html">View all Items</a>
 </h4>
