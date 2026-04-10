@@ -1,0 +1,299 @@
+This is a text-only version of the following page on https://raymii.org:
+---
+Title       : 	Put your SSH keys in your TPM chip!
+Author      : 	Remy van Elst
+Date        : 	10-04-2026 19:37
+URL         : 	https://raymii.org/s/tutorials/Put_your_SSH_keys_in_your_TPM_chip.html
+Format      : 	Markdown/HTML
+---
+
+
+
+I've got a [long](/s/articles/Get_Started_With_The_Nitrokey_HSM.html) [history](/s/tags/hsm.html) [with](/s/tags/yubikey.html) [hardware security modules](/s/articles/Nitrokey_HSM_web_cluster.html), both professionally and for fun. For the longest time, my SSH private key has lived inside a hardware token of some sort, be it the Nitrokey, the Smartcard-HSM or a Yubikey.
+The private key never leaves the device, you yourself can't even extract it, neither can malware. It does not live on your filesystem or in an `ssh-agent` (in memory) and some hardware keys even require a physical touch to use the key. Way more secure than the file  `~/.ssh/id_rsa`. I do hope you have a password on your private keys.
+Most, if not all modern machines come with a comparable hardware solution, a [TPM](https://en.wikipedia.org/wiki/Trusted_Platform_Module) (trusted platform module). It's required for Windows 11 so most hardware has one. Its often used to verify the boot process. You can however, also use it to store your SSH keys and in this guide I'll show you how I recently did just that.
+
+<p class="ad"> <!--<b>Recently I removed all Google Ads from this site due to their invasive tracking, as well as Google Analytics. Please, if you found this content useful, consider a small donation using any of the options below. It means the world to me if you  show your appreciation and you'll help pay the server costs:</b><br><br> <a href="https://github.com/sponsors/RaymiiOrg/">GitHub Sponsorship</a><br><br> <a href="https://pcbway.com/g/e7yQRg">PCBWay referral link (You get $5, I get $20 after you've placed an order)</a><br><br> <a href="https://www.digitalocean.com/?refcode=7435ae6b8212">Digital Ocea referral link  ($200 credit for 60 days. Spend $25 after your credit expires and I'll get $25!)</a><br><br>--> </p>
+
+
+
+![nuvoton tpm chip](/s/inc/img/2c5cae28e1a447e2bf6a7818e52902ef.png)
+> A Nuvoton NPCT750 TPM 
+
+
+This guide is based on [the official documentation](https://github.com/tpm2-software/tpm2-pkcs11/blob/master/docs/SSH.md)
+
+Do note that this does not work on WSL.
+
+### TPM vs HSM
+
+By HSM I mean all of those sorts of modules I mentioned earlier, the Yubikey,
+Nitrokey, Smartcard-HSM, etc. Or a big Gemalto one if you're that kind of
+guy. As long as you can use it with a PKCS#11 module. 
+
+The TPM module is a bit less secure for this purpose since it is device bound.
+Meaning that it does not require physical presence. You have to plug in a
+Yubikey to use it, but the TPM is always there. 
+
+Using a TPM is more secure than using files on your filesystem, but a bit less
+secure than an actual (portable) HSM you can plug in.
+
+A big warning is that a lot desktop motherboards (at least consumer oriented
+ones) wipe the TPM when you update the BIOS. I have chosen to generate an SSH
+key (on a secure, offline machine) and put that in the TPM, instead of
+letting the TPM generate one. That key can be securely backed up. And it
+might even help in the case of vulnerabilities like ROCA
+(CVE-2017-15361), where millions of Infineon TPM chips produced weak RSA
+keys.
+
+### TPM Setup for SSH
+
+First install the required software: 
+
+    apt install tpm2-tools libtpm2-pkcs11-tools libtpm2-pkcs11-1 opensc tpm2-abrmd
+
+Or if you're on Arch Linux:
+
+    pacman -Syu tpm2-tools tpm2-tss tpm2-pkcs11 tpm2-abrmd
+
+
+I [recompiled](https://github.com/tpm2-software/tpm2-pkcs11/issues/655) 
+`tpm2-tools` with `--with-fapi=no` because I got errors on every tpm related 
+command:
+
+    WARNING:fapi:src/tss2-fapi/api/Fapi_List.c:228:Fapi_List_Finish() Profile of path not provisioned: /HS/SRK  
+  
+I tried to use the `tpm2_provision` command beforehand but that did not work. 
+
+Add yourself to the `tss` group:
+
+     sudo usermod -a -G tss "$USER"
+
+Logout and log back in to make this change active.
+
+### Creating a token
+
+Create a persistent PKCS#11 store, a directory that contains the actual keys
+and other metadata needed by the PKCS#11 interface.
+
+> The private key is not stored directly in the TPM chip, instead, it's
+  encrypted and saved in a SQLite file in that directory. A TPM only has a
+  limited amount of storage memory but can use many keys because the private
+  keys are not stored in the TPM. The key is loaded into the TPM when it is
+  used.
+
+    mkdir ~/.tpm2_pkcs11
+    tpm2_ptool init
+
+Output:
+
+    action: Created
+    id: 1
+
+Add a token for your ssh key. You can repeat this step if you have multiple
+SSH keys. `pid` is the Primary Token ID, which the previous command's output
+gave you. 
+
+The user pin and Security Officer pin must be given as parameters to this
+command. We don't want that in our shell history, so put the passwords
+(without newlines) inside two text files, `sopin.txt` and `userpin.txt`, then
+use shell process substitution to echo the contents of those files. 
+
+Make sure that there are no newlines. Check with `object dump`:
+
+    od -c userpin.txt 
+
+Output:
+
+    0000000   U   S   E   R   P   I   N  \n
+    0000010
+  
+
+If the output has a `\n`, remove  that last byte:
+
+    [ "$(tail -c1 userpin.txt)" = "" ] && truncate -s -1 userpin.txt
+
+Verify:
+
+    od -c userpin.txt 
+
+Output:
+
+    0000000   U   S   E   R   P   I   N
+    0000007
+
+
+Add the token:
+
+    tpm2_ptool addtoken --pid 1 --label sshtoken --sopin $(cat sopin.txt) --userpin $(cat userpin.txt)
+
+The User pin is the password (it doesn't have to be a pin code, can be a long
+string) is the password you put in every time you want to use the key. The SO
+pin (Security Officer) is for key management (and a backup pin if you need to
+reset the user pin). You can verify the newly added object:
+
+    $ tpm2_ptool verify --label sshtoken --userpin $(cat userpin.txt)
+    config:
+      pss-sigs-good: true
+      token-init: true
+    label: sshtoken
+    objects: []
+    pin:
+      user:
+        seal-auth: 1...6
+    wrappingkey:
+      auth: 1...6
+      hex: '3...6'
+  
+
+### Importing an SSH key into the token
+
+You can let the TPM generate an SSH key, but there are stories online of TPM
+data being gone after a BIOS update. You can also export TPM keys, but in my
+experience that doesn't always work inside a different device. Therefore I
+generate new SSH keys on an offline system, back them up and import  them
+into the TPM.  `RSA` and `ecc256`  work as algorithms, others might not.
+
+Create a working directory and copy the existing SSH key to there:
+
+    mkdir sshtpm
+    cd sshtpm
+    cp path/to/id_rsa ./tpm_key
+
+  
+To import a key into the TPM, you must remove any password on it and convert
+it to PEM format:
+
+    ssh-keygen -f tpm_key -mPEM -ep
+
+Finally import the key into the token:
+
+    tpm2_ptool import --label sshtoken --key-label sshkey1 --userpin $(cat userpin.txt) --privkey tpm_key --algorithm rsa
+
+
+Remove the private key file afterwards:
+
+    rm tpm_key
+
+### Use the SSH key in the TPM
+
+You must set an environment variable to make the library path known to the
+tooling:
+
+    export TPM2_PKCS11_SO=/usr/lib/pkcs11/libtpm2_pkcs11.so
+
+You can put that in your `.bashrc` file. The path can vary as well, so make
+sure to check other folders under `/usr/lib`, for example on Ubuntu.
+
+Add the same path to the top of  your `~/.ssh/config` file:
+
+    PKCS11Provider /usr/lib/pkcs11/libtpm2_pkcs11.so
+
+
+Use the following command to get a list of public keys in the TPM:
+
+    ssh-keygen -D $TPM2_PKCS11_SO
+
+Output:
+  
+    ssh-rsa AA...C1 sshkey1
+    ecdsa-sha2-nistp256 A...Fc= sshkey2 
+
+You can now SSH into your servers using this key, but you will be queried for the User Pin:
+
+  
+    ssh root@server
+    **Enter PIN for 'sshkey1':**
+    Last login: Thu Apr  9 14:32:50 2026 from
+    192.0.2.10 root@server:~# 
+
+
+
+If you want to add the keys to the SSH agent and be asked only once for the
+pin, you can use this command:
+
+    ssh-add -s $TPM2_PKCS11_SO
+
+You can get some more info on the TPM module and the key material with the
+following commands. Info about objects via the PKCS#11 provider:
+  
+
+    pkcs11-tool --module /usr/lib/pkcs11/libtpm2_pkcs11.so --list-objects
+
+Output:
+  
+    Using slot 0 with a present token (0x1)
+    Public Key Object; RSA 4096 bits
+      label:      sshkey1
+      ID:         ...
+      Usage:      encrypt, verify
+      Access:     none
+      uri:        pkcs11:model=NPCT75x;manufacturer=Nuvoton;serial=0...1;token=sshtoken;id=%...;object=sshkey1;type=public
+
+Info via the tpm2 tooling:  
+  
+    tpm2_ptool listobjects --label sshtoken
+
+Output:
+
+    - CKA_CLASS: CKO_PRIVATE_KEY
+      CKA_ID:
+      - '3.7'
+      CKA_KEY_TYPE: CKK_RSA
+      CKA_LABEL: sshkey1
+      id: 1
+    - CKA_CLASS: CKO_PUBLIC_KEY
+      CKA_ID:
+      - '3.7'
+      CKA_KEY_TYPE: CKK_RSA
+      CKA_LABEL: sshkey1
+      id: 2
+
+The ssh keys inside the token:
+
+    tpm2_ptool listtokens --pid 1
+
+Output:
+
+    - id: 1
+      label: sshtoken
+    - id: 2
+      label: sshtoken2
+    
+
+---
+
+License:
+All the text on this website is free as in freedom unless stated otherwise. 
+This means you can use it in any way you want, you can copy it, change it 
+the way you like and republish it, as long as you release the (modified) 
+content under the same license to give others the same freedoms you've got 
+and place my name and a link to this site with the article as source.
+
+This site uses Google Analytics for statistics and Google Adwords for 
+advertisements. You are tracked and Google knows everything about you. 
+Use an adblocker like ublock-origin if you don't want it.
+
+All the code on this website is licensed under the GNU GPL v3 license 
+unless already licensed under a license which does not allows this form 
+of licensing or if another license is stated on that page / in that software:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Just to be clear, the information on this website is for meant for educational 
+purposes and you use it at your own risk. I do not take responsibility if you 
+screw something up. Use common sense, do not 'rm -rf /' as root for example. 
+If you have any questions then do not hesitate to contact me.
+
+See https://raymii.org/s/static/About.html for details.

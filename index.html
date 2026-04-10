@@ -41,6 +41,14 @@
           
     <h2>Hi there!</h2>   <p>I'm Remy, a developer from The Netherlands with a focus on C++,  C, some C#, Linux and embedded systems. </p> <p>I currently work on a C++ and Qt stack running on Yocto Linux. It controls hardware,  runs the UI and has a few utilities for IoT connectivity and configuration.  Technologies I'm fluid in include C, C# & C++, Windows (MFC/Win32), .NET (Core, Xaml, Framework and C++/CLI),  Flash, Qt, Ansible, Bash & PowerShell. I was Linux and UNIX sysadmin for over  10 years before I got into development.</p> <p>To read more or get in touch,  <a href="https://raymii.org/s/static/About.html"> click here</a>. This is my personal website, these articles do not reflect or are based on work, opinions or policies of any of my (previous) employers. <b>Any resemblance to reality is pure coincidence.</b></p>
 <h2>Latest Items</h2>
+<h4><a href="tutorials/Put_your_SSH_keys_in_your_TPM_chip.html">Put your SSH keys in your TPM chip!</a></h4>
+<small>10-04-2026 19:37 | Remy van Elst</small><br />
+<p><p>I&#39;ve got a <a href="/s/articles/Get_Started_With_The_Nitrokey_HSM.html">long</a> <a href="/s/tags/hsm.html">history</a> <a href="/s/tags/yubikey.html">with</a> <a href="/s/articles/Nitrokey_HSM_web_cluster.html">hardware security modules</a>, both professionally and for fun. For the longest time, my SSH private key has lived inside a hardware token of some sort, be it the Nitrokey, the Smartcard-HSM or a Yubikey.
+The private key never leaves the device, you yourself can&#39;t even extract it, neither can malware. It does not live on your filesystem or in an <code>ssh-agent</code> (in memory) and some hardware keys even require a physical touch to use the key. Way more secure than the file  <code>~/.ssh/id_rsa</code>. I do hope you have a password on your private keys.
+Most, if not all modern machines come with a comparable hardware solution, a <a href="https://en.wikipedia.org/wiki/Trusted_Platform_Module">TPM</a> (trusted platform module). It&#39;s required for Windows 11 so most hardware has one. Its often used to verify the boot process. You can however, also use it to store your SSH keys and in this guide I&#39;ll show you how I recently did just that.</p>
+</p>
+<a href="tutorials/Put_your_SSH_keys_in_your_TPM_chip.html">Read more...</a><br />
+<p></p>
 <h4><a href="blog/Ansible_2.19_on_old_ubuntu_18.04_with_working_apt.html">A way to run Ansible 2.19 on old operating systems like Ubuntu 18.04 with working Apt</a></h4>
 <small>31-01-2026 23:08 | Remy van Elst</small><br />
 <p><p>Ansible recently stopped working on one of my older servers. The playbooks wouldn&#39;t execute anymore, with a cryptic python error. With Ansible 2.14 this server worked, after upgrading to 2.19 the playbooks failed.
@@ -113,13 +121,6 @@ A few of the guides online suggest disabling HTTPS for the dashboard internally 
 <p><p>This is the result of my first attempt at learning KiCad during the Christmas break. I love the sound of a relay, so trying out <a href="https://www.youtube.com/watch?v=_nXc439NTYk">these relay logic gates</a> from the Usagi video and the information <a href="https://web.archive.org/web/20250104211313/https://relaiscomputer.nl/index.php/elements">here on the MERCIA relay computer</a> on a breadboard was fun, but a bit messy. No transistors or modern components, just relays, push buttons, resistors and LED&#39;s to show output. I&#39;ve always wanted to make my own PCB. These simple relay logic gates are perfect to try out KiCad and actual PCB design, having never done that before. This short post shows you my first PCB, with all the beginner mistakes included. </p>
 </p>
 <a href="blog/My_First_PCB_relay_AND_gate.html">Read more...</a><br />
-<p></p>
-<h4><a href="software/My_go-to_Cpp_code_for_asynchronous_work_processing_on_a_separate_thread.html">My go-to C++ code for asynchronous work processing on a separate thread</a></h4>
-<small>17-12-2024 23:59 | Remy van Elst</small><br />
-<p><p>You probably recognise this situation. You&#39;re working on your code and realise that the thing you&#39;re writing might take long, be blocking or is batch-wise. It might be resizing images, calling some API or processing hardware inputs or a stream of incoming messages. These tasks, if not handled efficiently, can halt your application, leaving it unresponsive. To avoid this, one solution is to offload these time-consuming operations to a separate thread, allowing the main application to continue executing without interruptions.
-In this article, I&#39;ll show you how you can implement asynchronous work processing in C++ using a worker thread. This example class is my go-to for this situation and is easily adapted to handle more complex use cases. It has a queue of work items and uses a <code>std::thread</code>, a <code>std::mutex</code> combined with a <code>std::condition_variable</code> to manage work asynchronously, processing items one by one.</p>
-</p>
-<a href="software/My_go-to_Cpp_code_for_asynchronous_work_processing_on_a_separate_thread.html">Read more...</a><br />
 <p></p>
 <h4><a href="tags/all.html">View all Items</a>
 </h4>
